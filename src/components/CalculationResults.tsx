@@ -212,10 +212,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
             const timeNeeded = quantity / shard.rate;
 
             return (
-              <div
-                key={shardId}
-                className="bg-white/5 border border-white/10 rounded-lg p-3 hover:scale-[1.02] transition-transform duration-200"
-              >
+              <div key={shardId} className="bg-white/5 border border-white/10 rounded-lg p-3 hover:scale-[1.02] transition-transform duration-200">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">
