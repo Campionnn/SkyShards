@@ -36,9 +36,7 @@ export const Navigation: React.FC = () => {
                       <Icon className="w-4 h-4" />
                       <span className="font-medium">{label}</span>
                     </div>
-                    {isActive && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg border border-purple-500/30" />
-                    )}
+                    {isActive && <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg border border-purple-500/30" />}
                   </div>
                 </Link>
               );

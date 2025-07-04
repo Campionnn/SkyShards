@@ -92,10 +92,7 @@ export const HomePage: React.FC = () => {
       {/* Stats Section */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center hover:scale-105 transition-transform duration-200"
-          >
+          <div key={stat.label} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center hover:scale-105 transition-transform duration-200">
             <div className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2">{stat.value}</div>
             <div className="text-slate-400 font-medium">{stat.label}</div>
           </div>
@@ -111,10 +108,7 @@ export const HomePage: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-200"
-            >
+            <div key={feature.title} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-200">
               <div className="flex items-start space-x-4">
                 <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
                   <feature.icon className="w-6 h-6 text-white" />

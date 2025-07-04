@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronRight, Clock, Hammer, Target, BarChart3 } from "lucide-react";
 import { formatTime, formatNumber, getRarityColor, getShardDetails } from "../utils";
 import type { CalculationResult, RecipeTree, Data } from "../types";
@@ -26,7 +25,7 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
 
   if (tree.method === "direct") {
     return (
-      <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+      <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
         <div className="flex items-center space-x-3">
           <div className="w-2 h-2 bg-green-400 rounded-full" />
           <div className="flex items-center space-x-3">
@@ -43,7 +42,7 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
             {shard.type} • {shard.family}
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -54,7 +53,7 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
   const displayQuantity = isTopLevel ? totalShardsProduced : tree.quantity;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+    <div className="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
       <button onClick={() => onToggle(nodeId)} className="w-full p-4 text-left hover:bg-white/5 transition-colors duration-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -82,21 +81,13 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
         </div>
       </button>
 
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="border-t border-white/10 p-4 space-y-3"
-          >
-            <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} />
-            <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {isExpanded && (
+        <div className="border-t border-white/10 p-4 space-y-3">
+          <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} />
+          <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} />
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -152,10 +143,10 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 backdrop-blur-xl border border-purple-500/20 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-purple-500/10 to-blue-500/10 backdrop-blur-xl border border-purple-500/20 rounded-xl p-4 hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
               <Clock className="w-5 h-5 text-purple-400" />
@@ -165,9 +156,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
               <p className="text-white font-semibold">{formatTime(result.timePerShard)}</p>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl border border-blue-500/20 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 backdrop-blur-xl border border-blue-500/20 rounded-xl p-4 hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
               <Target className="w-5 h-5 text-blue-400" />
@@ -177,9 +168,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
               <p className="text-white font-semibold">{formatTime(result.totalTime)}</p>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-xl border border-green-500/20 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 backdrop-blur-xl border border-green-500/20 rounded-xl p-4 hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
               <BarChart3 className="w-5 h-5 text-green-400" />
@@ -189,9 +180,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
               <p className="text-white font-semibold">{result.totalShardsProduced}</p>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div whileHover={{ scale: 1.02 }} className="bg-gradient-to-br from-orange-500/10 to-red-500/10 backdrop-blur-xl border border-orange-500/20 rounded-xl p-4">
+        <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 backdrop-blur-xl border border-orange-500/20 rounded-xl p-4 hover:scale-[1.02] transition-transform duration-200">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
               <Hammer className="w-5 h-5 text-orange-400" />
@@ -203,11 +194,11 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Materials Needed */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-white">Materials Needed</h3>
           <div className="text-sm text-slate-400">
@@ -221,12 +212,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
             const timeNeeded = quantity / shard.rate;
 
             return (
-              <motion.div
+              <div
                 key={shardId}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.02 }}
-                className="bg-white/5 border border-white/10 rounded-lg p-3"
+                className="bg-white/5 border border-white/10 rounded-lg p-3 hover:scale-[1.02] transition-transform duration-200"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -239,14 +227,14 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
                     <div className="text-xs text-slate-400">{formatTime(timeNeeded)}</div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
-      </motion.div>
+      </div>
 
       {/* Fusion Tree */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-white">Fusion Tree</h3>
           <button onClick={handleToggleAll} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors duration-200">
@@ -255,7 +243,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
         </div>
 
         <RecipeTreeNode tree={result.tree} data={data} isTopLevel={true} totalShardsProduced={result.totalShardsProduced} nodeId="root" expandedStates={expandedStates} onToggle={handleNodeToggle} />
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };

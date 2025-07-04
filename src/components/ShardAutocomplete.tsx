@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Search, X } from "lucide-react";
 import { DataService } from "../services/dataService";
 import { getRarityColor } from "../utils";
@@ -185,61 +184,52 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
         )}
       </div>
 
-      <AnimatePresence mode="wait">
-        {isOpen && suggestions.length > 0 && !isSelecting && (
-          <motion.ul
-            ref={listRef}
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.1 }}
-            className="
-              absolute z-50 w-full mt-2 
-              bg-slate-800/90 backdrop-blur-xl 
-              border border-white/10 
-              rounded-xl shadow-2xl
-              max-h-64 overflow-y-auto
-            "
-          >
-            {suggestions.map((shard, index) => (
-              <motion.li
-                key={shard.key}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={`
-                  px-4 py-3 cursor-pointer transition-colors
-                  ${index === focusedIndex ? "bg-purple-500/20 border-l-2 border-purple-500" : "hover:bg-white/5"}
-                  ${index !== suggestions.length - 1 ? "border-b border-white/5" : ""}
-                `}
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleSelect(shard);
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleSelect(shard);
-                }}
-                onMouseEnter={() => !isSelecting && setFocusedIndex(index)}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className={`font-medium ${getRarityColor(shard.rarity)}`}>{shard.name}</div>
-                    <div className="text-sm text-slate-400">
-                      {shard.family} • {shard.type}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-slate-400">{shard.id}</div>
+      {isOpen && suggestions.length > 0 && !isSelecting && (
+        <ul
+          ref={listRef}
+          className="
+            absolute z-50 w-full mt-2 
+            bg-slate-800/90 backdrop-blur-xl 
+            border border-white/10 
+            rounded-xl shadow-2xl
+            max-h-64 overflow-y-auto
+          "
+        >
+          {suggestions.map((shard, index) => (
+            <li
+              key={shard.key}
+              className={`
+                px-4 py-3 cursor-pointer transition-colors
+                ${index === focusedIndex ? "bg-purple-500/20 border-l-2 border-purple-500" : "hover:bg-white/5"}
+                ${index !== suggestions.length - 1 ? "border-b border-white/5" : ""}
+              `}
+              onMouseDown={(e: React.MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSelect(shard);
+              }}
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSelect(shard);
+              }}
+              onMouseEnter={() => !isSelecting && setFocusedIndex(index)}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className={`font-medium ${getRarityColor(shard.rarity)}`}>{shard.name}</div>
+                  <div className="text-sm text-slate-400">
+                    {shard.family} • {shard.type}
                   </div>
                 </div>
-              </motion.li>
-            ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
+                <div className="text-right">
+                  <div className="text-xs text-slate-400">{shard.id}</div>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

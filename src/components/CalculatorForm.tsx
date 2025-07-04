@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence } from "framer-motion";
 import { Settings, Zap, RotateCcw, ChevronDown } from "lucide-react";
 import { calculationSchema, type CalculationFormData } from "../schemas/validation";
 import { ShardAutocomplete } from "./ShardAutocomplete";
@@ -53,42 +52,36 @@ const PetLevelDropdown: React.FC<PetLevelDropdownProps> = ({ value, onChange, la
         <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="
-              absolute z-50 w-full mt-1
-              bg-slate-800/95 backdrop-blur-xl 
-              border border-white/10 
-              rounded-lg shadow-2xl
-              max-h-48 overflow-y-auto
-            "
-          >
-            {levels.map((level) => (
-              <button
-                key={level}
-                type="button"
-                onClick={() => {
-                  onChange(level);
-                  setIsOpen(false);
-                }}
-                className={`
-                  w-full px-2 py-1.5 text-xs text-left
-                  hover:bg-purple-500/20 transition-colors
-                  ${value === level ? "bg-purple-500/30 text-purple-300" : "text-white"}
-                  ${level !== levels.length - 1 ? "border-b border-white/5" : ""}
-                `}
-              >
-                Level {level}
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isOpen && (
+        <div
+          className="
+            absolute z-50 w-full mt-1
+            bg-slate-800/95 backdrop-blur-xl 
+            border border-white/10 
+            rounded-lg shadow-2xl
+            max-h-48 overflow-y-auto
+          "
+        >
+          {levels.map((level) => (
+            <button
+              key={level}
+              type="button"
+              onClick={() => {
+                onChange(level);
+                setIsOpen(false);
+              }}
+              className={`
+                w-full px-2 py-1.5 text-xs text-left
+                hover:bg-purple-500/20 transition-colors
+                ${value === level ? "bg-purple-500/30 text-purple-300" : "text-white"}
+                ${level !== levels.length - 1 ? "border-b border-white/5" : ""}
+              `}
+            >
+              Level {level}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -136,42 +129,36 @@ const KuudraDropdown: React.FC<KuudraDropdownProps> = ({ value, onChange, label 
         <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
-            className="
-              absolute z-50 w-full mt-1
-              bg-slate-800/95 backdrop-blur-xl 
-              border border-white/10 
-              rounded-lg shadow-2xl
-              max-h-48 overflow-y-auto
-            "
-          >
-            {KUUDRA_TIERS.map((tier) => (
-              <button
-                key={tier.value}
-                type="button"
-                onClick={() => {
-                  onChange(tier.value);
-                  setIsOpen(false);
-                }}
-                className={`
-                  w-full px-2 py-1.5 text-xs text-left
-                  hover:bg-purple-500/20 transition-colors
-                  ${value === tier.value ? "bg-purple-500/30 text-purple-300" : "text-white"}
-                  ${tier !== KUUDRA_TIERS[KUUDRA_TIERS.length - 1] ? "border-b border-white/5" : ""}
-                `}
-              >
-                {tier.label}
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {isOpen && (
+        <div
+          className="
+            absolute z-50 w-full mt-1
+            bg-slate-800/95 backdrop-blur-xl 
+            border border-white/10 
+            rounded-lg shadow-2xl
+            max-h-48 overflow-y-auto
+          "
+        >
+          {KUUDRA_TIERS.map((tier) => (
+            <button
+              key={tier.value}
+              type="button"
+              onClick={() => {
+                onChange(tier.value);
+                setIsOpen(false);
+              }}
+              className={`
+                w-full px-2 py-1.5 text-xs text-left
+                hover:bg-purple-500/20 transition-colors
+                ${value === tier.value ? "bg-purple-500/30 text-purple-300" : "text-white"}
+                ${tier !== KUUDRA_TIERS[KUUDRA_TIERS.length - 1] ? "border-b border-white/5" : ""}
+              `}
+            >
+              {tier.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -309,7 +296,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-3">
+    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-3">
       <form onSubmit={(e) => e.preventDefault()} className="space-y-3">
         {/* Shard Search Section */}
         <div className="space-y-2">
@@ -347,20 +334,19 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
 
               <div>
                 <label className="block text-xs font-medium text-slate-300 mb-1">&nbsp;</label>
-                <motion.button
+                <button
                   type="button"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   onClick={handleMaxQuantity}
                   className="
                     w-full h-[34px] text-sm bg-gradient-to-r from-blue-500 to-purple-500 
                     text-white font-medium rounded-lg flex items-center justify-center
                     hover:from-blue-600 hover:to-purple-600
                     transition-all duration-200 cursor-pointer
+                    hover:scale-[1.02] active:scale-[0.98]
                   "
                 >
                   Max
-                </motion.button>
+                </button>
               </div>
             </div>
           </div>
@@ -374,37 +360,35 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <motion.button
+            <button
               type="button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={handleMaxStats}
               className="
                 h-8 px-3 bg-gradient-to-r from-yellow-500 to-orange-500 
                 text-white font-medium rounded-lg text-xs
                 hover:from-yellow-600 hover:to-orange-600
                 transition-all duration-200 flex items-center justify-center space-x-1 cursor-pointer
+                hover:scale-[1.02] active:scale-[0.98]
               "
             >
               <Zap className="w-3 h-3" />
               <span>Max Stats</span>
-            </motion.button>
+            </button>
 
-            <motion.button
+            <button
               type="button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={handleReset}
               className="
                 h-8 px-3 bg-gradient-to-r from-rose-500 to-pink-500 
                 text-white font-medium rounded-lg text-xs
                 hover:from-rose-600 hover:to-pink-600
                 transition-all duration-200 flex items-center justify-center space-x-1 cursor-pointer
+                hover:scale-[1.02] active:scale-[0.98]
               "
             >
               <RotateCcw className="w-3 h-3" />
               <span>Reset</span>
-            </motion.button>
+            </button>
           </div>
 
           <div className="space-y-2">
@@ -538,6 +522,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           </div>
         </div>
       </form>
-    </motion.div>
+    </div>
   );
 };
