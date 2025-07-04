@@ -1,4 +1,13 @@
-import type { Data, RecipeChoice, RecipeTree, CalculationParams, CalculationResult, Shards, Recipes } from "../types";
+import type {
+  Data,
+  RecipeChoice,
+  RecipeTree,
+  CalculationParams,
+  CalculationResult,
+  Shards,
+  Recipes,
+  Shard
+} from "../types";
 import { NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS, BLACK_HOLE_SHARD } from "../constants";
 
 export class CalculationService {
@@ -85,7 +94,7 @@ export class CalculationService {
     return tier.multiplier * (3600 / (tier.baseTime + costTime));
   }
 
-  private applyFortuneModifiers(rate: number, shardId: string, shard: any, params: CalculationParams): number {
+  private applyFortuneModifiers(rate: number, shardId: string, shard: Shard, params: CalculationParams): number {
     let effectiveFortune = params.hunterFortune;
 
     const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
@@ -129,6 +138,7 @@ export class CalculationService {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
     const shards = Object.keys(data.shards);
+    const craftPenalty = 0.8 / 3600;
 
     // Initialize with direct costs
     shards.forEach((shard) => {
@@ -149,7 +159,6 @@ export class CalculationService {
           const fuse2 = data.shards[input2].fuse_amount;
           const costInput1 = minCosts.get(input1)! * fuse1;
           const costInput2 = minCosts.get(input2)! * fuse2;
-          const craftPenalty = 0.8 / 3600;
           const totalCost = costInput1 + costInput2 + craftPenalty;
           const costPerUnit = totalCost / recipe.outputQuantity;
 
