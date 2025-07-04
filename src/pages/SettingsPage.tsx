@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
 import { Search, RotateCcw, Save, Filter, ChevronDown, Layers } from "lucide-react";
 import { useShardsWithRecipes } from "../hooks/useShardsWithRecipes";
 import { useCustomRates } from "../hooks/useCustomRates";

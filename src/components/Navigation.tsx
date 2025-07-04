@@ -1,6 +1,5 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Calculator, Settings } from "lucide-react";
 
 export const Navigation: React.FC = () => {
@@ -16,9 +15,9 @@ export const Navigation: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center space-x-2">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 hover:scale-105 active:scale-95 transition-transform duration-200">
               <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Fusing Calculator</span>
-            </motion.div>
+            </div>
           </Link>
 
           <div className="flex items-center space-x-1 gap-2">
@@ -26,11 +25,10 @@ export const Navigation: React.FC = () => {
               const isActive = location.pathname === path;
               return (
                 <Link key={path} to={path}>
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <div
                     className={`
-                      relative px-4 py-2 rounded-lg transition-colors duration-200
+                      relative px-4 py-2 rounded-lg transition-all duration-200
+                      hover:scale-105 active:scale-95
                       ${isActive ? "bg-white/10 text-white" : "text-slate-300 hover:text-white hover:bg-white/5"}
                     `}
                   >
@@ -39,14 +37,9 @@ export const Navigation: React.FC = () => {
                       <span className="font-medium">{label}</span>
                     </div>
                     {isActive && (
-                      <motion.div
-                        layoutId="activeNav"
-                        className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg border border-purple-500/30"
-                        initial={false}
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg border border-purple-500/30" />
                     )}
-                  </motion.div>
+                  </div>
                 </Link>
               );
             })}

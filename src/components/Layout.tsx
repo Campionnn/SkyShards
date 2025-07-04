@@ -1,6 +1,5 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Navigation } from "./Navigation";
 
 export const Layout: React.FC = () => {
@@ -15,9 +14,9 @@ export const Layout: React.FC = () => {
       <div className="relative z-10">
         <Navigation />
         <main className="w-full px-4 lg:px-6 xl:px-8 py-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <div>
             <Outlet />
-          </motion.div>
+          </div>
         </main>
 
         <footer className="relative z-10 text-center py-6 text-slate-400 text-sm">
