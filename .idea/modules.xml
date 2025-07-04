@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/skyblocksharddb.iml" filepath="$PROJECT_DIR$/.idea/skyblocksharddb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/SkyShards.iml" filepath="$PROJECT_DIR$/.idea/SkyShards.iml" />
     </modules>
   </component>
 </project>
