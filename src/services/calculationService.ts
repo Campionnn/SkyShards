@@ -129,6 +129,7 @@ export class CalculationService {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
     const shards = Object.keys(data.shards);
+    const craftPenalty = 0.8 / 3600;
 
     // Initialize with direct costs
     shards.forEach((shard) => {
@@ -149,7 +150,6 @@ export class CalculationService {
           const fuse2 = data.shards[input2].fuse_amount;
           const costInput1 = minCosts.get(input1)! * fuse1;
           const costInput2 = minCosts.get(input2)! * fuse2;
-          const craftPenalty = 0.8 / 3600;
           const totalCost = costInput1 + costInput2 + craftPenalty;
           const costPerUnit = totalCost / recipe.outputQuantity;
 
