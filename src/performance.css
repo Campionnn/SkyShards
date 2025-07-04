@@ -1,0 +1,277 @@
+/* Ultra Performance Mode - Optimized with proper styling */
+
+/* Input and form styling for ultra performance mode */
+.ultra-performance-mode input,
+.ultra-performance-mode select,
+.ultra-performance-mode textarea {
+  background: #1e293b !important;
+  border: 1px solid #475569 !important;
+  color: #ffffff !important;
+  transition: none !important;
+  border-radius: 6px !important;
+}
+
+.ultra-performance-mode input:focus,
+.ultra-performance-mode select:focus,
+.ultra-performance-mode textarea:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+.ultra-performance-mode input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Autocomplete dropdown styling */
+.ultra-performance-mode .autocomplete-dropdown {
+  background: #1e293b !important;
+  border: 1px solid #475569 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Search bar specific styling */
+.ultra-performance-mode .search-input {
+  background: #1e293b !important;
+  border: 1px solid #475569 !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+}
+
+.ultra-performance-mode .search-input:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Button styling */
+.ultra-performance-mode button {
+  background: #374151 !important;
+  border: 1px solid #4b5563 !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  transition: none !important;
+}
+
+.ultra-performance-mode button:hover {
+  background: #4b5563 !important;
+  transform: none !important;
+}
+
+.ultra-performance-mode button:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Remove all expensive effects */
+.ultra-performance-mode .backdrop-blur-xl,
+.ultra-performance-mode .backdrop-blur-lg,
+.ultra-performance-mode .backdrop-blur-md,
+.ultra-performance-mode .backdrop-blur-performance,
+.ultra-performance-mode .backdrop-blur-light {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #0f172a !important;
+}
+
+.ultra-performance-mode .glass,
+.ultra-performance-mode .glass-strong {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+}
+
+/* Disable ALL animations and transitions */
+.ultra-performance-mode *,
+.ultra-performance-mode *::before,
+.ultra-performance-mode *::after {
+  animation: none !important;
+  animation-duration: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition: none !important;
+  transition-duration: 0ms !important;
+  transition-delay: 0ms !important;
+  transition-property: none !important;
+  scroll-behavior: auto !important;
+  transform: none !important;
+}
+
+/* Remove all gradients and replace with solid colors */
+.ultra-performance-mode .bg-gradient-to-r,
+.ultra-performance-mode .bg-gradient-to-l,
+.ultra-performance-mode .bg-gradient-to-t,
+.ultra-performance-mode .bg-gradient-to-b,
+.ultra-performance-mode .bg-gradient-to-br,
+.ultra-performance-mode .bg-gradient-to-bl,
+.ultra-performance-mode .bg-gradient-to-tr,
+.ultra-performance-mode .bg-gradient-to-tl {
+  background: #1e293b !important;
+  background-image: none !important;
+}
+
+/* Force simple borders and remove all box shadows */
+.ultra-performance-mode .border-white\/10 {
+  border-color: #334155 !important;
+}
+
+.ultra-performance-mode .shadow-xl,
+.ultra-performance-mode .shadow-lg,
+.ultra-performance-mode .shadow-md,
+.ultra-performance-mode .shadow-sm,
+.ultra-performance-mode .shadow {
+  box-shadow: none !important;
+}
+
+/* Disable hover effects entirely */
+.ultra-performance-mode *:hover {
+  transform: none !important;
+  scale: 1 !important;
+}
+
+/* Remove expensive text effects */
+.ultra-performance-mode .bg-clip-text {
+  background-clip: unset !important;
+  -webkit-background-clip: unset !important;
+  color: #e2e8f0 !important;
+}
+
+/* Simplify navigation in ultra mode */
+.ultra-performance-mode nav {
+  background: #0f172a !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Remove all opacity effects */
+.ultra-performance-mode .bg-black\/20,
+.ultra-performance-mode .bg-white\/10,
+.ultra-performance-mode .bg-white\/5 {
+  background: #1e293b !important;
+}
+
+/* Force containment for better performance */
+.ultra-performance-mode .container,
+.ultra-performance-mode .max-w-7xl,
+.ultra-performance-mode .max-w-6xl {
+  contain: layout style paint;
+}
+
+/* Disable expensive filter effects */
+.ultra-performance-mode .blur,
+.ultra-performance-mode .brightness-110,
+.ultra-performance-mode .contrast-125 {
+  filter: none !important;
+}
+
+/* Performance mode - less aggressive but still optimized */
+.performance-mode .backdrop-blur-xl,
+.performance-mode .backdrop-blur-lg {
+  backdrop-filter: blur(8px) !important;
+}
+
+.performance-mode .backdrop-blur-md {
+  backdrop-filter: blur(4px) !important;
+}
+
+.performance-mode .backdrop-blur-performance,
+.performance-mode .backdrop-blur-light {
+  backdrop-filter: blur(2px) !important;
+}
+
+/* Reduce animation duration in performance mode */
+.performance-mode * {
+  animation-duration: 0.1s !important;
+  transition-duration: 0.1s !important;
+}
+
+/* Force GPU acceleration for key elements only in normal mode */
+.gpu-accelerated {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Disable expensive effects on low-end devices */
+@media (max-width: 768px) {
+  .backdrop-blur-xl,
+  .backdrop-blur-lg {
+    backdrop-filter: blur(4px) !important;
+  }
+}
+
+/* Disable animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Additional ultra performance optimizations for specific components */
+.ultra-performance-mode .space-y-4 > * {
+  margin-top: 1rem !important;
+}
+
+.ultra-performance-mode .space-x-2 > * {
+  margin-left: 0.5rem !important;
+}
+
+/* Remove border radius in ultra mode for faster rendering */
+.ultra-performance-mode .rounded-lg,
+.ultra-performance-mode .rounded-md,
+.ultra-performance-mode .rounded {
+  border-radius: 6px !important;
+}
+
+/* Additional optimizations for ultra smooth performance */
+.ultra-performance-mode .text-shadow {
+  text-shadow: none !important;
+}
+
+.ultra-performance-mode .drop-shadow-xl,
+.ultra-performance-mode .drop-shadow-lg,
+.ultra-performance-mode .drop-shadow {
+  filter: none !important;
+}
+
+/* Force simple rendering for lists and tables */
+.ultra-performance-mode ul,
+.ultra-performance-mode ol,
+.ultra-performance-mode table {
+  contain: layout;
+}
+
+/* Disable complex pseudo-elements */
+.ultra-performance-mode *::before,
+.ultra-performance-mode *::after {
+  content: none !important;
+}
+
+/* Ultra performance navigation overrides */
+.ultra-performance-mode .hover\:scale-105:hover {
+  transform: none !important;
+}
+
+.ultra-performance-mode .active\:scale-95:active {
+  transform: none !important;
+}
+
+/* Remove glassmorphism completely */
+.ultra-performance-mode .glass-card,
+.ultra-performance-mode .glass-panel {
+  background: #1e293b !important;
+  backdrop-filter: none !important;
+  border: 1px solid #334155 !important;
+}
+
+/* Force layout containment for performance critical sections */
+.ultra-performance-mode .calculator-form,
+.ultra-performance-mode .results-section,
+.ultra-performance-mode .settings-panel {
+  contain: layout style paint;
+}

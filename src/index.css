@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./performance.css";
 
 /* Base styles for dark theme */
 html,
@@ -223,6 +224,19 @@ input[type="number"] {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Additional animation classes */
+.animate-fadeInUp {
+  animation: fadeInUp 0.2s ease-out;
+}
+
+.animate-fadeInScale {
+  animation: fadeInScale 0.2s ease-out;
+}
+
+.animate-slideInFromTop {
+  animation: slideInFromTop 0.3s ease-out;
 }
 
 /* Focus styles */

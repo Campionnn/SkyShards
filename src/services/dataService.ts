@@ -20,17 +20,28 @@ export class DataService {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.BASE_URL}fusion-data.json`);
+      const url = `${import.meta.env.BASE_URL}fusion-data.json`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
+
+      // Load rates as well
+      const defaultRates = await this.loadDefaultRates();
 
       this.shardsCache = Object.entries(data.shards).map(([key, shard]: [string, any]) => ({
         key,
         ...shard,
         id: key,
+        rate: defaultRates[key] || 0,
       }));
 
       return this.shardsCache;
     } catch (error) {
+      console.error("Failed to load shards:", error);
       throw new Error(`Failed to load shards: ${error}`);
     }
   }

@@ -25,20 +25,20 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
 
   if (tree.method === "direct") {
     return (
-      <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
-        <div className="flex items-center space-x-3">
-          <div className="w-2 h-2 bg-green-400 rounded-full" />
-          <div className="flex items-center space-x-3">
-            <span className="text-slate-400">{tree.quantity}x</span>
-            <span className={`font-medium cursor-help ${getRarityColor(shard.rarity)}`} title={getShardDetails(shard, true)}>
+      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-800/60 to-slate-700/60 rounded-xl border-2 border-slate-600/50 backdrop-blur-sm">
+        <div className="flex items-center space-x-4">
+          <div className="w-3 h-3 bg-green-400 rounded-full shadow-lg ring-2 ring-green-400/30" />
+          <div className="flex items-center space-x-4">
+            <span className="text-slate-300 font-semibold bg-slate-800/50 px-3 py-1 rounded-lg">{tree.quantity}x</span>
+            <span className={`font-bold cursor-help ${getRarityColor(shard.rarity)} hover:scale-105 transition-transform duration-200`} title={getShardDetails(shard, true)}>
               {shard.name}
             </span>
-            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full border border-green-500/30">direct</span>
+            <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-bold rounded-full border-2 border-green-500/40 shadow-lg">DIRECT</span>
           </div>
         </div>
         <div className="text-right flex flex-col items-end space-y-1">
-          <div className="text-xs text-slate-400">{formatNumber(shard.rate)}/hour</div>
-          <div className="text-xs text-slate-500 capitalize">
+          <div className="text-sm text-slate-300 font-semibold">{formatNumber(shard.rate)}/hour</div>
+          <div className="text-xs text-slate-400 capitalize font-medium">
             {shard.type} • {shard.family}
           </div>
         </div>
@@ -198,10 +198,23 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
       </div>
 
       {/* Materials Needed */}
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-bold text-white">Materials Needed</h3>
-          <div className="text-sm text-slate-400">
+      <div
+        className="
+        bg-gradient-to-br from-slate-800/90 to-slate-900/90 
+        backdrop-blur-xl border-2 border-slate-700/50 
+        rounded-2xl p-8 shadow-2xl
+        hover:border-slate-600/70 transition-all duration-300
+        ring-1 ring-white/5
+      "
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-2xl font-bold text-white flex items-center gap-3">
+            <div className="p-2 bg-blue-500/20 rounded-lg">
+              <Hammer className="w-6 h-6 text-blue-400" />
+            </div>
+            Materials Needed
+          </h3>
+          <div className="text-sm text-slate-300 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-600/30">
             for {result.totalShardsProduced} {targetShardName} ({result.craftsNeeded} craft{result.craftsNeeded > 1 ? "s" : ""})
           </div>
         </div>
@@ -231,10 +244,33 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
       </div>
 
       {/* Fusion Tree */}
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+      <div
+        className="
+        bg-gradient-to-br from-slate-800/90 to-slate-900/90 
+        backdrop-blur-xl border-2 border-slate-700/50 
+        rounded-2xl p-8 shadow-2xl
+        hover:border-slate-600/70 transition-all duration-300
+        ring-1 ring-white/5
+      "
+      >
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-white">Fusion Tree</h3>
-          <button onClick={handleToggleAll} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors duration-200">
+          <h3 className="text-2xl font-bold text-white flex items-center gap-3">
+            <div className="p-2 bg-purple-500/20 rounded-lg">
+              <BarChart3 className="w-6 h-6 text-purple-400" />
+            </div>
+            Fusion Tree
+          </h3>
+          <button
+            onClick={handleToggleAll}
+            className="
+              px-6 py-3 bg-gradient-to-r from-slate-700 to-slate-600 
+              hover:from-slate-600 hover:to-slate-500 
+              text-white rounded-xl transition-all duration-200 
+              font-semibold shadow-lg hover:shadow-xl
+              hover:scale-105 active:scale-95
+              ring-1 ring-white/10
+            "
+          >
             {Array.from(expandedStates.values()).every((expanded) => expanded) ? "Collapse All" : "Expand All"}
           </button>
         </div>

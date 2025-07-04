@@ -1,0 +1,166 @@
+/* Ultra Performance Mode - Completely disables all expensive effects */
+
+/* Force hardware acceleration for critical elements */
+.gpu-accelerated {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Ultra performance mode - most aggressive optimizations */
+.ultra-performance-mode .backdrop-blur-xl,
+.ultra-performance-mode .backdrop-blur-lg,
+.ultra-performance-mode .backdrop-blur-md,
+.ultra-performance-mode .backdrop-blur-performance,
+.ultra-performance-mode .backdrop-blur-light {
+  backdrop-filter: none !important;
+  background: #0f172a !important;
+}
+
+.ultra-performance-mode .glass,
+.ultra-performance-mode .glass-strong {
+  backdrop-filter: none !important;
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+}
+
+/* Disable all animations in ultra performance mode */
+.ultra-performance-mode *,
+.ultra-performance-mode *::before,
+.ultra-performance-mode *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Remove all gradients */
+.ultra-performance-mode .bg-gradient-to-r,
+.ultra-performance-mode .bg-gradient-to-l,
+.ultra-performance-mode .bg-gradient-to-t,
+.ultra-performance-mode .bg-gradient-to-b,
+.ultra-performance-mode .bg-gradient-to-br,
+.ultra-performance-mode .bg-gradient-to-bl {
+  background: #1e293b !important;
+}
+
+/* Force simple borders */
+.ultra-performance-mode .border-white\/10 {
+  border-color: #334155 !important;
+}
+
+.ultra-performance-mode .border-white\/20 {
+  border-color: #475569 !important;
+}
+
+/* Simplify hover effects */
+.ultra-performance-mode .hover\:bg-white\/5:hover,
+.ultra-performance-mode .hover\:bg-white\/10:hover {
+  background-color: #334155 !important;
+}
+
+/* Remove shadows */
+.ultra-performance-mode .shadow-lg,
+.ultra-performance-mode .shadow-xl,
+.ultra-performance-mode .shadow-2xl {
+  box-shadow: none !important;
+}
+
+/* Optimize text rendering */
+.ultra-performance-mode {
+  text-rendering: optimizeSpeed !important;
+  -webkit-font-smoothing: auto !important;
+  -moz-osx-font-smoothing: auto !important;
+}
+
+/* Regular performance mode (less aggressive) */
+.performance-mode .backdrop-blur-xl,
+.performance-mode .backdrop-blur-lg,
+.performance-mode .backdrop-blur-md {
+  backdrop-filter: none !important;
+  background: rgba(15, 23, 42, 0.8) !important;
+}
+
+.performance-mode .glass,
+.performance-mode .glass-strong {
+  backdrop-filter: none !important;
+  background: rgba(15, 23, 42, 0.6) !important;
+}
+
+/* Contain layout for better rendering performance */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-paint {
+  contain: paint;
+}
+
+.contain-strict {
+  contain: layout style paint;
+}
+
+/* Efficient transitions that avoid layout thrashing */
+.transition-transform-only {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-opacity-only {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-colors-only {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Completely disable transitions in ultra mode */
+.ultra-performance-mode .transition-all,
+.ultra-performance-mode .transition-colors,
+.ultra-performance-mode .transition-opacity,
+.ultra-performance-mode .transition-transform {
+  transition: none !important;
+}
+
+/* Hardware acceleration detection styles */
+@supports (backdrop-filter: blur(1px)) {
+  .supports-backdrop-filter .backdrop-blur-performance {
+    backdrop-filter: blur(4px);
+  }
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .backdrop-blur-performance,
+  .backdrop-blur-light,
+  .backdrop-blur-xl,
+  .backdrop-blur-lg {
+    backdrop-filter: none;
+    background: rgba(15, 23, 42, 0.8);
+  }
+}
+
+/* Force compositing layer for smooth animations */
+.force-layer {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Optimized scrolling */
+.optimized-scroll {
+  overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Disable hover effects on touch devices */
+@media (hover: none) {
+  .hover\:scale-105:hover,
+  .hover\:scale-\[1\.02\]:hover {
+    transform: none !important;
+  }
+}
