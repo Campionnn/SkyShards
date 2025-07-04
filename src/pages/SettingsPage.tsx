@@ -79,12 +79,8 @@ const RarityDropdown: React.FC<RarityDropdownProps> = ({ value, onChange }) => {
 
       {isOpen &&
         createPortal(
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="dropdown-portal fixed z-[9999] bg-gradient-to-b from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-purple-500/20 rounded-xl shadow-2xl shadow-purple-500/10"
+          <div
+            className="dropdown-portal fixed z-[9999] bg-gradient-to-b from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-purple-500/20 rounded-xl shadow-2xl shadow-purple-500/10 opacity-0 animate-[fadeInScale_0.2s_ease-out_forwards]"
             style={{
               top: dropdownPosition.top,
               left: dropdownPosition.left,
@@ -112,7 +108,7 @@ const RarityDropdown: React.FC<RarityDropdownProps> = ({ value, onChange }) => {
                 {rarity.label}
               </button>
             ))}
-          </motion.div>,
+          </div>,
           document.body
         )}
     </>
@@ -190,12 +186,8 @@ const TypeDropdown: React.FC<TypeDropdownProps> = ({ value, onChange }) => {
 
       {isOpen &&
         createPortal(
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="type-dropdown-portal fixed z-[9999] bg-gradient-to-b from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-emerald-500/20 rounded-xl shadow-2xl shadow-emerald-500/10"
+          <div
+            className="type-dropdown-portal fixed z-[9999] bg-gradient-to-b from-slate-800/95 to-slate-900/95 backdrop-blur-xl border border-emerald-500/20 rounded-xl shadow-2xl shadow-emerald-500/10 opacity-0 animate-[fadeInScale_0.2s_ease-out_forwards]"
             style={{
               top: dropdownPosition.top,
               left: dropdownPosition.left,
@@ -223,7 +215,7 @@ const TypeDropdown: React.FC<TypeDropdownProps> = ({ value, onChange }) => {
                 {type.label}
               </button>
             ))}
-          </motion.div>,
+          </div>,
           document.body
         )}
     </>
@@ -272,13 +264,13 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col space-y-4 py-4">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+      <div className="text-center">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2">Custom Shard Rates</h1>
         <p className="text-slate-400">Customize gathering rates for more accurate calculations</p>
-      </motion.div>
+      </div>
 
       {/* Controls */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 overflow-visible">
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 overflow-visible">
         <div className="flex flex-col lg:flex-row gap-3 overflow-visible">
           {/* Search */}
           <div className="flex-1 relative">
@@ -309,9 +301,7 @@ export const SettingsPage: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex gap-2">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               onClick={handleResetRates}
               className="
                 px-3 py-2.5 bg-red-500/20 hover:bg-red-500/30 
@@ -319,18 +309,15 @@ export const SettingsPage: React.FC = () => {
                 border border-red-500/20 hover:border-red-500/30
                 transition-all duration-200
                 flex items-center space-x-2
+                hover:scale-[1.02] active:scale-[0.98]
               "
             >
               <RotateCcw className="w-4 h-4" />
               <span>Reset</span>
-            </motion.button>
+            </button>
 
             {hasChanges && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <button
                 onClick={handleSave}
                 className="
                   px-3 py-2.5 bg-green-500/20 hover:bg-green-500/30 
@@ -338,11 +325,13 @@ export const SettingsPage: React.FC = () => {
                   border border-green-500/20 hover:border-green-500/30
                   transition-all duration-200
                   flex items-center space-x-2
+                  opacity-0 animate-[fadeInScale_0.2s_ease-out_forwards]
+                  hover:scale-[1.02] active:scale-[0.98]
                 "
               >
                 <Save className="w-4 h-4" />
                 <span>Save</span>
-              </motion.button>
+              </button>
             )}
           </div>
         </div>
@@ -352,27 +341,23 @@ export const SettingsPage: React.FC = () => {
             Base rates (shards/hour) • Showing {filteredShards.length} of {shards.length} shards
           </p>
         </div>
-      </motion.div>
+      </div>
 
       {/* Shards List */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden flex-1"
+      <div
+        className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden flex-1 opacity-0 animate-[fadeInUp_0.4s_ease-out_0.2s_forwards]"
       >
         <div className="h-full overflow-y-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 p-3">
             {filteredShards.map((shard, index) => (
-              <motion.div
+              <div
                 key={shard.key}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: Math.min(index * 0.01, 0.3) }}
                 className="
                   bg-white/5 border border-white/10 rounded-lg p-3
                   hover:bg-white/10 transition-all duration-200
+                  opacity-0 animate-[fadeInLeft_0.3s_ease-out_forwards]
                 "
+                style={{ animationDelay: `${Math.min(index * 0.01, 0.3)}s` }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
@@ -406,18 +391,18 @@ export const SettingsPage: React.FC = () => {
                     />
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {filteredShards.length === 0 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
+        <div className="text-center py-12 opacity-0 animate-[fadeIn_0.3s_ease-out_forwards]">
           <div className="text-6xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold text-white mb-2">No Shards Found</h3>
           <p className="text-slate-400">Try adjusting your search or filter criteria</p>
-        </motion.div>
+        </div>
       )}
     </div>
   );
