@@ -1,4 +1,13 @@
-import type { Data, RecipeChoice, RecipeTree, CalculationParams, CalculationResult, Shards, Recipes } from "../types";
+import type {
+  Data,
+  RecipeChoice,
+  RecipeTree,
+  CalculationParams,
+  CalculationResult,
+  Shards,
+  Recipes,
+  Shard
+} from "../types";
 import { NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS, BLACK_HOLE_SHARD } from "../constants";
 
 export class CalculationService {
@@ -85,7 +94,7 @@ export class CalculationService {
     return tier.multiplier * (3600 / (tier.baseTime + costTime));
   }
 
-  private applyFortuneModifiers(rate: number, shardId: string, shard: any, params: CalculationParams): number {
+  private applyFortuneModifiers(rate: number, shardId: string, shard: Shard, params: CalculationParams): number {
     let effectiveFortune = params.hunterFortune;
 
     const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
