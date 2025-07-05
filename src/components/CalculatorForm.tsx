@@ -188,12 +188,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
         // Only trigger calculation if the shard name is valid and complete
         const isValid = await isValidShardName(formData.shard);
         if (isValid) {
-          const currentValues = formData;
-          const transformedData = {
-            ...currentValues,
-            frogPet: !currentValues.frogPet, // Invert because checkbox is "No Frog Pet"
-          };
-          onSubmit(transformedData);
+          const currentValues = { ...formData, frogPet: false };
+          onSubmit(currentValues);
         }
       }, 1000); // Increased delay to give more time for typing
 
@@ -203,15 +199,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
 
   const handleShardSelect = (shard: ShardWithKey) => {
     setValue("shard", shard.name);
-    // Trigger calculation after a brief delay
     setTimeout(() => {
-      const currentValues = watch();
-      const transformedData = {
-        ...currentValues,
-        shard: shard.name, // Ensure we use the selected shard name
-        frogPet: !currentValues.frogPet, // Invert because checkbox is "No Frog Pet"
-      };
-      onSubmit(transformedData);
+      const currentValues = { ...watch(), shard: shard.name, frogPet: false };
+      onSubmit(currentValues);
     }, 100);
   };
 
@@ -413,20 +403,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 </div>
                 <label htmlFor="excludeWoodenBait" className="text-sm font-medium text-slate-200 cursor-pointer flex-1 group-hover:text-white transition-colors">
                   Exclude Wooden Bait
-                </label>
-              </div>
-
-              <div className="group flex items-center space-x-3 p-2.5 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 hover:border-white/20 transition-all duration-200 cursor-pointer">
-                <div className="relative">
-                  <input id="frogPet" type="checkbox" {...register("frogPet")} className="sr-only peer" />
-                  <div className="w-5 h-5 bg-slate-900 border-2 border-slate-600 rounded-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:border-slate-500 peer-checked:bg-fuchsia-500 peer-checked:border-fuchsia-500 peer-focus:ring-2 peer-focus:ring-fuchsia-500/20">
-                    <svg className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-                <label htmlFor="frogPet" className="text-sm font-medium text-slate-200 cursor-pointer flex-1 group-hover:text-white transition-colors">
-                  No Frog Pet
                 </label>
               </div>
             </div>
