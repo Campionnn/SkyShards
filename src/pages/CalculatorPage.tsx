@@ -4,16 +4,21 @@ import { CalculatorForm, CalculationResults } from "../components";
 import { useCalculation, useCustomRates } from "../hooks";
 import { DataService } from "../services/dataService";
 import type { CalculationFormData } from "../schemas/validation";
-import type { Data } from "../types";
+import { useCalculatorState } from "../context/CalculatorStateContext";
 
-export const CalculatorPage: React.FC = () => {
-  const { result, loading, error, calculate } = useCalculation();
+const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
+  const { setForm } = useCalculatorState();
+  return <CalculatorForm onSubmit={(data) => onSubmit(data, setForm)} />;
+};
+
+const CalculatorPageContent: React.FC = () => {
+  const { result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName } = useCalculatorState();
+  const { loading, error } = useCalculation();
   const { customRates } = useCustomRates();
-  const [calculationData, setCalculationData] = useState<Data | null>(null);
-  const [targetShardName, setTargetShardName] = useState<string>("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const handleCalculate = async (formData: CalculationFormData) => {
+  const handleCalculate = async (formData: CalculationFormData, setForm: (data: CalculationFormData) => void) => {
+    setForm(formData); // persist form state
     try {
       // Validate that we have a valid shard name before proceeding
       if (!formData.shard || formData.shard.trim() === "") {
@@ -55,11 +60,11 @@ export const CalculatorPage: React.FC = () => {
         noWoodenBait: formData.noWoodenBait,
       };
 
-      await calculate(shardKey, formData.quantity, params);
-
-      // Also get the data for display purposes
+      // Use the calculation service directly to get the result
       const calculationService = await import("../services/calculationService");
       const service = calculationService.CalculationService.getInstance();
+      const calculationResult = await service.calculateOptimalPath(shardKey, formData.quantity, params);
+      setResult(calculationResult);
       const data = await service.parseData(params);
       setCalculationData(data);
     } catch (err) {
@@ -95,7 +100,7 @@ export const CalculatorPage: React.FC = () => {
           </div>
 
           <div className={`${sidebarOpen ? "block" : "hidden xl:block"}`}>
-            <CalculatorForm onSubmit={handleCalculate} />
+            <CalculatorFormWithContext onSubmit={handleCalculate} />
           </div>
         </div>
 
@@ -123,7 +128,7 @@ export const CalculatorPage: React.FC = () => {
                   <Menu className="w-6 h-6 text-purple-400" />
                 </div>
                 <h3 className="text-lg font-medium text-white">Ready to Calculate</h3>
-                <p className="text-slate-400 text-sm">Configure your settings and select a shard to see optimal fusion paths</p>
+                <p className="text-slate-400 text-sm mt-1">Configure your settings and select a shard to see optimal fusion paths</p>
                 <div className="xl:hidden">
                   <button
                     onClick={() => setSidebarOpen(true)}
@@ -147,3 +152,5 @@ export const CalculatorPage: React.FC = () => {
     </div>
   );
 };
+
+export const CalculatorPage: React.FC = () => <CalculatorPageContent />;

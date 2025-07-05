@@ -15,9 +15,9 @@ export const formatTime = (decimalHours: number): string => {
     return `${minutes} min`;
   }
   if (minutes === 0 || isNaN(minutes)) {
-    return `${hours} hours`;
+    return `${hours} hr`;
   }
-  return `${hours} hours ${minutes} min`;
+  return `${hours} hr ${minutes} min`;
 };
 
 export const getMaxQuantityForRarity = (rarity: string): number => {
@@ -79,3 +79,5 @@ export const debounce = <T extends (...args: any[]) => any>(func: T, wait: numbe
     timeout = setTimeout(() => func(...args), wait);
   };
 };
+
+export { isValidShardName } from "./isValidShardName";

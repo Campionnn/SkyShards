@@ -1,6 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Layout } from "./components";
+import { CalculatorStateProvider } from "./context/CalculatorStateContext";
 
 // Lazy load pages for better code splitting
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
@@ -14,30 +15,36 @@ const LoadingSpinner = () => (
 );
 
 // App content
+const isProd = import.meta.env.PROD;
+const basename = isProd ? "/SkyShards" : "";
+
 const AppContent = () => {
   return (
-    <Router basename="/SkyShards">
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route
-            index
-            element={
-              <Suspense fallback={<LoadingSpinner />}>
-                <CalculatorPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="settings"
-            element={
-              <Suspense fallback={<LoadingSpinner />}>
-                <SettingsPage />
-              </Suspense>
-            }
-          />
-        </Route>
-      </Routes>
-    </Router>
+    <CalculatorStateProvider>
+      <Router basename={basename}>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route
+              index
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <CalculatorPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="settings"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <SettingsPage />
+                </Suspense>
+              }
+            />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </CalculatorStateProvider>
   );
 };
 

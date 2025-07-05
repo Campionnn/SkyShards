@@ -1,11 +1,12 @@
-import type { ShardWithKey, Recipes } from "../types";
+import type { ShardWithKey } from "../types";
+// import type { ShardWithKey, Recipes } from "../types";
 
 export class DataService {
   private static instance: DataService;
   private shardsCache: ShardWithKey[] | null = null;
   private shardNameToKeyCache: Record<string, string> | null = null;
   private defaultRatesCache: Record<string, number> | null = null;
-  private recipesCache: Recipes | null = null;
+  // private recipesCache: Recipes | null = null;
 
   public static getInstance(): DataService {
     if (!DataService.instance) {
@@ -74,33 +75,33 @@ export class DataService {
     }
   }
 
-  async loadRecipes(): Promise<Recipes> {
-    if (this.recipesCache) {
-      return this.recipesCache;
-    }
+  // async loadRecipes(): Promise<Recipes> {
+  //   if (this.recipesCache) {
+  //     return this.recipesCache;
+  //   }
 
-    try {
-      const response = await fetch(`${import.meta.env.BASE_URL}fusion-data.json`);
-      const data = await response.json();
+  //   try {
+  //     const response = await fetch(`${import.meta.env.BASE_URL}fusion-data.json`);
+  //     const data = await response.json();
 
-      const recipes: Recipes = {};
-      for (const outputShard in data.recipes) {
-        recipes[outputShard] = [];
-        for (const qtyStr in data.recipes[outputShard]) {
-          const qty = parseInt(qtyStr);
-          const recipeList = data.recipes[outputShard][qtyStr];
-          recipeList.forEach((inputs: [string, string]) => {
-            recipes[outputShard].push({ inputs, outputQuantity: qty });
-          });
-        }
-      }
+  //     const recipes: Recipes = {};
+  //     for (const outputShard in data.recipes) {
+  //       recipes[outputShard] = [];
+  //       for (const qtyStr in data.recipes[outputShard]) {
+  //         const qty = parseInt(qtyStr);
+  //         const recipeList = data.recipes[outputShard][qtyStr];
+  //         recipeList.forEach((inputs: [string, string]) => {
+  //           recipes[outputShard].push({ inputs, outputQuantity: qty });
+  //         });
+  //       }
+  //     }
 
-      this.recipesCache = recipes;
-      return recipes;
-    } catch (error) {
-      throw new Error(`Failed to load recipes: ${error}`);
-    }
-  }
+  //     this.recipesCache = recipes;
+  //     return recipes;
+  //   } catch (error) {
+  //     throw new Error(`Failed to load recipes: ${error}`);
+  //   }
+  // }
 
   async searchShards(query: string): Promise<ShardWithKey[]> {
     const shards = await this.loadShards();
