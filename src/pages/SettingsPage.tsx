@@ -67,7 +67,7 @@ const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value, onCha
           className="
             flex items-center justify-between space-x-2 px-3 py-2.5 min-w-[140px]
             bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30
-            rounded-xl text-white hover:bg-purple-500/20 
+            rounded-md text-white hover:bg-purple-500/20 
             transition-colors duration-200
           "
         >
@@ -82,7 +82,7 @@ const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value, onCha
       {isOpen &&
         createPortal(
           <div
-            className="dropdown-portal fixed z-[9999] bg-slate-800/95 backdrop-blur-sm border border-purple-500/20 rounded-xl shadow-2xl"
+            className="dropdown-portal fixed z-[9999] bg-slate-800/95 backdrop-blur-sm border border-purple-500/20 rounded-md shadow-2xl"
             style={{
               top: dropdownPosition.top,
               left: dropdownPosition.left,
@@ -174,7 +174,7 @@ const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, onChange 
           className="
             flex items-center justify-between space-x-2 px-3 py-2.5 min-w-[140px]
             bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-400/30
-            rounded-xl text-white hover:bg-emerald-500/20
+            rounded-md text-white hover:bg-emerald-500/20
             transition-colors duration-200
           "
         >
@@ -189,7 +189,7 @@ const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, onChange 
       {isOpen &&
         createPortal(
           <div
-            className="type-dropdown-portal fixed z-[9999] bg-slate-800/95 backdrop-blur-sm border border-emerald-500/20 rounded-xl shadow-2xl"
+            className="type-dropdown-portal fixed z-[9999] bg-slate-800/95 backdrop-blur-sm border border-emerald-500/20 rounded-md shadow-2xl"
             style={{
               top: dropdownPosition.top,
               left: dropdownPosition.left,
@@ -236,7 +236,7 @@ const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, onRateCha
   }, [shard.key, onRateChange]);
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-lg p-3 hover:bg-white/10 transition-colors duration-200">
+    <div className="bg-white/5 border border-white/10 rounded-md p-3 hover:bg-white/10 transition-colors duration-200">
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2 mb-1">
@@ -261,7 +261,7 @@ const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, onRateCha
             onChange={handleRateChange}
             className="
               w-full px-2 py-1.5 text-sm text-center
-              bg-white/5 border border-white/10 rounded-lg
+              bg-white/5 border border-white/10 rounded-md
               text-white placeholder-slate-400
               focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50
               transition-colors duration-200
@@ -339,7 +339,7 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Controls */}
-      <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+      <div className="bg-white/5 border border-white/10 rounded-md p-4">
         <div className="flex flex-col lg:flex-row gap-3">
           {/* Search */}
           <div className="flex-1 relative">
@@ -354,7 +354,7 @@ export const SettingsPage: React.FC = () => {
               className="
                 w-full pl-10 pr-4 py-2.5 
                 bg-white/5 border border-white/10 
-                rounded-xl text-white placeholder-slate-400
+                rounded-md text-white placeholder-slate-400
                 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50
                 transition-colors duration-200
               "
@@ -371,7 +371,7 @@ export const SettingsPage: React.FC = () => {
               onClick={handleResetRates}
               className="
                 px-3 py-2.5 bg-red-500/20 hover:bg-red-500/30 
-                text-red-400 font-medium rounded-xl 
+                text-red-400 font-medium rounded-md 
                 border border-red-500/20 hover:border-red-500/30
                 transition-colors duration-200
                 flex items-center space-x-2
@@ -386,7 +386,7 @@ export const SettingsPage: React.FC = () => {
                 onClick={handleSave}
                 className="
                   px-3 py-2.5 bg-green-500/20 hover:bg-green-500/30 
-                  text-green-400 font-medium rounded-xl 
+                  text-green-400 font-medium rounded-md 
                   border border-green-500/20 hover:border-green-500/30
                   transition-colors duration-200
                   flex items-center space-x-2
@@ -407,7 +407,7 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {/* Shards List */}
-      <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden flex-1">
+      <div className="bg-white/5 border border-white/10 rounded-md overflow-hidden flex-1">
         <div className="h-full overflow-y-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 p-3">
             {filteredShards.map((shard) => (

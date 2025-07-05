@@ -5,19 +5,19 @@ export const formatTime = (decimalHours: number): string => {
   const totalSeconds = Math.round(decimalHours * 3600); // Convert hours to seconds
 
   if (totalSeconds < 60) {
-    return `${totalSeconds} seconds`;
+    return `${totalSeconds} sec`;
   }
 
   const hours = Math.floor(decimalHours);
   const minutes = Math.round((decimalHours - hours) * 60);
 
   if (hours === 0) {
-    return `${minutes} minutes`;
+    return `${minutes} min`;
   }
   if (minutes === 0 || isNaN(minutes)) {
     return `${hours} hours`;
   }
-  return `${hours} hours ${minutes} minutes`;
+  return `${hours} hours ${minutes} min`;
 };
 
 export const getMaxQuantityForRarity = (rarity: string): number => {

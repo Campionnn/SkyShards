@@ -25,19 +25,23 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
 
   if (tree.method === "direct") {
     return (
-      <div className="flex items-center justify-between p-3 bg-slate-800 rounded border border-slate-600">
+      <div className="flex items-center justify-between p-2 bg-slate-800 rounded-md border border-slate-600">
         <div className="flex items-center space-x-3">
           <div className="w-3 h-3 bg-green-400 rounded-full" />
           <div className="flex items-center space-x-3">
-            <span className="text-slate-300 font-medium bg-slate-700 px-2 py-1 rounded text-sm">{tree.quantity}x</span>
+            <span className="text-slate-300 font-medium bg-slate-700 px-2 py-1 rounded-md text-sm">{tree.quantity}x</span>
             <span className={`font-medium ${getRarityColor(shard.rarity)}`} title={getShardDetails(shard, true)}>
               {shard.name}
             </span>
-            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded">DIRECT</span>
+            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-md">DIRECT</span>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-sm text-slate-300">{formatNumber(shard.rate)}/hour</div>
+          <div className="text-sm text-slate-300">
+            {formatNumber(shard.rate)}
+            <span className="text-slate-500 mx-0.5">/</span>
+            <span className="text-slate-400">hour</span>
+          </div>
           <div className="text-xs text-slate-400 capitalize">
             {shard.type} • {shard.family}
           </div>
@@ -53,8 +57,8 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
   const displayQuantity = isTopLevel ? totalShardsProduced : tree.quantity;
 
   return (
-    <div className="bg-slate-800 rounded border border-slate-600 overflow-hidden">
-      <button onClick={() => onToggle(nodeId)} className="w-full p-3 text-left">
+    <div className="bg-slate-800 rounded-md border border-slate-600 overflow-hidden">
+      <button onClick={() => onToggle(nodeId)} className="w-full p-2 text-left cursor-pointer hover:bg-slate-700/50 transition-colors">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
@@ -70,7 +74,7 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
             </div>
           </div>
           <div className="text-right">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-end space-x-2">
               <span className="text-xs text-slate-500">fusions</span>
               <span className="text-sm font-medium text-white">{displayQuantity}</span>
             </div>
@@ -82,7 +86,7 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
       </button>
 
       {isExpanded && (
-        <div className="border-t border-slate-600 p-3 space-y-2">
+        <div className="border-t border-slate-600 p-2 space-y-2">
           <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} />
           <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} />
         </div>
@@ -124,13 +128,23 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
     }
   }, [result.tree, lastTreeHash]);
 
-  const handleToggleAll = () => {
+  const handleExpandAll = () => {
     const newStates = new Map(expandedStates);
-    const allExpanded = Array.from(newStates.values()).every((expanded) => expanded);
 
-    // Toggle all states
+    // Set all states to true (expanded)
     for (const key of newStates.keys()) {
-      newStates.set(key, !allExpanded);
+      newStates.set(key, true);
+    }
+
+    setExpandedStates(newStates);
+  };
+
+  const handleCollapseAll = () => {
+    const newStates = new Map(expandedStates);
+
+    // Set all states to false (collapsed)
+    for (const key of newStates.keys()) {
+      newStates.set(key, false);
     }
 
     setExpandedStates(newStates);
@@ -143,12 +157,12 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-slate-800 border border-slate-600 rounded p-3">
+        <div className="bg-slate-800 border border-slate-600 rounded-md p-2">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-slate-700 rounded flex items-center justify-center">
+            <div className="w-8 h-8 bg-slate-700 rounded-md flex items-center justify-center">
               <Clock className="w-4 h-4 text-purple-400" />
             </div>
             <div>
@@ -158,9 +172,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
           </div>
         </div>
 
-        <div className="bg-slate-800 border border-slate-600 rounded p-3">
+        <div className="bg-slate-800 border border-slate-600 rounded-md p-2">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-slate-700 rounded flex items-center justify-center">
+            <div className="w-8 h-8 bg-slate-700 rounded-md flex items-center justify-center">
               <Target className="w-4 h-4 text-blue-400" />
             </div>
             <div>
@@ -170,9 +184,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
           </div>
         </div>
 
-        <div className="bg-slate-800 border border-slate-600 rounded p-3">
+        <div className="bg-slate-800 border border-slate-600 rounded-md p-2">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-slate-700 rounded flex items-center justify-center">
+            <div className="w-8 h-8 bg-slate-700 rounded-md flex items-center justify-center">
               <BarChart3 className="w-4 h-4 text-green-400" />
             </div>
             <div>
@@ -182,9 +196,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
           </div>
         </div>
 
-        <div className="bg-slate-800 border border-slate-600 rounded p-3">
+        <div className="bg-slate-800 border border-slate-600 rounded-md p-2">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-slate-700 rounded flex items-center justify-center">
+            <div className="w-8 h-8 bg-slate-700 rounded-md flex items-center justify-center">
               <Hammer className="w-4 h-4 text-orange-400" />
             </div>
             <div>
@@ -198,15 +212,15 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
       </div>
 
       {/* Materials Needed */}
-      <div className="bg-slate-800 border border-slate-600 rounded p-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-slate-800 border border-slate-600 rounded-md p-3">
+        <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-            <div className="p-1 bg-slate-700 rounded">
+            <div className="p-1 bg-slate-700 rounded-md">
               <Hammer className="w-5 h-5 text-blue-400" />
             </div>
             Materials Needed
           </h3>
-          <div className="text-sm text-slate-300 bg-slate-700 px-3 py-1 rounded">
+          <div className="text-sm text-slate-300 bg-slate-700 px-3 py-1 rounded-md">
             for {result.totalShardsProduced} {targetShardName} ({result.craftsNeeded} craft{result.craftsNeeded > 1 ? "s" : ""})
           </div>
         </div>
@@ -217,13 +231,17 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
             const timeNeeded = quantity / shard.rate;
 
             return (
-              <div key={shardId} className="bg-slate-700 border border-slate-600 rounded p-2">
+              <div key={shardId} className="bg-slate-700 border border-slate-600 rounded-md p-2">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium text-sm">
                       {quantity}x <span className={getRarityColor(shard.rarity)}>{shard.name}</span>
                     </div>
-                    <div className="text-xs text-slate-400">{formatNumber(shard.rate)}/hour</div>
+                    <div className="text-xs text-slate-400">
+                      {formatNumber(shard.rate)}
+                      <span className="text-slate-600 mx-0.5">/</span>
+                      <span className="text-slate-500">hour</span>
+                    </div>
                   </div>
                   <div className="text-right">
                     <div className="text-xs text-slate-400">{formatTime(timeNeeded)}</div>
@@ -236,17 +254,28 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
       </div>
 
       {/* Fusion Tree */}
-      <div className="bg-slate-800 border border-slate-600 rounded p-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-slate-800 border border-slate-600 rounded-md p-3">
+        <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-            <div className="p-1 bg-slate-700 rounded">
+            <div className="p-1 bg-slate-700 rounded-md">
               <BarChart3 className="w-5 h-5 text-purple-400" />
             </div>
             Fusion Tree
           </h3>
-          <button onClick={handleToggleAll} className="px-3 py-2 bg-slate-700 text-white rounded text-sm font-medium">
-            {Array.from(expandedStates.values()).every((expanded) => expanded) ? "Collapse All" : "Expand All"}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleExpandAll}
+              className="px-3 py-1.5 bg-green-500/10 border border-green-500/20 hover:border-green-400/30 text-white text-xs font-medium rounded-md hover:bg-green-500/20 transition-all duration-200 cursor-pointer"
+            >
+              Expand All
+            </button>
+            <button
+              onClick={handleCollapseAll}
+              className="px-3 py-1.5 bg-orange-500/10 border border-orange-500/20 hover:border-orange-400/30 text-white text-xs font-medium rounded-md hover:bg-orange-500/20 transition-all duration-200 cursor-pointer"
+            >
+              Collapse All
+            </button>
+          </div>
         </div>
 
         <RecipeTreeNode tree={result.tree} data={data} isTopLevel={true} totalShardsProduced={result.totalShardsProduced} nodeId="root" expandedStates={expandedStates} onToggle={handleNodeToggle} />

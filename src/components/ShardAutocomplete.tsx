@@ -47,7 +47,13 @@ const SuggestionItem: React.FC<{
             {shard.family} • {shard.type}
           </div>
         </div>
-        {shard.rate > 0 && <div className="text-xs font-mono bg-slate-900/50 px-2 py-1 rounded ml-2">{shard.rate}/hr</div>}
+        {shard.rate > 0 && (
+          <div className="text-xs font-mono bg-slate-900/50 px-2 py-1 rounded-md ml-2">
+            {shard.rate}
+            <span className="text-slate-500 mx-0.5">/</span>
+            <span className="text-slate-400">hr</span>
+          </div>
+        )}
       </div>
     </li>
   );
@@ -213,7 +219,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           onKeyDown={handleKeyDown}
           onFocus={handleInputFocus}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 hover:border-slate-500 transition-colors"
+          className="w-full pl-10 pr-10 py-2.5 bg-slate-800 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 hover:border-slate-500 transition-colors"
           autoComplete="off"
           spellCheck={false}
         />
@@ -225,7 +231,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
       </div>
 
       {isOpen && suggestions.length > 0 && !isSelecting && (
-        <ul ref={listRef} className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+        <ul ref={listRef} className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-md shadow-xl max-h-60 overflow-y-auto">
           {suggestions.map((shard, index) => (
             <SuggestionItem key={shard.key} shard={shard} index={index} focusedIndex={focusedIndex} onSelect={handleSelect} isSelecting={isSelecting} setFocusedIndex={setFocusedIndex} />
           ))}

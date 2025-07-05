@@ -73,30 +73,39 @@ export const CalculatorPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 lg:gap-6">
+    <div className="min-h-screen space-y-3 py-4">
+      {/* Header */}
+
+      <div className="grid grid-cols-1 xl:grid-cols-7 gap-3 lg:gap-4">
         {/* Configuration Panel */}
         <div className="xl:col-span-2">
-          <div className="sticky top-4">
-            {/* Mobile toggle */}
-            <div className="xl:hidden mb-3">
-              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded text-white flex items-center justify-center space-x-2">
-                {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-                <span className="text-sm font-medium">{sidebarOpen ? "Hide" : "Show"} Configuration</span>
-              </button>
-            </div>
+          {/* Mobile toggle */}
+          <div className="xl:hidden mb-3">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="
+                w-full px-3 py-2.5 
+                bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30
+                rounded-md text-white hover:bg-purple-500/20 
+                flex items-center justify-center space-x-2 
+                transition-colors duration-200 font-medium text-sm
+              "
+            >
+              {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              <span>{sidebarOpen ? "Hide" : "Show"} Configuration</span>
+            </button>
+          </div>
 
-            <div className={`${sidebarOpen ? "block" : "hidden xl:block"}`}>
-              <CalculatorForm onSubmit={handleCalculate} />
-            </div>
+          <div className={`${sidebarOpen ? "block" : "hidden xl:block"}`}>
+            <CalculatorForm onSubmit={handleCalculate} />
           </div>
         </div>
 
         {/* Results Panel */}
-        <div className="xl:col-span-3 space-y-4">
+        <div className="xl:col-span-5 space-y-3">
           {/* Error Display */}
           {error && (
-            <div className="bg-red-900/20 border border-red-800 rounded p-3 flex items-start space-x-2">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-md p-3 flex items-start space-x-2">
               <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-medium text-red-400">Calculation Error</h3>
@@ -110,15 +119,24 @@ export const CalculatorPage: React.FC = () => {
 
           {/* Empty State */}
           {!result && !loading && !error && (
-            <div className="text-center py-12 bg-slate-800/30 border border-slate-700 rounded">
+            <div className="text-center py-10 bg-white/5 border border-white/10 rounded-md">
               <div className="max-w-md mx-auto space-y-3">
-                <div className="w-12 h-12 bg-slate-700 rounded flex items-center justify-center mx-auto">
-                  <Menu className="w-6 h-6 text-slate-300" />
+                <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/20 rounded-md flex items-center justify-center mx-auto">
+                  <Menu className="w-6 h-6 text-purple-400" />
                 </div>
                 <h3 className="text-lg font-medium text-white">Ready to Calculate</h3>
                 <p className="text-slate-400 text-sm">Configure your settings and select a shard to see optimal fusion paths</p>
                 <div className="xl:hidden">
-                  <button onClick={() => setSidebarOpen(true)} className="px-4 py-2 bg-slate-700 text-white text-sm rounded flex items-center space-x-1 mx-auto">
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="
+                      px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 
+                      text-purple-400 font-medium rounded-md 
+                      border border-purple-500/20 hover:border-purple-500/30
+                      transition-colors duration-200 text-sm
+                      flex items-center space-x-2 mx-auto
+                    "
+                  >
                     <Menu className="w-4 h-4" />
                     <span>Open Configuration</span>
                   </button>

@@ -58,7 +58,7 @@ export const HomePage: React.FC = () => {
             <button
               className="
                 px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-600 
-                text-white font-semibold rounded-xl text-lg
+                text-white font-semibold rounded-md text-lg
                 hover:from-purple-600 hover:to-blue-700
                 transition-all duration-200
                 flex items-center space-x-2 w-full sm:w-auto justify-center
@@ -75,7 +75,7 @@ export const HomePage: React.FC = () => {
             <button
               className="
                 px-8 py-4 bg-white/10 backdrop-blur-xl border border-white/20 
-                text-white font-semibold rounded-xl text-lg
+                text-white font-semibold rounded-md text-lg
                 hover:bg-white/20
                 transition-all duration-200
                 flex items-center space-x-2 w-full sm:w-auto justify-center
@@ -110,7 +110,7 @@ export const HomePage: React.FC = () => {
           {features.map((feature) => (
             <div key={feature.title} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:scale-[1.02] transition-transform duration-200">
               <div className="flex items-start space-x-4">
-                <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-md flex items-center justify-center flex-shrink-0`}>
                   <feature.icon className="w-6 h-6 text-white" />
                 </div>
                 <div>
