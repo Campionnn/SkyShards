@@ -2,12 +2,10 @@ import React from "react";
 import { Zap, RotateCcw, Settings } from "lucide-react";
 import { type CalculationFormData } from "../schemas/validation";
 import { ShardAutocomplete } from "./ShardAutocomplete";
-import { MAX_QUANTITIES } from "../constants";
-import { DataService } from "../services/dataService";
-import { PetLevelDropdown } from "./calculator/PetLevelDropdown";
-import type { ShardWithKey } from "../types";
-import { KuudraDropdown } from "./calculator/KuudraDropdown";
 import { useCalculatorState } from "../context/CalculatorStateContext";
+import { PetLevelDropdown } from "./calculator/PetLevelDropdown";
+import { KuudraDropdown } from "./calculator/KuudraDropdown";
+import { MAX_QUANTITIES } from "../constants";
 
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
@@ -23,22 +21,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
     };
   }, []);
 
-  const selectedShard = form.shard;
-
   const handleInputChange = (field: keyof CalculationFormData, value: any) => {
     const updatedForm = { ...form, [field]: value };
     setForm(updatedForm);
     setTimeout(() => {
       onSubmit(updatedForm);
     }, 0);
-  };
-
-  const handleShardSelect = (shard: ShardWithKey) => {
-    setForm({ ...form, shard: shard.name });
-    setTimeout(() => {
-      const currentValues = { ...form, shard: shard.name, frogPet: false };
-      onSubmit(currentValues);
-    }, 100);
   };
 
   const handleMaxStats = () => {
@@ -89,36 +77,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
     }, 0);
   };
 
-  const handleMaxQuantity = async () => {
-    const shardName = selectedShard;
-    let updatedForm: CalculationFormData;
-    if (!shardName || shardName.trim() === "") {
-      updatedForm = { ...form, quantity: MAX_QUANTITIES.common };
-      setForm(updatedForm);
-      setTimeout(() => {
-        onSubmit(updatedForm);
-      }, 0);
-      return;
-    }
-    try {
-      const dataService = DataService.getInstance();
-      const shard = await dataService.getShardByName(shardName);
-      const maxQuantity = (shard && MAX_QUANTITIES[shard.rarity as keyof typeof MAX_QUANTITIES]) || MAX_QUANTITIES.common;
-      updatedForm = { ...form, quantity: maxQuantity };
-      setForm(updatedForm);
-      setTimeout(() => {
-        onSubmit(updatedForm);
-      }, 0);
-    } catch (error) {
-      console.error("Failed to get shard rarity:", error);
-      updatedForm = { ...form, quantity: MAX_QUANTITIES.common };
-      setForm(updatedForm);
-      setTimeout(() => {
-        onSubmit(updatedForm);
-      }, 0);
-    }
-  };
-
   return (
     <div className="bg-slate-800/40 border border-slate-600/30 rounded-md p-3 space-y-3">
       <form onSubmit={(e) => e.preventDefault()} className="space-y-3">
@@ -129,7 +87,27 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
               Target Shard
             </label>
-            <ShardAutocomplete value={form.shard} onChange={(value) => handleInputChange("shard", value)} onSelect={handleShardSelect} placeholder="Search for a shard..." />
+            <ShardAutocomplete
+              value={form.shard}
+              onChange={(value) => handleInputChange("shard", value)}
+              onSelect={(shard) => {
+                // Use the rarity directly from the selected shard (provided by autocomplete)
+                let rarityKey = "common";
+                if (shard && typeof shard.rarity === "string") {
+                  const normalized = shard.rarity.toLowerCase();
+                  if (normalized in MAX_QUANTITIES) rarityKey = normalized;
+                }
+                const maxQuantity: number = MAX_QUANTITIES[rarityKey as keyof typeof MAX_QUANTITIES];
+                const updated = { ...form, shard: shard.name, quantity: maxQuantity };
+                setForm(updated);
+                setTimeout(() => onSubmit(updated), 0);
+                setTimeout(() => {
+                  const input = document.querySelector<HTMLInputElement>('input[placeholder="1"]');
+                  if (input) input.select();
+                }, 0);
+              }}
+              placeholder="Search for a shard..."
+            />
           </div>
           <div className="flex gap-1.5">
             <div className="flex-1">
@@ -148,16 +126,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 }}
                 className="w-full px-3 py-1.5 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors duration-200"
               />
-            </div>
-            <div className="flex-shrink-0">
-              <label className="block text-xs font-medium text-slate-300 mb-1">&nbsp;</label>
-              <button
-                type="button"
-                onClick={handleMaxQuantity}
-                className="px-2.5 py-1.5 text-sm font-medium rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/20 hover:border-emerald-500/30 transition-colors duration-200 flex items-center justify-center cursor-pointer"
-              >
-                Max
-              </button>
             </div>
           </div>
         </div>
@@ -224,33 +192,52 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             </div>
 
             {/* Checkboxes */}
-            <div className="space-y-1.5">
-              <div className="group flex items-center space-x-3 p-2.5 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 hover:border-white/20 transition-all duration-200 cursor-pointer">
-                <div className="relative">
-                  <input id="excludeChameleon" type="checkbox" checked={form.excludeChameleon} onChange={(e) => handleInputChange("excludeChameleon", e.target.checked)} className="sr-only peer" />
-                  <div className="w-5 h-5 bg-slate-900 border-2 border-slate-600 rounded-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:border-slate-500 peer-checked:bg-fuchsia-500 peer-checked:border-fuchsia-500 peer-focus:ring-2 peer-focus:ring-fuchsia-500/20">
-                    <svg className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-                <label htmlFor="excludeChameleon" className="text-sm font-medium text-slate-200 cursor-pointer flex-1 group-hover:text-white transition-colors">
+            <div className="space-y-0">
+              {/* Exclude Chameleon Switch */}
+              <div className="flex items-center justify-between py-1">
+                <label htmlFor="excludeChameleon" className="text-sm font-medium text-slate-200 flex-1 cursor-pointer">
                   Exclude Chameleon
                 </label>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={form.excludeChameleon}
+                  onClick={() => handleInputChange("excludeChameleon", !form.excludeChameleon)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
+                    ${form.excludeChameleon ? "bg-fuchsia-600" : "bg-white/5"}
+                    hover:border-fuchsia-400`}
+                  style={{ boxShadow: "none" }}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full shadow transition-transform duration-200 border border-white/10
+                    ${form.excludeChameleon ? "bg-fuchsia-400" : "bg-slate-300/70"}
+                    ${form.excludeChameleon ? "translate-x-5" : "translate-x-0.5"}`}
+                    style={{ paddingLeft: "1px" }}
+                  />
+                </button>
               </div>
-
-              <div className="group flex items-center space-x-3 p-2.5 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 hover:border-white/20 transition-all duration-200 cursor-pointer">
-                <div className="relative">
-                  <input id="excludeWoodenBait" type="checkbox" checked={form.noWoodenBait} onChange={(e) => handleInputChange("noWoodenBait", e.target.checked)} className="sr-only peer" />
-                  <div className="w-5 h-5 bg-slate-900 border-2 border-slate-600 rounded-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:border-slate-500 peer-checked:bg-fuchsia-500 peer-checked:border-fuchsia-500 peer-focus:ring-2 peer-focus:ring-fuchsia-500/20">
-                    <svg className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-                <label htmlFor="excludeWoodenBait" className="text-sm font-medium text-slate-200 cursor-pointer flex-1 group-hover:text-white transition-colors">
+              {/* Exclude Wooden Bait Switch */}
+              <div className="flex items-center justify-between py-1">
+                <label htmlFor="excludeWoodenBait" className="text-sm font-medium text-slate-200 flex-1 cursor-pointer">
                   Exclude Wooden Bait
                 </label>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={form.noWoodenBait}
+                  onClick={() => handleInputChange("noWoodenBait", !form.noWoodenBait)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
+                    ${form.noWoodenBait ? "bg-fuchsia-600" : "bg-white/5"}
+                    hover:border-fuchsia-400`}
+                  style={{ boxShadow: "none" }}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full shadow transition-transform duration-200 border border-white/10
+                    ${form.noWoodenBait ? "bg-fuchsia-400" : "bg-slate-300/70"}
+                    ${form.noWoodenBait ? "translate-x-5" : "translate-x-0.5"}`}
+                    style={{ paddingLeft: "1px" }}
+                  />
+                </button>
               </div>
             </div>
           </div>

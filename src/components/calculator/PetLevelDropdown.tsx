@@ -3,7 +3,8 @@ import { ChevronDown } from "lucide-react";
 import type { PetLevelDropdownProps } from "../../types";
 
 export const PetLevelDropdown: React.FC<PetLevelDropdownProps> = React.memo(({ value, onChange, label }) => {
-  const levels = useMemo(() => Array.from({ length: 11 }, (_, i) => i), []); // 0-10
+  // Show levels 10 to 0 (descending)
+  const levels = useMemo(() => Array.from({ length: 11 }, (_, i) => 10 - i), []); // 10-0
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
