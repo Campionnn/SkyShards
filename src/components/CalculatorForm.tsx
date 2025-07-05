@@ -191,7 +191,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           const currentValues = { ...formData, frogPet: false };
           onSubmit(currentValues);
         }
-      }, 1000); // Increased delay to give more time for typing
+      }, 0); // Increased delay to give more time for typing
 
       return () => clearTimeout(timeoutId);
     }
