@@ -150,7 +150,12 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
                 <div className="flex flex-col items-start min-w-0 justify-center h-full">
                   <span className="text-slate-300 font-medium text-base flex-shrink-0">{quantity}x</span>
                   <span className={`mt-0 font-medium text-sm ${getRarityColor(shard.rarity)} flex items-center flex-shrink-0`}>
-                    <img src={`/shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-1" loading="lazy" />
+                    <img
+                      src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`}
+                      alt={shard.name}
+                      className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-1"
+                      loading="lazy"
+                    />
                     {shard.name}
                   </span>
                 </div>
