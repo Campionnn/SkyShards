@@ -6,9 +6,27 @@ export const Navigation: React.FC = () => {
   const location = useLocation();
 
   const navItems = [
-    { path: "/", label: "Calculator", icon: Calculator },
-    { path: "/settings", label: "Settings", icon: Settings },
+    { path: "/", label: "Calculator", icon: Calculator, color: "purple" },
+    { path: "/settings", label: "Settings", icon: Settings, color: "blue" },
   ];
+
+  // Color classes for each nav item
+  const colorClasses: Record<string, { bg: string; hoverBg: string; text: string; border: string; hoverBorder: string }> = {
+    purple: {
+      bg: "bg-purple-500/20",
+      hoverBg: "hover:bg-purple-500/30",
+      text: "text-purple-300",
+      border: "border border-purple-500/20",
+      hoverBorder: "hover:border-purple-500/30",
+    },
+    blue: {
+      bg: "bg-blue-500/20",
+      hoverBg: "hover:bg-blue-500/30",
+      text: "text-blue-300",
+      border: "border border-blue-500/20",
+      hoverBorder: "hover:border-blue-500/30",
+    },
+  };
 
   return (
     <nav className="border-b border-slate-700 bg-slate-900">
@@ -24,16 +42,20 @@ export const Navigation: React.FC = () => {
           </Link>
 
           <div className="flex items-center space-x-2">
-            {navItems.map(({ path, label, icon: Icon }) => {
+            {navItems.map(({ path, label, icon: Icon, color }) => {
               const isActive = location.pathname === path;
+              const colorClass = colorClasses[color];
+              // Set outline color based on nav item color
+              const ringClass = isActive ? (color === "blue" ? "ring-1 ring-offset-0 ring-blue-300" : "ring-1 ring-offset-0 ring-purple-300") : "";
               return (
                 <Link key={path} to={path}>
-                  <div className={`px-3 py-2 rounded-md transition-colors cursor-pointer ${isActive ? "bg-purple-600 text-white" : "text-slate-300 bg-slate-800 hover:bg-slate-700"}`}>
-                    <div className="flex items-center space-x-1">
-                      <Icon className="w-4 h-4" />
-                      <span className="text-sm font-medium">{label}</span>
-                    </div>
-                  </div>
+                  <button
+                    type="button"
+                    className={`px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer ${colorClass.bg} ${colorClass.hoverBg} ${colorClass.text} ${colorClass.border} ${colorClass.hoverBorder} ${ringClass}`}
+                  >
+                    <Icon className="w-3 h-3" />
+                    <span>{label}</span>
+                  </button>
                 </Link>
               );
             })}

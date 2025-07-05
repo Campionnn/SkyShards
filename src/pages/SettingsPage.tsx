@@ -16,14 +16,17 @@ const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value, onCha
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
-  const rarities = useMemo(() => [
-    { value: "all", label: "All Rarities" },
-    { value: "common", label: "Common" },
-    { value: "uncommon", label: "Uncommon" },
-    { value: "rare", label: "Rare" },
-    { value: "epic", label: "Epic" },
-    { value: "legendary", label: "Legendary" },
-  ], []);
+  const rarities = useMemo(
+    () => [
+      { value: "all", label: "All Rarities" },
+      { value: "common", label: "Common" },
+      { value: "uncommon", label: "Uncommon" },
+      { value: "rare", label: "Rare" },
+      { value: "epic", label: "Epic" },
+      { value: "legendary", label: "Legendary" },
+    ],
+    []
+  );
 
   const updatePosition = useCallback(() => {
     if (isOpen && buttonRef) {
@@ -52,10 +55,7 @@ const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value, onCha
     }
   }, [isOpen]);
 
-  const currentRarity = useMemo(() => 
-    rarities.find((r) => r.value === value), 
-    [rarities, value]
-  );
+  const currentRarity = useMemo(() => rarities.find((r) => r.value === value), [rarities, value]);
 
   return (
     <>
@@ -68,7 +68,7 @@ const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value, onCha
             flex items-center justify-between space-x-2 px-3 py-2.5 min-w-[140px]
             bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30
             rounded-md text-white hover:bg-purple-500/20 
-            transition-colors duration-200
+            transition-colors duration-200 cursor-pointer
           "
         >
           <div className="flex items-center space-x-2">
@@ -102,8 +102,8 @@ const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value, onCha
                   hover:bg-purple-500/20 transition-colors duration-200
                   ${value === rarity.value ? "bg-purple-500/30 text-purple-200" : "text-white hover:text-purple-200"}
                   ${rarity !== rarities[rarities.length - 1] ? "border-b border-purple-500/10" : ""}
-                  ${rarity === rarities[0] ? "rounded-t-xl" : ""}
-                  ${rarity === rarities[rarities.length - 1] ? "rounded-b-xl" : ""}
+                  ${rarity === rarities[0] ? "rounded-t-md" : ""}
+                  ${rarity === rarities[rarities.length - 1] ? "rounded-b-md" : ""}
                 `}
               >
                 {rarity.label}
@@ -126,11 +126,14 @@ const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, onChange 
   const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
 
-  const types = useMemo(() => [
-    { value: "all", label: "All Types" },
-    { value: "direct", label: "Direct" },
-    { value: "fuse", label: "Fuse" },
-  ], []);
+  const types = useMemo(
+    () => [
+      { value: "all", label: "All Types" },
+      { value: "direct", label: "Direct" },
+      { value: "fuse", label: "Fuse" },
+    ],
+    []
+  );
 
   const updatePosition = useCallback(() => {
     if (isOpen && buttonRef) {
@@ -159,10 +162,7 @@ const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, onChange 
     }
   }, [isOpen]);
 
-  const currentType = useMemo(() => 
-    types.find((t) => t.value === value), 
-    [types, value]
-  );
+  const currentType = useMemo(() => types.find((t) => t.value === value), [types, value]);
 
   return (
     <>
@@ -175,7 +175,7 @@ const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, onChange 
             flex items-center justify-between space-x-2 px-3 py-2.5 min-w-[140px]
             bg-emerald-500/10 border border-emerald-500/20 hover:border-emerald-400/30
             rounded-md text-white hover:bg-emerald-500/20
-            transition-colors duration-200
+            transition-colors duration-200 cursor-pointer
           "
         >
           <div className="flex items-center space-x-2">
@@ -189,7 +189,7 @@ const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, onChange 
       {isOpen &&
         createPortal(
           <div
-            className="type-dropdown-portal fixed z-[9999] bg-slate-800/95 backdrop-blur-sm border border-emerald-500/20 rounded-md shadow-2xl"
+            className="type-dropdown-portal fixed z-[9999] bg-slate-800/95 border border-emerald-500/20 rounded-md shadow-2xl"
             style={{
               top: dropdownPosition.top,
               left: dropdownPosition.left,
@@ -209,8 +209,8 @@ const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, onChange 
                   hover:bg-emerald-500/20 transition-colors duration-200
                   ${value === type.value ? "bg-emerald-500/30 text-emerald-200" : "text-white hover:text-emerald-200"}
                   ${type !== types[types.length - 1] ? "border-b border-emerald-500/10" : ""}
-                  ${type === types[0] ? "rounded-t-xl" : ""}
-                  ${type === types[types.length - 1] ? "rounded-b-xl" : ""}
+                  ${type === types[0] ? "rounded-t-md" : ""}
+                  ${type === types[types.length - 1] ? "rounded-b-md" : ""}
                 `}
               >
                 {type.label}
@@ -231,9 +231,12 @@ interface ShardItemProps {
 }
 
 const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, onRateChange }) => {
-  const handleRateChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onRateChange(shard.key, parseFloat(e.target.value) || 0);
-  }, [shard.key, onRateChange]);
+  const handleRateChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onRateChange(shard.key, parseFloat(e.target.value) || 0);
+    },
+    [shard.key, onRateChange]
+  );
 
   return (
     <div className="bg-white/5 border border-white/10 rounded-md p-3 hover:bg-white/10 transition-colors duration-200">
@@ -283,11 +286,8 @@ export const SettingsPage: React.FC = () => {
 
   // Debounced filter to reduce re-renders
   const [debouncedFilter, setDebouncedFilter] = useState("");
-  
-  const debouncedSetFilter = useMemo(
-    () => debounce((value: string) => setDebouncedFilter(value), 300),
-    []
-  );
+
+  const debouncedSetFilter = useMemo(() => debounce((value: string) => setDebouncedFilter(value), 300), []);
 
   useEffect(() => {
     debouncedSetFilter(filter);
@@ -303,10 +303,13 @@ export const SettingsPage: React.FC = () => {
     });
   }, [shards, debouncedFilter, rarityFilter, typeFilter]);
 
-  const handleRateChange = useCallback((shardId: string, newRate: number) => {
-    updateRate(shardId, newRate);
-    setHasChanges(true);
-  }, [updateRate]);
+  const handleRateChange = useCallback(
+    (shardId: string, newRate: number) => {
+      updateRate(shardId, newRate);
+      setHasChanges(true);
+    },
+    [updateRate]
+  );
 
   const handleResetRates = useCallback(() => {
     if (confirm("Are you sure you want to reset all rates to their defaults? This will clear all custom rates.")) {
@@ -374,7 +377,7 @@ export const SettingsPage: React.FC = () => {
                 text-red-400 font-medium rounded-md 
                 border border-red-500/20 hover:border-red-500/30
                 transition-colors duration-200
-                flex items-center space-x-2
+                flex items-center space-x-2 cursor-pointer
               "
             >
               <RotateCcw className="w-4 h-4" />
@@ -389,7 +392,7 @@ export const SettingsPage: React.FC = () => {
                   text-green-400 font-medium rounded-md 
                   border border-green-500/20 hover:border-green-500/30
                   transition-colors duration-200
-                  flex items-center space-x-2
+                  flex items-center space-x-2 cursor-pointer
                 "
               >
                 <Save className="w-4 h-4" />
@@ -411,12 +414,7 @@ export const SettingsPage: React.FC = () => {
         <div className="h-full overflow-y-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 p-3">
             {filteredShards.map((shard) => (
-              <ShardItem
-                key={shard.key}
-                shard={shard}
-                rate={customRates[shard.key] || defaultRates[shard.key] || 0}
-                onRateChange={handleRateChange}
-              />
+              <ShardItem key={shard.key} shard={shard} rate={customRates[shard.key] || defaultRates[shard.key] || 0} onRateChange={handleRateChange} />
             ))}
           </div>
         </div>
