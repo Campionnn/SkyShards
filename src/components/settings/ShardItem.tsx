@@ -24,9 +24,9 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, on
             <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.key}.png`} alt={shard.name} className="w-6 h-6 object-contain" loading="lazy" style={{ flexShrink: 0 }} />
             <div className={`font-medium text-sm ${getRarityColor(shard.rarity)} truncate`}>{shard.name}</div>
             {shard.isDirect ? (
-              <span className="px-1.5 py-0.5 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-full flex-shrink-0">Direct</span>
+              <span className="px-1.5 py-0.5 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
             ) : (
-              <span className="px-1.5 py-0.5 text-xs bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-full flex-shrink-0">Fuse</span>
+              <span className="px-1.5 py-0.5 text-xs bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-md flex-shrink-0">Fuse</span>
             )}
           </div>
           <div className="text-xs text-slate-400 truncate">

@@ -153,7 +153,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
                     <img
                       src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`}
                       alt={shard.name}
-                      className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-1"
+                      className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-2"
                       loading="lazy"
                     />
                     {shard.name}
