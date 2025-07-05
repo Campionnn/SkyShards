@@ -5,6 +5,8 @@ import { debounce } from "../utils";
 import { RarityDropdown, TypeDropdown, ShardItem } from "../components";
 
 export const SettingsPage: React.FC = () => {
+  console.log("SettingsPage rendered");
+
   const { shards, loading: shardsLoading } = useShardsWithRecipes();
   const { customRates, defaultRates, updateRate, resetRates } = useCustomRates();
   const [filter, setFilter] = useState("");

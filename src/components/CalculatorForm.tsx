@@ -1,33 +1,76 @@
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React from "react";
 import { Zap, RotateCcw, Settings } from "lucide-react";
-import { calculationSchema, type CalculationFormData } from "../schemas/validation";
+import { type CalculationFormData } from "../schemas/validation";
 import { ShardAutocomplete } from "./ShardAutocomplete";
 import { MAX_QUANTITIES } from "../constants";
 import { DataService } from "../services/dataService";
 import { PetLevelDropdown } from "./calculator/PetLevelDropdown";
 import type { ShardWithKey } from "../types";
 import { KuudraDropdown } from "./calculator/KuudraDropdown";
+import { useCalculatorState } from "../context/CalculatorStateContext";
+
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
 }
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
-  const {
-    register,
-    setValue,
-    watch,
-    reset,
-    formState: { errors },
-  } = useForm<CalculationFormData>({
-    resolver: zodResolver(calculationSchema),
-    defaultValues: {
-      shard: "",
-      quantity: 1,
+  const { form, setForm, resetForm } = useCalculatorState();
+
+  React.useEffect(() => {
+    console.log("[CalculatorForm] Mounted");
+    return () => {
+      console.log("[CalculatorForm] Unmounted");
+    };
+  }, []);
+
+  const selectedShard = form.shard;
+
+  const handleInputChange = (field: keyof CalculationFormData, value: any) => {
+    const updatedForm = { ...form, [field]: value };
+    setForm(updatedForm);
+    setTimeout(() => {
+      onSubmit(updatedForm);
+    }, 0);
+  };
+
+  const handleShardSelect = (shard: ShardWithKey) => {
+    setForm({ ...form, shard: shard.name });
+    setTimeout(() => {
+      const currentValues = { ...form, shard: shard.name, frogPet: false };
+      onSubmit(currentValues);
+    }, 100);
+  };
+
+  const handleMaxStats = () => {
+    const updatedForm = {
+      ...form,
+      hunterFortune: 121,
+      newtLevel: 10,
+      salamanderLevel: 10,
+      lizardKingLevel: 10,
+      leviathanLevel: 10,
+      pythonLevel: 10,
+      kingCobraLevel: 10,
+      seaSerpentLevel: 10,
+      tiamatLevel: 10,
+    };
+    setForm(updatedForm);
+    setTimeout(() => {
+      onSubmit(updatedForm);
+    }, 0);
+  };
+
+  const handleReset = () => {
+    // Preserve current shard and quantity values
+    const currentShard = form.shard;
+    const currentQuantity = form.quantity;
+    // Reset to default, then immediately restore shard and quantity
+    const resetFormData: CalculationFormData = {
+      shard: currentShard,
+      quantity: currentQuantity,
       hunterFortune: 0,
       excludeChameleon: false,
-      frogPet: false, // Default to false so "No Frog Pet" is unchecked by default
+      frogPet: false,
       newtLevel: 0,
       salamanderLevel: 0,
       lizardKingLevel: 0,
@@ -36,98 +79,43 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       kingCobraLevel: 0,
       seaSerpentLevel: 0,
       tiamatLevel: 0,
-      kuudraTier: "t5",
+      kuudraTier: "t5", // must be a valid enum value
       moneyPerHour: 0,
       noWoodenBait: false,
-    },
-  });
-
-  const selectedShard = watch("shard");
-  const formData = watch();
-
-  // Auto-submit when form data changes (but only if we have a valid shard)
-  useEffect(() => {
-    const isValidShardName = async (shardName: string): Promise<boolean> => {
-      if (!shardName || shardName.trim() === "") return false;
-
-      try {
-        const dataService = DataService.getInstance();
-        const nameToKeyMap = await dataService.getShardNameToKeyMap();
-        return !!nameToKeyMap[shardName.toLowerCase()];
-      } catch {
-        return false;
-      }
     };
-
-    if (selectedShard && selectedShard.trim() !== "" && formData.shard && formData.shard.trim() !== "") {
-      const timeoutId = setTimeout(async () => {
-        // Only trigger calculation if the shard name is valid and complete
-        const isValid = await isValidShardName(formData.shard);
-        if (isValid) {
-          const currentValues = { ...formData, frogPet: false };
-          onSubmit(currentValues);
-        }
-      }, 0); // Increased delay to give more time for typing
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [formData, onSubmit, selectedShard]);
-
-  const handleShardSelect = (shard: ShardWithKey) => {
-    setValue("shard", shard.name);
+    setForm(resetFormData);
     setTimeout(() => {
-      const currentValues = { ...watch(), shard: shard.name, frogPet: false };
-      onSubmit(currentValues);
-    }, 100);
-  };
-
-  const handleMaxStats = () => {
-    setValue("hunterFortune", 121);
-    setValue("newtLevel", 10);
-    setValue("salamanderLevel", 10);
-    setValue("lizardKingLevel", 10);
-    setValue("leviathanLevel", 10);
-    setValue("pythonLevel", 10);
-    setValue("kingCobraLevel", 10);
-    setValue("seaSerpentLevel", 10);
-    setValue("tiamatLevel", 10);
-  };
-
-  const handleReset = () => {
-    // Preserve current shard and quantity values
-    const currentShard = watch("shard");
-    const currentQuantity = watch("quantity");
-
-    // Reset all form values to defaults
-    reset();
-
-    // Restore the preserved values
-    setValue("shard", currentShard);
-    setValue("quantity", currentQuantity);
+      onSubmit(resetFormData);
+    }, 0);
   };
 
   const handleMaxQuantity = async () => {
     const shardName = selectedShard;
+    let updatedForm: CalculationFormData;
     if (!shardName || shardName.trim() === "") {
-      setValue("quantity", MAX_QUANTITIES.common); // Default to common max if no shard selected
+      updatedForm = { ...form, quantity: MAX_QUANTITIES.common };
+      setForm(updatedForm);
+      setTimeout(() => {
+        onSubmit(updatedForm);
+      }, 0);
       return;
     }
-
     try {
-      // Get the shard data to determine rarity
       const dataService = DataService.getInstance();
       const shard = await dataService.getShardByName(shardName);
-
-      if (shard) {
-        // Set max quantity based on rarity
-        const maxQuantity = MAX_QUANTITIES[shard.rarity as keyof typeof MAX_QUANTITIES] || MAX_QUANTITIES.common;
-        setValue("quantity", maxQuantity);
-      } else {
-        setValue("quantity", MAX_QUANTITIES.common); // Default to common if shard not found
-      }
+      const maxQuantity = (shard && MAX_QUANTITIES[shard.rarity as keyof typeof MAX_QUANTITIES]) || MAX_QUANTITIES.common;
+      updatedForm = { ...form, quantity: maxQuantity };
+      setForm(updatedForm);
+      setTimeout(() => {
+        onSubmit(updatedForm);
+      }, 0);
     } catch (error) {
       console.error("Failed to get shard rarity:", error);
-      setValue("quantity", MAX_QUANTITIES.common); // Default to common on error
+      updatedForm = { ...form, quantity: MAX_QUANTITIES.common };
+      setForm(updatedForm);
+      setTimeout(() => {
+        onSubmit(updatedForm);
+      }, 0);
     }
   };
 
@@ -141,45 +129,32 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
               Target Shard
             </label>
-            <ShardAutocomplete value={selectedShard} onChange={(value) => setValue("shard", value)} onSelect={handleShardSelect} placeholder="Search for a shard..." />
-            {errors.shard && <p className="mt-1 text-sm text-red-400">{errors.shard.message}</p>}
+            <ShardAutocomplete value={form.shard} onChange={(value) => handleInputChange("shard", value)} onSelect={handleShardSelect} placeholder="Search for a shard..." />
           </div>
-
           <div className="flex gap-1.5">
             <div className="flex-1">
               <label className="block text-xs font-medium text-slate-300 mb-1">Quantity</label>
               <input
                 type="number"
                 min="1"
-                {...register("quantity", { valueAsNumber: true })}
+                value={form.quantity === 0 ? "" : form.quantity}
+                placeholder="1"
+                onChange={(e) => handleInputChange("quantity", Number(e.target.value))}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
                     e.currentTarget.blur();
                   }
                 }}
-                className="
-                  w-full px-3 py-1.5 text-sm
-                  bg-white/5 border border-white/10 rounded-md
-                  text-white placeholder-slate-400
-                  focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50
-                  transition-colors duration-200
-                "
+                className="w-full px-3 py-1.5 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors duration-200"
               />
-              {errors.quantity && <p className="mt-1 text-sm text-red-400">{errors.quantity.message}</p>}
             </div>
-
             <div className="flex-shrink-0">
               <label className="block text-xs font-medium text-slate-300 mb-1">&nbsp;</label>
               <button
                 type="button"
                 onClick={handleMaxQuantity}
-                className="
-                  px-2.5 py-1.5 text-sm font-medium rounded-md
-                  bg-emerald-500/20 hover:bg-emerald-500/30 
-                  text-emerald-400 border border-emerald-500/20 hover:border-emerald-500/30
-                  transition-colors duration-200 flex items-center justify-center cursor-pointer
-                "
+                className="px-2.5 py-1.5 text-sm font-medium rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/20 hover:border-emerald-500/30 transition-colors duration-200 flex items-center justify-center cursor-pointer"
               >
                 Max
               </button>
@@ -235,13 +210,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               <input
                 type="number"
                 min="0"
-                {...register("hunterFortune", { valueAsNumber: true })}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    e.currentTarget.blur();
-                  }
-                }}
+                value={form.hunterFortune === 0 ? "" : form.hunterFortune}
+                placeholder="0"
+                onChange={(e) => handleInputChange("hunterFortune", Number(e.target.value))}
                 className="
                   w-full px-3 py-2 text-sm
                   bg-white/5 border border-white/10 rounded-md
@@ -256,7 +227,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             <div className="space-y-1.5">
               <div className="group flex items-center space-x-3 p-2.5 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 hover:border-white/20 transition-all duration-200 cursor-pointer">
                 <div className="relative">
-                  <input id="excludeChameleon" type="checkbox" {...register("excludeChameleon")} className="sr-only peer" />
+                  <input id="excludeChameleon" type="checkbox" checked={form.excludeChameleon} onChange={(e) => handleInputChange("excludeChameleon", e.target.checked)} className="sr-only peer" />
                   <div className="w-5 h-5 bg-slate-900 border-2 border-slate-600 rounded-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:border-slate-500 peer-checked:bg-fuchsia-500 peer-checked:border-fuchsia-500 peer-focus:ring-2 peer-focus:ring-fuchsia-500/20">
                     <svg className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -270,7 +241,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
 
               <div className="group flex items-center space-x-3 p-2.5 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 hover:border-white/20 transition-all duration-200 cursor-pointer">
                 <div className="relative">
-                  <input id="excludeWoodenBait" type="checkbox" {...register("noWoodenBait")} className="sr-only peer" />
+                  <input id="excludeWoodenBait" type="checkbox" checked={form.noWoodenBait} onChange={(e) => handleInputChange("noWoodenBait", e.target.checked)} className="sr-only peer" />
                   <div className="w-5 h-5 bg-slate-900 border-2 border-slate-600 rounded-md flex items-center justify-center cursor-pointer transition-all duration-200 hover:border-slate-500 peer-checked:bg-fuchsia-500 peer-checked:border-fuchsia-500 peer-focus:ring-2 peer-focus:ring-fuchsia-500/20">
                     <svg className="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -302,7 +273,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               { key: "seaSerpentLevel", label: "Sea Serpent" },
               { key: "tiamatLevel", label: "Tiamat" },
             ].map(({ key, label }) => (
-              <PetLevelDropdown key={key} value={watch(key as any) || 0} onChange={(value) => setValue(key as any, value)} label={label} />
+              <PetLevelDropdown
+                key={key}
+                value={(form[key as keyof CalculationFormData] as number) || 0}
+                onChange={(value) => handleInputChange(key as keyof CalculationFormData, value)}
+                label={label}
+              />
             ))}
           </div>
         </div>
@@ -314,14 +290,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             Kraken Shard
           </h3>
           <div className="space-y-2">
-            <KuudraDropdown value={watch("kuudraTier") || "t5"} onChange={(value) => setValue("kuudraTier", value as any)} label="Kuudra Tier" />
-
+            <KuudraDropdown value={form.kuudraTier || "t5"} onChange={(value) => handleInputChange("kuudraTier", value)} label="Kuudra Tier" />
             <div className="relative">
               <input
                 type="number"
                 min="0"
-                placeholder="40000000"
-                {...register("moneyPerHour", { valueAsNumber: true })}
+                placeholder="0"
+                value={form.moneyPerHour === 0 ? "" : form.moneyPerHour}
+                onChange={(e) => handleInputChange("moneyPerHour", Number(e.target.value))}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();

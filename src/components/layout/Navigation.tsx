@@ -48,14 +48,13 @@ export const Navigation: React.FC = () => {
               // Set outline color based on nav item color
               const ringClass = isActive ? (color === "blue" ? "ring-1 ring-offset-0 ring-blue-300" : "ring-1 ring-offset-0 ring-purple-300") : "";
               return (
-                <Link key={path} to={path}>
-                  <button
-                    type="button"
-                    className={`px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer ${colorClass.bg} ${colorClass.hoverBg} ${colorClass.text} ${colorClass.border} ${colorClass.hoverBorder} ${ringClass}`}
-                  >
-                    <Icon className="w-3 h-3" />
-                    <span>{label}</span>
-                  </button>
+                <Link
+                  key={path}
+                  to={path}
+                  className={`px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer ${colorClass.bg} ${colorClass.hoverBg} ${colorClass.text} ${colorClass.border} ${colorClass.hoverBorder} ${ringClass}`}
+                >
+                  <Icon className="w-3 h-3" />
+                  <span>{label}</span>
                 </Link>
               );
             })}

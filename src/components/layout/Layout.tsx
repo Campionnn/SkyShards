@@ -1,14 +1,25 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Navigation } from "./Navigation";
+import { ErrorBoundary } from "./ErrorBoundary";
 
 export const Layout: React.FC = () => {
+  const location = useLocation();
+  React.useEffect(() => {
+    // Debug: log when Layout mounts/unmounts and on route change
+    console.log("[Layout] Rendered. Current path:", location.pathname);
+    return () => {
+      console.log("[Layout] Unmounted.");
+    };
+  }, [location.pathname]);
   return (
     <div className="min-h-screen bg-slate-950">
       <Navigation />
       <main className="px-1 sm:px-2 lg:px-4 py-3">
         <div className="max-w-screen-2xl mx-auto w-full">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet key={location.pathname} />
+          </ErrorBoundary>
         </div>
       </main>
 
