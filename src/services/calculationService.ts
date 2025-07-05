@@ -34,7 +34,8 @@ export class CalculationService {
           const qty = parseInt(qtyStr);
           const recipeList = fusionJson.recipes[outputShard][qtyStr];
           recipeList.forEach((inputs: [string, string]) => {
-            recipes[outputShard].push({ inputs, outputQuantity: qty });
+            const isReptile = inputs.some(input => fusionJson.shards[input].family.includes("Reptile"));
+            recipes[outputShard].push({ inputs, outputQuantity: qty, isReptile: isReptile });
           });
         }
       }
@@ -135,6 +136,7 @@ export class CalculationService {
   }
 
   computeMinCosts(data: Data): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
+    const startTime = performance.now();
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
     const shards = Object.keys(data.shards);
@@ -160,8 +162,8 @@ export class CalculationService {
           const costInput1 = minCosts.get(input1)! * fuse1;
           const costInput2 = minCosts.get(input2)! * fuse2;
           const totalCost = costInput1 + costInput2 + craftPenalty;
-          const costPerUnit = totalCost / recipe.outputQuantity;
-
+          const effectiveOutputQuantity = recipe.isReptile ? recipe.outputQuantity * 1.2 : recipe.outputQuantity;
+          const costPerUnit = totalCost / effectiveOutputQuantity;
           if (costPerUnit < minCosts.get(outputShard)!) {
             minCosts.set(outputShard, costPerUnit);
             choices.set(outputShard, { recipe });
@@ -170,6 +172,8 @@ export class CalculationService {
         });
       });
     }
+
+    console.log(`Min costs computed in ${(performance.now() - startTime).toFixed(2)} ms`);
 
     return { minCosts, choices };
   }
@@ -191,7 +195,7 @@ export class CalculationService {
     tree.quantity = requiredQuantity;
     if (tree.method === "recipe") {
       const recipe = tree.recipe!;
-      const outputQuantity = recipe.outputQuantity;
+      const outputQuantity = recipe.isReptile ? recipe.outputQuantity * 1.2 : recipe.outputQuantity;
       const craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
       craftCounter.total += craftsNeeded;
       const [input1, input2] = recipe.inputs;
@@ -257,7 +261,7 @@ export class CalculationService {
     let craftsNeeded = 1;
     const choice = choices.get(targetShard);
     if (choice?.recipe) {
-      const outputQuantity = choice.recipe.outputQuantity;
+      const outputQuantity = choice.recipe.isReptile ? choice.recipe.outputQuantity * 1.2 : choice.recipe.outputQuantity;
       craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
       totalShardsProduced = craftsNeeded * outputQuantity;
     }

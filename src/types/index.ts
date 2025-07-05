@@ -14,6 +14,7 @@ export interface Shard {
 export type Recipe = {
   inputs: [string, string];
   outputQuantity: number;
+  isReptile: boolean;
 };
 
 export type Recipes = {
