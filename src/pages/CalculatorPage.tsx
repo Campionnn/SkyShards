@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { AlertCircle, Menu, X } from "lucide-react";
-import { CalculatorForm } from "../components/CalculatorForm";
-import { CalculationResults } from "../components/CalculationResults";
-import { useCalculation } from "../hooks/useCalculation";
-import { useCustomRates } from "../hooks/useCustomRates";
+import { CalculatorForm, CalculationResults } from "../components";
+import { useCalculation, useCustomRates } from "../hooks";
 import { DataService } from "../services/dataService";
 import type { CalculationFormData } from "../schemas/validation";
 import type { Data } from "../types";

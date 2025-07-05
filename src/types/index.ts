@@ -1,3 +1,5 @@
+import type { CalculationFormData } from "../schemas/validation";
+
 export interface Shard {
   id: string;
   name: string;
@@ -70,4 +72,60 @@ export interface CalculationResult {
 
 export interface ShardWithKey extends Shard {
   key: string;
+}
+
+export interface ShardWithDirectInfo extends ShardWithKey {
+  isDirect: boolean;
+}
+
+// calculator form
+export interface CalculatorFormProps {
+  onSubmit: (data: CalculationFormData) => void;
+}
+export interface PetLevelDropdownProps {
+  value: number;
+  onChange: (value: number) => void;
+  label: string;
+}
+
+export interface KuudraDropdownProps {
+  value: string;
+  onChange: (value: string) => void;
+  label: string;
+}
+
+//calcutation results
+export interface CalculationResultsProps {
+  result: CalculationResult;
+  data: Data;
+  targetShardName: string;
+}
+
+//fusiun tree
+export interface RecipeTreeNodeProps {
+  tree: RecipeTree;
+  data: Data;
+  isTopLevel?: boolean;
+  totalShardsProduced?: number;
+  nodeId: string;
+  expandedStates: Map<string, boolean>;
+  onToggle: (nodeId: string) => void;
+}
+
+// searchbar
+export interface ShardAutocompleteProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSelect: (shard: ShardWithKey) => void;
+  placeholder?: string;
+  className?: string;
+}
+
+export interface SuggestionItemProps {
+  shard: ShardWithKey;
+  index: number;
+  focusedIndex: number;
+  onSelect: (shard: ShardWithKey) => void;
+  isSelecting: boolean;
+  setFocusedIndex: (index: number) => void;
 }

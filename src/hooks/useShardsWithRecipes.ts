@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import { DataService } from "../services/dataService";
-import type { ShardWithKey } from "../types";
-
-export interface ShardWithDirectInfo extends ShardWithKey {
-  isDirect: boolean;
-}
+import type { ShardWithDirectInfo } from "../types";
 
 export const useShardsWithRecipes = () => {
   const [shards, setShards] = useState<ShardWithDirectInfo[]>([]);
