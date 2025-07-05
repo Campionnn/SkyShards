@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AlertCircle, Menu, X } from "lucide-react";
 import { CalculatorForm, CalculationResults } from "../components";
 import { useCalculation, useCustomRates } from "../hooks";
@@ -12,7 +12,7 @@ const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData
 };
 
 const CalculatorPageContent: React.FC = () => {
-  const { result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName } = useCalculatorState();
+  const { result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName, form } = useCalculatorState();
   const { loading, error } = useCalculation();
   const { customRates } = useCustomRates();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -74,6 +74,50 @@ const CalculatorPageContent: React.FC = () => {
       }
     }
   };
+
+  // Re-calculate when customRates change and form is valid
+  useEffect(() => {
+    if (form && form.shard && form.shard.trim() !== "") {
+      // Use the same calculation logic as handleCalculate
+      (async () => {
+        try {
+          const dataService = DataService.getInstance();
+          const nameToKeyMap = await dataService.getShardNameToKeyMap();
+          const shardKey = nameToKeyMap[form.shard.toLowerCase()];
+          if (!shardKey) return;
+          setTargetShardName(form.shard);
+          const params = {
+            customRates,
+            hunterFortune: form.hunterFortune,
+            excludeChameleon: form.excludeChameleon,
+            frogPet: form.frogPet,
+            newtLevel: form.newtLevel,
+            salamanderLevel: form.salamanderLevel,
+            lizardKingLevel: form.lizardKingLevel,
+            leviathanLevel: form.leviathanLevel,
+            pythonLevel: form.pythonLevel,
+            kingCobraLevel: form.kingCobraLevel,
+            seaSerpentLevel: form.seaSerpentLevel,
+            tiamatLevel: form.tiamatLevel,
+            kuudraTier: form.kuudraTier,
+            moneyPerHour: form.moneyPerHour,
+            noWoodenBait: form.noWoodenBait,
+          };
+          const calculationService = await import("../services/calculationService");
+          const service = calculationService.CalculationService.getInstance();
+          const calculationResult = await service.calculateOptimalPath(shardKey, form.quantity, params);
+          setResult(calculationResult);
+          const data = await service.parseData(params);
+          setCalculationData(data);
+        } catch (err) {
+          // Only log significant errors, not validation failures
+          if (err instanceof Error && !err.message.includes("not found")) {
+            console.error("Calculation failed (customRates effect):", err);
+          }
+        }
+      })();
+    }
+  }, [customRates, form, setResult, setCalculationData, setTargetShardName]);
 
   return (
     <div className="min-h-screen space-y-3 py-4">
