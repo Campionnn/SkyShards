@@ -25,22 +25,22 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
 
   if (tree.method === "direct") {
     return (
-      <div className="flex items-center justify-between p-2 bg-slate-800 rounded-md border border-slate-600">
-        <div className="flex items-center space-x-3">
-          <div className="w-3 h-3 bg-green-400 rounded-full" />
-          <div className="flex items-center space-x-3">
-            <span className="text-slate-300 font-medium bg-slate-700 px-2 py-1 rounded-md text-sm">{tree.quantity}x</span>
-            <span className={`font-medium ${getRarityColor(shard.rarity)}`} title={getShardDetails(shard, true)}>
+      <div className="flex items-center justify-between px-3 py-1 bg-slate-800 rounded-md border border-slate-600">
+        <div className="flex items-center space-x-2">
+          <div className="w-2 h-2 bg-green-400 rounded-full" />
+          <div className="flex items-center space-x-2">
+            <span className="text-slate-300 font-medium text-sm">{tree.quantity}x</span>
+            <span className={`font-medium text-sm ${getRarityColor(shard.rarity)}`} title={getShardDetails(shard, true)}>
               {shard.name}
             </span>
-            <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-md">DIRECT</span>
+            <span className="px-1.5 py-0.5 bg-green-500/20 text-green-400 text-xs font-medium rounded-md">DIRECT</span>
           </div>
         </div>
         <div className="text-right">
           <div className="text-sm text-slate-300">
             {formatNumber(shard.rate)}
             <span className="text-slate-500 mx-0.5">/</span>
-            <span className="text-slate-400">hour</span>
+            <span className="text-slate-400">hr</span>
           </div>
           <div className="text-xs text-slate-400 capitalize">
             {shard.type} • {shard.family}
@@ -57,28 +57,28 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
   const displayQuantity = isTopLevel ? totalShardsProduced : tree.quantity;
 
   return (
-    <div className="bg-slate-800 rounded-md border border-slate-600 overflow-hidden">
-      <button onClick={() => onToggle(nodeId)} className="w-full p-2 text-left cursor-pointer hover:bg-slate-700/50 transition-colors">
+    <div className={`${isTopLevel ? "bg-slate-800 border border-slate-600" : "bg-slate-800 border border-slate-600"} rounded-md overflow-hidden`}>
+      <button onClick={() => onToggle(nodeId)} className={`w-full px-3 py-1 text-left cursor-pointer hover:bg-slate-700/50 transition-colors`}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1.5">
             {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
             <div className="text-white">
-              <span className="font-medium">{displayQuantity}x </span>
-              <span className={`font-medium ${getRarityColor(shard.rarity)}`} title={getShardDetails(shard, false)}>
+              <span className="font-medium text-sm">{displayQuantity}x </span>
+              <span className={`font-medium ${getRarityColor(shard.rarity)} text-sm`} title={getShardDetails(shard, false)}>
                 {shard.name}
               </span>
-              <span className="text-slate-400 ml-2 text-sm">
+              <span className={"text-slate-400 ml-1.5 text-sm"}>
                 = {input1.quantity}x <span className={getRarityColor(input1Shard.rarity)}>{input1Shard.name}</span> + {input2.quantity}x{" "}
                 <span className={getRarityColor(input2Shard.rarity)}>{input2Shard.name}</span>
               </span>
             </div>
           </div>
           <div className="text-right">
-            <div className="flex items-center justify-end space-x-2">
+            <div className="flex items-center justify-end space-x-1.5">
               <span className="text-xs text-slate-500">fusions</span>
-              <span className="text-sm font-medium text-white">{displayQuantity}</span>
+              <span className={`font-medium text-white ${isTopLevel ? "text-sm" : "text-xs"}`}>{displayQuantity}</span>
             </div>
-            <div className="text-xs text-slate-400 capitalize">
+            <div className={`text-slate-400 capitalize ${isTopLevel ? "text-xs" : "text-xs"}`}>
               {shard.type} • {shard.family}
             </div>
           </div>
@@ -86,7 +86,7 @@ const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel 
       </button>
 
       {isExpanded && (
-        <div className="border-t border-slate-600 p-2 space-y-2">
+        <div className="border-t border-slate-600 pl-3 pr-0.5 py-0.5 space-y-0.5">
           <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} />
           <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} />
         </div>
@@ -204,7 +204,8 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
             <div>
               <p className="text-slate-400 text-xs">Total Fusions</p>
               <p className="text-white font-medium text-sm">
-                {result.totalFusions}x{result.craftTime > 1 / 12 && <span className="text-xs text-slate-400 block">{formatTime(result.craftTime)}</span>}
+                {result.totalFusions}x{result.craftTime > 1 / 12 && <span className="text-slate-400 mx-1">•</span>}
+                {result.craftTime > 1 / 12 && <span className="text-slate-400">{formatTime(result.craftTime)}</span>}
               </p>
             </div>
           </div>
@@ -220,8 +221,11 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
             </div>
             Materials Needed
           </h3>
-          <div className="text-sm text-slate-300 bg-slate-700 px-3 py-1 rounded-md">
-            for {result.totalShardsProduced} {targetShardName} ({result.craftsNeeded} craft{result.craftsNeeded > 1 ? "s" : ""})
+          <div className="px-3 py-1.5 bg-sky-500/20 border border-sky-500/30 text-sky-400 text-sm font-medium rounded-md">
+            for {result.totalShardsProduced} {targetShardName}{" "}
+            <span className="text-slate-400">
+              {result.craftsNeeded} craft{result.craftsNeeded > 1 ? "s" : ""}
+            </span>
           </div>
         </div>
 
@@ -240,7 +244,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
                     <div className="text-xs text-slate-400">
                       {formatNumber(shard.rate)}
                       <span className="text-slate-600 mx-0.5">/</span>
-                      <span className="text-slate-500">hour</span>
+                      <span className="text-slate-500">hr</span>
                     </div>
                   </div>
                   <div className="text-right">
@@ -278,7 +282,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
           </div>
         </div>
 
-        <RecipeTreeNode tree={result.tree} data={data} isTopLevel={true} totalShardsProduced={result.totalShardsProduced} nodeId="root" expandedStates={expandedStates} onToggle={handleNodeToggle} />
+        <div className="w-full">
+          <RecipeTreeNode tree={result.tree} data={data} isTopLevel={true} totalShardsProduced={result.totalShardsProduced} nodeId="root" expandedStates={expandedStates} onToggle={handleNodeToggle} />
+        </div>
       </div>
     </div>
   );

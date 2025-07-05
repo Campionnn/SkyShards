@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Zap, RotateCcw, Settings } from "lucide-react";
+import { Zap, RotateCcw, Settings, ChevronDown } from "lucide-react";
 import { calculationSchema, type CalculationFormData } from "../schemas/validation";
 import { ShardAutocomplete } from "./ShardAutocomplete";
 import { KUUDRA_TIERS, MAX_QUANTITIES } from "../constants";
@@ -16,21 +16,56 @@ interface PetLevelDropdownProps {
 
 const PetLevelDropdown: React.FC<PetLevelDropdownProps> = React.memo(({ value, onChange, label }) => {
   const levels = useMemo(() => Array.from({ length: 11 }, (_, i) => i), []); // 0-10
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (level: number) => {
+    onChange(level);
+    setIsOpen(false);
+  };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <label className="block text-xs font-medium text-slate-300 mb-1">{label}</label>
-      <select
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full px-3 py-2 bg-slate-800/80 border border-slate-600/50 rounded-md text-white text-sm focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 appearance-none cursor-pointer hover:border-slate-500/70 hover:bg-slate-700/60 transition-all duration-200"
-      >
-        {levels.map((level) => (
-          <option key={level} value={level} className="bg-slate-800 text-white">
-            Level {level}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full px-3 py-2 pr-10 bg-white/5 border border-white/10 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 cursor-pointer hover:border-white/20 hover:bg-white/10 transition-all duration-200 text-left"
+        >
+          Level {value}
+        </button>
+        <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+
+        {isOpen && (
+          <div className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-md shadow-xl max-h-48 overflow-y-auto">
+            {levels.map((level) => (
+              <button
+                key={level}
+                type="button"
+                onClick={() => handleSelect(level)}
+                className={`w-full px-3 py-2.5 text-left text-sm hover:bg-blue-500/20 hover:text-blue-300 transition-all duration-150 border-b border-white/5 last:border-b-0 ${
+                  value === level ? "bg-blue-500/30 text-blue-200" : "text-white"
+                }`}
+              >
+                Level {level}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 });
@@ -42,20 +77,58 @@ interface KuudraDropdownProps {
 }
 
 const KuudraDropdown: React.FC<KuudraDropdownProps> = React.memo(({ value, onChange, label }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (tierValue: string) => {
+    onChange(tierValue);
+    setIsOpen(false);
+  };
+
+  const selectedTier = KUUDRA_TIERS.find((tier) => tier.value === value);
+
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <label className="block text-xs font-medium text-slate-300 mb-1">{label}</label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 bg-slate-800/80 border border-slate-600/50 rounded-md text-white text-sm focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 appearance-none cursor-pointer hover:border-slate-500/70 hover:bg-slate-700/60 transition-all duration-200"
-      >
-        {KUUDRA_TIERS.map((tier) => (
-          <option key={tier.value} value={tier.value} className="bg-slate-800 text-white">
-            {tier.label}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full px-3 py-2 pr-10 bg-white/5 border border-white/10 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 cursor-pointer hover:border-white/20 hover:bg-white/10 transition-all duration-200 text-left"
+        >
+          {selectedTier?.label || "Select tier"}
+        </button>
+        <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+
+        {isOpen && (
+          <div className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-md shadow-xl max-h-48 overflow-y-auto">
+            {KUUDRA_TIERS.map((tier) => (
+              <button
+                key={tier.value}
+                type="button"
+                onClick={() => handleSelect(tier.value)}
+                className={`w-full px-3 py-2.5 text-left text-sm hover:bg-orange-500/20 hover:text-orange-300 transition-all duration-150 border-b border-white/5 last:border-b-0 ${
+                  value === tier.value ? "bg-orange-500/30 text-orange-200" : "text-white"
+                }`}
+              >
+                {tier.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 });
@@ -206,8 +279,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             {errors.shard && <p className="mt-1 text-sm text-red-400">{errors.shard.message}</p>}
           </div>
 
-          <div className="grid grid-cols-4 gap-2">
-            <div className="col-span-3">
+          <div className="flex gap-1.5">
+            <div className="flex-1">
               <label className="block text-xs font-medium text-slate-300 mb-1">Quantity</label>
               <input
                 type="number"
@@ -220,7 +293,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   }
                 }}
                 className="
-                  w-full px-3 py-2 text-sm
+                  w-full px-3 py-1.5 text-sm
                   bg-white/5 border border-white/10 rounded-md
                   text-white placeholder-slate-400
                   focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50
@@ -230,16 +303,16 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               {errors.quantity && <p className="mt-1 text-sm text-red-400">{errors.quantity.message}</p>}
             </div>
 
-            <div>
+            <div className="flex-shrink-0">
               <label className="block text-xs font-medium text-slate-300 mb-1">&nbsp;</label>
               <button
                 type="button"
                 onClick={handleMaxQuantity}
                 className="
-                  w-full h-[34px] text-sm font-medium rounded-md
+                  px-2.5 py-1.5 text-sm font-medium rounded-md
                   bg-emerald-500/20 hover:bg-emerald-500/30 
                   text-emerald-400 border border-emerald-500/20 hover:border-emerald-500/30
-                  transition-colors duration-200 flex items-center justify-center
+                  transition-colors duration-200 flex items-center justify-center cursor-pointer
                 "
               >
                 Max
@@ -263,11 +336,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   px-2 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 
                   text-amber-400 font-medium rounded-md text-xs
                   border border-amber-500/20 hover:border-amber-500/30
-                  transition-colors duration-200 flex items-center space-x-1
+                  transition-colors duration-200 flex items-center space-x-1 cursor-pointer
                 "
               >
                 <Zap className="w-3 h-3" />
-                <span>Max</span>
+                <span>Max Stats</span>
               </button>
 
               <button
@@ -277,7 +350,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   px-2 py-1.5 bg-red-500/20 hover:bg-red-500/30 
                   text-red-400 font-medium rounded-md text-xs
                   border border-red-500/20 hover:border-red-500/30
-                  transition-colors duration-200 flex items-center space-x-1
+                  transition-colors duration-200 flex items-center space-x-1 cursor-pointer
                 "
               >
                 <RotateCcw className="w-3 h-3" />
@@ -403,7 +476,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                     e.currentTarget.blur();
                   }
                 }}
-                className="w-full px-3 py-2 pr-20 text-sm bg-slate-800/80 border border-slate-600/50 rounded-md text-white placeholder-slate-400 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 hover:border-slate-500/70 hover:bg-slate-700/60 transition-all duration-200"
+                className="w-full px-3 py-2 pr-20 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 hover:border-white/20 hover:bg-white/10 transition-all duration-200"
               />
               <div className="absolute right-3 top-2.5 text-xs text-slate-500 pointer-events-none">coins/hour</div>
               <p className="mt-1 text-xs text-slate-400">Empty to ignore key cost</p>

@@ -14,11 +14,13 @@ export const Navigation: React.FC = () => {
     <nav className="border-b border-slate-700 bg-slate-900">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-7 h-7 bg-slate-700 rounded-md flex items-center justify-center">
-              <Calculator className="w-4 h-4 text-white" />
+          <Link to="/" className="flex items-center group">
+            <div
+              className="text-2xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent tracking-wide group-hover:from-blue-300 group-hover:via-purple-300 group-hover:to-emerald-300 transition-all duration-300 drop-shadow-sm"
+              style={{ fontFamily: "Orbitron, monospace" }}
+            >
+              Sky Shards
             </div>
-            <span className="text-lg font-semibold text-white">Fusing Calculator</span>
           </Link>
 
           <div className="flex items-center space-x-2">
