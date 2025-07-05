@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Search, X } from "lucide-react";
 import { DataService } from "../services/dataService";
-import { debounce } from "../utils";
+import { debounce, getRarityColor } from "../utils";
 import type { ShardWithKey } from "../types";
 
 interface ShardAutocompleteProps {
@@ -42,7 +42,7 @@ const SuggestionItem: React.FC<{
     >
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <div className="font-medium truncate">{shard.name}</div>
+          <div className={`font-medium truncate ${getRarityColor(shard.rarity)}`}>{shard.name}</div>
           <div className="text-xs opacity-75 truncate">
             {shard.family} • {shard.type}
           </div>
@@ -213,7 +213,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           onKeyDown={handleKeyDown}
           onFocus={handleInputFocus}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-500"
+          className="w-full pl-10 pr-10 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 hover:border-slate-500 transition-colors"
           autoComplete="off"
           spellCheck={false}
         />
@@ -225,7 +225,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
       </div>
 
       {isOpen && suggestions.length > 0 && !isSelecting && (
-        <ul ref={listRef} className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <ul ref={listRef} className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-xl max-h-60 overflow-y-auto">
           {suggestions.map((shard, index) => (
             <SuggestionItem key={shard.key} shard={shard} index={index} focusedIndex={focusedIndex} onSelect={handleSelect} isSelecting={isSelecting} setFocusedIndex={setFocusedIndex} />
           ))}

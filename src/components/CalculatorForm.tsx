@@ -23,10 +23,10 @@ const PetLevelDropdown: React.FC<PetLevelDropdownProps> = React.memo(({ value, o
       <select
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-purple-500"
+        className="w-full px-3 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 appearance-none cursor-pointer hover:border-slate-500 transition-colors"
       >
         {levels.map((level) => (
-          <option key={level} value={level}>
+          <option key={level} value={level} className="bg-slate-800 text-white">
             Level {level}
           </option>
         ))}
@@ -48,10 +48,10 @@ const KuudraDropdown: React.FC<KuudraDropdownProps> = React.memo(({ value, onCha
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-purple-500"
+        className="w-full px-3 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 appearance-none cursor-pointer hover:border-slate-500 transition-colors"
       >
         {KUUDRA_TIERS.map((tier) => (
-          <option key={tier.value} value={tier.value}>
+          <option key={tier.value} value={tier.value} className="bg-slate-800 text-white">
             {tier.label}
           </option>
         ))}
@@ -193,29 +193,29 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 space-y-6">
-      <div className="flex items-center space-x-3 pb-4 border-b border-slate-700/50">
-        <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-          <Settings className="w-4 h-4 text-indigo-400" />
+    <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 space-y-4">
+      <div className="flex items-center space-x-2 pb-3 border-b border-slate-700">
+        <div className="w-7 h-7 bg-purple-500/20 rounded flex items-center justify-center">
+          <Settings className="w-4 h-4 text-purple-400" />
         </div>
-        <h2 className="text-lg font-semibold text-white">Configuration</h2>
+        <h2 className="text-base font-medium text-white">Configuration</h2>
       </div>
 
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
         {/* Target Shard */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-slate-200 mb-3">
-              <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+            <label className="flex items-center gap-2 text-sm font-medium text-slate-200 mb-2">
+              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
               Target Shard
             </label>
             <ShardAutocomplete value={selectedShard} onChange={(value) => setValue("shard", value)} onSelect={handleShardSelect} placeholder="Search for a shard..." />
-            {errors.shard && <p className="mt-2 text-sm text-red-400">{errors.shard.message}</p>}
+            {errors.shard && <p className="mt-1 text-sm text-red-400">{errors.shard.message}</p>}
           </div>
 
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-4 gap-2">
             <div className="col-span-3">
-              <label className="block text-sm font-medium text-slate-300 mb-2">Quantity</label>
+              <label className="block text-xs font-medium text-slate-300 mb-1">Quantity</label>
               <input
                 type="number"
                 min="1"
@@ -226,17 +226,17 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                     e.currentTarget.blur();
                   }
                 }}
-                className="w-full px-3 py-2.5 text-sm bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                className="w-full px-3 py-2.5 text-sm bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 hover:border-slate-500 transition-colors"
               />
-              {errors.quantity && <p className="mt-2 text-sm text-red-400">{errors.quantity.message}</p>}
+              {errors.quantity && <p className="mt-1 text-sm text-red-400">{errors.quantity.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">&nbsp;</label>
+              <label className="block text-xs font-medium text-slate-300 mb-1">&nbsp;</label>
               <button
                 type="button"
                 onClick={handleMaxQuantity}
-                className="w-full h-[42px] text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+                className="w-full h-[42px] text-sm bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
               >
                 Max
               </button>

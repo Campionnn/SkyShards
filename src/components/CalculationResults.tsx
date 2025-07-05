@@ -145,7 +145,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
   return (
     <div className="space-y-4">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="bg-slate-800 border border-slate-600 rounded p-3">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-slate-700 rounded flex items-center justify-center">
@@ -211,7 +211,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
           {Array.from(result.totalQuantities).map(([shardId, quantity]) => {
             const shard = data.shards[shardId];
             const timeNeeded = quantity / shard.rate;

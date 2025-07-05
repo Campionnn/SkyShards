@@ -74,15 +74,9 @@ export const CalculatorPage: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-white">Fusion Calculator</h1>
-        <p className="text-slate-400">Calculate optimal fusion paths and material costs</p>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 lg:gap-6">
         {/* Configuration Panel */}
-        <div className="xl:col-span-1">
+        <div className="xl:col-span-2">
           <div className="sticky top-4">
             {/* Mobile toggle */}
             <div className="xl:hidden mb-3">
@@ -99,7 +93,7 @@ export const CalculatorPage: React.FC = () => {
         </div>
 
         {/* Results Panel */}
-        <div className="xl:col-span-2 space-y-4">
+        <div className="xl:col-span-3 space-y-4">
           {/* Error Display */}
           {error && (
             <div className="bg-red-900/20 border border-red-800 rounded p-3 flex items-start space-x-2">
