@@ -6,6 +6,7 @@ import { useCalculatorState } from "../context/CalculatorStateContext";
 import { PetLevelDropdown } from "./calculator/PetLevelDropdown";
 import { KuudraDropdown } from "./calculator/KuudraDropdown";
 import { MAX_QUANTITIES } from "../constants";
+import { isValidShardName } from "../utils";
 
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
@@ -21,12 +22,27 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
     };
   }, []);
 
+  // Calculation trigger based on valid shard name (instant, no debounce)
+  React.useEffect(() => {
+    const checkAndSubmit = async () => {
+      if (form.shard && form.shard.trim() !== "") {
+        const isValid = await isValidShardName(form.shard);
+        if (isValid) {
+          onSubmit({ ...form, frogPet: false });
+        }
+      }
+    };
+    checkAndSubmit();
+  }, [form.shard, form.quantity]);
+
+  // Only call onSubmit immediately for non-shard/quantity fields
   const handleInputChange = (field: keyof CalculationFormData, value: any) => {
     const updatedForm = { ...form, [field]: value };
     setForm(updatedForm);
-    setTimeout(() => {
+    // Only trigger immediate submit for fields that are not 'shard' and 'quantity'
+    if (field !== "shard" && field !== "quantity") {
       onSubmit(updatedForm);
-    }, 0);
+    }
   };
 
   const handleMaxStats = () => {
