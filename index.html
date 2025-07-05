@@ -5,7 +5,10 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SkyShards - Fusion Calculator</title>
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+
     <!-- Start Single Page Apps for GitHub Pages -->
     <script type="text/javascript">
       // Single Page Apps for GitHub Pages
@@ -18,22 +21,24 @@
       // When the single page app is loaded further down in this file,
       // the correct url will be waiting in the browser's history for
       // the single page app to route accordingly.
-      (function(l) {
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map(function(s) { 
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
-          );
+      (function (l) {
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
         }
-      }(window.location))
+      })(window.location);
     </script>
     <!-- End Single Page Apps for GitHub Pages -->
-    <script type="module" crossorigin src="/SkyShards/assets/index-BULUGQe3.js"></script>
+    <script type="module" crossorigin src="/SkyShards/assets/index-C98UCQXd.js"></script>
     <link rel="modulepreload" crossorigin href="/SkyShards/assets/vendor-lM--12k9.js">
-    <link rel="modulepreload" crossorigin href="/SkyShards/assets/icons-ub95DieP.js">
-    <link rel="stylesheet" crossorigin href="/SkyShards/assets/index-DwSzVwoa.css">
+    <link rel="modulepreload" crossorigin href="/SkyShards/assets/icons-D5G7fq2V.js">
+    <link rel="stylesheet" crossorigin href="/SkyShards/assets/index-BmpuwHNf.css">
   </head>
   <body>
     <div id="root"></div>
