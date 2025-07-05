@@ -1,48 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
-@import "./performance.css";
 
-/* Base styles for dark theme */
-html,
 body {
-  margin: 0;
-  padding: 0;
+  font-family: "Inter", sans-serif;
   background-color: #0f172a;
-  color: #f8fafc;
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  overflow-x: hidden;
+  color: #f1f5f9;
 }
 
-#root {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
-}
-
-/* Responsive layout improvements */
-@media (max-width: 1279px) {
-  .xl\:sticky {
-    position: static !important;
-  }
-
-  .xl\:top-6 {
-    top: auto !important;
-  }
-
-  .xl\:max-h-\[calc\(100vh-3rem\)\] {
-    max-height: none !important;
-  }
-
-  .xl\:overflow-y-auto {
-    overflow-y: visible !important;
-  }
-}
-
-/* Form elements dark styling */
-input,
-select,
-textarea {
-  color-scheme: dark;
-}
-
+/* Remove number input spinners */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -54,261 +19,20 @@ input[type="number"] {
   appearance: textfield;
 }
 
-/* Focus outline customization */
-*:focus {
-  outline: none;
-}
-
-/* Selection styling */
-::selection {
-  background: rgba(139, 92, 246, 0.3);
-  color: #f8fafc;
-}
-
-/* Custom scrollbar styles */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
-  border-radius: 4px;
+  background: #1e293b;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.5);
-  border-radius: 4px;
+  background: #475569;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.7);
-}
-
-/* Firefox scrollbar styles */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(100, 116, 139, 0.5) rgba(15, 23, 42, 0.5);
-}
-
-/* Glass morphism utilities */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.glass-strong {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Animation utilities */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes glow {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
-  }
-}
-
-.animate-glow {
-  animation: glow 3s ease-in-out infinite;
-}
-
-/* Additional animations for replaced Framer Motion components */
-@keyframes fadeInScale {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInLeft {
-  0% {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInFromTop {
-  0% {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInFromLeft {
-  0% {
-    opacity: 0;
-    transform: translateX(-100%);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes bounceIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-  70% {
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes staggerFadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Additional animation classes */
-.animate-fadeInUp {
-  animation: fadeInUp 0.2s ease-out;
-}
-
-.animate-fadeInScale {
-  animation: fadeInScale 0.2s ease-out;
-}
-
-.animate-slideInFromTop {
-  animation: slideInFromTop 0.3s ease-out;
-}
-
-/* Focus styles */
-.focus-visible:focus-visible {
-  outline: 2px solid rgba(139, 92, 246, 0.6);
-  outline-offset: 2px;
-}
-
-/* Form input styles for better consistency */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type="number"] {
-  appearance: textfield;
-  -moz-appearance: textfield;
-}
-
-/* Selection styles */
-::selection {
-  background: rgba(139, 92, 246, 0.3);
-  color: white;
-}
-
-::-moz-selection {
-  background: rgba(139, 92, 246, 0.3);
-  color: white;
-}
-
-/* Smooth transitions for interactive elements */
-button,
-input,
-select,
-textarea {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Custom checkbox styles */
-input[type="checkbox"] {
-  appearance: none;
-  background-color: rgba(255, 255, 255, 0.05);
-  margin: 0;
-  font: inherit;
-  color: rgb(139, 92, 246);
-  width: 1rem;
-  height: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.25rem;
-  transform: translateY(-0.075em);
-  display: grid;
-  place-content: center;
-}
-
-input[type="checkbox"]::before {
-  content: "";
-  width: 0.65rem;
-  height: 0.65rem;
-  transform: scale(0);
-  transition: 120ms transform ease-in-out;
-  box-shadow: inset 1rem 1rem rgb(139, 92, 246);
-  background-color: rgb(139, 92, 246);
-  transform-origin: center;
-  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
-}
-
-input[type="checkbox"]:checked::before {
-  transform: scale(1);
-}
-
-input[type="checkbox"]:focus {
-  outline: 2px solid rgba(139, 92, 246, 0.5);
-  outline-offset: 2px;
+  background: #64748b;
 }

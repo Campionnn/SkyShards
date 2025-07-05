@@ -1,119 +1,36 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Settings, Zap, RotateCcw, ChevronDown } from "lucide-react";
+import { Settings, Zap, RotateCcw } from "lucide-react";
 import { calculationSchema, type CalculationFormData } from "../schemas/validation";
 import { ShardAutocomplete } from "./ShardAutocomplete";
 import { KUUDRA_TIERS, MAX_QUANTITIES } from "../constants";
 import { DataService } from "../services/dataService";
-import { usePerformance } from "../contexts/PerformanceContext";
 import type { ShardWithKey } from "../types";
 
 interface PetLevelDropdownProps {
   value: number;
   onChange: (value: number) => void;
   label: string;
-  isUltraPerformance?: boolean;
 }
 
-const PetLevelDropdown: React.FC<PetLevelDropdownProps> = React.memo(({ value, onChange, label, isUltraPerformance = false }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const PetLevelDropdown: React.FC<PetLevelDropdownProps> = React.memo(({ value, onChange, label }) => {
   const levels = useMemo(() => Array.from({ length: 11 }, (_, i) => i), []); // 0-10
 
-  const handleClickOutside = useCallback((event: MouseEvent) => {
-    const target = event.target as Element;
-    if (!target.closest(".pet-level-dropdown")) {
-      setIsOpen(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [isOpen, handleClickOutside]);
-
-  const handleToggle = useCallback(() => {
-    if (!isUltraPerformance) setIsOpen(!isOpen);
-  }, [isUltraPerformance]);
-
-  const handleLevelSelect = useCallback(
-    (level: number) => {
-      onChange(level);
-      setIsOpen(false);
-    },
-    [onChange]
-  );
-
-  // Ultra performance mode uses native select
-  if (isUltraPerformance) {
-    return (
-      <div className="relative">
-        <label className="block text-xs font-medium text-slate-300 mb-0.5">{label}</label>
-        <select
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white focus:outline-none focus:border-blue-500"
-        >
-          {levels.map((level) => (
-            <option key={level} value={level}>
-              Level {level}
-            </option>
-          ))}
-        </select>
-      </div>
-    );
-  }
-
   return (
-    <div className="relative pet-level-dropdown">
-      <label className="block text-xs font-medium text-slate-300 mb-0.5">{label}</label>
-      <button
-        type="button"
-        onClick={handleToggle}
-        className="
-          w-full px-2 py-1.5 text-xs
-          bg-white/5 backdrop-blur-performance
-          border border-white/10 
-          rounded-lg text-white
-          focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50
-          hover:bg-white/10 transition-colors-only
-          flex items-center justify-between
-        "
+    <div className="relative">
+      <label className="block text-xs font-medium text-slate-300 mb-1">{label}</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-purple-500"
       >
-        <span>{value}</span>
-        <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-      </button>
-
-      {isOpen && (
-        <div
-          className="
-            absolute z-50 w-full mt-1
-            bg-slate-800/95 backdrop-blur-performance
-            border border-white/10 
-            rounded-lg shadow-2xl
-            max-h-48 overflow-y-auto
-            contain-paint
-          "
-        >
-          {levels.map((level) => (
-            <button
-              key={level}
-              type="button"
-              onClick={() => handleLevelSelect(level)}
-              className={`
-                w-full px-2 py-1.5 text-xs text-left
-                hover:bg-purple-500/20 transition-colors-only
-                ${value === level ? "bg-purple-500/30 text-purple-300" : "text-white"}
-                ${level !== levels.length - 1 ? "border-b border-white/5" : ""}
-              `}
-            >
-              Level {level}
-            </button>
-          ))}
-        </div>
-      )}
+        {levels.map((level) => (
+          <option key={level} value={level}>
+            Level {level}
+          </option>
+        ))}
+      </select>
     </div>
   );
 });
@@ -125,82 +42,20 @@ interface KuudraDropdownProps {
 }
 
 const KuudraDropdown: React.FC<KuudraDropdownProps> = React.memo(({ value, onChange, label }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleClickOutside = useCallback((event: MouseEvent) => {
-    const target = event.target as Element;
-    if (!target.closest(".kuudra-dropdown")) {
-      setIsOpen(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [isOpen, handleClickOutside]);
-
-  const handleToggle = useCallback(() => setIsOpen(!isOpen), []);
-
-  const handleTierSelect = useCallback(
-    (tierValue: string) => {
-      onChange(tierValue);
-      setIsOpen(false);
-    },
-    [onChange]
-  );
-
-  const currentTier = useMemo(() => KUUDRA_TIERS.find((tier) => tier.value === value), [value]);
-
   return (
-    <div className="relative kuudra-dropdown">
+    <div className="relative">
       <label className="block text-xs font-medium text-slate-300 mb-1">{label}</label>
-      <button
-        type="button"
-        onClick={handleToggle}
-        className="
-          w-full px-2 py-1.5 text-sm
-          bg-white/5 backdrop-blur-performance
-          border border-white/10 
-          rounded-lg text-white
-          focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50
-          hover:bg-white/10 transition-colors-only
-          flex items-center justify-between
-        "
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-purple-500"
       >
-        <span>{currentTier?.label || value}</span>
-        <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-      </button>
-
-      {isOpen && (
-        <div
-          className="
-            absolute z-50 w-full mt-1
-            bg-slate-800/95 backdrop-blur-performance
-            border border-white/10 
-            rounded-lg shadow-2xl
-            max-h-48 overflow-y-auto
-            contain-paint
-          "
-        >
-          {KUUDRA_TIERS.map((tier) => (
-            <button
-              key={tier.value}
-              type="button"
-              onClick={() => handleTierSelect(tier.value)}
-              className={`
-                w-full px-2 py-1.5 text-xs text-left
-                hover:bg-purple-500/20 transition-colors-only
-                ${value === tier.value ? "bg-purple-500/30 text-purple-300" : "text-white"}
-                ${tier !== KUUDRA_TIERS[KUUDRA_TIERS.length - 1] ? "border-b border-white/5" : ""}
-              `}
-            >
-              {tier.label}
-            </button>
-          ))}
-        </div>
-      )}
+        {KUUDRA_TIERS.map((tier) => (
+          <option key={tier.value} value={tier.value}>
+            {tier.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 });
@@ -240,7 +95,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
 
   const selectedShard = watch("shard");
   const formData = watch();
-  const { isUltraPerformanceMode } = usePerformance();
 
   // Auto-submit when form data changes (but only if we have a valid shard)
   useEffect(() => {
@@ -339,124 +193,82 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   };
 
   return (
-    <div
-      className="
-      bg-gradient-to-br from-slate-800/90 to-slate-900/90 
-      backdrop-blur-xl border-2 border-slate-700/50 
-      rounded-2xl p-6 shadow-2xl
-      hover:border-slate-600/70 transition-all duration-300
-      ring-1 ring-white/5
-    "
-    >
+    <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 space-y-6">
+      <div className="flex items-center space-x-3 pb-4 border-b border-slate-700/50">
+        <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+          <Settings className="w-4 h-4 text-indigo-400" />
+        </div>
+        <h2 className="text-lg font-semibold text-white">Configuration</h2>
+      </div>
+
       <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
-        {/* Shard Search Section */}
+        {/* Target Shard */}
         <div className="space-y-4">
-          <div className="space-y-3">
-            <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-200 mb-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                Target Shard
-              </label>
-              <ShardAutocomplete value={selectedShard} onChange={(value) => setValue("shard", value)} onSelect={handleShardSelect} placeholder="Search for a shard..." />
-              {errors.shard && <p className="mt-2 text-sm text-red-400">{errors.shard.message}</p>}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-slate-200 mb-3">
+              <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+              Target Shard
+            </label>
+            <ShardAutocomplete value={selectedShard} onChange={(value) => setValue("shard", value)} onSelect={handleShardSelect} placeholder="Search for a shard..." />
+            {errors.shard && <p className="mt-2 text-sm text-red-400">{errors.shard.message}</p>}
+          </div>
+
+          <div className="grid grid-cols-4 gap-3">
+            <div className="col-span-3">
+              <label className="block text-sm font-medium text-slate-300 mb-2">Quantity</label>
+              <input
+                type="number"
+                min="1"
+                {...register("quantity", { valueAsNumber: true })}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.currentTarget.blur();
+                  }
+                }}
+                className="w-full px-3 py-2.5 text-sm bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              />
+              {errors.quantity && <p className="mt-2 text-sm text-red-400">{errors.quantity.message}</p>}
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-300 mb-2">Quantity</label>
-                <input
-                  type="number"
-                  min="1"
-                  {...register("quantity", { valueAsNumber: true })}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      e.currentTarget.blur(); // Remove focus to prevent any further issues
-                    }
-                  }}
-                  className="
-                  w-full px-3 py-3 text-sm
-                  bg-slate-800/50 border-2 border-slate-600/50 
-                  rounded-xl text-white placeholder-slate-400
-                  focus:outline-none focus:border-purple-500/70 focus:bg-slate-800/70
-                  hover:border-slate-500/70 hover:bg-slate-800/60
-                  transition-all duration-200 ease-in-out
-                  backdrop-blur-sm
-                "
-                />
-                {errors.quantity && <p className="mt-2 text-sm text-red-400">{errors.quantity.message}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">&nbsp;</label>
-                <button
-                  type="button"
-                  onClick={handleMaxQuantity}
-                  className="
-                    w-full h-[46px] text-sm bg-gradient-to-r from-blue-500 to-purple-500 
-                    text-white font-semibold rounded-xl flex items-center justify-center
-                    hover:from-blue-600 hover:to-purple-600
-                    transition-all duration-200 ease-in-out cursor-pointer
-                    hover:scale-[1.02] active:scale-[0.98]
-                    shadow-lg hover:shadow-xl
-                    ring-1 ring-white/10
-                  "
-                >
-                  Max
-                </button>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">&nbsp;</label>
+              <button
+                type="button"
+                onClick={handleMaxQuantity}
+                className="w-full h-[42px] text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center"
+              >
+                Max
+              </button>
             </div>
           </div>
         </div>
 
         {/* Settings */}
         <div className="space-y-4">
-          <div className="flex items-center space-x-3 pb-2 border-b border-slate-700/50">
-            <div className="p-2 bg-purple-500/20 rounded-lg">
-              <Settings className="w-4 h-4 text-purple-400" />
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-slate-200">Settings</h3>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleMaxStats}
+                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded-md transition-colors flex items-center space-x-1"
+              >
+                <Zap className="w-3 h-3" />
+                <span>Max Stats</span>
+              </button>
+
+              <button type="button" onClick={handleReset} className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-md transition-colors flex items-center space-x-1">
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset</span>
+              </button>
             </div>
-            <h3 className="text-lg font-bold text-white">Settings</h3>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={handleMaxStats}
-              className="
-                h-10 px-4 bg-gradient-to-r from-yellow-500 to-orange-500 
-                text-white font-semibold rounded-xl text-sm
-                hover:from-yellow-600 hover:to-orange-600
-                transition-all duration-200 ease-in-out flex items-center justify-center space-x-2 cursor-pointer
-                hover:scale-[1.02] active:scale-[0.98]
-                shadow-lg hover:shadow-xl
-                ring-1 ring-white/10
-              "
-            >
-              <Zap className="w-4 h-4" />
-              <span>Max Stats</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleReset}
-              className="
-                h-10 px-4 bg-gradient-to-r from-rose-500 to-pink-500 
-                text-white font-semibold rounded-xl text-sm
-                hover:from-rose-600 hover:to-pink-600
-                transition-all duration-200 ease-in-out flex items-center justify-center space-x-2 cursor-pointer
-                hover:scale-[1.02] active:scale-[0.98]
-                shadow-lg hover:shadow-xl
-                ring-1 ring-white/10
-              "
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Reset</span>
-            </button>
           </div>
 
           <div className="space-y-4">
+            {/* Hunter Fortune */}
             <div>
-              <label className="flex items-center gap-2 text-sm font-semibold text-slate-300 mb-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
                 <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                 Hunter Fortune
               </label>
@@ -467,69 +279,32 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
-                    e.currentTarget.blur(); // Remove focus to prevent any further issues
+                    e.currentTarget.blur();
                   }
                 }}
-                className="
-                  w-full px-3 py-3 text-sm
-                  bg-slate-800/50 border-2 border-slate-600/50 
-                  rounded-xl text-white placeholder-slate-400
-                  focus:outline-none focus:border-purple-500/70 focus:bg-slate-800/70
-                  hover:border-slate-500/70 hover:bg-slate-800/60
-                  transition-all duration-200 ease-in-out
-                  backdrop-blur-sm
-                "
+                className="w-full px-3 py-2.5 text-sm bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               />
             </div>
 
-            <div className="space-y-2">
-              <div className="flex gap-2 items-center space-x-2 p-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all duration-200">
-                <input
-                  id="excludeChameleon"
-                  type="checkbox"
-                  {...register("excludeChameleon")}
-                  className="
-                    w-4 h-4 rounded-md bg-white/5 border-2 border-white/20 
-                    text-purple-500 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500
-                    transition-all duration-200 cursor-pointer
-                    checked:bg-purple-500 checked:border-purple-500
-                  "
-                />
-                <label htmlFor="excludeChameleon" className="text-xs font-medium text-white cursor-pointer flex-1">
+            {/* Checkboxes */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3 p-3 bg-slate-900/50 border border-slate-600/50 rounded-lg hover:bg-slate-900/70 transition-colors">
+                <input id="excludeChameleon" type="checkbox" {...register("excludeChameleon")} className="w-4 h-4 rounded bg-slate-600 border border-slate-500 text-indigo-500 focus:ring-indigo-500" />
+                <label htmlFor="excludeChameleon" className="text-sm font-medium text-white cursor-pointer flex-1">
                   Exclude Chameleon
                 </label>
               </div>
 
-              <div className="flex gap-2 items-center space-x-2 p-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all duration-200">
-                <input
-                  id="excludeWoodenBait"
-                  type="checkbox"
-                  {...register("noWoodenBait")}
-                  className="
-                    w-4 h-4 rounded-md bg-white/5 border-2 border-white/20 
-                    text-purple-500 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500
-                    transition-all duration-200 cursor-pointer
-                    checked:bg-purple-500 checked:border-purple-500
-                  "
-                />
-                <label htmlFor="excludeWoodenBait" className="text-xs font-medium text-white cursor-pointer flex-1">
+              <div className="flex items-center space-x-3 p-3 bg-slate-900/50 border border-slate-600/50 rounded-lg hover:bg-slate-900/70 transition-colors">
+                <input id="excludeWoodenBait" type="checkbox" {...register("noWoodenBait")} className="w-4 h-4 rounded bg-slate-600 border border-slate-500 text-indigo-500 focus:ring-indigo-500" />
+                <label htmlFor="excludeWoodenBait" className="text-sm font-medium text-white cursor-pointer flex-1">
                   Exclude Wooden Bait
                 </label>
               </div>
 
-              <div className="flex gap-2 items-center space-x-2 p-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all duration-200">
-                <input
-                  id="frogPet"
-                  type="checkbox"
-                  {...register("frogPet")}
-                  className="
-                    w-4 h-4 rounded-md bg-white/5 border-2 border-white/20 
-                    text-purple-500 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500
-                    transition-all duration-200 cursor-pointer
-                    checked:bg-purple-500 checked:border-purple-500
-                  "
-                />
-                <label htmlFor="frogPet" className="text-xs font-medium text-white cursor-pointer flex-1">
+              <div className="flex items-center space-x-3 p-3 bg-slate-900/50 border border-slate-600/50 rounded-lg hover:bg-slate-900/70 transition-colors">
+                <input id="frogPet" type="checkbox" {...register("frogPet")} className="w-4 h-4 rounded bg-slate-600 border border-slate-500 text-indigo-500 focus:ring-indigo-500" />
+                <label htmlFor="frogPet" className="text-sm font-medium text-white cursor-pointer flex-1">
                   No Frog Pet
                 </label>
               </div>
@@ -538,9 +313,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
         </div>
 
         {/* Shard Levels */}
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-white">Shard Levels</h3>
-          <div className="grid grid-cols-2 gap-1.5">
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-slate-200">Shard Levels</h3>
+          <div className="grid grid-cols-2 gap-2">
             {[
               { key: "newtLevel", label: "Newt" },
               { key: "salamanderLevel", label: "Salamander" },
@@ -551,19 +326,19 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               { key: "seaSerpentLevel", label: "Sea Serpent" },
               { key: "tiamatLevel", label: "Tiamat" },
             ].map(({ key, label }) => (
-              <PetLevelDropdown key={key} value={watch(key as any) || 0} onChange={(value) => setValue(key as any, value)} label={label} isUltraPerformance={isUltraPerformanceMode} />
+              <PetLevelDropdown key={key} value={watch(key as any) || 0} onChange={(value) => setValue(key as any, value)} label={label} />
             ))}
           </div>
         </div>
 
         {/* Kraken Shard */}
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-white">Kraken Shard</h3>
-          <div className="space-y-2">
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-slate-200">Kraken Shard</h3>
+          <div className="space-y-3">
             <KuudraDropdown value={watch("kuudraTier") || "t5"} onChange={(value) => setValue("kuudraTier", value as any)} label="Kuudra Tier" />
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Coins/hour</label>
+              <label className="block text-sm font-medium text-slate-300 mb-2">Coins/hour</label>
               <input
                 type="number"
                 min="0"
@@ -572,17 +347,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
-                    e.currentTarget.blur(); // Remove focus to prevent any further issues
+                    e.currentTarget.blur();
                   }
                 }}
-                className="
-                  w-full px-2 py-1.5 text-sm
-                  bg-white/5 backdrop-blur-xl 
-                  border border-white/10 
-                  rounded-lg text-white placeholder-slate-400
-                  focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50
-                  transition-all duration-200
-                "
+                className="w-full px-3 py-2.5 text-sm bg-slate-900/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
               />
               <p className="mt-1 text-xs text-slate-400">Empty to ignore key cost</p>
             </div>

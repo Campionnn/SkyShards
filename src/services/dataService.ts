@@ -105,7 +105,6 @@ export class DataService {
   async searchShards(query: string): Promise<ShardWithKey[]> {
     const shards = await this.loadShards();
     const lowerQuery = query.toLowerCase();
-
     return shards.filter((shard) => shard.name.toLowerCase().includes(lowerQuery));
   }
 
