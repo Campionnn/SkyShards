@@ -13,7 +13,7 @@ const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData
 
 const CalculatorPageContent: React.FC = () => {
   const { result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName } = useCalculatorState();
-  const { loading, error, calculate } = useCalculation();
+  const { loading, error } = useCalculation();
   const { customRates } = useCustomRates();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

@@ -14,7 +14,7 @@ interface CalculatorFormProps {
 }
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
-  const { form, setForm, resetForm } = useCalculatorState();
+  const { form, setForm } = useCalculatorState();
 
   React.useEffect(() => {
     console.log("[CalculatorForm] Mounted");
