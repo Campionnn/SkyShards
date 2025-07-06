@@ -197,8 +197,19 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
           </div>
         </div>
 
-        <div className="w-full">
-          <RecipeTreeNode tree={result.tree} data={data} isTopLevel={true} totalShardsProduced={result.totalShardsProduced} nodeId="root" expandedStates={expandedStates} onToggle={handleNodeToggle} />
+        {/* Only the outer container is scrollable */}
+        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
+          <div className="min-w-[650px]">
+            <RecipeTreeNode
+              tree={result.tree}
+              data={data}
+              isTopLevel={true}
+              totalShardsProduced={result.totalShardsProduced}
+              nodeId="root"
+              expandedStates={expandedStates}
+              onToggle={handleNodeToggle}
+            />
+          </div>
         </div>
       </div>
     </div>
