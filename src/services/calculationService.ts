@@ -1,13 +1,4 @@
-import type {
-  Data,
-  RecipeChoice,
-  RecipeTree,
-  CalculationParams,
-  CalculationResult,
-  Shards,
-  Recipes,
-  Shard
-} from "../types";
+import type { Data, RecipeChoice, RecipeTree, CalculationParams, CalculationResult, Shards, Recipes, Shard } from "../types";
 import { NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS, BLACK_HOLE_SHARD } from "../constants";
 
 export class CalculationService {
@@ -45,7 +36,9 @@ export class CalculationService {
 
         // Handle Kuudra rates for L15
         if (shardId === "L15" && rate === 0) {
-          rate = this.calculateKuudraRate(params.kuudraTier, params.moneyPerHour);
+          // If moneyPerHour is null, treat as Infinity (ignore key cost)
+          const moneyPerHour = params.moneyPerHour == null ? Infinity : params.moneyPerHour;
+          rate = this.calculateKuudraRate(params.kuudraTier, moneyPerHour);
         }
 
         if (rate > 0) {
@@ -90,7 +83,16 @@ export class CalculationService {
     const tier = tierData[kuudraTier];
     if (!tier) return 0;
 
-    const costTime = moneyPerHour === 0 ? 0 : (tier.cost / moneyPerHour) * 3600;
+    // If moneyPerHour is Infinity, ignore key cost (costTime = 0)
+    // If moneyPerHour is 0, treat as lowest possible rate (costTime very large)
+    let costTime: number;
+    if (moneyPerHour === Infinity) {
+      costTime = 0;
+    } else if (moneyPerHour === 0) {
+      costTime = 1e12; // effectively makes the rate approach zero
+    } else {
+      costTime = (tier.cost / moneyPerHour) * 3600;
+    }
     return tier.multiplier * (3600 / (tier.baseTime + costTime));
   }
 

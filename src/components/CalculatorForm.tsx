@@ -84,14 +84,51 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       seaSerpentLevel: 0,
       tiamatLevel: 0,
       kuudraTier: "t5", // must be a valid enum value
-      moneyPerHour: 0,
+      moneyPerHour: Infinity, // Reset to Infinity (ignore key cost)
       noWoodenBait: false,
     };
     setForm(resetFormData);
+    setMoneyInput(""); // Clear the input field
     setTimeout(() => {
       onSubmit(resetFormData);
     }, 0);
   };
+
+  // Utility to parse shorthand like 10k, 53m, 2.5b
+  function parseShorthandNumber(value: string): number {
+    if (!value) return 0;
+    const match = value
+      .trim()
+      .toLowerCase()
+      .match(/^([\d,.]+)([kmb])?$/);
+    if (!match) return Number(value.replace(/,/g, "")) || 0;
+    let num = parseFloat(match[1].replace(/,/g, ""));
+    const suffix = match[2];
+    if (suffix === "k") num *= 1_000;
+    else if (suffix === "m") num *= 1_000_000;
+    else if (suffix === "b") num *= 1_000_000_000;
+    return Math.round(num);
+  }
+
+  // For moneyPerHour, keep a local string state for user input
+  const [moneyInput, setMoneyInput] = React.useState<string>(""); // always empty by default
+
+  // Set moneyPerHour to Infinity by default on mount and when target shard changes
+  React.useEffect(() => {
+    if ((form.moneyPerHour === undefined || form.moneyPerHour === null || form.moneyPerHour === 0) && moneyInput === "") {
+      handleInputChange("moneyPerHour", Infinity);
+      // Also force update tree if needed
+      onSubmit({ ...form, moneyPerHour: Infinity });
+    }
+    // eslint-disable-next-line
+  }, [form.shard]);
+
+  // Only clear the input when moneyPerHour is reset to null
+  React.useEffect(() => {
+    if ((form.moneyPerHour === null || form.moneyPerHour === undefined) && moneyInput !== "") setMoneyInput("");
+    // Do not sync for numbers, so user input (e.g. 50m) is preserved
+    // eslint-disable-next-line
+  }, [form.moneyPerHour]);
 
   return (
     <div className="bg-slate-800/40 border border-slate-600/30 rounded-md p-3 space-y-3">
@@ -296,11 +333,19 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             <KuudraDropdown value={form.kuudraTier || "t5"} onChange={(value) => handleInputChange("kuudraTier", value)} label="Kuudra Tier" />
             <div className="relative">
               <input
-                type="number"
+                type="text"
                 min="0"
-                placeholder="0"
-                value={form.moneyPerHour === 0 ? "" : form.moneyPerHour}
-                onChange={(e) => handleInputChange("moneyPerHour", Number(e.target.value))}
+                value={moneyInput}
+                onChange={(e) => {
+                  setMoneyInput(e.target.value);
+                  if (e.target.value.trim() === "") {
+                    handleInputChange("moneyPerHour", Infinity); // Infinity means ignore key cost
+                    onSubmit({ ...form, moneyPerHour: Infinity }); // force update tree
+                  } else {
+                    const parsed = parseShorthandNumber(e.target.value);
+                    handleInputChange("moneyPerHour", parsed);
+                  }
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -309,7 +354,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 }}
                 className="w-full px-3 py-2 pr-20 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 hover:border-white/20 hover:bg-white/10 transition-all duration-200"
               />
-              <div className="absolute right-3 top-2.5 text-xs text-slate-500 pointer-events-none">coins/hour</div>
+              <div className="absolute right-3 top-2.5 text-xs text-slate-500 pointer-events-none">coins / hr</div>
               <p className="mt-1 text-xs text-slate-400">Empty to ignore key cost</p>
             </div>
           </div>
