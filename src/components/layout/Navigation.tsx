@@ -7,7 +7,7 @@ export const Navigation: React.FC = () => {
 
   const navItems = [
     { path: "/", label: "Calculator", icon: Calculator, color: "purple" },
-    { path: "/settings", label: "Settings", icon: Settings, color: "blue" },
+    { path: "/settings", label: "Shards", icon: Settings, color: "blue" },
   ];
 
   // Color classes for each nav item
