@@ -57,6 +57,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       kingCobraLevel: 10,
       seaSerpentLevel: 10,
       tiamatLevel: 10,
+      crocodileLevel: 10,
     };
     setForm(updatedForm);
     setTimeout(() => {
@@ -83,6 +84,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       kingCobraLevel: 0,
       seaSerpentLevel: 0,
       tiamatLevel: 0,
+      crocodileLevel: 0,
       kuudraTier: "t5", // must be a valid enum value
       moneyPerHour: 0,
       noWoodenBait: false,
@@ -275,6 +277,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               { key: "kingCobraLevel", label: "King Cobra" },
               { key: "seaSerpentLevel", label: "Sea Serpent" },
               { key: "tiamatLevel", label: "Tiamat" },
+              { key: "crocodileLevel", label: "Crocodile" },
             ].map(({ key, label }) => (
               <PetLevelDropdown
                 key={key}

@@ -15,6 +15,7 @@ const defaultForm: CalculationFormData = {
   kingCobraLevel: 0,
   seaSerpentLevel: 0,
   tiamatLevel: 0,
+  crocodileLevel: 0,
   kuudraTier: "t5",
   moneyPerHour: 0,
   noWoodenBait: false,

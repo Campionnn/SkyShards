@@ -135,11 +135,11 @@ export class CalculationService {
     return rate * (1 + effectiveFortune / 100);
   }
 
-  computeMinCosts(data: Data): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
-    const startTime = performance.now();
+  computeMinCosts(data: Data, crocodileLevel: number): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
     const shards = Object.keys(data.shards);
+    const crocodileMultiplier = 1 + ((2 * crocodileLevel) / 100);
     const craftPenalty = 0.8 / 3600;
 
     // Initialize with direct costs
@@ -162,7 +162,7 @@ export class CalculationService {
           const costInput1 = minCosts.get(input1)! * fuse1;
           const costInput2 = minCosts.get(input2)! * fuse2;
           const totalCost = costInput1 + costInput2 + craftPenalty;
-          const effectiveOutputQuantity = recipe.isReptile ? recipe.outputQuantity * 1.2 : recipe.outputQuantity;
+          const effectiveOutputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
           const costPerUnit = totalCost / effectiveOutputQuantity;
           if (costPerUnit < minCosts.get(outputShard)!) {
             minCosts.set(outputShard, costPerUnit);
@@ -172,8 +172,6 @@ export class CalculationService {
         });
       });
     }
-
-    console.log(`Min costs computed in ${(performance.now() - startTime).toFixed(2)} ms`);
 
     return { minCosts, choices };
   }
@@ -191,11 +189,11 @@ export class CalculationService {
     }
   }
 
-  assignQuantities(tree: RecipeTree, requiredQuantity: number, data: Data, craftCounter: { total: number }) {
+  assignQuantities(tree: RecipeTree, requiredQuantity: number, data: Data, craftCounter: { total: number }, crocodileMultiplier: number): void {
     tree.quantity = requiredQuantity;
     if (tree.method === "recipe") {
       const recipe = tree.recipe!;
-      const outputQuantity = recipe.isReptile ? recipe.outputQuantity * 1.2 : recipe.outputQuantity;
+      const outputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
       const craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
       craftCounter.total += craftsNeeded;
       const [input1, input2] = recipe.inputs;
@@ -203,8 +201,8 @@ export class CalculationService {
       const fuse2 = data.shards[input2].fuse_amount;
       const input1Quantity = craftsNeeded * fuse1;
       const input2Quantity = craftsNeeded * fuse2;
-      this.assignQuantities(tree.inputs![0], input1Quantity, data, craftCounter);
-      this.assignQuantities(tree.inputs![1], input2Quantity, data, craftCounter);
+      this.assignQuantities(tree.inputs![0], input1Quantity, data, craftCounter, crocodileMultiplier);
+      this.assignQuantities(tree.inputs![1], input2Quantity, data, craftCounter, crocodileMultiplier);
     }
   }
 
@@ -251,17 +249,19 @@ export class CalculationService {
       };
     }
 
-    const { minCosts, choices } = this.computeMinCosts(data);
+    const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel);
+    console.log(choices);
     const tree = this.buildRecipeTree(targetShard, choices);
     const craftCounter = { total: 0 };
-    this.assignQuantities(tree, requiredQuantity, data, craftCounter);
+    const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100);
+    this.assignQuantities(tree, requiredQuantity, data, craftCounter, crocodileMultiplier);
     const totalQuantities = this.collectTotalQuantities(tree);
 
     let totalShardsProduced = requiredQuantity;
     let craftsNeeded = 1;
     const choice = choices.get(targetShard);
     if (choice?.recipe) {
-      const outputQuantity = choice.recipe.isReptile ? choice.recipe.outputQuantity * 1.2 : choice.recipe.outputQuantity;
+      const outputQuantity = choice.recipe.isReptile ? choice.recipe.outputQuantity * crocodileMultiplier : choice.recipe.outputQuantity;
       craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
       totalShardsProduced = craftsNeeded * outputQuantity;
     }
