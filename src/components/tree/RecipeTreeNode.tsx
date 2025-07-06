@@ -52,7 +52,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                 loading="lazy"
                 style={{ verticalAlign: "middle" }}
               />
-              <span className={`font-medium ${getRarityColor(shard.rarity)} text-sm`} title={getShardDetails(shard, false)}>
+              <span className={`font-medium ${getRarityColor(shard.rarity)} text-sm whitespace-nowrap truncate`} style={{ maxWidth: "8rem" }} title={getShardDetails(shard, false)}>
                 {shard.name}
               </span>
               <span className="text-slate-400 text-sm font-medium flex items-center">
@@ -65,7 +65,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   loading="lazy"
                   style={{ verticalAlign: "middle" }}
                 />
-                <span className={getRarityColor(input1Shard.rarity)}>{input1Shard.name}</span>
+                <span className={getRarityColor(input1Shard.rarity) + " whitespace-nowrap truncate"} style={{ maxWidth: "8rem" }}>
+                  {input1Shard.name}
+                </span>
                 <span className="mx-2 text-white">+</span>
                 <span>{input2.quantity}x</span>
                 <img
@@ -75,7 +77,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   loading="lazy"
                   style={{ verticalAlign: "middle" }}
                 />
-                <span className={getRarityColor(input2Shard.rarity)}>{input2Shard.name}</span>
+                <span className={getRarityColor(input2Shard.rarity) + " whitespace-nowrap truncate"} style={{ maxWidth: "8rem" }}>
+                  {input2Shard.name}
+                </span>
               </span>
             </div>
           </div>
@@ -87,7 +91,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           </div>
         </div>
       </button>
-
       {isExpanded && (
         <div className="border-t border-slate-600 pl-3 pr-0.5 py-0.5 space-y-0.5">
           <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} />

@@ -19,9 +19,11 @@
     "@types/react-router-dom": "^5.3.3",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",
+    "react-custom-scrollbars-2": "^4.5.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.59.0",
     "react-router-dom": "^7.6.3",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.11",
     "zod": "^3.25.73"
   },
