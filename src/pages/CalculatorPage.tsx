@@ -123,7 +123,7 @@ const CalculatorPageContent: React.FC = () => {
     <div className="min-h-screen space-y-3 py-4">
       {/* Header */}
 
-      <div className="grid grid-cols-1 xl:grid-cols-7 gap-3 lg:gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-7 gap-1 lg:gap-4">
         {/* Configuration Panel */}
         <div className="xl:col-span-2">
           {/* Mobile toggle */}
@@ -135,7 +135,7 @@ const CalculatorPageContent: React.FC = () => {
                 bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30
                 rounded-md text-white hover:bg-purple-500/20 
                 flex items-center justify-center space-x-2 
-                transition-colors duration-200 font-medium text-sm
+                transition-colors duration-200 font-medium text-sm cursor-pointer
               "
             >
               {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -173,21 +173,6 @@ const CalculatorPageContent: React.FC = () => {
                 </div>
                 <h3 className="text-lg font-medium text-white">Ready to Calculate</h3>
                 <p className="text-slate-400 text-sm mt-1">Configure your settings and select a shard to see optimal fusion paths</p>
-                <div className="xl:hidden">
-                  <button
-                    onClick={() => setSidebarOpen(true)}
-                    className="
-                      px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 
-                      text-purple-400 font-medium rounded-md 
-                      border border-purple-500/20 hover:border-purple-500/30
-                      transition-colors duration-200 text-sm
-                      flex items-center space-x-2 mx-auto
-                    "
-                  >
-                    <Menu className="w-4 h-4" />
-                    <span>Open Configuration</span>
-                  </button>
-                </div>
               </div>
             </div>
           )}
