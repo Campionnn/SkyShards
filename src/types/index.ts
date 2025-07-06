@@ -34,13 +34,38 @@ export interface RecipeChoice {
   recipe: Recipe | null;
 }
 
-export interface RecipeTree {
+export type RecipeTree =
+    | {
   shard: string;
-  method: "direct" | "recipe";
+  method: "direct";
   quantity: number;
-  recipe?: Recipe;
-  inputs?: RecipeTree[];
 }
+    | {
+  shard: string;
+  method: "recipe";
+  quantity: number;
+  recipe: Recipe;
+  inputs: [RecipeTree, RecipeTree];
+}
+    | {
+  shard: string;
+  method: "cycle";
+  quantity: number;
+  recipes: Recipe[];
+  cycleInfo?: {
+    expectedCrafts: number;
+    expectedOutput: number;
+    baseOutput: number;
+    multiplier: number;
+  };
+}
+    | {
+  shard: string;
+  method: "cycleNode";
+  quantity: number;
+  recipe: Recipe;
+  inputs: [RecipeTree, RecipeTree];
+};
 
 export interface CalculationParams {
   customRates: { [shardId: string]: number };

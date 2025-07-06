@@ -6,7 +6,8 @@ import type {
   CalculationResult,
   Shards,
   Recipes,
-  Shard
+  Shard,
+  Recipe
 } from "../types";
 import { NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS, BLACK_HOLE_SHARD } from "../constants";
 
@@ -176,48 +177,265 @@ export class CalculationService {
     return { minCosts, choices };
   }
 
-  buildRecipeTree(shard: string, choices: Map<string, RecipeChoice>): RecipeTree {
+  private findCycleNodes(choices: Map<string, RecipeChoice>): Set<string> {
+    const graph = new Map<string, string[]>();
+    // Build dependency graph: output -> inputs
+    for (const [shard, choice] of choices) {
+      if (choice.recipe) {
+        graph.set(shard, choice.recipe.inputs);
+      }
+    }
+
+    let index = 0;
+    const indices = new Map<string, number>();
+    const lowLinks = new Map<string, number>();
+    const onStack = new Map<string, boolean>();
+    const stack: string[] = [];
+    const cycleNodes = new Set<string>();
+
+    const strongConnect = (node: string) => {
+      indices.set(node, index);
+      lowLinks.set(node, index);
+      index++;
+      stack.push(node);
+      onStack.set(node, true);
+
+      const neighbors = graph.get(node) || [];
+      for (const neighbor of neighbors) {
+        if (!graph.has(neighbor)) continue;
+
+        if (!indices.has(neighbor)) {
+          strongConnect(neighbor);
+          lowLinks.set(node, Math.min(lowLinks.get(node)!, lowLinks.get(neighbor)!));
+        } else if (onStack.get(neighbor)) {
+          lowLinks.set(node, Math.min(lowLinks.get(node)!, indices.get(neighbor)!));
+        }
+      }
+
+      if (lowLinks.get(node) === indices.get(node)) {
+        const scc: string[] = [];
+        let w: string;
+        do {
+          w = stack.pop()!;
+          onStack.set(w, false);
+          scc.push(w);
+        } while (w !== node);
+
+        if (scc.length > 1) {
+          scc.forEach(n => cycleNodes.add(n));
+        } else {
+          // Check for self-loop
+          if (graph.get(node)?.includes(node)) {
+            cycleNodes.add(node);
+          }
+        }
+      }
+    };
+
+    for (const node of graph.keys()) {
+      if (!indices.has(node)) {
+        strongConnect(node);
+      }
+    }
+
+    return cycleNodes;
+  }
+
+  // buildCycle using choices and a shard, return a list of recipes contained in the cycle
+  private buildCycle(
+      shard: string,
+      choices: Map<string, RecipeChoice>,
+      cycleNodes: Set<string>
+  ): Recipe[] {
+    const recipes: Recipe[] = [];
+    const visited = new Set<string>();
+    let current = shard;
+
+    while (!visited.has(current)) {
+      visited.add(current);
+      const choice = choices.get(current);
+
+      if (!choice || !choice.recipe) break;
+
+      recipes.push(choice.recipe);
+
+      // Find next shard in the cycle
+      const nextInput = choice.recipe.inputs.find(input =>
+          cycleNodes.has(input) && input !== current
+      );
+
+      if (!nextInput) break;
+      current = nextInput;
+    }
+
+    return recipes;
+  }
+
+  buildRecipeTree(
+      shard: string,
+      choices: Map<string, RecipeChoice>,
+      cycleNodes: Set<string>
+  ): RecipeTree {
+    if (cycleNodes.has(shard)) {
+      const recipes = this.buildCycle(shard, choices, cycleNodes);
+      return {
+        shard,
+        method: "cycle",
+        recipes,
+        quantity: 0
+      };
+    }
+
     const choice = choices.get(shard)!;
     if (choice.recipe === null) {
       return { shard, method: "direct", quantity: 0 };
     } else {
       const recipe = choice.recipe;
       const [input1, input2] = recipe.inputs;
-      const tree1 = this.buildRecipeTree(input1, choices);
-      const tree2 = this.buildRecipeTree(input2, choices);
-      return { shard, method: "recipe", recipe, inputs: [tree1, tree2], quantity: 0 };
+      const tree1 = this.buildRecipeTree(input1, choices, cycleNodes);
+      const tree2 = this.buildRecipeTree(input2, choices, cycleNodes);
+
+      // Check if this node is part of a cycle
+      if (cycleNodes.has(shard)) {
+        return {
+          shard,
+          method: "cycleNode",
+          recipe,
+          inputs: [tree1, tree2],
+          quantity: 0
+        };
+      }
+
+      return {
+        shard,
+        method: "recipe",
+        recipe,
+        inputs: [tree1, tree2],
+        quantity: 0
+      };
     }
   }
 
-  assignQuantities(tree: RecipeTree, requiredQuantity: number, data: Data, craftCounter: { total: number }, crocodileMultiplier: number): void {
+  assignQuantities(
+      tree: RecipeTree,
+      requiredQuantity: number,
+      data: Data,
+      craftCounter: { total: number },
+      choices: Map<string, RecipeChoice>,
+      crocodileMultiplier: number
+  ): void {
     tree.quantity = requiredQuantity;
-    if (tree.method === "recipe") {
-      const recipe = tree.recipe!;
-      const outputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
-      const craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
-      craftCounter.total += craftsNeeded;
-      const [input1, input2] = recipe.inputs;
-      const fuse1 = data.shards[input1].fuse_amount;
-      const fuse2 = data.shards[input2].fuse_amount;
-      const input1Quantity = craftsNeeded * fuse1;
-      const input2Quantity = craftsNeeded * fuse2;
-      this.assignQuantities(tree.inputs![0], input1Quantity, data, craftCounter, crocodileMultiplier);
-      this.assignQuantities(tree.inputs![1], input2Quantity, data, craftCounter, crocodileMultiplier);
+
+    switch (tree.method) {
+      case "recipe":
+      case "cycleNode": {
+        const recipe = tree.recipe;
+        const outputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
+        const craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
+        craftCounter.total += craftsNeeded;
+
+        const [input1, input2] = recipe.inputs;
+        const fuse1 = data.shards[input1].fuse_amount;
+        const fuse2 = data.shards[input2].fuse_amount;
+        const input1Quantity = craftsNeeded * fuse1;
+        const input2Quantity = craftsNeeded * fuse2;
+
+        this.assignQuantities(tree.inputs[0], input1Quantity, data, craftCounter, choices, crocodileMultiplier);
+        this.assignQuantities(tree.inputs[1], input2Quantity, data, craftCounter, choices, crocodileMultiplier);
+        break;
+      }
+
+      case "cycle":
+        if (tree.recipes.length > 0) {
+          // Find the recipe that produces our target shard
+          const outputRecipe = tree.recipes.find(r => {
+            // Find the shard ID (outputShard) that has this recipe in data.recipes
+            return Object.entries(data.recipes).some(([, recipes]) =>
+                recipes.includes(r)
+            );
+          }) || tree.recipes[0];
+
+          const baseOutput = outputRecipe.outputQuantity / 2;
+          const expectedOutput = outputRecipe.isReptile
+              ? baseOutput * crocodileMultiplier
+              : baseOutput;
+
+          const expectedCrafts = Math.ceil(requiredQuantity / expectedOutput);
+
+          // Create cycleInfo for display
+          tree.cycleInfo = {
+            expectedCrafts,
+            expectedOutput,
+            baseOutput,
+            multiplier: crocodileMultiplier,
+          };
+
+          // Increment craft counter for cycle crafts
+          craftCounter.total += expectedCrafts * tree.recipes.length;
+        }
+        break;
     }
   }
 
-  collectTotalQuantities(tree: RecipeTree): Map<string, number> {
+  collectTotalQuantities(tree: RecipeTree, data: Data): Map<string, number> {
     const totals = new Map<string, number>();
+
     const traverse = (node: RecipeTree) => {
-      if (node.method === "direct") {
-        const current = totals.get(node.shard) || 0;
-        totals.set(node.shard, current + node.quantity);
-      } else {
-        node.inputs!.forEach(traverse);
+      switch (node.method) {
+        case "direct":
+          totals.set(node.shard, (totals.get(node.shard) || 0) + node.quantity);
+          break;
+
+        case "recipe":
+        case "cycleNode":
+          node.inputs.forEach(traverse);
+          break;
+
+        case "cycle":
+          if (node.recipes.length > 0 && node.cycleInfo) {
+            // Calculate inputs for the entire cycle
+            const cycleInputs = new Map<string, number>();
+            const craftsPerCycle = node.cycleInfo.expectedCrafts;
+
+            node.recipes.forEach(recipe => {
+              const [input1, input2] = recipe.inputs;
+              const fuse1 = data.shards[input1].fuse_amount;
+              const fuse2 = data.shards[input2].fuse_amount;
+
+              if (!data.shards[input1].family.includes("Reptile")) {
+                cycleInputs.set(input1, (cycleInputs.get(input1) || 0) + (craftsPerCycle * fuse1));
+              }
+              if (!data.shards[input2].family.includes("Reptile")) {
+                cycleInputs.set(input2, (cycleInputs.get(input2) || 0) + (craftsPerCycle * fuse2));
+              }
+            });
+
+            // Add cycle inputs to totals
+            cycleInputs.forEach((quantity, shard) => {
+              totals.set(shard, (totals.get(shard) || 0) + quantity);
+            });
+          }
+          break;
       }
     };
+
     traverse(tree);
     return totals;
+  }
+
+  fixMinCosts(data: Data, minCosts: Map<string, number>, choices: Map<string, RecipeChoice>, cycleNodes: Set<string>): void {
+      cycleNodes.forEach((node) => {
+      const choice = choices.get(node);
+      if (choice && choice.recipe) {
+          const [input1, input2] = choice.recipe.inputs;
+          const costInput1 = minCosts.get(input1)!;
+          const costInput2 = minCosts.get(input2)!;
+          const totalCost = costInput1 + costInput2;
+
+          // Update the cost for the cycle node
+          minCosts.set(node, totalCost);
+      }
+      });
   }
 
   decimalHoursToHoursMinutes(decimalHours: number): string {
@@ -236,7 +454,6 @@ export class CalculationService {
     const data = await this.parseData(params);
 
     if (!data.shards[targetShard]) {
-      // Return empty result instead of throwing to prevent console noise
       return {
         timePerShard: 0,
         totalTime: 0,
@@ -245,23 +462,28 @@ export class CalculationService {
         totalQuantities: new Map<string, number>(),
         totalFusions: 0,
         craftTime: 0,
-        tree: { shard: targetShard, method: "direct", quantity: 0, inputs: [] },
+        tree: { shard: targetShard, method: "direct", quantity: 0 },
       };
     }
 
     const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel);
-    console.log(choices);
-    const tree = this.buildRecipeTree(targetShard, choices);
+    const cycleNodes = params.crocodileLevel > 0 ? this.findCycleNodes(choices) : new Set<string>();
+    const tree = this.buildRecipeTree(targetShard, choices, cycleNodes);
+    // this.fixMinCosts(data, minCosts, choices, cycleNodes);
     const craftCounter = { total: 0 };
     const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100);
-    this.assignQuantities(tree, requiredQuantity, data, craftCounter, crocodileMultiplier);
-    const totalQuantities = this.collectTotalQuantities(tree);
+    this.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, crocodileMultiplier);
+
+    const totalQuantities = this.collectTotalQuantities(tree, data);
 
     let totalShardsProduced = requiredQuantity;
     let craftsNeeded = 1;
     const choice = choices.get(targetShard);
+
     if (choice?.recipe) {
-      const outputQuantity = choice.recipe.isReptile ? choice.recipe.outputQuantity * crocodileMultiplier : choice.recipe.outputQuantity;
+      const outputQuantity = choice.recipe.isReptile
+          ? choice.recipe.outputQuantity * crocodileMultiplier
+          : choice.recipe.outputQuantity;
       craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
       totalShardsProduced = craftsNeeded * outputQuantity;
     }
