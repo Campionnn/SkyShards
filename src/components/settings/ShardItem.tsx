@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import type { ShardWithDirectInfo } from "../../types";
 import { getRarityColor } from "../../utils";
+import { RotateCcw } from "lucide-react";
 
 interface ShardItemProps {
   shard: ShardWithDirectInfo;
@@ -58,7 +59,16 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
           </div>
         </div>
 
-        <div className="w-20 ml-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            title="Reset to default"
+            className="flex items-center justify-center px-1.5 py-1.5 cursor-pointer text-sm text-center bg-red-500/20 border border-red-500/30 rounded-md text-red-400 hover:bg-red-500/30 hover:text-red-300 transition-colors duration-150 focus:outline-none focus:ring-1 focus:ring-red-500/40 focus:border-red-500/40"
+            onClick={() => onRateChange(shard.key, defaultRate)}
+            tabIndex={0}
+          >
+            <RotateCcw className="w-4 h-4" />
+          </button>
           <input
             type="number"
             min="0"
@@ -67,7 +77,7 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
             onChange={handleRateChange}
             onBlur={handleBlur}
             placeholder={typeof rate === "number" ? rate.toString() : "0"}
-            className="w-full px-2 py-1.5 text-sm text-center bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 transition-colors duration-200"
+            className="w-16 px-2 py-1 text-sm text-center bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 transition-colors duration-200"
           />
         </div>
       </div>
