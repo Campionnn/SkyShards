@@ -57,6 +57,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       kingCobraLevel: 10,
       seaSerpentLevel: 10,
       tiamatLevel: 10,
+      kuudraTier: "t5" as CalculationFormData["kuudraTier"], // Set Kuudra to t5 on max stats, type-safe
     };
     setForm(updatedForm);
     setTimeout(() => {
@@ -83,7 +84,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       kingCobraLevel: 0,
       seaSerpentLevel: 0,
       tiamatLevel: 0,
-      kuudraTier: "t5", // must be a valid enum value
+      kuudraTier: "none", // No Kuudra by default
       moneyPerHour: Infinity, // Reset to Infinity (ignore key cost)
       noWoodenBait: false,
     };
@@ -330,7 +331,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             Kraken Shard
           </h3>
           <div className="space-y-2">
-            <KuudraDropdown value={form.kuudraTier || "t5"} onChange={(value) => handleInputChange("kuudraTier", value)} label="Kuudra Tier" />
+            <KuudraDropdown value={form.kuudraTier || "none"} onChange={(value) => handleInputChange("kuudraTier", value)} label="Kuudra Tier" />
             <div className="relative">
               <input
                 type="text"
