@@ -163,7 +163,7 @@ export const SettingsPage: React.FC = () => {
       {popupShard &&
         (() => {
           const desc = getShardDesc(popupShard.key);
-          const icon = `/shardIcons/${popupShard.key}.png`;
+          const icon = `${import.meta.env.BASE_URL}shardIcons/${popupShard.key}.png`;
           return (
             <ShardPopup
               open={!!popupShard}
