@@ -133,6 +133,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
     // eslint-disable-next-line
   }, [form.moneyPerHour]);
 
+  // Clear shard input on focus if a shard is already selected
+  const handleShardInputFocus = () => {
+    if (form.shard) {
+      handleInputChange("shard", "");
+    }
+  };
+
   return (
     <div className="bg-slate-800/40 border border-slate-600/30 rounded-md p-3 space-y-3">
       <form onSubmit={(e) => e.preventDefault()} className="space-y-3">
@@ -157,11 +164,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 const updated = { ...form, shard: shard.name, quantity: maxQuantity };
                 setForm(updated);
                 setTimeout(() => onSubmit(updated), 0);
-                setTimeout(() => {
-                  const input = document.querySelector<HTMLInputElement>('input[placeholder="1"]');
-                  if (input) input.select();
-                }, 0);
+                // Removed auto-select of quantity input
               }}
+              onFocus={handleShardInputFocus}
               placeholder="Search for a shard..."
             />
           </div>

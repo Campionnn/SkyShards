@@ -7,12 +7,13 @@ interface ShardItemProps {
   shard: ShardWithDirectInfo;
   rate: number;
   defaultRate: number;
-  onRateChange: (shardId: string, newRate: number) => void;
+  onRateChange: (shardId: string, newRate: number | undefined) => void;
   onCardClick?: () => void;
 }
 
 export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, defaultRate, onRateChange, onCardClick }) => {
   const [inputValue, setInputValue] = useState<string>("");
+  const [isEditing, setIsEditing] = useState(false);
 
   // Determine if the rate is custom (changed from default)
   const isChanged = rate !== defaultRate;
@@ -21,7 +22,7 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setInputValue(e.target.value);
       if (e.target.value === "") {
-        onRateChange(shard.key, 0);
+        // Don't update rate yet, wait for blur
       } else {
         onRateChange(shard.key, parseFloat(e.target.value) || 0);
       }
@@ -29,8 +30,19 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
     [shard.key, onRateChange]
   );
 
-  // When the input loses focus, reset inputValue to "" so placeholder is shown
+  const handleFocus = () => {
+    setIsEditing(true);
+    setInputValue(rate.toString());
+  };
+
+  // When the input loses focus, update rate if empty and reset editing state
   const handleBlur = () => {
+    setIsEditing(false);
+    if (inputValue === "") {
+      onRateChange(shard.key, undefined); // Unset custom rate, revert to default
+    } else {
+      onRateChange(shard.key, parseFloat(inputValue) || 0);
+    }
     setInputValue("");
   };
 
@@ -73,10 +85,11 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
             type="number"
             min="0"
             step="0.01"
-            value={inputValue}
+            value={isEditing ? inputValue : rate !== undefined ? rate : ""}
             onChange={handleRateChange}
+            onFocus={handleFocus}
             onBlur={handleBlur}
-            placeholder={typeof rate === "number" ? rate.toString() : "0"}
+            placeholder={isEditing ? undefined : rate !== undefined ? rate.toString() : "0"}
             className="w-16 px-2 py-1 text-sm text-center bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 transition-colors duration-200"
           />
         </div>

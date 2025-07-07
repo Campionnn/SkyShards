@@ -151,6 +151,7 @@ export interface ShardAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
   onSelect: (shard: ShardWithKey) => void;
+  onFocus?: () => void;
   placeholder?: string;
   className?: string;
 }

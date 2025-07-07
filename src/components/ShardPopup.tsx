@@ -18,7 +18,7 @@ interface ShardPopupProps {
   rarity: string;
   icon: string;
   rate?: number;
-  onRateChange?: (newRate: number) => void;
+  onRateChange?: (newRate: number | undefined) => void;
   isDirect?: boolean;
   family?: string;
   type?: string;
@@ -47,7 +47,7 @@ export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, na
     setInputValue(e.target.value);
     if (onRateChange) {
       const val = parseFloat(e.target.value);
-      if (e.target.value === "") onRateChange(0); // Set to 0 when cleared
+      if (e.target.value === "") onRateChange(undefined); // Unset custom rate, revert to default
       else if (!isNaN(val)) onRateChange(val);
     }
   };

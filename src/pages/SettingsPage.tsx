@@ -36,7 +36,7 @@ export const SettingsPage: React.FC = () => {
   }, [shards, debouncedFilter, rarityFilter, typeFilter]);
 
   const handleRateChange = useCallback(
-    (shardId: string, newRate: number) => {
+    (shardId: string, newRate: number | undefined) => {
       updateRate(shardId, newRate);
       setHasChanges(true);
     },
@@ -149,8 +149,8 @@ export const SettingsPage: React.FC = () => {
               <div key={shard.key}>
                 <ShardItem
                   shard={shard}
-                  rate={customRates[shard.key] || defaultRates[shard.key] || 0}
-                  defaultRate={defaultRates[shard.key] || 0}
+                  rate={customRates[shard.key] !== undefined ? customRates[shard.key]! : defaultRates[shard.key]}
+                  defaultRate={defaultRates[shard.key]}
                   onRateChange={handleRateChange}
                   onCardClick={() => setPopupShard(shard)}
                 />
@@ -173,7 +173,7 @@ export const SettingsPage: React.FC = () => {
               description={desc?.description || "No description."}
               rarity={popupShard.rarity}
               icon={icon}
-              rate={customRates[popupShard.key] || defaultRates[popupShard.key] || 0}
+              rate={customRates[popupShard.key] !== undefined ? customRates[popupShard.key] : defaultRates[popupShard.key]}
               onRateChange={(newRate) => handleRateChange(popupShard.key, newRate)}
               isDirect={popupShard.isDirect}
               family={popupShard.family}

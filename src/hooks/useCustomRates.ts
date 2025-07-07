@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { DataService } from "../services/dataService";
 
 export const useCustomRates = () => {
-  const [customRates, setCustomRates] = useState<Record<string, number>>({});
+  // Allow undefined to represent 'unset' custom rates
+  const [customRates, setCustomRates] = useState<Record<string, number | undefined>>({});
   const [defaultRates, setDefaultRates] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
@@ -19,12 +20,12 @@ export const useCustomRates = () => {
         if (stored) {
           try {
             const parsed = JSON.parse(stored);
-            setCustomRates({ ...defaults, ...parsed });
+            setCustomRates({ ...parsed });
           } catch {
-            setCustomRates({ ...defaults });
+            setCustomRates({});
           }
         } else {
-          setCustomRates({ ...defaults });
+          setCustomRates({});
         }
       } catch (error) {
         console.error("Failed to load rates:", error);
@@ -38,23 +39,35 @@ export const useCustomRates = () => {
     loadRates();
   }, []);
 
-  const updateRate = (shardId: string, rate: number) => {
-    const newRates = { ...customRates, [shardId]: rate };
+  // Accept undefined to unset a custom rate
+  const updateRate = (shardId: string, rate: number | undefined) => {
+    let newRates: Record<string, number | undefined>;
+    if (rate === undefined) {
+      // Remove the custom rate for this shard
+      const { [shardId]: _, ...rest } = customRates;
+      newRates = { ...rest };
+    } else {
+      newRates = { ...customRates, [shardId]: rate };
+    }
     setCustomRates(newRates);
 
-    // Save to localStorage
+    // Save only custom changes (diff from default)
     const customChanges = Object.entries(newRates).reduce((acc, [id, value]) => {
-      if (value !== defaultRates[id]) {
+      if (value !== undefined && value !== defaultRates[id]) {
         acc[id] = value;
       }
       return acc;
     }, {} as Record<string, number>);
 
-    localStorage.setItem("customRates", JSON.stringify(customChanges));
+    if (Object.keys(customChanges).length > 0) {
+      localStorage.setItem("customRates", JSON.stringify(customChanges));
+    } else {
+      localStorage.removeItem("customRates");
+    }
   };
 
   const resetRates = () => {
-    setCustomRates({ ...defaultRates });
+    setCustomRates({});
     localStorage.removeItem("customRates");
   };
 

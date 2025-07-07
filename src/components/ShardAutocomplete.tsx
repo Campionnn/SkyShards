@@ -5,7 +5,7 @@ import { debounce } from "../utils";
 import type { ShardWithKey, ShardAutocompleteProps } from "../types";
 import { SuggestionItem } from "./search/SuggestionItem";
 
-export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onChange, onSelect, placeholder = "Search for a shard...", className = "" }) => {
+export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onChange, onSelect, onFocus, placeholder = "Search for a shard...", className = "" }) => {
   const [suggestions, setSuggestions] = useState<ShardWithKey[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -163,7 +163,10 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={handleInputFocus}
+          onFocus={() => {
+            if (onFocus) onFocus();
+            handleInputFocus();
+          }}
           placeholder={placeholder}
           className="w-full pl-10 pr-10 py-2.5 bg-slate-800 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 hover:border-slate-500 transition-colors"
           autoComplete="off"
