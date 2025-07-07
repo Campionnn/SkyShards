@@ -429,18 +429,6 @@ export class CalculationService {
     return totals;
   }
 
-  decimalHoursToHoursMinutes(decimalHours: number): string {
-    const hours = Math.floor(decimalHours);
-    const minutes = Math.round((decimalHours - hours) * 60);
-    if (hours === 0) {
-      return `${minutes} minutes`;
-    }
-    if (minutes === 0 || isNaN(minutes)) {
-      return `${hours} hours`;
-    }
-    return `${hours} hours ${minutes} minutes`;
-  }
-
   async calculateOptimalPath(targetShard: string, requiredQuantity: number, params: CalculationParams): Promise<CalculationResult> {
     const data = await this.parseData(params);
 
