@@ -100,6 +100,7 @@ const CalculatorPageContent: React.FC = () => {
             kingCobraLevel: form.kingCobraLevel,
             seaSerpentLevel: form.seaSerpentLevel,
             tiamatLevel: form.tiamatLevel,
+            crocodileLevel: form.crocodileLevel,
             kuudraTier: form.kuudraTier,
             moneyPerHour: form.moneyPerHour,
             noWoodenBait: form.noWoodenBait,

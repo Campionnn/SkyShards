@@ -15,8 +15,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                                                               }) => {
   const shard = data.shards[tree.shard];
 
-  // Handle cycle nodes first
-    if (tree.method === "cycle") {
+  if (tree.method === "cycle") {
         const isExpanded = expandedStates.get(nodeId) ?? true;
         const shard = data.shards[tree.shard];
 
