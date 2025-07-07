@@ -64,6 +64,7 @@ export type RecipeTree =
         multiplier: number;
       }[];
       craftsNeeded: number;
+      inputRecipe: RecipeTree;
     }
   | {
       shard: string;
