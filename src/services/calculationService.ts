@@ -1,14 +1,4 @@
-import type {
-  Data,
-  RecipeChoice,
-  RecipeTree,
-  CalculationParams,
-  CalculationResult,
-  Shards,
-  Recipes,
-  Shard,
-  Recipe
-} from "../types";
+import type { Data, RecipeChoice, RecipeTree, CalculationParams, CalculationResult, Shards, Recipes, Shard, Recipe } from "../types";
 import { NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS, BLACK_HOLE_SHARD } from "../constants";
 
 export class CalculationService {
@@ -35,7 +25,7 @@ export class CalculationService {
           const qty = parseInt(qtyStr);
           const recipeList = fusionJson.recipes[outputShard][qtyStr];
           recipeList.forEach((inputs: [string, string]) => {
-            const isReptile = inputs.some(input => fusionJson.shards[input].family.includes("Reptile"));
+            const isReptile = inputs.some((input) => fusionJson.shards[input].family.includes("Reptile"));
             recipes[outputShard].push({ inputs, outputQuantity: qty, isReptile: isReptile });
           });
         }
@@ -151,7 +141,7 @@ export class CalculationService {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
     const shards = Object.keys(data.shards);
-    const crocodileMultiplier = 1 + ((2 * crocodileLevel) / 100);
+    const crocodileMultiplier = 1 + (2 * crocodileLevel) / 100;
     const craftPenalty = 0.8 / 3600;
 
     // Initialize with direct costs
@@ -247,11 +237,7 @@ export class CalculationService {
     return cycles;
   }
 
-  private buildCycle(
-      shard: string,
-      choices: Map<string, RecipeChoice>,
-      cycleNodes: string[][]
-  ): { outputShard: string; recipe: Recipe }[][] {
+  private buildCycle(shard: string, choices: Map<string, RecipeChoice>, cycleNodes: string[][]): { outputShard: string; recipe: Recipe }[][] {
     const cycleSteps: { outputShard: string; recipe: Recipe }[][] = [];
 
     for (const cycle of cycleNodes) {
@@ -270,25 +256,22 @@ export class CalculationService {
     return cycleSteps;
   }
 
-  buildRecipeTree(
-      shard: string,
-      choices: Map<string, RecipeChoice>,
-      cycleNodes: string[][]
-  ): RecipeTree {
+  buildRecipeTree(shard: string, choices: Map<string, RecipeChoice>, cycleNodes: string[][]): RecipeTree {
     if (cycleNodes.flat().includes(shard)) {
       const cycleSteps = this.buildCycle(shard, choices, cycleNodes);
       return {
         shard,
         method: "cycle",
         quantity: 0,
-        cycles: cycleSteps.map(steps => ({
+        cycles: cycleSteps.map((steps) => ({
           steps,
           // These will be populated in assignQuantities
           expectedCrafts: 0,
           expectedOutput: 0,
           baseOutput: 0,
-          multiplier: 1
-        }))
+          multiplier: 1,
+        })),
+        craftsNeeded: 0,
       };
     }
 
@@ -307,7 +290,8 @@ export class CalculationService {
           method: "cycleNode",
           recipe,
           inputs: [tree1, tree2],
-          quantity: 0
+          quantity: 0,
+          craftsNeeded: 0,
         };
       }
 
@@ -316,26 +300,21 @@ export class CalculationService {
         method: "recipe",
         recipe,
         inputs: [tree1, tree2],
-        quantity: 0
+        quantity: 0,
+        craftsNeeded: 0,
       };
     }
   }
 
-  assignQuantities(
-      tree: RecipeTree,
-      requiredQuantity: number,
-      data: Data,
-      craftCounter: { total: number },
-      choices: Map<string, RecipeChoice>,
-      crocodileMultiplier: number
-  ): void {
+  assignQuantities(tree: RecipeTree, requiredQuantity: number, data: Data, craftCounter: { total: number }, choices: Map<string, RecipeChoice>, crocodileMultiplier: number): void {
     tree.quantity = requiredQuantity;
 
     switch (tree.method) {
       case "recipe": {
         const recipe = tree.recipe;
         const outputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
-        const craftsNeeded = Math.ceil(requiredQuantity / (outputQuantity));
+        const craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
+        tree.craftsNeeded = craftsNeeded;
         craftCounter.total += craftsNeeded;
 
         const [input1, input2] = recipe.inputs;
@@ -351,7 +330,8 @@ export class CalculationService {
       case "cycleNode": {
         const recipe = tree.recipe;
         const outputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
-        const craftsNeeded = Math.ceil(requiredQuantity / (outputQuantity));
+        const craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
+        tree.craftsNeeded = craftsNeeded;
         craftCounter.total += craftsNeeded;
 
         const [input1, input2] = recipe.inputs;
@@ -365,14 +345,12 @@ export class CalculationService {
 
       case "cycle":
         for (const cycle of tree.cycles) {
-          const outputStep = cycle.steps.find(step => step.outputShard === tree.shard);
+          const outputStep = cycle.steps.find((step) => step.outputShard === tree.shard);
           if (!outputStep) continue;
 
           const recipe = outputStep.recipe;
           const baseOutput = recipe.outputQuantity;
-          const expectedOutput = recipe.isReptile
-              ? baseOutput * crocodileMultiplier
-              : baseOutput;
+          const expectedOutput = recipe.isReptile ? baseOutput * crocodileMultiplier : baseOutput;
 
           const expectedCrafts = Math.ceil(requiredQuantity / expectedOutput);
 
@@ -384,14 +362,12 @@ export class CalculationService {
 
           craftCounter.total += expectedCrafts * cycle.steps.length;
         }
+        tree.craftsNeeded = tree.cycles.reduce((sum, c) => sum + (c.expectedCrafts || 0), 0);
         break;
     }
   }
 
-  private collectTotalQuantities(
-      tree: RecipeTree,
-      data: Data
-  ): Map<string, number> {
+  private collectTotalQuantities(tree: RecipeTree, data: Data): Map<string, number> {
     const totals = new Map<string, number>();
 
     const traverse = (node: RecipeTree) => {
@@ -411,16 +387,16 @@ export class CalculationService {
               const craftsPerCycle = node.cycles[0].expectedCrafts;
 
               const cycleInputs = new Map<string, number>();
-              cycleRecipes.steps.forEach(recipe => {
+              cycleRecipes.steps.forEach((recipe) => {
                 const [input1, input2] = recipe.recipe.inputs;
                 const fuse1 = data.shards[input1].fuse_amount;
                 const fuse2 = data.shards[input2].fuse_amount;
 
                 if (!data.shards[input1].family.includes("Reptile")) {
-                  cycleInputs.set(input1, (cycleInputs.get(input1) || 0) + (craftsPerCycle * fuse1));
+                  cycleInputs.set(input1, (cycleInputs.get(input1) || 0) + craftsPerCycle * fuse1);
                 }
                 if (!data.shards[input2].family.includes("Reptile")) {
-                  cycleInputs.set(input2, (cycleInputs.get(input2) || 0) + (craftsPerCycle * fuse2));
+                  cycleInputs.set(input2, (cycleInputs.get(input2) || 0) + craftsPerCycle * fuse2);
                 }
               });
 
@@ -469,7 +445,7 @@ export class CalculationService {
     const cycleNodes = params.crocodileLevel > 0 ? this.findCycleNodes(choices) : [];
     const tree = this.buildRecipeTree(targetShard, choices, cycleNodes);
     const craftCounter = { total: 0 };
-    const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100);
+    const crocodileMultiplier = 1 + (2 * params.crocodileLevel) / 100;
     this.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, crocodileMultiplier);
 
     const totalQuantities = this.collectTotalQuantities(tree, data);
@@ -479,9 +455,7 @@ export class CalculationService {
     const choice = choices.get(targetShard);
 
     if (choice?.recipe) {
-      const outputQuantity = choice.recipe.isReptile
-          ? choice.recipe.outputQuantity * crocodileMultiplier
-          : choice.recipe.outputQuantity;
+      const outputQuantity = choice.recipe.isReptile ? choice.recipe.outputQuantity * crocodileMultiplier : choice.recipe.outputQuantity;
       craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
       totalShardsProduced = craftsNeeded * outputQuantity;
     }

@@ -35,40 +35,44 @@ export interface RecipeChoice {
 }
 
 export type RecipeTree =
-    | {
-  shard: string;
-  method: "direct";
-  quantity: number;
-}
-    | {
-  shard: string;
-  method: "recipe";
-  quantity: number;
-  recipe: Recipe;
-  inputs: [RecipeTree, RecipeTree];
-}
-    | {
-  shard: string;
-  method: "cycle";
-  quantity: number;
-  cycles: {
-    steps: {
-      outputShard: string;
+  | {
+      shard: string;
+      method: "direct";
+      quantity: number;
+      craftsNeeded?: number; // Not needed for direct, but for type safety
+    }
+  | {
+      shard: string;
+      method: "recipe";
+      quantity: number;
       recipe: Recipe;
-    }[];
-    expectedCrafts: number;
-    expectedOutput: number;
-    baseOutput: number;
-    multiplier: number;
-  }[];  // Store complete cycle information
-}
-    | {
-  shard: string;
-  method: "cycleNode";
-  quantity: number;
-  recipe: Recipe;
-  inputs: [RecipeTree, RecipeTree];
-};
+      inputs: [RecipeTree, RecipeTree];
+      craftsNeeded: number;
+    }
+  | {
+      shard: string;
+      method: "cycle";
+      quantity: number;
+      cycles: {
+        steps: {
+          outputShard: string;
+          recipe: Recipe;
+        }[];
+        expectedCrafts: number;
+        expectedOutput: number;
+        baseOutput: number;
+        multiplier: number;
+      }[];
+      craftsNeeded: number;
+    }
+  | {
+      shard: string;
+      method: "cycleNode";
+      quantity: number;
+      recipe: Recipe;
+      inputs: [RecipeTree, RecipeTree];
+      craftsNeeded: number;
+    };
 
 export interface CalculationParams {
   customRates: { [shardId: string]: number };

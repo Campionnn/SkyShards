@@ -165,6 +165,11 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
   const input2 = tree.inputs![1];
   const input1Shard = data.shards[input1.shard];
   const input2Shard = data.shards[input2.shard];
+  // For recipe nodes, use multiplier if reptile
+  let crafts = 1;
+  if ("craftsNeeded" in tree) {
+    crafts = tree.craftsNeeded ?? 1;
+  }
   const displayQuantity = isTopLevel ? totalShardsProduced : tree.quantity;
 
   return (
@@ -216,7 +221,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           <div className="text-right">
             <div className="flex items-center justify-end space-x-1.5">
               <span className="text-xs text-slate-500">fusions</span>
-              <span className={`font-medium text-white ${isTopLevel ? "text-xs" : "text-xs"}`}>{displayQuantity}</span>
+              <span className="font-medium text-white text-xs">{crafts}</span>
             </div>
           </div>
         </div>
