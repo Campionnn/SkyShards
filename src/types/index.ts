@@ -51,13 +51,16 @@ export type RecipeTree =
   shard: string;
   method: "cycle";
   quantity: number;
-  recipes: Recipe[];
-  cycleInfo?: {
+  cycles: {
+    steps: {
+      outputShard: string;
+      recipe: Recipe;
+    }[];
     expectedCrafts: number;
     expectedOutput: number;
     baseOutput: number;
     multiplier: number;
-  };
+  }[];  // Store complete cycle information
 }
     | {
   shard: string;

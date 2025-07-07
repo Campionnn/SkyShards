@@ -177,7 +177,7 @@ export class CalculationService {
     return { minCosts, choices };
   }
 
-  private findCycleNodes(choices: Map<string, RecipeChoice>): Set<string> {
+  private findCycleNodes(choices: Map<string, RecipeChoice>): string[][] {
     const graph = new Map<string, string[]>();
     // Build dependency graph: output -> inputs
     for (const [shard, choice] of choices) {
@@ -191,7 +191,7 @@ export class CalculationService {
     const lowLinks = new Map<string, number>();
     const onStack = new Map<string, boolean>();
     const stack: string[] = [];
-    const cycleNodes = new Set<string>();
+    const cycles: string[][] = [];
 
     const strongConnect = (node: string) => {
       indices.set(node, index);
@@ -221,13 +221,8 @@ export class CalculationService {
           scc.push(w);
         } while (w !== node);
 
-        if (scc.length > 1) {
-          scc.forEach(n => cycleNodes.add(n));
-        } else {
-          // Check for self-loop
-          if (graph.get(node)?.includes(node)) {
-            cycleNodes.add(node);
-          }
+        if (scc.length > 1 || (scc.length === 1 && graph.get(node)?.includes(node))) {
+          cycles.push(scc);
         }
       }
     };
@@ -238,51 +233,51 @@ export class CalculationService {
       }
     }
 
-    return cycleNodes;
+    return cycles;
   }
 
-  // buildCycle using choices and a shard, return a list of recipes contained in the cycle
   private buildCycle(
       shard: string,
       choices: Map<string, RecipeChoice>,
-      cycleNodes: Set<string>
-  ): Recipe[] {
-    const recipes: Recipe[] = [];
-    const visited = new Set<string>();
-    let current = shard;
+      cycleNodes: string[][]
+  ): { outputShard: string; recipe: Recipe }[][] {
+    const cycleSteps: { outputShard: string; recipe: Recipe }[][] = [];
 
-    while (!visited.has(current)) {
-      visited.add(current);
-      const choice = choices.get(current);
-
-      if (!choice || !choice.recipe) break;
-
-      recipes.push(choice.recipe);
-
-      // Find next shard in the cycle
-      const nextInput = choice.recipe.inputs.find(input =>
-          cycleNodes.has(input) && input !== current
-      );
-
-      if (!nextInput) break;
-      current = nextInput;
+    for (const cycle of cycleNodes) {
+      if (cycle.includes(shard)) {
+        const steps: { outputShard: string; recipe: Recipe }[] = [];
+        for (const node of cycle) {
+          const choice = choices.get(node);
+          if (choice?.recipe) {
+            steps.push({ outputShard: node, recipe: choice.recipe });
+          }
+        }
+        cycleSteps.push(steps);
+      }
     }
 
-    return recipes;
+    return cycleSteps;
   }
 
   buildRecipeTree(
       shard: string,
       choices: Map<string, RecipeChoice>,
-      cycleNodes: Set<string>
+      cycleNodes: string[][]
   ): RecipeTree {
-    if (cycleNodes.has(shard)) {
-      const recipes = this.buildCycle(shard, choices, cycleNodes);
+    if (cycleNodes.flat().includes(shard)) {
+      const cycleSteps = this.buildCycle(shard, choices, cycleNodes);
       return {
         shard,
         method: "cycle",
-        recipes,
-        quantity: 0
+        quantity: 0,
+        cycles: cycleSteps.map(steps => ({
+          steps,
+          // These will be populated in assignQuantities
+          expectedCrafts: 0,
+          expectedOutput: 0,
+          baseOutput: 0,
+          multiplier: 1
+        }))
       };
     }
 
@@ -295,8 +290,7 @@ export class CalculationService {
       const tree1 = this.buildRecipeTree(input1, choices, cycleNodes);
       const tree2 = this.buildRecipeTree(input2, choices, cycleNodes);
 
-      // Check if this node is part of a cycle
-      if (cycleNodes.has(shard)) {
+      if (cycleNodes.flat().includes(shard)) {
         return {
           shard,
           method: "cycleNode",
@@ -327,11 +321,10 @@ export class CalculationService {
     tree.quantity = requiredQuantity;
 
     switch (tree.method) {
-      case "recipe":
-      case "cycleNode": {
+      case "recipe": {
         const recipe = tree.recipe;
         const outputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
-        const craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
+        const craftsNeeded = Math.ceil(requiredQuantity / (outputQuantity));
         craftCounter.total += craftsNeeded;
 
         const [input1, input2] = recipe.inputs;
@@ -344,40 +337,52 @@ export class CalculationService {
         this.assignQuantities(tree.inputs[1], input2Quantity, data, craftCounter, choices, crocodileMultiplier);
         break;
       }
+      case "cycleNode": {
+        const recipe = tree.recipe;
+        const outputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
+        const craftsNeeded = Math.ceil(requiredQuantity / (outputQuantity));
+        craftCounter.total += craftsNeeded;
+
+        const [input1, input2] = recipe.inputs;
+        const fuse1 = data.shards[input1].fuse_amount;
+        const fuse2 = data.shards[input2].fuse_amount;
+
+        this.assignQuantities(tree.inputs[0], fuse1, data, craftCounter, choices, crocodileMultiplier);
+        this.assignQuantities(tree.inputs[1], fuse2, data, craftCounter, choices, crocodileMultiplier);
+        break;
+      }
 
       case "cycle":
-        if (tree.recipes.length > 0) {
-          // Find the recipe that produces our target shard
-          const outputRecipe = tree.recipes.find(r => {
-            // Find the shard ID (outputShard) that has this recipe in data.recipes
-            return Object.entries(data.recipes).some(([, recipes]) =>
-                recipes.includes(r)
-            );
-          }) || tree.recipes[0];
+        for (const cycle of tree.cycles) {
+          const outputStep = cycle.steps.find(step => step.outputShard === tree.shard);
+          if (!outputStep) continue;
+          console.log(cycle);
+          console.log(requiredQuantity);
 
-          const baseOutput = outputRecipe.outputQuantity / 2;
-          const expectedOutput = outputRecipe.isReptile
+          const recipe = outputStep.recipe;
+          const baseOutput = recipe.outputQuantity;
+          const expectedOutput = recipe.isReptile
               ? baseOutput * crocodileMultiplier
               : baseOutput;
 
           const expectedCrafts = Math.ceil(requiredQuantity / expectedOutput);
 
-          // Create cycleInfo for display
-          tree.cycleInfo = {
-            expectedCrafts,
-            expectedOutput,
-            baseOutput,
-            multiplier: crocodileMultiplier,
-          };
+          // Update cycle info
+          cycle.expectedCrafts = expectedCrafts;
+          cycle.expectedOutput = expectedOutput;
+          cycle.baseOutput = baseOutput;
+          cycle.multiplier = crocodileMultiplier;
 
-          // Increment craft counter for cycle crafts
-          craftCounter.total += expectedCrafts * tree.recipes.length;
+          craftCounter.total += expectedCrafts * cycle.steps.length;
         }
         break;
     }
   }
 
-  collectTotalQuantities(tree: RecipeTree, data: Data): Map<string, number> {
+  private collectTotalQuantities(
+      tree: RecipeTree,
+      data: Data
+  ): Map<string, number> {
     const totals = new Map<string, number>();
 
     const traverse = (node: RecipeTree) => {
@@ -392,28 +397,28 @@ export class CalculationService {
           break;
 
         case "cycle":
-          if (node.recipes.length > 0 && node.cycleInfo) {
-            // Calculate inputs for the entire cycle
-            const cycleInputs = new Map<string, number>();
-            const craftsPerCycle = node.cycleInfo.expectedCrafts;
+          if (node.cycles.length > 0) {
+            for (const cycleRecipes of node.cycles) {
+              const craftsPerCycle = node.cycles[0].expectedCrafts;
 
-            node.recipes.forEach(recipe => {
-              const [input1, input2] = recipe.inputs;
-              const fuse1 = data.shards[input1].fuse_amount;
-              const fuse2 = data.shards[input2].fuse_amount;
+              const cycleInputs = new Map<string, number>();
+              cycleRecipes.steps.forEach(recipe => {
+                const [input1, input2] = recipe.recipe.inputs;
+                const fuse1 = data.shards[input1].fuse_amount;
+                const fuse2 = data.shards[input2].fuse_amount;
 
-              if (!data.shards[input1].family.includes("Reptile")) {
-                cycleInputs.set(input1, (cycleInputs.get(input1) || 0) + (craftsPerCycle * fuse1));
-              }
-              if (!data.shards[input2].family.includes("Reptile")) {
-                cycleInputs.set(input2, (cycleInputs.get(input2) || 0) + (craftsPerCycle * fuse2));
-              }
-            });
+                if (!data.shards[input1].family.includes("Reptile")) {
+                  cycleInputs.set(input1, (cycleInputs.get(input1) || 0) + (craftsPerCycle * fuse1));
+                }
+                if (!data.shards[input2].family.includes("Reptile")) {
+                  cycleInputs.set(input2, (cycleInputs.get(input2) || 0) + (craftsPerCycle * fuse2));
+                }
+              });
 
-            // Add cycle inputs to totals
-            cycleInputs.forEach((quantity, shard) => {
-              totals.set(shard, (totals.get(shard) || 0) + quantity);
-            });
+              cycleInputs.forEach((quantity, shard) => {
+                totals.set(shard, (totals.get(shard) || 0) + quantity);
+              });
+            }
           }
           break;
       }
@@ -421,21 +426,6 @@ export class CalculationService {
 
     traverse(tree);
     return totals;
-  }
-
-  fixMinCosts(data: Data, minCosts: Map<string, number>, choices: Map<string, RecipeChoice>, cycleNodes: Set<string>): void {
-      cycleNodes.forEach((node) => {
-      const choice = choices.get(node);
-      if (choice && choice.recipe) {
-          const [input1, input2] = choice.recipe.inputs;
-          const costInput1 = minCosts.get(input1)!;
-          const costInput2 = minCosts.get(input2)!;
-          const totalCost = costInput1 + costInput2;
-
-          // Update the cost for the cycle node
-          minCosts.set(node, totalCost);
-      }
-      });
   }
 
   decimalHoursToHoursMinutes(decimalHours: number): string {
@@ -467,9 +457,8 @@ export class CalculationService {
     }
 
     const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel);
-    const cycleNodes = params.crocodileLevel > 0 ? this.findCycleNodes(choices) : new Set<string>();
+    const cycleNodes = params.crocodileLevel > 0 ? this.findCycleNodes(choices) : [];
     const tree = this.buildRecipeTree(targetShard, choices, cycleNodes);
-    // this.fixMinCosts(data, minCosts, choices, cycleNodes);
     const craftCounter = { total: 0 };
     const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100);
     this.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, crocodileMultiplier);
