@@ -132,9 +132,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
             Materials Needed
           </h3>
           <div className="px-3 py-1.5 bg-sky-500/20 border border-sky-500/30 text-sky-400 text-sm font-medium rounded-md">
-            for {result.totalShardsProduced} {targetShardName}{" "}
+            for {Math.floor(result.totalShardsProduced)} {targetShardName}{" "}
             <span className="text-slate-400">
-              {result.craftsNeeded} craft{result.craftsNeeded > 1 ? "s" : ""}
+              {Math.floor(result.craftsNeeded)} craft{Math.floor(result.craftsNeeded) > 1 ? "s" : ""}
             </span>
           </div>
         </div>

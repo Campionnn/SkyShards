@@ -305,7 +305,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
             Shard Levels
           </h3>
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="grid grid-cols-3 gap-1.5">
             {[
               { key: "newtLevel", label: "Newt" },
               { key: "salamanderLevel", label: "Salamander" },
@@ -325,6 +325,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               />
             ))}
           </div>
+          {/* Crocodile warning note */}
+          <p className="text-xs text-orange-400 mt-1">Note: Using Crocodile levels may slow down calculations a lot.</p>
         </div>
 
         {/* Kraken Shard */}
