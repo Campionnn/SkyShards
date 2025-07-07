@@ -447,7 +447,9 @@ export class CalculationService {
     const cycleNodes = params.crocodileLevel > 0 ? this.findCycleNodes(choices) : [];
     const tree = this.buildRecipeTree(targetShard, choices, cycleNodes);
     const craftCounter = { total: 0 };
-    const crocodileMultiplier = 1 + (2 * params.crocodileLevel) / 100;
+    const tiamatMultiplier = 1 + ((5 * params.tiamatLevel) / 100);
+    const seaSerpentMultiplier = 1 + (((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier);
+    const crocodileMultiplier = 1 + (((2 * params.crocodileLevel) / 100) * seaSerpentMultiplier);
     this.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, crocodileMultiplier);
 
     const totalQuantities = this.collectTotalQuantities(tree, data);
