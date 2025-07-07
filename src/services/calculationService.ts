@@ -367,8 +367,6 @@ export class CalculationService {
         for (const cycle of tree.cycles) {
           const outputStep = cycle.steps.find(step => step.outputShard === tree.shard);
           if (!outputStep) continue;
-          console.log(cycle);
-          console.log(requiredQuantity);
 
           const recipe = outputStep.recipe;
           const baseOutput = recipe.outputQuantity;
