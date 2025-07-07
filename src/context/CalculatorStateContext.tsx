@@ -16,8 +16,8 @@ const defaultForm: CalculationFormData = {
   seaSerpentLevel: 0,
   tiamatLevel: 0,
   crocodileLevel: 0,
-  kuudraTier: "t5",
-  moneyPerHour: 0,
+  kuudraTier: "none", // No Kuudra by default
+  moneyPerHour: Infinity,
   noWoodenBait: false,
 };
 

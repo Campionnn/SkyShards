@@ -16,7 +16,7 @@ export const calculationSchema = z.object({
   tiamatLevel: z.number().min(0).max(10),
     crocodileLevel: z.number().min(0).max(10),
   kuudraTier: z.enum(["none", "t1", "t2", "t3", "t4", "t5"]),
-  moneyPerHour: z.number().min(0),
+  moneyPerHour: z.number().min(0).nullable(),
   noWoodenBait: z.boolean(),
 });
 

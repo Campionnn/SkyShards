@@ -145,21 +145,26 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
             const timeNeeded = quantity / shard.rate;
 
             return (
-              <div key={shardId} className="bg-slate-700 border border-slate-600 rounded-md p-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-sm">
-                      {quantity}x <span className={getRarityColor(shard.rarity)}>{shard.name}</span>
-                    </div>
-                    <div className="text-xs text-slate-400">
-                      {formatNumber(shard.rate)}
-                      <span className="text-slate-600 mx-0.5">/</span>
-                      <span className="text-slate-500">hr</span>
-                    </div>
+              <div key={shardId} className="bg-slate-700 border border-slate-600 rounded-md px-3 pt-1 pb-2 flex flex-row items-center justify-between">
+                {/* Left side: quantity, then icon+name underneath */}
+                <div className="flex flex-col items-start min-w-0 justify-center h-full">
+                  <span className="text-slate-300 font-medium text-base flex-shrink-0">{quantity}x</span>
+                  <span className={`mt-0 font-medium text-sm ${getRarityColor(shard.rarity)} flex items-center flex-shrink-0`}>
+                    <img
+                      src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`}
+                      alt={shard.name}
+                      className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-2"
+                      loading="lazy"
+                    />
+                    {shard.name}
+                  </span>
+                </div>
+                {/* Right side: rate, then time underneath */}
+                <div className="flex flex-col items-end ml-2 justify-center h-full">
+                  <div className="text-sm text-slate-400 whitespace-nowrap">
+                    {formatNumber(shard.rate)} <span className="text-slate-500"> / </span> <span className="text-slate-500">hr</span>
                   </div>
-                  <div className="text-right">
-                    <div className="text-xs text-slate-400">{formatTime(timeNeeded)}</div>
-                  </div>
+                  <div className="text-xs text-slate-400 whitespace-nowrap mt-1">{formatTime(timeNeeded)}</div>
                 </div>
               </div>
             );
@@ -192,8 +197,19 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
           </div>
         </div>
 
-        <div className="w-full">
-          <RecipeTreeNode tree={result.tree} data={data} isTopLevel={true} totalShardsProduced={result.totalShardsProduced} nodeId="root" expandedStates={expandedStates} onToggle={handleNodeToggle} />
+        {/* Only the outer container is scrollable */}
+        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
+          <div className="min-w-[650px]">
+            <RecipeTreeNode
+              tree={result.tree}
+              data={data}
+              isTopLevel={true}
+              totalShardsProduced={result.totalShardsProduced}
+              nodeId="root"
+              expandedStates={expandedStates}
+              onToggle={handleNodeToggle}
+            />
+          </div>
         </div>
       </div>
     </div>

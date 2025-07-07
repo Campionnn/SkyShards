@@ -24,10 +24,13 @@ export const SuggestionItem: React.FC<SuggestionItemProps> = React.memo(({ shard
       onMouseEnter={handleMouseEnter}
     >
       <div className="flex items-center justify-between">
-        <div className="flex-1 min-w-0">
-          <div className={`font-medium truncate ${getRarityColor(shard.rarity)}`}>{shard.name}</div>
-          <div className="text-xs opacity-75 truncate">
-            {shard.family} • {shard.type}
+        <div className="flex items-center min-w-0 flex-1 gap-2">
+          <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.key}.png`} alt={shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
+          <div>
+            <div className={`font-medium truncate ${getRarityColor(shard.rarity)}`}>{shard.name}</div>
+            <div className="text-xs opacity-75 truncate">
+              {shard.family} • {shard.type}
+            </div>
           </div>
         </div>
         {shard.rate > 0 && (

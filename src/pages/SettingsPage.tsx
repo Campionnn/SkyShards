@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Search, RotateCcw, Save } from "lucide-react";
 import { useShardsWithRecipes, useCustomRates } from "../hooks";
 import { debounce } from "../utils";
-import { RarityDropdown, TypeDropdown, ShardItem } from "../components";
+import { RarityDropdown, TypeDropdown, ShardItem, ShardPopup } from "../components";
+import { getShardDesc } from "../utils/getShardDesc";
 
 export const SettingsPage: React.FC = () => {
   console.log("SettingsPage rendered");
@@ -13,6 +14,7 @@ export const SettingsPage: React.FC = () => {
   const [rarityFilter, setRarityFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [hasChanges, setHasChanges] = useState(false);
+  const [popupShard, setPopupShard] = useState<null | any>(null);
 
   // Debounced filter to reduce re-renders
   const [debouncedFilter, setDebouncedFilter] = useState("");
@@ -144,11 +146,41 @@ export const SettingsPage: React.FC = () => {
         <div className="h-full overflow-y-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 p-3">
             {filteredShards.map((shard) => (
-              <ShardItem key={shard.key} shard={shard} rate={customRates[shard.key] || defaultRates[shard.key] || 0} onRateChange={handleRateChange} />
+              <div key={shard.key}>
+                <ShardItem
+                  shard={shard}
+                  rate={customRates[shard.key] || defaultRates[shard.key] || 0}
+                  defaultRate={defaultRates[shard.key] || 0}
+                  onRateChange={handleRateChange}
+                  onCardClick={() => setPopupShard(shard)}
+                />
+              </div>
             ))}
           </div>
         </div>
       </div>
+
+      {popupShard &&
+        (() => {
+          const desc = getShardDesc(popupShard.key);
+          const icon = `${import.meta.env.BASE_URL}shardIcons/${popupShard.key}.png`;
+          return (
+            <ShardPopup
+              open={!!popupShard}
+              onClose={() => setPopupShard(null)}
+              title={desc?.title || popupShard.name}
+              name={popupShard.name}
+              description={desc?.description || "No description."}
+              rarity={popupShard.rarity}
+              icon={icon}
+              rate={customRates[popupShard.key] || defaultRates[popupShard.key] || 0}
+              onRateChange={(newRate) => handleRateChange(popupShard.key, newRate)}
+              isDirect={popupShard.isDirect}
+              family={popupShard.family}
+              type={popupShard.type}
+            />
+          );
+        })()}
 
       {filteredShards.length === 0 && (
         <div className="text-center py-12">

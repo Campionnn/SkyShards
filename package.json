@@ -19,9 +19,11 @@
     "@types/react-router-dom": "^5.3.3",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",
+    "react-custom-scrollbars-2": "^4.5.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.59.0",
     "react-router-dom": "^7.6.3",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.11",
     "zod": "^3.25.73"
   },
@@ -39,5 +41,6 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.34.1",
     "vite": "^7.0.0"
-  }
+  },
+  "packageManager": "pnpm@10.12.4+sha512.5ea8b0deed94ed68691c9bad4c955492705c5eeb8a87ef86bc62c74a26b037b08ff9570f108b2e4dbd1dd1a9186fea925e527f141c648e85af45631074680184"
 }
