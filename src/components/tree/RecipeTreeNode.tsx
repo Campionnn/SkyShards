@@ -18,7 +18,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           <div className="flex items-center space-x-2">
             {isExpanded ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-amber-400" />}
             <div className="flex items-center gap-3">
-              <div className="text-xs text-amber-300">{runCount} runs</div>
+              <div className="text-xs text-amber-300">{runCount} crafts</div>
               <div className="w-1.5 h-1.5 bg-slate-50 rounded-full"></div>
               <div className="flex items-center space-x-2">
                 <span className="text-white font-medium text-sm">{Math.floor(tree.quantity)}x</span>
