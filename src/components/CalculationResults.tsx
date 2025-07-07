@@ -142,31 +142,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
           {Array.from(result.totalQuantities).map(([shardId, quantity]) => {
             const shard = data.shards[shardId];
-            let displayQuantity = quantity;
-            // --- Fix: If this shard is a direct input to a cycle, double the quantity as in the fusion tree ---
-            // Find if this shard is a direct input to a cycle in the main tree
-            function findCycleInputMultiplier(tree: RecipeTree | undefined): number {
-              if (!tree) return 1;
-              if (tree.method === "cycle") {
-                // For each cycle, check all steps for direct inputs
-                let multiplier = 1;
-                for (const cycle of tree.cycles) {
-                  for (const step of cycle.steps) {
-                    for (const input of step.recipe.inputs) {
-                      if (input === shardId && data.shards[input].rate > 0) {
-                        multiplier = 2; // Your logic may vary; adjust as needed
-                      }
-                    }
-                  }
-                }
-                return multiplier;
-              } else if (tree.method === "recipe" || tree.method === "cycleNode") {
-                return findCycleInputMultiplier(tree.inputs[0]) * findCycleInputMultiplier(tree.inputs[1]);
-              }
-              return 1;
-            }
-            const cycleMultiplier = findCycleInputMultiplier(result.tree);
-            if (cycleMultiplier > 1) displayQuantity = quantity * cycleMultiplier;
+            const displayQuantity = quantity; // Use the quantity as calculated, no additional multiplication
             const timeNeeded = displayQuantity / shard.rate;
             return (
               <div key={shardId} className="bg-slate-700 border border-slate-600 rounded-md px-3 pt-1 pb-2 flex flex-row items-center justify-between">
