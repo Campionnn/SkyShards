@@ -101,7 +101,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
             </div>
             <div>
               <p className="text-slate-400 text-xs">Shards Produced</p>
-              <p className="text-white font-medium text-sm">{result.totalShardsProduced}</p>
+              <p className="text-white font-medium text-sm">{Math.floor(result.totalShardsProduced)}</p>
             </div>
           </div>
         </div>
@@ -142,13 +142,37 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
           {Array.from(result.totalQuantities).map(([shardId, quantity]) => {
             const shard = data.shards[shardId];
-            const timeNeeded = quantity / shard.rate;
-
+            let displayQuantity = quantity;
+            // --- Fix: If this shard is a direct input to a cycle, double the quantity as in the fusion tree ---
+            // Find if this shard is a direct input to a cycle in the main tree
+            function findCycleInputMultiplier(tree: RecipeTree | undefined): number {
+              if (!tree) return 1;
+              if (tree.method === "cycle") {
+                // For each cycle, check all steps for direct inputs
+                let multiplier = 1;
+                for (const cycle of tree.cycles) {
+                  for (const step of cycle.steps) {
+                    for (const input of step.recipe.inputs) {
+                      if (input === shardId && data.shards[input].rate > 0) {
+                        multiplier = 2; // Your logic may vary; adjust as needed
+                      }
+                    }
+                  }
+                }
+                return multiplier;
+              } else if (tree.method === "recipe" || tree.method === "cycleNode") {
+                return findCycleInputMultiplier(tree.inputs[0]) * findCycleInputMultiplier(tree.inputs[1]);
+              }
+              return 1;
+            }
+            const cycleMultiplier = findCycleInputMultiplier(result.tree);
+            if (cycleMultiplier > 1) displayQuantity = quantity * cycleMultiplier;
+            const timeNeeded = displayQuantity / shard.rate;
             return (
               <div key={shardId} className="bg-slate-700 border border-slate-600 rounded-md px-3 pt-1 pb-2 flex flex-row items-center justify-between">
                 {/* Left side: quantity, then icon+name underneath */}
                 <div className="flex flex-col items-start min-w-0 justify-center h-full">
-                  <span className="text-slate-300 font-medium text-base flex-shrink-0">{quantity}x</span>
+                  <span className="text-slate-300 font-medium text-base flex-shrink-0">{displayQuantity}x</span>
                   <span className={`mt-0 font-medium text-sm ${getRarityColor(shard.rarity)} flex items-center flex-shrink-0`}>
                     <img
                       src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`}

@@ -102,7 +102,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                       if (!inputShardTotals[inputId]) {
                         inputShardTotals[inputId] = { quantity: 0, shard: inputShard };
                       }
-                      inputShardTotals[inputId].quantity = inputShard.fuse_amount;
+                      inputShardTotals[inputId].quantity += inputShard.fuse_amount;
                     });
                   });
                   // Always show the summary div, only unique shards by id
