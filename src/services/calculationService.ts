@@ -100,8 +100,8 @@ export class CalculationService {
   private applyFortuneModifiers(rate: number, shardId: string, shard: Shard, params: CalculationParams): number {
     let effectiveFortune = params.hunterFortune;
 
-    const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
-    const seaSerpentMultiplier = 1 + ((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier;
+    const tiamatMultiplier = 1 + ((5 * params.tiamatLevel) / 100);
+    const seaSerpentMultiplier = 1 + (((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier);
     const pythonMultiplier = ((2 * params.pythonLevel) / 100) * seaSerpentMultiplier;
     const kingCobraMultiplier = (params.kingCobraLevel / 100) * seaSerpentMultiplier;
 
@@ -137,11 +137,13 @@ export class CalculationService {
     return rate * (1 + effectiveFortune / 100);
   }
 
-  computeMinCosts(data: Data, crocodileLevel: number): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
+  computeMinCosts(data: Data, crocodileLevel: number, seaSerpentLevel: number, tiamatLevel: number): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
     const shards = Object.keys(data.shards);
-    const crocodileMultiplier = 1 + (2 * crocodileLevel) / 100;
+    const tiamatMultiplier = 1 + ((5 * tiamatLevel) / 100);
+    const seaSerpentMultiplier = 1 + (((2 * seaSerpentLevel) / 100) * tiamatMultiplier);
+    const crocodileMultiplier = 1 + (((2 * crocodileLevel) / 100) * seaSerpentMultiplier);
     const craftPenalty = 0.8 / 3600;
 
     // Initialize with direct costs
@@ -441,7 +443,7 @@ export class CalculationService {
       };
     }
 
-    const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel);
+    const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel);
     const cycleNodes = params.crocodileLevel > 0 ? this.findCycleNodes(choices) : [];
     const tree = this.buildRecipeTree(targetShard, choices, cycleNodes);
     const craftCounter = { total: 0 };
