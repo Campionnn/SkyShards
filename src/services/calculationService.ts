@@ -100,8 +100,8 @@ export class CalculationService {
   private applyFortuneModifiers(rate: number, shardId: string, shard: Shard, params: CalculationParams): number {
     let effectiveFortune = params.hunterFortune;
 
-    const tiamatMultiplier = 1 + ((5 * params.tiamatLevel) / 100);
-    const seaSerpentMultiplier = 1 + (((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier);
+    const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
+    const seaSerpentMultiplier = 1 + ((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier;
     const pythonMultiplier = ((2 * params.pythonLevel) / 100) * seaSerpentMultiplier;
     const kingCobraMultiplier = (params.kingCobraLevel / 100) * seaSerpentMultiplier;
 
@@ -141,9 +141,9 @@ export class CalculationService {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
     const shards = Object.keys(data.shards);
-    const tiamatMultiplier = 1 + ((5 * tiamatLevel) / 100);
-    const seaSerpentMultiplier = 1 + (((2 * seaSerpentLevel) / 100) * tiamatMultiplier);
-    const crocodileMultiplier = 1 + (((2 * crocodileLevel) / 100) * seaSerpentMultiplier);
+    const tiamatMultiplier = 1 + (5 * tiamatLevel) / 100;
+    const seaSerpentMultiplier = 1 + ((2 * seaSerpentLevel) / 100) * tiamatMultiplier;
+    const crocodileMultiplier = 1 + ((2 * crocodileLevel) / 100) * seaSerpentMultiplier;
     const craftPenalty = 0.8 / 3600;
 
     // Initialize with direct costs
@@ -263,7 +263,7 @@ export class CalculationService {
       const cycleSteps = this.buildCycle(shard, choices1, cycleNodes);
       const { minCosts, choices } = this.computeMinCosts(data, 0, 0, 0);
       const targetShard = cycleNodes.flat().reduce((minShard, shard) => {
-        return (minCosts.get(shard)! < minCosts.get(minShard)!) ? shard : minShard;
+        return minCosts.get(shard)! < minCosts.get(minShard)! ? shard : minShard;
       }, cycleNodes.flat()[0]);
 
       const tree = this.buildRecipeTree(data, targetShard, choices, []);
@@ -372,7 +372,6 @@ export class CalculationService {
           cycle.multiplier = crocodileMultiplier;
 
           craftCounter.total += expectedCrafts * cycle.steps.length;
-
         }
         tree.craftsNeeded = tree.cycles.reduce((sum, c) => sum + (c.expectedCrafts || 0), 0);
 
@@ -399,6 +398,8 @@ export class CalculationService {
           if (node.cycles.length > 0) {
             for (const cycleRecipes of node.cycles) {
               const craftsPerCycle = node.cycles[0].expectedCrafts;
+              // Apply the same * 2 multiplier that the UI uses for runCount
+              const totalCrafts = craftsPerCycle * 2;
 
               const cycleInputs = new Map<string, number>();
               cycleRecipes.steps.forEach((recipe) => {
@@ -407,10 +408,10 @@ export class CalculationService {
                 const fuse2 = data.shards[input2].fuse_amount;
 
                 if (!data.shards[input1].family.includes("Reptile")) {
-                  cycleInputs.set(input1, (cycleInputs.get(input1) || 0) + craftsPerCycle * fuse1);
+                  cycleInputs.set(input1, (cycleInputs.get(input1) || 0) + totalCrafts * fuse1);
                 }
                 if (!data.shards[input2].family.includes("Reptile")) {
-                  cycleInputs.set(input2, (cycleInputs.get(input2) || 0) + craftsPerCycle * fuse2);
+                  cycleInputs.set(input2, (cycleInputs.get(input2) || 0) + totalCrafts * fuse2);
                 }
               });
 
