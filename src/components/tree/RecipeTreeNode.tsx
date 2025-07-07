@@ -43,46 +43,49 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
               <div key={cycleIndex} className="">
                 <div className="text-xs font-semibold text-amber-400"></div>
                 <div className="space-y-0.5">
-                  {cycle.steps.map((step, stepIndex) => {
-                    const recipe = step.recipe;
-                    const outputShardData = data.shards[step.outputShard];
-                    const input1Shard = data.shards[recipe.inputs[0]];
-                    const input2Shard = data.shards[recipe.inputs[1]];
-
-                    // Calculate quantities
-                    const input1Quantity = input1Shard.fuse_amount;
-                    const input2Quantity = input2Shard.fuse_amount;
-                    let outputQuantity = recipe.outputQuantity;
-                    if (recipe.isReptile) {
-                      outputQuantity = outputQuantity * cycle.multiplier;
-                    }
-
-                    return (
-                      <div key={stepIndex}>
-                        <div className="px-3 py-1.5 bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between">
-                          <div className="flex flex-wrap items-center gap-x-2 text-sm font-medium">
-                            <span className="font-normal text-xs text-amber-300">Step {stepIndex + 1} :</span>
-                            <span className="text-white">{outputQuantity}x</span>
-                            <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShardData.id}.png`} alt={outputShardData.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-                            <span className={`${getRarityColor(outputShardData.rarity)}`}>{outputShardData.name}</span>
-                            <span> = </span>
-                            <span className="text-slate-400">{input1Quantity}x</span>
-                            <img src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`} alt={input1Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-                            <span className={`${getRarityColor(input1Shard.rarity)}`}>{input1Shard.name}</span>
-                            <span> + </span>
-                            <span className="text-slate-400">{input2Quantity}x</span>
-                            <img src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`} alt={input2Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-                            <span className={`${getRarityColor(input2Shard.rarity)}`}>{input2Shard.name}</span>
-                          </div>
-                          <div className="text-right min-w-[80px] ml-2">
-                            <span className="text-slate-300 text-xs font-medium">{formatNumber(outputShardData.rate)}</span>
-                            <span className="text-slate-500 text-xs mx-0.5">/</span>
-                            <span className="text-slate-400 text-xs">hr</span>
+                  {[...cycle.steps]
+                    .slice()
+                    .reverse()
+                    .map((step, stepIndex) => {
+                      // Calculate quantities
+                      const recipe = step.recipe;
+                      const outputShardData = data.shards[step.outputShard];
+                      const input1Shard = data.shards[recipe.inputs[0]];
+                      const input2Shard = data.shards[recipe.inputs[1]];
+                      const input1Quantity = input1Shard.fuse_amount;
+                      const input2Quantity = input2Shard.fuse_amount;
+                      let outputQuantity = recipe.outputQuantity;
+                      if (recipe.isReptile) {
+                        outputQuantity = outputQuantity * cycle.multiplier;
+                      }
+                      // Step number should be from the end (so Step 2, Step 1, ...)
+                      const stepNumber = cycle.steps.length - stepIndex;
+                      return (
+                        <div key={stepIndex}>
+                          <div className="px-3 py-1.5 bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between">
+                            <div className="flex flex-wrap items-center gap-x-2 text-sm font-medium">
+                              <span className="font-normal text-xs text-amber-300">Step {stepNumber} :</span>
+                              <span className="text-white">{outputQuantity}x</span>
+                              <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShardData.id}.png`} alt={outputShardData.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
+                              <span className={`${getRarityColor(outputShardData.rarity)}`}>{outputShardData.name}</span>
+                              <span> = </span>
+                              <span className="text-slate-400">{input1Quantity}x</span>
+                              <img src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`} alt={input1Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
+                              <span className={`${getRarityColor(input1Shard.rarity)}`}>{input1Shard.name}</span>
+                              <span> + </span>
+                              <span className="text-slate-400">{input2Quantity}x</span>
+                              <img src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`} alt={input2Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
+                              <span className={`${getRarityColor(input2Shard.rarity)}`}>{input2Shard.name}</span>
+                            </div>
+                            <div className="text-right min-w-[80px] ml-2">
+                              <span className="text-slate-300 text-xs font-medium">{formatNumber(outputShardData.rate)}</span>
+                              <span className="text-slate-500 text-xs mx-0.5">/</span>
+                              <span className="text-slate-400 text-xs">hr</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
                 </div>
                 {/* Generalized summary for all unique input shards in the cycle */}
                 {(() => {
@@ -99,7 +102,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                       if (!inputShardTotals[inputId]) {
                         inputShardTotals[inputId] = { quantity: 0, shard: inputShard };
                       }
-                      inputShardTotals[inputId].quantity += inputShard.fuse_amount;
+                      inputShardTotals[inputId].quantity = inputShard.fuse_amount;
                     });
                   });
                   // Always show the summary div, only unique shards by id
@@ -109,7 +112,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                         <div key={shard.id} className="bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between px-3 py-1.5 text-sm font-medium gap-2">
                           <div className="flex items-center gap-2 min-w-0">
                             <div className="w-2 h-2 bg-green-400 rounded-full" />
-                            <span className="text-slate-300 font-medium text-sm">{Math.floor(quantity * runCount)}x</span>
+                            <span className="text-slate-300 font-medium text-sm">{quantity * runCount}x</span>
                             <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
                             <span className={getRarityColor(shard.rarity)}>{shard.name}</span>
                             <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
