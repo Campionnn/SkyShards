@@ -29,10 +29,10 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
             </div>
           </div>
           <div className="text-right">
-            <div className="text-sm text-slate-300">
+            <div className="text-xs text-slate-300">
               {formatNumber(shard.rate)}
-              <span className="text-slate-500 mx-0.5">/</span>
-              <span className="text-slate-400">hr</span>
+              <span className="text-slate-500 text-xs mx-0.5">/</span>
+              <span className="text-slate-400 text-xs">hr</span>
             </div>
           </div>
         </button>
@@ -149,10 +149,10 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
         </div>
         <div className="text-right">
-          <div className="text-sm text-slate-300">
+          <div className="text-xs text-slate-300">
             {formatNumber(shard.rate)}
-            <span className="text-slate-500 mx-0.5">/</span>
-            <span className="text-slate-400">hr</span>
+            <span className="text-slate-500 text-xs mx-0.5">/</span>
+            <span className="text-slate-400 text-xs">hr</span>
           </div>
         </div>
       </div>

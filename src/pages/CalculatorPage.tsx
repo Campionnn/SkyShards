@@ -41,9 +41,12 @@ const CalculatorPageContent: React.FC = () => {
 
       setTargetShardName(formData.shard);
 
+      // Filter out undefined values from customRates
+      const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
+
       // Prepare calculation parameters
       const params = {
-        customRates,
+        customRates: filteredCustomRates,
         hunterFortune: formData.hunterFortune,
         excludeChameleon: formData.excludeChameleon,
         frogPet: formData.frogPet,
@@ -87,8 +90,9 @@ const CalculatorPageContent: React.FC = () => {
           const shardKey = nameToKeyMap[form.shard.toLowerCase()];
           if (!shardKey) return;
           setTargetShardName(form.shard);
+          const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
           const params = {
-            customRates,
+            customRates: filteredCustomRates,
             hunterFortune: form.hunterFortune,
             excludeChameleon: form.excludeChameleon,
             frogPet: form.frogPet,
