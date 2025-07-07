@@ -28,7 +28,11 @@ export const SettingsPage: React.FC = () => {
   // Memoized filtered shards for better performance
   const filteredShards = useMemo(() => {
     return shards.filter((shard) => {
-      const matchesSearch = shard.name.toLowerCase().includes(debouncedFilter.toLowerCase());
+      const search = debouncedFilter.toLowerCase();
+      const matchesName = shard.name.toLowerCase().includes(search);
+      const matchesFamily = shard.family.toLowerCase().includes(search);
+      const matchesTypeField = shard.type.toLowerCase().includes(search);
+      const matchesSearch = matchesName || matchesFamily || matchesTypeField;
       const matchesRarity = rarityFilter === "all" || shard.rarity === rarityFilter;
       const matchesType = typeFilter === "all" || (typeFilter === "direct" && shard.isDirect) || (typeFilter === "fuse" && !shard.isDirect);
       return matchesSearch && matchesRarity && matchesType;
@@ -85,6 +89,7 @@ export const SettingsPage: React.FC = () => {
               type="text"
               value={filter}
               onChange={handleFilterChange}
+              onFocus={() => setFilter("")}
               placeholder="Search shards..."
               className="
                 w-full pl-10 pr-4 py-2.5 
