@@ -88,9 +88,9 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, className = ""
       </button>
 
       {isVisible && (
-        <div 
-          ref={tooltipRef} 
-          className={`fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 ${!isPositioned ? 'opacity-0' : 'opacity-100'} transition-opacity duration-100`} 
+        <div
+          ref={tooltipRef}
+          className={`fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 ${!isPositioned ? "opacity-0" : "opacity-100"} transition-opacity duration-100`}
           style={{ top: position.top, left: position.left }}
         >
           {title && (

@@ -1,6 +1,6 @@
 import React from "react";
 import { getRarityColor, getShardDetails } from "../../utils/index";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, MoveRight } from "lucide-react";
 import { formatNumber } from "../../utils/index";
 import type { RecipeTreeNodeProps } from "../../types/index";
 
@@ -114,7 +114,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
   if (tree.method === "cycle") {
     const isExpanded = expandedStates.get(nodeId) ?? true;
-    const runCount = tree.cycles.reduce((sum, cycle) => sum + cycle.expectedCrafts, 0) * 2;
+    const runCount = tree.cycles.reduce((sum, cycle) => sum + cycle.expectedCrafts, 0);
 
     return (
       <div className="flex flex-col border border-slate-400/70 rounded-md bg-slate-500/40">
@@ -123,7 +123,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
             {renderChevron(isExpanded)}
             <div className="flex items-center gap-3">
               <div className="text-xs text-amber-300">{runCount} crafts</div>
-              <div className="w-1.5 h-1.5 bg-slate-50 rounded-full"></div>
+              <MoveRight className="w-4 text-amber-400" />
               <div className="flex items-center space-x-2">
                 {renderShardInfo(Math.floor(tree.quantity), shard, false)}
                 <span className="px-1 bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">CYCLE !</span>

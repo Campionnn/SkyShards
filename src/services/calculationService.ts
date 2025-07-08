@@ -363,7 +363,19 @@ export class CalculationService {
           const baseOutput = recipe.outputQuantity;
           const expectedOutput = recipe.isReptile ? baseOutput * crocodileMultiplier : baseOutput;
 
-          const expectedCrafts = Math.ceil(requiredQuantity / expectedOutput);
+          // Calculate net output per cycle (gross output minus inputs consumed in the cycle)
+          let totalInputsConsumed = 0;
+          cycle.steps.forEach((step) => {
+            step.recipe.inputs.forEach((inputId) => {
+              if (inputId === tree.shard) {
+                const inputShard = data.shards[inputId];
+                totalInputsConsumed += inputShard.fuse_amount;
+              }
+            });
+          });
+
+          const netOutputPerCycle = expectedOutput - totalInputsConsumed;
+          const expectedCrafts = netOutputPerCycle > 0 ? Math.ceil(requiredQuantity / netOutputPerCycle) : Math.ceil(requiredQuantity / expectedOutput);
 
           // Update cycle info
           cycle.expectedCrafts = expectedCrafts;
@@ -375,7 +387,37 @@ export class CalculationService {
         }
         tree.craftsNeeded = tree.cycles.reduce((sum, c) => sum + (c.expectedCrafts || 0), 0);
 
-        this.assignQuantities(tree.inputRecipe, data.shards[tree.inputRecipe.shard].fuse_amount, data, craftCounter, choices, 1);
+        // For cycles, we need to calculate the total quantities needed for external inputs
+        // based on the number of cycles that will be run
+        if (tree.cycles.length > 0) {
+          const totalCycles = tree.cycles[0].expectedCrafts;
+
+          // Calculate total quantities needed for each input shard across all cycles
+          const inputQuantities = new Map<string, number>();
+
+          tree.cycles[0].steps.forEach((step) => {
+            step.recipe.inputs.forEach((inputId) => {
+              const inputShard = data.shards[inputId];
+              const currentQuantity = inputQuantities.get(inputId) || 0;
+              inputQuantities.set(inputId, currentQuantity + inputShard.fuse_amount);
+            });
+          });
+
+          // Assign quantities for each external input (inputs that don't appear as outputs in the cycle)
+          const outputShards = new Set(tree.cycles[0].steps.map((step) => step.outputShard));
+
+          inputQuantities.forEach((quantityPerCycle, inputId) => {
+            if (!outputShards.has(inputId)) {
+              // This is an external input - calculate total needed
+              const totalQuantityNeeded = quantityPerCycle * totalCycles;
+              const inputChoice = choices.get(inputId);
+              if (inputChoice && inputChoice.recipe) {
+                const inputTree = this.buildRecipeTree(data, inputId, choices, []);
+                this.assignQuantities(inputTree, totalQuantityNeeded, data, craftCounter, choices, crocodileMultiplier);
+              }
+            }
+          });
+        }
         break;
     }
   }
@@ -398,8 +440,8 @@ export class CalculationService {
           if (node.cycles.length > 0) {
             for (const cycleRecipes of node.cycles) {
               const craftsPerCycle = node.cycles[0].expectedCrafts;
-              // Apply the same * 2 multiplier that the UI uses for runCount
-              const totalCrafts = craftsPerCycle * 2;
+              // Use the correct number of cycles without additional multiplier
+              const totalCrafts = craftsPerCycle;
 
               const cycleInputs = new Map<string, number>();
               cycleRecipes.steps.forEach((recipe) => {
@@ -449,9 +491,9 @@ export class CalculationService {
     const cycleNodes = params.crocodileLevel > 0 ? this.findCycleNodes(choices) : [];
     const tree = this.buildRecipeTree(data, targetShard, choices, cycleNodes);
     const craftCounter = { total: 0 };
-    const tiamatMultiplier = 1 + ((5 * params.tiamatLevel) / 100);
-    const seaSerpentMultiplier = 1 + (((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier);
-    const crocodileMultiplier = 1 + (((2 * params.crocodileLevel) / 100) * seaSerpentMultiplier);
+    const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
+    const seaSerpentMultiplier = 1 + ((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier;
+    const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100) * seaSerpentMultiplier;
     this.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, crocodileMultiplier);
 
     const totalQuantities = this.collectTotalQuantities(tree, data);
