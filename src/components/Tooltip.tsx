@@ -12,6 +12,7 @@ interface TooltipProps {
 
 export const Tooltip: React.FC<TooltipProps> = ({ content, title, className = "", shardIcon, rarity, warning }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [isPositioned, setIsPositioned] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -38,12 +39,16 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, className = ""
       }
 
       setPosition({ top, left });
+      setIsPositioned(true);
     }
   };
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!isVisible) {
+      setIsPositioned(false);
+    }
     setIsVisible(!isVisible);
   };
 
@@ -83,7 +88,11 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, className = ""
       </button>
 
       {isVisible && (
-        <div ref={tooltipRef} className="fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3" style={{ top: position.top, left: position.left }}>
+        <div 
+          ref={tooltipRef} 
+          className={`fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 ${!isPositioned ? 'opacity-0' : 'opacity-100'} transition-opacity duration-100`} 
+          style={{ top: position.top, left: position.left }}
+        >
           {title && (
             <div className="flex items-center gap-2 mb-2">
               {shardIcon && <img src={`${import.meta.env.BASE_URL}shardIcons/${shardIcon}.png`} alt={title} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />}
