@@ -100,9 +100,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
               const isDirect = directInputId === "C11" || directInputId === "U38" || directInputId === "C23";
 
               if (isDirect) {
-                return renderDirectShard(directShard.fuse_amount, directShard);
+                return <div key={`direct-${directInputId}`}>{renderDirectShard(directShard.fuse_amount, directShard)}</div>;
               } else if (subRecipe && level < 2) {
-                return renderSubRecipe(subRecipe, directShard, subNodeId, level + 1);
+                return <div key={`sub-${directInputId}`}>{renderSubRecipe(subRecipe, directShard, subNodeId, level + 1)}</div>;
               }
               return null;
             })}
@@ -228,7 +228,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                     });
                   });
 
-                  return <div className="flex flex-col gap-0.5 mt-0.5">{Object.values(inputShardTotals).map(({ quantity, shard }) => renderDirectShard(quantity * runCount, shard))}</div>;
+                  return (
+                    <div className="flex flex-col gap-0.5 mt-0.5">
+                      {Object.values(inputShardTotals).map(({ quantity, shard }) => (
+                        <div key={shard.id}>{renderDirectShard(quantity * runCount, shard)}</div>
+                      ))}
+                    </div>
+                  );
                 })()}
               </div>
             ))}

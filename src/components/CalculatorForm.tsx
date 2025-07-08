@@ -5,8 +5,8 @@ import { ShardAutocomplete } from "./ShardAutocomplete";
 import { useCalculatorState } from "../context/CalculatorStateContext";
 import { PetLevelDropdown } from "./calculator/PetLevelDropdown";
 import { KuudraDropdown } from "./calculator/KuudraDropdown";
-import { MAX_QUANTITIES } from "../constants";
-import { isValidShardName } from "../utils";
+import { MAX_QUANTITIES, PET_DESCRIPTIONS } from "../constants";
+import { isValidShardName, convertToRangeDescription } from "../utils";
 
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
@@ -15,12 +15,7 @@ interface CalculatorFormProps {
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   const { form, setForm } = useCalculatorState();
 
-  React.useEffect(() => {
-    console.log("[CalculatorForm] Mounted");
-    return () => {
-      console.log("[CalculatorForm] Unmounted");
-    };
-  }, []);
+  // Removed debug logs
 
   // Calculation trigger based on valid shard name (instant, no debounce)
   React.useEffect(() => {
@@ -321,17 +316,23 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               { key: "seaSerpentLevel", label: "Sea Serpent" },
               { key: "tiamatLevel", label: "Tiamat" },
               { key: "crocodileLevel", label: "Crocodile" },
-            ].map(({ key, label }) => (
-              <PetLevelDropdown
-                key={key}
-                value={(form[key as keyof CalculationFormData] as number) || 0}
-                onChange={(value) => handleInputChange(key as keyof CalculationFormData, value)}
-                label={label}
-              />
-            ))}
+            ].map(({ key, label }) => {
+              const petDesc = PET_DESCRIPTIONS[key as keyof typeof PET_DESCRIPTIONS];
+              return (
+                <PetLevelDropdown
+                  key={key}
+                  value={(form[key as keyof CalculationFormData] as number) || 0}
+                  onChange={(value) => handleInputChange(key as keyof CalculationFormData, value)}
+                  label={label}
+                  tooltipTitle={petDesc.title}
+                  tooltipContent={convertToRangeDescription(petDesc.description)}
+                  tooltipShardIcon={petDesc.shardIcon}
+                  tooltipRarity={petDesc.rarity}
+                  tooltipWarning={(petDesc as any).warning}
+                />
+              );
+            })}
           </div>
-          {/* Crocodile warning note */}
-          <p className="text-xs text-orange-400 mt-1">Note: Using Crocodile levels may slow down calculations a lot.</p>
         </div>
 
         {/* Kraken Shard */}

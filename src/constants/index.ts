@@ -1,5 +1,7 @@
 export const NO_FORTUNE_SHARDS = ["C19", "U4", "U16", "U28", "R25", "L4", "L15"];
 
+export { PET_DESCRIPTIONS } from "./petToShardMap";
+
 export const WOODEN_BAIT_SHARDS = ["R29", "L23", "R59", "R23"];
 
 export const BLACK_HOLE_SHARD: { [key: string]: boolean } = {

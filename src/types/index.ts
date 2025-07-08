@@ -121,6 +121,11 @@ export interface PetLevelDropdownProps {
   value: number;
   onChange: (value: number) => void;
   label: string;
+  tooltipTitle?: string;
+  tooltipContent?: string;
+  tooltipShardIcon?: string;
+  tooltipRarity?: string;
+  tooltipWarning?: string;
 }
 
 export interface KuudraDropdownProps {

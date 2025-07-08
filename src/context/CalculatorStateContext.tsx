@@ -41,12 +41,7 @@ export const CalculatorStateProvider: React.FC<{ children: React.ReactNode }> = 
   const [calculationData, setCalculationData] = useState<any>(null);
   const [targetShardName, setTargetShardName] = useState<string>("");
 
-  React.useEffect(() => {
-    console.log("[CalculatorStateProvider] Mounted");
-    return () => {
-      console.log("[CalculatorStateProvider] Unmounted");
-    };
-  }, []);
+  // Removed debug logs
 
   const handleSetForm = useCallback((data: CalculationFormData) => {
     setForm(data);

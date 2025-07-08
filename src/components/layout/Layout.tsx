@@ -5,13 +5,7 @@ import { ErrorBoundary } from "./ErrorBoundary";
 
 export const Layout: React.FC = () => {
   const location = useLocation();
-  React.useEffect(() => {
-    // Debug: log when Layout mounts/unmounts and on route change
-    console.log("[Layout] Rendered. Current path:", location.pathname);
-    return () => {
-      console.log("[Layout] Unmounted.");
-    };
-  }, [location.pathname]);
+  // Removed debug logs
   return (
     <div className="min-h-screen bg-slate-950">
       <Navigation />

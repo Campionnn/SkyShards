@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { ChevronDown } from "lucide-react";
 import type { PetLevelDropdownProps } from "../../types";
+import { Tooltip } from "../Tooltip";
 
-export const PetLevelDropdown: React.FC<PetLevelDropdownProps> = React.memo(({ value, onChange, label }) => {
+export const PetLevelDropdown: React.FC<PetLevelDropdownProps> = React.memo(({ value, onChange, label, tooltipTitle, tooltipContent, tooltipShardIcon, tooltipRarity, tooltipWarning }) => {
   // Show levels 10 to 0 (descending)
   const levels = useMemo(() => Array.from({ length: 11 }, (_, i) => 10 - i), []); // 10-0
   const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +28,10 @@ export const PetLevelDropdown: React.FC<PetLevelDropdownProps> = React.memo(({ v
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <label className="block text-xs font-medium text-slate-300 mb-1">{label}</label>
+      <div className="flex items-center gap-1 mb-1">
+        <label className="block text-xs font-medium text-slate-300">{label}</label>
+        {tooltipContent && <Tooltip title={tooltipTitle} content={tooltipContent} shardIcon={tooltipShardIcon} rarity={tooltipRarity} warning={tooltipWarning} />}
+      </div>
       <div className="relative">
         <button
           type="button"
