@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { getRarityColor } from "../utils";
-import { MoveRight } from "lucide-react";
 
 interface TooltipProps {
   content: string;

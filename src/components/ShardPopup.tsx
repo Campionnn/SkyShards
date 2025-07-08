@@ -77,7 +77,7 @@ export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, na
               </span>
             </div>
             <div className="flex flex-col gap-1">
-              <div className="text-sm text-yellow-500 font-medium truncate">{title} I-X</div>
+              <div className="text-sm text-yellow-500 font-medium truncate">{title} I→X</div>
               {family && type && (
                 <span className="text-xs text-slate-400">
                   {family} • {type}
