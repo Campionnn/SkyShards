@@ -1,8 +1,10 @@
 import React from "react";
-import { getRarityColor, getShardDetails } from "../../utils/index";
+import { getRarityColor, getShardDetails, formatShardDescription } from "../../utils/index";
 import { ChevronDown, ChevronRight, MoveRight } from "lucide-react";
 import { formatNumber } from "../../utils/index";
 import type { RecipeTreeNodeProps } from "../../types/index";
+import { Tooltip } from "../Tooltip";
+import { SHARD_DESCRIPTIONS } from "../../constants";
 
 export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel = false, totalShardsProduced = tree.quantity, nodeId, expandedStates, onToggle }) => {
   const shard = data.shards[tree.shard];
@@ -22,35 +24,103 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
   const renderChevron = (isExpanded: boolean) => (isExpanded ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-amber-400" />);
 
-  const renderShardInfo = (quantity: number, shard: any, showRate = true) => (
-    <>
-      <span className="text-white">{quantity}x</span>
-      <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-      <span className={getRarityColor(shard.rarity)}>{shard.name}</span>
-      {showRate && (
-        <div className="text-right min-w-[80px] ml-2">
-          <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-          <span className="text-slate-500 text-xs mx-0.5">/</span>
-          <span className="text-slate-400 text-xs">hr</span>
-        </div>
-      )}
-    </>
-  );
+  const renderShardInfo = (quantity: number, shard: any, showRate = true) => {
+    const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
+    return (
+      <>
+        <span className="text-white">{quantity}x</span>
+        <Tooltip
+          content={formatShardDescription(shardDesc?.description || "No description available.")}
+          title={shardDesc?.title}
+          shardName={shard.name}
+          shardIcon={shard.id}
+          rarity={shardDesc?.rarity?.toLowerCase() || shard.rarity}
+          family={shardDesc?.family}
+          type={shardDesc?.type}
+          className="cursor-pointer"
+        >
+          <div className="flex items-center gap-2">
+            <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
+            <span className={getRarityColor(shard.rarity)}>{shard.name}</span>
+          </div>
+        </Tooltip>
+        {showRate && (
+          <div className="text-right min-w-[80px] ml-2">
+            <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
+            <span className="text-slate-500 text-xs mx-0.5">/</span>
+            <span className="text-slate-400 text-xs">hr</span>
+          </div>
+        )}
+      </>
+    );
+  };
 
-  const renderRecipeDisplay = (outputQuantity: number, outputShard: any, input1Quantity: number, input1Shard: any, input2Quantity: number, input2Shard: any, showStep = false, stepNumber?: number) => (
-    <div className="flex flex-wrap items-center gap-x-2 text-sm font-medium">
-      {showStep && <span className="font-normal text-xs text-amber-300">Step {stepNumber} :</span>}
-      {renderShardInfo(outputQuantity, outputShard, false)}
-      <span> = </span>
-      <span className="text-slate-400">{input1Quantity}x</span>
-      <img src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`} alt={input1Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-      <span className={getRarityColor(input1Shard.rarity)}>{input1Shard.name}</span>
-      <span> + </span>
-      <span className="text-slate-400">{input2Quantity}x</span>
-      <img src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`} alt={input2Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-      <span className={getRarityColor(input2Shard.rarity)}>{input2Shard.name}</span>
-    </div>
-  );
+  const renderRecipeDisplay = (outputQuantity: number, outputShard: any, input1Quantity: number, input1Shard: any, input2Quantity: number, input2Shard: any, showStep = false, stepNumber?: number) => {
+    const outputShardDesc = SHARD_DESCRIPTIONS[outputShard.id as keyof typeof SHARD_DESCRIPTIONS];
+    const input1ShardDesc = SHARD_DESCRIPTIONS[input1Shard.id as keyof typeof SHARD_DESCRIPTIONS];
+    const input2ShardDesc = SHARD_DESCRIPTIONS[input2Shard.id as keyof typeof SHARD_DESCRIPTIONS];
+
+    return (
+      <div className="flex flex-wrap items-center gap-x-2 text-sm font-medium">
+        {showStep && <span className="font-normal text-xs text-amber-300">Step {stepNumber} :</span>}
+
+        <span className="text-white">{outputQuantity}x</span>
+        <Tooltip
+          content={formatShardDescription(outputShardDesc?.description || "No description available.")}
+          title={outputShardDesc?.title}
+          shardName={outputShard.name}
+          shardIcon={outputShard.id}
+          rarity={outputShardDesc?.rarity?.toLowerCase() || outputShard.rarity}
+          family={outputShardDesc?.family}
+          type={outputShardDesc?.type}
+          className="cursor-pointer"
+        >
+          <div className="flex items-center gap-1">
+            <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
+            <span className={getRarityColor(outputShard.rarity)}>{outputShard.name}</span>
+          </div>
+        </Tooltip>
+
+        <span> = </span>
+
+        <span className="text-slate-400">{input1Quantity}x</span>
+        <Tooltip
+          content={formatShardDescription(input1ShardDesc?.description || "No description available.")}
+          title={input1ShardDesc?.title}
+          shardName={input1Shard.name}
+          shardIcon={input1Shard.id}
+          rarity={input1ShardDesc?.rarity?.toLowerCase() || input1Shard.rarity}
+          family={input1ShardDesc?.family}
+          type={input1ShardDesc?.type}
+          className="cursor-pointer"
+        >
+          <div className="flex items-center gap-1">
+            <img src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`} alt={input1Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
+            <span className={getRarityColor(input1Shard.rarity)}>{input1Shard.name}</span>
+          </div>
+        </Tooltip>
+
+        <span> + </span>
+
+        <span className="text-slate-400">{input2Quantity}x</span>
+        <Tooltip
+          content={formatShardDescription(input2ShardDesc?.description || "No description available.")}
+          title={input2ShardDesc?.title || input2Shard.name}
+          shardName={input2Shard.name}
+          shardIcon={input2Shard.id}
+          rarity={input2ShardDesc?.rarity?.toLowerCase() || input2Shard.rarity}
+          family={input2ShardDesc?.family}
+          type={input2ShardDesc?.type}
+          className="cursor-pointer"
+        >
+          <div className="flex items-center gap-1">
+            <img src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`} alt={input2Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
+            <span className={getRarityColor(input2Shard.rarity)}>{input2Shard.name}</span>
+          </div>
+        </Tooltip>
+      </div>
+    );
+  };
 
   const renderDirectShard = (quantity: number, shard: any) => (
     <div className="bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between px-3 py-1.5 text-sm font-medium gap-2">
@@ -272,6 +342,10 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
   const crafts = "craftsNeeded" in tree ? tree.craftsNeeded ?? 1 : 1;
   const displayQuantity = isTopLevel ? totalShardsProduced : tree.quantity;
 
+  const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
+  const input1ShardDesc = SHARD_DESCRIPTIONS[input1Shard.id as keyof typeof SHARD_DESCRIPTIONS];
+  const input2ShardDesc = SHARD_DESCRIPTIONS[input2Shard.id as keyof typeof SHARD_DESCRIPTIONS];
+
   return (
     <div className="bg-slate-800 border border-slate-600 rounded-md overflow-hidden">
       <button onClick={() => onToggle(nodeId)} className="w-full px-3 py-1 text-left cursor-pointer hover:bg-slate-700/50 transition-colors">
@@ -280,33 +354,77 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
             {renderChevron(isExpanded)}
             <div className="text-white flex items-center">
               <span className="font-medium text-sm">{Math.floor(displayQuantity)}x</span>
-              <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain inline-block align-middle mx-2 flex-shrink-0" loading="lazy" />
-              <span className={`font-medium ${getRarityColor(shard.rarity)} text-sm whitespace-nowrap truncate`} style={{ maxWidth: "8rem" }} title={getShardDetails(shard, false)}>
-                {shard.name}
-              </span>
+
+              <Tooltip
+                content={formatShardDescription(shardDesc?.description || "No description available.")}
+                title={shardDesc?.title}
+                shardName={shard.name}
+                shardIcon={shard.id}
+                rarity={shardDesc?.rarity?.toLowerCase() || shard.rarity}
+                family={shardDesc?.family}
+                type={shardDesc?.type}
+                className="cursor-pointer mx-2"
+              >
+                <div className="flex items-center gap-2">
+                  <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain inline-block align-middle flex-shrink-0" loading="lazy" />
+                  <span className={`font-medium ${getRarityColor(shard.rarity)} text-sm whitespace-nowrap truncate`} style={{ maxWidth: "8rem" }} title={getShardDetails(shard, false)}>
+                    {shard.name}
+                  </span>
+                </div>
+              </Tooltip>
+
               <span className="text-slate-400 text-sm font-medium flex items-center">
                 <span className="mx-2 text-white">=</span>
                 <span>{Math.floor(input1.quantity)}x</span>
-                <img
-                  src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`}
-                  alt={input1Shard.name}
-                  className="w-5 h-5 object-contain inline-block align-middle mx-2 flex-shrink-0"
-                  loading="lazy"
-                />
-                <span className={getRarityColor(input1Shard.rarity) + " whitespace-nowrap truncate"} style={{ maxWidth: "8rem" }}>
-                  {input1Shard.name}
-                </span>
+
+                <Tooltip
+                  content={formatShardDescription(input1ShardDesc?.description || "No description available.")}
+                  title={input1ShardDesc?.title}
+                  shardName={input1Shard.name}
+                  shardIcon={input1Shard.id}
+                  rarity={input1ShardDesc?.rarity?.toLowerCase() || input1Shard.rarity}
+                  family={input1ShardDesc?.family}
+                  type={input1ShardDesc?.type}
+                  className="cursor-pointer mx-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`}
+                      alt={input1Shard.name}
+                      className="w-5 h-5 object-contain inline-block align-middle flex-shrink-0"
+                      loading="lazy"
+                    />
+                    <span className={getRarityColor(input1Shard.rarity) + " whitespace-nowrap truncate"} style={{ maxWidth: "8rem" }}>
+                      {input1Shard.name}
+                    </span>
+                  </div>
+                </Tooltip>
+
                 <span className="mx-2 text-white">+</span>
                 <span>{Math.floor(input2.quantity)}x</span>
-                <img
-                  src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`}
-                  alt={input2Shard.name}
-                  className="w-5 h-5 object-contain inline-block align-middle mx-2 flex-shrink-0"
-                  loading="lazy"
-                />
-                <span className={getRarityColor(input2Shard.rarity) + " whitespace-nowrap truncate"} style={{ maxWidth: "8rem" }}>
-                  {input2Shard.name}
-                </span>
+
+                <Tooltip
+                  content={formatShardDescription(input2ShardDesc?.description || "No description available.")}
+                  title={input2ShardDesc?.title}
+                  shardName={input2Shard.name}
+                  shardIcon={input2Shard.id}
+                  rarity={input2ShardDesc?.rarity?.toLowerCase() || input2Shard.rarity}
+                  family={input2ShardDesc?.family}
+                  type={input2ShardDesc?.type}
+                  className="cursor-pointer mx-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`}
+                      alt={input2Shard.name}
+                      className="w-5 h-5 object-contain inline-block align-middle flex-shrink-0"
+                      loading="lazy"
+                    />
+                    <span className={getRarityColor(input2Shard.rarity) + " whitespace-nowrap truncate"} style={{ maxWidth: "8rem" }}>
+                      {input2Shard.name}
+                    </span>
+                  </div>
+                </Tooltip>
               </span>
             </div>
           </div>

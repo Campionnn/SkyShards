@@ -63,26 +63,29 @@ export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, na
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65" onClick={handleOverlayClick}>
-      <div className={`bg-slate-900 border ${getRarityBorderColor(rarity)} rounded-xl shadow-2xl px-10 py-8 min-w-[380px] max-w-[96vw] relative animate-fadeIn`} onClick={(e) => e.stopPropagation()}>
+      <div className={`bg-slate-900 border ${getRarityBorderColor(rarity)} rounded-xl shadow-2xl px-10 py-8 min-w-[380px]  max-w-[700px] relative animate-fadeIn`} onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-0 right-2 text-2xl text-slate-500 cursor-pointer">
           &times;
         </button>
         <div className="flex items-center gap-10">
           <img src={icon} alt={title} className="w-32 h-32 object-contain flex-shrink-0 shadow-lg" />
           <div className="flex flex-col flex-1 min-w-0 justify-center">
-            <div className="text-xl font-bold text-white mb-0.5 truncate">{name}</div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="text-xl font-bold text-white mb-0.5 truncate flex gap-2">
+              {name}
               <span className={`space-x-2 px-1.5 py-1 font-medium uppercase tracking-wider text-xs ${getRarityColor(rarity)} ${rarityBg[rarity] || rarityBg.common} border rounded-md self-start`}>
                 {rarity}
               </span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="text-sm text-yellow-500 font-medium truncate">{title} I-X</div>
               {family && type && (
-                <span className="text-xs text-slate-400 ml-2">
+                <span className="text-xs text-slate-400">
                   {family} • {type}
                 </span>
               )}
             </div>
-            <div className="text-base text-slate-300 font-semibold mb-2 truncate">{title}</div>
-            <p className="text-slate-300 text-base leading-snug break-words max-w-xl mb-1">{description}</p>
+
+            <p className="text-slate-300 text-base leading-snug break-words max-w-xl my-3" dangerouslySetInnerHTML={{ __html: description }}></p>
             <div className="flex items-center gap-2 mt-2">
               {typeof isDirect === "boolean" &&
                 (isDirect ? (

@@ -5,8 +5,8 @@ import { ShardAutocomplete } from "./ShardAutocomplete";
 import { useCalculatorState } from "../context/CalculatorStateContext";
 import { PetLevelDropdown } from "./calculator/PetLevelDropdown";
 import { KuudraDropdown } from "./calculator/KuudraDropdown";
-import { MAX_QUANTITIES, PET_DESCRIPTIONS } from "../constants";
-import { isValidShardName, convertToRangeDescription } from "../utils";
+import { MAX_QUANTITIES, SHARD_DESCRIPTIONS } from "../constants";
+import { isValidShardName, formatShardDescription } from "../utils";
 
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
@@ -307,28 +307,31 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           </h3>
           <div className="grid grid-cols-3 gap-1.5">
             {[
-              { key: "newtLevel", label: "Newt" },
-              { key: "salamanderLevel", label: "Salamander" },
-              { key: "lizardKingLevel", label: "Lizard King" },
-              { key: "leviathanLevel", label: "Leviathan" },
-              { key: "pythonLevel", label: "Python" },
-              { key: "kingCobraLevel", label: "King Cobra" },
-              { key: "seaSerpentLevel", label: "Sea Serpent" },
-              { key: "tiamatLevel", label: "Tiamat" },
-              { key: "crocodileLevel", label: "Crocodile" },
-            ].map(({ key, label }) => {
-              const petDesc = PET_DESCRIPTIONS[key as keyof typeof PET_DESCRIPTIONS];
+              { key: "newtLevel", label: "Newt", shardId: "C35" },
+              { key: "salamanderLevel", label: "Salamander", shardId: "U8" },
+              { key: "lizardKingLevel", label: "Lizard King", shardId: "R8" },
+              { key: "leviathanLevel", label: "Leviathan", shardId: "E5" },
+              { key: "pythonLevel", label: "Python", shardId: "R9" },
+              { key: "kingCobraLevel", label: "King Cobra", shardId: "R54" },
+              { key: "seaSerpentLevel", label: "Sea Serpent", shardId: "E32" },
+              { key: "tiamatLevel", label: "Tiamat", shardId: "L6" },
+              { key: "crocodileLevel", label: "Crocodile", shardId: "R45" },
+            ].map(({ key, label, shardId }) => {
+              const shardDesc = SHARD_DESCRIPTIONS[shardId as keyof typeof SHARD_DESCRIPTIONS];
               return (
                 <PetLevelDropdown
                   key={key}
                   value={(form[key as keyof CalculationFormData] as number) || 0}
                   onChange={(value) => handleInputChange(key as keyof CalculationFormData, value)}
                   label={label}
-                  tooltipTitle={petDesc.title}
-                  tooltipContent={convertToRangeDescription(petDesc.description)}
-                  tooltipShardIcon={petDesc.shardIcon}
-                  tooltipRarity={petDesc.rarity}
-                  tooltipWarning={(petDesc as any).warning}
+                  tooltipTitle={shardDesc?.title}
+                  tooltipContent={formatShardDescription(shardDesc?.description || "No description available.")}
+                  tooltipShardName={label}
+                  tooltipShardIcon={shardId}
+                  tooltipRarity={shardDesc?.rarity?.toLowerCase() || "common"}
+                  tooltipFamily={shardDesc?.family}
+                  tooltipType={shardDesc?.type}
+                  tooltipWarning={key === "crocodileLevel" ? "Warning: May slow calculations significantly" : undefined}
                 />
               );
             })}

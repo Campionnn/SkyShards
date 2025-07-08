@@ -1,6 +1,6 @@
 export const NO_FORTUNE_SHARDS = ["C19", "U4", "U16", "U28", "R25", "R60", "E12", "L4", "L15", "L30", "L33"];
 
-export { PET_DESCRIPTIONS } from "./petToShardMap";
+export { SHARD_DESCRIPTIONS } from "./petToShardMap";
 
 export const WOODEN_BAIT_SHARDS = ["R29", "L23", "R59", "R23"];
 

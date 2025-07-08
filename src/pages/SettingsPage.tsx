@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Search, RotateCcw, Save } from "lucide-react";
 import { useShardsWithRecipes, useCustomRates } from "../hooks";
-import { debounce } from "../utils";
+import { debounce, formatShardDescription } from "../utils";
 import { RarityDropdown, TypeDropdown, ShardItem, ShardPopup } from "../components";
-import { getShardDesc } from "../utils/getShardDesc";
+import { SHARD_DESCRIPTIONS } from "../constants";
 
 export const SettingsPage: React.FC = () => {
   console.log("SettingsPage rendered");
@@ -167,7 +167,7 @@ export const SettingsPage: React.FC = () => {
 
       {popupShard &&
         (() => {
-          const desc = getShardDesc(popupShard.key);
+          const desc = SHARD_DESCRIPTIONS[popupShard.key as keyof typeof SHARD_DESCRIPTIONS];
           const icon = `${import.meta.env.BASE_URL}shardIcons/${popupShard.key}.png`;
           return (
             <ShardPopup
@@ -175,7 +175,7 @@ export const SettingsPage: React.FC = () => {
               onClose={() => setPopupShard(null)}
               title={desc?.title || popupShard.name}
               name={popupShard.name}
-              description={desc?.description || "No description."}
+              description={formatShardDescription(desc?.description || "No description.")}
               rarity={popupShard.rarity}
               icon={icon}
               rate={customRates[popupShard.key] !== undefined ? customRates[popupShard.key] : defaultRates[popupShard.key]}

@@ -1,176 +1,1046 @@
 {
-  "C1": ["Nature Elemental", "Grants +2 ❤ Health"],
-  "C2": ["Fog Elemental", "Grants +1 ✎ Intelligence"],
-  "C3": ["Light Elemental", "Grants +1 ❁ Strength"],
-  "C4": ["Nocturnal Animal", "Grants +1 ∮ Sweep during the night"],
-  "C5": ["Cheapstake", "Gain +1% more Coins from fishing treasures"],
-  "C7": ["Moonglade Mastery", "Grants +10 ☘ Fig Fortune and +10 ☘ Mangrove Fortune"],
-  "C8": ["Fisherman", "Has a +1% chance not to consume any bait"],
-  "C9": ["Experience", "Grants +10% more experience orbs from killing mobs"],
-  "C10": ["Mossy Box", "Grants +5 ☘ Block Fortune"],
-  "C11": ["Forest Fishing", "Grants +3 ☂ Fishing Speed while on Foraging Islands"],
-  "C12": ["Skeletal Ruler", "Increase damage to Skeletal creatures by +3%"],
-  "C14": ["Monster Bait", "Grants +0.5 α Sea Creature Chance"],
-  "C15": ["Arthropod Resistance", "Grants +4 ❈ Defense against Spiders"],
-  "C16": ["Happy Box", "Grants a +2% chance to obtain an extra Winter Gift when finding one"],
-  "C17": ["Yummy", "Grants a +10% chance to drop double Berries and Sea Lumies"],
-  "C18": ["Undead Resistance", "Grants +4 ❈ Defense against Undead Monsters"],
-  "C19": ["Fig Sharpening", "Grants +5 ∮ Sweep towards Fig Trees"],
-  "C20": ["Unity is Strength", "Grants +0.02 ∮ Sweep for each unique Common Attribute you own"],
-  "C21": ["Ender Resistance", "Grants +4 ❈ Defense against mobs in The End"],
-  "C23": ["Bucket Lover", "You have a +5% chance to gain extra Chums"],
-  "C24": ["Tree Lurker", "Increases the odds of finding monsters from Tree Gifts by +5%"],
-  "C25": ["Visitor Bait", "Garden Visitors arrive +1% faster"],
-  "C27": ["Midas Touch", "Grants +1 Coin per kill"],
-  "C29": ["Forest Strength", "Grants +5 ❁ Strength while on Foraging Islands"],
-  "C30": ["Blazing Resistance", "Grants +4 ❈ Defense against mobs while in the Crimson Isle"],
-  "C33": ["Yog Membrane", "Grants +1 ♨ Heat Resistance"],
-  "C34": ["Owl Friend", "Your pets gain +2% more Pet EXP from Fann"],
-  "C35": ["Decent Karma", "Grants +2 ☘ Hunter Fortune towards COMMON Attributes"],
-  "C36": ["Rotten Pickaxe", "Grants +3 ⸕ Mining Speed"],
-  "U1": ["Wood Elemental", "Grants +2 ❤ Health"],
-  "U2": ["Water Elemental", "Grants +1 ✎ Intelligence"],
-  "U3": ["Stone Elemental", "Grants +1 ❁ Strength"],
-  "U4": ["Fig Collector", "Grants +1 ☘ Fig Fortune for every digit in your Fig Log collection. (Max 10M collection)"],
-  "U5": ["Gold Bait", "The cooldown of Golden Fish is reduced by +30s"],
-  "U6": ["Mountain Climber", "Commissions grant +1% more HOTM Exp"],
-  "U7": ["Bigger Box", "Grants a +5% chance to find an extra item in Treasure Chests and the Crystal Nucleus"],
-  "U8": ["Good Karma", "Grants +2 ☘ Hunter Fortune towards UNCOMMON Attributes"],
-  "U9": ["Echo of Boxes", "Your \"Box\" Attributes are +2% stronger"],
-  "U10": ["Pest Luck", "Gain a +2% chance to obtain rare loot from Pests"],
-  "U11": ["Forest Trap", "Forest Shards get caught by Traps +1% faster"],
-  "U12": ["Mana Steal", "Regain +0.5 of your maximum Mana every time you hit a monster"],
-  "U15": ["Dragon Shortbow Improvement", "Your Dragon Shortbow gains +2% more ❁ Damage while in The End"],
-  "U16": ["Mangrove Sharpening", "Grants +10 ∮ Sweep towards Mangrove Trees"],
-  "U18": ["Speed", "Grants +1 ✦ Speed"],
-  "U20": ["Lost and Found", "Grants a +0.1% chance to find a Wet Book when fishing a Treasure"],
-  "U21": ["Hunter's Fang", "Your Hunting Axes gain +1% more stats from the weapon they hold"],
-  "U22": ["Insect Power", "Your Vacuum deals +5% extra ❁ Damage"],
-  "U24": ["Undead Ruler", "Grants +3% more ❁ Damage against Undead Monsters"],
-  "U25": ["Strong Arms", "Your Axe gains +3 ∮ Sweep on throws"],
-  "U27": ["Life Recovery", "Heals for +0.1% of your max health each time you kill a mob"],
-  "U28": ["Mangrove Collector", "Grants +1 ☘ Mangrove Fortune for every digit in your Mangrove Log collection. (Max 10M collection)"],
-  "U29": ["Spirit Axe", "Your Axes deal +2% extra ❁ Damage to creatures on Galatea"],
-  "U30": ["Combo", "Deal +0.1% more ❁ Damage per Grandma Wolf pet combo. (Max 50 combo)"],
-  "U31": ["Strong Legs", "Your Axe gains +3 ∮ Sweep on melee"],
-  "U32": ["Infection", "Increases the chance of catching corrupted Sea Creatures by +0.2%"],
-  "U33": ["Arthropod Ruler", "Grants +3% more ❁ Damage against Spiders"],
-  "U34": ["Kat's Favorite", "Kat takes +1% less time to upgrade a Pet"],
-  "U36": ["Ender Ruler", "Grants +3% more ❁ Damage against Ender Creatures"],
-  "U38": ["Magmatic Ruler", "Grants +3% more ❁ Damage against Lava Sea Creatures"],
-  "U39": ["Battle Frog", "Your Frog Pet gains +3 ❁ Strength"],
-  "U40": ["Infiltration", "Grants +3 ☘ Farming Fortune if your Garden Plot currently has a Pest in it"],
-  "R1": ["Forest Elemental", "Grants +2 ❤ Health"],
-  "R2": ["Torrent Elemental", "Grants +1 ✎ Intelligence"],
-  "R3": ["Lightning Elemental", "Grants +1 ❁ Strength"],
-  "R4": ["Animal Expertise", "Grants +10 ☘ Foraging Fortune"],
-  "R5": ["Frog Legs", "Frogs have a +10% chance to jump 1 less time"],
-  "R6": ["Essence of Ice", "Gain +1% more Ice Essence"],
-  "R7": ["Beacon Zealot", "The effects of beacons are 10% stronger on you. Gain a 0.1% chance to find Signal Enhancers in Tree Gifts"],
-  "R8": ["Great Karma", "Grants +1 ☘ Hunter Fortune towards RARE Attributes"],
-  "R9": ["Hunter's Pressure", "Your Black Holes capture creatures +2% faster"],
-  "R10": ["Fancy Visit", "RARE and above Garden Visitors have a +1% higher chance to arrive"],
-  "R11": ["Moonglade Serendipity", "Increases the odds of finding rare items in Tree Gifts at Moonglade Marsh by +2%"],
-  "R13": ["Catacombs Box", "ncreases the quality of boss rewards in The Catacombs by +1"],
-  "R15": ["Bone Font", "Grants a +2% extra chance of finding Level 6+ books or higher in Superpairs"],
-  "R16": ["Crop Bug", "Increased the odds of finding a Cropie, Squash or Fermento by +2%"],
-  "R18": ["Humanoid Ruler", "Grants +3% more ❁ Damage against Humanoid Creatures"],
-  "R21": ["Atomized Mithril", "Gain +1% extra Mithril Powder"],
-  "R22": ["Kuudra's Box", "Gives +5% chance to have an extra Kuudra Teeth in the Paid Reward Chest"],
-  "R23": ["Dwarven Serendipity", "Increases the chance to find Golden and Diamond Goblins by +10%"],
-  "R24": ["Essence of Arthropods", "Gain +1% more Spider Essence"],
-  "R25": ["Cookie Eater", "Gain +5% of your Booster Cookie Bits up front"],
-  "R27": ["Essence of Unliving", "Gain +1% more Undead Essence"],
-  "R29": ["Crystal Serendipity", "Grants a +2% chance to double any loot from Crystal Hollows Treasure Chests"],
-  "R30": ["Deadeye", "Increases damage from ranged weapons by +2.5%"],
-  "R31": ["Atomized Crystals", "Gain +1% extra Gemstone Powder"],
-  "R33": ["Quartz Speed", "⸕ Mining Speed from events is increased by +10%"],
-  "R34": ["Accessory Size", "Grants +1 extra Accessory Bag slots"],
-  "R35": ["Winter's Serendipity", "Increases the odds of finding rare items in Winter Gifts by +2%"],
-  "R36": ["Lifeline", "When under 20% maximum HP, your ❁ Damage and ❈ Defense increase by +2.5%"],
-  "R38": ["Rabbit Crew", "Your Chocolate Factory gains +2 more Chocolate per second"],
-  "R39": ["Breeze", "When you haven't been damaged in the last 5s or more, your mana costs are decreased by +1%"],
-  "R42": ["Ignition", "Increases the duration of fire damage that you inflict on enemies by +30%"],
-  "R43": ["Pretty Clothes", "Gain +1% more Copper from Garden Visitors"],
-  "R44": ["Extreme Pressure", "Grants +5 ❍ Pressure Resistance"],
-  "R45": ["Pure Reptile", "Grants a +2% chance to double shards from a Reptile Fusion"],
-  "R46": ["Berry Enjoyer", "Berries have a +10% chance to grant you double points in Starlyn Contests"],
-  "R49": ["Essence of the Forest", "Gain +1% more Forest Essence"],
-  "R50": ["Deep Diving", "Grants +5 ⚶ Respiration"],
-  "R51": ["Atomized Glacite", "Gain +1% extra Glacite Powder"],
-  "R52": ["Fungy Luck", "Gain a +10% chance to gain an additional Chisel charge upon starting the Fossil Excavator"],
-  "R53": ["Eelastic", "Increase Pull by +1 when using your Fishing Nets"],
-  "R54": ["Hunter's Grasp", "Your Black Holes gain +1% ☘ Hunter Fortune"],
-  "R56": ["Blazing Fortune", "Grants +1 ✯ Magic Find on Lava Sea Creatures"],
-  "R57": ["Essence of Dragons", "Gain +1% more Dragon Essence"],
-  "R58": ["Battle Experience", "Pets gain +1% more EXP from Combat"],
-  "R59": ["Crimson Serendipity", "Increase the odds of finding a Vanquisher by +2%"],
-  "R60": ["Essence of Wither", "Gain +1% more Wither Essence"],
-  "R61": ["Echo of Sharpening", "Your Sharpening Attributes are +2% stronger"],
-  "E1": ["Earth Elemental", "Grants +2 ❤ Health"],
-  "E2": ["Frost Elemental", "Grants +1 ✎ Intelligence"],
-  "E3": ["Wind Elemental", "Grants +1 ❁ Strength"],
-  "E4": ["Foraging Wisdom", "Grants +0.5 ☯ Foraging Wisdom"],
-  "E5": ["Excellent Karma", "Grants +1 ☘ Hunter Fortune towards EPIC Attributes"],
-  "E6": ["Echo of Resistance", "Your Resistance Attributes are +2% stronger"],
-  "E7": ["Berry Mogul", "Your Salts last +1% longer"],
-  "E9": ["Hunter's Suppress", "Lassos deplete Stamina +2% faster"],
-  "E10": ["Echo of Atomized", "Your Atomized Attributes are +2% stronger"],
-  "E11": ["Lucky Rod", "Fish Treasure Shards are +1% easier to find"],
-  "E12": ["Dominance", "Gain +1.5% more ❁ Damage when at full health"],
-  "E13": ["Lunar Power", "Grants +5 ☘ Farming Fortune during the Night"],
-  "E14": ["Trophy Hunter", "Grants +2 ♔ Trophy Fish Chance"],
-  "E15": ["Deep Technique", "Each block you mine has a +1% chance to grant 1 extra ✧ Pristine for that block"],
-  "E16": ["Sack Size", "Your sacks can hold +1% more items"],
-  "E17": ["Fishing Speed", "Grants +3 ☂ Fishing Speed"],
-  "E18": ["Blazing", "Grants +3% more ❁ Damage against mobs while in the Crimson Isle"],
-  "E20": ["Sea Wisdom", "Grants +0.5 ☯ Fishing Wisdom"],
-  "E21": ["Reborn", "Killing a Prince has a +10% chance to add 1 Bonus Score to your Dungeon Run"],
-  "E22": ["Echo of Essence", "Your Essence Attributes are +2% stronger"],
-  "E24": ["Faker", "Dungeon Blessings are +1% stronger on you"],
-  "E26": ["Shell", "Gain +10% Regular Knockback Resistance"],
-  "E27": ["Warrior", "Increases melee damage dealt by +2.5%"],
-  "E28": ["Why Not More", "Your pet's EXP Share grants +1% more EXP"],
-  "E29": ["Matriarch Cubs", "Grants a +2% chance to get a second Heavy Pearl"],
-  "E30": ["Echo of Ruler", "Your Ruler Attributes are +2% stronger"],
-  "E31": ["Solar Power", "Grants +5 ☘ Farming Fortune during the day"],
-  "E32": ["Echo of Hunter", "Your Hunter Attributes are +2% stronger"],
-  "E33": ["Veil", "Grants +1 ❂ True Defense"],
-  "E34": ["Mana Regeneration", "Increases your Mana regeneration by +1%"],
-  "E35": ["Hunt Wisdom", "Grants +0.5 ☯ Hunting Wisdom"],
-  "E36": ["Cavern Wisdom", "Grants +0.5 ☯ Mining Wisdom"],
-  "E37": ["Garden Wisdom", "Grants +0.5 ☯ Farming Wisdom"],
-  "L1": ["Shadow Elemental", "Grants +2 ❤ Health"],
-  "L2": ["Snow Elemental", "Grants +1 ✎ Intelligence"],
-  "L3": ["Storm Elemental", "Grants +1 ❁ Strength"],
-  "L4": ["Reptiloid", "Fusions with Chameleons grant the next 3 IDs as results"],
-  "L6": ["Echo of Echoes", "Your Echo Attributes are +5% stronger"],
-  "L7": ["Echo of Wisdom", "Your Wisdom Attributes are +2% stronger"],
-  "L8": ["Cloak Improvement", "Your David's Cloak gains +1 ❂ True Defense"],
-  "L9": ["Paramount Fortitude", "Your ❈ Defense is increased by +0.2%"],
-  "L11": ["Charmed", "Grants a +0.05% chance to charm the Shard of monsters you kill"],
-  "L12": ["Book Wisdom", "Grants +0.5 ☯ Enchanting Wisdom"],
-  "L13": ["Wart Eater", "Grants a +0.01% chance to obtain a Warty when breaking Nether Warts"],
-  "L14": ["Payback", "When hit, your next hit deals +2% damage"],
-  "L15": ["Vitality", "Grants +2 ♨ Vitality"],
-  "L17": ["Maximal Torment", "Your ✎ Intelligence is increased by +0.1%"],
-  "L18": ["Pity", "Your RNG Meter fills +1% faster"],
-  "L20": ["Star Bait", "Grants a +0.1% chance to fish a Shinyfish"],
-  "L23": ["Help From Above", "Grants +1.25 ❣ Health Regen"],
-  "L24": ["Wings of Destiny", "Increases the odds of finding Ananke Feathers by +2%"],
-  "L25": ["Tuning Box", "Grants +1 Tuning Points"],
-  "L26": ["Crimson Hook", "Grants +0.5 ⚓ Double Hook Chance while on the Crimson Isle"],
-  "L27": ["Attack Speed", "Grants +1 ⚔ Bonus Attack Speed"],
-  "L28": ["Magic Find", "Grants +0.5 ✯ Magic Find"],
-  "L29": ["Hunter's Karma", "Grants +1 ☘ Hunter Fortune"],
-  "L30": ["Elite", "Grants +3% more ❁ Damage against bosses and mini-bosses"],
-  "L31": ["Pet Wisdom", "Grants +0.5 ☯ Taming Wisdom"],
-  "L32": ["Starborn", "The effect of Starborn Temples is +1% stronger on you"],
-  "L33": ["Veteran", "Grants +1 ☯ Combat Wisdom"],
-  "L34": ["Rare Bird", "Grants +1 ♣ Pet Luck"],
-  "L36": ["Unlimited Power", "Your ❁ Strength is increased by +0.1%"],
-  "L39": ["Unlimited Energy", "Your ☠ Crit Damage is increased by +0.1%"],
-  "L41": ["Ultimate DNA", "Grants +1 ☘ Mining Fortune, ☘ Farming Fortune, and ☘ Foraging Fortune"],
-  "L42": ["Almighty", "Your \"Unlimited\" Attributes are +5% stronger"],
-  "L44": ["Echo of Elemental", "Buffs all other shards in the Elemental Family by +2%"]
+  "C1": {
+    "title": "Nature Elemental",
+    "description": "Grants +2 ❤ Health",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "C2": {
+    "title": "Fog Elemental",
+    "description": "Grants +1 ✎ Intelligence",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "C3": {
+    "title": "Light Elemental",
+    "description": "Grants +1 ❁ Strength",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "C4": {
+    "title": "Nocturnal Animal",
+    "description": "Grants +1 ∮ Sweep during the night",
+    "family": "Phantom Family",
+    "type": "Foraging"
+  },
+  "C5": {
+    "title": "Cheapstake",
+    "description": "Gain +1% more Coins from fishing treasures",
+    "family": "Tropical Fish Family",
+    "type": "Fishing"
+  },
+  "C7": {
+    "title": "Moonglade Mastery",
+    "description": "Grants +10 ☘ Fig Fortune and +10 ☘ Mangrove Fortune",
+    "family": "Phantom Family",
+    "type": "Foraging"
+  },
+  "C8": {
+    "title": "Fisherman",
+    "description": "Has a +1% chance not to consume any bait",
+    "family": "Squid Family",
+    "type": "Fishing"
+  },
+  "C9": {
+    "title": "Experience",
+    "description": "Grants +10% more experience orbs from killing mobs",
+    "family": "Lapis Family",
+    "type": "Enchanting"
+  },
+  "C10": {
+    "title": "Mossy Box",
+    "description": "Grants +5 ☘ Block Fortune",
+    "family": "Shulker Family",
+    "type": "Mining"
+  },
+  "C11": {
+    "title": "Forest Fishing",
+    "description": "Grants +3 ☂ Fishing Speed while on Foraging Islands",
+    "family": "Tropical Fish Family",
+    "type": "Fishing"
+  },
+  "C12": {
+    "title": "Skeletal Ruler",
+    "description": "Increase damage to Skeletal creatures by +3%",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "C14": {
+    "title": "Monster Bait",
+    "description": "Grants +0.5 α Sea Creature Chance",
+    "family": "Unknown Family",
+    "type": "Fishing"
+  },
+  "C15": {
+    "title": "Arthropod Resistance",
+    "description": "Grants +4 ❈ Defense against Spiders",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "C16": {
+    "title": "Happy Box",
+    "description": "Grants a +2% chance to obtain an extra Winter Gift when finding one",
+    "family": "Shulker Family",
+    "type": "Global"
+  },
+  "C17": {
+    "title": "Yummy",
+    "description": "Grants a +10% chance to drop double Berries and Sea Lumies",
+    "family": "Unknown Family",
+    "type": "Foraging"
+  },
+  "C18": {
+    "title": "Undead Resistance",
+    "description": "Grants +4 ❈ Defense against Undead Monsters",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "C19": {
+    "title": "Fig Sharpening",
+    "description": "Grants +5 ∮ Sweep towards Fig Trees",
+    "family": "Bird Family",
+    "type": "Foraging"
+  },
+  "C20": {
+    "title": "Unity is Strength",
+    "description": "Grants +0.02 ∮ Sweep for each unique Common Attribute you own",
+    "family": "Frog and Amphibian Family",
+    "type": "Hunting"
+  },
+  "C21": {
+    "title": "Ender Resistance",
+    "description": "Grants +4 ❈ Defense against mobs in The End",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "C23": {
+    "title": "Bucket Lover",
+    "description": "You have a +5% chance to gain extra Chums",
+    "family": "Axolotl Family",
+    "type": "Fishing"
+  },
+  "C24": {
+    "title": "Tree Lurker",
+    "description": "Increases the odds of finding monsters from Tree Gifts by +5%",
+    "family": "Bird Family",
+    "type": "Hunting"
+  },
+  "C25": {
+    "title": "Visitor Bait",
+    "description": "Garden Visitors arrive +1% faster",
+    "family": "Unknown Family",
+    "type": "Farming"
+  },
+  "C27": {
+    "title": "Midas Touch",
+    "description": "Grants +1 Coin per kill",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "C29": {
+    "title": "Forest Strength",
+    "description": "Grants +5 ❁ Strength while on Foraging Islands",
+    "family": "Tropical Fish Family",
+    "type": "Combat"
+  },
+  "C30": {
+    "title": "Blazing Resistance",
+    "description": "Grants +4 ❈ Defense against mobs while in the Crimson Isle",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "C33": {
+    "title": "Yog Membrane",
+    "description": "Grants +1 ♨ Heat Resistance",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "C34": {
+    "title": "Owl Friend",
+    "description": "Your pets gain +2% more Pet EXP from Fann",
+    "family": "Bird Family",
+    "type": "Taming"
+  },
+  "C35": {
+    "title": "Decent Karma",
+    "description": "Grants +2 ☘ Hunter Fortune towards COMMON Attributes",
+    "family": "Reptile and Lizard Family",
+    "type": "Hunting"
+  },
+  "C36": {
+    "title": "Rotten Pickaxe",
+    "description": "Grants +3 ⸕ Mining Speed",
+    "family": "Cave Dweller Family",
+    "type": "Mining"
+  },
+  "U1": {
+    "title": "Wood Elemental",
+    "description": "Grants +2 ❤ Health",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "U2": {
+    "title": "Water Elemental",
+    "description": "Grants +1 ✎ Intelligence",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "U3": {
+    "title": "Stone Elemental",
+    "description": "Grants +1 ❁ Strength",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "U4": {
+    "title": "Fig Collector",
+    "description": "Grants +1 ☘ Fig Fortune for every digit in your Fig Log collection. (Max 10M collection)",
+    "family": "Bird Family",
+    "type": "Foraging"
+  },
+  "U5": {
+    "title": "Gold Bait",
+    "description": "The cooldown of Golden Fish is reduced by +30s",
+    "family": "Unknown Family",
+    "type": "Fishing"
+  },
+  "U6": {
+    "title": "Mountain Climber",
+    "description": "Commissions grant +1% more HOTM Exp",
+    "family": "Cave Dweller Family",
+    "type": "Mining"
+  },
+  "U7": {
+    "title": "Bigger Box",
+    "description": "Grants a +5% chance to find an extra item in Treasure Chests and the Crystal Nucleus",
+    "family": "Shulker Family",
+    "type": "Global"
+  },
+  "U8": {
+    "title": "Good Karma",
+    "description": "Grants +2 ☘ Hunter Fortune towards UNCOMMON Attributes",
+    "family": "Reptile and Lizard Family",
+    "type": "Hunting"
+  },
+  "U9": {
+    "title": "Echo of Boxes",
+    "description": "Your \"Box\" Attributes are +2% stronger",
+    "family": "Reptile and Serpent Family",
+    "type": "Hunting"
+  },
+  "U10": {
+    "title": "Pest Luck",
+    "description": "Gain a +2% chance to obtain rare loot from Pests",
+    "family": "Bug Family",
+    "type": "Farming"
+  },
+  "U11": {
+    "title": "Forest Trap",
+    "description": "Forest Shards get caught by Traps +1% faster",
+    "family": "Frog and Amphibian Family",
+    "type": "Hunting"
+  },
+  "U12": {
+    "title": "Mana Steal",
+    "description": "Regain +0.5 of your maximum Mana every time you hit a monster",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "U15": {
+    "title": "Dragon Shortbow Improvement",
+    "description": "Your Dragon Shortbow gains +2% more ❁ Damage while in The End",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "U16": {
+    "title": "Mangrove Sharpening",
+    "description": "Grants +10 ∮ Sweep towards Mangrove Trees",
+    "family": "Bird Family",
+    "type": "Foraging"
+  },
+  "U18": {
+    "title": "Speed",
+    "description": "Grants +1 ✦ Speed",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "U20": {
+    "title": "Lost and Found",
+    "description": "Grants a +0.1% chance to find a Wet Book when fishing a Treasure",
+    "family": "Unknown Family",
+    "type": "Fishing"
+  },
+  "U21": {
+    "title": "Hunter's Fang",
+    "description": "Your Hunting Axes gain +1% more stats from the weapon they hold",
+    "family": "Reptile and Serpent Family",
+    "type": "Hunting"
+  },
+  "U22": {
+    "title": "Insect Power",
+    "description": "Your Vacuum deals +5% extra ❁ Damage",
+    "family": "Bug Family",
+    "type": "Farming"
+  },
+  "U24": {
+    "title": "Undead Ruler",
+    "description": "Grants +3% more ❁ Damage against Undead Monsters",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "U25": {
+    "title": "Strong Arms",
+    "description": "Your Axe gains +3 ∮ Sweep on throws",
+    "family": "Panda Family",
+    "type": "Foraging"
+  },
+  "U27": {
+    "title": "Life Recovery",
+    "description": "Heals for +0.1% of your max health each time you kill a mob",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "U28": {
+    "title": "Mangrove Collector",
+    "description": "Grants +1 ☘ Mangrove Fortune for every digit in your Mangrove Log collection. (Max 10M collection)",
+    "family": "Bird Family",
+    "type": "Foraging"
+  },
+  "U29": {
+    "title": "Spirit Axe",
+    "description": "Your Axes deal +2% extra ❁ Damage to creatures on Galatea",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "U30": {
+    "title": "Combo",
+    "description": "Deal +0.1% more ❁ Damage per Grandma Wolf pet combo. (Max 50 combo)",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "U31": {
+    "title": "Strong Legs",
+    "description": "Your Axe gains +3 ∮ Sweep on melee",
+    "family": "Panda Family",
+    "type": "Foraging"
+  },
+  "U32": {
+    "title": "Infection",
+    "description": "Increases the chance of catching corrupted Sea Creatures by +0.2%",
+    "family": "Unknown Family",
+    "type": "Fishing"
+  },
+  "U33": {
+    "title": "Arthropod Ruler",
+    "description": "Grants +3% more ❁ Damage against Spiders",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "U34": {
+    "title": "Kat's Favorite",
+    "description": "Kat takes +1% less time to upgrade a Pet",
+    "family": "Bird Family",
+    "type": "Taming"
+  },
+  "U36": {
+    "title": "Ender Ruler",
+    "description": "Grants +3% more ❁ Damage against Ender Creatures",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "U38": {
+    "title": "Magmatic Ruler",
+    "description": "Grants +3% more ❁ Damage against Lava Sea Creatures",
+    "family": "Drowned Family",
+    "type": "Combat"
+  },
+  "U39": {
+    "title": "Battle Frog",
+    "description": "Your Frog Pet gains +3 ❁ Strength",
+    "family": "Frog and Amphibian Family",
+    "type": "Taming"
+  },
+  "U40": {
+    "title": "Infiltration",
+    "description": "Grants +3 ☘ Farming Fortune if your Garden Plot currently has a Pest in it",
+    "family": "Bug Family",
+    "type": "Farming"
+  },
+  "R1": {
+    "title": "Forest Elemental",
+    "description": "Grants +2 ❤ Health",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "R2": {
+    "title": "Torrent Elemental",
+    "description": "Grants +1 ✎ Intelligence",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "R3": {
+    "title": "Lightning Elemental",
+    "description": "Grants +1 ❁ Strength",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "R4": {
+    "title": "Animal Expertise",
+    "description": "Grants +10 ☘ Foraging Fortune",
+    "family": "Panda Family",
+    "type": "Foraging"
+  },
+  "R5": {
+    "title": "Frog Legs",
+    "description": "Frogs have a +10% chance to jump 1 less time",
+    "family": "Frog and Amphibian Family",
+    "type": "Hunting"
+  },
+  "R6": {
+    "title": "Essence of Ice",
+    "description": "Gain +1% more Ice Essence",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "R7": {
+    "title": "Beacon Zealot",
+    "description": "The effects of beacons are 10% stronger on you. Gain a 0.1% chance to find Signal Enhancers in Tree Gifts",
+    "family": "Bug Family",
+    "type": "Foraging"
+  },
+  "R8": {
+    "title": "Great Karma",
+    "description": "Grants +1 ☘ Hunter Fortune towards RARE Attributes",
+    "family": "Reptile and Lizard Family",
+    "type": "Hunting"
+  },
+  "R9": {
+    "title": "Hunter's Pressure",
+    "description": "Your Black Holes capture creatures +2% faster",
+    "family": "Reptile and Serpent Family",
+    "type": "Hunting"
+  },
+  "R10": {
+    "title": "Fancy Visit",
+    "description": "RARE and above Garden Visitors have a +1% higher chance to arrive",
+    "family": "Bug Family",
+    "type": "Farming"
+  },
+  "R11": {
+    "title": "Moonglade Serendipity",
+    "description": "Increases the odds of finding rare items in Tree Gifts at Moonglade Marsh by +2%",
+    "family": "Treasure Fish Family",
+    "type": "Global"
+  },
+  "R13": {
+    "title": "Catacombs Box",
+    "description": "ncreases the quality of boss rewards in The Catacombs by +1",
+    "family": "Shulker Family",
+    "type": "Global"
+  },
+  "R15": {
+    "title": "Bone Font",
+    "description": "Grants a +2% extra chance of finding Level 6+ books or higher in Superpairs",
+    "family": "Lapis Family",
+    "type": "Enchanting"
+  },
+  "R16": {
+    "title": "Crop Bug",
+    "description": "Increased the odds of finding a Cropie, Squash or Fermento by +2%",
+    "family": "Bug Family",
+    "type": "Farming"
+  },
+  "R18": {
+    "title": "Humanoid Ruler",
+    "description": "Grants +3% more ❁ Damage against Humanoid Creatures",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "R21": {
+    "title": "Atomized Mithril",
+    "description": "Gain +1% extra Mithril Powder",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "R22": {
+    "title": "Kuudra's Box",
+    "description": "Gives +5% chance to have an extra Kuudra Teeth in the Paid Reward Chest",
+    "family": "Shulker Family",
+    "type": "Global"
+  },
+  "R23": {
+    "title": "Dwarven Serendipity",
+    "description": "Increases the chance to find Golden and Diamond Goblins by +10%",
+    "family": "Treasure Fish Family",
+    "type": "Global"
+  },
+  "R24": {
+    "title": "Essence of Arthropods",
+    "description": "Gain +1% more Spider Essence",
+    "family": "Spider Family",
+    "type": "Global"
+  },
+  "R25": {
+    "title": "Cookie Eater",
+    "description": "Gain +5% of your Booster Cookie Bits up front",
+    "family": "Bug Family",
+    "type": "Global"
+  },
+  "R27": {
+    "title": "Essence of Unliving",
+    "description": "Gain +1% more Undead Essence",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "R29": {
+    "title": "Crystal Serendipity",
+    "description": "Grants a +2% chance to double any loot from Crystal Hollows Treasure Chests",
+    "family": "Treasure Fish Family",
+    "type": "Global"
+  },
+  "R30": {
+    "title": "Deadeye",
+    "description": "Increases damage from ranged weapons by +2.5%",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "R31": {
+    "title": "Atomized Crystals",
+    "description": "Gain +1% extra Gemstone Powder",
+    "family": "Cave Dweller Family",
+    "type": "Combat"
+  },
+  "R33": {
+    "title": "Quartz Speed",
+    "description": "⸕ Mining Speed from events is increased by +10%",
+    "family": "Cave Dweller Family",
+    "type": "Mining"
+  },
+  "R34": {
+    "title": "Accessory Size",
+    "description": "Grants +1 extra Accessory Bag slots",
+    "family": "Shulker Family",
+    "type": "Global"
+  },
+  "R35": {
+    "title": "Winter's Serendipity",
+    "description": "Increases the odds of finding rare items in Winter Gifts by +2%",
+    "family": "Treasure Fish Family",
+    "type": "Global"
+  },
+  "R36": {
+    "title": "Lifeline",
+    "description": "When under 20% maximum HP, your ❁ Damage and ❈ Defense increase by +2.5%",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "R38": {
+    "title": "Rabbit Crew",
+    "description": "Your Chocolate Factory gains +2 more Chocolate per second",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "R39": {
+    "title": "Breeze",
+    "description": "When you haven't been damaged in the last 5s or more, your mana costs are decreased by +1%",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "R42": {
+    "title": "Ignition",
+    "description": "Increases the duration of fire damage that you inflict on enemies by +30%",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "R43": {
+    "title": "Pretty Clothes",
+    "description": "Gain +1% more Copper from Garden Visitors",
+    "family": "Bug Family",
+    "type": "Farming"
+  },
+  "R44": {
+    "title": "Extreme Pressure",
+    "description": "Grants +5 ❍ Pressure Resistance",
+    "family": "Squid Family",
+    "type": "Global"
+  },
+  "R45": {
+    "title": "Pure Reptile",
+    "description": "Grants a +2% chance to double shards from a Reptile Fusion",
+    "family": "Reptile and Croco Family",
+    "type": "Hunting"
+  },
+  "R46": {
+    "title": "Berry Enjoyer",
+    "description": "Berries have a +10% chance to grant you double points in Starlyn Contests",
+    "family": "Frog and Amphibian Family",
+    "type": "Foraging"
+  },
+  "R49": {
+    "title": "Essence of the Forest",
+    "description": "Gain +1% more Forest Essence",
+    "family": "Phantom Family",
+    "type": "Global"
+  },
+  "R50": {
+    "title": "Deep Diving",
+    "description": "Grants +5 ⚶ Respiration",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "R51": {
+    "title": "Atomized Glacite",
+    "description": "Gain +1% extra Glacite Powder",
+    "family": "Cave Dweller Family",
+    "type": "Combat"
+  },
+  "R52": {
+    "title": "Fungy Luck",
+    "description": "Gain a +10% chance to gain an additional Chisel charge upon starting the Fossil Excavator",
+    "family": "Cave Dweller Family",
+    "type": "Combat"
+  },
+  "R53": {
+    "title": "Eelastic",
+    "description": "Increase Pull by +1 when using your Fishing Nets",
+    "family": "Eel and Amphibian Family",
+    "type": "Hunting"
+  },
+  "R54": {
+    "title": "Hunter's Grasp",
+    "description": "Your Black Holes gain +1% ☘ Hunter Fortune",
+    "family": "Reptile and Serpent Family",
+    "type": "Hunting"
+  },
+  "R56": {
+    "title": "Blazing Fortune",
+    "description": "Grants +1 ✯ Magic Find on Lava Sea Creatures",
+    "family": "Unknown Family",
+    "type": "Fishing"
+  },
+  "R57": {
+    "title": "Essence of Dragons",
+    "description": "Gain +1% more Dragon Essence",
+    "family": "Dragon Family",
+    "type": "Global"
+  },
+  "R58": {
+    "title": "Battle Experience",
+    "description": "Pets gain +1% more EXP from Combat",
+    "family": "Bird Family",
+    "type": "Taming"
+  },
+  "R59": {
+    "title": "Crimson Serendipity",
+    "description": "Increase the odds of finding a Vanquisher by +2%",
+    "family": "Treasure Fish Family",
+    "type": "Global"
+  },
+  "R60": {
+    "title": "Essence of Wither",
+    "description": "Gain +1% more Wither Essence",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "R61": {
+    "title": "Echo of Sharpening",
+    "description": "Your Sharpening Attributes are +2% stronger",
+    "family": "Reptile and Scaled Family",
+    "type": "Hunting"
+  },
+  "E1": {
+    "title": "Earth Elemental",
+    "description": "Grants +2 ❤ Health",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "E2": {
+    "title": "Frost Elemental",
+    "description": "Grants +1 ✎ Intelligence",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "E3": {
+    "title": "Wind Elemental",
+    "description": "Grants +1 ❁ Strength",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "E4": {
+    "title": "Foraging Wisdom",
+    "description": "Grants +0.5 ☯ Foraging Wisdom",
+    "family": "Panda Family",
+    "type": "Foraging"
+  },
+  "E5": {
+    "title": "Excellent Karma",
+    "description": "Grants +1 ☘ Hunter Fortune towards EPIC Attributes",
+    "family": "Reptile and Lizard Family",
+    "type": "Hunting"
+  },
+  "E6": {
+    "title": "Echo of Resistance",
+    "description": "Your Resistance Attributes are +2% stronger",
+    "family": "Reptile and Croco Family",
+    "type": "Hunting"
+  },
+  "E7": {
+    "title": "Berry Mogul",
+    "description": "Your Salts last +1% longer",
+    "family": "Frog and Amphibian Family",
+    "type": "Hunting"
+  },
+  "E9": {
+    "title": "Hunter's Suppress",
+    "description": "Lassos deplete Stamina +2% faster",
+    "family": "Reptile and Serpent Family",
+    "type": "Hunting"
+  },
+  "E10": {
+    "title": "Echo of Atomized",
+    "description": "Your Atomized Attributes are +2% stronger",
+    "family": "Reptile and Scaled Family",
+    "type": "Hunting"
+  },
+  "E11": {
+    "title": "Lucky Rod",
+    "description": "Fish Treasure Shards are +1% easier to find",
+    "family": "Eel and Amphibian Family",
+    "type": "Hunting"
+  },
+  "E12": {
+    "title": "Dominance",
+    "description": "Gain +1.5% more ❁ Damage when at full health",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "E13": {
+    "title": "Lunar Power",
+    "description": "Grants +5 ☘ Farming Fortune during the Night",
+    "family": "Bug Family",
+    "type": "Farming"
+  },
+  "E14": {
+    "title": "Trophy Hunter",
+    "description": "Grants +2 ♔ Trophy Fish Chance",
+    "family": "Eel and Amphibian Family",
+    "type": "Fishing"
+  },
+  "E15": {
+    "title": "Deep Technique",
+    "description": "Each block you mine has a +1% chance to grant 1 extra ✧ Pristine for that block",
+    "family": "Cave Dweller Family",
+    "type": "Mining"
+  },
+  "E16": {
+    "title": "Sack Size",
+    "description": "Your sacks can hold +1% more items",
+    "family": "Shulker Family",
+    "type": "Global"
+  },
+  "E17": {
+    "title": "Fishing Speed",
+    "description": "Grants +3 ☂ Fishing Speed",
+    "family": "Unknown Family",
+    "type": "Fishing"
+  },
+  "E18": {
+    "title": "Blazing",
+    "description": "Grants +3% more ❁ Damage against mobs while in the Crimson Isle",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "E20": {
+    "title": "Sea Wisdom",
+    "description": "Grants +0.5 ☯ Fishing Wisdom",
+    "family": "Unknown Family",
+    "type": "Fishing"
+  },
+  "E21": {
+    "title": "Reborn",
+    "description": "Killing a Prince has a +10% chance to add 1 Bonus Score to your Dungeon Run",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "E22": {
+    "title": "Echo of Essence",
+    "description": "Your Essence Attributes are +2% stronger",
+    "family": "Reptile and Scaled Family",
+    "type": "Hunting"
+  },
+  "E24": {
+    "title": "Faker",
+    "description": "Dungeon Blessings are +1% stronger on you",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "E26": {
+    "title": "Shell",
+    "description": "Gain +10% Regular Knockback Resistance",
+    "family": "Reptile and Turtle Family",
+    "type": "Global"
+  },
+  "E27": {
+    "title": "Warrior",
+    "description": "Increases melee damage dealt by +2.5%",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "E28": {
+    "title": "Why Not More",
+    "description": "Your pet's EXP Share grants +1% more EXP",
+    "family": "Bird Family",
+    "type": "Taming"
+  },
+  "E29": {
+    "title": "Matriarch Cubs",
+    "description": "Grants a +2% chance to get a second Heavy Pearl",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "E30": {
+    "title": "Echo of Ruler",
+    "description": "Your Ruler Attributes are +2% stronger",
+    "family": "Reptile and Croco Family",
+    "type": "Hunting"
+  },
+  "E31": {
+    "title": "Solar Power",
+    "description": "Grants +5 ☘ Farming Fortune during the day",
+    "family": "Bug Family",
+    "type": "Farming"
+  },
+  "E32": {
+    "title": "Echo of Hunter",
+    "description": "Your Hunter Attributes are +2% stronger",
+    "family": "Eel, Serpent and Amphibian Family",
+    "type": "Hunting"
+  },
+  "E33": {
+    "title": "Veil",
+    "description": "Grants +1 ❂ True Defense",
+    "family": "Cave Dweller Family",
+    "type": "Combat"
+  },
+  "E34": {
+    "title": "Mana Regeneration",
+    "description": "Increases your Mana regeneration by +1%",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "E35": {
+    "title": "Hunt Wisdom",
+    "description": "Grants +0.5 ☯ Hunting Wisdom",
+    "family": "Reptile and Turtle Family",
+    "type": "Hunting"
+  },
+  "E36": {
+    "title": "Cavern Wisdom",
+    "description": "Grants +0.5 ☯ Mining Wisdom",
+    "family": "Cave Dweller Family",
+    "type": "Mining"
+  },
+  "E37": {
+    "title": "Garden Wisdom",
+    "description": "Grants +0.5 ☯ Farming Wisdom",
+    "family": "Bug Family",
+    "type": "Farming"
+  },
+  "L1": {
+    "title": "Shadow Elemental",
+    "description": "Grants +2 ❤ Health",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "L2": {
+    "title": "Snow Elemental",
+    "description": "Grants +1 ✎ Intelligence",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "L3": {
+    "title": "Storm Elemental",
+    "description": "Grants +1 ❁ Strength",
+    "family": "Elemental Family",
+    "type": "Global"
+  },
+  "L4": {
+    "title": "Reptiloid",
+    "description": "Fusions with Chameleons grant the next 3 IDs as results",
+    "family": "Reptile Family",
+    "type": "Hunting"
+  },
+  "L6": {
+    "title": "Echo of Echoes",
+    "description": "Your Echo Attributes are +5% stronger",
+    "family": "Reptile and Croco Family",
+    "type": "Hunting"
+  },
+  "L7": {
+    "title": "Echo of Wisdom",
+    "description": "Your Wisdom Attributes are +2% stronger",
+    "family": "Reptile and Scaled Family",
+    "type": "Hunting"
+  },
+  "L8": {
+    "title": "Cloak Improvement",
+    "description": "Your David's Cloak gains +1 ❂ True Defense",
+    "family": "Reptile and Turtle Family",
+    "type": "Hunting"
+  },
+  "L9": {
+    "title": "Paramount Fortitude",
+    "description": "Your ❈ Defense is increased by +0.2%",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "L11": {
+    "title": "Charmed",
+    "description": "Grants a +0.05% chance to charm the Shard of monsters you kill",
+    "family": "Eel and Amphibian Family",
+    "type": "Hunting"
+  },
+  "L12": {
+    "title": "Book Wisdom",
+    "description": "Grants +0.5 ☯ Enchanting Wisdom",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "L13": {
+    "title": "Wart Eater",
+    "description": "Grants a +0.01% chance to obtain a Warty when breaking Nether Warts",
+    "family": "Bug Family",
+    "type": "Farming"
+  },
+  "L14": {
+    "title": "Payback",
+    "description": "When hit, your next hit deals +2% damage",
+    "family": "Unknown Family",
+    "type": "Foraging"
+  },
+  "L15": {
+    "title": "Vitality",
+    "description": "Grants +2 ♨ Vitality",
+    "family": "Demon Family",
+    "type": "Global"
+  },
+  "L17": {
+    "title": "Maximal Torment",
+    "description": "Your ✎ Intelligence is increased by +0.1%",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "L18": {
+    "title": "Pity",
+    "description": "Your RNG Meter fills +1% faster",
+    "family": "Demon Family",
+    "type": "Global"
+  },
+  "L20": {
+    "title": "Star Bait",
+    "description": "Grants a +0.1% chance to fish a Shinyfish",
+    "family": "Demon Family",
+    "type": "Global"
+  },
+  "L23": {
+    "title": "Help From Above",
+    "description": "Grants +1.25 ❣ Health Regen",
+    "family": "Unknown Family",
+    "type": "Combat"
+  },
+  "L24": {
+    "title": "Wings of Destiny",
+    "description": "Increases the odds of finding Ananke Feathers by +2%",
+    "family": "Demon and Bird Family",
+    "type": "Global"
+  },
+  "L25": {
+    "title": "Tuning Box",
+    "description": "Grants +1 Tuning Points",
+    "family": "Shulker Family",
+    "type": "Global"
+  },
+  "L26": {
+    "title": "Crimson Hook",
+    "description": "Grants +0.5 ⚓ Double Hook Chance while on the Crimson Isle",
+    "family": "Unknown Family",
+    "type": "Fishing"
+  },
+  "L27": {
+    "title": "Attack Speed",
+    "description": "Grants +1 ⚔ Bonus Attack Speed",
+    "family": "Demon Family",
+    "type": "Combat"
+  },
+  "L28": {
+    "title": "Magic Find",
+    "description": "Grants +0.5 ✯ Magic Find",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "L29": {
+    "title": "Hunter's Karma",
+    "description": "Grants +1 ☘ Hunter Fortune",
+    "family": "Reptile and Turtle Family",
+    "type": "Hunting"
+  },
+  "L30": {
+    "title": "Elite",
+    "description": "Grants +3% more ❁ Damage against bosses and mini-bosses",
+    "family": "Dragon Family",
+    "type": "Combat"
+  },
+  "L31": {
+    "title": "Pet Wisdom",
+    "description": "Grants +0.5 ☯ Taming Wisdom",
+    "family": "Bird Family",
+    "type": "Taming"
+  },
+  "L32": {
+    "title": "Starborn",
+    "description": "The effect of Starborn Temples is +1% stronger on you",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "L33": {
+    "title": "Veteran",
+    "description": "Grants +1 ☯ Combat Wisdom",
+    "family": "Dragon Family",
+    "type": "Combat"
+  },
+  "L34": {
+    "title": "Rare Bird",
+    "description": "Grants +1 ♣ Pet Luck",
+    "family": "Bird Family",
+    "type": "Taming"
+  },
+  "L36": {
+    "title": "Unlimited Power",
+    "description": "Your ❁ Strength is increased by +0.1%",
+    "family": "Demon and Dragon Family",
+    "type": "Global"
+  },
+  "L39": {
+    "title": "Unlimited Energy",
+    "description": "Your ☠ Crit Damage is increased by +0.1%",
+    "family": "Demon and Dragon Family",
+    "type": "Global"
+  },
+  "L41": {
+    "title": "Ultimate DNA",
+    "description": "Grants +1 ☘ Mining Fortune, ☘ Farming Fortune, and ☘ Foraging Fortune",
+    "family": "Unknown Family",
+    "type": "Global"
+  },
+  "L42": {
+    "title": "Almighty",
+    "description": "Your \"Unlimited\" Attributes are +5% stronger",
+    "family": "Demon and Dragon Family",
+    "type": "Global"
+  },
+  "L44": {
+    "title": "Echo of Elemental",
+    "description": "Buffs all other shards in the Elemental Family by +2%",
+    "family": "Elemental Family",
+    "type": "Global"
+  }
 }

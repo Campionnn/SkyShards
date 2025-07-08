@@ -123,9 +123,12 @@ export interface PetLevelDropdownProps {
   label: string;
   tooltipTitle?: string;
   tooltipContent?: string;
+  tooltipShardName?: string;
   tooltipShardIcon?: string;
   tooltipRarity?: string;
   tooltipWarning?: string;
+  tooltipFamily?: string;
+  tooltipType?: string;
 }
 
 export interface KuudraDropdownProps {
