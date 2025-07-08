@@ -63,7 +63,7 @@ export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, na
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65" onClick={handleOverlayClick}>
-      <div className={`bg-slate-900 border ${getRarityBorderColor(rarity)} rounded-xl shadow-2xl px-10 py-8 min-w-[380px]  max-w-[700px] relative animate-fadeIn`} onClick={(e) => e.stopPropagation()}>
+      <div className={`bg-slate-900 border ${getRarityBorderColor(rarity)} rounded-xl shadow-2xl px-10 py-8 min-w-[500px]  max-w-[700px] relative animate-fadeIn`} onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-0 right-2 text-2xl text-slate-500 cursor-pointer">
           &times;
         </button>
