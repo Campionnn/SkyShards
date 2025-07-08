@@ -11,6 +11,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [isSelecting, setIsSelecting] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [dropdownWidth, setDropdownWidth] = useState<number | undefined>(undefined);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -128,6 +129,12 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
 
   const handleInputFocus = useCallback(() => {
     if (isSelecting) return;
+
+    // Capture the input width when focused
+    if (inputRef.current) {
+      setDropdownWidth(inputRef.current.offsetWidth);
+    }
+
     if (value.trim()) {
       debouncedSearch(value);
     }
@@ -168,7 +175,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
             handleInputFocus();
           }}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2.5 bg-slate-800 border border-slate-600 rounded-md text-white placeholder-slate-400 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 hover:border-slate-500 transition-colors"
+          className="w-full pl-10 pr-10 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 hover:bg-slate-700/70 transition-colors"
           autoComplete="off"
           spellCheck={false}
         />
@@ -180,7 +187,11 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
       </div>
 
       {isOpen && suggestions.length > 0 && !isSelecting && (
-        <ul ref={listRef} className="absolute z-50 w-full mt-1 bg-slate-800 border border-slate-600 rounded-md shadow-xl max-h-60 overflow-y-auto">
+        <ul
+          ref={listRef}
+          className="absolute z-50 mt-1 bg-slate-800 border border-slate-600 rounded-md shadow-xl max-h-60 overflow-y-auto"
+          style={{ width: dropdownWidth ? `${dropdownWidth}px` : "100%" }}
+        >
           {suggestions.map((shard, index) => (
             <SuggestionItem key={shard.key} shard={shard} index={index} focusedIndex={focusedIndex} onSelect={handleSelect} isSelecting={isSelecting} setFocusedIndex={setFocusedIndex} />
           ))}

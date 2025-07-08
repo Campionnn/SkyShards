@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calculator, Settings } from "lucide-react";
+import { Calculator, Settings, Shuffle } from "lucide-react";
 
 // Custom GitHub icon to avoid deprecation warnings
 const GitHubIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -14,6 +14,7 @@ export const Navigation: React.FC = () => {
 
   const navItems = [
     { path: "/", label: "Calculator", icon: Calculator, color: "purple" },
+    { path: "/recipes", label: "Recipes", icon: Shuffle, color: "green" },
     { path: "/settings", label: "Shards", icon: Settings, color: "blue" },
   ];
 
@@ -25,6 +26,13 @@ export const Navigation: React.FC = () => {
       text: "text-purple-300",
       border: "border border-purple-500/20",
       hoverBorder: "hover:border-purple-500/30",
+    },
+    green: {
+      bg: "bg-green-500/20",
+      hoverBg: "hover:bg-green-500/30",
+      text: "text-green-300",
+      border: "border border-green-500/20",
+      hoverBorder: "hover:border-green-500/30",
     },
     blue: {
       bg: "bg-blue-500/20",
@@ -53,7 +61,13 @@ export const Navigation: React.FC = () => {
               const isActive = location.pathname === path;
               const colorClass = colorClasses[color];
               // Set outline color based on nav item color
-              const ringClass = isActive ? (color === "blue" ? "ring-1 ring-offset-0 ring-blue-300" : "ring-1 ring-offset-0 ring-purple-300") : "";
+              const ringClass = isActive
+                ? color === "blue"
+                  ? "ring-1 ring-offset-0 ring-blue-300"
+                  : color === "green"
+                  ? "ring-1 ring-offset-0 ring-green-300"
+                  : "ring-1 ring-offset-0 ring-purple-300"
+                : "";
               return (
                 <Link
                   key={path}
