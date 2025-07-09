@@ -45,7 +45,7 @@ export class CalculationService {
         if (rate > 0) {
           // Apply wooden bait modifier
           if (params.noWoodenBait && WOODEN_BAIT_SHARDS.includes(shardId)) {
-            rate *= 0.05;
+            rate *= 0.2;
           }
 
           // Apply fortune calculations
