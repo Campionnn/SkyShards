@@ -134,7 +134,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
             Materials Needed
           </h3>
           <div className="px-3 py-1.5 bg-sky-500/20 border border-sky-500/30 text-sky-400 text-sm font-medium rounded-md">
-            for {Math.floor(result.totalShardsProduced)} {targetShardName}{" "}
+            <span className="text-slate-300">{Math.floor(result.totalShardsProduced)}x</span> {targetShardName}{" "}
             <span className="text-slate-400">
               {Math.floor(result.craftsNeeded)} craft{Math.floor(result.craftsNeeded) > 1 ? "s" : ""}
             </span>
@@ -176,7 +176,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
                 {/* Right side: rate, then time underneath */}
                 <div className="flex flex-col items-end ml-2 justify-center h-full">
                   <div className="text-sm text-slate-400 whitespace-nowrap">
-                    {formatNumber(shard.rate)} <span className="text-slate-500"> / </span> <span className="text-slate-500">hr</span>
+                    {formatNumber(shard.rate)} <span className="text-slate-500 font-bold"> / </span> <span className="text-slate-500">hr</span>
                   </div>
                   <div className="text-xs text-slate-400 whitespace-nowrap mt-1">{formatTime(timeNeeded)}</div>
                 </div>
@@ -213,7 +213,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
 
         {/* Only the outer container is scrollable */}
         <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
-          <div className="min-w-[650px]">
+          <div className="min-w-fit">
             <RecipeTreeNode
               tree={result.tree}
               data={data}

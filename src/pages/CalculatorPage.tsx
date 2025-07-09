@@ -26,9 +26,6 @@ const CalculatorPageContent: React.FC = () => {
         return;
       }
 
-      // Hide sidebar on mobile after submission
-      setSidebarOpen(false);
-
       // Get shard key from name
       const dataService = DataService.getInstance();
       const nameToKeyMap = await dataService.getShardNameToKeyMap();
@@ -129,11 +126,11 @@ const CalculatorPageContent: React.FC = () => {
     <div className="min-h-screen space-y-3 py-4">
       {/* Header */}
 
-      <div className="grid grid-cols-1 xl:grid-cols-7 gap-1 lg:gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-7 gap-3">
         {/* Configuration Panel */}
         <div className="xl:col-span-2">
           {/* Mobile toggle */}
-          <div className="xl:hidden mb-3">
+          <div className="xl:hidden">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="
@@ -149,7 +146,7 @@ const CalculatorPageContent: React.FC = () => {
             </button>
           </div>
 
-          <div className={`${sidebarOpen ? "block" : "hidden xl:block"}`}>
+          <div className={`${sidebarOpen ? "block mt-3" : "hidden xl:block"}`}>
             <CalculatorFormWithContext onSubmit={handleCalculate} />
           </div>
         </div>

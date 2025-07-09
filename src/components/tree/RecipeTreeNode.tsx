@@ -22,13 +22,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
     return finder ? recipesForShard.find(finder) : recipesForShard.sort((a, b) => b.outputQuantity - a.outputQuantity)[0];
   };
 
-  const renderChevron = (isExpanded: boolean) => (isExpanded ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-amber-400" />);
+  const renderChevron = (isExpanded: boolean) => (isExpanded ? <ChevronDown className="w-6 h-6 text-amber-400" /> : <ChevronRight className="w-6 h-6 text-amber-400" />);
 
   const renderShardInfo = (quantity: number, shard: any, showRate = true) => {
     const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
     return (
       <>
-        <span className="text-white">{quantity}x</span>
+        <span className="text-white flex-shrink-0 text-sm">{quantity}x</span>
         <Tooltip
           content={formatShardDescription(shardDesc?.description || "No description available.")}
           title={shardDesc?.title}
@@ -39,16 +39,16 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           type={shardDesc?.type}
           className="cursor-pointer"
         >
-          <div className="flex items-center gap-2">
-            <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-            <span className={getRarityColor(shard.rarity)}>{shard.name}</span>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
+            <span className={`${getRarityColor(shard.rarity)} whitespace-nowrap text-sm`}>{shard.name}</span>
           </div>
         </Tooltip>
         {showRate && (
-          <div className="text-right min-w-[80px] ml-2">
-            <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-            <span className="text-slate-500 text-xs mx-0.5">/</span>
-            <span className="text-slate-400 text-xs">hr</span>
+          <div className="text-right flex-shrink-0">
+            <span className="text-slate-300 text-sm font-medium">{formatNumber(shard.rate)}</span>
+            <span className="text-slate-500 text-sm mx-0.5">/</span>
+            <span className="text-slate-400 text-sm">hr</span>
           </div>
         )}
       </>
@@ -61,78 +61,84 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
     const input2ShardDesc = SHARD_DESCRIPTIONS[input2Shard.id as keyof typeof SHARD_DESCRIPTIONS];
 
     return (
-      <div className="flex flex-wrap items-center gap-x-2 text-sm font-medium">
-        {showStep && <span className="font-normal text-xs text-amber-300">Step {stepNumber} :</span>}
+      <div className="flex items-center gap-2 text-sm font-medium min-w-0">
+        {showStep && <span className="font-normal text-sm text-amber-300 flex-shrink-0 mr-2">Step {stepNumber}:</span>}
 
-        <span className="text-white">{outputQuantity}x</span>
-        <Tooltip
-          content={formatShardDescription(outputShardDesc?.description || "No description available.")}
-          title={outputShardDesc?.title}
-          shardName={outputShard.name}
-          shardIcon={outputShard.id}
-          rarity={outputShardDesc?.rarity?.toLowerCase() || outputShard.rarity}
-          family={outputShardDesc?.family}
-          type={outputShardDesc?.type}
-          className="cursor-pointer"
-        >
-          <div className="flex items-center gap-1">
-            <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-            <span className={getRarityColor(outputShard.rarity)}>{outputShard.name}</span>
-          </div>
-        </Tooltip>
+        <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+          <span className="text-white flex-shrink-0 text-sm">{outputQuantity}x</span>
+          <Tooltip
+            content={formatShardDescription(outputShardDesc?.description || "No description available.")}
+            title={outputShardDesc?.title}
+            shardName={outputShard.name}
+            shardIcon={outputShard.id}
+            rarity={outputShardDesc?.rarity?.toLowerCase() || outputShard.rarity}
+            family={outputShardDesc?.family}
+            type={outputShardDesc?.type}
+            className="cursor-pointer min-w-0"
+          >
+            <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+              <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
+              <span className={`${getRarityColor(outputShard.rarity)} whitespace-nowrap text-sm`}>{outputShard.name}</span>
+            </div>
+          </Tooltip>
+        </div>
 
-        <span> = </span>
+        <span className="flex-shrink-0 text-sm">=</span>
 
-        <span className="text-slate-400">{input1Quantity}x</span>
-        <Tooltip
-          content={formatShardDescription(input1ShardDesc?.description || "No description available.")}
-          title={input1ShardDesc?.title}
-          shardName={input1Shard.name}
-          shardIcon={input1Shard.id}
-          rarity={input1ShardDesc?.rarity?.toLowerCase() || input1Shard.rarity}
-          family={input1ShardDesc?.family}
-          type={input1ShardDesc?.type}
-          className="cursor-pointer"
-        >
-          <div className="flex items-center gap-1">
-            <img src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`} alt={input1Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-            <span className={getRarityColor(input1Shard.rarity)}>{input1Shard.name}</span>
-          </div>
-        </Tooltip>
+        <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+          <span className="text-slate-400 flex-shrink-0 text-sm">{input1Quantity}x</span>
+          <Tooltip
+            content={formatShardDescription(input1ShardDesc?.description || "No description available.")}
+            title={input1ShardDesc?.title}
+            shardName={input1Shard.name}
+            shardIcon={input1Shard.id}
+            rarity={input1ShardDesc?.rarity?.toLowerCase() || input1Shard.rarity}
+            family={input1ShardDesc?.family}
+            type={input1ShardDesc?.type}
+            className="cursor-pointer min-w-0"
+          >
+            <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+              <img src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`} alt={input1Shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
+              <span className={`${getRarityColor(input1Shard.rarity)} whitespace-nowrap text-sm`}>{input1Shard.name}</span>
+            </div>
+          </Tooltip>
+        </div>
 
-        <span> + </span>
+        <span className="flex-shrink-0 text-sm">+</span>
 
-        <span className="text-slate-400">{input2Quantity}x</span>
-        <Tooltip
-          content={formatShardDescription(input2ShardDesc?.description || "No description available.")}
-          title={input2ShardDesc?.title || input2Shard.name}
-          shardName={input2Shard.name}
-          shardIcon={input2Shard.id}
-          rarity={input2ShardDesc?.rarity?.toLowerCase() || input2Shard.rarity}
-          family={input2ShardDesc?.family}
-          type={input2ShardDesc?.type}
-          className="cursor-pointer"
-        >
-          <div className="flex items-center gap-1">
-            <img src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`} alt={input2Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-            <span className={getRarityColor(input2Shard.rarity)}>{input2Shard.name}</span>
-          </div>
-        </Tooltip>
+        <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+          <span className="text-slate-400 flex-shrink-0 text-sm">{input2Quantity}x</span>
+          <Tooltip
+            content={formatShardDescription(input2ShardDesc?.description || "No description available.")}
+            title={input2ShardDesc?.title || input2Shard.name}
+            shardName={input2Shard.name}
+            shardIcon={input2Shard.id}
+            rarity={input2ShardDesc?.rarity?.toLowerCase() || input2Shard.rarity}
+            family={input2ShardDesc?.family}
+            type={input2ShardDesc?.type}
+            className="cursor-pointer min-w-0"
+          >
+            <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+              <img src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`} alt={input2Shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
+              <span className={`${getRarityColor(input2Shard.rarity)} whitespace-nowrap text-sm`}>{input2Shard.name}</span>
+            </div>
+          </Tooltip>
+        </div>
       </div>
     );
   };
 
   const renderDirectShard = (quantity: number, shard: any) => (
-    <div className="bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between px-3 py-1.5 text-sm font-medium gap-2">
+    <div className="bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between px-3 py-1.5 text-sm font-medium">
       <div className="flex items-center gap-2 min-w-0">
-        <div className="w-2 h-2 bg-green-400 rounded-full" />
-        {renderShardInfo(quantity, shard, false)}
-        <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
+        <div className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0" />
+        <div className="flex-shrink-0 flex items-center gap-2">{renderShardInfo(quantity, shard, false)}</div>
+        <span className="px-1 py-0.4 text-sm bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
       </div>
-      <div className="text-right min-w-[80px] ml-2">
-        <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-        <span className="text-slate-500 text-xs mx-0.5">/</span>
-        <span className="text-slate-400 text-xs">hr</span>
+      <div className="text-right flex-shrink-0">
+        <span className="text-slate-300 text-sm font-medium">{formatNumber(shard.rate)}</span>
+        <span className="text-slate-500 text-sm mx-0.5">/</span>
+        <span className="text-slate-400 text-sm">hr</span>
       </div>
     </div>
   );
@@ -148,13 +154,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
     return (
       <div className="bg-slate-600/20 rounded border border-slate-300/50 overflow-hidden">
-        <button onClick={() => onToggle(subNodeId)} className="w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+        <button onClick={() => onToggle(subNodeId)} className="w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 min-w-0">
             {renderChevron(isExpanded)}
-            {renderRecipeDisplay(maxOutputQuantity, inputShard, input1Quantity, input1Shard, input2Quantity, input2Shard)}
+            <div className="min-w-0 flex-shrink-0">{renderRecipeDisplay(maxOutputQuantity, inputShard, input1Quantity, input1Shard, input2Quantity, input2Shard)}</div>
           </div>
-          <div className="text-right min-w-[80px] ml-2">
-            <div className="flex items-center justify-end space-x-1.5">
+          <div className="text-right flex-shrink-0">
+            <div className="flex items-center justify-end gap-1">
               <span className="text-xs text-slate-500">fusions</span>
               <span className="font-medium text-white text-xs">1</span>
             </div>
@@ -188,20 +194,20 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
     return (
       <div className="flex flex-col border border-slate-400/70 rounded-md bg-slate-500/40">
-        <button className="flex items-center justify-between w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors" onClick={() => onToggle(nodeId)}>
-          <div className="flex items-center space-x-2">
+        <button className="flex items-center justify-between w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors gap-2" onClick={() => onToggle(nodeId)}>
+          <div className="flex items-center gap-2 min-w-0">
             {renderChevron(isExpanded)}
-            <div className="flex items-center gap-3">
-              <div className="text-xs text-amber-300">{runCount} crafts</div>
-              <MoveRight className="w-4 text-amber-400" />
-              <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="text-sm text-amber-300 flex-shrink-0">{runCount} crafts</div>
+              <MoveRight className="w-6 text-amber-400 flex-shrink-0" />
+              <div className="flex items-center gap-2 min-w-0">
                 {renderShardInfo(Math.floor(tree.quantity), shard, false)}
-                <span className="px-1 bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">CYCLE !</span>
+                <span className="px-1 bg-amber-500/20 text-amber-400 border border-amber-400/40 text-sm font-medium rounded-md flex-shrink-0">CYCLE !</span>
               </div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="flex items-center justify-end space-x-1.5">
+          <div className="text-right flex-shrink-0">
+            <div className="flex items-center justify-end gap-1">
               <span className="text-xs text-slate-500">fusions</span>
               <span className="font-medium text-white text-xs">{runCount}</span>
             </div>
@@ -235,14 +241,16 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                           <div key={stepIndex} className="bg-slate-600/20 rounded border border-slate-300/50 overflow-hidden">
                             <button
                               onClick={() => onToggle(stepNodeId)}
-                              className="w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors flex items-center justify-between"
+                              className="w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors flex items-center justify-between gap-4"
                             >
-                              <div className="flex items-center space-x-2">
+                              <div className="flex items-center gap-2 min-w-0">
                                 {renderChevron(stepIsExpanded)}
-                                {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
+                                <div className="min-w-0 flex-shrink-0">
+                                  {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
+                                </div>
                               </div>
-                              <div className="text-right min-w-[80px] ml-2">
-                                <div className="flex items-center justify-end space-x-1.5">
+                              <div className="text-right flex-shrink-0">
+                                <div className="flex items-center justify-end gap-1">
                                   <span className="text-xs text-slate-500">fusions</span>
                                   <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
                                 </div>
@@ -270,9 +278,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                       } else {
                         return (
                           <div key={stepIndex} className="px-3 py-1.5 bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between">
-                            {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
-                            <div className="text-right min-w-[80px] ml-2">
-                              <div className="flex items-center justify-end space-x-1.5">
+                            <div className="min-w-0">{renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}</div>
+                            <div className="text-right flex-shrink-0">
+                              <div className="flex items-center justify-end gap-1">
                                 <span className="text-xs text-slate-500">fusions</span>
                                 <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
                               </div>
@@ -317,15 +325,15 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
   if (tree.method === "direct") {
     return (
       <div className="flex items-center justify-between px-3 py-1 bg-slate-800 rounded-md border border-slate-600">
-        <div className="flex items-center space-x-2 p-0.5">
+        <div className="flex items-center gap-2 p-0.5">
           <div className="w-2 h-2 bg-green-400 rounded-full" />
           {renderShardInfo(tree.quantity, shard, false)}
-          <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
+          <span className="px-1 py-0.4 text-sm bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
         </div>
         <div className="text-right">
           <div className="text-xs text-slate-300">
             {formatNumber(shard.rate)}
-            <span className="text-slate-500 text-xs mx-0.5">/</span>
+            <span className="text-slate-500 text-xs font-bold mx-0.5">/</span>
             <span className="text-slate-400 text-xs">hr</span>
           </div>
         </div>
@@ -349,11 +357,11 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
   return (
     <div className="bg-slate-800 border border-slate-600 rounded-md overflow-hidden">
       <button onClick={() => onToggle(nodeId)} className="w-full px-3 py-1 text-left cursor-pointer hover:bg-slate-700/50 transition-colors">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-1.5 p-0.5">
+        <div className="flex items-center justify-between gap-4 min-w-0">
+          <div className="flex items-center gap-2 p-0.5 min-w-0">
             {renderChevron(isExpanded)}
-            <div className="text-white flex items-center">
-              <span className="font-medium text-sm">{Math.floor(displayQuantity)}x</span>
+            <div className="text-white flex items-center gap-2 min-w-0 flex-shrink-0 whitespace-nowrap">
+              <span className="font-medium text-sm flex-shrink-0">{Math.floor(displayQuantity)}x</span>
 
               <Tooltip
                 content={formatShardDescription(shardDesc?.description || "No description available.")}
@@ -363,19 +371,20 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                 rarity={shardDesc?.rarity?.toLowerCase() || shard.rarity}
                 family={shardDesc?.family}
                 type={shardDesc?.type}
-                className="cursor-pointer mx-2"
+                className="cursor-pointer min-w-0"
               >
-                <div className="flex items-center gap-2">
-                  <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain inline-block align-middle flex-shrink-0" loading="lazy" />
-                  <span className={`font-medium ${getRarityColor(shard.rarity)} text-sm whitespace-nowrap truncate`} style={{ maxWidth: "8rem" }} title={getShardDetails(shard, false)}>
+                <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+                  <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
+                  <span className={`font-medium ${getRarityColor(shard.rarity)} text-sm whitespace-nowrap`} title={getShardDetails(shard, false)}>
                     {shard.name}
                   </span>
                 </div>
               </Tooltip>
 
-              <span className="text-slate-400 text-sm font-medium flex items-center">
-                <span className="mx-2 text-white">=</span>
-                <span>{Math.floor(input1.quantity)}x</span>
+              <span className="text-slate-400 text-sm font-medium flex items-center gap-2 min-w-0 flex-shrink-0 whitespace-nowrap">
+                <span className="text-white flex-shrink-0 text-sm">=</span>
+
+                <span className="flex-shrink-0 text-sm">{Math.floor(input1.quantity)}x</span>
 
                 <Tooltip
                   content={formatShardDescription(input1ShardDesc?.description || "No description available.")}
@@ -385,23 +394,17 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   rarity={input1ShardDesc?.rarity?.toLowerCase() || input1Shard.rarity}
                   family={input1ShardDesc?.family}
                   type={input1ShardDesc?.type}
-                  className="cursor-pointer mx-2"
+                  className="cursor-pointer min-w-0"
                 >
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`}
-                      alt={input1Shard.name}
-                      className="w-5 h-5 object-contain inline-block align-middle flex-shrink-0"
-                      loading="lazy"
-                    />
-                    <span className={getRarityColor(input1Shard.rarity) + " whitespace-nowrap truncate"} style={{ maxWidth: "8rem" }}>
-                      {input1Shard.name}
-                    </span>
+                  <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+                    <img src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`} alt={input1Shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
+                    <span className={`${getRarityColor(input1Shard.rarity)} whitespace-nowrap text-sm`}>{input1Shard.name}</span>
                   </div>
                 </Tooltip>
 
-                <span className="mx-2 text-white">+</span>
-                <span>{Math.floor(input2.quantity)}x</span>
+                <span className="flex-shrink-0 text-white text-sm">+</span>
+
+                <span className="flex-shrink-0 text-sm">{Math.floor(input2.quantity)}x</span>
 
                 <Tooltip
                   content={formatShardDescription(input2ShardDesc?.description || "No description available.")}
@@ -411,25 +414,18 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   rarity={input2ShardDesc?.rarity?.toLowerCase() || input2Shard.rarity}
                   family={input2ShardDesc?.family}
                   type={input2ShardDesc?.type}
-                  className="cursor-pointer mx-2"
+                  className="cursor-pointer min-w-0"
                 >
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`}
-                      alt={input2Shard.name}
-                      className="w-5 h-5 object-contain inline-block align-middle flex-shrink-0"
-                      loading="lazy"
-                    />
-                    <span className={getRarityColor(input2Shard.rarity) + " whitespace-nowrap truncate"} style={{ maxWidth: "8rem" }}>
-                      {input2Shard.name}
-                    </span>
+                  <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+                    <img src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`} alt={input2Shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
+                    <span className={`${getRarityColor(input2Shard.rarity)} whitespace-nowrap text-sm`}>{input2Shard.name}</span>
                   </div>
                 </Tooltip>
               </span>
             </div>
           </div>
-          <div className="text-right">
-            <div className="flex items-center justify-end space-x-1.5">
+          <div className="text-right flex-shrink-0">
+            <div className="flex items-center justify-end gap-1">
               <span className="text-xs text-slate-500">fusions</span>
               <span className="font-medium text-white text-xs">{crafts}</span>
             </div>
