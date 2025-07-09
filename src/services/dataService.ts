@@ -1,4 +1,5 @@
 import type { ShardWithKey } from "../types";
+import { SHARD_DESCRIPTIONS } from "../constants";
 // import type { ShardWithKey, Recipes } from "../types";
 
 export class DataService {
@@ -106,9 +107,6 @@ export class DataService {
   async searchShards(query: string): Promise<ShardWithKey[]> {
     const shards = await this.loadShards();
     const lowerQuery = query.toLowerCase();
-
-    // Import SHARD_DESCRIPTIONS to search by title and description
-    const { SHARD_DESCRIPTIONS } = await import("../constants");
 
     return shards.filter((shard) => {
       // Search by name (existing functionality)
