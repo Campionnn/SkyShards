@@ -163,6 +163,7 @@ export interface ShardAutocompleteProps {
   onFocus?: () => void;
   placeholder?: string;
   className?: string;
+  searchMode?: "enhanced" | "name-only";
 }
 
 export interface SuggestionItemProps {

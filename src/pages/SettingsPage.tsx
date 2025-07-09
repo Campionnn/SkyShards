@@ -20,7 +20,6 @@ export const SettingsPage: React.FC = () => {
   const [debouncedFilter, setDebouncedFilter] = useState("");
 
   const debouncedSetFilter = useMemo(() => debounce((value: string) => setDebouncedFilter(value), 300), []);
-
   useEffect(() => {
     debouncedSetFilter(filter);
   }, [filter, debouncedSetFilter]);
@@ -32,7 +31,13 @@ export const SettingsPage: React.FC = () => {
       const matchesName = shard.name.toLowerCase().includes(search);
       const matchesFamily = shard.family.toLowerCase().includes(search);
       const matchesTypeField = shard.type.toLowerCase().includes(search);
-      const matchesSearch = matchesName || matchesFamily || matchesTypeField;
+
+      // Search by title (perk name) and description
+      const shardDesc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
+      const matchesTitle = shardDesc?.title?.toLowerCase().includes(search) || false;
+      const matchesDescription = shardDesc?.description?.toLowerCase().includes(search) || false;
+
+      const matchesSearch = matchesName || matchesFamily || matchesTypeField || matchesTitle || matchesDescription;
       const matchesRarity = rarityFilter === "all" || shard.rarity === rarityFilter;
       const matchesType = typeFilter === "all" || (typeFilter === "direct" && shard.isDirect) || (typeFilter === "fuse" && !shard.isDirect);
       return matchesSearch && matchesRarity && matchesType;
@@ -93,7 +98,7 @@ export const SettingsPage: React.FC = () => {
               value={filter}
               onChange={handleFilterChange}
               onFocus={() => setFilter("")}
-              placeholder="Search shards..."
+              placeholder="Search by name, perk, or description..."
               className="
                 w-full pl-10 pr-4 py-2.5 
                 bg-white/5 border border-white/10 
@@ -151,7 +156,7 @@ export const SettingsPage: React.FC = () => {
               value={filter}
               onChange={handleFilterChange}
               onFocus={() => setFilter("")}
-              placeholder="Search shards..."
+              placeholder="Search by name, perk, or description..."
               className="
                 w-full pl-10 pr-4 py-2.5 
                 bg-white/5 border border-white/10 

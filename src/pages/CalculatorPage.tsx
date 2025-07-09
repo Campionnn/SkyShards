@@ -146,7 +146,7 @@ const CalculatorPageContent: React.FC = () => {
             </button>
           </div>
 
-          <div className={`${sidebarOpen ? "block mt-3" : "hidden xl:block"}`}>
+          <div className={`${sidebarOpen ? "block not-xl:mt-3" : "hidden xl:block"}`}>
             <CalculatorFormWithContext onSubmit={handleCalculate} />
           </div>
         </div>

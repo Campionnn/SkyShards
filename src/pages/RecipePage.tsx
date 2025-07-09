@@ -77,8 +77,9 @@ const RecipePage = () => {
                   onChange={setSearchValue}
                   onSelect={handleShardSelect}
                   onFocus={handleSearchInputFocus}
-                  placeholder="Search for a shard to see all fusion recipes..."
+                  placeholder="Search for a shard..."
                   className="w-full text-sm py-2 px-3"
+                  searchMode="name-only"
                 />
               </div>
             </div>
@@ -112,8 +113,9 @@ const RecipePage = () => {
                 onChange={setSearchValue}
                 onSelect={handleShardSelect}
                 onFocus={handleSearchInputFocus}
-                placeholder="Search for a shard to see all fusion recipes..."
+                placeholder="Search for a shard..."
                 className="w-full"
+                searchMode="name-only"
               />
             </div>
 
@@ -147,8 +149,9 @@ const RecipePage = () => {
                 onChange={setOutputSearchValue}
                 onSelect={handleOutputShardSelect}
                 onFocus={handleOutputSearchInputFocus}
-                placeholder="Search for an output shard to see recipes..."
+                placeholder="Search for a shard..."
                 className="w-full"
+                searchMode="name-only"
               />
             </div>
 

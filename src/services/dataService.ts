@@ -106,7 +106,34 @@ export class DataService {
   async searchShards(query: string): Promise<ShardWithKey[]> {
     const shards = await this.loadShards();
     const lowerQuery = query.toLowerCase();
-    return shards.filter((shard) => shard.name.toLowerCase().includes(lowerQuery));
+
+    // Import SHARD_DESCRIPTIONS to search by title and description
+    const { SHARD_DESCRIPTIONS } = await import("../constants");
+
+    return shards.filter((shard) => {
+      // Search by name (existing functionality)
+      const matchesName = shard.name.toLowerCase().includes(lowerQuery);
+
+      // Search by family and type (existing functionality from settings)
+      const matchesFamily = shard.family.toLowerCase().includes(lowerQuery);
+      const matchesType = shard.type.toLowerCase().includes(lowerQuery);
+
+      // Search by title (perk name) and description
+      const shardDesc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
+      const matchesTitle = shardDesc?.title?.toLowerCase().includes(lowerQuery) || false;
+      const matchesDescription = shardDesc?.description?.toLowerCase().includes(lowerQuery) || false;
+
+      return matchesName || matchesFamily || matchesType || matchesTitle || matchesDescription;
+    });
+  }
+
+  async searchShardsByNameOnly(query: string): Promise<ShardWithKey[]> {
+    const shards = await this.loadShards();
+    const lowerQuery = query.toLowerCase();
+
+    return shards.filter((shard) => {
+      return shard.name.toLowerCase().includes(lowerQuery);
+    });
   }
 
   async getShardByKey(key: string): Promise<ShardWithKey | undefined> {
