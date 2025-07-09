@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { getRarityColor, getRarityBorderColor } from "../utils";
+import { MoveRight } from "lucide-react";
 
 const rarityBg: Record<string, string> = {
   common: "bg-gray-700/80 border-gray-500/80",
@@ -94,9 +95,11 @@ export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, na
               </span>
             </div>
             <div className="flex flex-col gap-1">
-              <div className="text-sm text-yellow-500 font-medium truncate flex gap-1">
+              <div className="text-sm text-yellow-500 font-medium truncate flex gap-1 items-center">
                 {title}
-                <span className="flex items-center">I→X</span>
+                <span className="flex items-center">
+                  I<MoveRight className="w-4" />X
+                </span>
               </div>
               {family && type && (
                 <span className="text-xs text-slate-400">
