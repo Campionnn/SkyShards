@@ -15,14 +15,12 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
   const [inputValue, setInputValue] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
 
-  // Determine if the rate is custom (changed from default)
   const isChanged = rate !== defaultRate;
 
   const handleRateChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setInputValue(e.target.value);
       if (e.target.value === "") {
-        // Don't update rate yet, wait for blur
       } else {
         onRateChange(shard.key, parseFloat(e.target.value) || 0);
       }
@@ -35,11 +33,10 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
     setInputValue(rate.toString());
   };
 
-  // When the input loses focus, update rate if empty and reset editing state
   const handleBlur = () => {
     setIsEditing(false);
     if (inputValue === "") {
-      onRateChange(shard.key, undefined); // Unset custom rate, revert to default
+      onRateChange(shard.key, defaultRate);
     } else {
       onRateChange(shard.key, parseFloat(inputValue) || 0);
     }

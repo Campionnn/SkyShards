@@ -1,13 +1,11 @@
 import type { ShardWithKey } from "../types";
 import { SHARD_DESCRIPTIONS } from "../constants";
-// import type { ShardWithKey, Recipes } from "../types";
 
 export class DataService {
   private static instance: DataService;
   private shardsCache: ShardWithKey[] | null = null;
   private shardNameToKeyCache: Record<string, string> | null = null;
   private defaultRatesCache: Record<string, number> | null = null;
-  // private recipesCache: Recipes | null = null;
 
   public static getInstance(): DataService {
     if (!DataService.instance) {
@@ -31,7 +29,6 @@ export class DataService {
 
       const data = await response.json();
 
-      // Load rates as well
       const defaultRates = await this.loadDefaultRates();
 
       this.shardsCache = Object.entries(data.shards).map(([key, shard]: [string, any]) => ({
@@ -76,47 +73,16 @@ export class DataService {
     }
   }
 
-  // async loadRecipes(): Promise<Recipes> {
-  //   if (this.recipesCache) {
-  //     return this.recipesCache;
-  //   }
-
-  //   try {
-  //     const response = await fetch(`${import.meta.env.BASE_URL}fusion-data.json`);
-  //     const data = await response.json();
-
-  //     const recipes: Recipes = {};
-  //     for (const outputShard in data.recipes) {
-  //       recipes[outputShard] = [];
-  //       for (const qtyStr in data.recipes[outputShard]) {
-  //         const qty = parseInt(qtyStr);
-  //         const recipeList = data.recipes[outputShard][qtyStr];
-  //         recipeList.forEach((inputs: [string, string]) => {
-  //           recipes[outputShard].push({ inputs, outputQuantity: qty });
-  //         });
-  //       }
-  //     }
-
-  //     this.recipesCache = recipes;
-  //     return recipes;
-  //   } catch (error) {
-  //     throw new Error(`Failed to load recipes: ${error}`);
-  //   }
-  // }
-
   async searchShards(query: string): Promise<ShardWithKey[]> {
     const shards = await this.loadShards();
     const lowerQuery = query.toLowerCase();
 
     return shards.filter((shard) => {
-      // Search by name (existing functionality)
       const matchesName = shard.name.toLowerCase().includes(lowerQuery);
 
-      // Search by family and type (existing functionality from settings)
       const matchesFamily = shard.family.toLowerCase().includes(lowerQuery);
       const matchesType = shard.type.toLowerCase().includes(lowerQuery);
 
-      // Search by title (perk name) and description
       const shardDesc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
       const matchesTitle = shardDesc?.title?.toLowerCase().includes(lowerQuery) || false;
       const matchesDescription = shardDesc?.description?.toLowerCase().includes(lowerQuery) || false;

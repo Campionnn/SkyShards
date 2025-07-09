@@ -2,14 +2,12 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Calculator, Settings, Shuffle, Menu, X } from "lucide-react";
 
-// Custom GitHub icon to avoid deprecation warnings
 const GitHubIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
   </svg>
 );
 
-// Custom Ko-fi icon (coffee cup)
 const KofiIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 241 194" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
     <mask id="mask0_1_219" className="mask-type-luminance" maskUnits="userSpaceOnUse" x="-1" y="0" width="242" height="194">
@@ -54,7 +52,6 @@ export const Navigation: React.FC = () => {
     { path: "/settings", label: "Shards", icon: Settings, color: "blue" },
   ];
 
-  // Color classes for each nav item
   const colorClasses: Record<string, { bg: string; hoverBg: string; text: string; border: string; hoverBorder: string }> = {
     purple: {
       bg: "bg-purple-500/20",
@@ -92,12 +89,10 @@ export const Navigation: React.FC = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-2">
             {navItems.map(({ path, label, icon: Icon, color }) => {
               const isActive = location.pathname === path;
               const colorClass = colorClasses[color];
-              // Set outline color based on nav item color
               const ringClass = isActive
                 ? color === "blue"
                   ? "ring-1 ring-offset-0 ring-blue-300"
@@ -137,7 +132,6 @@ export const Navigation: React.FC = () => {
             </a>
           </div>
 
-          {/* Mobile menu button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -149,7 +143,6 @@ export const Navigation: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-slate-700 pt-3 py-2">
             <div className="flex flex-col space-y-1 gap-1">

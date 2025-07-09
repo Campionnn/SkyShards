@@ -16,7 +16,6 @@ export const SettingsPage: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [popupShard, setPopupShard] = useState<null | any>(null);
 
-  // Debounced filter to reduce re-renders
   const [debouncedFilter, setDebouncedFilter] = useState("");
 
   const debouncedSetFilter = useMemo(() => debounce((value: string) => setDebouncedFilter(value), 300), []);
@@ -24,7 +23,6 @@ export const SettingsPage: React.FC = () => {
     debouncedSetFilter(filter);
   }, [filter, debouncedSetFilter]);
 
-  // Memoized filtered shards for better performance
   const filteredShards = useMemo(() => {
     return shards.filter((shard) => {
       const search = debouncedFilter.toLowerCase();
@@ -32,7 +30,6 @@ export const SettingsPage: React.FC = () => {
       const matchesFamily = shard.family.toLowerCase().includes(search);
       const matchesTypeField = shard.type.toLowerCase().includes(search);
 
-      // Search by title (perk name) and description
       const shardDesc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
       const matchesTitle = shardDesc?.title?.toLowerCase().includes(search) || false;
       const matchesDescription = shardDesc?.description?.toLowerCase().includes(search) || false;
@@ -47,9 +44,21 @@ export const SettingsPage: React.FC = () => {
   const handleRateChange = useCallback(
     (shardId: string, newRate: number | undefined) => {
       updateRate(shardId, newRate);
-      setHasChanges(true);
+
+      // Only show save button if there are actual changes from defaults
+      // Check if the new rate is different from the default rate
+      const defaultRate = defaultRates[shardId];
+      const hasActualChange = newRate !== undefined && newRate !== defaultRate;
+
+      // Check if any other shards have custom rates that differ from defaults
+      const otherChanges = Object.entries(customRates).some(([id, rate]) => {
+        if (id === shardId) return false; // Skip the current shard being changed
+        return rate !== undefined && rate !== defaultRates[id];
+      });
+
+      setHasChanges(hasActualChange || otherChanges);
     },
-    [updateRate]
+    [updateRate, defaultRates, customRates]
   );
 
   const handleResetRates = useCallback(() => {
@@ -86,9 +95,7 @@ export const SettingsPage: React.FC = () => {
             <span className="text-slate-500">hr</span> for more accurate calculations
           </p>
         </div>
-        {/* Mobile Layout: Search on top, filters/buttons below */}
         <div className="md:hidden space-y-3">
-          {/* Search Bar */}
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-slate-400" />
@@ -109,7 +116,6 @@ export const SettingsPage: React.FC = () => {
             />
           </div>
 
-          {/* Filters and Buttons */}
           <div className="flex flex-wrap gap-3">
             <RarityDropdown value={rarityFilter} onChange={setRarityFilter} />
             <TypeDropdown value={typeFilter} onChange={setTypeFilter} />
@@ -144,9 +150,7 @@ export const SettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Desktop Layout: All in one row */}
         <div className="hidden md:flex md:flex-wrap gap-3">
-          {/* Search */}
           <div className="flex-1 min-w-[400px] relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-slate-400" />
@@ -167,11 +171,9 @@ export const SettingsPage: React.FC = () => {
             />
           </div>
 
-          {/* Filters */}
           <RarityDropdown value={rarityFilter} onChange={setRarityFilter} />
           <TypeDropdown value={typeFilter} onChange={setTypeFilter} />
 
-          {/* Action Buttons */}
           <div className="flex gap-2">
             <button
               onClick={handleResetRates}
@@ -212,7 +214,6 @@ export const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Shards List */}
       <div className="bg-white/5 border border-white/10 rounded-md overflow-hidden flex-1">
         <div className="h-full overflow-y-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-3">

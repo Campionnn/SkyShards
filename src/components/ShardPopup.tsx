@@ -28,7 +28,6 @@ export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, na
   const [inputValue, setInputValue] = useState<string>("");
 
   React.useEffect(() => {
-    // When popup opens, set inputValue to empty string (show placeholder)
     if (open) setInputValue("");
   }, [open]);
 
@@ -43,18 +42,36 @@ export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, na
     };
   }, [open]);
 
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && open) {
+        if (document.activeElement) {
+          (document.activeElement as HTMLElement).blur();
+        }
+        onClose();
+      }
+    };
+
+    if (open) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, onClose]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
     if (onRateChange) {
       const val = parseFloat(e.target.value);
-      if (e.target.value === "") onRateChange(undefined); // Unset custom rate, revert to default
+      if (e.target.value === "") onRateChange(undefined);
       else if (!isNaN(val)) onRateChange(val);
     }
   };
 
   if (!open) return null;
 
-  // Close popup when clicking outside the modal content
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();

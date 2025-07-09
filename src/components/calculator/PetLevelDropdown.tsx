@@ -5,12 +5,10 @@ import { Tooltip } from "../Tooltip";
 
 export const PetLevelDropdown: React.FC<PetLevelDropdownProps> = React.memo(
   ({ value, onChange, label, tooltipTitle, tooltipContent, tooltipShardName, tooltipShardIcon, tooltipRarity, tooltipWarning, tooltipFamily, tooltipType }) => {
-    // Show levels 10 to 0 (descending)
     const levels = useMemo(() => Array.from({ length: 11 }, (_, i) => 10 - i), []); // 10-0
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Close dropdown when clicking outside
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
