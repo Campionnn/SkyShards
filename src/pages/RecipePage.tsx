@@ -270,7 +270,7 @@ const RecipePage = () => {
                     const isOpen = outputDropdowns.dropdownOpen[input1] || false;
 
                     return (
-                      <div key={`${input1}-${groupIndex}`} className="p-1 lg:p-2">
+                      <div key={`${input1}-${groupIndex}`} className="px-2">
                         <div className="flex items-center gap-2 lg:gap-3 min-w-0 min-h-[40px]">
                           <ShardDisplay shardId={input1} fusionData={fusionData} />
 
