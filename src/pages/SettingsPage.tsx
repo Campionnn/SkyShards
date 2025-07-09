@@ -72,16 +72,77 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col space-y-4 py-4">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2">Custom Shard Rates</h1>
-        <p className="text-slate-400">Customize gathering rates for more accurate calculations</p>
-      </div>
-
       {/* Controls */}
       <div className="bg-white/5 border border-white/10 rounded-md p-4">
-        <div className="flex flex-col lg:flex-row gap-3">
+        <div className="text-center pb-6 pt-2">
+          <h1 className="text-2xl font-black text-purple-400 mb-2">Shard Overview and Rates</h1>
+          <p className="text-slate-400">
+            Customize gathering rates<span className="font-bold text-slate-500 mx-0.5">/</span>
+            <span className="text-slate-500">hr</span> for more accurate calculations
+          </p>
+        </div>
+        {/* Mobile Layout: Search on top, filters/buttons below */}
+        <div className="md:hidden space-y-3">
+          {/* Search Bar */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-slate-400" />
+            </div>
+            <input
+              type="text"
+              value={filter}
+              onChange={handleFilterChange}
+              onFocus={() => setFilter("")}
+              placeholder="Search shards..."
+              className="
+                w-full pl-10 pr-4 py-2.5 
+                bg-white/5 border border-white/10 
+                rounded-md text-white placeholder-slate-400
+                focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50
+                transition-colors duration-200
+              "
+            />
+          </div>
+
+          {/* Filters and Buttons */}
+          <div className="flex flex-wrap gap-3">
+            <RarityDropdown value={rarityFilter} onChange={setRarityFilter} />
+            <TypeDropdown value={typeFilter} onChange={setTypeFilter} />
+            <button
+              onClick={handleResetRates}
+              className="
+                px-3 py-2.5 bg-red-500/20 hover:bg-red-500/30 
+                text-red-400 font-medium rounded-md 
+                border border-red-500/20 hover:border-red-500/30
+                transition-colors duration-200
+                flex items-center space-x-2 cursor-pointer
+              "
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Reset</span>
+            </button>
+            {hasChanges && (
+              <button
+                onClick={handleSave}
+                className="
+                  px-3 py-2.5 bg-green-500/20 hover:bg-green-500/30 
+                  text-green-400 font-medium rounded-md 
+                  border border-green-500/20 hover:border-green-500/30
+                  transition-colors duration-200
+                  flex items-center space-x-2 cursor-pointer
+                "
+              >
+                <Save className="w-4 h-4" />
+                <span>Save</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop Layout: All in one row */}
+        <div className="hidden md:flex md:flex-wrap gap-3">
           {/* Search */}
-          <div className="flex-1 relative">
+          <div className="flex-1 min-w-[400px] relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-slate-400" />
             </div>
@@ -149,7 +210,7 @@ export const SettingsPage: React.FC = () => {
       {/* Shards List */}
       <div className="bg-white/5 border border-white/10 rounded-md overflow-hidden flex-1">
         <div className="h-full overflow-y-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 p-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-3">
             {filteredShards.map((shard) => (
               <div key={shard.key}>
                 <ShardItem
