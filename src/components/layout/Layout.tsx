@@ -5,7 +5,6 @@ import { ErrorBoundary } from "./ErrorBoundary";
 
 export const Layout: React.FC = () => {
   const location = useLocation();
-  // Removed debug logs
   return (
     <div className="min-h-screen bg-slate-950">
       <Navigation />

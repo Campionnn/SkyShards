@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { getRarityColor } from "../utils";
+import { MoveRight } from "lucide-react";
 
 interface TooltipProps {
   content: string;
@@ -104,7 +105,14 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
               {shardIcon && <img src={`${import.meta.env.BASE_URL}shardIcons/${shardIcon}.png`} alt={title || shardName} className="w-8 h-8 object-contain flex-shrink-0" loading="lazy" />}
               <div className="flex flex-col">
                 {shardName && <div className={`font-medium text-sm ${rarity ? getRarityColor(rarity) : "text-white"}`}>{shardName}</div>}
-                {title && <div className="text-yellow-500 text-xs">{title} I→X</div>}
+                {title && (
+                  <div className="text-yellow-500 text-xs flex gap-1 items-center">
+                    {title}
+                    <span className="flex items-center">
+                      I<MoveRight className="w-3" />X
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}

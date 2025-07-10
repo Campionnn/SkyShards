@@ -154,10 +154,10 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
     return (
       <div className="bg-slate-600/20 rounded border border-slate-300/50 overflow-hidden">
-        <button onClick={() => onToggle(subNodeId)} className="w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 min-w-0">
+        <button onClick={() => onToggle(subNodeId)} className="w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors flex items-center justify-between gap-2 sm:gap-8">
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
             {renderChevron(isExpanded)}
-            <div className="min-w-0 flex-shrink-0">{renderRecipeDisplay(maxOutputQuantity, inputShard, input1Quantity, input1Shard, input2Quantity, input2Shard)}</div>
+            <div className="min-w-0 flex-shrink-0 overflow-hidden">{renderRecipeDisplay(maxOutputQuantity, inputShard, input1Quantity, input1Shard, input2Quantity, input2Shard)}</div>
           </div>
           <div className="text-right flex-shrink-0">
             <div className="flex items-center justify-end gap-1">
@@ -194,13 +194,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
     return (
       <div className="flex flex-col border border-slate-400/70 rounded-md bg-slate-500/40">
-        <button className="flex items-center justify-between w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors gap-2" onClick={() => onToggle(nodeId)}>
-          <div className="flex items-center gap-2 min-w-0">
+        <button className="flex items-center justify-between w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors gap-2 sm:gap-8" onClick={() => onToggle(nodeId)}>
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
             {renderChevron(isExpanded)}
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-1 sm:gap-2 min-w-0 overflow-hidden">
               <div className="text-sm text-amber-300 flex-shrink-0">{runCount} crafts</div>
               <MoveRight className="w-6 text-amber-400 flex-shrink-0" />
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-1 sm:gap-2 min-w-0 overflow-hidden">
                 {renderShardInfo(Math.floor(tree.quantity), shard, false)}
                 <span className="px-1 bg-amber-500/20 text-amber-400 border border-amber-400/40 text-sm font-medium rounded-md flex-shrink-0">CYCLE !</span>
               </div>
@@ -241,11 +241,11 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                           <div key={stepIndex} className="bg-slate-600/20 rounded border border-slate-300/50 overflow-hidden">
                             <button
                               onClick={() => onToggle(stepNodeId)}
-                              className="w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors flex items-center justify-between gap-4"
+                              className="w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors flex items-center justify-between gap-2 sm:gap-8"
                             >
-                              <div className="flex items-center gap-2 min-w-0">
+                              <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
                                 {renderChevron(stepIsExpanded)}
-                                <div className="min-w-0 flex-shrink-0">
+                                <div className="min-w-0 flex-shrink-0 overflow-hidden">
                                   {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
                                 </div>
                               </div>
@@ -277,8 +277,10 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                         );
                       } else {
                         return (
-                          <div key={stepIndex} className="px-3 py-1.5 bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between">
-                            <div className="min-w-0">{renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}</div>
+                          <div key={stepIndex} className="px-3 py-1.5 bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between gap-2 sm:gap-8">
+                            <div className="min-w-0 flex-1 overflow-hidden">
+                              {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
+                            </div>
                             <div className="text-right flex-shrink-0">
                               <div className="flex items-center justify-end gap-1">
                                 <span className="text-xs text-slate-500">fusions</span>
@@ -357,10 +359,10 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
   return (
     <div className="bg-slate-800 border border-slate-600 rounded-md overflow-hidden">
       <button onClick={() => onToggle(nodeId)} className="w-full px-3 py-1 text-left cursor-pointer hover:bg-slate-700/50 transition-colors">
-        <div className="flex items-center justify-between gap-4 min-w-0">
-          <div className="flex items-center gap-2 p-0.5 min-w-0">
+        <div className="flex items-center justify-between gap-15 sm:gap-8 min-w-0">
+          <div className="flex items-center gap-1 sm:gap-2 p-0.5 min-w-0 flex-1">
             {renderChevron(isExpanded)}
-            <div className="text-white flex items-center gap-2 min-w-0 flex-shrink-0 whitespace-nowrap">
+            <div className="text-white flex items-center gap-1 sm:gap-2 min-w-0 flex-shrink-0 overflow-hidden">
               <span className="font-medium text-sm flex-shrink-0">{Math.floor(displayQuantity)}x</span>
 
               <Tooltip
@@ -373,15 +375,15 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                 type={shardDesc?.type}
                 className="cursor-pointer min-w-0"
               >
-                <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+                <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-shrink-0">
                   <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
-                  <span className={`font-medium ${getRarityColor(shard.rarity)} text-sm whitespace-nowrap`} title={getShardDetails(shard, false)}>
+                  <span className={`font-medium ${getRarityColor(shard.rarity)} text-sm truncate`} title={getShardDetails(shard, false)}>
                     {shard.name}
                   </span>
                 </div>
               </Tooltip>
 
-              <span className="text-slate-400 text-sm font-medium flex items-center gap-2 min-w-0 flex-shrink-0 whitespace-nowrap">
+              <span className="text-slate-400 text-sm font-medium flex items-center gap-1 min-w-0 flex-shrink-0 overflow-hidden">
                 <span className="text-white flex-shrink-0 text-sm">=</span>
 
                 <span className="flex-shrink-0 text-sm">{Math.floor(input1.quantity)}x</span>
@@ -396,9 +398,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   type={input1ShardDesc?.type}
                   className="cursor-pointer min-w-0"
                 >
-                  <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+                  <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
                     <img src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`} alt={input1Shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
-                    <span className={`${getRarityColor(input1Shard.rarity)} whitespace-nowrap text-sm`}>{input1Shard.name}</span>
+                    <span className={`${getRarityColor(input1Shard.rarity)} text-sm truncate`}>{input1Shard.name}</span>
                   </div>
                 </Tooltip>
 
@@ -416,9 +418,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   type={input2ShardDesc?.type}
                   className="cursor-pointer min-w-0"
                 >
-                  <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
+                  <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
                     <img src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`} alt={input2Shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
-                    <span className={`${getRarityColor(input2Shard.rarity)} whitespace-nowrap text-sm`}>{input2Shard.name}</span>
+                    <span className={`${getRarityColor(input2Shard.rarity)} text-sm truncate`}>{input2Shard.name}</span>
                   </div>
                 </Tooltip>
               </span>
