@@ -16,8 +16,6 @@ import { BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS } from "../cons
 
 export class CalculationService {
   private static instance: CalculationService;
-  private dataCache?: Data;
-  private minCostsCache?: Map<string, number>;
 
   public static getInstance(): CalculationService {
     if (!CalculationService.instance) {
@@ -237,19 +235,9 @@ export class CalculationService {
     return { minCosts, choices };
   }
 
-  private async ensureCache(params: CalculationParams): Promise<void> {
-    if (!this.dataCache) {
-      this.dataCache = await this.parseData(params);
-    }
-    if (!this.minCostsCache) {
-      const { minCosts } = this.computeMinCosts(this.dataCache, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel);
-      this.minCostsCache = minCosts;
-    }
-  }
-
   private clearCaches(): void {
-    this.dataCache = undefined;
-    this.minCostsCache = undefined;
+    // Method kept for backward compatibility but no longer needed
+    // since we're calculating fresh data each time
   }
 
   private getCostCalculationContext(params: CalculationParams) {
@@ -291,36 +279,38 @@ export class CalculationService {
       .slice(0, 5);
   }
 
-  async getAlternativeRecipe(outputShard: string, params: CalculationParams): Promise<AlternativeRecipeOption[]> {
-    await this.ensureCache(params);
+  async getAlternativeRecipe(outputShard: string, params: CalculationParams, recipeOverrides: RecipeOverride[] = []): Promise<AlternativeRecipeOption[]> {
+    const data = await this.parseData(params);
+    const { minCosts } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
     const context = this.getCostCalculationContext(params);
     const alternatives: AlternativeRecipeOption[] = [];
 
     // Calculate costs for all recipes
-    for (const recipe of this.dataCache!.recipes[outputShard] || []) {
-      const cost = this.calculateRecipeCost(recipe, context, this.dataCache!, this.minCostsCache!);
+    for (const recipe of data.recipes[outputShard] || []) {
+      const cost = this.calculateRecipeCost(recipe, context, data, minCosts);
       alternatives.push({ recipe, cost, timePerShard: cost, isCurrent: false });
     }
 
     // Add direct option
-    const directCost = this.dataCache!.shards[outputShard].rate > 0 ? 1 / this.dataCache!.shards[outputShard].rate : Infinity;
+    const directCost = data.shards[outputShard].rate > 0 ? 1 / data.shards[outputShard].rate : Infinity;
     alternatives.push({ recipe: null, cost: directCost, timePerShard: directCost, isCurrent: false });
 
     return this.processAlternatives(alternatives);
   }
 
-  async getAlternativeDirect(inputShard: string, otherInputShard: string, outputShard: string, params: CalculationParams): Promise<AlternativeRecipeOption[]> {
-    await this.ensureCache(params);
+  async getAlternativeDirect(inputShard: string, otherInputShard: string, outputShard: string, params: CalculationParams, recipeOverrides: RecipeOverride[] = []): Promise<AlternativeRecipeOption[]> {
+    const data = await this.parseData(params);
+    const { minCosts } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
     const context = this.getCostCalculationContext(params);
     const alternatives: AlternativeRecipeOption[] = [];
-    const recipes = this.dataCache!.recipes[outputShard] || [];
+    const recipes = data.recipes[outputShard] || [];
 
     // Find compatible recipes
     for (const recipe of recipes) {
       const [input1, input2] = recipe.inputs;
 
       if ((input1 === otherInputShard || input2 === otherInputShard) && input1 !== inputShard && input2 !== inputShard) {
-        const cost = this.calculateRecipeCost(recipe, context, this.dataCache!, this.minCostsCache!);
+        const cost = this.calculateRecipeCost(recipe, context, data, minCosts);
         alternatives.push({ recipe, cost, timePerShard: cost, isCurrent: false });
       }
     }
@@ -404,7 +394,8 @@ export class CalculationService {
     }
 
     return cycleSteps;
-  }  buildRecipeTree(data: Data, shard: string, choices1: Map<string, RecipeChoice>, cycleNodes: string[][], recipeOverrides: RecipeOverride[] = []): RecipeTree {
+  }
+  buildRecipeTree(data: Data, shard: string, choices1: Map<string, RecipeChoice>, cycleNodes: string[][], recipeOverrides: RecipeOverride[] = []): RecipeTree {
     if (cycleNodes.flat().includes(shard)) {
       const cycleSteps = this.buildCycle(shard, choices1, cycleNodes);
       // Use the same overrides that created the cycle
@@ -643,8 +634,6 @@ export class CalculationService {
     }
 
     const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
-    this.dataCache = data;
-    this.minCostsCache = minCosts;
 
     // Always run cycle detection if we have overrides or crocodile level > 0
     // This ensures cycles created by overrides are properly detected
@@ -716,8 +705,8 @@ export class CalculationService {
     return result;
   }
 
-  async getAlternativeRecipeWithContext(outputShard: string, params: CalculationParams, currentRecipe?: Recipe | null): Promise<AlternativeRecipeOption[]> {
-    const alternatives = await this.getAlternativeRecipe(outputShard, params);
+  async getAlternativeRecipeWithContext(outputShard: string, params: CalculationParams, currentRecipe?: Recipe | null, recipeOverrides: RecipeOverride[] = []): Promise<AlternativeRecipeOption[]> {
+    const alternatives = await this.getAlternativeRecipe(outputShard, params, recipeOverrides);
 
     return alternatives.map((alt) => ({
       ...alt,
@@ -730,9 +719,10 @@ export class CalculationService {
     otherInputShard: string,
     outputShard: string,
     params: CalculationParams,
-    currentRecipe?: Recipe | null
+    currentRecipe?: Recipe | null,
+    recipeOverrides: RecipeOverride[] = []
   ): Promise<AlternativeRecipeOption[]> {
-    const alternatives = await this.getAlternativeDirect(inputShard, otherInputShard, outputShard, params);
+    const alternatives = await this.getAlternativeDirect(inputShard, otherInputShard, outputShard, params, recipeOverrides);
 
     return alternatives.map((alt) => ({
       ...alt,
@@ -747,7 +737,7 @@ export class CalculationService {
   }
 
   // Method to get alternatives while handling cycle nodes properly
-  async getAlternativesForTreeNode(shardId: string, params: CalculationParams, context: AlternativeSelectionContext): Promise<AlternativeRecipeOption[]> {
+  async getAlternativesForTreeNode(shardId: string, params: CalculationParams, context: AlternativeSelectionContext, recipeOverrides: RecipeOverride[] = []): Promise<AlternativeRecipeOption[]> {
     // Don't block cycle nodes - they can still have alternatives
     // The user should be able to break out of cycles by choosing different recipes
 
@@ -755,9 +745,9 @@ export class CalculationService {
       let alternatives: AlternativeRecipeOption[] = [];
 
       if (context.isDirectInput && context.inputShard && context.otherInputShard && context.outputShard) {
-        alternatives = await this.getAlternativeDirectWithContext(context.inputShard, context.otherInputShard, context.outputShard, params, context.currentRecipe);
+        alternatives = await this.getAlternativeDirectWithContext(context.inputShard, context.otherInputShard, context.outputShard, params, context.currentRecipe, recipeOverrides);
       } else {
-        alternatives = await this.getAlternativeRecipeWithContext(shardId, params, context.currentRecipe);
+        alternatives = await this.getAlternativeRecipeWithContext(shardId, params, context.currentRecipe, recipeOverrides);
       }
 
       return alternatives;

@@ -2,7 +2,7 @@ import React from "react";
 import { getRarityColor, getShardDetails, formatShardDescription } from "../../utils/index";
 import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
 import { formatNumber } from "../../utils/index";
-import type { RecipeTreeNodeProps, Recipe } from "../../types/index";
+import type { RecipeTreeNodeProps } from "../../types/index";
 import { Tooltip } from "../Tooltip";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 
@@ -122,7 +122,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
     );
   };
 
-  const renderDirectShard = (quantity: number, shard: any, context?: { otherInputShard?: string; outputShard?: string; currentRecipe?: Recipe | null }) => (
+  const renderDirectShard = (quantity: number, shard: any) => (
     <div className="bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between px-3 py-1.5 text-sm font-medium gap-2">
       <div className="flex items-center gap-2 min-w-0">
         <div className="w-2 h-2 bg-green-400 rounded-full" />
@@ -135,15 +135,12 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           <span className="text-slate-500 text-xs mx-0.5">/</span>
           <span className="text-slate-400 text-xs">hr</span>
         </div>
-        {onShowAlternatives && context && (
+        {onShowAlternatives && (
           <button
             onClick={() =>
               onShowAlternatives(shard.id, {
-                isDirectInput: true,
-                inputShard: shard.id,
-                otherInputShard: context.otherInputShard,
-                outputShard: context.outputShard,
-                currentRecipe: context.currentRecipe,
+                isDirectInput: false, // Changed: treat as regular recipe alternatives for this shard
+                currentRecipe: null, // Direct collection has no current recipe
               })
             }
             className="p-1 hover:bg-slate-700 rounded transition-colors"

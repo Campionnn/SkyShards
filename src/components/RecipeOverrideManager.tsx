@@ -38,7 +38,7 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({ ta
 
       try {
         const calculationService = CalculationService.getInstance();
-        const alternatives = await calculationService.getAlternativesForTreeNode(shardId, params, context);
+        const alternatives = await calculationService.getAlternativesForTreeNode(shardId, params, context, recipeOverrides);
 
         // Get shard name from data
         const data = await calculationService.parseData(params);
@@ -60,7 +60,7 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({ ta
         }));
       }
     },
-    [params]
+    [params, recipeOverrides]
   );
 
   const handleRecipeSelect = useCallback(
