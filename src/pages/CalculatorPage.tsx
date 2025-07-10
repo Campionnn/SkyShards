@@ -184,9 +184,9 @@ const CalculatorPageContent: React.FC = () => {
 
           {/* Results */}
           {result && calculationData && currentParams && (
-            <CalculationResults 
-              result={result} 
-              data={calculationData} 
+            <CalculationResults
+              result={result}
+              data={calculationData}
               targetShardName={targetShardName}
               targetShard={currentShardKey}
               requiredQuantity={currentQuantity}

@@ -404,20 +404,19 @@ export class CalculationService {
     }
 
     return cycleSteps;
-  }
-
-  buildRecipeTree(data: Data, shard: string, choices1: Map<string, RecipeChoice>, cycleNodes: string[][]): RecipeTree {
+  }  buildRecipeTree(data: Data, shard: string, choices1: Map<string, RecipeChoice>, cycleNodes: string[][], recipeOverrides: RecipeOverride[] = []): RecipeTree {
     if (cycleNodes.flat().includes(shard)) {
       const cycleSteps = this.buildCycle(shard, choices1, cycleNodes);
-      const { minCosts, choices } = this.computeMinCosts(data, 0, 0, 0);
+      // Use the same overrides that created the cycle
+      const { minCosts, choices } = this.computeMinCosts(data, 0, 0, 0, recipeOverrides);
       const targetShard = cycleNodes.flat().reduce((minShard, shard) => {
         return minCosts.get(shard)! < minCosts.get(minShard)! ? shard : minShard;
       }, cycleNodes.flat()[0]);
 
-      const tree = this.buildRecipeTree(data, targetShard, choices, []);
+      const tree = this.buildRecipeTree(data, targetShard, choices, [], recipeOverrides);
       const craftCounter = { total: 0 };
-      this.assignQuantities(tree, data.shards[targetShard].fuse_amount, data, craftCounter, choices, 1);
-      
+      this.assignQuantities(tree, data.shards[targetShard].fuse_amount, data, craftCounter, choices, 1, recipeOverrides);
+
       return {
         shard,
         method: "cycle",
@@ -441,8 +440,8 @@ export class CalculationService {
     } else {
       const recipe = choice.recipe;
       const [input1, input2] = recipe.inputs;
-      const tree1 = this.buildRecipeTree(data, input1, choices1, cycleNodes);
-      const tree2 = this.buildRecipeTree(data, input2, choices1, cycleNodes);
+      const tree1 = this.buildRecipeTree(data, input1, choices1, cycleNodes, recipeOverrides);
+      const tree2 = this.buildRecipeTree(data, input2, choices1, cycleNodes, recipeOverrides);
 
       if (cycleNodes.flat().includes(shard)) {
         return {
@@ -466,7 +465,15 @@ export class CalculationService {
     }
   }
 
-  assignQuantities(tree: RecipeTree, requiredQuantity: number, data: Data, craftCounter: { total: number }, choices: Map<string, RecipeChoice>, crocodileMultiplier: number): void {
+  assignQuantities(
+    tree: RecipeTree,
+    requiredQuantity: number,
+    data: Data,
+    craftCounter: { total: number },
+    choices: Map<string, RecipeChoice>,
+    crocodileMultiplier: number,
+    recipeOverrides: RecipeOverride[] = []
+  ): void {
     tree.quantity = requiredQuantity;
 
     switch (tree.method) {
@@ -483,8 +490,8 @@ export class CalculationService {
         const input1Quantity = craftsNeeded * fuse1;
         const input2Quantity = craftsNeeded * fuse2;
 
-        this.assignQuantities(tree.inputs[0], input1Quantity, data, craftCounter, choices, crocodileMultiplier);
-        this.assignQuantities(tree.inputs[1], input2Quantity, data, craftCounter, choices, crocodileMultiplier);
+        this.assignQuantities(tree.inputs[0], input1Quantity, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
+        this.assignQuantities(tree.inputs[1], input2Quantity, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
         break;
       }
       case "cycleNode": {
@@ -498,8 +505,8 @@ export class CalculationService {
         const fuse1 = data.shards[input1].fuse_amount;
         const fuse2 = data.shards[input2].fuse_amount;
 
-        this.assignQuantities(tree.inputs[0], fuse1, data, craftCounter, choices, crocodileMultiplier);
-        this.assignQuantities(tree.inputs[1], fuse2, data, craftCounter, choices, crocodileMultiplier);
+        this.assignQuantities(tree.inputs[0], fuse1, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
+        this.assignQuantities(tree.inputs[1], fuse2, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
         break;
       }
 
@@ -561,8 +568,8 @@ export class CalculationService {
               const totalQuantityNeeded = quantityPerCycle * totalCycles;
               const inputChoice = choices.get(inputId);
               if (inputChoice && inputChoice.recipe) {
-                const inputTree = this.buildRecipeTree(data, inputId, choices, []);
-                this.assignQuantities(inputTree, totalQuantityNeeded, data, craftCounter, choices, crocodileMultiplier);
+                const inputTree = this.buildRecipeTree(data, inputId, choices, [], recipeOverrides);
+                this.assignQuantities(inputTree, totalQuantityNeeded, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
               }
             }
           });
@@ -638,13 +645,17 @@ export class CalculationService {
     const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
     this.dataCache = data;
     this.minCostsCache = minCosts;
-    const cycleNodes = params.crocodileLevel > 0 ? this.findCycleNodes(choices) : [];
-    const tree = this.buildRecipeTree(data, targetShard, choices, cycleNodes);
+
+    // Always run cycle detection if we have overrides or crocodile level > 0
+    // This ensures cycles created by overrides are properly detected
+    const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0 ? this.findCycleNodes(choices) : [];
+
+    const tree = this.buildRecipeTree(data, targetShard, choices, cycleNodes, recipeOverrides);
     const craftCounter = { total: 0 };
     const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
     const seaSerpentMultiplier = 1 + ((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier;
     const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100) * seaSerpentMultiplier;
-    this.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, crocodileMultiplier);
+    this.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
 
     const totalQuantities = this.collectTotalQuantities(tree, data);
 
@@ -698,10 +709,10 @@ export class CalculationService {
 
     // Recalculate with the new overrides
     const result = await this.calculateOptimalPath(targetShard, requiredQuantity, params, updatedOverrides);
-    
+
     // Ensure caches are cleared after calculation to prevent stale data
     this.clearCaches();
-    
+
     return result;
   }
 
@@ -739,16 +750,16 @@ export class CalculationService {
   async getAlternativesForTreeNode(shardId: string, params: CalculationParams, context: AlternativeSelectionContext): Promise<AlternativeRecipeOption[]> {
     // Don't block cycle nodes - they can still have alternatives
     // The user should be able to break out of cycles by choosing different recipes
-    
+
     try {
       let alternatives: AlternativeRecipeOption[] = [];
-      
+
       if (context.isDirectInput && context.inputShard && context.otherInputShard && context.outputShard) {
         alternatives = await this.getAlternativeDirectWithContext(context.inputShard, context.otherInputShard, context.outputShard, params, context.currentRecipe);
       } else {
         alternatives = await this.getAlternativeRecipeWithContext(shardId, params, context.currentRecipe);
       }
-      
+
       return alternatives;
     } catch (error) {
       console.error("Error getting alternatives for tree node:", error);

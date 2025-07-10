@@ -8,15 +8,7 @@ import { RecipeOverrideManager } from "./RecipeOverrideManager";
 import { Tooltip } from "./Tooltip";
 import { SHARD_DESCRIPTIONS } from "../constants";
 
-export const CalculationResults: React.FC<CalculationResultsProps> = ({ 
-  result, 
-  data, 
-  targetShardName, 
-  targetShard, 
-  requiredQuantity, 
-  params, 
-  onResultUpdate 
-}) => {
+export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, data, targetShardName, targetShard, requiredQuantity, params, onResultUpdate }) => {
   const [expandedStates, setExpandedStates] = useState<Map<string, boolean>>(new Map());
   const [lastTreeHash, setLastTreeHash] = useState<string>("");
 
@@ -223,12 +215,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
         {/* Only the outer container is scrollable */}
         <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
           <div className="min-w-[650px]">
-            <RecipeOverrideManager
-              targetShard={targetShard}
-              requiredQuantity={requiredQuantity}
-              params={params}
-              onResultUpdate={onResultUpdate}
-            >
+            <RecipeOverrideManager targetShard={targetShard} requiredQuantity={requiredQuantity} params={params} onResultUpdate={onResultUpdate}>
               {({ showAlternatives }) => (
                 <RecipeTreeNode
                   tree={result.tree}

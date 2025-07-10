@@ -28,7 +28,7 @@ export type Recipes = {
 export type RecipeOverride = {
   shardId: string;
   recipe: Recipe | null;
-}
+};
 
 export interface Data {
   recipes: Recipes;
@@ -215,8 +215,5 @@ export interface RecipeOverrideManagerProps {
   requiredQuantity: number;
   params: CalculationParams;
   onResultUpdate: (result: CalculationResult) => void;
-  children: (props: {
-    showAlternatives: (shardId: string, context: AlternativeSelectionContext) => void;
-    recipeOverrides: RecipeOverride[];
-  }) => React.ReactNode;
+  children: (props: { showAlternatives: (shardId: string, context: AlternativeSelectionContext) => void; recipeOverrides: RecipeOverride[] }) => React.ReactNode;
 }

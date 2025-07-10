@@ -6,16 +6,7 @@ import type { RecipeTreeNodeProps, Recipe } from "../../types/index";
 import { Tooltip } from "../Tooltip";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 
-export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ 
-  tree, 
-  data, 
-  isTopLevel = false, 
-  totalShardsProduced = tree.quantity, 
-  nodeId, 
-  expandedStates, 
-  onToggle,
-  onShowAlternatives 
-}) => {
+export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel = false, totalShardsProduced = tree.quantity, nodeId, expandedStates, onToggle, onShowAlternatives }) => {
   const shard = data.shards[tree.shard];
 
   const findRecipeForShard = (shardId: string) => {
@@ -146,13 +137,15 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         </div>
         {onShowAlternatives && context && (
           <button
-            onClick={() => onShowAlternatives(shard.id, {
-              isDirectInput: true,
-              inputShard: shard.id,
-              otherInputShard: context.otherInputShard,
-              outputShard: context.outputShard,
-              currentRecipe: context.currentRecipe
-            })}
+            onClick={() =>
+              onShowAlternatives(shard.id, {
+                isDirectInput: true,
+                inputShard: shard.id,
+                otherInputShard: context.otherInputShard,
+                outputShard: context.outputShard,
+                currentRecipe: context.currentRecipe,
+              })
+            }
             className="p-1 hover:bg-slate-700 rounded transition-colors"
             title="Show alternatives"
           >
@@ -241,8 +234,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onShowAlternatives(tree.shard, { 
-                    currentRecipe: null // Cycles don't have a single recipe
+                  onShowAlternatives(tree.shard, {
+                    currentRecipe: null, // Cycles don't have a single recipe
                   });
                 }}
                 className="p-1 hover:bg-slate-700 rounded transition-colors"
@@ -280,10 +273,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                         return (
                           <div key={stepIndex} className="bg-slate-600/20 rounded border border-slate-300/50 overflow-hidden">
                             <div className="flex items-center justify-between w-full px-3 py-1.5">
-                              <button
-                                onClick={() => onToggle(stepNodeId)}
-                                className="flex-1 text-left cursor-pointer hover:bg-slate-800/40 transition-colors rounded p-0.5"
-                              >
+                              <button onClick={() => onToggle(stepNodeId)} className="flex-1 text-left cursor-pointer hover:bg-slate-800/40 transition-colors rounded p-0.5">
                                 <div className="flex items-center space-x-2">
                                   {renderChevron(stepIsExpanded)}
                                   {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
@@ -300,8 +290,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      onShowAlternatives(step.outputShard, { 
-                                        currentRecipe: recipe
+                                      onShowAlternatives(step.outputShard, {
+                                        currentRecipe: recipe,
                                       });
                                     }}
                                     className="p-1 hover:bg-slate-700 rounded transition-colors"
@@ -346,8 +336,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    onShowAlternatives(step.outputShard, { 
-                                      currentRecipe: recipe
+                                    onShowAlternatives(step.outputShard, {
+                                      currentRecipe: recipe,
                                     });
                                   }}
                                   className="p-1 hover:bg-slate-700 rounded transition-colors"
@@ -411,11 +401,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
             </div>
           </div>
           {onShowAlternatives && (
-            <button
-              onClick={() => onShowAlternatives(tree.shard, { currentRecipe: null })}
-              className="p-1 hover:bg-slate-700 rounded transition-colors"
-              title="Show alternatives"
-            >
+            <button onClick={() => onShowAlternatives(tree.shard, { currentRecipe: null })} className="p-1 hover:bg-slate-700 rounded transition-colors" title="Show alternatives">
               <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
             </button>
           )}
@@ -531,8 +517,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onShowAlternatives(tree.shard, { 
-                  currentRecipe: "recipe" in tree ? tree.recipe : null 
+                onShowAlternatives(tree.shard, {
+                  currentRecipe: "recipe" in tree ? tree.recipe : null,
                 });
               }}
               className="p-1 hover:bg-slate-700 rounded transition-colors"
