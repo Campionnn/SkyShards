@@ -200,6 +200,7 @@ export interface AlternativeSelectionContext {
   currentRecipe?: Recipe | null;
 }
 
+// Component props interfaces
 export interface AlternativeRecipePopupProps {
   isOpen: boolean;
   onClose: () => void;

@@ -16,72 +16,67 @@ interface TooltipProps {
 
 export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, className = "", shardIcon, rarity, warning, family, type, children }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [isPositioned, setIsPositioned] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const updatePosition = () => {
-    if (triggerRef.current && tooltipRef.current) {
-      const triggerRect = triggerRef.current.getBoundingClientRect();
-      const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    if (!triggerRef.current || !tooltipRef.current) return;
 
-      // Position above the trigger by default
-      let top = triggerRect.top - tooltipRect.height - 8;
-      let left = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+    const triggerRect = triggerRef.current.getBoundingClientRect();
+    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    const viewportPadding = 8;
 
-      // Adjust if tooltip would go off screen
-      if (top < 8) {
-        // Position below if no room above
-        top = triggerRect.bottom + 8;
-      }
+    // Calculate position above trigger by default
+    let top = triggerRect.top - tooltipRect.height - viewportPadding;
+    let left = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
 
-      if (left < 8) {
-        left = 8;
-      } else if (left + tooltipRect.width > window.innerWidth - 8) {
-        left = window.innerWidth - tooltipRect.width - 8;
-      }
-
-      setPosition({ top, left });
-      setIsPositioned(true);
+    // Adjust if tooltip would go off screen
+    if (top < viewportPadding) {
+      top = triggerRect.bottom + viewportPadding;
     }
+
+    left = Math.max(viewportPadding, Math.min(left, window.innerWidth - tooltipRect.width - viewportPadding));
+
+    setPosition({ top, left });
   };
 
-  const handleClick = (e: React.MouseEvent) => {
+  const toggleTooltip = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isVisible) {
-      setIsPositioned(false);
-    }
     setIsVisible(!isVisible);
   };
 
   useEffect(() => {
-    if (isVisible) {
-      updatePosition();
-      window.addEventListener("resize", updatePosition);
-      window.addEventListener("scroll", updatePosition);
+    if (!isVisible) return;
 
-      // Close tooltip when clicking outside
-      const handleClickOutside = (event: MouseEvent) => {
-        if (triggerRef.current && !triggerRef.current.contains(event.target as Node) && tooltipRef.current && !tooltipRef.current.contains(event.target as Node)) {
-          setIsVisible(false);
-        }
-      };
+    updatePosition();
 
-      document.addEventListener("mousedown", handleClickOutside);
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (!triggerRef.current?.contains(target) && !tooltipRef.current?.contains(target)) {
+        setIsVisible(false);
+      }
+    };
 
-      return () => {
-        window.removeEventListener("resize", updatePosition);
-        window.removeEventListener("scroll", updatePosition);
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }
+    const handlePositionUpdate = () => updatePosition();
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    window.addEventListener("resize", handlePositionUpdate);
+    window.addEventListener("scroll", handlePositionUpdate);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      window.removeEventListener("resize", handlePositionUpdate);
+      window.removeEventListener("scroll", handlePositionUpdate);
+    };
   }, [isVisible]);
+
+  const metaInfo = [family, type].filter(Boolean).join(" • ");
 
   return (
     <>
-      <div ref={triggerRef} onClick={handleClick} className={`cursor-pointer ${className}`} aria-label="Show description">
+      <div ref={triggerRef} onClick={toggleTooltip} className={`cursor-pointer ${className}`} aria-label="Show description">
         {children || (
           <button
             type="button"
@@ -96,7 +91,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
       {isVisible && (
         <div
           ref={tooltipRef}
-          className={`fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 ${!isPositioned ? "opacity-0" : "opacity-100"} transition-opacity duration-100`}
+          className="fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 opacity-100 transition-opacity duration-100"
           style={{ top: position.top, left: position.left }}
         >
           {(title || shardName) && (
@@ -109,7 +104,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
             </div>
           )}
           <div className="text-slate-300 text-xs flex flex-col gap-1">
-            {(family || type) && <div className="text-slate-400 text-xs">{family && type ? `${family} • ${type}` : family || type}</div>}
+            {metaInfo && <div className="text-slate-400 text-xs">{metaInfo}</div>}
             <div dangerouslySetInnerHTML={{ __html: content }} />
             {warning && <div className="text-red-400">{warning}</div>}
           </div>

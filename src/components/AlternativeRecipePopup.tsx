@@ -1,7 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { X, Clock, Star, ChevronRight } from "lucide-react";
-import { getRarityColor } from "../utils";
+import { getRarityColor, formatTime } from "../utils";
 import type { AlternativeRecipePopupProps, Recipe, AlternativeRecipeOption } from "../types";
 
 export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading }) => {
@@ -10,19 +10,6 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
   const handleSelect = (recipe: Recipe | null) => {
     onSelect(recipe);
     onClose();
-  };
-
-  const formatTime = (timePerShard: number) => {
-    if (timePerShard === Infinity) return "∞";
-    if (timePerShard === 0) return "0s";
-
-    const hours = Math.floor(timePerShard);
-    const minutes = Math.floor((timePerShard - hours) * 60);
-    const seconds = Math.floor(((timePerShard - hours) * 60 - minutes) * 60);
-
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    if (minutes > 0) return `${minutes}m ${seconds}s`;
-    return `${seconds}s`;
   };
 
   const renderRecipeOption = (option: AlternativeRecipeOption, key: string | number, index: number) => {

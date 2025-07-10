@@ -2,7 +2,7 @@ import { MAX_QUANTITIES } from "../constants";
 import type { Shard } from "../types";
 
 export const formatTime = (decimalHours: number): string => {
-  const totalSeconds = Math.round(decimalHours * 3600); // Convert hours to seconds
+  const totalSeconds = Math.round(decimalHours * 3600);
 
   if (totalSeconds < 60) {
     return `${totalSeconds} sec`;
@@ -64,7 +64,6 @@ export const getShardDetails = (shard: Shard, isDirect: boolean = false): string
     `Rate: ${shard.rate}`,
   ];
 
-  // Only include ID for non-direct shards (craftable shards)
   if (!isDirect) {
     details.unshift(`ID: ${shard.id}`);
   }
@@ -80,202 +79,149 @@ export const debounce = <T extends (...args: any[]) => any>(func: T, wait: numbe
   };
 };
 
+// Stat icon configurations for color mapping
+interface StatIconConfig {
+  color: string;
+  keywords: readonly string[];
+  specific?: Record<string, string>;
+}
+
+const STAT_ICON_CONFIG: Record<string, StatIconConfig> = {
+  "❤": { color: "text-red-400", keywords: ["Health"] },
+  "❁": { color: "text-red-400", keywords: ["Strength", "Damage"] },
+  "☠": { color: "text-red-400", keywords: ["Crit Damage"] },
+  "♨": { color: "text-red-400", keywords: ["Vitality"], specific: { "Heat Resistance": "text-orange-400" } },
+  "❈": { color: "text-green-400", keywords: ["Defense"] },
+  "❣": { color: "text-green-400", keywords: ["Health Regen"] },
+  "∮": { color: "text-green-600", keywords: ["Sweep"] },
+  "✎": { color: "text-blue-400", keywords: ["Intelligence"] },
+  α: { color: "text-blue-400", keywords: ["Sea Creature Chance"] },
+  "⚓": { color: "text-blue-400", keywords: ["Double Hook Chance"] },
+  "⚶": { color: "text-blue-400", keywords: ["Respiration"] },
+  "☂": { color: "text-sky-400", keywords: ["Fishing Speed"] },
+  "❍": { color: "text-cyan-400", keywords: ["Pressure Resistance"] },
+  "☘": {
+    color: "text-fuchsia-400",
+    keywords: ["Hunter Fortune"],
+    specific: {
+      "Mining Fortune": "text-yellow-400",
+      "Farming Fortune": "text-yellow-400",
+      "Foraging Fortune": "text-yellow-400",
+      "Fig Fortune": "text-yellow-400",
+      "Mangrove Fortune": "text-yellow-400",
+      "Block Fortune": "text-yellow-400",
+    },
+  },
+  "⚔": { color: "text-orange-400", keywords: ["Bonus Attack Speed", "Attack Speed"] },
+  "✯": { color: "text-yellow-400", keywords: ["Magic Find"] },
+  "♔": { color: "text-yellow-400", keywords: ["Trophy Fish Chance"] },
+  "⸕": { color: "text-yellow-400", keywords: ["Mining Speed"] },
+  "♣": { color: "text-pink-400", keywords: ["Pet Luck"] },
+  "☯": {
+    color: "text-purple-400",
+    keywords: ["Foraging Wisdom", "Fishing Wisdom", "Hunting Wisdom", "Mining Wisdom", "Farming Wisdom", "Enchanting Wisdom", "Taming Wisdom", "Combat Wisdom", "Wisdom"],
+  },
+  "✦": { color: "text-white", keywords: ["Speed"] },
+  "❂": { color: "text-white", keywords: ["True Defense"] },
+  "✧": { color: "text-white", keywords: ["Pristine"] },
+};
+
+const RARITY_COLORS = {
+  common: "text-white",
+  uncommon: "text-green-400",
+  rare: "text-blue-400",
+  epic: "text-purple-400",
+  legendary: "text-yellow-400",
+} as const;
+
 export const formatShardDescription = (description: string): string => {
   let result = description;
 
-  // Color specific stat icons and text first
-  result = result
-    // Health (red) - both full name and just icon
-    .replace(/(❤)\s*(Health)/gi, '<span class="text-red-400">$1 $2</span>')
-    .replace(/(❤)(?!\s*Health)/gi, '<span class="text-red-400">$1</span>')
-    // Intelligence (blue)
-    .replace(/(✎)\s*(Intelligence)/gi, '<span class="text-blue-400">$1 $2</span>')
-    .replace(/(✎)(?!\s*Intelligence)/gi, '<span class="text-blue-400">$1</span>')
-    // Strength and Damage (red)
-    .replace(/(❁)\s*(Strength|Damage)/gi, '<span class="text-red-400">$1 $2</span>')
-    .replace(/(❁)(?!\s*(Strength|Damage))/gi, '<span class="text-red-400">$1</span>')
-    // Defense (green)
-    .replace(/(❈)\s*(Defense)/gi, '<span class="text-green-400">$1 $2</span>')
-    .replace(/(❈)(?!\s*Defense)/gi, '<span class="text-green-400">$1</span>')
-    // Hunter Fortune (fuchsia)
-    .replace(/(☘)\s*(Hunter Fortune)/gi, '<span class="text-fuchsia-400">$1 $2</span>')
-    // Mining/Farming/Foraging/Fig/Mangrove/Block Fortune (gold)
-    .replace(/(☘)\s*(Mining Fortune|Farming Fortune|Foraging Fortune|Fig Fortune|Mangrove Fortune|Block Fortune)/gi, '<span class="text-yellow-400">$1 $2</span>')
-    // General Fortune (fuchsia as fallback)
-    .replace(/(☘)\s*(Fortune)/gi, '<span class="text-fuchsia-400">$1 $2</span>')
-    .replace(/(☘)(?!\s*(Hunter Fortune|Mining Fortune|Farming Fortune|Foraging Fortune|Fig Fortune|Mangrove Fortune|Block Fortune|Fortune))/gi, '<span class="text-fuchsia-400">$1</span>')
-    // Speed (white)
-    .replace(/(✦)\s*(Speed)/gi, '<span class="text-white">$1 $2</span>')
-    .replace(/(✦)(?!\s*Speed)/gi, '<span class="text-white">$1</span>')
-    // Attack Speed (orange)
-    .replace(/(⚔)\s*(Bonus Attack Speed|Attack Speed)/gi, '<span class="text-orange-400">$1 $2</span>')
-    .replace(/(⚔)(?!\s*(Bonus Attack Speed|Attack Speed))/gi, '<span class="text-orange-400">$1</span>')
-    // Magic Find (yellow)
-    .replace(/(✯)\s*(Magic Find)/gi, '<span class="text-yellow-400">$1 $2</span>')
-    .replace(/(✯)(?!\s*Magic Find)/gi, '<span class="text-yellow-400">$1</span>')
-    // Crit Damage (red)
-    .replace(/(☠)\s*(Crit Damage)/gi, '<span class="text-red-400">$1 $2</span>')
-    .replace(/(☠)(?!\s*Crit Damage)/gi, '<span class="text-red-400">$1</span>')
-    // True Defense (white)
-    .replace(/(❂)\s*(True Defense)/gi, '<span class="text-white">$1 $2</span>')
-    .replace(/(❂)(?!\s*True Defense)/gi, '<span class="text-white">$1</span>')
-    // Mining Speed (gold)
-    .replace(/(⸕)\s*(Mining Speed)/gi, '<span class="text-yellow-400">$1 $2</span>')
-    .replace(/(⸕)(?!\s*Mining Speed)/gi, '<span class="text-yellow-400">$1</span>')
-    // Fishing Speed (sky blue)
-    .replace(/(☂)\s*(Fishing Speed)/gi, '<span class="text-sky-400">$1 $2</span>')
-    .replace(/(☂)(?!\s*Fishing Speed)/gi, '<span class="text-sky-400">$1</span>')
-    // Sweep (dark green)
-    .replace(/(∮)\s*(Sweep)/gi, '<span class="text-green-600">$1 $2</span>')
-    .replace(/(∮)(?!\s*Sweep)/gi, '<span class="text-green-600">$1</span>')
-    // Sea Creature Chance (blue)
-    .replace(/(α)\s*(Sea Creature Chance)/gi, '<span class="text-blue-400">$1 $2</span>')
-    .replace(/(α)(?!\s*Sea Creature Chance)/gi, '<span class="text-blue-400">$1</span>')
-    // Pet Luck (pink)
-    .replace(/(♣)\s*(Pet Luck)/gi, '<span class="text-pink-400">$1 $2</span>')
-    .replace(/(♣)(?!\s*Pet Luck)/gi, '<span class="text-pink-400">$1</span>')
-    // Trophy Fish Chance (yellow)
-    .replace(/(♔)\s*(Trophy Fish Chance)/gi, '<span class="text-yellow-400">$1 $2</span>')
-    .replace(/(♔)(?!\s*Trophy Fish Chance)/gi, '<span class="text-yellow-400">$1</span>')
-    // Health Regen (green)
-    .replace(/(❣)\s*(Health Regen)/gi, '<span class="text-green-400">$1 $2</span>')
-    .replace(/(❣)(?!\s*Health Regen)/gi, '<span class="text-green-400">$1</span>')
-    // Vitality (red)
-    .replace(/(♨)\s*(Vitality)/gi, '<span class="text-red-400">$1 $2</span>')
-    // Heat Resistance (orange)
-    .replace(/(♨)\s*(Heat Resistance)/gi, '<span class="text-orange-400">$1 $2</span>')
-    .replace(/(♨)(?!\s*(Vitality|Heat Resistance))/gi, '<span class="text-red-400">$1</span>')
-    // Wisdom types (purple)
-    .replace(/(☯)\s*(Foraging Wisdom|Fishing Wisdom|Hunting Wisdom|Mining Wisdom|Farming Wisdom|Enchanting Wisdom|Taming Wisdom|Combat Wisdom|Wisdom)/gi, '<span class="text-purple-400">$1 $2</span>')
-    .replace(/(☯)(?!\s*(Foraging Wisdom|Fishing Wisdom|Hunting Wisdom|Mining Wisdom|Farming Wisdom|Enchanting Wisdom|Taming Wisdom|Combat Wisdom|Wisdom))/gi, '<span class="text-purple-400">$1</span>')
-    // Double Hook Chance (blue)
-    .replace(/(⚓)\s*(Double Hook Chance)/gi, '<span class="text-blue-400">$1 $2</span>')
-    .replace(/(⚓)(?!\s*Double Hook Chance)/gi, '<span class="text-blue-400">$1</span>')
-    // Pressure Resistance (cyan)
-    .replace(/(❍)\s*(Pressure Resistance)/gi, '<span class="text-cyan-400">$1 $2</span>')
-    .replace(/(❍)(?!\s*Pressure Resistance)/gi, '<span class="text-cyan-400">$1</span>')
-    // Respiration (blue)
-    .replace(/(⚶)\s*(Respiration)/gi, '<span class="text-blue-400">$1 $2</span>')
-    .replace(/(⚶)(?!\s*Respiration)/gi, '<span class="text-blue-400">$1</span>')
-    // Pristine (white)
-    .replace(/(✧)\s*(Pristine)/gi, '<span class="text-white">$1 $2</span>')
-    .replace(/(✧)(?!\s*Pristine)/gi, '<span class="text-white">$1</span>');
-
-  // Convert single values to ranges with context-aware coloring
-  result = result.replace(/\+(\d+(?:\.\d+)?)([%s]?)/g, (match, number, unit, offset, string) => {
-    const num = parseFloat(number);
-    const max = num * 10;
-
-    // Get the surrounding context to determine stat type
-    const beforeMatch = string.substring(Math.max(0, offset - 50), offset);
-    const afterMatch = string.substring(offset + match.length, offset + match.length + 50);
-    const context = beforeMatch + afterMatch;
-
-    // Determine color based on stat type in context
-    let colorClass = "text-green-400"; // default
-
-    if (
-      context.includes("❤") ||
-      context.includes("Health") ||
-      context.includes("❁") ||
-      context.includes("Strength") ||
-      context.includes("Damage") ||
-      context.includes("☠") ||
-      context.includes("Crit Damage") ||
-      context.includes("Vitality")
-    ) {
-      colorClass = "text-red-400";
-    } else if (context.includes("♨") || context.includes("Heat Resistance")) {
-      colorClass = "text-orange-400";
-    } else if (
-      context.includes("✎") ||
-      context.includes("Intelligence") ||
-      context.includes("α") ||
-      context.includes("Sea Creature") ||
-      context.includes("⚓") ||
-      context.includes("Double Hook") ||
-      context.includes("⚶") ||
-      context.includes("Respiration")
-    ) {
-      colorClass = "text-blue-400";
-    } else if (context.includes("☂") || context.includes("Fishing Speed")) {
-      colorClass = "text-sky-400";
-    } else if (context.includes("☘") && context.includes("Hunter Fortune")) {
-      colorClass = "text-fuchsia-400";
-    } else if (
-      context.includes("☘") &&
-      (context.includes("Mining Fortune") ||
-        context.includes("Farming Fortune") ||
-        context.includes("Foraging Fortune") ||
-        context.includes("Fig Fortune") ||
-        context.includes("Mangrove Fortune") ||
-        context.includes("Block Fortune") ||
-        context.includes("Fortune"))
-    ) {
-      colorClass = "text-yellow-400";
-    } else if (context.includes("✯") || context.includes("Magic Find") || context.includes("♔") || context.includes("Trophy Fish")) {
-      colorClass = "text-yellow-400";
-    } else if (context.includes("⸕") || context.includes("Mining Speed")) {
-      colorClass = "text-yellow-400";
-    } else if (context.includes("⚔") || context.includes("Attack Speed")) {
-      colorClass = "text-orange-400";
-    } else if (context.includes("❂") || context.includes("True Defense")) {
-      colorClass = "text-white";
-    } else if (context.includes("☯") || context.includes("Wisdom")) {
-      colorClass = "text-purple-400";
-    } else if (context.includes("✦") || context.includes("Speed")) {
-      colorClass = "text-white";
-    } else if (context.includes("❍") || context.includes("Pressure")) {
-      colorClass = "text-cyan-400";
-    } else if (context.includes("∮") || context.includes("Sweep")) {
-      colorClass = "text-green-600";
-    } else if (context.includes("♣") || context.includes("Pet Luck")) {
-      colorClass = "text-pink-400";
-    } else if (context.includes("❈") || context.includes("Defense") || context.includes("❣") || context.includes("Health Regen")) {
-      colorClass = "text-green-400";
-    } else if (context.includes("✧") || context.includes("Pristine")) {
-      colorClass = "text-white";
+  // Apply stat icon coloring
+  for (const [icon, config] of Object.entries(STAT_ICON_CONFIG)) {
+    // Handle specific keyword overrides first
+    if (config.specific) {
+      for (const [keyword, color] of Object.entries(config.specific)) {
+        const regex = new RegExp(`(${icon})\\s*(${keyword})`, "gi");
+        result = result.replace(regex, `<span class="${color}">$1 $2</span>`);
+      }
     }
 
+    // Handle general keywords
+    if (config.keywords.length > 0) {
+      const keywordPattern = config.keywords.join("|");
+      const regex = new RegExp(`(${icon})\\s*(${keywordPattern})`, "gi");
+      result = result.replace(regex, `<span class="${config.color}">$1 $2</span>`);
+    }
+
+    // Handle standalone icons
+    const negativePattern = config.keywords.length > 0 ? `(?!\\s*(${config.keywords.join("|")}))` : "";
+    const specificPattern = config.specific ? `(?!\\s*(${Object.keys(config.specific).join("|")}))` : "";
+    const standaloneRegex = new RegExp(`(${icon})${negativePattern}${specificPattern}`, "gi");
+    result = result.replace(standaloneRegex, `<span class="${config.color}">$1</span>`);
+  }
+
+  return applyRangeConversion(result);
+};
+
+const applyRangeConversion = (text: string): string => {
+  // Convert single values to ranges with context-aware coloring
+  let result = text.replace(/\+(\d+(?:\.\d+)?)([%s]?)/g, (match, number, unit, offset, string) => {
+    const num = parseFloat(number);
+    const max = num * 10;
+    const context = string.substring(Math.max(0, offset - 50), offset + match.length + 50);
+
+    const colorClass = determineStatColor(context);
     return `<span class="${colorClass}">+${number}${unit} to +${max}${unit}</span>`;
   });
 
-  // Color rarity words
-  result = result
-    .replace(/\bCOMMON\b/gi, '<span class="text-white">COMMON</span>')
-    .replace(/\bUNCOMMON\b/gi, '<span class="text-green-400">UNCOMMON</span>')
-    .replace(/\bRARE\b/gi, '<span class="text-blue-400">RARE</span>')
-    .replace(/\bEPIC\b/gi, '<span class="text-purple-400">EPIC</span>')
-    .replace(/\bLEGENDARY\b/gi, '<span class="text-yellow-400">LEGENDARY</span>');
+  // Apply rarity coloring
+  for (const [rarity, color] of Object.entries(RARITY_COLORS)) {
+    result = result.replace(new RegExp(`\\b${rarity}\\b`, "gi"), `<span class="${color}">${rarity.toUpperCase()}</span>`);
+  }
 
   return result;
 };
 
+const determineStatColor = (context: string): string => {
+  const lowerContext = context.toLowerCase();
+
+  // Check for specific stat patterns
+  for (const [icon, config] of Object.entries(STAT_ICON_CONFIG)) {
+    if (lowerContext.includes(icon)) {
+      if (config.specific) {
+        for (const [keyword, color] of Object.entries(config.specific)) {
+          if (lowerContext.includes(keyword.toLowerCase())) {
+            return color;
+          }
+        }
+      }
+      return config.color;
+    }
+  }
+
+  return "text-green-400"; // default
+};
+
 export const convertToRangeDescription = (description: string): string => {
-  // Convert "Provides +X per level" to "Provides +X to +Xx10" with colored numbers
   let result = description.replace(/\+(\d+)\s*([%]?)\s*([^/]*?)\s*per level/gi, (_, amount, percent, rest) => {
     const min = amount;
     const max = parseInt(amount) * 10;
     const restText = rest.trim();
 
-    // Use fuchsia for Hunter Fortune (color everything), green for just the numbers on other bonuses
     if (restText.toLowerCase().includes("hunter fortune")) {
       return `<span class="text-fuchsia-400">+${min}${percent} to +${max}${percent} ${restText}</span>`;
-    } else {
-      return `<span class="text-green-400">+${min}${percent} to +${max}${percent}</span> ${restText}`;
     }
+    return `<span class="text-green-400">+${min}${percent} to +${max}${percent}</span> ${restText}`;
   });
 
-  // Color rarity words with their respective colors
+  // Apply rarity and pet name coloring
   result = result
     .replace(/\bCOMMON\b/gi, '<span class="text-white">COMMON</span>')
     .replace(/\bUNCOMMON\b/gi, '<span class="text-green-400">UNCOMMON</span>')
     .replace(/\bRARE\b/gi, '<span class="text-blue-400">RARE</span>')
     .replace(/\bEPIC\b/gi, '<span class="text-purple-400">EPIC</span>')
-    .replace(/\bLEGENDARY\b/gi, '<span class="text-yellow-400">LEGENDARY</span>');
-
-  // Color pet names with legendary rarity color (since they're all legendary)
-  result = result
+    .replace(/\bLEGENDARY\b/gi, '<span class="text-yellow-400">LEGENDARY</span>')
     .replace(/\bSea Serpent\b/gi, '<span class="text-purple-400">Sea Serpent</span>')
     .replace(/\bTiamat\b/gi, '<span class="text-yellow-400">Tiamat</span>')
     .replace(/\bPython\b/gi, '<span class="text-blue-400">Python</span>')
