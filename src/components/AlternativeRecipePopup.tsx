@@ -1,10 +1,42 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { X, Clock, Star, ChevronRight } from "lucide-react";
+import { X, Clock, Star, ChevronRight, Search } from "lucide-react";
 import { getRarityColor, formatTime } from "../utils";
 import type { AlternativeRecipePopupProps, Recipe, AlternativeRecipeOption } from "../types";
 
 export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Reset search query when popup closes
+  React.useEffect(() => {
+    if (!isOpen) {
+      setSearchQuery("");
+    }
+  }, [isOpen]);
+
+  // Filter alternatives based on search query
+  const filteredAlternatives = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return alternatives.slice(0, 20); // Show only 20 alternatives when no search
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = alternatives.filter((option) => {
+      if (option.recipe === null) {
+        // Direct collection - always include if searching for "direct" or "collection"
+        return "direct collection".includes(query);
+      } else {
+        // Fusion recipe - search in input shard names
+        return option.recipe.inputs.some((inputId) => {
+          const inputShard = data.shards[inputId];
+          return inputShard?.name.toLowerCase().includes(query);
+        });
+      }
+    });
+
+    return filtered.slice(0, 20); // Limit to 20 results
+  }, [alternatives, searchQuery, data.shards]);
+
   if (!isOpen) return null;
 
   const handleSelect = (recipe: Recipe | null) => {
@@ -68,7 +100,7 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
               <Clock className="w-4 h-4" />
               <span>{formatTime(option.timePerShard)}</span>
             </div>
-            {index === 0 && !isCurrent && (
+            {index === 0 && !isCurrent && !searchQuery && (
               <div className="flex items-center gap-1 text-emerald-400">
                 <Star className="w-4 h-4" />
                 <span className="text-xs">Best</span>
@@ -82,8 +114,9 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
 
   return createPortal(
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-900 rounded-xl border border-slate-700 shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-slate-700">
+      <div className="bg-slate-900 rounded-xl border border-slate-700 shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-700 flex-shrink-0">
           <div>
             <h2 className="text-xl font-bold text-white">Alternative Recipes</h2>
             <p className="text-slate-400 text-sm mt-1">
@@ -95,28 +128,68 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-[60vh]">
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-8 h-8 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
+        {/* Search Bar */}
+        <div className="p-4 border-b border-slate-700 flex-shrink-0">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400" />
             </div>
-          ) : alternatives.length === 0 ? (
-            <div className="text-center py-8 text-slate-400">No alternatives available for this shard.</div>
-          ) : (
-            <div className="space-y-3">
-              {alternatives.map((option, index) => {
-                // Create a unique key that includes recipe inputs and output to handle duplicates
-                const uniqueKey = option.recipe ? `${option.recipe.inputs.join("-")}-${option.recipe.outputQuantity}-${index}` : `direct-${index}`;
-                return renderRecipeOption(option, uniqueKey, index);
-              })}
-            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for shards in recipes..."
+              className="w-full pl-10 pr-3 py-2 bg-slate-800/50 border border-slate-600/50 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-colors text-sm"
+            />
+          </div>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="mt-2 text-xs text-slate-400 hover:text-white transition-colors"
+            >
+              Clear search
+            </button>
           )}
         </div>
 
-        <div className="p-6 border-t border-slate-700 bg-slate-800/50">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="w-8 h-8 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
+              </div>
+            ) : filteredAlternatives.length === 0 ? (
+              <div className="text-center py-8 text-slate-400">
+                {searchQuery ? "No alternatives match your search." : "No alternatives available for this shard."}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredAlternatives.map((option, index) => {
+                  // Create a unique key that includes recipe inputs and output to handle duplicates
+                  const uniqueKey = option.recipe ? `${option.recipe.inputs.join("-")}-${option.recipe.outputQuantity}-${index}` : `direct-${index}`;
+                  return renderRecipeOption(option, uniqueKey, index);
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-slate-700 bg-slate-800/50 flex-shrink-0">
           <div className="flex items-center justify-between text-sm text-slate-400">
-            <span>Options are sorted by efficiency (time per shard)</span>
-            <span>{alternatives.length} alternatives found</span>
+            <span>
+              {searchQuery 
+                ? `${filteredAlternatives.length} of ${alternatives.length} alternatives shown` 
+                : "Options are sorted by efficiency (time per shard)"
+              }
+            </span>
+            <span>
+              {searchQuery 
+                ? `Showing top ${Math.min(filteredAlternatives.length, 20)} results`
+                : `${Math.min(alternatives.length, 20)} of ${alternatives.length} alternatives`
+              }
+            </span>
           </div>
         </div>
       </div>
