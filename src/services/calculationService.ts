@@ -1,4 +1,4 @@
-import type { Data, RecipeChoice, RecipeTree, CalculationParams, CalculationResult, Shards, Recipes, Shard, Recipe } from "../types";
+import type { Data, RecipeChoice, RecipeTree, CalculationParams, CalculationResult, Shards, Recipes, Shard, Recipe, RecipeOverride } from "../types";
 import { NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS, BLACK_HOLE_SHARD } from "../constants";
 
 export class CalculationService {
@@ -139,7 +139,23 @@ export class CalculationService {
     return rate * (1 + effectiveFortune / 100);
   }
 
-  computeMinCosts(data: Data, crocodileLevel: number, seaSerpentLevel: number, tiamatLevel: number): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
+  private areRecipesEqual(a: Recipe, b: Recipe | null | undefined): boolean {
+    if (!b) return false;
+    return (
+        a.inputs[0] === b.inputs[0] &&
+        a.inputs[1] === b.inputs[1] &&
+        a.outputQuantity === b.outputQuantity &&
+        a.isReptile === b.isReptile
+    );
+  }
+
+  computeMinCosts(
+    data: Data,
+    crocodileLevel: number,
+    seaSerpentLevel: number,
+    tiamatLevel: number,
+    recipeOverrides: RecipeOverride[] = [],
+  ): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
     const shards = Object.keys(data.shards);
@@ -159,7 +175,33 @@ export class CalculationService {
     let updated = true;
     while (updated) {
       updated = false;
-      shards.forEach((outputShard) => {
+      for (const outputShard of shards) {
+        const recipeOverride = recipeOverrides.find(ro => ro.shardId === outputShard);
+        if (recipeOverride) {
+          const overrideRecipe = recipeOverride.recipe;
+          if (overrideRecipe === null) {
+            continue;
+          }
+          const fuse1 = data.shards[overrideRecipe.inputs[0]].fuse_amount;
+          const fuse2 = data.shards[overrideRecipe.inputs[1]].fuse_amount;
+          const costInput1 = minCosts.get(overrideRecipe.inputs[0])! * fuse1;
+          const costInput2 = minCosts.get(overrideRecipe.inputs[1])! * fuse2;
+          const totalCost = costInput1 + costInput2 + craftPenalty;
+          const effectiveOutputQuantity = overrideRecipe.isReptile ? overrideRecipe.outputQuantity * crocodileMultiplier : overrideRecipe.outputQuantity;
+          const newCost = totalCost / effectiveOutputQuantity;
+
+          const currentCost = minCosts.get(outputShard)!;
+          const currentRecipe = choices.get(outputShard)?.recipe;
+
+          const recipeChanged = !this.areRecipesEqual(overrideRecipe, currentRecipe);
+          if (newCost !== currentCost || recipeChanged) {
+            minCosts.set(outputShard, newCost);
+            choices.set(outputShard, { recipe: overrideRecipe });
+            updated = true;
+          }
+
+          continue;
+        }
         const recipes = data.recipes[outputShard] || [];
         recipes.forEach((recipe) => {
           const [input1, input2] = recipe.inputs;
@@ -176,105 +218,137 @@ export class CalculationService {
             updated = true;
           }
         });
-      });
+      }
     }
 
     return { minCosts, choices };
   }
 
-  async getAlternativeRecipe(
-      outputShard: string,
-      params: CalculationParams
-  ): Promise<{ recipe: Recipe; cost: number; }[]> {
+  private async ensureCache(params: CalculationParams): Promise<void> {
     if (!this.dataCache) {
       this.dataCache = await this.parseData(params);
     }
     if (!this.minCostsCache) {
-      const { minCosts } = this.computeMinCosts(this.dataCache, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel);
+      const { minCosts } = this.computeMinCosts(
+          this.dataCache,
+          params.crocodileLevel,
+          params.seaSerpentLevel,
+          params.tiamatLevel
+      );
       this.minCostsCache = minCosts;
     }
+  }
 
+  private getCostCalculationContext(params: CalculationParams) {
     const craftPenalty = 0.8 / 3600;
     const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
     const seaSerpentMultiplier = 1 + (2 * params.seaSerpentLevel / 100) * tiamatMultiplier;
     const crocodileMultiplier = 1 + (2 * params.crocodileLevel / 100) * seaSerpentMultiplier;
 
-    const alternatives: {recipe: Recipe, cost: number}[] = [];
+    return {
+      craftPenalty,
+      crocodileMultiplier
+    };
+  }
 
-    for (const recipe of this.dataCache.recipes[outputShard] || []) {
-      const [input1, input2] = recipe.inputs;
-      const fuse1 = this.dataCache.shards[input1].fuse_amount;
-      const fuse2 = this.dataCache.shards[input2].fuse_amount;
+  private calculateRecipeCost(
+      recipe: Recipe,
+      context: ReturnType<typeof this.getCostCalculationContext>,
+      data: Data,
+      minCosts: Map<string, number>
+  ): number {
+    const [input1, input2] = recipe.inputs;
+    const fuse1 = data.shards[input1].fuse_amount;
+    const fuse2 = data.shards[input2].fuse_amount;
 
-      const cost1 = this.minCostsCache.get(input1) || Infinity;
-      const cost2 = this.minCostsCache.get(input2) || Infinity;
+    const cost1 = minCosts.get(input1) || Infinity;
+    const cost2 = minCosts.get(input2) || Infinity;
 
-      const totalCost = (cost1 * fuse1) + (cost2 * fuse2) + craftPenalty;
-      const effectiveOutput = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
+    const totalCost = (cost1 * fuse1) + (cost2 * fuse2) + context.craftPenalty;
+    const effectiveOutput = recipe.isReptile ?
+        recipe.outputQuantity * context.crocodileMultiplier :
+        recipe.outputQuantity;
 
-      const costPerShard = totalCost / effectiveOutput;
+    return totalCost / effectiveOutput;
+  }
 
-      alternatives.push({
-        recipe,
-        cost: costPerShard
-      });
-    }
-
-    alternatives.push({
-      recipe: { inputs: ["", ""], outputQuantity: 1, isReptile: false },
-      cost: this.dataCache.shards[outputShard].rate > 0 ? 1 / this.dataCache.shards[outputShard].rate : Infinity,
-    })
-
+  private processAlternatives(
+      alternatives: {recipe: Recipe | null; cost: number}[]
+  ): {recipe: Recipe | null; cost: number}[] {
     return alternatives
         .sort((a, b) => a.cost - b.cost)
+        .filter((alt, index, self) => {
+          if (alt.recipe === null) return true; // Keep direct option
+
+          const isDuplicate = self.findIndex(
+              a => a.recipe &&
+                  alt.recipe &&
+                  a.recipe.inputs.sort().toString() === alt.recipe.inputs.sort().toString()
+          ) !== index;
+
+          return !isDuplicate;
+        })
         .slice(0, 5);
   }
 
-  async getAlternativeDirect(
-    inputShard: string,
-    otherInputShard: string,
-    outputShard: string,
-    params: CalculationParams
-  ): Promise<{ recipe: Recipe; cost: number; }[]> {
-    if (!this.dataCache) {
-      this.dataCache = await this.parseData(params);
-    }
-    if (!this.minCostsCache) {
-      const { minCosts } = this.computeMinCosts(this.dataCache, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel);
-      this.minCostsCache = minCosts;
-    }
+  async getAlternativeRecipe(
+      outputShard: string,
+      params: CalculationParams
+  ): Promise<{ recipe: Recipe | null; cost: number }[]> {
+    await this.ensureCache(params);
+    const context = this.getCostCalculationContext(params);
+    const alternatives: {recipe: Recipe | null, cost: number}[] = [];
 
-    const craftPenalty = 0.8 / 3600;
-    const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
-    const seaSerpentMultiplier = 1 + (2 * params.seaSerpentLevel / 100) * tiamatMultiplier;
-    const crocodileMultiplier = 1 + (2 * params.crocodileLevel / 100) * seaSerpentMultiplier;
-
-    // find all shards that can replace shardId in the recipe while still producing outputShard
-    const alternatives: {recipe: Recipe, cost: number}[] = [];
-    for (const recipe of this.dataCache.recipes[outputShard] || []) {
-      const [input1, input2] = recipe.inputs;
-      if ((input1 === otherInputShard || input2 === otherInputShard) && (input1 !== inputShard && input2 !== inputShard)) {
-        const fuse1 = this.dataCache.shards[input1].fuse_amount;
-        const fuse2 = this.dataCache.shards[input2].fuse_amount;
-
-        const cost1 = this.minCostsCache.get(input1) || Infinity;
-        const cost2 = this.minCostsCache.get(input2) || Infinity;
-
-        const totalCost = (cost1 * fuse1) + (cost2 * fuse2) + craftPenalty;
-        const effectiveOutput = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
-
-        const costPerShard = totalCost / effectiveOutput;
-
-        alternatives.push({
+    // Calculate costs for all recipes
+    for (const recipe of this.dataCache!.recipes[outputShard] || []) {
+      const cost = this.calculateRecipeCost(
           recipe,
-          cost: costPerShard
-        });
+          context,
+          this.dataCache!,
+          this.minCostsCache!
+      );
+      alternatives.push({ recipe, cost });
+    }
+
+    // Add direct option
+    const directCost = this.dataCache!.shards[outputShard].rate > 0 ?
+        1 / this.dataCache!.shards[outputShard].rate :
+        Infinity;
+    alternatives.push({ recipe: null, cost: directCost });
+
+    return this.processAlternatives(alternatives);
+  }
+
+  async getAlternativeDirect(
+      inputShard: string,
+      otherInputShard: string,
+      outputShard: string,
+      params: CalculationParams
+  ): Promise<{ recipe: Recipe | null; cost: number; }[]> {
+    await this.ensureCache(params);
+    const context = this.getCostCalculationContext(params);
+    const alternatives: {recipe: Recipe | null, cost: number}[] = [];
+    const recipes = this.dataCache!.recipes[outputShard] || [];
+
+    // Find compatible recipes
+    for (const recipe of recipes) {
+      const [input1, input2] = recipe.inputs;
+
+      if (
+          (input1 === otherInputShard || input2 === otherInputShard) &&
+          (input1 !== inputShard && input2 !== inputShard)
+      ) {
+        const cost = this.calculateRecipeCost(
+            recipe,
+            context,
+            this.dataCache!,
+            this.minCostsCache!
+        );
+        alternatives.push({ recipe, cost });
       }
     }
 
-    return alternatives
-        .sort((a, b) => a.cost - b.cost)
-        .slice(0, 5);
+    return this.processAlternatives(alternatives);
   }
 
   private findCycleNodes(choices: Map<string, RecipeChoice>): string[][] {
@@ -584,7 +658,10 @@ export class CalculationService {
       };
     }
 
-    const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel);
+    const recipeOverrides: RecipeOverride[] = [];
+    // recipeOverrides.push({shardId: "L44", recipe: { inputs: ["L3", "L41"], outputQuantity: 2, isReptile: false }});
+
+    const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
     this.dataCache = data;
     this.minCostsCache = minCosts;
     const cycleNodes = params.crocodileLevel > 0 ? this.findCycleNodes(choices) : [];
@@ -610,8 +687,6 @@ export class CalculationService {
     const timePerShard = minCosts.get(targetShard) ?? 0;
     const totalTime = timePerShard * totalShardsProduced;
     const craftTime = (craftCounter.total * 0.8) / 3600;
-
-    console.log(await this.getAlternativeRecipe("L44", params));
 
     return {
       timePerShard,

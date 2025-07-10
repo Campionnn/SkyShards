@@ -11,6 +11,10 @@ export interface Shard {
   rate: number;
 }
 
+export type Shards = {
+  [shardId: string]: Shard;
+};
+
 export type Recipe = {
   inputs: [string, string];
   outputQuantity: number;
@@ -21,9 +25,10 @@ export type Recipes = {
   [shardId: string]: Recipe[];
 };
 
-export type Shards = {
-  [shardId: string]: Shard;
-};
+export type RecipeOverride = {
+  shardId: string;
+  recipe: Recipe | null;
+}
 
 export interface Data {
   recipes: Recipes;
