@@ -190,7 +190,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
   if (tree.method === "cycle") {
     const isExpanded = expandedStates.get(nodeId) ?? true;
-    const runCount = tree.cycles.reduce((sum, cycle) => sum + cycle.expectedCrafts, 0);
+    const runCount = Math.ceil(tree.quantity / (tree.cycles[0].expectedOutput - tree.cycles[0].baseOutput));
 
     return (
       <div className="flex flex-col border border-slate-400/70 rounded-md bg-slate-500/40">
