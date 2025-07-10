@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Clock, Star, ChevronRight, Search } from "lucide-react";
+import { X, Clock, Star, Search } from "lucide-react";
 import { getRarityColor, formatTime } from "../utils";
 import type { AlternativeRecipePopupProps, Recipe, AlternativeRecipeOption } from "../types";
 
@@ -8,11 +8,16 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
   const [searchQuery, setSearchQuery] = useState("");
 
   // Reset search query when popup closes
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isOpen) {
       setSearchQuery("");
     }
   }, [isOpen]);
+
+  // Find the output shard from the data
+  const outputShard = useMemo(() => {
+    return Object.values(data.shards).find(shard => shard.name === shardName);
+  }, [data.shards, shardName]);
 
   // Filter alternatives based on search query
   const filteredAlternatives = useMemo(() => {
@@ -87,10 +92,15 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
                       </React.Fragment>
                     );
                   })}
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
-                  <span className="text-slate-300">
-                    {option.recipe!.outputQuantity}x {shardName}
-                  </span>
+                  <span className="text-slate-400 mx-2">=</span>
+                  <div className="flex items-center gap-1">
+                    {outputShard && (
+                      <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
+                    )}
+                    <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300"}>
+                      {option.recipe!.outputQuantity}x {shardName}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
