@@ -16,8 +16,9 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
 
   // Find the output shard from the data
   const outputShard = useMemo(() => {
-    return Object.values(data.shards).find(shard => shard.name === shardName);
-  }, [data.shards, shardName]);
+    if (!data?.shards) return null;
+    return Object.values(data.shards).find((shard) => shard.name === shardName);
+  }, [data?.shards, shardName]);
 
   // Filter alternatives based on search query
   const filteredAlternatives = useMemo(() => {
@@ -33,14 +34,14 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
       } else {
         // Fusion recipe - search in input shard names
         return option.recipe.inputs.some((inputId) => {
-          const inputShard = data.shards[inputId];
+          const inputShard = data?.shards?.[inputId];
           return inputShard?.name.toLowerCase().includes(query);
         });
       }
     });
 
     return filtered; // Return all filtered results
-  }, [alternatives, searchQuery, data.shards]);
+  }, [alternatives, searchQuery, data?.shards]);
 
   if (!isOpen) return null;
 
@@ -79,13 +80,14 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   {option.recipe!.inputs.map((inputId: string, inputIndex: number) => {
-                    const inputShard = data.shards[inputId];
+                    const inputShard = data?.shards?.[inputId];
                     if (!inputShard) return null;
 
                     return (
                       <React.Fragment key={inputId}>
                         {inputIndex > 0 && <span className="text-slate-400">+</span>}
                         <div className="flex items-center gap-1">
+                          <span className="text-slate-400">{inputShard.fuse_amount}x</span>
                           <img src={`${import.meta.env.BASE_URL}shardIcons/${inputId}.png`} alt={inputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
                           <span className={getRarityColor(inputShard.rarity)}>{inputShard.name}</span>
                         </div>
@@ -94,12 +96,9 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
                   })}
                   <span className="text-slate-400 mx-2">=</span>
                   <div className="flex items-center gap-1">
-                    {outputShard && (
-                      <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
-                    )}
-                    <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300"}>
-                      {option.recipe!.outputQuantity}x {shardName}
-                    </span>
+                    <span className="text-slate-400">{option.recipe!.outputQuantity}x</span>
+                    {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
+                    <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300"}>{shardName}</span>
                   </div>
                 </div>
               </div>
@@ -153,10 +152,7 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
             />
           </div>
           {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="mt-2 text-xs text-slate-400 hover:text-white transition-colors"
-            >
+            <button onClick={() => setSearchQuery("")} className="mt-2 text-xs text-slate-400 hover:text-white transition-colors">
               Clear search
             </button>
           )}
@@ -170,9 +166,7 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
                 <div className="w-8 h-8 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
               </div>
             ) : filteredAlternatives.length === 0 ? (
-              <div className="text-center py-8 text-slate-400">
-                {searchQuery ? "No alternatives match your search." : "No alternatives available for this shard."}
-              </div>
+              <div className="text-center py-8 text-slate-400">{searchQuery ? "No alternatives match your search." : "No alternatives available for this shard."}</div>
             ) : (
               <div className="space-y-3">
                 {filteredAlternatives.map((option, index) => {
@@ -188,18 +182,8 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
         {/* Footer */}
         <div className="p-6 border-t border-slate-700 bg-slate-800/50 flex-shrink-0">
           <div className="flex items-center justify-between text-sm text-slate-400">
-            <span>
-              {searchQuery 
-                ? `${filteredAlternatives.length} of ${alternatives.length} alternatives shown` 
-                : "Options are sorted by efficiency (time per shard)"
-              }
-            </span>
-            <span>
-              {searchQuery 
-                ? `Showing ${filteredAlternatives.length} filtered results`
-                : `Showing all ${alternatives.length} alternatives`
-              }
-            </span>
+            <span>{searchQuery ? `${filteredAlternatives.length} of ${alternatives.length} alternatives shown` : "Options are sorted by efficiency (time per shard)"}</span>
+            <span>{searchQuery ? `Showing ${filteredAlternatives.length} filtered results` : `Showing all ${alternatives.length} alternatives`}</span>
           </div>
         </div>
       </div>
