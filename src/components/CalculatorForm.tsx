@@ -163,6 +163,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               }}
               onFocus={handleShardInputFocus}
               placeholder="Search for a shard..."
+              searchMode="name-only"
             />
           </div>
           <div className="flex gap-1.5">

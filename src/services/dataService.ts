@@ -71,6 +71,12 @@ export class DataService {
     return shards.filter((shard) => shard.name.toLowerCase().includes(lowerQuery));
   }
 
+  async searchShardsByNameOnly(query: string): Promise<ShardWithKey[]> {
+    const shards = await this.loadShards();
+    const lowerQuery = query.toLowerCase();
+    return shards.filter((shard) => shard.name.toLowerCase().includes(lowerQuery));
+  }
+
   async getShardByKey(key: string): Promise<ShardWithKey | undefined> {
     const shards = await this.loadShards();
     return shards.find((shard) => shard.key === key);

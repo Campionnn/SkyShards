@@ -15,14 +15,12 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
   const [inputValue, setInputValue] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
 
-  // Determine if the rate is custom (changed from default)
   const isChanged = rate !== defaultRate;
 
   const handleRateChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setInputValue(e.target.value);
       if (e.target.value === "") {
-        // Don't update rate yet, wait for blur
       } else {
         onRateChange(shard.key, parseFloat(e.target.value) || 0);
       }
@@ -35,11 +33,10 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
     setInputValue(rate.toString());
   };
 
-  // When the input loses focus, update rate if empty and reset editing state
   const handleBlur = () => {
     setIsEditing(false);
     if (inputValue === "") {
-      onRateChange(shard.key, undefined); // Unset custom rate, revert to default
+      onRateChange(shard.key, defaultRate);
     } else {
       onRateChange(shard.key, parseFloat(inputValue) || 0);
     }
@@ -54,10 +51,10 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
       role={onCardClick ? "button" : undefined}
       style={onCardClick ? { cursor: "pointer" } : {}}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2 mb-1">
-            <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.key}.png`} alt={shard.name} className="w-6 h-6 object-contain" loading="lazy" style={{ flexShrink: 0 }} />
+          <div className="flex items-center gap-1 mb-1">
+            <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.key}.png`} alt={shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
             <div className={`font-medium text-sm ${getRarityColor(shard.rarity)} truncate`}>{shard.name}</div>
             {shard.isDirect ? (
               <span className="px-1.5 py-0.5 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
@@ -71,7 +68,7 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
           </div>
         </div>
 
-        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             title="Reset to default"

@@ -16,23 +16,25 @@ export const SettingsPage: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [popupShard, setPopupShard] = useState<null | any>(null);
 
-  // Debounced filter to reduce re-renders
   const [debouncedFilter, setDebouncedFilter] = useState("");
 
   const debouncedSetFilter = useMemo(() => debounce((value: string) => setDebouncedFilter(value), 300), []);
-
   useEffect(() => {
     debouncedSetFilter(filter);
   }, [filter, debouncedSetFilter]);
 
-  // Memoized filtered shards for better performance
   const filteredShards = useMemo(() => {
     return shards.filter((shard) => {
       const search = debouncedFilter.toLowerCase();
       const matchesName = shard.name.toLowerCase().includes(search);
       const matchesFamily = shard.family.toLowerCase().includes(search);
       const matchesTypeField = shard.type.toLowerCase().includes(search);
-      const matchesSearch = matchesName || matchesFamily || matchesTypeField;
+
+      const shardDesc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
+      const matchesTitle = shardDesc?.title?.toLowerCase().includes(search) || false;
+      const matchesDescription = shardDesc?.description?.toLowerCase().includes(search) || false;
+
+      const matchesSearch = matchesName || matchesFamily || matchesTypeField || matchesTitle || matchesDescription;
       const matchesRarity = rarityFilter === "all" || shard.rarity === rarityFilter;
       const matchesType = typeFilter === "all" || (typeFilter === "direct" && shard.isDirect) || (typeFilter === "fuse" && !shard.isDirect);
       return matchesSearch && matchesRarity && matchesType;
@@ -42,9 +44,21 @@ export const SettingsPage: React.FC = () => {
   const handleRateChange = useCallback(
     (shardId: string, newRate: number | undefined) => {
       updateRate(shardId, newRate);
-      setHasChanges(true);
+
+      // Only show save button if there are actual changes from defaults
+      // Check if the new rate is different from the default rate
+      const defaultRate = defaultRates[shardId];
+      const hasActualChange = newRate !== undefined && newRate !== defaultRate;
+
+      // Check if any other shards have custom rates that differ from defaults
+      const otherChanges = Object.entries(customRates).some(([id, rate]) => {
+        if (id === shardId) return false; // Skip the current shard being changed
+        return rate !== undefined && rate !== defaultRates[id];
+      });
+
+      setHasChanges(hasActualChange || otherChanges);
     },
-    [updateRate]
+    [updateRate, defaultRates, customRates]
   );
 
   const handleResetRates = useCallback(() => {
@@ -72,16 +86,17 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col space-y-4 py-4">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-2">Custom Shard Rates</h1>
-        <p className="text-slate-400">Customize gathering rates for more accurate calculations</p>
-      </div>
-
       {/* Controls */}
       <div className="bg-white/5 border border-white/10 rounded-md p-4">
-        <div className="flex flex-col lg:flex-row gap-3">
-          {/* Search */}
-          <div className="flex-1 relative">
+        <div className="text-center pb-6 pt-2">
+          <h1 className="text-2xl font-black text-purple-400 mb-2">Shard Overview and Rates</h1>
+          <p className="text-slate-400">
+            Customize gathering rates<span className="font-bold text-slate-500 mx-0.5">/</span>
+            <span className="text-slate-500">hr</span> for more accurate calculations
+          </p>
+        </div>
+        <div className="md:hidden space-y-3">
+          <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-slate-400" />
             </div>
@@ -90,7 +105,7 @@ export const SettingsPage: React.FC = () => {
               value={filter}
               onChange={handleFilterChange}
               onFocus={() => setFilter("")}
-              placeholder="Search shards..."
+              placeholder="Search by name, perk, or description..."
               className="
                 w-full pl-10 pr-4 py-2.5 
                 bg-white/5 border border-white/10 
@@ -101,11 +116,64 @@ export const SettingsPage: React.FC = () => {
             />
           </div>
 
-          {/* Filters */}
+          <div className="flex flex-wrap gap-3">
+            <RarityDropdown value={rarityFilter} onChange={setRarityFilter} />
+            <TypeDropdown value={typeFilter} onChange={setTypeFilter} />
+            <button
+              onClick={handleResetRates}
+              className="
+                px-3 py-2.5 bg-red-500/20 hover:bg-red-500/30 
+                text-red-400 font-medium rounded-md 
+                border border-red-500/20 hover:border-red-500/30
+                transition-colors duration-200
+                flex items-center space-x-2 cursor-pointer
+              "
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Reset</span>
+            </button>
+            {hasChanges && (
+              <button
+                onClick={handleSave}
+                className="
+                  px-3 py-2.5 bg-green-500/20 hover:bg-green-500/30 
+                  text-green-400 font-medium rounded-md 
+                  border border-green-500/20 hover:border-green-500/30
+                  transition-colors duration-200
+                  flex items-center space-x-2 cursor-pointer
+                "
+              >
+                <Save className="w-4 h-4" />
+                <span>Save</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="hidden md:flex md:flex-wrap gap-3">
+          <div className="flex-1 min-w-[400px] relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-slate-400" />
+            </div>
+            <input
+              type="text"
+              value={filter}
+              onChange={handleFilterChange}
+              onFocus={() => setFilter("")}
+              placeholder="Search by name, perk, or description..."
+              className="
+                w-full pl-10 pr-4 py-2.5 
+                bg-white/5 border border-white/10 
+                rounded-md text-white placeholder-slate-400
+                focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50
+                transition-colors duration-200
+              "
+            />
+          </div>
+
           <RarityDropdown value={rarityFilter} onChange={setRarityFilter} />
           <TypeDropdown value={typeFilter} onChange={setTypeFilter} />
 
-          {/* Action Buttons */}
           <div className="flex gap-2">
             <button
               onClick={handleResetRates}
@@ -146,10 +214,9 @@ export const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Shards List */}
       <div className="bg-white/5 border border-white/10 rounded-md overflow-hidden flex-1">
         <div className="h-full overflow-y-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2 p-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-3">
             {filteredShards.map((shard) => (
               <div key={shard.key}>
                 <ShardItem

@@ -5,7 +5,7 @@ import { debounce } from "../utils";
 import type { ShardWithKey, ShardAutocompleteProps } from "../types";
 import { SuggestionItem } from "./search/SuggestionItem";
 
-export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onChange, onSelect, onFocus, placeholder = "Search for a shard...", className = "" }) => {
+export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onChange, onSelect, onFocus, placeholder = "Search for a shard...", className = "", searchMode = "enhanced" }) => {
   const [suggestions, setSuggestions] = useState<ShardWithKey[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -30,7 +30,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
         setIsSearching(true);
         try {
           const dataService = DataService.getInstance();
-          const results = await dataService.searchShards(query);
+          const results = searchMode === "name-only" ? await dataService.searchShardsByNameOnly(query) : await dataService.searchShards(query);
 
           setSuggestions(results.slice(0, 10));
           setIsOpen(results.length > 0);
@@ -43,7 +43,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           setIsSearching(false);
         }
       }, 100),
-    [isSelecting]
+    [isSelecting, searchMode]
   );
 
   const handleInputChange = useCallback(

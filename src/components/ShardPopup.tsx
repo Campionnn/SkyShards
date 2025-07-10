@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { getRarityColor, getRarityBorderColor } from "../utils";
+import { MoveRight } from "lucide-react";
 
 const rarityBg: Record<string, string> = {
   common: "bg-gray-700/80 border-gray-500/80",
@@ -28,7 +29,6 @@ export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, na
   const [inputValue, setInputValue] = useState<string>("");
 
   React.useEffect(() => {
-    // When popup opens, set inputValue to empty string (show placeholder)
     if (open) setInputValue("");
   }, [open]);
 
@@ -43,18 +43,36 @@ export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, na
     };
   }, [open]);
 
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && open) {
+        if (document.activeElement) {
+          (document.activeElement as HTMLElement).blur();
+        }
+        onClose();
+      }
+    };
+
+    if (open) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, onClose]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
     if (onRateChange) {
       const val = parseFloat(e.target.value);
-      if (e.target.value === "") onRateChange(undefined); // Unset custom rate, revert to default
+      if (e.target.value === "") onRateChange(undefined);
       else if (!isNaN(val)) onRateChange(val);
     }
   };
 
   if (!open) return null;
 
-  // Close popup when clicking outside the modal content
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -62,7 +80,7 @@ export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, na
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65" onClick={handleOverlayClick}>
+    <div className="fixed inset-0 z-50 px-1 flex items-center justify-center bg-black/65" onClick={handleOverlayClick}>
       <div className={`bg-slate-900 border ${getRarityBorderColor(rarity)} rounded-xl shadow-2xl px-10 py-8 min-w-[500px]  max-w-[700px] relative animate-fadeIn`} onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-0 right-2 text-2xl text-slate-500 cursor-pointer">
           &times;
@@ -77,7 +95,12 @@ export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, na
               </span>
             </div>
             <div className="flex flex-col gap-1">
-              <div className="text-sm text-yellow-500 font-medium truncate">{title} I→X</div>
+              <div className="text-sm text-yellow-500 font-medium truncate flex gap-1 items-center">
+                {title}
+                <span className="flex items-center">
+                  I<MoveRight className="w-4" />X
+                </span>
+              </div>
               {family && type && (
                 <span className="text-xs text-slate-400">
                   {family} • {type}
