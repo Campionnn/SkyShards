@@ -278,8 +278,7 @@ export class CalculationService {
         const isDuplicate = self.findIndex((a) => a.recipe && alt.recipe && a.recipe.inputs.sort().toString() === alt.recipe.inputs.sort().toString()) !== index;
 
         return !isDuplicate;
-      })
-      .slice(0, 5);
+      });
   }
 
   private async getAlternativesBase(
