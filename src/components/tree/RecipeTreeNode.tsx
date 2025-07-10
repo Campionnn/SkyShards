@@ -384,7 +384,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
   if (tree.method === "direct") {
     return (
       <div className="flex items-center justify-between px-3 py-1 bg-slate-800 rounded-md border border-slate-600">
-        <div className="flex items-center space-x-2 p-0.5">
+        <div className="flex items-center space-x-2 p-0.5 text-sm">
           <div className="w-2 h-2 bg-green-400 rounded-full" />
           {renderShardInfo(tree.quantity, shard, false)}
           <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
@@ -448,7 +448,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
               </Tooltip>
 
               <span className="text-slate-400 text-sm font-medium flex items-center">
-                <span className="mx-2 text-white">=</span>
+                <span className="mr-2 text-white">=</span>
                 <span>{Math.floor(input1.quantity)}x</span>
 
                 <Tooltip
@@ -474,7 +474,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   </div>
                 </Tooltip>
 
-                <span className="mx-2 text-white">+</span>
+                <span className="mr-2 text-white">+</span>
                 <span>{Math.floor(input2.quantity)}x</span>
 
                 <Tooltip
