@@ -374,7 +374,7 @@ export class CalculationService {
             });
           });
 
-          const netOutputPerCycle = expectedOutput - totalInputsConsumed;
+          const netOutputPerCycle = 2 * (expectedOutput - totalInputsConsumed);
           const expectedCrafts = netOutputPerCycle > 0 ? Math.ceil(requiredQuantity / netOutputPerCycle) : Math.ceil(requiredQuantity / expectedOutput);
 
           // Update cycle info
