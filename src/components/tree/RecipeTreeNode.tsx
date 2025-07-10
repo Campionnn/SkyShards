@@ -1,12 +1,21 @@
 import React from "react";
 import { getRarityColor, getShardDetails, formatShardDescription } from "../../utils/index";
-import { ChevronDown, ChevronRight, MoveRight } from "lucide-react";
+import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
 import { formatNumber } from "../../utils/index";
-import type { RecipeTreeNodeProps } from "../../types/index";
+import type { RecipeTreeNodeProps, Recipe } from "../../types/index";
 import { Tooltip } from "../Tooltip";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 
-export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel = false, totalShardsProduced = tree.quantity, nodeId, expandedStates, onToggle }) => {
+export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ 
+  tree, 
+  data, 
+  isTopLevel = false, 
+  totalShardsProduced = tree.quantity, 
+  nodeId, 
+  expandedStates, 
+  onToggle,
+  onShowAlternatives 
+}) => {
   const shard = data.shards[tree.shard];
 
   const findRecipeForShard = (shardId: string) => {
@@ -122,17 +131,34 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
     );
   };
 
-  const renderDirectShard = (quantity: number, shard: any) => (
+  const renderDirectShard = (quantity: number, shard: any, context?: { otherInputShard?: string; outputShard?: string; currentRecipe?: Recipe | null }) => (
     <div className="bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between px-3 py-1.5 text-sm font-medium gap-2">
       <div className="flex items-center gap-2 min-w-0">
         <div className="w-2 h-2 bg-green-400 rounded-full" />
         {renderShardInfo(quantity, shard, false)}
         <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
       </div>
-      <div className="text-right min-w-[80px] ml-2">
-        <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-        <span className="text-slate-500 text-xs mx-0.5">/</span>
-        <span className="text-slate-400 text-xs">hr</span>
+      <div className="flex items-center gap-2">
+        <div className="text-right min-w-[80px] ml-2">
+          <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
+          <span className="text-slate-500 text-xs mx-0.5">/</span>
+          <span className="text-slate-400 text-xs">hr</span>
+        </div>
+        {onShowAlternatives && context && (
+          <button
+            onClick={() => onShowAlternatives(shard.id, {
+              isDirectInput: true,
+              inputShard: shard.id,
+              otherInputShard: context.otherInputShard,
+              outputShard: context.outputShard,
+              currentRecipe: context.currentRecipe
+            })}
+            className="p-1 hover:bg-slate-700 rounded transition-colors"
+            title="Show alternatives"
+          >
+            <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -148,18 +174,20 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
     return (
       <div className="bg-slate-600/20 rounded border border-slate-300/50 overflow-hidden">
-        <button onClick={() => onToggle(subNodeId)} className="w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {renderChevron(isExpanded)}
-            {renderRecipeDisplay(maxOutputQuantity, inputShard, input1Quantity, input1Shard, input2Quantity, input2Shard)}
-          </div>
+        <div className="flex items-center justify-between w-full px-3 py-1.5">
+          <button onClick={() => onToggle(subNodeId)} className="flex-1 text-left cursor-pointer hover:bg-slate-800/40 transition-colors rounded p-0.5">
+            <div className="flex items-center space-x-2">
+              {renderChevron(isExpanded)}
+              {renderRecipeDisplay(maxOutputQuantity, inputShard, input1Quantity, input1Shard, input2Quantity, input2Shard)}
+            </div>
+          </button>
           <div className="text-right min-w-[80px] ml-2">
             <div className="flex items-center justify-end space-x-1.5">
               <span className="text-xs text-slate-500">fusions</span>
               <span className="font-medium text-white text-xs">1</span>
             </div>
           </div>
-        </button>
+        </div>
         {isExpanded && (
           <div className="border-t border-slate-400/70 pl-3 pr-0.5 py-0.5 flex flex-col gap-0.5">
             {recipe.inputs.map((directInputId: string) => {
@@ -188,25 +216,43 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
     return (
       <div className="flex flex-col border border-slate-400/70 rounded-md bg-slate-500/40">
-        <button className="flex items-center justify-between w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors" onClick={() => onToggle(nodeId)}>
-          <div className="flex items-center space-x-2">
-            {renderChevron(isExpanded)}
-            <div className="flex items-center gap-3">
-              <div className="text-xs text-amber-300">{runCount} crafts</div>
-              <MoveRight className="w-4 text-amber-400" />
-              <div className="flex items-center space-x-2">
-                {renderShardInfo(Math.floor(tree.quantity), shard, false)}
-                <span className="px-1 bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">CYCLE !</span>
+        <div className="flex items-center justify-between w-full px-3 py-1.5">
+          <button className="flex-1 text-left cursor-pointer hover:bg-slate-800/40 transition-colors rounded p-0.5" onClick={() => onToggle(nodeId)}>
+            <div className="flex items-center space-x-2">
+              {renderChevron(isExpanded)}
+              <div className="flex items-center gap-3">
+                <div className="text-xs text-amber-300">{runCount} crafts</div>
+                <MoveRight className="w-4 text-amber-400" />
+                <div className="flex items-center space-x-2">
+                  {renderShardInfo(Math.floor(tree.quantity), shard, false)}
+                  <span className="px-1 bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">CYCLE !</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="text-right">
-            <div className="flex items-center justify-end space-x-1.5">
-              <span className="text-xs text-slate-500">fusions</span>
-              <span className="font-medium text-white text-xs">{runCount}</span>
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="text-right">
+              <div className="flex items-center justify-end space-x-1.5">
+                <span className="text-xs text-slate-500">fusions</span>
+                <span className="font-medium text-white text-xs">{runCount}</span>
+              </div>
             </div>
+            {onShowAlternatives && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShowAlternatives(tree.shard, { 
+                    currentRecipe: null // Cycles don't have a single recipe
+                  });
+                }}
+                className="p-1 hover:bg-slate-700 rounded transition-colors"
+                title="Show alternatives"
+              >
+                <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
+              </button>
+            )}
           </div>
-        </button>
+        </div>
 
         {isExpanded && tree.cycles.length > 0 && (
           <div className="border-t border-slate-400/70 pl-3 pr-0.5 py-0.5 space-y-2">
@@ -233,21 +279,39 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
                         return (
                           <div key={stepIndex} className="bg-slate-600/20 rounded border border-slate-300/50 overflow-hidden">
-                            <button
-                              onClick={() => onToggle(stepNodeId)}
-                              className="w-full px-3 py-1.5 text-left cursor-pointer hover:bg-slate-800/40 transition-colors flex items-center justify-between"
-                            >
-                              <div className="flex items-center space-x-2">
-                                {renderChevron(stepIsExpanded)}
-                                {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
-                              </div>
-                              <div className="text-right min-w-[80px] ml-2">
-                                <div className="flex items-center justify-end space-x-1.5">
-                                  <span className="text-xs text-slate-500">fusions</span>
-                                  <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
+                            <div className="flex items-center justify-between w-full px-3 py-1.5">
+                              <button
+                                onClick={() => onToggle(stepNodeId)}
+                                className="flex-1 text-left cursor-pointer hover:bg-slate-800/40 transition-colors rounded p-0.5"
+                              >
+                                <div className="flex items-center space-x-2">
+                                  {renderChevron(stepIsExpanded)}
+                                  {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
                                 </div>
+                              </button>
+                              <div className="flex items-center gap-2">
+                                <div className="text-right min-w-[80px] ml-2">
+                                  <div className="flex items-center justify-end space-x-1.5">
+                                    <span className="text-xs text-slate-500">fusions</span>
+                                    <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
+                                  </div>
+                                </div>
+                                {onShowAlternatives && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onShowAlternatives(step.outputShard, { 
+                                        currentRecipe: recipe
+                                      });
+                                    }}
+                                    className="p-1 hover:bg-slate-700 rounded transition-colors"
+                                    title="Show alternatives"
+                                  >
+                                    <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
+                                  </button>
+                                )}
                               </div>
-                            </button>
+                            </div>
                             {stepIsExpanded && (
                               <div className="border-t border-slate-400/70 pl-3 pr-0.5 py-0.5 space-y-1">
                                 {recipe.inputs.map((inputId: string) => {
@@ -271,11 +335,27 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                         return (
                           <div key={stepIndex} className="px-3 py-1.5 bg-slate-600/20 rounded border border-slate-300/50 flex items-center justify-between">
                             {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
-                            <div className="text-right min-w-[80px] ml-2">
-                              <div className="flex items-center justify-end space-x-1.5">
-                                <span className="text-xs text-slate-500">fusions</span>
-                                <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="text-right min-w-[80px] ml-2">
+                                <div className="flex items-center justify-end space-x-1.5">
+                                  <span className="text-xs text-slate-500">fusions</span>
+                                  <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
+                                </div>
                               </div>
+                              {onShowAlternatives && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onShowAlternatives(step.outputShard, { 
+                                      currentRecipe: recipe
+                                    });
+                                  }}
+                                  className="p-1 hover:bg-slate-700 rounded transition-colors"
+                                  title="Show alternatives"
+                                >
+                                  <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
+                                </button>
+                              )}
                             </div>
                           </div>
                         );
@@ -322,12 +402,23 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           {renderShardInfo(tree.quantity, shard, false)}
           <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
         </div>
-        <div className="text-right">
-          <div className="text-xs text-slate-300">
-            {formatNumber(shard.rate)}
-            <span className="text-slate-500 text-xs mx-0.5">/</span>
-            <span className="text-slate-400 text-xs">hr</span>
+        <div className="flex items-center gap-2">
+          <div className="text-right">
+            <div className="text-xs text-slate-300">
+              {formatNumber(shard.rate)}
+              <span className="text-slate-500 text-xs mx-0.5">/</span>
+              <span className="text-slate-400 text-xs">hr</span>
+            </div>
           </div>
+          {onShowAlternatives && (
+            <button
+              onClick={() => onShowAlternatives(tree.shard, { currentRecipe: null })}
+              className="p-1 hover:bg-slate-700 rounded transition-colors"
+              title="Show alternatives"
+            >
+              <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
+            </button>
+          )}
         </div>
       </div>
     );
@@ -348,9 +439,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
   return (
     <div className="bg-slate-800 border border-slate-600 rounded-md overflow-hidden">
-      <button onClick={() => onToggle(nodeId)} className="w-full px-3 py-1 text-left cursor-pointer hover:bg-slate-700/50 transition-colors">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-1.5 p-0.5">
+      <div className="flex items-center justify-between w-full px-3 py-1">
+        <button onClick={() => onToggle(nodeId)} className="flex-1 text-left cursor-pointer hover:bg-slate-700/50 transition-colors rounded p-0.5">
+          <div className="flex items-center space-x-1.5">
             {renderChevron(isExpanded)}
             <div className="text-white flex items-center">
               <span className="font-medium text-sm">{Math.floor(displayQuantity)}x</span>
@@ -428,18 +519,34 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
               </span>
             </div>
           </div>
+        </button>
+        <div className="flex items-center gap-2">
           <div className="text-right">
             <div className="flex items-center justify-end space-x-1.5">
               <span className="text-xs text-slate-500">fusions</span>
               <span className="font-medium text-white text-xs">{crafts}</span>
             </div>
           </div>
+          {onShowAlternatives && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onShowAlternatives(tree.shard, { 
+                  currentRecipe: "recipe" in tree ? tree.recipe : null 
+                });
+              }}
+              className="p-1 hover:bg-slate-700 rounded transition-colors"
+              title="Show alternatives"
+            >
+              <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
+            </button>
+          )}
         </div>
-      </button>
+      </div>
       {isExpanded && (
         <div className="border-t border-slate-600 pl-3 pr-0.5 py-0.5 space-y-0.5">
-          <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} />
-          <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} />
+          <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} />
+          <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} />
         </div>
       )}
     </div>

@@ -147,6 +147,10 @@ export interface CalculationResultsProps {
   result: CalculationResult;
   data: Data;
   targetShardName: string;
+  targetShard: string;
+  requiredQuantity: number;
+  params: CalculationParams;
+  onResultUpdate: (result: CalculationResult) => void;
 }
 
 //fusiun tree
@@ -158,6 +162,7 @@ export interface RecipeTreeNodeProps {
   nodeId: string;
   expandedStates: Map<string, boolean>;
   onToggle: (nodeId: string) => void;
+  onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
 }
 
 // searchbar
@@ -177,4 +182,41 @@ export interface SuggestionItemProps {
   onSelect: (shard: ShardWithKey) => void;
   isSelecting: boolean;
   setFocusedIndex: (index: number) => void;
+}
+
+// Alternative recipe types
+export interface AlternativeRecipeOption {
+  recipe: Recipe | null;
+  cost: number;
+  timePerShard: number;
+  isCurrent: boolean;
+}
+
+export interface AlternativeSelectionContext {
+  isDirectInput?: boolean;
+  inputShard?: string;
+  otherInputShard?: string;
+  outputShard?: string;
+  currentRecipe?: Recipe | null;
+}
+
+export interface AlternativeRecipePopupProps {
+  isOpen: boolean;
+  onClose: () => void;
+  alternatives: AlternativeRecipeOption[];
+  onSelect: (recipe: Recipe | null) => void;
+  shardName: string;
+  data: Data;
+  loading: boolean;
+}
+
+export interface RecipeOverrideManagerProps {
+  targetShard: string;
+  requiredQuantity: number;
+  params: CalculationParams;
+  onResultUpdate: (result: CalculationResult) => void;
+  children: (props: {
+    showAlternatives: (shardId: string, context: AlternativeSelectionContext) => void;
+    recipeOverrides: RecipeOverride[];
+  }) => React.ReactNode;
 }

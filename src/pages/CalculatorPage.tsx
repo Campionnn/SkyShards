@@ -4,6 +4,7 @@ import { CalculatorForm, CalculationResults } from "../components";
 import { useCalculation, useCustomRates } from "../hooks";
 import { DataService } from "../services/dataService";
 import type { CalculationFormData } from "../schemas/validation";
+import type { CalculationResult, CalculationParams } from "../types";
 import { useCalculatorState } from "../context/CalculatorStateContext";
 
 const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
@@ -16,6 +17,9 @@ const CalculatorPageContent: React.FC = () => {
   const { loading, error } = useCalculation();
   const { customRates } = useCustomRates();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentParams, setCurrentParams] = useState<CalculationParams | null>(null);
+  const [currentShardKey, setCurrentShardKey] = useState<string>("");
+  const [currentQuantity, setCurrentQuantity] = useState<number>(1);
 
   const handleCalculate = async (formData: CalculationFormData, setForm: (data: CalculationFormData) => void) => {
     setForm(formData); // persist form state
@@ -40,6 +44,8 @@ const CalculatorPageContent: React.FC = () => {
       }
 
       setTargetShardName(formData.shard);
+      setCurrentShardKey(shardKey);
+      setCurrentQuantity(formData.quantity);
 
       // Filter out undefined values from customRates
       const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
@@ -64,6 +70,8 @@ const CalculatorPageContent: React.FC = () => {
         noWoodenBait: formData.noWoodenBait,
       };
 
+      setCurrentParams(params);
+
       // Use the calculation service directly to get the result
       const calculationService = await import("../services/calculationService");
       const service = calculationService.CalculationService.getInstance();
@@ -79,6 +87,10 @@ const CalculatorPageContent: React.FC = () => {
     }
   };
 
+  const handleResultUpdate = (newResult: CalculationResult) => {
+    setResult(newResult);
+  };
+
   // Re-calculate when customRates change and form is valid
   useEffect(() => {
     if (form && form.shard && form.shard.trim() !== "") {
@@ -90,6 +102,8 @@ const CalculatorPageContent: React.FC = () => {
           const shardKey = nameToKeyMap[form.shard.toLowerCase()];
           if (!shardKey) return;
           setTargetShardName(form.shard);
+          setCurrentShardKey(shardKey);
+          setCurrentQuantity(form.quantity);
           const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
           const params = {
             customRates: filteredCustomRates,
@@ -109,6 +123,7 @@ const CalculatorPageContent: React.FC = () => {
             moneyPerHour: form.moneyPerHour,
             noWoodenBait: form.noWoodenBait,
           };
+          setCurrentParams(params);
           const calculationService = await import("../services/calculationService");
           const service = calculationService.CalculationService.getInstance();
           const calculationResult = await service.calculateOptimalPath(shardKey, form.quantity, params);
@@ -168,7 +183,17 @@ const CalculatorPageContent: React.FC = () => {
           )}
 
           {/* Results */}
-          {result && calculationData && <CalculationResults result={result} data={calculationData} targetShardName={targetShardName} />}
+          {result && calculationData && currentParams && (
+            <CalculationResults 
+              result={result} 
+              data={calculationData} 
+              targetShardName={targetShardName}
+              targetShard={currentShardKey}
+              requiredQuantity={currentQuantity}
+              params={currentParams}
+              onResultUpdate={handleResultUpdate}
+            />
+          )}
 
           {/* Empty State */}
           {!result && !loading && !error && (
