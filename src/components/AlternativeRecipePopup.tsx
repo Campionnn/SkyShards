@@ -17,7 +17,7 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
   // Filter alternatives based on search query
   const filteredAlternatives = useMemo(() => {
     if (!searchQuery.trim()) {
-      return alternatives.slice(0, 20); // Show only 20 alternatives when no search
+      return alternatives; // Show all alternatives when no search
     }
 
     const query = searchQuery.toLowerCase();
@@ -34,7 +34,7 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
       }
     });
 
-    return filtered.slice(0, 20); // Limit to 20 results
+    return filtered; // Return all filtered results
   }, [alternatives, searchQuery, data.shards]);
 
   if (!isOpen) return null;
@@ -186,8 +186,8 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
             </span>
             <span>
               {searchQuery 
-                ? `Showing top ${Math.min(filteredAlternatives.length, 20)} results`
-                : `${Math.min(alternatives.length, 20)} of ${alternatives.length} alternatives`
+                ? `Showing ${filteredAlternatives.length} filtered results`
+                : `Showing all ${alternatives.length} alternatives`
               }
             </span>
           </div>
