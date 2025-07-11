@@ -1,5 +1,15 @@
-import type { Data, RecipeChoice, RecipeTree, CalculationParams, CalculationResult, Shards, Recipes, Shard, Recipe } from "../types";
-import { NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS, BLACK_HOLE_SHARD } from "../constants";
+import type {
+  CalculationParams,
+  CalculationResult,
+  Data,
+  Recipe,
+  RecipeChoice,
+  Recipes,
+  RecipeTree,
+  Shard,
+  Shards
+} from "../types";
+import {BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS} from "../constants";
 
 export class CalculationService {
   private static instance: CalculationService;
@@ -439,9 +449,8 @@ export class CalculationService {
         case "cycle":
           if (node.cycles.length > 0) {
             for (const cycleRecipes of node.cycles) {
-              const craftsPerCycle = node.cycles[0].expectedCrafts;
               // Use the correct number of cycles without additional multiplier
-              const totalCrafts = craftsPerCycle;
+              const totalCrafts = Math.ceil(tree.quantity / (node.cycles[0].expectedOutput - node.cycles[0].baseOutput));
 
               const cycleInputs = new Map<string, number>();
               cycleRecipes.steps.forEach((recipe) => {
