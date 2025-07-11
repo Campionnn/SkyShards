@@ -35,7 +35,6 @@ const performCalculation = async (
   const shardKey = nameToKeyMap[formData.shard.toLowerCase()];
 
   if (!shardKey) {
-    console.warn(`Calculation skipped: Shard "${formData.shard}" not found in data`);
     return;
   }
 

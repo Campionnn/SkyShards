@@ -162,7 +162,15 @@ export class CalculationService {
   private areRecipesEqual(a: Recipe | null, b: Recipe | null | undefined): boolean {
     if (!a && !b) return true;
     if (!a || !b) return false;
-    return a.inputs[0] === b.inputs[0] && a.inputs[1] === b.inputs[1] && a.outputQuantity === b.outputQuantity && a.isReptile === b.isReptile;
+
+    // Check if inputs match in any order (since inputs could be swapped)
+    const aInputsSorted = [...a.inputs].sort();
+    const bInputsSorted = [...b.inputs].sort();
+    const inputsMatch = aInputsSorted[0] === bInputsSorted[0] && aInputsSorted[1] === bInputsSorted[1];
+
+    const result = inputsMatch && a.outputQuantity === b.outputQuantity && a.isReptile === b.isReptile;
+
+    return result;
   }
 
   computeMinCosts(
@@ -230,7 +238,30 @@ export class CalculationService {
           const totalCost = costInput1 + costInput2 + craftPenalty;
           const effectiveOutputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
           const costPerUnit = totalCost / effectiveOutputQuantity;
-          if (costPerUnit < minCosts.get(outputShard)!) {
+
+          const currentCost = minCosts.get(outputShard)!;
+          const currentRecipe = choices.get(outputShard)?.recipe;
+
+          // Check if we should update the recipe
+          let shouldUpdate = false;
+
+          if (costPerUnit < currentCost) {
+            // New recipe is strictly better
+            shouldUpdate = true;
+          } else if (costPerUnit === currentCost && currentRecipe) {
+            // Same cost - apply preference rules
+            // For Leviathan (E5), prefer Salamander (U8) over Lizard King (R8)
+            if (outputShard === "E5") {
+              const hasU8 = recipe.inputs.includes("U8");
+              const currentHasR8 = currentRecipe.inputs.includes("R8");
+              if (hasU8 && currentHasR8) {
+                // New recipe has Salamander (U8) and current has Lizard King (R8) - prefer Salamander
+                shouldUpdate = true;
+              }
+            }
+          }
+
+          if (shouldUpdate) {
             minCosts.set(outputShard, costPerUnit);
             choices.set(outputShard, { recipe });
             updated = true;

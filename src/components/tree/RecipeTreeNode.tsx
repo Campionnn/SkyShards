@@ -231,8 +231,17 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
               <button
                 onClick={(e) => {
                   e.stopPropagation();
+                  // Find the recipe that produces the target shard across all cycles
+                  let targetRecipe = null;
+                  for (const cycle of tree.cycles) {
+                    const step = cycle.steps.find((step) => step.outputShard === tree.shard);
+                    if (step) {
+                      targetRecipe = step.recipe;
+                      break;
+                    }
+                  }
                   onShowAlternatives(tree.shard, {
-                    currentRecipe: null, // Cycles don't have a single recipe
+                    currentRecipe: targetRecipe,
                   });
                 }}
                 className="p-1 hover:bg-slate-700 rounded transition-colors"
