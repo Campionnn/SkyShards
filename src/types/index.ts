@@ -205,7 +205,8 @@ export interface AlternativeSelectionContext {
 export interface AlternativeRecipePopupProps {
   isOpen: boolean;
   onClose: () => void;
-  alternatives: AlternativeRecipeOption[];
+  // Changed: alternatives is now grouped
+  alternatives: { direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> };
   onSelect: (recipe: Recipe | null) => void;
   shardName: string;
   data: Data;

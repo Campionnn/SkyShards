@@ -293,16 +293,78 @@ export class CalculationService {
     return totalCost / effectiveOutput;
   }
 
-  private processAlternatives(alternatives: AlternativeRecipeOption[]): AlternativeRecipeOption[] {
-    return alternatives
-      .sort((a, b) => a.cost - b.cost)
-      .filter((alt, index, self) => {
-        if (alt.recipe === null) return true; // Keep direct option
+  private groupAlternativeRecipes(alternatives: AlternativeRecipeOption[]): { direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> } {
+    // Separate direct option from fusion recipes
+    const directOption = alternatives.find(alt => alt.recipe === null) || null;
+    const fusionAlts = alternatives.filter(alt => alt.recipe !== null);
 
-        const isDuplicate = self.findIndex((a) => a.recipe && alt.recipe && a.recipe.inputs.sort().toString() === alt.recipe.inputs.sort().toString()) !== index;
+    // Build a set of valid input pairs for normalization check
+    const validPairs = new Set<string>();
+    for (const alt of fusionAlts) {
+      if (alt.recipe) {
+        const [a, b] = alt.recipe.inputs;
+        validPairs.add(`${a}-${b}-${alt.recipe.outputQuantity}`);
+      }
+    }
 
-        return !isDuplicate;
-      });
+    // Count how many times each shard appears in any input slot
+    const shardCount: Record<string, number> = {};
+    for (const alt of fusionAlts) {
+      if (alt.recipe) {
+        for (const shard of alt.recipe.inputs) {
+          shardCount[shard] = (shardCount[shard] || 0) + 1;
+        }
+      }
+    }
+
+    // For each recipe, put the most common shard in the first slot,
+    // but only if the normalized recipe exists
+    const normalized: AlternativeRecipeOption[] = fusionAlts.map(alt => {
+      if (!alt.recipe) return alt;
+      const [a, b] = alt.recipe.inputs;
+      // If b is more common than a, and the swapped recipe exists, swap
+      if ((shardCount[b] ?? 0) > (shardCount[a] ?? 0)) {
+        const swappedKey = `${b}-${a}-${alt.recipe.outputQuantity}`;
+        if (validPairs.has(swappedKey)) {
+          return {
+            ...alt,
+            recipe: {
+              ...alt.recipe,
+              inputs: [b, a],
+            },
+          };
+        }
+      }
+      return alt;
+    });
+
+    // Remove mirrored recipes (same pair, different order)
+    const seen = new Set<string>();
+    const deduped: AlternativeRecipeOption[] = [];
+    for (const alt of normalized) {
+      if (!alt.recipe) continue;
+      const key = `${alt.recipe.inputs[0]}-${alt.recipe.inputs[1]}-${alt.recipe.outputQuantity}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        deduped.push(alt);
+      }
+    }
+
+    // Group by first input shard
+    const grouped: Record<string, AlternativeRecipeOption[]> = {};
+    for (const alt of deduped) {
+      if (!alt.recipe) continue;
+      const first = alt.recipe.inputs[0];
+      if (!grouped[first]) grouped[first] = [];
+      grouped[first].push(alt);
+    }
+
+    // Sort each group by efficiency
+    for (const shardId in grouped) {
+      grouped[shardId].sort((a, b) => a.timePerShard - b.timePerShard);
+    }
+
+    return { direct: directOption, grouped };
   }
 
   private async getAlternativeRecipe(
@@ -310,7 +372,7 @@ export class CalculationService {
     params: CalculationParams,
     recipeOverrides: RecipeOverride[] = [],
     recipeFilter?: (recipe: Recipe) => boolean
-  ): Promise<AlternativeRecipeOption[]> {
+  ): Promise<{ direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> }> {
     const data = await this.parseData(params);
     const {minCosts} = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
     const context = this.getCostCalculationContext(params);
@@ -331,7 +393,42 @@ export class CalculationService {
       alternatives.push({recipe: null, cost: directCost, timePerShard: directCost, isCurrent: false});
     }
 
-    return this.processAlternatives(alternatives);
+    return this.groupAlternativeRecipes(alternatives);
+  }
+
+  async getAlternativeRecipeWithContext(
+    outputShard: string,
+    params: CalculationParams,
+    currentRecipe?: Recipe | null,
+    recipeOverrides: RecipeOverride[] = []
+  ): Promise<{ direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> }> {
+    const result = await this.getAlternativeRecipe(outputShard, params, recipeOverrides);
+
+    // Mark the current recipe
+    if (result.direct) {
+      result.direct.isCurrent = this.areRecipesEqual(result.direct.recipe, currentRecipe);
+    }
+    for (const group of Object.values(result.grouped)) {
+      for (const alt of group) {
+        alt.isCurrent = this.areRecipesEqual(alt.recipe, currentRecipe);
+      }
+    }
+    return result;
+  }
+
+  // Method to get alternatives while handling cycle nodes properly
+  async getAlternativesForTreeNode(
+    shardId: string,
+    params: CalculationParams,
+    context: AlternativeSelectionContext,
+    recipeOverrides: RecipeOverride[] = []
+  ): Promise<{ direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> }> {
+    try {
+      return await this.getAlternativeRecipeWithContext(shardId, params, context.currentRecipe, recipeOverrides);
+    } catch (error) {
+      console.error("Error getting alternatives for tree node:", error);
+      return { direct: null, grouped: {} };
+    }
   }
 
   private findCycleNodes(choices: Map<string, RecipeChoice>): string[][] {
@@ -710,24 +807,5 @@ export class CalculationService {
 
     // Recalculate with the new overrides
     return await this.calculateOptimalPath(targetShard, requiredQuantity, params, updatedOverrides);
-  }
-
-  async getAlternativeRecipeWithContext(outputShard: string, params: CalculationParams, currentRecipe?: Recipe | null, recipeOverrides: RecipeOverride[] = []): Promise<AlternativeRecipeOption[]> {
-    const alternatives = await this.getAlternativeRecipe(outputShard, params, recipeOverrides);
-
-    return alternatives.map((alt) => ({
-      ...alt,
-      isCurrent: this.areRecipesEqual(alt.recipe, currentRecipe),
-    }));
-  }
-
-  // Method to get alternatives while handling cycle nodes properly
-  async getAlternativesForTreeNode(shardId: string, params: CalculationParams, context: AlternativeSelectionContext, recipeOverrides: RecipeOverride[] = []): Promise<AlternativeRecipeOption[]> {
-    try {
-      return await this.getAlternativeRecipeWithContext(shardId, params, context.currentRecipe, recipeOverrides);
-    } catch (error) {
-      console.error("Error getting alternatives for tree node:", error);
-      return [];
-    }
   }
 }

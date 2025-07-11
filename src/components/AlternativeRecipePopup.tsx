@@ -1,16 +1,21 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Clock, Star, Search, Plus, Equal } from "lucide-react";
+import { X, Clock, Star, Search, Plus, Equal, ChevronDown } from "lucide-react";
 import { getRarityColor, formatTime } from "../utils";
 import type { AlternativeRecipePopupProps, Recipe, AlternativeRecipeOption } from "../types";
 
-export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading }) => {
+export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps & {
+  alternatives: { direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> }
+}> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  // Track selected recipe index for each group
+  const [selectedIndices, setSelectedIndices] = useState<Record<string, number>>({});
 
   // Reset state when popup closes
   useEffect(() => {
     if (!isOpen) {
       setSearchQuery("");
+      setSelectedIndices({});
     }
   }, [isOpen]);
 
@@ -20,59 +25,34 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
     return Object.values(data.shards).find((shard) => shard.name === shardName);
   }, [data?.shards, shardName]);
 
-  // Process alternatives with filtering and deduplication
+  // Process alternatives with filtering and grouping
   const processedAlternatives = useMemo(() => {
-    if (!alternatives || !data?.shards) return { direct: null, fusion: [] };
+    if (!alternatives || !data?.shards) return { direct: null, grouped: {} };
 
-    let directOption: AlternativeRecipeOption | null = null;
-    const allFusionOptions: AlternativeRecipeOption[] = [];
+    let { direct, grouped } = alternatives;
 
-    // Filter alternatives based on search query
-    let filtered = alternatives;
+    // Filter grouped fusion options by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = alternatives.filter((option) => {
-        if (option.recipe === null) {
-          return "direct collection".includes(query);
-        } else {
-          return option.recipe.inputs.some((inputId) => {
-            const inputShard = data?.shards?.[inputId];
+      const filteredGrouped: typeof grouped = {};
+      for (const [firstShard, group] of Object.entries(grouped)) {
+        const filteredGroup = group.filter(option => {
+          if (!option.recipe) return false;
+          return option.recipe.inputs.some(inputId => {
+            const inputShard = data.shards[inputId];
             return inputShard?.name.toLowerCase().includes(query);
           });
-        }
-      });
+        });
+        if (filteredGroup.length > 0) filteredGrouped[firstShard] = filteredGroup;
+      }
+      grouped = filteredGrouped;
+      // Hide direct if searching and it doesn't match
+      if (direct && !"direct collection".includes(query)) {
+        direct = null;
+      }
     }
 
-    // Separate direct and fusion options
-    filtered.forEach((option) => {
-      if (option.recipe === null) {
-        directOption = option;
-      } else {
-        allFusionOptions.push(option);
-      }
-    });
-
-    // Remove duplicate recipes with same inputs in different orders
-    const uniqueFusionOptions: AlternativeRecipeOption[] = [];
-    const seenRecipes = new Set<string>();
-
-    allFusionOptions.forEach((option) => {
-      if (option.recipe) {
-        // Create a sorted key to identify duplicate recipes regardless of input order
-        const sortedInputs = [...option.recipe.inputs].sort();
-        const recipeKey = `${sortedInputs.join("-")}-${option.recipe.outputQuantity}`;
-
-        if (!seenRecipes.has(recipeKey)) {
-          seenRecipes.add(recipeKey);
-          uniqueFusionOptions.push(option);
-        }
-      }
-    });
-
-    // Sort by efficiency (time per shard)
-    uniqueFusionOptions.sort((a, b) => a.timePerShard - b.timePerShard);
-
-    return { direct: directOption, fusion: uniqueFusionOptions };
+    return { direct, grouped };
   }, [alternatives, searchQuery, data?.shards]);
 
   if (!isOpen) return null;
@@ -109,7 +89,7 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
     );
   };
 
-  const renderFusionOption = (option: AlternativeRecipeOption, index: number) => {
+  const renderFusionOption = (option: AlternativeRecipeOption) => {
     if (!option.recipe) return null;
 
     const [firstInput, partner] = option.recipe.inputs;
@@ -122,7 +102,6 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
 
     return (
       <button
-        key={`${firstInput}-${partner}-${index}`}
         onClick={() => handleSelect(option.recipe)}
         className={`w-full p-3 rounded-lg border text-left transition-all duration-200 ${
           isCurrent ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30" : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
@@ -154,6 +133,65 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
         </div>
       </button>
     );
+  };
+
+  // Render grouped fusion options as dropdowns
+  const renderGroupedFusionOptions = (grouped: Record<string, AlternativeRecipeOption[]>) => {
+    // Sort groups by total count descending (most common first)
+    const groupKeys = Object.keys(grouped);
+    groupKeys.sort((a, b) => grouped[b].length - grouped[a].length);
+
+    return groupKeys.map((firstShard) => {
+      // Get all options for this group and sort by cost (lowest first)
+      const group = [...grouped[firstShard]].sort((a, b) => a.timePerShard - b.timePerShard);
+      const firstShardObj = data?.shards?.[firstShard];
+
+      // Get selected index or default to 0 (best option)
+      const selectedIndex = selectedIndices[firstShard] || 0;
+      const selectedOption = group[selectedIndex];
+
+      return (
+        <div key={firstShard} className="mb-4">
+          <div className="flex items-center gap-2 mb-1">
+            {firstShardObj && (
+              <>
+                <img src={`${import.meta.env.BASE_URL}shardIcons/${firstShard}.png`} alt={firstShardObj.name} className="w-4 h-4 object-contain" loading="lazy" />
+                <span className={getRarityColor(firstShardObj.rarity) + " font-semibold"}>{firstShardObj.name}</span>
+                <span className="text-xs text-slate-400">({group.length} recipe{group.length !== 1 ? "s" : ""})</span>
+              </>
+            )}
+          </div>
+
+          {/* Dropdown for recipe selection */}
+          <div className="relative mb-2">
+            <select
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white appearance-none"
+              value={selectedIndex}
+              onChange={(e) => setSelectedIndices({
+                ...selectedIndices,
+                [firstShard]: parseInt(e.target.value)
+              })}
+            >
+              {group.map((option, idx) => {
+                if (!option.recipe) return null;
+                const [, partnerShard] = option.recipe.inputs;
+                const partner = data?.shards?.[partnerShard];
+                return (
+                  <option key={idx} value={idx}>
+                    + {partner?.name || partnerShard} • {formatTime(option.timePerShard)}
+                    {option.isCurrent ? " (current)" : ""}
+                  </option>
+                );
+              })}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
+
+          {/* Render selected recipe */}
+          {selectedOption && renderFusionOption(selectedOption)}
+        </div>
+      );
+    });
   };
 
   return createPortal(
@@ -191,15 +229,15 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
             <div className="flex items-center justify-center py-12">
               <div className="w-8 h-8 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
             </div>
-          ) : processedAlternatives.direct === null && processedAlternatives.fusion.length === 0 ? (
+          ) : processedAlternatives.direct === null && Object.keys(processedAlternatives.grouped).length === 0 ? (
             <div className="text-center py-12 text-slate-400">{searchQuery ? `No alternatives found matching "${searchQuery}"` : "No alternatives found"}</div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {/* Direct collection option */}
               {processedAlternatives.direct && renderDirectOption(processedAlternatives.direct)}
 
-              {/* All fusion recipes */}
-              {processedAlternatives.fusion.map((option, index) => renderFusionOption(option, index))}
+              {/* Grouped fusion recipes as dropdowns */}
+              {renderGroupedFusionOptions(processedAlternatives.grouped)}
             </div>
           )}
         </div>
@@ -207,10 +245,11 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
         {/* Footer */}
         <div className="p-4 border-t border-slate-700 bg-slate-800/50">
           <div className="flex items-center justify-between text-sm text-slate-400">
-            <span>All recipes displayed • Sorted by efficiency</span>
+            <span>Recipes grouped by most common input • Best options shown first</span>
             <span>
               {processedAlternatives.direct ? "1 direct + " : ""}
-              {processedAlternatives.fusion.length} fusion recipe{processedAlternatives.fusion.length !== 1 ? "s" : ""}
+              {Object.values(processedAlternatives.grouped).reduce((sum, group) => sum + group.length, 0)} fusion recipe
+              {Object.values(processedAlternatives.grouped).reduce((sum, group) => sum + group.length, 0) !== 1 ? "s" : ""}
               {searchQuery && ` (filtered)`}
             </span>
           </div>
