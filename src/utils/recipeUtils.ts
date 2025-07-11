@@ -39,15 +39,10 @@ export const processInputRecipes = (selectedShard: ShardWithKey, fusionData: Fus
       recipeList.forEach((recipe) => {
         if (recipe.length === 2) {
           const [input1, input2] = recipe;
-          let partnerShard: string | null = null;
 
+          // Only include recipes where selectedShard is in the first position
           if (input1 === selectedShard.key) {
-            partnerShard = input2;
-          } else if (input2 === selectedShard.key) {
-            partnerShard = input1;
-          }
-
-          if (partnerShard) {
+            const partnerShard = input2;
             if (!outputMap.has(outputShardId)) {
               outputMap.set(outputShardId, { partners: new Set(), quantities: new Map() });
             }

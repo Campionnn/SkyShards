@@ -7,7 +7,7 @@ import { RecipeTreeNode } from "./tree/RecipeTreeNode";
 import { Tooltip } from "./Tooltip";
 import { SHARD_DESCRIPTIONS } from "../constants";
 
-export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, data, targetShardName }) => {
+export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, data, targetShardName, noWoodenBait = false }) => {
   const [expandedStates, setExpandedStates] = useState<Map<string, boolean>>(new Map());
   const [lastTreeHash, setLastTreeHash] = useState<string>("");
 
@@ -134,40 +134,41 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
             Materials Needed
           </h3>
           <div className="flex gap-2">
-            {(() => {
-              const forestEssenceShards = Array.from(result.totalQuantities).filter(([shardId]) =>
-                ["shinyfish", "inferno koi", "abyssal lanternfish", "silentdepth"].includes(data.shards[shardId]?.name?.toLowerCase())
-              );
+            {!noWoodenBait &&
+              (() => {
+                const forestEssenceShards = Array.from(result.totalQuantities).filter(([shardId]) =>
+                  ["shinyfish", "inferno koi", "abyssal lanternfish", "silentdepth"].includes(data.shards[shardId]?.name?.toLowerCase())
+                );
 
-              if (forestEssenceShards.length === 0) return null;
+                if (forestEssenceShards.length === 0) return null;
 
-              const totalForestEssence = forestEssenceShards.reduce((total, [shardId, quantity]) => {
-                const shardName = data.shards[shardId]?.name?.toLowerCase();
-                const multiplier = shardName === "shinyfish" ? 512 : 1024;
-                return total + quantity * multiplier;
-              }, 0);
+                const totalForestEssence = forestEssenceShards.reduce((total, [shardId, quantity]) => {
+                  const shardName = data.shards[shardId]?.name?.toLowerCase();
+                  const multiplier = shardName === "shinyfish" ? 512 : 1024;
+                  return total + quantity * multiplier;
+                }, 0);
 
-              const formatLargeNumber = (num: number): string => {
-                if (num >= 1000000000) {
-                  return (num / 1000000000).toFixed(1).replace(/\.0$/, "") + "b";
-                }
-                if (num >= 1000000) {
-                  return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "m";
-                }
-                if (num >= 1000) {
-                  return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k";
-                }
-                return num.toString();
-              };
+                const formatLargeNumber = (num: number): string => {
+                  if (num >= 1000000000) {
+                    return (num / 1000000000).toFixed(1).replace(/\.0$/, "") + "b";
+                  }
+                  if (num >= 1000000) {
+                    return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "m";
+                  }
+                  if (num >= 1000) {
+                    return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k";
+                  }
+                  return num.toString();
+                };
 
-              return (
-                <div className="flex gap-1 items-center px-3 py-1.5 bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-400 text-sm font-medium rounded-md min-w-0">
-                  <span className="text-slate-300">{formatLargeNumber(totalForestEssence)}</span>
-                  {/* <img src={`${import.meta.env.BASE_URL}shardIcons/C1.png`} alt="Forest Essence" className="w-4 h-4 object-contain inline-block align-middle" loading="lazy" /> */}
-                  <span className="truncate">Forest Essence</span>
-                </div>
-              );
-            })()}
+                return (
+                  <div className="flex gap-1 items-center px-3 py-1.5 bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-400 text-sm font-medium rounded-md min-w-0">
+                    <span className="text-slate-300">{formatLargeNumber(totalForestEssence)}</span>
+                    {/* <img src={`${import.meta.env.BASE_URL}shardIcons/C1.png`} alt="Forest Essence" className="w-4 h-4 object-contain inline-block align-middle" loading="lazy" /> */}
+                    <span className="truncate">Forest Essence</span>
+                  </div>
+                );
+              })()}
             <div className="px-3 py-1.5 flex gap-1 bg-sky-500/20 border border-sky-500/30 text-sky-400 text-sm font-medium rounded-md min-w-0">
               <span className="text-slate-300">{Math.floor(result.totalShardsProduced)}x</span>
               <span className="truncate">{targetShardName}</span>

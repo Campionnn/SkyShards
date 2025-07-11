@@ -142,6 +142,7 @@ export interface CalculationResultsProps {
   result: CalculationResult;
   data: Data;
   targetShardName: string;
+  noWoodenBait?: boolean;
 }
 
 //fusiun tree

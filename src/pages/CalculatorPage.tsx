@@ -165,7 +165,7 @@ const CalculatorPageContent: React.FC = () => {
           )}
 
           {/* Results */}
-          {result && calculationData && <CalculationResults result={result} data={calculationData} targetShardName={targetShardName} />}
+          {result && calculationData && <CalculationResults result={result} data={calculationData} targetShardName={targetShardName} noWoodenBait={form?.noWoodenBait} />}
 
           {/* Empty State */}
           {!result && !loading && !error && (
