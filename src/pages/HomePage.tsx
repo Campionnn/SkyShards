@@ -13,7 +13,7 @@ export const HomePage: React.FC = () => {
     {
       icon: Zap,
       title: "Fortune Calculations",
-      description: "Account for Hunter Fortune, pet levels, and all modifiers for accurate results.",
+      description: "Account for Hunter Fortune, shard levels, and all modifiers for accurate results.",
       color: "from-yellow-500 to-orange-600",
     },
     {
