@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "predeploy": "pnpm run build",
+    "predeploy": "pnpm run build && echo skyshards.com > dist/CNAME",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
