@@ -10,9 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
     <script>
       // Redirect all 404s to the SPA entry point, preserving the path for React Router
-      if (location.pathname.startsWith("/SkyShards")) {
-        const newPath = location.pathname.replace("/SkyShards", "") || "/";
-        location.replace(newPath + location.search + location.hash);
+      if (location.pathname !== "/SkyShards/" && !location.pathname.endsWith(".html")) {
+        location.replace("/SkyShards/" + "#" + location.pathname.replace("/SkyShards", "") + location.search + location.hash);
       }
     </script>
   </head>
