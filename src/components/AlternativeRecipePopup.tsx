@@ -148,11 +148,11 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
     return (
       <button
         key={group.firstInput}
-        onClick={() => (hasMultipleOptions ? undefined : handleSelect(selectedOption.recipe))}
+        onClick={() => (hasMultipleOptions || selectedOption.isCurrent ? undefined : handleSelect(selectedOption.recipe))}
         className={`w-full p-4 rounded-lg border text-left transition-all duration-200 ${
           selectedOption.isCurrent ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30" : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
-        } ${hasMultipleOptions ? "cursor-default" : "cursor-pointer"}`}
-        disabled={selectedOption.isCurrent}
+        } ${hasMultipleOptions || selectedOption.isCurrent ? "cursor-default" : "cursor-pointer"}`}
+        disabled={false}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 flex-1">
