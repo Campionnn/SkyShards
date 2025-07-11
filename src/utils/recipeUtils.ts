@@ -20,6 +20,7 @@ export interface OutputGroup {
   fuseAmount: number;
   partners: string[];
   quantities: Map<string, number>;
+  positions: Map<string, "first" | "second">;
 }
 
 export interface Recipe {
@@ -31,7 +32,8 @@ export interface Recipe {
 const RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary"];
 
 export const processInputRecipes = (selectedShard: ShardWithKey, fusionData: FusionData): OutputGroup[] => {
-  const outputMap = new Map<string, { partners: Set<string>; quantities: Map<string, number> }>();
+  const outputMap = new Map<string, { partners: Set<string>; quantities: Map<string, number>; positions: Map<string, "first" | "second"> }>();
+  const seenRecipes = new Set<string>(); // Track recipes we've already processed
 
   Object.entries(fusionData.recipes).forEach(([outputShardId, recipeData]) => {
     Object.entries(recipeData).forEach(([quantityStr, recipeList]) => {
@@ -39,16 +41,39 @@ export const processInputRecipes = (selectedShard: ShardWithKey, fusionData: Fus
       recipeList.forEach((recipe) => {
         if (recipe.length === 2) {
           const [input1, input2] = recipe;
+          let partnerShard: string | null = null;
+          let position: "first" | "second" | null = null;
 
-          // Only include recipes where selectedShard is in the first position
           if (input1 === selectedShard.key) {
-            const partnerShard = input2;
-            if (!outputMap.has(outputShardId)) {
-              outputMap.set(outputShardId, { partners: new Set(), quantities: new Map() });
+            partnerShard = input2;
+            position = "first";
+          } else if (input2 === selectedShard.key) {
+            partnerShard = input1;
+            position = "second";
+          }
+
+          if (partnerShard && position) {
+            // Create a unique recipe identifier for deduplication
+            // Sort the inputs to ensure consistent ordering for comparison
+            const sortedInputs = [selectedShard.key, partnerShard].sort();
+            const recipeKey = `${sortedInputs[0]}-${sortedInputs[1]}-${outputShardId}`;
+
+            // Skip if we've already processed this recipe combination
+            if (seenRecipes.has(recipeKey)) {
+              return;
             }
-            const outputData = outputMap.get(outputShardId)!;
+            seenRecipes.add(recipeKey);
+
+            // Create a unique key for each output-position combination
+            const outputKey = `${outputShardId}-${position}`;
+
+            if (!outputMap.has(outputKey)) {
+              outputMap.set(outputKey, { partners: new Set(), quantities: new Map(), positions: new Map() });
+            }
+            const outputData = outputMap.get(outputKey)!;
             outputData.partners.add(partnerShard);
             outputData.quantities.set(partnerShard, outputQuantity);
+            outputData.positions.set(partnerShard, position);
           }
         }
       });
@@ -56,13 +81,15 @@ export const processInputRecipes = (selectedShard: ShardWithKey, fusionData: Fus
   });
 
   const groups: OutputGroup[] = [];
-  outputMap.forEach((outputData, outputShardId) => {
+  outputMap.forEach((outputData, outputKey) => {
+    const outputShardId = outputKey.split("-")[0];
     const fuseAmount = fusionData.shards[outputShardId]?.fuse_amount || 2;
     groups.push({
       output: outputShardId,
       fuseAmount,
       partners: Array.from(outputData.partners).sort(),
       quantities: outputData.quantities,
+      positions: outputData.positions,
     });
   });
 

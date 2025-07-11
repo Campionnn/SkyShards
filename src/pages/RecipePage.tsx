@@ -193,17 +193,18 @@ const RecipePage = () => {
                     .map((outputGroup) => {
                       const partnerId = selectedPartner[outputGroup.output] || outputGroup.partners[0];
                       const isOpen = inputDropdowns.dropdownOpen[outputGroup.output] || false;
+                      const position = outputGroup.positions.get(partnerId) || "first";
+
                       return (
-                        <div key={outputGroup.output} className="px-2">
+                        <div key={`${outputGroup.output}-${position}`} className="px-2">
                           <div className="flex items-center gap-2 lg:gap-3 min-w-0 min-h-[40px]">
-                            <ShardDisplay shardId={selectedShard.key} fusionData={fusionData} />
-
-                            <div className="flex items-center justify-center flex-shrink-0">
-                              <Plus className="w-3 h-3 text-purple-400" strokeWidth={2} />
-                            </div>
-
+                            {/* First position shard */}
                             <div className="flex items-center gap-1 lg:gap-2 min-w-0 flex-shrink-0">
-                              {outputGroup.partners.length > 1 ? (
+                              {position === "first" ? (
+                                // Selected shard is first, so show it directly
+                                <ShardDisplay shardId={selectedShard.key} fusionData={fusionData} />
+                              ) : // Partner is first, so show dropdown/partner
+                              outputGroup.partners.length > 1 ? (
                                 <div className="relative flex-shrink-0" ref={(el) => inputDropdowns.setRef(outputGroup.output, el)}>
                                   <button
                                     type="button"
@@ -226,6 +227,66 @@ const RecipePage = () => {
                                           onClick={() => {
                                             setSelectedPartner((prev) => ({ ...prev, [outputGroup.output]: pid }));
                                             inputDropdowns.closeDropdown(outputGroup.output);
+                                          }}
+                                        >
+                                          <span className="text-sm text-slate-400 font-medium flex-shrink-0">×{fusionData.shards[pid]?.fuse_amount || 2}</span>
+                                          <img
+                                            src={`${import.meta.env.BASE_URL}shardIcons/${pid}.png`}
+                                            alt={fusionData.shards[pid]?.name}
+                                            className="w-5 h-5 object-contain flex-shrink-0"
+                                            loading="lazy"
+                                          />
+                                          <span
+                                            className={`text-sm flex-1 ${pid === partnerId ? "text-blue-300" : getRarityColor(fusionData.shards[pid]?.rarity || "common")}`}
+                                            title={fusionData.shards[pid]?.name}
+                                          >
+                                            {fusionData.shards[pid]?.name}
+                                          </span>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <ShardDisplay shardId={partnerId} fusionData={fusionData} />
+                              )}
+                            </div>
+
+                            <div className="flex items-center justify-center flex-shrink-0">
+                              <Plus className="w-3 h-3 text-purple-400" strokeWidth={2} />
+                            </div>
+
+                            {/* Second position shard */}
+                            <div className="flex items-center gap-1 lg:gap-2 min-w-0 flex-shrink-0">
+                              {position === "second" ? (
+                                // Selected shard is second, so show it directly
+                                <ShardDisplay shardId={selectedShard.key} fusionData={fusionData} />
+                              ) : // Partner is second, so show dropdown/partner
+                              outputGroup.partners.length > 1 ? (
+                                <div className="relative flex-shrink-0" ref={(el) => inputDropdowns.setRef(outputGroup.output + "-second", el)}>
+                                  <button
+                                    type="button"
+                                    className="flex items-center gap-1 lg:gap-2 px-1 lg:px-2 py-1 lg:py-2 text-slate-200 rounded shadow-sm border cursor-pointer bg-slate-800 border-slate-700 hover:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                                    onClick={() => inputDropdowns.toggleDropdown(outputGroup.output + "-second")}
+                                    tabIndex={0}
+                                  >
+                                    <ShardDisplay shardId={partnerId} fusionData={fusionData} size="sm" />
+                                    <ChevronDown
+                                      className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${inputDropdowns.dropdownOpen[outputGroup.output + "-second"] ? "rotate-180" : ""}`}
+                                    />
+                                  </button>
+                                  {inputDropdowns.dropdownOpen[outputGroup.output + "-second"] && (
+                                    <div className="absolute z-50 top-full mt-1 left-0 bg-slate-900 border border-slate-600 rounded shadow-xl max-h-40 overflow-auto min-w-max">
+                                      {outputGroup.partners.map((pid) => (
+                                        <button
+                                          key={pid}
+                                          type="button"
+                                          className={`w-full cursor-pointer flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-700 focus:bg-slate-700 transition-colors duration-150 ${
+                                            pid === partnerId ? "bg-slate-700 border-l-2 border-blue-400" : "text-slate-200"
+                                          }`}
+                                          onClick={() => {
+                                            setSelectedPartner((prev) => ({ ...prev, [outputGroup.output]: pid }));
+                                            inputDropdowns.closeDropdown(outputGroup.output + "-second");
                                           }}
                                         >
                                           <span className="text-sm text-slate-400 font-medium flex-shrink-0">×{fusionData.shards[pid]?.fuse_amount || 2}</span>
