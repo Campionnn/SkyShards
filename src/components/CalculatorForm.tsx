@@ -7,13 +7,14 @@ import { PetLevelDropdown } from "./calculator/PetLevelDropdown";
 import { KuudraDropdown } from "./calculator/KuudraDropdown";
 import { MAX_QUANTITIES, SHARD_DESCRIPTIONS } from "../constants";
 import { isValidShardName, formatShardDescription } from "../utils";
+import { Tooltip } from "./Tooltip";
 
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
 }
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
-  const { form, setForm } = useCalculatorState();
+  const { form, setForm, saveEnabled, setSaveEnabledState } = useCalculatorState();
 
   // Removed debug logs
 
@@ -141,10 +142,40 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
         {/* Target Shard */}
         <div className="space-y-2">
           <div>
-            <label className="flex items-center gap-2 text-sm font-medium text-emerald-300 mb-2">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-              Target Shard
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-emerald-300">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                Target Shard
+              </label>
+              
+              {/* Auto Save Toggle */}
+              <div className="flex items-center gap-1.5">
+                <label htmlFor="saveSettings" className="text-xs font-medium text-slate-200 cursor-pointer">
+                  Auto Save
+                </label>
+                <Tooltip 
+                  content="Automatically saves all your settings (fortune, pet levels, etc.) in your browser. Data is restored when the page reloads."
+                >
+                </Tooltip>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={saveEnabled}
+                  onClick={() => setSaveEnabledState(!saveEnabled)}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
+                    ${saveEnabled ? "bg-emerald-600" : "bg-white/5"}
+                    hover:border-emerald-400`}
+                  style={{ boxShadow: "none" }}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform duration-200 border border-white/10
+                    ${saveEnabled ? "bg-emerald-400" : "bg-slate-300/70"}
+                    ${saveEnabled ? "translate-x-4" : "translate-x-0.5"}`}
+                    style={{ paddingLeft: "1px" }}
+                  />
+                </button>
+              </div>
+            </div>
             <ShardAutocomplete
               value={form.shard}
               onChange={(value) => handleInputChange("shard", value)}
