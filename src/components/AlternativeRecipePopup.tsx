@@ -54,12 +54,12 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
     return Object.values(data.shards).find((shard) => shard.name === shardName);
   }, [data?.shards, shardName]);
 
-  // Group alternatives by first input shard and filter based on search query
+  // Group alternatives and filter based on search query
   const groupedAlternatives = useMemo(() => {
     if (!alternatives || !data?.shards) return { direct: null, groups: [] };
 
     let directOption: AlternativeRecipeOption | null = null;
-    const groups: { [firstInput: string]: AlternativeRecipeOption[] } = {};
+    const allFusionOptions: AlternativeRecipeOption[] = [];
 
     // Filter alternatives based on search query
     let filtered = alternatives;
@@ -77,29 +77,58 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
       });
     }
 
-    // Group by first input shard
+    // Separate direct and fusion options
     filtered.forEach((option) => {
       if (option.recipe === null) {
         directOption = option;
       } else {
-        const firstInputId = option.recipe.inputs[0];
+        allFusionOptions.push(option);
+      }
+    });
+
+    // Check if we need to group by first input or create a single group
+    const firstInputs = [...new Set(allFusionOptions.map((opt) => opt.recipe?.inputs[0]))];
+    const secondInputs = [...new Set(allFusionOptions.map((opt) => opt.recipe?.inputs[1]))];
+
+    // If there are multiple first inputs OR multiple second inputs, group appropriately
+    if (firstInputs.length > 1 || secondInputs.length > 1) {
+      // Group by first input, but each group will show all available combinations
+      const groups: { [firstInput: string]: AlternativeRecipeOption[] } = {};
+
+      allFusionOptions.forEach((option) => {
+        const firstInputId = option.recipe!.inputs[0];
         if (!groups[firstInputId]) {
           groups[firstInputId] = [];
         }
         groups[firstInputId].push(option);
-      }
-    });
+      });
 
-    // Sort groups by efficiency of best option in each group
-    const sortedGroups = Object.entries(groups)
-      .map(([firstInput, options]) => {
-        // Sort options within group by efficiency
-        const sortedOptions = options.sort((a, b) => a.timePerShard - b.timePerShard);
-        return { firstInput, options: sortedOptions };
-      })
-      .sort((a, b) => a.options[0].timePerShard - b.options[0].timePerShard);
+      // Sort groups by efficiency of best option in each group
+      const sortedGroups = Object.entries(groups)
+        .map(([firstInput, options]) => {
+          // Sort options within group by efficiency
+          const sortedOptions = options.sort((a, b) => a.timePerShard - b.timePerShard);
+          return { firstInput, options: sortedOptions, hasMultipleFirst: firstInputs.length > 1 };
+        })
+        .sort((a, b) => a.options[0].timePerShard - b.options[0].timePerShard);
 
-    return { direct: directOption, groups: sortedGroups };
+      return { direct: directOption, groups: sortedGroups };
+    } else {
+      // Single group with all options
+      const sortedOptions = allFusionOptions.sort((a, b) => a.timePerShard - b.timePerShard);
+      const groups =
+        sortedOptions.length > 0
+          ? [
+              {
+                firstInput: sortedOptions[0].recipe!.inputs[0],
+                options: sortedOptions,
+                hasMultipleFirst: false,
+              },
+            ]
+          : [];
+
+      return { direct: directOption, groups };
+    }
   }, [alternatives, searchQuery, data?.shards]);
 
   if (!isOpen) return null;
@@ -136,11 +165,11 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
     );
   };
 
-  const renderGroupedOption = (group: { firstInput: string; options: AlternativeRecipeOption[] }) => {
+  const renderGroupedOption = (group: { firstInput: string; options: AlternativeRecipeOption[]; hasMultipleFirst?: boolean }) => {
     const firstInputShard = data?.shards?.[group.firstInput];
     if (!firstInputShard) return null;
 
-    const hasMultipleOptions = group.options.length > 1;
+    const hasMultipleSecondOptions = group.options.length > 1;
     const selectedPartnerId = selectedPartner[group.firstInput] || group.options[0].recipe?.inputs[1];
     const selectedOption = group.options.find((opt) => opt.recipe?.inputs[1] === selectedPartnerId) || group.options[0];
     const isOpen = dropdownOpen[group.firstInput] || false;
@@ -148,10 +177,10 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
     return (
       <button
         key={group.firstInput}
-        onClick={() => (hasMultipleOptions || selectedOption.isCurrent ? undefined : handleSelect(selectedOption.recipe))}
+        onClick={() => (hasMultipleSecondOptions || selectedOption.isCurrent ? undefined : handleSelect(selectedOption.recipe))}
         className={`w-full p-4 rounded-lg border text-left transition-all duration-200 ${
           selectedOption.isCurrent ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30" : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
-        } ${hasMultipleOptions || selectedOption.isCurrent ? "cursor-default" : "cursor-pointer"}`}
+        } ${hasMultipleSecondOptions || selectedOption.isCurrent ? "cursor-default" : "cursor-pointer"}`}
         disabled={false}
       >
         <div className="flex items-center justify-between">
@@ -167,17 +196,72 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps> = ({ 
         </div>
 
         <div className="mt-3 flex items-center gap-2 text-sm">
-          {/* First input shard */}
-          <div className="flex items-center gap-1">
-            <span className="text-slate-400">{firstInputShard.fuse_amount}x</span>
-            <img src={`${import.meta.env.BASE_URL}shardIcons/${group.firstInput}.png`} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
-            <span className={getRarityColor(firstInputShard.rarity)}>{firstInputShard.name}</span>
-          </div>
+          {/* First input shard - with dropdown if hasMultipleFirst */}
+          {group.hasMultipleFirst ? (
+            <div className="relative" ref={(el) => setRef(`first-${group.firstInput}`, el)}>
+              <button
+                type="button"
+                className="flex items-center gap-1 px-2 py-1 text-slate-200 rounded shadow-sm border cursor-pointer bg-slate-800 border-slate-700 hover:bg-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown(`first-${group.firstInput}`);
+                }}
+              >
+                <span className="text-slate-400 text-xs">{firstInputShard.fuse_amount}x</span>
+                <img src={`${import.meta.env.BASE_URL}shardIcons/${group.firstInput}.png`} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
+                <span className={getRarityColor(firstInputShard.rarity)}>{firstInputShard.name}</span>
+                <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${dropdownOpen[`first-${group.firstInput}`] ? "rotate-180" : ""}`} />
+              </button>
+
+              {dropdownOpen[`first-${group.firstInput}`] && (
+                <div className="absolute z-50 top-full mt-1 left-0 bg-slate-900 border border-slate-600 rounded shadow-xl max-h-40 overflow-auto min-w-max">
+                  {/* Show all unique first inputs from all groups */}
+                  {groupedAlternatives.groups.map((otherGroup) => {
+                    const otherFirstShard = data?.shards?.[otherGroup.firstInput];
+                    if (!otherFirstShard) return null;
+
+                    const isSelected = otherGroup.firstInput === group.firstInput;
+
+                    return (
+                      <button
+                        key={otherGroup.firstInput}
+                        type="button"
+                        className={`w-full cursor-pointer flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-700 focus:bg-slate-700 transition-colors duration-150 ${
+                          isSelected ? "bg-slate-700 border-l-2 border-blue-400" : "text-slate-200"
+                        }`}
+                        onClick={() => {
+                          const bestOption = otherGroup.options[0];
+                          setDropdownOpen((prev) => ({ ...prev, [`first-${group.firstInput}`]: false }));
+                          handleSelect(bestOption.recipe);
+                        }}
+                      >
+                        <span className="text-sm text-slate-400 font-medium flex-shrink-0">×{otherFirstShard.fuse_amount}</span>
+                        <img src={`${import.meta.env.BASE_URL}shardIcons/${otherGroup.firstInput}.png`} alt={otherFirstShard.name} className="w-4 h-4 object-contain flex-shrink-0" loading="lazy" />
+                        <span className={`text-sm flex-1 ${isSelected ? "text-blue-300" : getRarityColor(otherFirstShard.rarity)}`} title={otherFirstShard.name}>
+                          {otherFirstShard.name}
+                        </span>
+                        <div className="flex items-center gap-1 text-xs text-slate-400">
+                          <Clock className="w-3 h-3" />
+                          <span>{formatTime(otherGroup.options[0].timePerShard)}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <span className="text-slate-400">{firstInputShard.fuse_amount}x</span>
+              <img src={`${import.meta.env.BASE_URL}shardIcons/${group.firstInput}.png`} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
+              <span className={getRarityColor(firstInputShard.rarity)}>{firstInputShard.name}</span>
+            </div>
+          )}
 
           <Plus className="w-3 h-3 text-purple-400" />
 
           {/* Second input shard with dropdown */}
-          {hasMultipleOptions && selectedPartnerId ? (
+          {hasMultipleSecondOptions && selectedPartnerId ? (
             <div className="relative" ref={(el) => setRef(group.firstInput, el)}>
               <button
                 type="button"
