@@ -44,7 +44,13 @@ export const CalculatorStateProvider: React.FC<{ children: React.ReactNode }> = 
     const isSaveEnabled = getSaveEnabled();
     if (isSaveEnabled) {
       const savedData = loadFormData();
-      return savedData || defaultForm;
+
+      if (savedData) {
+        return {
+          ...defaultForm,
+          ...savedData,
+        };
+      }
     }
     return defaultForm;
   });

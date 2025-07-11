@@ -3,9 +3,24 @@ import type { CalculationFormData } from "../schemas/validation";
 const STORAGE_KEY = "calculator_data";
 const SAVE_ENABLED_KEY = "calculator_save_enabled";
 
+const EXCLUDED_FIELDS = ['shard', 'quantity'] as const;
+
+const filterFormDataForSave = (data: CalculationFormData): Partial<CalculationFormData> => {
+  const result: Partial<CalculationFormData> = {};
+  
+  for (const [key, value] of Object.entries(data)) {
+    if (!EXCLUDED_FIELDS.includes(key as any)) {
+      (result as any)[key] = value;
+    }
+  }
+  
+  return result;
+};
+
 export const saveFormData = (data: CalculationFormData): void => {
   try {
-    const serializedData = JSON.stringify(data);
+    const filteredData = filterFormDataForSave(data);
+    const serializedData = JSON.stringify(filteredData);
     localStorage.setItem(STORAGE_KEY, serializedData);
   } catch (error) {
     console.warn("Failed to save form data to localStorage:", error);
