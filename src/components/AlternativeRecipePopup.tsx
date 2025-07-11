@@ -4,9 +4,11 @@ import { X, Clock, Star, Search, Plus, Equal, ChevronDown } from "lucide-react";
 import { getRarityColor, formatTime } from "../utils";
 import type { AlternativeRecipePopupProps, Recipe, AlternativeRecipeOption } from "../types";
 
-export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps & {
-  alternatives: { direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> }
-}> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading }) => {
+export const AlternativeRecipePopup: React.FC<
+  AlternativeRecipePopupProps & {
+    alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
+  }
+> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading }) => {
   const [searchQuery, setSearchQuery] = useState("");
   // Track selected recipe index for each group
   const [selectedIndices, setSelectedIndices] = useState<Record<string, number>>({});
@@ -36,9 +38,9 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps & {
       const query = searchQuery.toLowerCase();
       const filteredGrouped: typeof grouped = {};
       for (const [firstShard, group] of Object.entries(grouped)) {
-        const filteredGroup = group.filter(option => {
+        const filteredGroup = group.filter((option) => {
           if (!option.recipe) return false;
-          return option.recipe.inputs.some(inputId => {
+          return option.recipe.inputs.some((inputId) => {
             const inputShard = data.shards[inputId];
             return inputShard?.name.toLowerCase().includes(query);
           });
@@ -157,7 +159,9 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps & {
               <>
                 <img src={`${import.meta.env.BASE_URL}shardIcons/${firstShard}.png`} alt={firstShardObj.name} className="w-4 h-4 object-contain" loading="lazy" />
                 <span className={getRarityColor(firstShardObj.rarity) + " font-semibold"}>{firstShardObj.name}</span>
-                <span className="text-xs text-slate-400">({group.length} recipe{group.length !== 1 ? "s" : ""})</span>
+                <span className="text-xs text-slate-400">
+                  ({group.length} recipe{group.length !== 1 ? "s" : ""})
+                </span>
               </>
             )}
           </div>
@@ -167,10 +171,12 @@ export const AlternativeRecipePopup: React.FC<AlternativeRecipePopupProps & {
             <select
               className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white appearance-none"
               value={selectedIndex}
-              onChange={(e) => setSelectedIndices({
-                ...selectedIndices,
-                [firstShard]: parseInt(e.target.value)
-              })}
+              onChange={(e) =>
+                setSelectedIndices({
+                  ...selectedIndices,
+                  [firstShard]: parseInt(e.target.value),
+                })
+              }
             >
               {group.map((option, idx) => {
                 if (!option.recipe) return null;

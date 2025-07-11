@@ -5,7 +5,7 @@ import type { RecipeOverrideManagerProps, AlternativeRecipeOption, AlternativeSe
 
 interface PopupState {
   isOpen: boolean;
-  alternatives: AlternativeRecipeOption[];
+  alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
   shardId?: string;
   shardName?: string;
   loading: boolean;
@@ -16,14 +16,14 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({ ta
   const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
   const [popupState, setPopupState] = useState<PopupState>({
     isOpen: false,
-    alternatives: [],
+    alternatives: { direct: null, grouped: {} },
     loading: false,
   });
 
   const closePopup = useCallback(() => {
     setPopupState({
       isOpen: false,
-      alternatives: [],
+      alternatives: { direct: null, grouped: {} },
       loading: false,
     });
   }, []);
@@ -32,7 +32,7 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({ ta
     async (shardId: string, context: AlternativeSelectionContext) => {
       setPopupState({
         isOpen: true,
-        alternatives: [],
+        alternatives: { direct: null, grouped: {} },
         shardId,
         shardName: shardId,
         loading: true,
@@ -55,7 +55,7 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({ ta
         console.error("Failed to load alternatives:", error);
         setPopupState((prev) => ({
           ...prev,
-          alternatives: [],
+          alternatives: { direct: null, grouped: {} },
           loading: false,
         }));
       }
