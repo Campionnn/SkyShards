@@ -49,7 +49,7 @@ export const Navigation: React.FC = () => {
   const navItems = [
     { path: "/", label: "Calculator", icon: Calculator, color: "purple" },
     { path: "/recipes", label: "Recipes", icon: Shuffle, color: "green" },
-    { path: "/settings", label: "Shards", icon: Settings, color: "blue" },
+    { path: "/shards", label: "Shards", icon: Settings, color: "blue" },
   ];
 
   const colorClasses: Record<string, { bg: string; hoverBg: string; text: string; border: string; hoverBorder: string }> = {
@@ -85,7 +85,7 @@ export const Navigation: React.FC = () => {
               className="text-2xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 bg-clip-text text-transparent tracking-wide group-hover:from-blue-300 group-hover:via-purple-300 group-hover:to-emerald-300 transition-all duration-300 drop-shadow-sm"
               style={{ fontFamily: "Orbitron, monospace" }}
             >
-              Sky Shards
+              SkyShards
             </div>
           </Link>
 
