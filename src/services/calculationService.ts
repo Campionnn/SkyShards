@@ -271,11 +271,6 @@ export class CalculationService {
     return { minCosts, choices };
   }
 
-  private clearCaches(): void {
-    // Method kept for backward compatibility but no longer needed
-    // since we're calculating fresh data each time
-  }
-
   private getCostCalculationContext(params: CalculationParams) {
     const multipliers = this.calculateMultipliers(params);
     return {
@@ -713,16 +708,8 @@ export class CalculationService {
     const updatedOverrides = existingOverrides.filter((o) => o.shardId !== shardId);
     updatedOverrides.push(newOverride);
 
-    // Clear caches to ensure fresh calculation with overrides
-    this.clearCaches();
-
     // Recalculate with the new overrides
-    const result = await this.calculateOptimalPath(targetShard, requiredQuantity, params, updatedOverrides);
-
-    // Ensure caches are cleared after calculation to prevent stale data
-    this.clearCaches();
-
-    return result;
+    return await this.calculateOptimalPath(targetShard, requiredQuantity, params, updatedOverrides);
   }
 
   async getAlternativeRecipeWithContext(outputShard: string, params: CalculationParams, currentRecipe?: Recipe | null, recipeOverrides: RecipeOverride[] = []): Promise<AlternativeRecipeOption[]> {
@@ -736,9 +723,6 @@ export class CalculationService {
 
   // Method to get alternatives while handling cycle nodes properly
   async getAlternativesForTreeNode(shardId: string, params: CalculationParams, context: AlternativeSelectionContext, recipeOverrides: RecipeOverride[] = []): Promise<AlternativeRecipeOption[]> {
-    // Don't block cycle nodes - they can still have alternatives
-    // The user should be able to break out of cycles by choosing different recipes
-
     try {
       return await this.getAlternativeRecipeWithContext(shardId, params, context.currentRecipe, recipeOverrides);
     } catch (error) {
