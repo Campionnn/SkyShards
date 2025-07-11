@@ -11,10 +11,10 @@
     <script>
       // Store the current path and redirect to index.html for SPA routing
       const currentPath = window.location.pathname + window.location.search + window.location.hash;
-      sessionStorage.setItem('pathToRedirect', currentPath);
-      
+      sessionStorage.setItem("pathToRedirect", currentPath);
+
       // Redirect to the root, but React Router will handle the actual routing
-      window.location.replace('/');
+      window.location.replace("/");
     </script>
   </head>
   <body>
