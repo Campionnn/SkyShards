@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calculator, Settings, Shuffle, Menu, X } from "lucide-react";
+import { Calculator, Settings, Shuffle, Menu, X, DollarSign } from "lucide-react";
 
 const GitHubIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -49,7 +49,8 @@ export const Navigation: React.FC = () => {
   const navItems = [
     { path: "/", label: "Calculator", icon: Calculator, color: "purple" },
     { path: "/recipes", label: "Recipes", icon: Shuffle, color: "green" },
-    { path: "/settings", label: "Shards", icon: Settings, color: "blue" },
+    { path: "/prices", label: "Prices", icon: DollarSign, color: "yellow" },
+    { path: "/settings", label: "Settings", icon: Settings, color: "blue" },
   ];
 
   const colorClasses: Record<string, { bg: string; hoverBg: string; text: string; border: string; hoverBorder: string }> = {
@@ -66,6 +67,13 @@ export const Navigation: React.FC = () => {
       text: "text-green-300",
       border: "border border-green-500/20",
       hoverBorder: "hover:border-green-500/30",
+    },
+    yellow: {
+      bg: "bg-yellow-500/20",
+      hoverBg: "hover:bg-yellow-500/30",
+      text: "text-yellow-300",
+      border: "border border-yellow-500/20",
+      hoverBorder: "hover:border-yellow-500/30",
     },
     blue: {
       bg: "bg-blue-500/20",

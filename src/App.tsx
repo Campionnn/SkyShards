@@ -7,6 +7,7 @@ import { RecipeStateProvider } from "./context/RecipeStateContext";
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));
 const RecipePage = lazy(() => import("./pages/RecipePage"));
+const ShardPricesPage = lazy(() => import("./pages/ShardPricesPage"));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center py-12">
@@ -52,6 +53,14 @@ const router = createBrowserRouter(
           element: (
             <Suspense fallback={<LoadingSpinner />}>
               <RecipePage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "prices",
+          element: (
+            <Suspense fallback={<LoadingSpinner />}>
+              <ShardPricesPage />
             </Suspense>
           ),
         },
