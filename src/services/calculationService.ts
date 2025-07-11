@@ -450,7 +450,7 @@ export class CalculationService {
           if (node.cycles.length > 0) {
             for (const cycleRecipes of node.cycles) {
               // Use the correct number of cycles without additional multiplier
-              const totalCrafts = Math.ceil(tree.quantity / (node.cycles[0].expectedOutput - node.cycles[0].baseOutput));
+              const totalCrafts = node.cycles[0].expectedCrafts;
 
               const cycleInputs = new Map<string, number>();
               cycleRecipes.steps.forEach((recipe) => {

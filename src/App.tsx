@@ -22,8 +22,8 @@ const ProtectedLayout = () => (
   </CalculatorStateProvider>
 );
 
-const isProd = import.meta.env.PROD;
-const basename = isProd ? "/SkyShards" : "";
+// const isProd = import.meta.env.PROD;
+const basename = "/";
 
 const router = createBrowserRouter(
   [

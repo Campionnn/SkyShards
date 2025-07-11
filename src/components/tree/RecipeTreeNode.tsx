@@ -1,8 +1,8 @@
 import React from "react";
-import { getRarityColor, getShardDetails, formatShardDescription } from "../../utils/index";
+import { getRarityColor, getShardDetails, formatShardDescription } from "../../utils";
 import { ChevronDown, ChevronRight, MoveRight } from "lucide-react";
-import { formatNumber } from "../../utils/index";
-import type { RecipeTreeNodeProps } from "../../types/index";
+import { formatNumber } from "../../utils";
+import type { RecipeTreeNodeProps } from "../../types";
 import { Tooltip } from "../Tooltip";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 
@@ -311,7 +311,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   return (
                     <div className="flex flex-col gap-0.5 mt-0.5">
                       {Object.values(inputShardTotals).map(({ quantity, shard }) => (
-                        <div key={shard.id}>{renderDirectShard(quantity * runCount, shard)}</div>
+                        <div key={shard.id}>{renderDirectShard(quantity * cycle.expectedCrafts, shard)}</div>
                       ))}
                     </div>
                   );

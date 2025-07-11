@@ -3,13 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://campionnn.github.io/SkyShards/",
+  "homepage": "https://skyshards.com",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "predeploy": "pnpm run build",
+    "predeploy": "pnpm run build && echo skyshards.com > dist/CNAME",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
