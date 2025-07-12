@@ -193,7 +193,8 @@ const RecipePage = () => {
                     .map((outputGroup) => {
                       const partnerId = selectedPartner[outputGroup.output] || outputGroup.partners[0];
                       const isOpen = inputDropdowns.dropdownOpen[outputGroup.output] || false;
-                      const position = outputGroup.positions.get(partnerId) || "first";
+                      // Determine position based on which shard has a lower ID/key value
+                      const position = selectedShard.key < partnerId ? "first" : "second";
 
                       return (
                         <div key={`${outputGroup.output}-${position}`} className="px-2">

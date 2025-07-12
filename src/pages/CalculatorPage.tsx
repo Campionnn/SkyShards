@@ -4,6 +4,7 @@ import { CalculatorForm, CalculationResults } from "../components";
 import { useCalculation, useCustomRates } from "../hooks";
 import { DataService } from "../services/dataService";
 import type { CalculationFormData } from "../schemas/validation";
+import type { CalculationResult, CalculationParams } from "../types";
 import { useCalculatorState } from "../context/CalculatorStateContext";
 
 const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
@@ -11,114 +12,119 @@ const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData
   return <CalculatorForm onSubmit={(data) => onSubmit(data, setForm)} />;
 };
 
+// Shared calculation logic
+const performCalculation = async (
+  formData: CalculationFormData,
+  customRates: { [shardId: string]: number | undefined },
+  callbacks: {
+    setTargetShardName: (name: string) => void;
+    setCurrentShardKey: (key: string) => void;
+    setCurrentQuantity: (quantity: number) => void;
+    setCurrentParams: (params: CalculationParams) => void;
+    setResult: (result: CalculationResult) => void;
+    setCalculationData: (data: any) => void;
+  }
+) => {
+  if (!formData.shard || formData.shard.trim() === "") {
+    console.warn("Calculation skipped: No shard selected");
+    return;
+  }
+
+  const dataService = DataService.getInstance();
+  const nameToKeyMap = await dataService.getShardNameToKeyMap();
+  const shardKey = nameToKeyMap[formData.shard.toLowerCase()];
+
+  if (!shardKey) {
+    return;
+  }
+
+  callbacks.setTargetShardName(formData.shard);
+  callbacks.setCurrentShardKey(shardKey);
+  callbacks.setCurrentQuantity(formData.quantity);
+
+  const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
+
+  const params = {
+    customRates: filteredCustomRates,
+    hunterFortune: formData.hunterFortune,
+    excludeChameleon: formData.excludeChameleon,
+    frogPet: formData.frogPet,
+    newtLevel: formData.newtLevel,
+    salamanderLevel: formData.salamanderLevel,
+    lizardKingLevel: formData.lizardKingLevel,
+    leviathanLevel: formData.leviathanLevel,
+    pythonLevel: formData.pythonLevel,
+    kingCobraLevel: formData.kingCobraLevel,
+    seaSerpentLevel: formData.seaSerpentLevel,
+    tiamatLevel: formData.tiamatLevel,
+    crocodileLevel: formData.crocodileLevel,
+    kuudraTier: formData.kuudraTier,
+    moneyPerHour: formData.moneyPerHour,
+    noWoodenBait: formData.noWoodenBait,
+  };
+
+  callbacks.setCurrentParams(params);
+
+  const calculationService = await import("../services/calculationService");
+  const service = calculationService.CalculationService.getInstance();
+  const calculationResult = await service.calculateOptimalPath(shardKey, formData.quantity, params);
+  callbacks.setResult(calculationResult);
+  const data = await service.parseData(params);
+  callbacks.setCalculationData(data);
+};
+
 const CalculatorPageContent: React.FC = () => {
   const { result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName, form } = useCalculatorState();
   const { loading, error } = useCalculation();
   const { customRates } = useCustomRates();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentParams, setCurrentParams] = useState<CalculationParams | null>(null);
+  const [currentShardKey, setCurrentShardKey] = useState<string>("");
+  const [currentQuantity, setCurrentQuantity] = useState<number>(1);
 
   const handleCalculate = async (formData: CalculationFormData, setForm: (data: CalculationFormData) => void) => {
-    setForm(formData); // persist form state
+    setForm(formData);
+    setSidebarOpen(false);
+
+    const callbacks = {
+      setTargetShardName,
+      setCurrentShardKey,
+      setCurrentQuantity,
+      setCurrentParams,
+      setResult,
+      setCalculationData,
+    };
+
     try {
-      // Validate that we have a valid shard name before proceeding
-      if (!formData.shard || formData.shard.trim() === "") {
-        console.warn("Calculation skipped: No shard selected");
-        return;
-      }
-
-      // Get shard key from name
-      const dataService = DataService.getInstance();
-      const nameToKeyMap = await dataService.getShardNameToKeyMap();
-      const shardKey = nameToKeyMap[formData.shard.toLowerCase()];
-
-      if (!shardKey) {
-        console.warn(`Calculation skipped: Shard "${formData.shard}" not found in data`);
-        return;
-      }
-
-      setTargetShardName(formData.shard);
-
-      // Filter out undefined values from customRates
-      const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
-
-      // Prepare calculation parameters
-      const params = {
-        customRates: filteredCustomRates,
-        hunterFortune: formData.hunterFortune,
-        excludeChameleon: formData.excludeChameleon,
-        frogPet: formData.frogPet,
-        newtLevel: formData.newtLevel,
-        salamanderLevel: formData.salamanderLevel,
-        lizardKingLevel: formData.lizardKingLevel,
-        leviathanLevel: formData.leviathanLevel,
-        pythonLevel: formData.pythonLevel,
-        kingCobraLevel: formData.kingCobraLevel,
-        seaSerpentLevel: formData.seaSerpentLevel,
-        tiamatLevel: formData.tiamatLevel,
-        crocodileLevel: formData.crocodileLevel,
-        kuudraTier: formData.kuudraTier,
-        moneyPerHour: formData.moneyPerHour,
-        noWoodenBait: formData.noWoodenBait,
-      };
-
-      // Use the calculation service directly to get the result
-      const calculationService = await import("../services/calculationService");
-      const service = calculationService.CalculationService.getInstance();
-      const calculationResult = await service.calculateOptimalPath(shardKey, formData.quantity, params);
-      setResult(calculationResult);
-      const data = await service.parseData(params);
-      setCalculationData(data);
+      await performCalculation(formData, customRates, callbacks);
     } catch (err) {
-      // Only log significant errors, not validation failures
       if (err instanceof Error && !err.message.includes("not found")) {
         console.error("Calculation failed:", err);
       }
     }
   };
 
+  const handleResultUpdate = (newResult: CalculationResult) => {
+    setResult(newResult);
+  };
+
   // Re-calculate when customRates change and form is valid
   useEffect(() => {
     if (form && form.shard && form.shard.trim() !== "") {
-      // Use the same calculation logic as handleCalculate
-      (async () => {
-        try {
-          const dataService = DataService.getInstance();
-          const nameToKeyMap = await dataService.getShardNameToKeyMap();
-          const shardKey = nameToKeyMap[form.shard.toLowerCase()];
-          if (!shardKey) return;
-          setTargetShardName(form.shard);
-          const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
-          const params = {
-            customRates: filteredCustomRates,
-            hunterFortune: form.hunterFortune,
-            excludeChameleon: form.excludeChameleon,
-            frogPet: form.frogPet,
-            newtLevel: form.newtLevel,
-            salamanderLevel: form.salamanderLevel,
-            lizardKingLevel: form.lizardKingLevel,
-            leviathanLevel: form.leviathanLevel,
-            pythonLevel: form.pythonLevel,
-            kingCobraLevel: form.kingCobraLevel,
-            seaSerpentLevel: form.seaSerpentLevel,
-            tiamatLevel: form.tiamatLevel,
-            crocodileLevel: form.crocodileLevel,
-            kuudraTier: form.kuudraTier,
-            moneyPerHour: form.moneyPerHour,
-            noWoodenBait: form.noWoodenBait,
-          };
-          const calculationService = await import("../services/calculationService");
-          const service = calculationService.CalculationService.getInstance();
-          const calculationResult = await service.calculateOptimalPath(shardKey, form.quantity, params);
-          setResult(calculationResult);
-          const data = await service.parseData(params);
-          setCalculationData(data);
-        } catch (err) {
-          // Only log significant errors, not validation failures
-          if (err instanceof Error && !err.message.includes("not found")) {
-            console.error("Calculation failed (customRates effect):", err);
-          }
+      const callbacks = {
+        setTargetShardName,
+        setCurrentShardKey,
+        setCurrentQuantity,
+        setCurrentParams,
+        setResult,
+        setCalculationData,
+      };
+
+      performCalculation(form, customRates, callbacks).catch((err) => {
+        if (err instanceof Error && !err.message.includes("not found")) {
+          console.error("Calculation failed (customRates effect):", err);
         }
-      })();
+      });
     }
   }, [customRates, form, setResult, setCalculationData, setTargetShardName]);
 
@@ -126,11 +132,11 @@ const CalculatorPageContent: React.FC = () => {
     <div className="min-h-screen space-y-3 py-4">
       {/* Header */}
 
-      <div className="grid grid-cols-1 xl:grid-cols-7 gap-3">
+      <div className="grid grid-cols-1 xl:grid-cols-7 gap-1 lg:gap-4">
         {/* Configuration Panel */}
         <div className="xl:col-span-2">
           {/* Mobile toggle */}
-          <div className="xl:hidden">
+          <div className="xl:hidden mb-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="
@@ -146,7 +152,7 @@ const CalculatorPageContent: React.FC = () => {
             </button>
           </div>
 
-          <div className={`${sidebarOpen ? "block not-xl:mt-3" : "hidden xl:block"}`}>
+          <div className={`${sidebarOpen ? "block" : "hidden xl:block"}`}>
             <CalculatorFormWithContext onSubmit={handleCalculate} />
           </div>
         </div>
@@ -165,7 +171,17 @@ const CalculatorPageContent: React.FC = () => {
           )}
 
           {/* Results */}
-          {result && calculationData && <CalculationResults result={result} data={calculationData} targetShardName={targetShardName} noWoodenBait={form?.noWoodenBait} />}
+          {result && calculationData && currentParams && (
+            <CalculationResults
+              result={result}
+              data={calculationData}
+              targetShardName={targetShardName}
+              targetShard={currentShardKey}
+              requiredQuantity={currentQuantity}
+              params={currentParams}
+              onResultUpdate={handleResultUpdate}
+            />
+          )}
 
           {/* Empty State */}
           {!result && !loading && !error && (

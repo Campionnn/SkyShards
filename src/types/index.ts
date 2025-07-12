@@ -147,7 +147,6 @@ export interface CalculationResultsProps {
   result: CalculationResult;
   data: Data;
   targetShardName: string;
-  noWoodenBait?: boolean;
   targetShard: string;
   requiredQuantity: number;
   params: CalculationParams;
