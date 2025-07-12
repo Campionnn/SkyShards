@@ -1,4 +1,4 @@
-[🌐 Live App on GitHub Pages](https://campionnn.github.io/SkyShards/)
+[🌐 Live App](https://skyshards.com/)
 
 # React + TypeScript + Vite
 
