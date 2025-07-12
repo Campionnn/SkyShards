@@ -1,0 +1,30 @@
+User-agent: *
+Allow: /
+
+# Important pages
+Allow: /calculator
+Allow: /fusion-guide
+Allow: /shard-prices
+Allow: /screenshots/
+Allow: /shardIcons/
+
+# Sitemaps
+Sitemap: https://skyshards.com/sitemap.xml
+
+# Crawl delay
+Crawl-delay: 1
+
+# Specific bots
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
