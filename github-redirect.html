@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyShards - Redirecting...</title>
+    
+    <!-- Immediate redirect -->
+    <meta http-equiv="refresh" content="0; url=https://skyshards.com/">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://skyshards.com/">
+    
+    <!-- Preconnect for faster loading -->
+    <link rel="preconnect" href="https://skyshards.com">
+    
+    <!-- Modern styling -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .message {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .redirect-link {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .redirect-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">SkyShards</div>
+        <div class="message">Redirecting to our new domain...</div>
+        <div class="spinner"></div>
+        <a href="https://skyshards.com/" class="redirect-link" id="redirectLink">
+            Continue to SkyShards.com
+        </a>
+        <div class="footer">
+            If you are not redirected automatically, click the link above
+        </div>
+    </div>
+
+    <script>
+        // Enhanced redirect with path preservation
+        (function() {
+            // Get the current path and parameters
+            const currentPath = window.location.pathname;
+            const currentSearch = window.location.search;
+            const currentHash = window.location.hash;
+            
+            // Build new URL preserving the path structure
+            let newUrl = 'https://skyshards.com';
+            
+            // Preserve path if it's not just the root or index
+            if (currentPath && currentPath !== '/' && currentPath !== '/index.html' && currentPath !== '/SkyShards/') {
+                // Remove /SkyShards prefix if present (GitHub Pages repo path)
+                const cleanPath = currentPath.replace(/^\/SkyShards\/?/, '/');
+                newUrl += cleanPath;
+            }
+            
+            // Add search parameters and hash
+            if (currentSearch) {
+                newUrl += currentSearch;
+            }
+            if (currentHash) {
+                newUrl += currentHash;
+            }
+            
+            // Update the redirect link
+            const redirectLink = document.getElementById('redirectLink');
+            if (redirectLink) {
+                redirectLink.href = newUrl;
+            }
+            
+            // Multiple redirect methods for maximum compatibility
+            
+            // Method 1: Immediate redirect (most reliable)
+            setTimeout(() => {
+                window.location.replace(newUrl);
+            }, 100);
+            
+            // Method 2: Backup redirect after 2 seconds
+            setTimeout(() => {
+                if (window.location.href.includes('github.io')) {
+                    window.location.href = newUrl;
+                }
+            }, 2000);
+            
+            // Method 3: Handle browsers that block automatic redirects
+            setTimeout(() => {
+                if (window.location.href.includes('github.io')) {
+                    // Show a more prominent message
+                    document.querySelector('.message').innerHTML = 
+                        'Please click the link below to continue to SkyShards.com';
+                    document.querySelector('.spinner').style.display = 'none';
+                    document.querySelector('.redirect-link').style.fontSize = '1.2rem';
+                    document.querySelector('.redirect-link').style.padding = '1rem 2rem';
+                }
+            }, 5000);
+        })();
+        
+        // Analytics tracking (optional)
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'redirect', {
+                'event_category': 'navigation',
+                'event_label': 'github-to-custom-domain'
+            });
+        }
+    </script>
+</body>
+</html>
