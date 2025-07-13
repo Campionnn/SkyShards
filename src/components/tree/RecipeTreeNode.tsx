@@ -347,21 +347,37 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                 {(() => {
                   const outputShardIds = new Set(cycle.steps.map((step) => step.outputShard));
                   const inputShardTotals: Record<string, { quantity: number; shard: any }> = {};
+
+                  // Only count external inputs (not produced within the cycle)
+                  // Use a Set to avoid counting the same external input multiple times
+                  const externalInputs = new Set<string>();
+
                   cycle.steps.forEach((step) => {
                     step.recipe.inputs.forEach((inputId: string) => {
                       const inputShard = data.shards[inputId];
+                      // Skip if input shard doesn't exist OR if it's produced by another step in this cycle
                       if (!inputShard || outputShardIds.has(inputId)) return;
-                      if (!inputShardTotals[inputId]) {
-                        inputShardTotals[inputId] = { quantity: 0, shard: inputShard };
-                      }
-                      inputShardTotals[inputId].quantity += inputShard.fuse_amount;
+
+                      // Add to set of external inputs (will automatically handle duplicates)
+                      externalInputs.add(inputId);
                     });
+                  });
+
+                  // Now count each external input only once
+                  externalInputs.forEach((inputId) => {
+                    const inputShard = data.shards[inputId];
+                    if (inputShard) {
+                      inputShardTotals[inputId] = {
+                        quantity: inputShard.fuse_amount,
+                        shard: inputShard,
+                      };
+                    }
                   });
 
                   return (
                     <div className="flex flex-col gap-0.5 mt-0.5">
                       {Object.values(inputShardTotals).map(({ quantity, shard }) => (
-                        <div key={shard.id}>{renderDirectShard(quantity * runCount, shard)}</div>
+                        <div key={shard.id}>{renderDirectShard(quantity * cycle.expectedCrafts, shard)}</div>
                       ))}
                     </div>
                   );

@@ -12,7 +12,7 @@ import type {
   Shard,
   Shards,
 } from "../types";
-import {BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS} from "../constants";
+import { BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS } from "../constants";
 
 export class CalculationService {
   private static instance: CalculationService;
@@ -293,10 +293,10 @@ export class CalculationService {
     return totalCost / effectiveOutput;
   }
 
-  private groupAlternativeRecipes(alternatives: AlternativeRecipeOption[]): { direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> } {
+  private groupAlternativeRecipes(alternatives: AlternativeRecipeOption[]): { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> } {
     // Separate direct option from fusion recipes
-    const directOption = alternatives.find(alt => alt.recipe === null) || null;
-    const fusionAlts = alternatives.filter(alt => alt.recipe !== null);
+    const directOption = alternatives.find((alt) => alt.recipe === null) || null;
+    const fusionAlts = alternatives.filter((alt) => alt.recipe !== null);
 
     // Build a set of valid input pairs for normalization check
     const validPairs = new Set<string>();
@@ -319,7 +319,7 @@ export class CalculationService {
 
     // For each recipe, put the most common shard in the first slot,
     // but only if the normalized recipe exists
-    const normalized: AlternativeRecipeOption[] = fusionAlts.map(alt => {
+    const normalized: AlternativeRecipeOption[] = fusionAlts.map((alt) => {
       if (!alt.recipe) return alt;
       const [a, b] = alt.recipe.inputs;
       // If b is more common than a, and the swapped recipe exists, swap
@@ -372,9 +372,9 @@ export class CalculationService {
     params: CalculationParams,
     recipeOverrides: RecipeOverride[] = [],
     recipeFilter?: (recipe: Recipe) => boolean
-  ): Promise<{ direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> }> {
+  ): Promise<{ direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> }> {
     const data = await this.parseData(params);
-    const {minCosts} = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
+    const { minCosts } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
     const context = this.getCostCalculationContext(params);
     const alternatives: AlternativeRecipeOption[] = [];
     const recipes = data.recipes[outputShard] || [];
@@ -383,14 +383,14 @@ export class CalculationService {
     for (const recipe of recipes) {
       if (!recipeFilter || recipeFilter(recipe)) {
         const cost = this.calculateRecipeCost(recipe, context, data, minCosts);
-        alternatives.push({recipe, cost, timePerShard: cost, isCurrent: false});
+        alternatives.push({ recipe, cost, timePerShard: cost, isCurrent: false });
       }
     }
 
     // Add direct option for recipe alternatives (not for direct input alternatives)
     if (!recipeFilter) {
       const directCost = data.shards[outputShard].rate > 0 ? 1 / data.shards[outputShard].rate : Infinity;
-      alternatives.push({recipe: null, cost: directCost, timePerShard: directCost, isCurrent: false});
+      alternatives.push({ recipe: null, cost: directCost, timePerShard: directCost, isCurrent: false });
     }
 
     return this.groupAlternativeRecipes(alternatives);
@@ -401,7 +401,7 @@ export class CalculationService {
     params: CalculationParams,
     currentRecipe?: Recipe | null,
     recipeOverrides: RecipeOverride[] = []
-  ): Promise<{ direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> }> {
+  ): Promise<{ direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> }> {
     const result = await this.getAlternativeRecipe(outputShard, params, recipeOverrides);
 
     // Mark the current recipe
@@ -422,7 +422,7 @@ export class CalculationService {
     params: CalculationParams,
     context: AlternativeSelectionContext,
     recipeOverrides: RecipeOverride[] = []
-  ): Promise<{ direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> }> {
+  ): Promise<{ direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> }> {
     try {
       return await this.getAlternativeRecipeWithContext(shardId, params, context.currentRecipe, recipeOverrides);
     } catch (error) {
@@ -643,7 +643,8 @@ export class CalculationService {
           cycle.baseOutput = baseOutput;
           cycle.multiplier = crocodileMultiplier;
 
-          craftCounter.total += expectedCrafts * cycle.steps.length;
+          // Add total crafts for this cycle (not multiplied by steps - each cycle runs once)
+          craftCounter.total += expectedCrafts;
         }
         tree.craftsNeeded = tree.cycles.reduce((sum, c) => sum + (c.expectedCrafts || 0), 0);
 
@@ -655,26 +656,28 @@ export class CalculationService {
           // Calculate total quantities needed for each input shard across all cycles
           const inputQuantities = new Map<string, number>();
 
+          // First, get all outputs produced within this cycle
+          const outputShards = new Set(tree.cycles[0].steps.map((step) => step.outputShard));
+
           tree.cycles[0].steps.forEach((step) => {
             step.recipe.inputs.forEach((inputId) => {
-              const inputShard = data.shards[inputId];
-              const currentQuantity = inputQuantities.get(inputId) || 0;
-              inputQuantities.set(inputId, currentQuantity + inputShard.fuse_amount);
+              // Only count external inputs (not produced within the cycle)
+              if (!outputShards.has(inputId)) {
+                const inputShard = data.shards[inputId];
+                const currentQuantity = inputQuantities.get(inputId) || 0;
+                inputQuantities.set(inputId, currentQuantity + inputShard.fuse_amount);
+              }
             });
           });
 
-          // Assign quantities for each external input (inputs that don't appear as outputs in the cycle)
-          const outputShards = new Set(tree.cycles[0].steps.map((step) => step.outputShard));
-
+          // Assign quantities for each external input
           inputQuantities.forEach((quantityPerCycle, inputId) => {
-            if (!outputShards.has(inputId)) {
-              // This is an external input - calculate total needed
-              const totalQuantityNeeded = quantityPerCycle * totalCycles;
-              const inputChoice = choices.get(inputId);
-              if (inputChoice && inputChoice.recipe) {
-                const inputTree = this.buildRecipeTree(data, inputId, choices, [], recipeOverrides);
-                this.assignQuantities(inputTree, totalQuantityNeeded, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
-              }
+            // This is an external input - calculate total needed
+            const totalQuantityNeeded = quantityPerCycle * totalCycles;
+            const inputChoice = choices.get(inputId);
+            if (inputChoice && inputChoice.recipe) {
+              const inputTree = this.buildRecipeTree(data, inputId, choices, [], recipeOverrides);
+              this.assignQuantities(inputTree, totalQuantityNeeded, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
             }
           });
         }
@@ -699,25 +702,34 @@ export class CalculationService {
         case "cycle":
           if (node.cycles.length > 0) {
             for (const cycleRecipes of node.cycles) {
-              // Use the correct number of cycles without additional multiplier
-              const totalCrafts = node.cycles[0].expectedCrafts;
+              // Use the correct number of cycles for this specific cycle
+              const totalCrafts = cycleRecipes.expectedCrafts;
 
-              const cycleInputs = new Map<string, number>();
+              // Get all outputs produced within this cycle
+              const outputShardIds = new Set(cycleRecipes.steps.map((step) => step.outputShard));
+
+              // Use a Set to avoid counting the same external input multiple times
+              const externalInputs = new Set<string>();
+
               cycleRecipes.steps.forEach((recipe) => {
                 const [input1, input2] = recipe.recipe.inputs;
-                const fuse1 = data.shards[input1].fuse_amount;
-                const fuse2 = data.shards[input2].fuse_amount;
 
-                if (!data.shards[input1].family.includes("Reptile")) {
-                  cycleInputs.set(input1, (cycleInputs.get(input1) || 0) + totalCrafts * fuse1);
+                // Only count external inputs (not produced within the cycle)
+                if (!data.shards[input1].family.includes("Reptile") && !outputShardIds.has(input1)) {
+                  externalInputs.add(input1);
                 }
-                if (!data.shards[input2].family.includes("Reptile")) {
-                  cycleInputs.set(input2, (cycleInputs.get(input2) || 0) + totalCrafts * fuse2);
+                if (!data.shards[input2].family.includes("Reptile") && !outputShardIds.has(input2)) {
+                  externalInputs.add(input2);
                 }
               });
 
-              cycleInputs.forEach((quantity, shard) => {
-                totals.set(shard, (totals.get(shard) || 0) + quantity);
+              // Now count each external input only once per cycle
+              externalInputs.forEach((inputId) => {
+                const inputShard = data.shards[inputId];
+                if (inputShard) {
+                  const quantity = inputShard.fuse_amount;
+                  totals.set(inputId, (totals.get(inputId) || 0) + quantity * totalCrafts);
+                }
               });
             }
             traverse(node.inputRecipe);
