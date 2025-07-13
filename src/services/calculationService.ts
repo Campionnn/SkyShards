@@ -715,10 +715,10 @@ export class CalculationService {
                 const [input1, input2] = recipe.recipe.inputs;
 
                 // Only count external inputs (not produced within the cycle)
-                if (!data.shards[input1].family.includes("Reptile") && !outputShardIds.has(input1)) {
+                if (!outputShardIds.has(input1)) {
                   externalInputs.add(input1);
                 }
-                if (!data.shards[input2].family.includes("Reptile") && !outputShardIds.has(input2)) {
+                if (!outputShardIds.has(input2)) {
                   externalInputs.add(input2);
                 }
               });
