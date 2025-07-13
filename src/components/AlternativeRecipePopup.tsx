@@ -173,7 +173,7 @@ export const AlternativeRecipePopup: React.FC<
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full" />
             <span className="text-green-400 font-medium text-sm">Direct Collection</span>
-            {isCurrent && <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">Current</span>}
+            {isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
           </div>
           <div className="flex items-center gap-1 text-slate-400 text-sm">
             <Clock className="w-4 h-4" />
@@ -218,9 +218,8 @@ export const AlternativeRecipePopup: React.FC<
               <span className="text-slate-400 text-xs">{option.recipe.outputQuantity}x</span>
               {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
               <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300"}>{shardName}</span>
-              {option.recipe.isReptile && <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0 ml-1">Reptile</span>}
             </div>
-            {isCurrent && <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">Current</span>}
+            {isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
           </div>
           <div className="flex items-center gap-1 text-slate-400 text-sm">
             <Clock className="w-4 h-4" />
@@ -246,7 +245,7 @@ export const AlternativeRecipePopup: React.FC<
       return fastestTimeA - fastestTimeB;
     });
 
-    return groupKeys.map((firstShard, groupIndex) => {
+    return groupKeys.map((firstShard) => {
       // Get all options for this group and sort by cost (lowest first)
       const group = [...grouped[firstShard]].sort((a, b) => {
         // First sort by time (ascending - fastest first)
@@ -291,21 +290,30 @@ export const AlternativeRecipePopup: React.FC<
             [firstShard]: !prev[firstShard],
           };
 
-          // Auto-scroll to bottom only when opening the last dropdown
+          // Auto-scroll to show the full dropdown when opening
           if (!prev[firstShard] && newState[firstShard]) {
-            const isLastDropdown = groupIndex === groupKeys.length - 1;
-            if (isLastDropdown) {
-              setTimeout(() => {
-                // Find the scrollable content area of the popup
-                const popupContent = document.querySelector(".overflow-y-auto.flex-1.min-h-0");
-                if (popupContent) {
-                  popupContent.scrollTo({
-                    top: popupContent.scrollHeight,
-                    behavior: "auto",
+            setTimeout(() => {
+              const dropdownButton = document.querySelector(`[data-dropdown-button="${firstShard}"]`);
+              const popupContent = document.querySelector(".overflow-y-auto.flex-1.min-h-0") as HTMLElement;
+
+              if (dropdownButton && popupContent) {
+                const buttonRect = dropdownButton.getBoundingClientRect();
+                const popupRect = popupContent.getBoundingClientRect();
+                const dropdownHeight = 260; // Max height of dropdown
+
+                // Calculate how much space we need below the button
+                const spaceNeeded = buttonRect.bottom - popupRect.top + dropdownHeight;
+                const availableSpace = popupRect.height;
+
+                // If we need more space, scroll down to make room
+                if (spaceNeeded > availableSpace) {
+                  const scrollAmount = spaceNeeded - availableSpace + 20; // 20px padding
+                  popupContent.scrollBy({
+                    top: scrollAmount,
                   });
                 }
-              }, 100);
-            }
+              }
+            }, 50);
           }
 
           return newState;
@@ -346,6 +354,7 @@ export const AlternativeRecipePopup: React.FC<
               <button
                 type="button"
                 onClick={toggleDropdown}
+                data-dropdown-button={firstShard}
                 className="w-full px-4 py-3 bg-slate-800/95 border border-slate-600/70 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 hover:border-slate-500/80 hover:bg-slate-700/80 transition-all duration-200 cursor-pointer"
               >
                 <div className="flex items-center justify-between">
@@ -360,17 +369,21 @@ export const AlternativeRecipePopup: React.FC<
                             <span className="text-slate-400 text-xs">{partner?.fuse_amount || 2}x</span>
                             <img src={`${import.meta.env.BASE_URL}shardIcons/${partnerShard}.png`} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
                             <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>{partner?.name || partnerShard}</span>
-                            <Clock className="w-3 h-3 text-slate-400 ml-1" />
-                            <span className="text-slate-400 text-xs">{formatTime(selectedOption.timePerShard)}</span>
-                            {selectedOption.isCurrent && <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded ml-2">Current</span>}
-                            {selectedOption.recipe.isReptile && (
-                              <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0 ml-1">Reptile</span>
+                            {partner?.family?.includes("Reptile") && (
+                              <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">Reptile</span>
                             )}
+                            {selectedOption.isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
                           </>
                         );
                       })()}
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 text-slate-400 text-xs">
+                      <Clock className="w-3 h-3" />
+                      <span>{selectedOption ? formatTime(selectedOption.timePerShard) : ""}</span>
+                    </div>
+                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+                  </div>
                 </div>
               </button>
 
@@ -418,17 +431,21 @@ export const AlternativeRecipePopup: React.FC<
                               isSelected ? "bg-purple-500/20 text-purple-200" : "text-white"
                             }`}
                           >
-                            <div className="flex items-center gap-2">
-                              <Plus className="w-4 h-4 text-fuchsia-400" />
-                              <span className="text-slate-400 text-xs">{partner?.fuse_amount || 2}x</span>
-                              <img src={`${import.meta.env.BASE_URL}shardIcons/${partnerShard}.png`} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
-                              <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>{partner?.name || partnerShard}</span>
-                              <Clock className="w-3 h-3 text-slate-400 ml-1" />
-                              <span className="text-slate-400 text-xs">{formatTime(option.timePerShard)}</span>
-                              {option.isCurrent && <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded ml-2">Current</span>}
-                              {option.recipe.isReptile && (
-                                <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0 ml-1">Reptile</span>
-                              )}
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center gap-2">
+                                <Plus className="w-4 h-4 text-fuchsia-400" />
+                                <span className="text-slate-400 text-xs">{partner?.fuse_amount || 2}x</span>
+                                <img src={`${import.meta.env.BASE_URL}shardIcons/${partnerShard}.png`} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
+                                <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>{partner?.name || partnerShard}</span>
+                                {partner?.family?.includes("Reptile") && (
+                                  <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">Reptile</span>
+                                )}
+                                {option.isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
+                              </div>
+                              <div className="flex items-center gap-1 text-slate-400 text-xs">
+                                <Clock className="w-3 h-3" />
+                                <span>{formatTime(option.timePerShard)}</span>
+                              </div>
                             </div>
                           </button>
                         );
