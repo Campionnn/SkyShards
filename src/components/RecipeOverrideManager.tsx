@@ -10,6 +10,7 @@ interface PopupState {
   shardName?: string;
   loading: boolean;
   data?: Data;
+  requiredQuantity?: number;
 }
 
 export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
@@ -44,6 +45,7 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
         shardId,
         shardName: shardId,
         loading: true,
+        requiredQuantity: context.requiredQuantity,
       });
 
       try {
@@ -127,6 +129,7 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
         shardName={popupState.shardName || ""}
         data={popupState.data || ({} as Data)}
         loading={popupState.loading}
+        requiredQuantity={popupState.requiredQuantity}
       />
     </>
   );

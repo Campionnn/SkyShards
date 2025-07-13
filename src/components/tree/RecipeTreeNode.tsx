@@ -226,6 +226,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   }
                   onShowAlternatives(tree.shard, {
                     currentRecipe: targetRecipe,
+                    requiredQuantity: tree.quantity,
                   });
                 }}
                 className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer"
@@ -282,6 +283,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                                       e.stopPropagation();
                                       onShowAlternatives(step.outputShard, {
                                         currentRecipe: recipe,
+                                        requiredQuantity: cycle.expectedCrafts * outputQuantity,
                                       });
                                     }}
                                     className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer"
@@ -328,6 +330,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                                     e.stopPropagation();
                                     onShowAlternatives(step.outputShard, {
                                       currentRecipe: recipe,
+                                      requiredQuantity: cycle.expectedCrafts * outputQuantity,
                                     });
                                   }}
                                   className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer"
@@ -518,6 +521,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                 e.stopPropagation();
                 onShowAlternatives(tree.shard, {
                   currentRecipe: "recipe" in tree ? tree.recipe : null,
+                  requiredQuantity: tree.quantity,
                 });
               }}
               className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer"

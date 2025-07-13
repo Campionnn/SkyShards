@@ -202,6 +202,7 @@ export interface AlternativeSelectionContext {
   otherInputShard?: string;
   outputShard?: string;
   currentRecipe?: Recipe | null;
+  requiredQuantity?: number;
 }
 
 // Component props interfaces
@@ -214,6 +215,7 @@ export interface AlternativeRecipePopupProps {
   shardName: string;
   data: Data;
   loading: boolean;
+  requiredQuantity?: number;
 }
 
 export interface RecipeOverrideManagerProps {

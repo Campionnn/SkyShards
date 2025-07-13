@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Clock, Star, Search, Plus, Equal, ChevronDown } from "lucide-react";
+import { X, Star, Search, Plus, Equal, ChevronDown } from "lucide-react";
 import { getRarityColor, formatTime } from "../utils";
 import type { AlternativeRecipePopupProps, Recipe, AlternativeRecipeOption } from "../types";
 
@@ -8,7 +8,7 @@ export const AlternativeRecipePopup: React.FC<
   AlternativeRecipePopupProps & {
     alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
   }
-> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading }) => {
+> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading, requiredQuantity = 1 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   // Track selected recipe index for each group
   const [selectedIndices, setSelectedIndices] = useState<Record<string, number>>({});
@@ -176,8 +176,10 @@ export const AlternativeRecipePopup: React.FC<
             {isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
           </div>
           <div className="flex items-center gap-1 text-slate-400 text-sm">
-            <Clock className="w-4 h-4" />
-            <span>{formatTime(option.timePerShard)}</span>
+            <div className="text-right">
+              <div>{formatTime(option.timePerShard)}</div>
+              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(option.timePerShard * requiredQuantity)}</div>}
+            </div>
           </div>
         </div>
       </button>
@@ -222,8 +224,10 @@ export const AlternativeRecipePopup: React.FC<
             {isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
           </div>
           <div className="flex items-center gap-1 text-slate-400 text-sm">
-            <Clock className="w-4 h-4" />
-            <span>{formatTime(option.timePerShard)}</span>
+            <div className="text-right">
+              <div>{formatTime(option.timePerShard)}</div>
+              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(option.timePerShard * requiredQuantity)}</div>}
+            </div>
           </div>
         </div>
       </button>
@@ -484,8 +488,10 @@ export const AlternativeRecipePopup: React.FC<
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1 text-slate-400 text-xs">
-                      <Clock className="w-3 h-3" />
-                      <span>{selectedOption ? formatTime(selectedOption.timePerShard) : ""}</span>
+                      <div className="text-right">
+                        <div>{selectedOption ? formatTime(selectedOption.timePerShard) : ""}</div>
+                        {selectedOption && requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(selectedOption.timePerShard * requiredQuantity)}</div>}
+                      </div>
                     </div>
                     <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
                   </div>
@@ -548,8 +554,10 @@ export const AlternativeRecipePopup: React.FC<
                                 {option.isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
                               </div>
                               <div className="flex items-center gap-1 text-slate-400 text-xs">
-                                <Clock className="w-3 h-3" />
-                                <span>{formatTime(option.timePerShard)}</span>
+                                <div className="text-right">
+                                  <div>{formatTime(option.timePerShard)}</div>
+                                  {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(option.timePerShard * requiredQuantity)}</div>}
+                                </div>
                               </div>
                             </div>
                           </button>
