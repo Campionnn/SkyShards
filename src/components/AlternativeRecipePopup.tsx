@@ -283,6 +283,90 @@ export const AlternativeRecipePopup: React.FC<
           })
         : group;
 
+      // Process group for reptile family grouping (only when not searching)
+      const processedGroup = dropdownSearchQuery.trim()
+        ? filteredGroup
+        : (() => {
+            // Group reptiles by family
+            const reptileFamilies: Record<string, AlternativeRecipeOption[]> = {};
+            const nonReptiles: AlternativeRecipeOption[] = [];
+            const hiddenReptiles: AlternativeRecipeOption[] = [];
+
+            for (const option of filteredGroup) {
+              if (!option.recipe) continue;
+              const [, partnerShard] = option.recipe.inputs;
+              const partner = data?.shards?.[partnerShard];
+
+              if (partner?.family?.includes("Reptile")) {
+                // Extract the specific reptile family (e.g., "Reptile - Gecko" -> "Gecko")
+                const familyParts = partner.family.split(" - ");
+                const specificFamily = familyParts.length > 1 ? familyParts[1] : "Reptile";
+
+                if (!reptileFamilies[specificFamily]) {
+                  reptileFamilies[specificFamily] = [];
+                }
+                reptileFamilies[specificFamily].push(option);
+              } else {
+                nonReptiles.push(option);
+              }
+            }
+
+            // For each reptile family, pick the best representative
+            const reptileRepresentatives: AlternativeRecipeOption[] = [];
+            for (const familyOptions of Object.values(reptileFamilies)) {
+              // Sort by: current first, then by time
+              familyOptions.sort((a, b) => {
+                if (a.isCurrent && !b.isCurrent) return -1;
+                if (!a.isCurrent && b.isCurrent) return 1;
+                return a.timePerShard - b.timePerShard;
+              });
+
+              // Add the best one as representative
+              reptileRepresentatives.push(familyOptions[0]);
+              // Add the rest to hidden list
+              hiddenReptiles.push(...familyOptions.slice(1));
+            }
+
+            // Sort representatives: current reptiles first, then by time
+            reptileRepresentatives.sort((a, b) => {
+              if (a.isCurrent && !b.isCurrent) return -1;
+              if (!a.isCurrent && b.isCurrent) return 1;
+              return a.timePerShard - b.timePerShard;
+            });
+
+            // Separate current recipes from non-current
+            const currentRecipes: AlternativeRecipeOption[] = [];
+            const nonCurrentReptiles: AlternativeRecipeOption[] = [];
+            const nonCurrentNonReptiles: AlternativeRecipeOption[] = [];
+
+            // Categorize all options
+            for (const option of [...reptileRepresentatives, ...nonReptiles]) {
+              if (option.isCurrent) {
+                currentRecipes.push(option);
+              } else if (reptileRepresentatives.includes(option)) {
+                nonCurrentReptiles.push(option);
+              } else {
+                nonCurrentNonReptiles.push(option);
+              }
+            }
+
+            // Sort non-current reptiles by time
+            nonCurrentReptiles.sort((a, b) => a.timePerShard - b.timePerShard);
+            // Sort non-current non-reptiles by time
+            nonCurrentNonReptiles.sort((a, b) => a.timePerShard - b.timePerShard);
+
+            // If there are current recipes: current first, then reptiles, then non-reptiles
+            // If no current recipes: best non-reptile first, then reptiles, then remaining non-reptiles
+            if (currentRecipes.length > 0) {
+              return [...currentRecipes, ...nonCurrentReptiles, ...nonCurrentNonReptiles, ...hiddenReptiles];
+            } else {
+              // Take the best non-reptile (first one after sorting) and put it first
+              const bestNonReptile = nonCurrentNonReptiles.slice(0, 1);
+              const remainingNonReptiles = nonCurrentNonReptiles.slice(1);
+              return [...bestNonReptile, ...nonCurrentReptiles, ...remainingNonReptiles, ...hiddenReptiles];
+            }
+          })();
+
       const toggleDropdown = () => {
         setOpenDropdowns((prev) => {
           const newState = {
@@ -412,10 +496,10 @@ export const AlternativeRecipePopup: React.FC<
 
                   {/* Options list */}
                   <div className="max-h-52 overflow-y-auto pb-1">
-                    {filteredGroup.length === 0 ? (
+                    {processedGroup.length === 0 ? (
                       <div className="px-4 py-3 text-center text-slate-400 text-xs">No shards found</div>
                     ) : (
-                      filteredGroup.map((option, idx) => {
+                      processedGroup.map((option, idx) => {
                         if (!option.recipe) return null;
                         const [, partnerShard] = option.recipe.inputs;
                         const partner = data?.shards?.[partnerShard];
