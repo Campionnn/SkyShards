@@ -283,14 +283,21 @@ export const AlternativeRecipePopup: React.FC<
           })
         : group;
 
-      // Process group for reptile family grouping (only when not searching)
       const processedGroup = dropdownSearchQuery.trim()
         ? filteredGroup
         : (() => {
-            // Group reptiles by family
+            // Define reptile family groups
+            const reptileFamilyGroups = {
+              Turtle: ["Shellwise", "Leatherback", "Tortoise", "Megalith"],
+              Amphibian: ["Newt", "Salamander", "Lizard king", "Leviathan"],
+              Snake: ["Viper", "Python", "King cobra", "Basilisk"],
+              Lizard: ["Gecko", "Iguana", "Komodo dragon", "Wyvern"],
+              Crocodilian: ["Crocodile", "Alligator", "Caiman", "Tiamat"],
+            };
+
+            // Separate reptiles by family and non-reptiles
             const reptileFamilies: Record<string, AlternativeRecipeOption[]> = {};
             const nonReptiles: AlternativeRecipeOption[] = [];
-            const hiddenReptiles: AlternativeRecipeOption[] = [];
 
             for (const option of filteredGroup) {
               if (!option.recipe) continue;
@@ -298,73 +305,87 @@ export const AlternativeRecipePopup: React.FC<
               const partner = data?.shards?.[partnerShard];
 
               if (partner?.family?.includes("Reptile")) {
-                // Extract the specific reptile family (e.g., "Reptile - Gecko" -> "Gecko")
-                const familyParts = partner.family.split(" - ");
-                const specificFamily = familyParts.length > 1 ? familyParts[1] : "Reptile";
-
-                if (!reptileFamilies[specificFamily]) {
-                  reptileFamilies[specificFamily] = [];
+                // Find which reptile family this belongs to
+                let familyGroup = "Other";
+                for (const [groupName, families] of Object.entries(reptileFamilyGroups)) {
+                  if (families.some((family) => partner.name.toLowerCase().includes(family.toLowerCase()))) {
+                    familyGroup = groupName;
+                    break;
+                  }
                 }
-                reptileFamilies[specificFamily].push(option);
+
+                if (!reptileFamilies[familyGroup]) {
+                  reptileFamilies[familyGroup] = [];
+                }
+                reptileFamilies[familyGroup].push(option);
               } else {
                 nonReptiles.push(option);
               }
             }
 
-            // For each reptile family, pick the best representative
-            const reptileRepresentatives: AlternativeRecipeOption[] = [];
+            // For each reptile family, find the most efficient one (keep) and others (push to bottom)
+            const keptReptiles: AlternativeRecipeOption[] = [];
+            const bottomReptiles: AlternativeRecipeOption[] = [];
+
             for (const familyOptions of Object.values(reptileFamilies)) {
-              // Sort by: current first, then by time
+              if (familyOptions.length === 0) continue;
+
+              // Sort by efficiency: current first, then by time, then by rarity (lower is better)
               familyOptions.sort((a, b) => {
                 if (a.isCurrent && !b.isCurrent) return -1;
                 if (!a.isCurrent && b.isCurrent) return 1;
-                return a.timePerShard - b.timePerShard;
+
+                const timeDiff = a.timePerShard - b.timePerShard;
+                if (timeDiff !== 0) return timeDiff;
+
+                // If times are the same, prefer lower rarity
+                if (!a.recipe || !b.recipe) return 0;
+                const [, partnerA] = a.recipe.inputs;
+                const [, partnerB] = b.recipe.inputs;
+                const shardA = data?.shards?.[partnerA];
+                const shardB = data?.shards?.[partnerB];
+
+                if (shardA?.rarity && shardB?.rarity) {
+                  const rarityOrder: Record<string, number> = {
+                    Common: 1,
+                    Uncommon: 2,
+                    Rare: 3,
+                    Epic: 4,
+                    Legendary: 5,
+                  };
+
+                  const rarityA = rarityOrder[shardA.rarity] || 999;
+                  const rarityB = rarityOrder[shardB.rarity] || 999;
+
+                  return rarityA - rarityB;
+                }
+
+                return 0;
               });
 
-              // Add the best one as representative
-              reptileRepresentatives.push(familyOptions[0]);
-              // Add the rest to hidden list
-              hiddenReptiles.push(...familyOptions.slice(1));
+              // Keep the most efficient one, push the rest to bottom
+              keptReptiles.push(familyOptions[0]);
+              if (familyOptions.length > 1) {
+                bottomReptiles.push(...familyOptions.slice(1));
+              }
             }
 
-            // Sort representatives: current reptiles first, then by time
-            reptileRepresentatives.sort((a, b) => {
+            // Sort all groups
+            const allMainOptions = [...nonReptiles, ...keptReptiles];
+            allMainOptions.sort((a, b) => {
               if (a.isCurrent && !b.isCurrent) return -1;
               if (!a.isCurrent && b.isCurrent) return 1;
               return a.timePerShard - b.timePerShard;
             });
 
-            // Separate current recipes from non-current
-            const currentRecipes: AlternativeRecipeOption[] = [];
-            const nonCurrentReptiles: AlternativeRecipeOption[] = [];
-            const nonCurrentNonReptiles: AlternativeRecipeOption[] = [];
+            bottomReptiles.sort((a, b) => {
+              if (a.isCurrent && !b.isCurrent) return -1;
+              if (!a.isCurrent && b.isCurrent) return 1;
+              return a.timePerShard - b.timePerShard;
+            });
 
-            // Categorize all options
-            for (const option of [...reptileRepresentatives, ...nonReptiles]) {
-              if (option.isCurrent) {
-                currentRecipes.push(option);
-              } else if (reptileRepresentatives.includes(option)) {
-                nonCurrentReptiles.push(option);
-              } else {
-                nonCurrentNonReptiles.push(option);
-              }
-            }
-
-            // Sort non-current reptiles by time
-            nonCurrentReptiles.sort((a, b) => a.timePerShard - b.timePerShard);
-            // Sort non-current non-reptiles by time
-            nonCurrentNonReptiles.sort((a, b) => a.timePerShard - b.timePerShard);
-
-            // If there are current recipes: current first, then reptiles, then non-reptiles
-            // If no current recipes: best non-reptile first, then reptiles, then remaining non-reptiles
-            if (currentRecipes.length > 0) {
-              return [...currentRecipes, ...nonCurrentReptiles, ...nonCurrentNonReptiles, ...hiddenReptiles];
-            } else {
-              // Take the best non-reptile (first one after sorting) and put it first
-              const bestNonReptile = nonCurrentNonReptiles.slice(0, 1);
-              const remainingNonReptiles = nonCurrentNonReptiles.slice(1);
-              return [...bestNonReptile, ...nonCurrentReptiles, ...remainingNonReptiles, ...hiddenReptiles];
-            }
+            // Combine: main options (sorted by time with kept reptiles in their correct positions), then bottom reptiles
+            return [...allMainOptions, ...bottomReptiles];
           })();
 
       const toggleDropdown = () => {
