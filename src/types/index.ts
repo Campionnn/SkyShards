@@ -206,7 +206,7 @@ export interface AlternativeRecipePopupProps {
   isOpen: boolean;
   onClose: () => void;
   // Changed: alternatives is now grouped
-  alternatives: { direct: AlternativeRecipeOption | null, grouped: Record<string, AlternativeRecipeOption[]> };
+  alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
   onSelect: (recipe: Recipe | null) => void;
   shardName: string;
   data: Data;
@@ -218,5 +218,5 @@ export interface RecipeOverrideManagerProps {
   requiredQuantity: number;
   params: CalculationParams;
   onResultUpdate: (result: CalculationResult) => void;
-  children: (props: { showAlternatives: (shardId: string, context: AlternativeSelectionContext) => void; recipeOverrides: RecipeOverride[] }) => React.ReactNode;
+  children: (props: { showAlternatives: (shardId: string, context: AlternativeSelectionContext) => void; recipeOverrides: RecipeOverride[]; resetAlternatives: () => void }) => React.ReactNode;
 }

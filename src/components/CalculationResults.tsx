@@ -80,7 +80,6 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
           additionalValue={result.craftTime > 1 / 12 ? formatTime(result.craftTime) : undefined}
         />
       </div>
-
       {/* Materials Needed */}
       <div className="bg-slate-800 border border-slate-600 rounded-md p-3">
         <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap items-start sm:items-center sm:justify-between mb-3">
@@ -141,47 +140,53 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
             return <MaterialItem key={shardId} shard={shard} quantity={quantity} />;
           })}
         </div>
-      </div>
-
+      </div>{" "}
       {/* Fusion Tree */}
       <div className="bg-slate-800 border border-slate-600 rounded-md p-3">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-            <div className="p-1 bg-slate-700 rounded-md">
-              <BarChart3 className="w-5 h-5 text-purple-400" />
-            </div>
-            Fusion Tree
-          </h3>
-          <div className="flex gap-2">
-            <button
-              onClick={handleExpandAll}
-              className="px-3 py-1.5 bg-green-500/10 border border-green-500/20 hover:border-green-400/30 text-white text-xs font-medium rounded-md hover:bg-green-500/20 transition-all duration-200 cursor-pointer"
-            >
-              Expand All
-            </button>
-            <button
-              onClick={handleCollapseAll}
-              className="px-3 py-1.5 bg-orange-500/10 border border-orange-500/20 hover:border-orange-400/30 text-white text-xs font-medium rounded-md hover:bg-orange-500/20 transition-all duration-200 cursor-pointer"
-            >
-              Collapse All
-            </button>
-          </div>
-        </div>
-
         <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
           <div className="min-w-[650px]">
             <RecipeOverrideManager targetShard={targetShard} requiredQuantity={requiredQuantity} params={params} onResultUpdate={onResultUpdate}>
-              {({ showAlternatives }) => (
-                <RecipeTreeNode
-                  tree={result.tree}
-                  data={data}
-                  isTopLevel={true}
-                  totalShardsProduced={result.totalShardsProduced}
-                  nodeId="root"
-                  expandedStates={expandedStates}
-                  onToggle={handleNodeToggle}
-                  onShowAlternatives={showAlternatives}
-                />
+              {({ showAlternatives, resetAlternatives }) => (
+                <>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <div className="p-1 bg-slate-700 rounded-md">
+                        <BarChart3 className="w-5 h-5 text-purple-400" />
+                      </div>
+                      Fusion Tree
+                    </h3>
+                    <div className="flex gap-2 flex-wrap">
+                      <button
+                        onClick={resetAlternatives}
+                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 hover:border-red-500/30 order-3 sm:order-1"
+                      >
+                        <span>Reset Alternatives</span>
+                      </button>
+                      <button
+                        onClick={handleExpandAll}
+                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 hover:border-green-500/30 order-2 sm:order-2"
+                      >
+                        <span>Expand All</span>
+                      </button>
+                      <button
+                        onClick={handleCollapseAll}
+                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/20 hover:border-orange-500/30 order-1 sm:order-3"
+                      >
+                        <span>Collapse All</span>
+                      </button>
+                    </div>
+                  </div>
+                  <RecipeTreeNode
+                    tree={result.tree}
+                    data={data}
+                    isTopLevel={true}
+                    totalShardsProduced={result.totalShardsProduced}
+                    nodeId="root"
+                    expandedStates={expandedStates}
+                    onToggle={handleNodeToggle}
+                    onShowAlternatives={showAlternatives}
+                  />
+                </>
               )}
             </RecipeOverrideManager>
           </div>

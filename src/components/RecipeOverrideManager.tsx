@@ -40,7 +40,15 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({ ta
 
       try {
         const calculationService = CalculationService.getInstance();
-        const alternatives = await calculationService.getAlternativesForTreeNode(shardId, params, context, recipeOverrides);
+
+        // Check if there's an active override for this shard
+        const activeOverride = recipeOverrides.find((override) => override.shardId === shardId);
+        const updatedContext = {
+          ...context,
+          currentRecipe: activeOverride ? activeOverride.recipe : context.currentRecipe,
+        };
+
+        const alternatives = await calculationService.getAlternativesForTreeNode(shardId, params, updatedContext, recipeOverrides);
         const data = await calculationService.parseData(params);
         const shardName = data.shards[shardId]?.name || shardId;
 
@@ -90,9 +98,20 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({ ta
     [popupState.shardId, targetShard, requiredQuantity, params, recipeOverrides, onResultUpdate, closePopup]
   );
 
+  const resetAlternatives = useCallback(async () => {
+    try {
+      setRecipeOverrides([]);
+      const calculationService = CalculationService.getInstance();
+      const newResult = await calculationService.calculateOptimalPath(targetShard, requiredQuantity, params);
+      onResultUpdate(newResult);
+    } catch (error) {
+      console.error("Failed to reset alternatives:", error);
+    }
+  }, [targetShard, requiredQuantity, params, onResultUpdate]);
+
   return (
     <>
-      {children({ showAlternatives, recipeOverrides })}
+      {children({ showAlternatives, recipeOverrides, resetAlternatives })}
       <AlternativeRecipePopup
         isOpen={popupState.isOpen}
         onClose={closePopup}

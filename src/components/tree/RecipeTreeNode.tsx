@@ -143,7 +143,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                 currentRecipe: null, // Direct collection has no current recipe
               })
             }
-            className="p-1 hover:bg-slate-700 rounded transition-colors"
+            className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer"
             title="Show alternatives"
           >
             <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
@@ -164,13 +164,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
     return (
       <div className="bg-slate-600/20 rounded border border-slate-300/50 overflow-hidden">
-        <div className="flex items-center justify-between w-full px-3 py-1.5">
-          <button onClick={() => onToggle(subNodeId)} className="flex-1 text-left cursor-pointer hover:bg-slate-800/40 transition-colors rounded p-0.5">
+        <div className="flex items-center justify-between w-full px-3 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer" onClick={() => onToggle(subNodeId)}>
+          <div className="flex-1 text-left">
             <div className="flex items-center space-x-2">
               {renderChevron(isExpanded)}
               {renderRecipeDisplay(maxOutputQuantity, inputShard, input1Quantity, input1Shard, input2Quantity, input2Shard)}
             </div>
-          </button>
+          </div>
           <div className="text-right min-w-[80px] ml-2">
             <div className="flex items-center justify-end space-x-1.5">
               <span className="text-xs text-slate-500">fusions</span>
@@ -206,8 +206,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
     return (
       <div className="flex flex-col border border-slate-400/70 rounded-md bg-slate-500/40">
-        <div className="flex items-center justify-between w-full px-3 py-1.5">
-          <button className="flex-1 text-left cursor-pointer hover:bg-slate-800/40 transition-colors rounded p-0.5" onClick={() => onToggle(nodeId)}>
+        <div className="flex items-center justify-between w-full px-3 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer" onClick={() => onToggle(nodeId)}>
+          <div className="flex-1 text-left">
             <div className="flex items-center space-x-2">
               {renderChevron(isExpanded)}
               <div className="flex items-center gap-3">
@@ -219,7 +219,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                 </div>
               </div>
             </div>
-          </button>
+          </div>
           <div className="flex items-center gap-2">
             <div className="text-right">
               <div className="flex items-center justify-end space-x-1.5">
@@ -244,7 +244,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                     currentRecipe: targetRecipe,
                   });
                 }}
-                className="p-1 hover:bg-slate-700 rounded transition-colors"
+                className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer"
                 title="Show alternatives"
               >
                 <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
@@ -278,13 +278,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
                         return (
                           <div key={stepIndex} className="bg-slate-600/20 rounded border border-slate-300/50 overflow-hidden">
-                            <div className="flex items-center justify-between w-full px-3 py-1.5">
-                              <button onClick={() => onToggle(stepNodeId)} className="flex-1 text-left cursor-pointer hover:bg-slate-800/40 transition-colors rounded p-0.5">
+                            <div className="flex items-center justify-between w-full px-3 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer" onClick={() => onToggle(stepNodeId)}>
+                              <div className="flex-1 text-left">
                                 <div className="flex items-center space-x-2">
                                   {renderChevron(stepIsExpanded)}
                                   {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
                                 </div>
-                              </button>
+                              </div>
                               <div className="flex items-center gap-2">
                                 <div className="text-right min-w-[80px] ml-2">
                                   <div className="flex items-center justify-end space-x-1.5">
@@ -300,7 +300,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                                         currentRecipe: recipe,
                                       });
                                     }}
-                                    className="p-1 hover:bg-slate-700 rounded transition-colors"
+                                    className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer"
                                     title="Show alternatives"
                                   >
                                     <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
@@ -346,7 +346,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                                       currentRecipe: recipe,
                                     });
                                   }}
-                                  className="p-1 hover:bg-slate-700 rounded transition-colors"
+                                  className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer"
                                   title="Show alternatives"
                                 >
                                   <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
@@ -407,7 +407,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
             </div>
           </div>
           {onShowAlternatives && (
-            <button onClick={() => onShowAlternatives(tree.shard, { currentRecipe: null })} className="p-1 hover:bg-slate-700 rounded transition-colors" title="Show alternatives">
+            <button onClick={() => onShowAlternatives(tree.shard, { currentRecipe: null })} className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer" title="Show alternatives">
               <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
             </button>
           )}
@@ -431,8 +431,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
   return (
     <div className="bg-slate-800 border border-slate-600 rounded-md overflow-hidden">
-      <div className="flex items-center justify-between w-full px-3 py-1">
-        <button onClick={() => onToggle(nodeId)} className="flex-1 text-left cursor-pointer hover:bg-slate-700/50 transition-colors rounded p-0.5">
+      <div className="flex items-center justify-between w-full px-3 py-1 hover:bg-slate-700/30 transition-colors cursor-pointer" onClick={() => onToggle(nodeId)}>
+        <div className="flex-1 text-left">
           <div className="flex items-center space-x-1.5">
             {renderChevron(isExpanded)}
             <div className="text-white flex items-center">
@@ -511,7 +511,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
               </span>
             </div>
           </div>
-        </button>
+        </div>
         <div className="flex items-center gap-2">
           <div className="text-right">
             <div className="flex items-center justify-end space-x-1.5">
@@ -527,7 +527,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   currentRecipe: "recipe" in tree ? tree.recipe : null,
                 });
               }}
-              className="p-1 hover:bg-slate-700 rounded transition-colors"
+              className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer"
               title="Show alternatives"
             >
               <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
