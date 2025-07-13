@@ -1,4 +1,4 @@
-[🌐 Live App](https://skyshards.com/)
+[🌐 Live App](https://skyshards.com/) | [🔗 Alternative Link](https://skyshards-1jk.pages.dev/)
 
 # React + TypeScript + Vite
 
@@ -104,6 +104,63 @@ src/
 public/               # Static assets and data (fusion-data.json, etc.)
 ```
 
+## Troubleshooting
+
+### Can't Access skyshards.com? Try These Steps:
+
+If you're seeing a 404 error or the site won't load:
+
+**Quick Fixes (try first):**
+
+1. **Hard refresh**: `Ctrl+F5` (Windows) or `Cmd+Shift+R` (Mac)
+2. **Try incognito/private mode** in your browser
+3. **Wait 10-15 minutes** and try again
+4. **Try a different browser** (Chrome, Firefox, Safari, Edge)
+
+**Still not working? Clear DNS cache:**
+
+**Windows:**
+
+```bash
+# Open Command Prompt as Administrator:
+ipconfig /flushdns
+```
+
+**Mac:**
+
+```bash
+# Open Terminal:
+sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder
+```
+
+**Check DNS (for troubleshooting):**
+
+```bash
+# Windows users - run these in Command Prompt:
+nslookup skyshards.com
+nslookup skyshards.com 8.8.8.8
+ipconfig /displaydns | findstr skyshards
+
+# Mac/Linux users:
+nslookup skyshards.com
+dig skyshards.com
+```
+
+**Router Reset:**
+
+- Unplug your router for 30 seconds, then plug back in
+- Or restart your internet connection
+
+**Alternative Access:**
+
+- **Direct Cloudflare URL**: https://skyshards-1jk.pages.dev
+- **Status Page**: https://skyshards.com/status.html (or https://skyshards-1jk.pages.dev/status.html)
+- Try using mobile data instead of WiFi
+- Ask someone on a different network to test
+- Use a VPN to test from a different location
+
+If none of these work, the issue should resolve automatically within 24-48 hours as DNS propagates globally.
+
 ## Contributing
 
 Pull requests and suggestions are welcome! For major changes, please open an issue first to discuss what you would like to change.
@@ -115,4 +172,5 @@ MIT
 ---
 
 _Sky Shards Fusion Calculator is a fan project and not affiliated with Hypixel._
+
 # Test commit Sat Jul 12 06:59:44 CEST 2025
