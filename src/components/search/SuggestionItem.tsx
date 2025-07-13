@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { getRarityColor } from "../../utils";
-import type { SuggestionItemProps } from "../../types";
+import type { SuggestionItemProps } from "../../types/types";
 
 export const SuggestionItem: React.FC<SuggestionItemProps> = React.memo(({ shard, index, focusedIndex, onSelect, isSelecting, setFocusedIndex }) => {
   const handleMouseDown = useCallback(

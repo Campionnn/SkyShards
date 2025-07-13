@@ -1,4 +1,4 @@
-import type { ShardWithKey } from "../types";
+import type { ShardWithKey } from "../types/types";
 
 export class DataService {
   private static instance: DataService;

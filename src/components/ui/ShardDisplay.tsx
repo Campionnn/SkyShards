@@ -1,5 +1,5 @@
-import { getRarityColor } from "../utils";
-import type { FusionData } from "../utils/recipeUtils";
+import { getRarityColor } from "../../utils";
+import type { FusionData } from "../../utils";
 
 interface ShardDisplayProps {
   shardId: string;

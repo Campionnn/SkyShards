@@ -1,15 +1,11 @@
 import { useState, useEffect } from "react";
-import { ShardAutocomplete } from "../components/ShardAutocomplete";
-import { RecipeCountBadge } from "../components/RecipeCountBadge";
-import { SearchFilterInput } from "../components/SearchFilterInput";
-import { ShardDisplay } from "../components/ShardDisplay";
+import { ShardAutocomplete, RecipeCountBadge, SearchFilterInput, ShardDisplay, DropdownButton } from "../components";
 import { getRarityColor } from "../utils";
-import { Plus, Equal, ChevronDown } from "lucide-react";
+import { Plus, Equal } from "lucide-react";
 import { useRecipeState } from "../context/RecipeStateContext";
-import { useFusionData } from "../hooks/useFusionData";
-import { useDropdownManager } from "../hooks/useDropdownManager";
-import { processInputRecipes, processOutputRecipes, filterGroups, groupRecipesByInput, filterRecipeGroups, type OutputGroup, type Recipe } from "../utils/recipeUtils";
-import type { ShardWithKey } from "../types";
+import { useFusionData, useDropdownManager } from "../hooks";
+import { processInputRecipes, processOutputRecipes, filterGroups, groupRecipesByInput, filterRecipeGroups, type OutputGroup, type Recipe } from "../utils";
+import type { ShardWithKey } from "../types/types";
 
 const RecipePage = () => {
   const { selectedShard, setSelectedShard, selectedOutputShard, setSelectedOutputShard } = useRecipeState();
@@ -193,29 +189,20 @@ const RecipePage = () => {
                     .map((outputGroup) => {
                       const partnerId = selectedPartner[outputGroup.output] || outputGroup.partners[0];
                       const isOpen = inputDropdowns.dropdownOpen[outputGroup.output] || false;
-                      // Determine position based on which shard has a lower ID/key value
                       const position = selectedShard.key < partnerId ? "first" : "second";
 
                       return (
                         <div key={`${outputGroup.output}-${position}`} className="px-2">
                           <div className="flex items-center gap-2 lg:gap-3 min-w-0 min-h-[40px]">
-                            {/* First position shard */}
                             <div className="flex items-center gap-1 lg:gap-2 min-w-0 flex-shrink-0">
                               {position === "first" ? (
                                 // Selected shard is first, so show it directly
                                 <ShardDisplay shardId={selectedShard.key} fusionData={fusionData} />
-                              ) : // Partner is first, so show dropdown/partner
-                              outputGroup.partners.length > 1 ? (
+                              ) : outputGroup.partners.length > 1 ? (
                                 <div className="relative flex-shrink-0" ref={(el) => inputDropdowns.setRef(outputGroup.output, el)}>
-                                  <button
-                                    type="button"
-                                    className="flex items-center gap-1 lg:gap-2 px-1 lg:px-2 py-1 lg:py-2 text-slate-200 rounded shadow-sm border cursor-pointer bg-slate-800 border-slate-700 hover:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200"
-                                    onClick={() => inputDropdowns.toggleDropdown(outputGroup.output)}
-                                    tabIndex={0}
-                                  >
+                                  <DropdownButton isOpen={isOpen} onClick={() => inputDropdowns.toggleDropdown(outputGroup.output)}>
                                     <ShardDisplay shardId={partnerId} fusionData={fusionData} size="sm" />
-                                    <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-                                  </button>
+                                  </DropdownButton>
                                   {isOpen && (
                                     <div className="absolute z-50 top-full mt-1 left-0 bg-slate-900 border border-slate-600 rounded shadow-xl max-h-40 overflow-auto min-w-max">
                                       {outputGroup.partners.map((pid) => (
@@ -265,17 +252,9 @@ const RecipePage = () => {
                               ) : // Partner is second, so show dropdown/partner
                               outputGroup.partners.length > 1 ? (
                                 <div className="relative flex-shrink-0" ref={(el) => inputDropdowns.setRef(outputGroup.output + "-second", el)}>
-                                  <button
-                                    type="button"
-                                    className="flex items-center gap-1 lg:gap-2 px-1 lg:px-2 py-1 lg:py-2 text-slate-200 rounded shadow-sm border cursor-pointer bg-slate-800 border-slate-700 hover:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200"
-                                    onClick={() => inputDropdowns.toggleDropdown(outputGroup.output + "-second")}
-                                    tabIndex={0}
-                                  >
+                                  <DropdownButton isOpen={inputDropdowns.dropdownOpen[outputGroup.output + "-second"]} onClick={() => inputDropdowns.toggleDropdown(outputGroup.output + "-second")}>
                                     <ShardDisplay shardId={partnerId} fusionData={fusionData} size="sm" />
-                                    <ChevronDown
-                                      className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${inputDropdowns.dropdownOpen[outputGroup.output + "-second"] ? "rotate-180" : ""}`}
-                                    />
-                                  </button>
+                                  </DropdownButton>
                                   {inputDropdowns.dropdownOpen[outputGroup.output + "-second"] && (
                                     <div className="absolute z-50 top-full mt-1 left-0 bg-slate-900 border border-slate-600 rounded shadow-xl max-h-40 overflow-auto min-w-max">
                                       {outputGroup.partners.map((pid) => (
@@ -346,15 +325,9 @@ const RecipePage = () => {
                           <div className="flex items-center gap-1 lg:gap-2 min-w-0 flex-shrink-0">
                             {partners.length > 1 ? (
                               <div className="relative flex-shrink-0" ref={(el) => outputDropdowns.setRef(input1, el)}>
-                                <button
-                                  type="button"
-                                  className="flex items-center gap-1 lg:gap-2 px-1 lg:px-2 py-1 lg:py-2 text-slate-200 rounded shadow-sm border cursor-pointer bg-slate-800 border-slate-700 hover:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all duration-200"
-                                  onClick={() => outputDropdowns.toggleDropdown(input1)}
-                                  tabIndex={0}
-                                >
+                                <DropdownButton isOpen={isOpen} onClick={() => outputDropdowns.toggleDropdown(input1)}>
                                   <ShardDisplay shardId={selectedPartner.input2} fusionData={fusionData} size="sm" />
-                                  <ChevronDown className={`w-2 h-2 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-                                </button>
+                                </DropdownButton>
                                 {isOpen && (
                                   <div className="absolute z-50 top-full mt-1 left-0 bg-slate-900 border border-slate-600 rounded shadow-xl max-h-40 overflow-auto min-w-max">
                                     {partners.map((partner, index) => (

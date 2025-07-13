@@ -1,4 +1,4 @@
-import type { ShardWithKey } from "../types";
+import type { ShardWithKey } from "../types/types";
 
 export interface FusionData {
   recipes: Record<string, Record<string, string[][]>>;

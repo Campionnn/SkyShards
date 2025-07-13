@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Search, X } from "lucide-react";
-import { DataService } from "../services/dataService";
-import { debounce } from "../utils";
-import type { ShardWithKey, ShardAutocompleteProps } from "../types";
-import { SuggestionItem } from "./search/SuggestionItem";
+import { DataService } from "../../services/dataService";
+import { debounce } from "../../utils";
+import type { ShardWithKey, ShardAutocompleteProps } from "../../types/types";
+import { SuggestionItem } from "../search/SuggestionItem";
 
 export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onChange, onSelect, onFocus, placeholder = "Search for a shard...", className = "", searchMode = "enhanced" }) => {
   const [suggestions, setSuggestions] = useState<ShardWithKey[]>([]);

@@ -1,13 +1,12 @@
 import React from "react";
 import { Zap, RotateCcw, Settings } from "lucide-react";
-import { type CalculationFormData } from "../schemas/validation";
-import { ShardAutocomplete } from "./ShardAutocomplete";
-import { useCalculatorState } from "../context/CalculatorStateContext";
-import { PetLevelDropdown } from "./calculator/PetLevelDropdown";
-import { KuudraDropdown } from "./calculator/KuudraDropdown";
-import { MAX_QUANTITIES, SHARD_DESCRIPTIONS } from "../constants";
-import { isValidShardName, formatShardDescription } from "../utils";
-import { Tooltip } from "./Tooltip";
+import { type CalculationFormData } from "../../schemas/validation";
+import { ShardAutocomplete, MoneyInput } from "../inputs";
+import { useCalculatorState } from "../../context/CalculatorStateContext";
+import { LevelDropdown, KuudraDropdown } from "../calculator";
+import { MAX_QUANTITIES, SHARD_DESCRIPTIONS } from "../../constants";
+import { isValidShardName, formatShardDescription } from "../../utils";
+import { Tooltip, ToggleSwitch } from "../ui";
 
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
@@ -24,7 +23,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       if (form.shard && form.shard.trim() !== "") {
         const isValid = await isValidShardName(form.shard);
         if (isValid) {
-          onSubmit({ ...form, frogPet: false });
+          onSubmit({ ...form, frogBonus: false });
         }
       }
     };
@@ -72,7 +71,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       quantity: currentQuantity,
       hunterFortune: 0,
       excludeChameleon: false,
-      frogPet: false,
+      frogBonus: false,
       newtLevel: 0,
       salamanderLevel: 0,
       lizardKingLevel: 0,
@@ -147,16 +146,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                 Target Shard
               </label>
-              
+
               {/* Auto Save Toggle */}
               <div className="flex items-center gap-1.5">
                 <label htmlFor="saveSettings" className="text-xs font-medium text-slate-200 cursor-pointer">
                   Auto Save
                 </label>
-                <Tooltip 
-                  content="Automatically saves all your settings (fortune, pet levels, etc.) in your browser. Data is restored when the page reloads."
-                >
-                </Tooltip>
+                <Tooltip content="Automatically saves all your settings (fortune, shard levels, etc.) in your browser. Data is restored when the page reloads."></Tooltip>
                 <button
                   type="button"
                   role="switch"
@@ -282,51 +278,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             {/* Checkboxes */}
             <div className="space-y-0">
               {/* Exclude Chameleon Switch */}
-              <div className="flex items-center justify-between py-1">
-                <label htmlFor="excludeChameleon" className="text-sm font-medium text-slate-200 flex-1 cursor-pointer">
-                  Exclude Chameleon
-                </label>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={form.excludeChameleon}
-                  onClick={() => handleInputChange("excludeChameleon", !form.excludeChameleon)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
-                    ${form.excludeChameleon ? "bg-fuchsia-600" : "bg-white/5"}
-                    hover:border-fuchsia-400`}
-                  style={{ boxShadow: "none" }}
-                >
-                  <span
-                    className={`inline-block h-5 w-5 transform rounded-full shadow transition-transform duration-200 border border-white/10
-                    ${form.excludeChameleon ? "bg-fuchsia-400" : "bg-slate-300/70"}
-                    ${form.excludeChameleon ? "translate-x-5" : "translate-x-0.5"}`}
-                    style={{ paddingLeft: "1px" }}
-                  />
-                </button>
-              </div>
+              <ToggleSwitch id="excludeChameleon" label="Exclude Chameleon" checked={form.excludeChameleon} onChange={(checked) => handleInputChange("excludeChameleon", checked)} />
               {/* Exclude Wooden Bait Switch */}
-              <div className="flex items-center justify-between py-1">
-                <label htmlFor="excludeWoodenBait" className="text-sm font-medium text-slate-200 flex-1 cursor-pointer">
-                  Exclude Wooden Bait
-                </label>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={form.noWoodenBait}
-                  onClick={() => handleInputChange("noWoodenBait", !form.noWoodenBait)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
-                    ${form.noWoodenBait ? "bg-fuchsia-600" : "bg-white/5"}
-                    hover:border-fuchsia-400`}
-                  style={{ boxShadow: "none" }}
-                >
-                  <span
-                    className={`inline-block h-5 w-5 transform rounded-full shadow transition-transform duration-200 border border-white/10
-                    ${form.noWoodenBait ? "bg-fuchsia-400" : "bg-slate-300/70"}
-                    ${form.noWoodenBait ? "translate-x-5" : "translate-x-0.5"}`}
-                    style={{ paddingLeft: "1px" }}
-                  />
-                </button>
-              </div>
+              <ToggleSwitch id="excludeWoodenBait" label="Exclude Wooden Bait" checked={form.noWoodenBait} onChange={(checked) => handleInputChange("noWoodenBait", checked)} />
             </div>
           </div>
         </div>
@@ -351,10 +305,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             ].map(({ key, label, shardId }) => {
               const shardDesc = SHARD_DESCRIPTIONS[shardId as keyof typeof SHARD_DESCRIPTIONS];
               return (
-                <PetLevelDropdown
+                <LevelDropdown
                   key={key}
                   value={(form[key as keyof CalculationFormData] as number) || 0}
-                  onChange={(value) => handleInputChange(key as keyof CalculationFormData, value)}
+                  onChange={(value: number) => handleInputChange(key as keyof CalculationFormData, value)}
                   label={label}
                   tooltipTitle={shardDesc?.title}
                   tooltipContent={formatShardDescription(shardDesc?.description || "No description available.")}
@@ -378,32 +332,20 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           </h3>
           <div className="space-y-2">
             <KuudraDropdown value={form.kuudraTier || "none"} onChange={(value) => handleInputChange("kuudraTier", value)} label="Kuudra Tier" />
-            <div className="relative">
-              <input
-                type="text"
-                min="0"
-                value={moneyInput}
-                onChange={(e) => {
-                  setMoneyInput(e.target.value);
-                  if (e.target.value.trim() === "") {
-                    handleInputChange("moneyPerHour", Infinity); // Infinity means ignore key cost
-                    onSubmit({ ...form, moneyPerHour: Infinity }); // force update tree
-                  } else {
-                    const parsed = parseShorthandNumber(e.target.value);
-                    handleInputChange("moneyPerHour", parsed);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    e.currentTarget.blur();
-                  }
-                }}
-                className="w-full px-3 py-2 pr-20 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 hover:border-white/20 hover:bg-white/10 transition-all duration-200"
-              />
-              <div className="absolute right-3 top-2.5 text-xs text-slate-500 pointer-events-none">coins / hr</div>
-              <p className="mt-1 text-xs text-slate-400">Empty to ignore key cost</p>
-            </div>
+            <MoneyInput
+              value={moneyInput}
+              onChange={(value) => {
+                setMoneyInput(value);
+                if (value.trim() === "") {
+                  handleInputChange("moneyPerHour", Infinity); // Infinity means ignore key cost
+                  onSubmit({ ...form, moneyPerHour: Infinity }); // force update tree
+                } else {
+                  const parsed = parseShorthandNumber(value);
+                  handleInputChange("moneyPerHour", parsed);
+                }
+              }}
+              placeholder="1m"
+            />
           </div>
         </div>
       </form>

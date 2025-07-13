@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { CalculationFormData } from "../schemas/validation";
-import { saveFormData, loadFormData, clearFormData, getSaveEnabled, setSaveEnabled } from "../utils/localStorage";
+import { saveFormData, loadFormData, clearFormData, getSaveEnabled, setSaveEnabled } from "../utils";
 
 const defaultForm: CalculationFormData = {
   shard: "",
   quantity: 1,
   hunterFortune: 0,
   excludeChameleon: false,
-  frogPet: false,
+  frogBonus: false,
   newtLevel: 0,
   salamanderLevel: 0,
   lizardKingLevel: 0,
@@ -73,7 +73,7 @@ export const CalculatorStateProvider: React.FC<{ children: React.ReactNode }> = 
   const setSaveEnabledState = useCallback((enabled: boolean) => {
     setSaveEnabledLocal(enabled);
     setSaveEnabled(enabled);
-    
+
     // If saving is disabled, only clear saved data but keep current form
     if (!enabled) {
       clearFormData();
@@ -89,7 +89,9 @@ export const CalculatorStateProvider: React.FC<{ children: React.ReactNode }> = 
   }, [saveEnabled]);
 
   return (
-    <CalculatorStateContext.Provider value={{ form, setForm: handleSetForm, resetForm, result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName, saveEnabled, setSaveEnabledState }}>
+    <CalculatorStateContext.Provider
+      value={{ form, setForm: handleSetForm, resetForm, result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName, saveEnabled, setSaveEnabledState }}
+    >
       {children}
     </CalculatorStateContext.Provider>
   );

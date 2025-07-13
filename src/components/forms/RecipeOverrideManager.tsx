@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
-import { CalculationService } from "../services/calculationService";
-import { AlternativeRecipePopup } from "./AlternativeRecipePopup";
-import type { RecipeOverrideManagerProps, AlternativeRecipeOption, AlternativeSelectionContext, Recipe, RecipeOverride, Data } from "../types";
+import { CalculationService } from "../../services/calculationService";
+import { AlternativeRecipePopup } from "../popups";
+import type { RecipeOverrideManagerProps, AlternativeRecipeOption, AlternativeSelectionContext, Recipe, RecipeOverride, Data } from "../../types/types";
 
 interface PopupState {
   isOpen: boolean;

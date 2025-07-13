@@ -11,7 +11,7 @@ import type {
   RecipeTree,
   Shard,
   Shards,
-} from "../types";
+} from "../types/types";
 import { BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS } from "../constants";
 
 export class CalculationService {
@@ -143,8 +143,8 @@ export class CalculationService {
 
     effectiveFortune += rarityBonuses[shard.rarity] || 0;
 
-    // Apply frog pet bonus
-    if (params.frogPet) {
+    // Apply frog bonus
+    if (params.frogBonus) {
       rate *= 1.1;
     }
 

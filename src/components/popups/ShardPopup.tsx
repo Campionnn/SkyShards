@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getRarityColor, getRarityBorderColor } from "../utils";
+import { getRarityColor, getRarityBorderColor } from "../../utils";
 import { MoveRight } from "lucide-react";
 
 const rarityBg: Record<string, string> = {

@@ -1,8 +1,8 @@
 import React from "react";
-import { formatNumber, getRarityColor, formatShardDescription, formatTime } from "../utils";
+import { formatNumber, getRarityColor, formatShardDescription, formatTime } from "../../utils";
 import { Tooltip } from "./Tooltip";
-import { SHARD_DESCRIPTIONS } from "../constants";
-import type { Shard } from "../types";
+import { SHARD_DESCRIPTIONS } from "../../constants";
+import type { Shard } from "../../types/types";
 
 interface MaterialItemProps {
   shard: Shard;

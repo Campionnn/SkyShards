@@ -84,7 +84,7 @@ export interface CalculationParams {
   customRates: { [shardId: string]: number };
   hunterFortune: number;
   excludeChameleon: boolean;
-  frogPet: boolean;
+  frogBonus: boolean;
   newtLevel: number;
   salamanderLevel: number;
   lizardKingLevel: number;
@@ -122,7 +122,7 @@ export interface ShardWithDirectInfo extends ShardWithKey {
 export interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
 }
-export interface PetLevelDropdownProps {
+export interface LevelDropdownProps {
   value: number;
   onChange: (value: number) => void;
   label: string;

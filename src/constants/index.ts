@@ -1,6 +1,6 @@
 export const NO_FORTUNE_SHARDS = ["C19", "U4", "U16", "U28", "R25", "R60", "E12", "L4", "L15", "L30", "L33"];
 
-export { SHARD_DESCRIPTIONS } from "./petToShardMap";
+export { SHARD_DESCRIPTIONS } from "./shardDescriptions";
 
 export const WOODEN_BAIT_SHARDS = ["R29", "L23", "R59", "R23"];
 
@@ -56,7 +56,7 @@ export const KUUDRA_TIERS = [
   { value: "t5", label: "T5" },
 ] as const;
 
-export const PET_LEVELS = Array.from({ length: 11 }, (_, i) => ({
+export const SHARD_LEVELS = Array.from({ length: 11 }, (_, i) => ({
   value: i,
   label: i.toString(),
 })).reverse();

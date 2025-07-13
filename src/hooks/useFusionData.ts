@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { FusionData } from "../utils/recipeUtils";
+import type { FusionData } from "../utils";
 
 export const useFusionData = () => {
   const [fusionData, setFusionData] = useState<FusionData | null>(null);

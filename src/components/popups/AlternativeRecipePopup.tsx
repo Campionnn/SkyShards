@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Star, Search, Plus, Equal, ChevronDown } from "lucide-react";
-import { getRarityColor, formatTime } from "../utils";
-import type { AlternativeRecipePopupProps, Recipe, AlternativeRecipeOption } from "../types";
+import { getRarityColor, formatTime } from "../../utils";
+import type { AlternativeRecipePopupProps, Recipe, AlternativeRecipeOption } from "../../types/types";
 
 export const AlternativeRecipePopup: React.FC<
   AlternativeRecipePopupProps & {
@@ -10,17 +10,12 @@ export const AlternativeRecipePopup: React.FC<
   }
 > = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading, requiredQuantity = 1, crocodileLevel, seaSerpentLevel, tiamatLevel }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  // Track selected recipe index for each group
   const [selectedIndices, setSelectedIndices] = useState<Record<string, number>>({});
-  // Track open dropdowns
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
-  // Track search queries for each dropdown
   const [dropdownSearchQueries, setDropdownSearchQueries] = useState<Record<string, string>>({});
 
-  // Helper function to calculate total time accounting for reptile multipliers
   const calculateTotalTime = (option: AlternativeRecipeOption, requiredQuantity: number) => {
     if (!option.recipe || !option.recipe.isReptile) {
-      // For non-reptile recipes or direct options, use simple multiplication
       return option.timePerShard * requiredQuantity;
     }
 
@@ -35,7 +30,6 @@ export const AlternativeRecipePopup: React.FC<
     return option.timePerShard * totalShardsProduced;
   };
 
-  // Reset state when popup closes
   useEffect(() => {
     if (!isOpen) {
       setSearchQuery("");
@@ -51,12 +45,10 @@ export const AlternativeRecipePopup: React.FC<
     setDropdownSearchQueries({});
   }, [alternatives]);
 
-  // Close dropdowns and popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
 
-      // Close all dropdowns if clicking outside any dropdown
       const isClickInsideDropdown = target.closest("[data-dropdown-container]");
       if (!isClickInsideDropdown) {
         setOpenDropdowns({});
@@ -75,7 +67,6 @@ export const AlternativeRecipePopup: React.FC<
     return Object.values(data.shards).find((shard) => shard.name === shardName);
   }, [data?.shards, shardName]);
 
-  // Process alternatives with filtering and grouping
   const processedAlternatives = useMemo(() => {
     if (!alternatives || !data?.shards) return { direct: null, grouped: {} };
 

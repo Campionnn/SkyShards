@@ -3,8 +3,8 @@ import { AlertCircle, Menu, X } from "lucide-react";
 import { CalculatorForm, CalculationResults } from "../components";
 import { useCalculation, useCustomRates } from "../hooks";
 import { DataService } from "../services/dataService";
-import type { CalculationFormData } from "../schemas/validation";
-import type { CalculationResult, CalculationParams, RecipeOverride } from "../types";
+import type { CalculationFormData } from "../schemas";
+import type { CalculationResult, CalculationParams, RecipeOverride } from "../types/types";
 import { useCalculatorState } from "../context/CalculatorStateContext";
 
 const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
@@ -49,7 +49,7 @@ const performCalculation = async (
     customRates: filteredCustomRates,
     hunterFortune: formData.hunterFortune,
     excludeChameleon: formData.excludeChameleon,
-    frogPet: formData.frogPet,
+    frogBonus: formData.frogBonus,
     newtLevel: formData.newtLevel,
     salamanderLevel: formData.salamanderLevel,
     lizardKingLevel: formData.lizardKingLevel,

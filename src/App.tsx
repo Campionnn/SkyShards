@@ -3,7 +3,7 @@ import { Suspense, lazy } from "react";
 import { Layout } from "./components";
 import { CalculatorStateProvider } from "./context/CalculatorStateContext";
 import { RecipeStateProvider } from "./context/RecipeStateContext";
-import usePageTitle from "./hooks/usePageTitle";
+import { usePageTitle } from "./hooks/usePageTitle";
 
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));

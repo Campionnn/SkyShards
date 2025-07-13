@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { Clock, Hammer, Target, BarChart3 } from "lucide-react";
-import { formatTime } from "../utils";
-import type { RecipeTree, CalculationResultsProps } from "../types";
-import { RecipeTreeNode } from "./tree/RecipeTreeNode";
-import { RecipeOverrideManager } from "./RecipeOverrideManager";
-import { SummaryCard } from "./SummaryCard";
-import { MaterialItem } from "./MaterialItem";
+import { formatTime } from "../../utils";
+import type { RecipeTree, CalculationResultsProps } from "../../types/types";
+import { RecipeTreeNode } from "../tree";
+import { RecipeOverrideManager } from "../forms";
+import { SummaryCard, MaterialItem } from "../ui";
 
 // Utility function to manage expanded states
 const useTreeExpansion = (tree: RecipeTree | null) => {

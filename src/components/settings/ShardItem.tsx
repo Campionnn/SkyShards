@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import type { ShardWithDirectInfo } from "../../types";
+import type { ShardWithDirectInfo } from "../../types/types";
 import { getRarityColor } from "../../utils";
 import { RotateCcw } from "lucide-react";
 

@@ -21,7 +21,7 @@ A modern, fast, and visually appealing web app for calculating Sky Shard fusions
 
 - Instantly search for any Sky Shard and see its fusion requirements.
 - Calculate the optimal path and resources needed to craft or upgrade shards.
-- Adjust pet levels, Kuudra tier, and other settings for accurate, personalized results.
+- Adjust shard levels, Kuudra tier, and other settings for accurate, personalized results.
 - Use advanced options like "Max Stats" or "Reset" for quick scenario testing.
 - Enjoy a compact, color-coded, and mobile-friendly interface.
 
@@ -45,7 +45,7 @@ Whether you're a casual player or a min-maxer, this tool makes shard progression
 
 - 🔍 **Instant Shard Search**: Autocomplete and search for any Sky Shard by name.
 - 📊 **Fusion Calculator**: Instantly calculates required resources, optimal paths, and costs for fusing shards.
-- 🐸 **Pet & Level Selectors**: Easily set pet levels and Kuudra tier for accurate calculations.
+- � **Shard & Level Selectors**: Easily set shard levels and Kuudra tier for accurate calculations.
 - ⚡ **Performance Optimized**: Ultra-fast, responsive UI with compact, color-coded components.
 - 🎨 **Modern UI/UX**: Clean, compact, and color-coded interface for easy navigation and use.
 - 🛠️ **Settings & Customization**: Max stats, reset, and advanced options for power users.

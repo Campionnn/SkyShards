@@ -1,9 +1,9 @@
 import React from "react";
-import { getRarityColor, getShardDetails, formatShardDescription } from "../../utils/index";
+import { getRarityColor, formatShardDescription } from "../../utils";
 import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
-import { formatNumber } from "../../utils/index";
-import type { RecipeTreeNodeProps } from "../../types/index";
-import { Tooltip } from "../Tooltip";
+import { formatNumber } from "../../utils";
+import type { RecipeTreeNodeProps } from "../../types/types";
+import { Tooltip } from "../ui/Tooltip";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 
 export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel = false, totalShardsProduced = tree.quantity, nodeId, expandedStates, onToggle, onShowAlternatives }) => {
@@ -446,7 +446,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
               >
                 <div className="flex items-center gap-2">
                   <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain inline-block align-middle flex-shrink-0" loading="lazy" />
-                  <span className={`font-medium ${getRarityColor(shard.rarity)} text-sm whitespace-nowrap truncate`} style={{ maxWidth: "8rem" }} title={getShardDetails(shard, false)}>
+                  <span className={`font-medium ${getRarityColor(shard.rarity)} text-sm whitespace-nowrap truncate`} style={{ maxWidth: "8rem" }} title={shard.name}>
                     {shard.name}
                   </span>
                 </div>
