@@ -27,8 +27,9 @@ const ProtectedLayout = () => {
   );
 };
 
-// const isProd = import.meta.env.PROD;
-const basename = "/";
+const isProd = import.meta.env.PROD;
+const isGitHubPages = import.meta.env.BASE_URL.includes("/SkyShards/");
+const basename = isProd && isGitHubPages ? "/SkyShards" : "";
 
 const router = createBrowserRouter(
   [

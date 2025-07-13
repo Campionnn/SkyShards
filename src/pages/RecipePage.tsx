@@ -193,7 +193,8 @@ const RecipePage = () => {
                     .map((outputGroup) => {
                       const partnerId = selectedPartner[outputGroup.output] || outputGroup.partners[0];
                       const isOpen = inputDropdowns.dropdownOpen[outputGroup.output] || false;
-                      const position = outputGroup.positions.get(partnerId) || "first";
+                      // Determine position based on which shard has a lower ID/key value
+                      const position = selectedShard.key < partnerId ? "first" : "second";
 
                       return (
                         <div key={`${outputGroup.output}-${position}`} className="px-2">
@@ -229,7 +230,7 @@ const RecipePage = () => {
                                             inputDropdowns.closeDropdown(outputGroup.output);
                                           }}
                                         >
-                                          <span className="text-sm text-slate-400 font-medium flex-shrink-0">×{fusionData.shards[pid]?.fuse_amount || 2}</span>
+                                          <span className="text-sm text-slate-400 font-medium flex-shrink-0">{fusionData.shards[pid]?.fuse_amount || 2}x</span>
                                           <img
                                             src={`${import.meta.env.BASE_URL}shardIcons/${pid}.png`}
                                             alt={fusionData.shards[pid]?.name}
@@ -289,7 +290,7 @@ const RecipePage = () => {
                                             inputDropdowns.closeDropdown(outputGroup.output + "-second");
                                           }}
                                         >
-                                          <span className="text-sm text-slate-400 font-medium flex-shrink-0">×{fusionData.shards[pid]?.fuse_amount || 2}</span>
+                                          <span className="text-sm text-slate-400 font-medium flex-shrink-0">{fusionData.shards[pid]?.fuse_amount || 2}x</span>
                                           <img
                                             src={`${import.meta.env.BASE_URL}shardIcons/${pid}.png`}
                                             alt={fusionData.shards[pid]?.name}
@@ -368,7 +369,7 @@ const RecipePage = () => {
                                           outputDropdowns.closeDropdown(input1);
                                         }}
                                       >
-                                        <span className="text-sm text-slate-400 font-medium flex-shrink-0">×{fusionData.shards[partner.input2]?.fuse_amount || 2}</span>
+                                        <span className="text-sm text-slate-400 font-medium flex-shrink-0">{fusionData.shards[partner.input2]?.fuse_amount || 2}x</span>
                                         <img
                                           src={`${import.meta.env.BASE_URL}shardIcons/${partner.input2}.png`}
                                           alt={fusionData.shards[partner.input2]?.name}

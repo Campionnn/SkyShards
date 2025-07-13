@@ -14,17 +14,10 @@ export const calculationSchema = z.object({
   kingCobraLevel: z.number().min(0).max(10),
   seaSerpentLevel: z.number().min(0).max(10),
   tiamatLevel: z.number().min(0).max(10),
-    crocodileLevel: z.number().min(0).max(10),
+  crocodileLevel: z.number().min(0).max(10),
   kuudraTier: z.enum(["none", "t1", "t2", "t3", "t4", "t5"]),
   moneyPerHour: z.number().min(0).nullable(),
   noWoodenBait: z.boolean(),
 });
 
 export type CalculationFormData = z.infer<typeof calculationSchema>;
-
-export const rateEditSchema = z.object({
-  shardId: z.string(),
-  rate: z.number().min(0),
-});
-
-export type RateEditData = z.infer<typeof rateEditSchema>;
