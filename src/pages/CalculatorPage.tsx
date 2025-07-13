@@ -4,7 +4,7 @@ import { CalculatorForm, CalculationResults } from "../components";
 import { useCalculation, useCustomRates } from "../hooks";
 import { DataService } from "../services/dataService";
 import type { CalculationFormData } from "../schemas/validation";
-import type { CalculationResult, CalculationParams } from "../types";
+import type { CalculationResult, CalculationParams, RecipeOverride } from "../types";
 import { useCalculatorState } from "../context/CalculatorStateContext";
 
 const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
@@ -16,6 +16,7 @@ const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData
 const performCalculation = async (
   formData: CalculationFormData,
   customRates: { [shardId: string]: number | undefined },
+  recipeOverrides: RecipeOverride[] = [], // Add recipe overrides parameter
   callbacks: {
     setTargetShardName: (name: string) => void;
     setCurrentShardKey: (key: string) => void;
@@ -67,7 +68,7 @@ const performCalculation = async (
 
   const calculationService = await import("../services/calculationService");
   const service = calculationService.CalculationService.getInstance();
-  const calculationResult = await service.calculateOptimalPath(shardKey, formData.quantity, params);
+  const calculationResult = await service.calculateOptimalPath(shardKey, formData.quantity, params, recipeOverrides);
   callbacks.setResult(calculationResult);
   const data = await service.parseData(params);
   callbacks.setCalculationData(data);
@@ -81,6 +82,7 @@ const CalculatorPageContent: React.FC = () => {
   const [currentParams, setCurrentParams] = useState<CalculationParams | null>(null);
   const [currentShardKey, setCurrentShardKey] = useState<string>("");
   const [currentQuantity, setCurrentQuantity] = useState<number>(1);
+  const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
 
   const handleCalculate = async (formData: CalculationFormData, setForm: (data: CalculationFormData) => void) => {
     setForm(formData);
@@ -96,7 +98,7 @@ const CalculatorPageContent: React.FC = () => {
     };
 
     try {
-      await performCalculation(formData, customRates, callbacks);
+      await performCalculation(formData, customRates, recipeOverrides, callbacks);
     } catch (err) {
       if (err instanceof Error && !err.message.includes("not found")) {
         console.error("Calculation failed:", err);
@@ -106,6 +108,14 @@ const CalculatorPageContent: React.FC = () => {
 
   const handleResultUpdate = (newResult: CalculationResult) => {
     setResult(newResult);
+  };
+
+  const handleRecipeOverridesUpdate = (newOverrides: RecipeOverride[]) => {
+    setRecipeOverrides(newOverrides);
+  };
+
+  const resetRecipeOverrides = () => {
+    setRecipeOverrides([]);
   };
 
   // Re-calculate when customRates change and form is valid
@@ -120,7 +130,7 @@ const CalculatorPageContent: React.FC = () => {
         setCalculationData,
       };
 
-      performCalculation(form, customRates, callbacks).catch((err) => {
+      performCalculation(form, customRates, recipeOverrides, callbacks).catch((err) => {
         if (err instanceof Error && !err.message.includes("not found")) {
           console.error("Calculation failed (customRates effect):", err);
         }
@@ -180,6 +190,9 @@ const CalculatorPageContent: React.FC = () => {
               requiredQuantity={currentQuantity}
               params={currentParams}
               onResultUpdate={handleResultUpdate}
+              recipeOverrides={recipeOverrides}
+              onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
+              onResetRecipeOverrides={resetRecipeOverrides}
             />
           )}
 

@@ -129,26 +129,10 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
         {renderShardInfo(quantity, shard, false)}
         <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="text-right min-w-[80px] ml-2">
-          <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-          <span className="text-slate-500 text-xs mx-0.5">/</span>
-          <span className="text-slate-400 text-xs">hr</span>
-        </div>
-        {onShowAlternatives && (
-          <button
-            onClick={() =>
-              onShowAlternatives(shard.id, {
-                isDirectInput: false, // Changed: treat as regular recipe alternatives for this shard
-                currentRecipe: null, // Direct collection has no current recipe
-              })
-            }
-            className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer"
-            title="Show alternatives"
-          >
-            <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
-          </button>
-        )}
+      <div className="text-right min-w-[80px] ml-2">
+        <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
+        <span className="text-slate-500 text-xs mx-0.5">/</span>
+        <span className="text-slate-400 text-xs">hr</span>
       </div>
     </div>
   );
@@ -398,19 +382,12 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           {renderShardInfo(tree.quantity, shard, false)}
           <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="text-right">
-            <div className="text-xs text-slate-300">
-              {formatNumber(shard.rate)}
-              <span className="text-slate-500 text-xs mx-0.5">/</span>
-              <span className="text-slate-400 text-xs">hr</span>
-            </div>
+        <div className="text-right">
+          <div className="text-xs text-slate-300">
+            {formatNumber(shard.rate)}
+            <span className="text-slate-500 text-xs mx-0.5">/</span>
+            <span className="text-slate-400 text-xs">hr</span>
           </div>
-          {onShowAlternatives && (
-            <button onClick={() => onShowAlternatives(tree.shard, { currentRecipe: null })} className="p-1 hover:bg-slate-700 rounded transition-colors cursor-pointer" title="Show alternatives">
-              <Settings className="w-4 h-4 text-slate-400 hover:text-slate-300" />
-            </button>
-          )}
         </div>
       </div>
     );

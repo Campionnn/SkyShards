@@ -12,8 +12,16 @@ interface PopupState {
   data?: Data;
 }
 
-export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({ targetShard, requiredQuantity, params, onResultUpdate, children }) => {
-  const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
+export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
+  targetShard,
+  requiredQuantity,
+  params,
+  onResultUpdate,
+  recipeOverrides,
+  onRecipeOverridesUpdate,
+  onResetRecipeOverrides,
+  children,
+}) => {
   const [popupState, setPopupState] = useState<PopupState>({
     isOpen: false,
     alternatives: { direct: null, grouped: {} },
@@ -84,10 +92,9 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({ ta
           recipe: selectedRecipe,
         };
 
-        setRecipeOverrides((prev) => {
-          const filtered = prev.filter((o) => o.shardId !== popupState.shardId);
-          return [...filtered, newOverride];
-        });
+        const filtered = recipeOverrides.filter((o) => o.shardId !== popupState.shardId);
+        const updatedOverrides = [...filtered, newOverride];
+        onRecipeOverridesUpdate(updatedOverrides);
 
         onResultUpdate(newResult);
         closePopup();
@@ -95,19 +102,19 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({ ta
         console.error("Failed to apply recipe override:", error);
       }
     },
-    [popupState.shardId, targetShard, requiredQuantity, params, recipeOverrides, onResultUpdate, closePopup]
+    [popupState.shardId, targetShard, requiredQuantity, params, recipeOverrides, onRecipeOverridesUpdate, onResultUpdate, closePopup]
   );
 
   const resetAlternatives = useCallback(async () => {
     try {
-      setRecipeOverrides([]);
+      onResetRecipeOverrides();
       const calculationService = CalculationService.getInstance();
       const newResult = await calculationService.calculateOptimalPath(targetShard, requiredQuantity, params);
       onResultUpdate(newResult);
     } catch (error) {
       console.error("Failed to reset alternatives:", error);
     }
-  }, [targetShard, requiredQuantity, params, onResultUpdate]);
+  }, [targetShard, requiredQuantity, params, onResetRecipeOverrides, onResultUpdate]);
 
   return (
     <>

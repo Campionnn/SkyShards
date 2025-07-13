@@ -62,7 +62,18 @@ const useTreeExpansion = (tree: RecipeTree | null) => {
   return { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle };
 };
 
-export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, data, targetShardName, targetShard, requiredQuantity, params, onResultUpdate }) => {
+export const CalculationResults: React.FC<CalculationResultsProps> = ({
+  result,
+  data,
+  targetShardName,
+  targetShard,
+  requiredQuantity,
+  params,
+  onResultUpdate,
+  recipeOverrides,
+  onRecipeOverridesUpdate,
+  onResetRecipeOverrides,
+}) => {
   const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
 
   return (
@@ -145,7 +156,15 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({ result, 
       <div className="bg-slate-800 border border-slate-600 rounded-md p-3">
         <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
           <div className="min-w-[650px]">
-            <RecipeOverrideManager targetShard={targetShard} requiredQuantity={requiredQuantity} params={params} onResultUpdate={onResultUpdate}>
+            <RecipeOverrideManager
+              targetShard={targetShard}
+              requiredQuantity={requiredQuantity}
+              params={params}
+              onResultUpdate={onResultUpdate}
+              recipeOverrides={recipeOverrides}
+              onRecipeOverridesUpdate={onRecipeOverridesUpdate}
+              onResetRecipeOverrides={onResetRecipeOverrides}
+            >
               {({ showAlternatives, resetAlternatives }) => (
                 <>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">

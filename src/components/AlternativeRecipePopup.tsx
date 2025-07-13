@@ -218,6 +218,7 @@ export const AlternativeRecipePopup: React.FC<
               <span className="text-slate-400 text-xs">{option.recipe.outputQuantity}x</span>
               {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
               <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300"}>{shardName}</span>
+              {option.recipe.isReptile && <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0 ml-1">Reptile</span>}
             </div>
             {isCurrent && <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">Current</span>}
           </div>
@@ -245,7 +246,7 @@ export const AlternativeRecipePopup: React.FC<
       return fastestTimeA - fastestTimeB;
     });
 
-    return groupKeys.map((firstShard) => {
+    return groupKeys.map((firstShard, groupIndex) => {
       // Get all options for this group and sort by cost (lowest first)
       const group = [...grouped[firstShard]].sort((a, b) => {
         // First sort by time (ascending - fastest first)
@@ -284,10 +285,31 @@ export const AlternativeRecipePopup: React.FC<
         : group;
 
       const toggleDropdown = () => {
-        setOpenDropdowns((prev) => ({
-          ...prev,
-          [firstShard]: !prev[firstShard],
-        }));
+        setOpenDropdowns((prev) => {
+          const newState = {
+            ...prev,
+            [firstShard]: !prev[firstShard],
+          };
+
+          // Auto-scroll to bottom only when opening the last dropdown
+          if (!prev[firstShard] && newState[firstShard]) {
+            const isLastDropdown = groupIndex === groupKeys.length - 1;
+            if (isLastDropdown) {
+              setTimeout(() => {
+                // Find the scrollable content area of the popup
+                const popupContent = document.querySelector(".overflow-y-auto.flex-1.min-h-0");
+                if (popupContent) {
+                  popupContent.scrollTo({
+                    top: popupContent.scrollHeight,
+                    behavior: "auto",
+                  });
+                }
+              }, 100);
+            }
+          }
+
+          return newState;
+        });
       };
 
       const selectOption = (index: number) => {
@@ -341,6 +363,9 @@ export const AlternativeRecipePopup: React.FC<
                             <Clock className="w-3 h-3 text-slate-400 ml-1" />
                             <span className="text-slate-400 text-xs">{formatTime(selectedOption.timePerShard)}</span>
                             {selectedOption.isCurrent && <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded ml-2">Current</span>}
+                            {selectedOption.recipe.isReptile && (
+                              <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0 ml-1">Reptile</span>
+                            )}
                           </>
                         );
                       })()}
@@ -401,6 +426,9 @@ export const AlternativeRecipePopup: React.FC<
                               <Clock className="w-3 h-3 text-slate-400 ml-1" />
                               <span className="text-slate-400 text-xs">{formatTime(option.timePerShard)}</span>
                               {option.isCurrent && <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded ml-2">Current</span>}
+                              {option.recipe.isReptile && (
+                                <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0 ml-1">Reptile</span>
+                              )}
                             </div>
                           </button>
                         );

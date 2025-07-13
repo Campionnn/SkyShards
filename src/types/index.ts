@@ -151,6 +151,9 @@ export interface CalculationResultsProps {
   requiredQuantity: number;
   params: CalculationParams;
   onResultUpdate: (result: CalculationResult) => void;
+  recipeOverrides: RecipeOverride[];
+  onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
+  onResetRecipeOverrides: () => void;
 }
 
 //fusiun tree
@@ -218,5 +221,8 @@ export interface RecipeOverrideManagerProps {
   requiredQuantity: number;
   params: CalculationParams;
   onResultUpdate: (result: CalculationResult) => void;
+  recipeOverrides: RecipeOverride[];
+  onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
+  onResetRecipeOverrides: () => void;
   children: (props: { showAlternatives: (shardId: string, context: AlternativeSelectionContext) => void; recipeOverrides: RecipeOverride[]; resetAlternatives: () => void }) => React.ReactNode;
 }
