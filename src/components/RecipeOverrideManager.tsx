@@ -130,6 +130,9 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
         data={popupState.data || ({} as Data)}
         loading={popupState.loading}
         requiredQuantity={popupState.requiredQuantity}
+        crocodileLevel={params.crocodileLevel}
+        seaSerpentLevel={params.seaSerpentLevel}
+        tiamatLevel={params.tiamatLevel}
       />
     </>
   );

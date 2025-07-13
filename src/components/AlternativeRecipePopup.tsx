@@ -8,7 +8,7 @@ export const AlternativeRecipePopup: React.FC<
   AlternativeRecipePopupProps & {
     alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
   }
-> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading, requiredQuantity = 1 }) => {
+> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading, requiredQuantity = 1, crocodileLevel, seaSerpentLevel, tiamatLevel }) => {
   const [searchQuery, setSearchQuery] = useState("");
   // Track selected recipe index for each group
   const [selectedIndices, setSelectedIndices] = useState<Record<string, number>>({});
@@ -16,6 +16,24 @@ export const AlternativeRecipePopup: React.FC<
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
   // Track search queries for each dropdown
   const [dropdownSearchQueries, setDropdownSearchQueries] = useState<Record<string, string>>({});
+
+  // Helper function to calculate total time accounting for reptile multipliers
+  const calculateTotalTime = (option: AlternativeRecipeOption, requiredQuantity: number) => {
+    if (!option.recipe || !option.recipe.isReptile) {
+      // For non-reptile recipes or direct options, use simple multiplication
+      return option.timePerShard * requiredQuantity;
+    }
+
+    const tiamatMultiplier = 1 + (5 * tiamatLevel) / 100;
+    const seaSerpentMultiplier = 1 + ((2 * seaSerpentLevel) / 100) * tiamatMultiplier;
+    const crocodileMultiplier = 1 + ((2 * crocodileLevel) / 100) * seaSerpentMultiplier;
+
+    const outputPerCraft = option.recipe.outputQuantity * crocodileMultiplier;
+    const craftsNeeded = Math.ceil(requiredQuantity / outputPerCraft);
+    const totalShardsProduced = craftsNeeded * outputPerCraft;
+
+    return option.timePerShard * totalShardsProduced;
+  };
 
   // Reset state when popup closes
   useEffect(() => {
@@ -178,7 +196,7 @@ export const AlternativeRecipePopup: React.FC<
           <div className="flex items-center gap-1 text-slate-400 text-sm">
             <div className="text-right">
               <div>{formatTime(option.timePerShard)}</div>
-              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(option.timePerShard * requiredQuantity)}</div>}
+              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(calculateTotalTime(option, requiredQuantity))}</div>}
             </div>
           </div>
         </div>
@@ -226,7 +244,7 @@ export const AlternativeRecipePopup: React.FC<
           <div className="flex items-center gap-1 text-slate-400 text-sm">
             <div className="text-right">
               <div>{formatTime(option.timePerShard)}</div>
-              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(option.timePerShard * requiredQuantity)}</div>}
+              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(calculateTotalTime(option, requiredQuantity))}</div>}
             </div>
           </div>
         </div>
@@ -490,7 +508,9 @@ export const AlternativeRecipePopup: React.FC<
                     <div className="flex items-center gap-1 text-slate-400 text-xs">
                       <div className="text-right">
                         <div>{selectedOption ? formatTime(selectedOption.timePerShard) : ""}</div>
-                        {selectedOption && requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(selectedOption.timePerShard * requiredQuantity)}</div>}
+                        {selectedOption && requiredQuantity && requiredQuantity > 0 && (
+                          <div className="text-xs text-blue-400">Total: {formatTime(calculateTotalTime(selectedOption, requiredQuantity))}</div>
+                        )}
                       </div>
                     </div>
                     <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
@@ -556,7 +576,7 @@ export const AlternativeRecipePopup: React.FC<
                               <div className="flex items-center gap-1 text-slate-400 text-xs">
                                 <div className="text-right">
                                   <div>{formatTime(option.timePerShard)}</div>
-                                  {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(option.timePerShard * requiredQuantity)}</div>}
+                                  {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(calculateTotalTime(option, requiredQuantity))}</div>}
                                 </div>
                               </div>
                             </div>

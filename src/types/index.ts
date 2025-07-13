@@ -216,6 +216,9 @@ export interface AlternativeRecipePopupProps {
   data: Data;
   loading: boolean;
   requiredQuantity?: number;
+  crocodileLevel: number;
+  seaSerpentLevel: number;
+  tiamatLevel: number;
 }
 
 export interface RecipeOverrideManagerProps {
