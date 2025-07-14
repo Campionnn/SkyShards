@@ -212,17 +212,48 @@ export class CalculationService {
   }
 
   computeMinCosts(
-    data: Data,
-    crocodileLevel: number,
-    seaSerpentLevel: number,
-    tiamatLevel: number,
-    recipeOverrides: RecipeOverride[] = []
+      data: Data,
+      crocodileLevel: number,
+      seaSerpentLevel: number,
+      tiamatLevel: number,
+      recipeOverrides: RecipeOverride[] = []
   ): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
     const shards = Object.keys(data.shards);
     const multipliers = this.calculateMultipliers({ crocodileLevel, seaSerpentLevel, tiamatLevel } as CalculationParams);
     const { crocodileMultiplier, craftPenalty } = multipliers;
+
+    const precomputed: Record<string, {
+      recipes: Recipe[],
+      effectiveOutputQty: number[],
+      fuseAmounts: [number, number][]
+    }> = {};
+    for (const shard of shards) {
+      const recipes = data.recipes[shard] || [];
+      precomputed[shard] = {
+        recipes,
+        effectiveOutputQty: recipes.map(recipe =>
+            recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity
+        ),
+        fuseAmounts: recipes.map(recipe => [
+          data.shards[recipe.inputs[0]].fuse_amount,
+          data.shards[recipe.inputs[1]].fuse_amount
+        ])
+      };
+    }
+
+    // Build reverse dependency graph: for each shard, which shards depend on it as input
+    const dependents: Record<string, Set<string>> = {};
+    for (const shard of shards) dependents[shard] = new Set();
+    for (const outputShard of shards) {
+      const recipes = precomputed[outputShard].recipes;
+      for (const recipe of recipes) {
+        for (const input of recipe.inputs) {
+          dependents[input].add(outputShard);
+        }
+      }
+    }
 
     // Initialize with direct costs
     shards.forEach((shard) => {
@@ -231,87 +262,103 @@ export class CalculationService {
       choices.set(shard, { recipe: null });
     });
 
-    // Iteratively find better recipes
-    let updated = true;
-    let iterations = 0;
-    const maxIterations = 100; // Prevent infinite loops
+    const queue: string[] = [...shards];
+    const inQueue = new Set<string>(queue);
+    const tolerance = 1e-10;
 
-    while (updated && iterations < maxIterations) {
-      updated = false;
-      iterations++;
+    while (queue.length > 0) {
+      const outputShard = queue.shift()!;
+      inQueue.delete(outputShard);
 
-      for (const outputShard of shards) {
-        const recipeOverride = recipeOverrides.find((ro) => ro.shardId === outputShard);
-        if (recipeOverride) {
-          const overrideRecipe = recipeOverride.recipe;
-          if (overrideRecipe === null) {
-            // User chose direct collection - force it to stay direct
-            const directCost = data.shards[outputShard].rate > 0 ? 1 / data.shards[outputShard].rate : Infinity;
+      const currentCost = minCosts.get(outputShard)!;
+      const currentChoice = choices.get(outputShard)!;
+
+      // Handle recipe overrides
+      const recipeOverride = recipeOverrides.find((ro) => ro.shardId === outputShard);
+      if (recipeOverride) {
+        const overrideRecipe = recipeOverride.recipe;
+        if (overrideRecipe === null) {
+          const directCost = data.shards[outputShard].rate > 0 ? 1 / data.shards[outputShard].rate : Infinity;
+          if (Math.abs(directCost - currentCost) > tolerance) {
             minCosts.set(outputShard, directCost);
             choices.set(outputShard, { recipe: null });
-            continue;
-          }
-          const fuse1 = data.shards[overrideRecipe.inputs[0]].fuse_amount;
-          const fuse2 = data.shards[overrideRecipe.inputs[1]].fuse_amount;
-          const costInput1 = minCosts.get(overrideRecipe.inputs[0])! * fuse1;
-          const costInput2 = minCosts.get(overrideRecipe.inputs[1])! * fuse2;
-          const totalCost = costInput1 + costInput2 + craftPenalty;
-          const effectiveOutputQuantity = overrideRecipe.isReptile ? overrideRecipe.outputQuantity * crocodileMultiplier : overrideRecipe.outputQuantity;
-          const newCost = totalCost / effectiveOutputQuantity;
-
-          const currentCost = minCosts.get(outputShard)!;
-          const currentRecipe = choices.get(outputShard)?.recipe;
-
-          const recipeChanged = !this.areRecipesEqual(overrideRecipe, currentRecipe);
-          const tolerance = 1e-10; // Small tolerance for floating point comparison
-
-          if (Math.abs(newCost - currentCost) > tolerance || recipeChanged) {
-            minCosts.set(outputShard, newCost);
-            choices.set(outputShard, { recipe: overrideRecipe });
-            updated = true;
-          }
-
-          continue;
-        }
-        const recipes = data.recipes[outputShard] || [];
-        recipes.forEach((recipe) => {
-          const [input1, input2] = recipe.inputs;
-          const fuse1 = data.shards[input1].fuse_amount;
-          const fuse2 = data.shards[input2].fuse_amount;
-          const costInput1 = minCosts.get(input1)! * fuse1;
-          const costInput2 = minCosts.get(input2)! * fuse2;
-          const totalCost = costInput1 + costInput2 + craftPenalty;
-          const effectiveOutputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
-          const costPerUnit = totalCost / effectiveOutputQuantity;
-
-          const currentCost = minCosts.get(outputShard)!;
-          const currentRecipe = choices.get(outputShard)?.recipe;
-
-          let shouldUpdate = false;
-          const tolerance = 1e-10;
-
-          if (costPerUnit < currentCost - tolerance) {
-            shouldUpdate = true;
-          } else if (
-            outputShard === "E5" &&
-            Math.abs(costPerUnit - currentCost) <= tolerance &&
-            currentRecipe
-          ) {
-            // Prefer U8 over R8 for E5, but only if current is R8 and new is U8
-            const newHasU8 = recipe.inputs.includes("U8");
-            const currentHasR8 = currentRecipe.inputs.includes("R8");
-            const currentHasU8 = currentRecipe.inputs.includes("U8");
-            if (newHasU8 && currentHasR8 && !currentHasU8) {
-              shouldUpdate = true;
+            for (const dep of dependents[outputShard]) {
+              if (!inQueue.has(dep)) {
+                queue.push(dep);
+                inQueue.add(dep);
+              }
             }
           }
+          continue;
+        }
+        const [input1, input2] = overrideRecipe.inputs;
+        const fuse1 = data.shards[input1].fuse_amount;
+        const fuse2 = data.shards[input2].fuse_amount;
+        const costInput1 = minCosts.get(input1)! * fuse1;
+        const costInput2 = minCosts.get(input2)! * fuse2;
+        const totalCost = costInput1 + costInput2 + craftPenalty;
+        const effectiveOutputQuantity = overrideRecipe.isReptile ? overrideRecipe.outputQuantity * crocodileMultiplier : overrideRecipe.outputQuantity;
+        const newCost = totalCost / effectiveOutputQuantity;
 
-          if (shouldUpdate) {
-            minCosts.set(outputShard, costPerUnit);
-            choices.set(outputShard, { recipe });
-            updated = true;
+        if (Math.abs(newCost - currentCost) > tolerance) {
+          minCosts.set(outputShard, newCost);
+          choices.set(outputShard, { recipe: overrideRecipe });
+          for (const dep of dependents[outputShard]) {
+            if (!inQueue.has(dep)) {
+              queue.push(dep);
+              inQueue.add(dep);
+            }
           }
-        });
+        }
+        continue;
+      }
+
+      const { recipes, effectiveOutputQty, fuseAmounts } = precomputed[outputShard];
+      let bestCost = currentCost;
+      let bestRecipe: Recipe | null = currentChoice.recipe;
+
+      for (let i = 0; i < recipes.length; i++) {
+        const recipe = recipes[i];
+        const [fuse1, fuse2] = fuseAmounts[i];
+        const [input1, input2] = recipe.inputs;
+        const costInput1 = minCosts.get(input1)! * fuse1;
+        const costInput2 = minCosts.get(input2)! * fuse2;
+        const totalCost = costInput1 + costInput2 + craftPenalty;
+        const costPerUnit = totalCost / effectiveOutputQty[i];
+
+        let shouldUpdate = false;
+
+        if (costPerUnit < bestCost - tolerance) {
+          shouldUpdate = true;
+        } else if (
+            outputShard === "E5" &&
+            Math.abs(costPerUnit - bestCost) <= tolerance &&
+            bestRecipe
+        ) {
+          // Prefer U8 over R8 for E5, but only if current is R8 and new is U8
+          const newHasU8 = recipe.inputs.includes("U8");
+          const currentHasR8 = bestRecipe.inputs.includes("R8");
+          const currentHasU8 = bestRecipe.inputs.includes("U8");
+          if (newHasU8 && currentHasR8 && !currentHasU8) {
+            shouldUpdate = true;
+          }
+        }
+
+        if (shouldUpdate) {
+          bestCost = costPerUnit;
+          bestRecipe = recipe;
+        }
+      }
+
+      if (bestCost < currentCost - tolerance || bestRecipe !== currentChoice.recipe) {
+        minCosts.set(outputShard, bestCost);
+        choices.set(outputShard, { recipe: bestRecipe });
+        for (const dep of dependents[outputShard]) {
+          if (!inQueue.has(dep)) {
+            queue.push(dep);
+            inQueue.add(dep);
+          }
+        }
       }
     }
 
@@ -555,16 +602,30 @@ export class CalculationService {
 
     return cycleSteps;
   }
-  buildRecipeTree(data: Data, shard: string, choices1: Map<string, RecipeChoice>, cycleNodes: string[][], recipeOverrides: RecipeOverride[] = []): RecipeTree {
+
+  buildRecipeTree(
+    data: Data,
+    shard: string,
+    choices1: Map<string, RecipeChoice>,
+    cycleNodes: string[][],
+    recipeOverrides: RecipeOverride[] = [],
+    minCostsCache?: { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> }
+  ): RecipeTree {
+    if (!minCostsCache) {
+      console.log("Building min costs cache...");
+      const result = this.computeMinCosts(data, 0, 0, 0, recipeOverrides);
+      minCostsCache = { minCosts: result.minCosts, choices: result.choices };
+    }
+
     if (cycleNodes.flat().includes(shard)) {
       const cycleSteps = this.buildCycle(shard, choices1, cycleNodes);
-      // Use the same overrides that created the cycle
-      const { minCosts, choices } = this.computeMinCosts(data, 0, 0, 0, recipeOverrides);
+      const minCosts = minCostsCache.minCosts;
+      const choices = minCostsCache.choices;
       const targetShard = cycleNodes.flat().reduce((minShard, shard) => {
         return minCosts.get(shard)! < minCosts.get(minShard)! ? shard : minShard;
       }, cycleNodes.flat()[0]);
 
-      const tree = this.buildRecipeTree(data, targetShard, choices, [], recipeOverrides);
+      const tree = this.buildRecipeTree(data, targetShard, choices, [], recipeOverrides, minCostsCache);
       const craftCounter = { total: 0 };
       this.assignQuantities(tree, data.shards[targetShard].fuse_amount, data, craftCounter, choices, 1, recipeOverrides);
 
@@ -591,8 +652,8 @@ export class CalculationService {
     } else {
       const recipe = choice.recipe;
       const [input1, input2] = recipe.inputs;
-      const tree1 = this.buildRecipeTree(data, input1, choices1, cycleNodes, recipeOverrides);
-      const tree2 = this.buildRecipeTree(data, input2, choices1, cycleNodes, recipeOverrides);
+      const tree1 = this.buildRecipeTree(data, input1, choices1, cycleNodes, recipeOverrides, minCostsCache);
+      const tree2 = this.buildRecipeTree(data, input2, choices1, cycleNodes, recipeOverrides, minCostsCache);
 
       if (cycleNodes.flat().includes(shard)) {
         return {
@@ -805,13 +866,11 @@ export class CalculationService {
       };
     }
 
+    const startTime = performance.now();
     const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
-
-    // Always run cycle detection if we have overrides or crocodile level > 0
-    // This ensures cycles created by overrides are properly detected
     const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0 ? this.findCycleNodes(choices) : [];
-
     const tree = this.buildRecipeTree(data, targetShard, choices, cycleNodes, recipeOverrides);
+    console.log(`Min costs computed in ${performance.now() - startTime}ms`);
     const craftCounter = { total: 0 };
     const multipliers = this.calculateMultipliers(params);
     const { crocodileMultiplier } = multipliers;
