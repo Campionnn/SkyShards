@@ -326,25 +326,7 @@ export class CalculationService {
         const totalCost = costInput1 + costInput2 + craftPenalty;
         const costPerUnit = totalCost / effectiveOutputQty[i];
 
-        let shouldUpdate = false;
-
         if (costPerUnit < bestCost - tolerance) {
-          shouldUpdate = true;
-        } else if (
-            outputShard === "E5" &&
-            Math.abs(costPerUnit - bestCost) <= tolerance &&
-            bestRecipe
-        ) {
-          // Prefer U8 over R8 for E5, but only if current is R8 and new is U8
-          const newHasU8 = recipe.inputs.includes("U8");
-          const currentHasR8 = bestRecipe.inputs.includes("R8");
-          const currentHasU8 = bestRecipe.inputs.includes("U8");
-          if (newHasU8 && currentHasR8 && !currentHasU8) {
-            shouldUpdate = true;
-          }
-        }
-
-        if (shouldUpdate) {
           bestCost = costPerUnit;
           bestRecipe = recipe;
         }
