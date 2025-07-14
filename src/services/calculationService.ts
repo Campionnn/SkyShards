@@ -193,8 +193,13 @@ export class CalculationService {
 
     // Iteratively find better recipes
     let updated = true;
-    while (updated) {
+    let iterations = 0;
+    const maxIterations = 100; // Prevent infinite loops
+
+    while (updated && iterations < maxIterations) {
       updated = false;
+      iterations++;
+
       for (const outputShard of shards) {
         const recipeOverride = recipeOverrides.find((ro) => ro.shardId === outputShard);
         if (recipeOverride) {
@@ -218,7 +223,9 @@ export class CalculationService {
           const currentRecipe = choices.get(outputShard)?.recipe;
 
           const recipeChanged = !this.areRecipesEqual(overrideRecipe, currentRecipe);
-          if (newCost !== currentCost || recipeChanged) {
+          const tolerance = 1e-10; // Small tolerance for floating point comparison
+
+          if (Math.abs(newCost - currentCost) > tolerance || recipeChanged) {
             minCosts.set(outputShard, newCost);
             choices.set(outputShard, { recipe: overrideRecipe });
             updated = true;
@@ -242,11 +249,12 @@ export class CalculationService {
 
           // Check if we should update the recipe
           let shouldUpdate = false;
+          const tolerance = 1e-10; // Small tolerance for floating point comparison
 
-          if (costPerUnit < currentCost) {
+          if (costPerUnit < currentCost - tolerance) {
             // New recipe is strictly better
             shouldUpdate = true;
-          } else if (costPerUnit === currentCost && currentRecipe) {
+          } else if (Math.abs(costPerUnit - currentCost) <= tolerance && currentRecipe) {
             // Same cost - apply preference rules
             // For Leviathan (E5), prefer Salamander (U8) over Lizard King (R8)
             if (outputShard === "E5") {
