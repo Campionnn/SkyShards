@@ -20,6 +20,7 @@ export interface OutputGroup {
   fuseAmount: number;
   partners: string[];
   quantities: Map<string, number>;
+  selectedPosition: "first" | "second"; // Position of the selected shard for this output
 }
 
 export interface Recipe {
@@ -36,6 +37,7 @@ const iterateRecipes = (fusionData: FusionData, callback: (outputId: string, rec
       const outputQuantity = parseInt(quantityStr, 10);
       recipeList.forEach((recipe) => {
         if (recipe.length === 2) {
+          // Keep the original order for display, don't normalize here
           callback(outputShardId, recipe, outputQuantity);
         }
       });
@@ -53,31 +55,53 @@ const sortByRarity = (a: string, b: string, fusionData: FusionData) => {
 };
 
 export const processInputRecipes = (selectedShard: ShardWithKey, fusionData: FusionData): OutputGroup[] => {
-  const outputMap = new Map<string, { partners: Set<string>; quantities: Map<string, number> }>();
+  const outputMap = new Map<string, { partners: Set<string>; quantities: Map<string, number>; selectedPosition: "first" | "second" | null }>();
 
   iterateRecipes(fusionData, (outputShardId, recipe, outputQuantity) => {
     const [input1, input2] = recipe;
-    const partnerShard = input1 === selectedShard.key ? input2 : input2 === selectedShard.key ? input1 : null;
 
-    if (partnerShard) {
+    let partnerShard = null;
+    let selectedPosition: "first" | "second" | null = null;
+
+    // Check if the selected shard matches either input in the original recipe
+    if (input1 === selectedShard.key) {
+      partnerShard = input2;
+      selectedPosition = "first";
+    } else if (input2 === selectedShard.key) {
+      partnerShard = input1;
+      selectedPosition = "second";
+    }
+
+    if (partnerShard && selectedPosition) {
       if (!outputMap.has(outputShardId)) {
-        outputMap.set(outputShardId, { partners: new Set(), quantities: new Map() });
+        outputMap.set(outputShardId, {
+          partners: new Set(),
+          quantities: new Map(),
+          selectedPosition,
+        });
       }
+
       const outputData = outputMap.get(outputShardId)!;
       outputData.partners.add(partnerShard);
       outputData.quantities.set(partnerShard, outputQuantity);
+
+      // Keep the first position we encounter for this output
+      if (outputData.selectedPosition === null) {
+        outputData.selectedPosition = selectedPosition;
+      }
     }
   });
 
-  const groups: OutputGroup[] = Array.from(outputMap.entries()).map(([outputShardId, outputData]) => ({
+  const outputGroups: OutputGroup[] = Array.from(outputMap.entries()).map(([outputShardId, outputData]) => ({
     output: outputShardId,
     fuseAmount: fusionData.shards[outputShardId]?.fuse_amount || 2,
     partners: Array.from(outputData.partners).sort(),
     quantities: outputData.quantities,
+    selectedPosition: outputData.selectedPosition!,
   }));
 
-  groups.sort((a, b) => sortByRarity(a.output, b.output, fusionData));
-  return groups;
+  outputGroups.sort((a, b) => sortByRarity(a.output, b.output, fusionData));
+  return outputGroups;
 };
 
 export const processOutputRecipes = (selectedShard: ShardWithKey, fusionData: FusionData): Recipe[] => {

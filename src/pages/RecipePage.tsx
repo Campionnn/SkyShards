@@ -189,10 +189,10 @@ const RecipePage = () => {
                     .map((outputGroup) => {
                       const partnerId = selectedPartner[outputGroup.output] || outputGroup.partners[0];
                       const isOpen = inputDropdowns.dropdownOpen[outputGroup.output] || false;
-                      const position = selectedShard.key < partnerId ? "first" : "second";
+                      const position = outputGroup.selectedPosition;
 
                       return (
-                        <div key={`${outputGroup.output}-${position}`} className="px-2">
+                        <div key={outputGroup.output} className="px-2">
                           <div className="flex items-center gap-2 lg:gap-3 min-w-0 min-h-[40px]">
                             <div className="flex items-center gap-1 lg:gap-2 min-w-0 flex-shrink-0">
                               {position === "first" ? (
