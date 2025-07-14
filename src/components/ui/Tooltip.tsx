@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getRarityColor } from "../../utils";
+import { getRarityColor } from "../../utilities";
 import { MoveRight } from "lucide-react";
 
 interface TooltipProps {
@@ -51,7 +51,10 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
   useEffect(() => {
     if (!isVisible) return;
 
-    updatePosition();
+    // Use requestAnimationFrame to ensure DOM is ready for measuring
+    const raf = requestAnimationFrame(() => {
+      updatePosition();
+    });
 
     const handleOutsideClick = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -60,13 +63,18 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
       }
     };
 
-    const handlePositionUpdate = () => updatePosition();
+    const handlePositionUpdate = () => {
+      requestAnimationFrame(() => {
+        updatePosition();
+      });
+    };
 
     document.addEventListener("mousedown", handleOutsideClick);
     window.addEventListener("resize", handlePositionUpdate);
     window.addEventListener("scroll", handlePositionUpdate);
 
     return () => {
+      cancelAnimationFrame(raf);
       document.removeEventListener("mousedown", handleOutsideClick);
       window.removeEventListener("resize", handlePositionUpdate);
       window.removeEventListener("scroll", handlePositionUpdate);
@@ -89,35 +97,38 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
         )}
       </div>
 
-      {isVisible && (
-        <div
-          ref={tooltipRef}
-          className="fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 opacity-100 transition-opacity duration-100"
-          style={{ top: position.top, left: position.left }}
-        >
-          {(title || shardName) && (
-            <div className="flex items-center gap-2 mb-2">
-              {shardIcon && <img src={`${import.meta.env.BASE_URL}shardIcons/${shardIcon}.png`} alt={title || shardName} className="w-8 h-8 object-contain flex-shrink-0" loading="lazy" />}
-              <div className="flex flex-col">
-                {shardName && <div className={`font-medium text-sm ${rarity ? getRarityColor(rarity) : "text-white"}`}>{shardName}</div>}
-                {title && (
-                  <div className="text-yellow-500 text-xs flex gap-1 items-center">
-                    {title}
-                    <span className="flex items-center">
-                      I<MoveRight className="w-3" />X
-                    </span>
-                  </div>
-                )}
-              </div>
+      <div
+        ref={tooltipRef}
+        className={`fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 transition-opacity duration-200 ${
+          isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        style={{
+          top: position.top,
+          left: position.left,
+        }}
+      >
+        {(title || shardName) && (
+          <div className="flex items-center gap-2 mb-2">
+            {shardIcon && <img src={`${import.meta.env.BASE_URL}shardIcons/${shardIcon}.png`} alt={title || shardName} className="w-8 h-8 object-contain flex-shrink-0" loading="lazy" />}
+            <div className="flex flex-col">
+              {shardName && <div className={`font-medium text-sm ${rarity ? getRarityColor(rarity) : "text-white"}`}>{shardName}</div>}
+              {title && (
+                <div className="text-yellow-500 text-xs flex gap-1 items-center">
+                  {title}
+                  <span className="flex items-center">
+                    I<MoveRight className="w-3" />X
+                  </span>
+                </div>
+              )}
             </div>
-          )}
-          <div className="text-slate-300 text-xs flex flex-col gap-1">
-            {metaInfo && <div className="text-slate-400 text-xs">{metaInfo}</div>}
-            <div dangerouslySetInnerHTML={{ __html: content }} />
-            {warning && <div className="text-red-400">{warning}</div>}
           </div>
+        )}
+        <div className="text-slate-300 text-xs flex flex-col gap-1">
+          {metaInfo && <div className="text-slate-400 text-xs">{metaInfo}</div>}
+          <div dangerouslySetInnerHTML={{ __html: content }} />
+          {warning && <div className="text-red-400">{warning}</div>}
         </div>
-      )}
+      </div>
     </>
   );
 };

@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { ShardAutocomplete, RecipeCountBadge, SearchFilterInput, ShardDisplay, DropdownButton } from "../components";
-import { getRarityColor } from "../utils";
+import { getRarityColor } from "../utilities";
 import { Plus, Equal } from "lucide-react";
-import { useRecipeState } from "../context/RecipeStateContext";
+import { useRecipeState } from "../context";
 import { useFusionData, useDropdownManager } from "../hooks";
-import { processInputRecipes, processOutputRecipes, filterGroups, groupRecipesByInput, filterRecipeGroups, type OutputGroup, type Recipe } from "../utils";
+import { processInputRecipes, processOutputRecipes, filterGroups, groupRecipesByInput, filterRecipeGroups, type OutputGroup, type Recipe } from "../utilities";
 import type { ShardWithKey } from "../types/types";
 
 const RecipePage = () => {

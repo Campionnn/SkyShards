@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Star, Search, Plus, Equal, ChevronDown } from "lucide-react";
-import { getRarityColor, formatTime } from "../../utils";
-import type { AlternativeRecipePopupProps, Recipe, AlternativeRecipeOption } from "../../types/types";
+import { getRarityColor, formatTime } from "../../utilities";
+import type { AlternativeRecipeModalProps, Recipe, AlternativeRecipeOption } from "../../types/types";
 
-export const AlternativeRecipePopup: React.FC<
-  AlternativeRecipePopupProps & {
+export const AlternativeRecipeModal: React.FC<
+  AlternativeRecipeModalProps & {
     alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
   }
 > = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading, requiredQuantity = 1, crocodileLevel, seaSerpentLevel, tiamatLevel }) => {
@@ -593,7 +593,7 @@ export const AlternativeRecipePopup: React.FC<
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Star className="w-5 h-5 text-purple-400" />
-              <h2 className="text-lg font-semibold text-white">Alternative Recipes</h2>
+              <h2 className="text-lg font-semibold text-white">Alternative Recipe Modal</h2>
               <span className="text-slate-400 text-sm">for {shardName}</span>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer">

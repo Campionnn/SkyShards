@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getRarityColor, getRarityBorderColor } from "../../utils";
+import { getRarityColor, getRarityBorderColor } from "../../utilities";
 import { MoveRight } from "lucide-react";
 
 const rarityBg: Record<string, string> = {
@@ -10,7 +10,7 @@ const rarityBg: Record<string, string> = {
   legendary: "bg-yellow-400/10 border-yellow-400/20",
 };
 
-interface ShardPopupProps {
+interface ShardModalProps {
   open: boolean;
   onClose: () => void;
   title: string;
@@ -25,7 +25,7 @@ interface ShardPopupProps {
   type?: string;
 }
 
-export const ShardPopup: React.FC<ShardPopupProps> = ({ open, onClose, title, name, description, rarity, icon, rate, onRateChange, isDirect, family, type }) => {
+export const ShardModal: React.FC<ShardModalProps> = ({ open, onClose, title, name, description, rarity, icon, rate, onRateChange, isDirect, family, type }) => {
   const [inputValue, setInputValue] = useState<string>("");
 
   React.useEffect(() => {

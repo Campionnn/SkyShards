@@ -206,7 +206,7 @@ export interface AlternativeSelectionContext {
 }
 
 // Component props interfaces
-export interface AlternativeRecipePopupProps {
+export interface AlternativeRecipeModalProps {
   isOpen: boolean;
   onClose: () => void;
   // Changed: alternatives is now grouped

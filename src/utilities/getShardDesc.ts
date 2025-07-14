@@ -1,4 +1,4 @@
-import desc from "../../public/desc.json";
+import desc from "../desc.json";
 
 export function getShardDesc(key: string): { title: string; description: string; family: string; type: string } | null {
   const entry = (desc as Record<string, { title: string; description: string; family: string; type: string }>)[key];

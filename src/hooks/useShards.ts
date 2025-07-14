@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DataService } from "../services/dataService";
+import { DataService } from "../services";
 import type { ShardWithKey } from "../types/types";
 
 export const useShards = () => {

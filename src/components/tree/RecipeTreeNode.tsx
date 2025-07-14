@@ -1,7 +1,7 @@
 import React from "react";
-import { getRarityColor, formatShardDescription } from "../../utils";
+import { getRarityColor, formatShardDescription } from "../../utilities";
 import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
-import { formatNumber } from "../../utils";
+import { formatNumber } from "../../utilities";
 import type { RecipeTreeNodeProps } from "../../types/types";
 import { Tooltip } from "../ui/Tooltip";
 import { SHARD_DESCRIPTIONS } from "../../constants";

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DataService } from "../services/dataService";
+import { DataService } from "../services";
 
 export const useCustomRates = () => {
   const [customRates, setCustomRates] = useState<Record<string, number | undefined>>({});

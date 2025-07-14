@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { AlertCircle, Menu, X } from "lucide-react";
 import { CalculatorForm, CalculationResults } from "../components";
 import { useCalculation, useCustomRates } from "../hooks";
-import { DataService } from "../services/dataService";
+import { DataService } from "../services";
 import type { CalculationFormData } from "../schemas";
 import type { CalculationResult, CalculationParams, RecipeOverride } from "../types/types";
-import { useCalculatorState } from "../context/CalculatorStateContext";
+import { useCalculatorState } from "../context";
 
 const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
   const { setForm } = useCalculatorState();

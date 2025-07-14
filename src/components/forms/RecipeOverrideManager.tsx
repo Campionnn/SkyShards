@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from "react";
-import { CalculationService } from "../../services/calculationService";
-import { AlternativeRecipePopup } from "../popups";
+import { CalculationService } from "../../services";
+import { AlternativeRecipeModal } from "../modals";
 import type { RecipeOverrideManagerProps, AlternativeRecipeOption, AlternativeSelectionContext, Recipe, RecipeOverride, Data } from "../../types/types";
 
-interface PopupState {
+interface ModalState {
   isOpen: boolean;
   alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
   shardId?: string;
@@ -23,14 +23,14 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
   onResetRecipeOverrides,
   children,
 }) => {
-  const [popupState, setPopupState] = useState<PopupState>({
+  const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
     alternatives: { direct: null, grouped: {} },
     loading: false,
   });
 
-  const closePopup = useCallback(() => {
-    setPopupState({
+  const closeModal = useCallback(() => {
+    setModalState({
       isOpen: false,
       alternatives: { direct: null, grouped: {} },
       loading: false,
@@ -39,7 +39,7 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
 
   const showAlternatives = useCallback(
     async (shardId: string, context: AlternativeSelectionContext) => {
-      setPopupState({
+      setModalState({
         isOpen: true,
         alternatives: { direct: null, grouped: {} },
         shardId,
@@ -62,7 +62,7 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
         const data = await calculationService.parseData(params);
         const shardName = data.shards[shardId]?.name || shardId;
 
-        setPopupState((prev) => ({
+        setModalState((prev) => ({
           ...prev,
           alternatives,
           shardName,
@@ -71,7 +71,7 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
         }));
       } catch (error) {
         console.error("Failed to load alternatives:", error);
-        setPopupState((prev) => ({
+        setModalState((prev) => ({
           ...prev,
           alternatives: { direct: null, grouped: {} },
           loading: false,
@@ -83,28 +83,28 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
 
   const handleRecipeSelect = useCallback(
     async (selectedRecipe: Recipe | null) => {
-      if (!popupState.shardId) return;
+      if (!modalState.shardId) return;
 
       try {
         const calculationService = CalculationService.getInstance();
-        const newResult = await calculationService.applyRecipeOverride(popupState.shardId, selectedRecipe, targetShard, requiredQuantity, params, recipeOverrides);
+        const newResult = await calculationService.applyRecipeOverride(modalState.shardId, selectedRecipe, targetShard, requiredQuantity, params, recipeOverrides);
 
         const newOverride: RecipeOverride = {
-          shardId: popupState.shardId,
+          shardId: modalState.shardId,
           recipe: selectedRecipe,
         };
 
-        const filtered = recipeOverrides.filter((o) => o.shardId !== popupState.shardId);
+        const filtered = recipeOverrides.filter((o) => o.shardId !== modalState.shardId);
         const updatedOverrides = [...filtered, newOverride];
         onRecipeOverridesUpdate(updatedOverrides);
 
         onResultUpdate(newResult);
-        closePopup();
+        closeModal();
       } catch (error) {
         console.error("Failed to apply recipe override:", error);
       }
     },
-    [popupState.shardId, targetShard, requiredQuantity, params, recipeOverrides, onRecipeOverridesUpdate, onResultUpdate, closePopup]
+    [modalState.shardId, targetShard, requiredQuantity, params, recipeOverrides, onRecipeOverridesUpdate, onResultUpdate, closeModal]
   );
 
   const resetAlternatives = useCallback(async () => {
@@ -121,15 +121,15 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
   return (
     <>
       {children({ showAlternatives, recipeOverrides, resetAlternatives })}
-      <AlternativeRecipePopup
-        isOpen={popupState.isOpen}
-        onClose={closePopup}
-        alternatives={popupState.alternatives}
+      <AlternativeRecipeModal
+        isOpen={modalState.isOpen}
+        onClose={closeModal}
+        alternatives={modalState.alternatives}
         onSelect={handleRecipeSelect}
-        shardName={popupState.shardName || ""}
-        data={popupState.data || ({} as Data)}
-        loading={popupState.loading}
-        requiredQuantity={popupState.requiredQuantity}
+        shardName={modalState.shardName || ""}
+        data={modalState.data || ({} as Data)}
+        loading={modalState.loading}
+        requiredQuantity={modalState.requiredQuantity}
         crocodileLevel={params.crocodileLevel}
         seaSerpentLevel={params.seaSerpentLevel}
         tiamatLevel={params.tiamatLevel}

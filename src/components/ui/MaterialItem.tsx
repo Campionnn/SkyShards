@@ -1,5 +1,5 @@
 import React from "react";
-import { formatNumber, getRarityColor, formatShardDescription, formatTime } from "../../utils";
+import { formatNumber, getRarityColor, formatShardDescription, formatTime } from "../../utilities";
 import { Tooltip } from "./Tooltip";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 import type { Shard } from "../../types/types";

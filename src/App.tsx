@@ -1,8 +1,7 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Layout } from "./components";
-import { CalculatorStateProvider } from "./context/CalculatorStateContext";
-import { RecipeStateProvider } from "./context/RecipeStateContext";
+import { CalculatorStateProvider, RecipeStateProvider } from "./context";
 import { usePageTitle } from "./hooks/usePageTitle";
 
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));

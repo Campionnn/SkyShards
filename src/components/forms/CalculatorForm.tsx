@@ -1,11 +1,11 @@
 import React from "react";
 import { Zap, RotateCcw, Settings } from "lucide-react";
-import { type CalculationFormData } from "../../schemas/validation";
-import { ShardAutocomplete, MoneyInput } from "../inputs";
-import { useCalculatorState } from "../../context/CalculatorStateContext";
+import { type CalculationFormData } from "../../schemas";
+import { ShardAutocomplete, MoneyInput } from "./inputs";
+import { useCalculatorState } from "../../context";
 import { LevelDropdown, KuudraDropdown } from "../calculator";
 import { MAX_QUANTITIES, SHARD_DESCRIPTIONS } from "../../constants";
-import { isValidShardName, formatShardDescription } from "../../utils";
+import { isValidShardName, formatShardDescription } from "../../utilities";
 import { Tooltip, ToggleSwitch } from "../ui";
 
 interface CalculatorFormProps {
@@ -174,8 +174,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             </div>
             <ShardAutocomplete
               value={form.shard}
-              onChange={(value) => handleInputChange("shard", value)}
-              onSelect={(shard) => {
+              onChange={(value: string) => handleInputChange("shard", value)}
+              onSelect={(shard: any) => {
                 // Use the rarity directly from the selected shard (provided by autocomplete)
                 let rarityKey = "common";
                 if (shard && typeof shard.rarity === "string") {
@@ -334,7 +334,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             <KuudraDropdown value={form.kuudraTier || "none"} onChange={(value) => handleInputChange("kuudraTier", value)} label="Kuudra Tier" />
             <MoneyInput
               value={moneyInput}
-              onChange={(value) => {
+              onChange={(value: string) => {
                 setMoneyInput(value);
                 if (value.trim() === "") {
                   handleInputChange("moneyPerHour", Infinity); // Infinity means ignore key cost
@@ -344,7 +344,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   handleInputChange("moneyPerHour", parsed);
                 }
               }}
-              placeholder="1m"
+              placeholder="200k, 2.5m, 2b..."
             />
           </div>
         </div>

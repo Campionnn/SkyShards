@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Clock, Hammer, Target, BarChart3 } from "lucide-react";
-import { formatTime } from "../../utils";
+import { formatTime } from "../../utilities";
 import type { RecipeTree, CalculationResultsProps } from "../../types/types";
 import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";

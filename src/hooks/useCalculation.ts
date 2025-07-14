@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { CalculationService } from "../services/calculationService";
+import { CalculationService } from "../services";
 import type { CalculationParams, CalculationResult, RecipeOverride } from "../types/types";
 
 export const useCalculation = () => {

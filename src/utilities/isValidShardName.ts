@@ -1,4 +1,4 @@
-import { DataService } from "../services/dataService";
+import { DataService } from "../services";
 
 /**
  * Checks if a shard name is valid (case-insensitive, trims whitespace).

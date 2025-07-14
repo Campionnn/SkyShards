@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import type { ShardWithDirectInfo } from "../../types/types";
-import { getRarityColor } from "../../utils";
+import { getRarityColor } from "../../utilities";
 import { RotateCcw } from "lucide-react";
 
 interface ShardItemProps {
