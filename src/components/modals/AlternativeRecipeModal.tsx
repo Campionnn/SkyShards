@@ -61,6 +61,16 @@ export const AlternativeRecipeModal: React.FC<
     }
   }, [isOpen]);
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }
+  }, [isOpen]);
+
   // Find the output shard from the data
   const outputShard = useMemo(() => {
     if (!data?.shards) return null;
