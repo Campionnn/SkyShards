@@ -83,35 +83,38 @@ const CalculatorPageContent: React.FC = () => {
   const [currentShardKey, setCurrentShardKey] = useState<string>("");
   const [currentQuantity, setCurrentQuantity] = useState<number>(1);
   const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
-  
+
   // Debounced calculation
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const debouncedCalculate = useCallback(async (formData: CalculationFormData, delay = 300) => {
-    // Clear existing timeout
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    debounceTimeoutRef.current = setTimeout(async () => {
-      const callbacks = {
-        setTargetShardName,
-        setCurrentShardKey,
-        setCurrentQuantity,
-        setCurrentParams,
-        setResult,
-        setCalculationData,
-      };
-
-      try {
-        await performCalculation(formData, customRates, recipeOverrides, callbacks);
-      } catch (err) {
-        if (err instanceof Error && !err.message.includes("not found")) {
-          console.error("Calculation failed:", err);
-        }
+  const debouncedCalculate = useCallback(
+    async (formData: CalculationFormData, delay = 300) => {
+      // Clear existing timeout
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
       }
-    }, delay);
-  }, [customRates, recipeOverrides, setTargetShardName, setCurrentShardKey, setCurrentQuantity, setCurrentParams, setResult, setCalculationData]);
+
+      debounceTimeoutRef.current = setTimeout(async () => {
+        const callbacks = {
+          setTargetShardName,
+          setCurrentShardKey,
+          setCurrentQuantity,
+          setCurrentParams,
+          setResult,
+          setCalculationData,
+        };
+
+        try {
+          await performCalculation(formData, customRates, recipeOverrides, callbacks);
+        } catch (err) {
+          if (err instanceof Error && !err.message.includes("not found")) {
+            console.error("Calculation failed:", err);
+          }
+        }
+      }, delay);
+    },
+    [customRates, recipeOverrides, setTargetShardName, setCurrentShardKey, setCurrentQuantity, setCurrentParams, setResult, setCalculationData]
+  );
 
   const handleCalculate = async (formData: CalculationFormData, setForm: (data: CalculationFormData) => void) => {
     setForm(formData);

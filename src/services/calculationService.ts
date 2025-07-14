@@ -48,7 +48,7 @@ export class CalculationService {
 
   async parseData(params: CalculationParams): Promise<Data> {
     const cacheKey = this.getCacheKey(params);
-    
+
     // Check cache first
     if (this.dataCache.has(cacheKey)) {
       return this.dataCache.get(cacheKey)!;
@@ -109,7 +109,7 @@ export class CalculationService {
       }
 
       const result = { recipes, shards };
-      
+
       // Cache the result (limit cache size to prevent memory issues)
       if (this.dataCache.size > 50) {
         const firstKey = this.dataCache.keys().next().value;
@@ -118,7 +118,7 @@ export class CalculationService {
         }
       }
       this.dataCache.set(cacheKey, result);
-      
+
       return result;
     } catch (error) {
       throw new Error(`Failed to parse data: ${error}`);
