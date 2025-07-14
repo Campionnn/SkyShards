@@ -287,23 +287,22 @@ export class CalculationService {
           const currentCost = minCosts.get(outputShard)!;
           const currentRecipe = choices.get(outputShard)?.recipe;
 
-          // Check if we should update the recipe
           let shouldUpdate = false;
-          const tolerance = 1e-10; // Small tolerance for floating point comparison
+          const tolerance = 1e-10;
 
           if (costPerUnit < currentCost - tolerance) {
-            // New recipe is strictly better
             shouldUpdate = true;
-          } else if (Math.abs(costPerUnit - currentCost) <= tolerance && currentRecipe) {
-            // Same cost - apply preference rules
-            // For Leviathan (E5), prefer Salamander (U8) over Lizard King (R8)
-            if (outputShard === "E5") {
-              const hasU8 = recipe.inputs.includes("U8");
-              const currentHasR8 = currentRecipe.inputs.includes("R8");
-              if (hasU8 && currentHasR8) {
-                // New recipe has Salamander (U8) and current has Lizard King (R8) - prefer Salamander
-                shouldUpdate = true;
-              }
+          } else if (
+            outputShard === "E5" &&
+            Math.abs(costPerUnit - currentCost) <= tolerance &&
+            currentRecipe
+          ) {
+            // Prefer U8 over R8 for E5, but only if current is R8 and new is U8
+            const newHasU8 = recipe.inputs.includes("U8");
+            const currentHasR8 = currentRecipe.inputs.includes("R8");
+            const currentHasU8 = currentRecipe.inputs.includes("U8");
+            if (newHasU8 && currentHasR8 && !currentHasU8) {
+              shouldUpdate = true;
             }
           }
 
