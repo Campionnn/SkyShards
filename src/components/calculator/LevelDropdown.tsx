@@ -38,6 +38,7 @@ export const LevelDropdown: React.FC<LevelDropdownProps> = React.memo(
               warning={tooltipWarning}
               family={tooltipFamily}
               type={tooltipType}
+              shardId={tooltipShardIcon}
             />
           )}
         </div>

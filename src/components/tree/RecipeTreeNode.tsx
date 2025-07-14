@@ -37,6 +37,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           rarity={shardDesc?.rarity?.toLowerCase() || shard.rarity}
           family={shardDesc?.family}
           type={shardDesc?.type}
+          shardId={shard.id}
           className="cursor-pointer"
         >
           <div className="flex items-center gap-2">
@@ -73,6 +74,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           rarity={outputShardDesc?.rarity?.toLowerCase() || outputShard.rarity}
           family={outputShardDesc?.family}
           type={outputShardDesc?.type}
+          shardId={outputShard.id}
           className="cursor-pointer"
         >
           <div className="flex items-center gap-1">
@@ -92,6 +94,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           rarity={input1ShardDesc?.rarity?.toLowerCase() || input1Shard.rarity}
           family={input1ShardDesc?.family}
           type={input1ShardDesc?.type}
+          shardId={input1Shard.id}
           className="cursor-pointer"
         >
           <div className="flex items-center gap-1">
@@ -111,6 +114,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
           rarity={input2ShardDesc?.rarity?.toLowerCase() || input2Shard.rarity}
           family={input2ShardDesc?.family}
           type={input2ShardDesc?.type}
+          shardId={input2Shard.id}
           className="cursor-pointer"
         >
           <div className="flex items-center gap-1">
@@ -442,6 +446,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                 rarity={shardDesc?.rarity?.toLowerCase() || shard.rarity}
                 family={shardDesc?.family}
                 type={shardDesc?.type}
+                shardId={shard.id}
                 className="cursor-pointer mx-2"
               >
                 <div className="flex items-center gap-2">
@@ -464,6 +469,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   rarity={input1ShardDesc?.rarity?.toLowerCase() || input1Shard.rarity}
                   family={input1ShardDesc?.family}
                   type={input1ShardDesc?.type}
+                  shardId={input1Shard.id}
                   className="cursor-pointer mx-2"
                 >
                   <div className="flex items-center gap-2">
@@ -490,6 +496,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                   rarity={input2ShardDesc?.rarity?.toLowerCase() || input2Shard.rarity}
                   family={input2ShardDesc?.family}
                   type={input2ShardDesc?.type}
+                  shardId={input2Shard.id}
                   className="cursor-pointer mx-2"
                 >
                   <div className="flex items-center gap-2">

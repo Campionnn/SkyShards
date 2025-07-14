@@ -13,9 +13,10 @@ interface TooltipProps {
   family?: string;
   type?: string;
   children?: React.ReactNode;
+  shardId?: string; // Add shardId prop
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, className = "", shardIcon, rarity, warning, family, type, children }) => {
+export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, className = "", shardIcon, rarity, warning, family, type, children, shardId }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -81,7 +82,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
     };
   }, [isVisible]);
 
-  const metaInfo = [family, type].filter(Boolean).join(" • ");
+  const metaInfo = [shardId, family, type].filter(Boolean).join(" • ");
 
   return (
     <>

@@ -118,7 +118,8 @@ const CalculatorPageContent: React.FC = () => {
 
   const handleCalculate = async (formData: CalculationFormData, setForm: (data: CalculationFormData) => void) => {
     setForm(formData);
-    setSidebarOpen(false);
+    // Don't close mobile sidebar after calculation to allow multiple changes
+    // setSidebarOpen(false);
 
     // For immediate fields like shard selection, calculate immediately
     if (formData.shard !== form?.shard || formData.quantity !== form?.quantity) {

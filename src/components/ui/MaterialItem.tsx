@@ -25,6 +25,7 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity }) =
           rarity={shardDesc?.rarity?.toLowerCase() || shard.rarity}
           family={shardDesc?.family}
           type={shardDesc?.type}
+          shardId={shard.id}
           className="cursor-pointer"
         >
           <span className={`mt-0 font-medium text-sm ${getRarityColor(shard.rarity)} flex items-center flex-shrink-0`}>
