@@ -16,6 +16,7 @@ import { BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS } from "../cons
 
 export class CalculationService {
   private static instance: CalculationService;
+  private dataCache: Map<string, Data> = new Map();
 
   public static getInstance(): CalculationService {
     if (!CalculationService.instance) {
@@ -24,7 +25,35 @@ export class CalculationService {
     return CalculationService.instance;
   }
 
+  private getCacheKey(params: CalculationParams): string {
+    return JSON.stringify({
+      customRates: params.customRates,
+      hunterFortune: params.hunterFortune,
+      excludeChameleon: params.excludeChameleon,
+      frogBonus: params.frogBonus,
+      newtLevel: params.newtLevel,
+      salamanderLevel: params.salamanderLevel,
+      lizardKingLevel: params.lizardKingLevel,
+      leviathanLevel: params.leviathanLevel,
+      pythonLevel: params.pythonLevel,
+      kingCobraLevel: params.kingCobraLevel,
+      seaSerpentLevel: params.seaSerpentLevel,
+      tiamatLevel: params.tiamatLevel,
+      crocodileLevel: params.crocodileLevel,
+      kuudraTier: params.kuudraTier,
+      moneyPerHour: params.moneyPerHour,
+      noWoodenBait: params.noWoodenBait,
+    });
+  }
+
   async parseData(params: CalculationParams): Promise<Data> {
+    const cacheKey = this.getCacheKey(params);
+    
+    // Check cache first
+    if (this.dataCache.has(cacheKey)) {
+      return this.dataCache.get(cacheKey)!;
+    }
+
     try {
       const [fusionResponse, ratesResponse] = await Promise.all([fetch(`${import.meta.env.BASE_URL}fusion-data.json`), fetch(`${import.meta.env.BASE_URL}rates.json`)]);
 
@@ -79,7 +108,18 @@ export class CalculationService {
         };
       }
 
-      return { recipes, shards };
+      const result = { recipes, shards };
+      
+      // Cache the result (limit cache size to prevent memory issues)
+      if (this.dataCache.size > 50) {
+        const firstKey = this.dataCache.keys().next().value;
+        if (firstKey) {
+          this.dataCache.delete(firstKey);
+        }
+      }
+      this.dataCache.set(cacheKey, result);
+      
+      return result;
     } catch (error) {
       throw new Error(`Failed to parse data: ${error}`);
     }

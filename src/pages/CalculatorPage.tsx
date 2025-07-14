@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { AlertCircle, Menu, X } from "lucide-react";
 import { CalculatorForm, CalculationResults } from "../components";
 import { useCalculation, useCustomRates } from "../hooks";
@@ -83,26 +83,45 @@ const CalculatorPageContent: React.FC = () => {
   const [currentShardKey, setCurrentShardKey] = useState<string>("");
   const [currentQuantity, setCurrentQuantity] = useState<number>(1);
   const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
+  
+  // Debounced calculation
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedCalculate = useCallback(async (formData: CalculationFormData, delay = 300) => {
+    // Clear existing timeout
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(async () => {
+      const callbacks = {
+        setTargetShardName,
+        setCurrentShardKey,
+        setCurrentQuantity,
+        setCurrentParams,
+        setResult,
+        setCalculationData,
+      };
+
+      try {
+        await performCalculation(formData, customRates, recipeOverrides, callbacks);
+      } catch (err) {
+        if (err instanceof Error && !err.message.includes("not found")) {
+          console.error("Calculation failed:", err);
+        }
+      }
+    }, delay);
+  }, [customRates, recipeOverrides, setTargetShardName, setCurrentShardKey, setCurrentQuantity, setCurrentParams, setResult, setCalculationData]);
 
   const handleCalculate = async (formData: CalculationFormData, setForm: (data: CalculationFormData) => void) => {
     setForm(formData);
     setSidebarOpen(false);
 
-    const callbacks = {
-      setTargetShardName,
-      setCurrentShardKey,
-      setCurrentQuantity,
-      setCurrentParams,
-      setResult,
-      setCalculationData,
-    };
-
-    try {
-      await performCalculation(formData, customRates, recipeOverrides, callbacks);
-    } catch (err) {
-      if (err instanceof Error && !err.message.includes("not found")) {
-        console.error("Calculation failed:", err);
-      }
+    // For immediate fields like shard selection, calculate immediately
+    if (formData.shard !== form?.shard || formData.quantity !== form?.quantity) {
+      await debouncedCalculate(formData, 100); // Short delay for shard/quantity changes
+    } else {
+      await debouncedCalculate(formData, 300); // Longer delay for other fields
     }
   };
 
@@ -121,22 +140,18 @@ const CalculatorPageContent: React.FC = () => {
   // Re-calculate when customRates change and form is valid
   useEffect(() => {
     if (form && form.shard && form.shard.trim() !== "") {
-      const callbacks = {
-        setTargetShardName,
-        setCurrentShardKey,
-        setCurrentQuantity,
-        setCurrentParams,
-        setResult,
-        setCalculationData,
-      };
-
-      performCalculation(form, customRates, recipeOverrides, callbacks).catch((err) => {
-        if (err instanceof Error && !err.message.includes("not found")) {
-          console.error("Calculation failed (customRates effect):", err);
-        }
-      });
+      debouncedCalculate(form, 150); // Shorter delay for rate changes
     }
-  }, [customRates, form, setResult, setCalculationData, setTargetShardName]);
+  }, [customRates, form, debouncedCalculate]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="min-h-screen space-y-3 py-4">
