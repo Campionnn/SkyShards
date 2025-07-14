@@ -612,7 +612,6 @@ export class CalculationService {
     minCostsCache?: { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> }
   ): RecipeTree {
     if (!minCostsCache) {
-      console.log("Building min costs cache...");
       const result = this.computeMinCosts(data, 0, 0, 0, recipeOverrides);
       minCostsCache = { minCosts: result.minCosts, choices: result.choices };
     }
@@ -866,11 +865,9 @@ export class CalculationService {
       };
     }
 
-    const startTime = performance.now();
     const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
     const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0 ? this.findCycleNodes(choices) : [];
     const tree = this.buildRecipeTree(data, targetShard, choices, cycleNodes, recipeOverrides);
-    console.log(`Min costs computed in ${performance.now() - startTime}ms`);
     const craftCounter = { total: 0 };
     const multipliers = this.calculateMultipliers(params);
     const { crocodileMultiplier } = multipliers;
