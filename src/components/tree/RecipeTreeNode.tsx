@@ -9,6 +9,14 @@ import { SHARD_DESCRIPTIONS } from "../../constants";
 export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel = false, totalShardsProduced = tree.quantity, nodeId, expandedStates, onToggle, onShowAlternatives }) => {
   const shard = data.shards[tree.shard];
 
+  // Helper function to get expansion state and ensure it's initialized
+  const getExpansionState = (id: string, defaultState: boolean = true) => {
+    if (!expandedStates.has(id)) {
+      expandedStates.set(id, defaultState);
+    }
+    return expandedStates.get(id)!;
+  };
+
   const findRecipeForShard = (shardId: string) => {
     const recipesForShard = data.recipes[shardId];
     if (!recipesForShard?.length) return null;
@@ -148,11 +156,17 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
     const input1Quantity = input1Shard.fuse_amount;
     const input2Quantity = input2Shard.fuse_amount;
     const subNodeId = `${nodePrefix}-${inputShard.id}`;
-    const isExpanded = expandedStates.get(subNodeId) ?? true;
+    const isExpanded = getExpansionState(subNodeId, true);
 
     return (
       <div className="rounded border border-slate-400/50 overflow-hidden">
-        <div className="flex items-center justify-between w-full px-3 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer" onClick={() => onToggle(subNodeId)}>
+        <div
+          className="flex items-center justify-between w-full px-3 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle(subNodeId);
+          }}
+        >
           <div className="flex-1 text-left">
             <div className="flex items-center space-x-2">
               {renderChevron(isExpanded)}
@@ -189,12 +203,18 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
   };
 
   if (tree.method === "cycle") {
-    const isExpanded = expandedStates.get(nodeId) ?? true;
+    const isExpanded = getExpansionState(nodeId, true);
     const runCount = tree.cycles.reduce((sum, cycle) => sum + cycle.expectedCrafts, 0);
 
     return (
       <div className="flex flex-col border border-slate-400/50 rounded-md bg-slate-900">
-        <div className="flex items-center justify-between w-full pl-3 pr-2 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer" onClick={() => onToggle(nodeId)}>
+        <div
+          className="flex items-center justify-between w-full pl-3 pr-2 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle(nodeId);
+          }}
+        >
           <div className="flex-1 text-left">
             <div className="flex items-center space-x-2">
               {renderChevron(isExpanded)}
@@ -263,11 +283,17 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
                       if (stepNumber === 1) {
                         const stepNodeId = `${nodeId}-step-${stepNumber}`;
-                        const stepIsExpanded = expandedStates.get(stepNodeId) ?? true;
+                        const stepIsExpanded = getExpansionState(stepNodeId, true);
 
                         return (
                           <div key={stepIndex} className="rounded border border-slate-400/50 overflow-hidden">
-                            <div className="flex items-center justify-between w-full pl-3 pr-2 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer" onClick={() => onToggle(stepNodeId)}>
+                            <div
+                              className="flex items-center justify-between w-full pl-3 pr-2 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onToggle(stepNodeId);
+                              }}
+                            >
                               <div className="flex-1 text-left">
                                 <div className="flex items-center space-x-2">
                                   {renderChevron(stepIsExpanded)}
@@ -307,7 +333,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                                   if (inputRecipe && inputShard && inputId !== "C11" && inputId !== "U38" && inputId !== "C23") {
                                     return (
                                       <div key={inputId} className="space-y-1">
-                                        {renderSubRecipe(inputRecipe, inputShard, nodeId)}
+                                        {renderSubRecipe(inputRecipe, inputShard, stepNodeId)}
                                       </div>
                                     );
                                   }
@@ -417,7 +443,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
   }
 
   // Recipe nodes
-  const isExpanded = expandedStates.get(nodeId) ?? true;
+  const isExpanded = getExpansionState(nodeId, true);
   const input1 = tree.inputs![0];
   const input2 = tree.inputs![1];
   const input1Shard = data.shards[input1.shard];
@@ -431,7 +457,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
 
   return (
     <div className="bg-slate-800 border border-slate-600 rounded-md overflow-hidden">
-      <div className="flex items-center justify-between w-full pl-3 pr-2 py-1 hover:bg-slate-700/30 transition-colors cursor-pointer" onClick={() => onToggle(nodeId)}>
+      <div
+        className="flex items-center justify-between w-full pl-3 pr-2 py-1 hover:bg-slate-700/30 transition-colors cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle(nodeId);
+        }}
+      >
         <div className="flex-1 text-left">
           <div className="flex items-center space-x-1.5">
             {renderChevron(isExpanded)}
