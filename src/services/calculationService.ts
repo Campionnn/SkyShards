@@ -212,11 +212,11 @@ export class CalculationService {
   }
 
   computeMinCosts(
-      data: Data,
-      crocodileLevel: number,
-      seaSerpentLevel: number,
-      tiamatLevel: number,
-      recipeOverrides: RecipeOverride[] = []
+    data: Data,
+    crocodileLevel: number,
+    seaSerpentLevel: number,
+    tiamatLevel: number,
+    recipeOverrides: RecipeOverride[] = []
   ): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
@@ -224,22 +224,20 @@ export class CalculationService {
     const multipliers = this.calculateMultipliers({ crocodileLevel, seaSerpentLevel, tiamatLevel } as CalculationParams);
     const { crocodileMultiplier, craftPenalty } = multipliers;
 
-    const precomputed: Record<string, {
-      recipes: Recipe[],
-      effectiveOutputQty: number[],
-      fuseAmounts: [number, number][]
-    }> = {};
+    const precomputed: Record<
+      string,
+      {
+        recipes: Recipe[];
+        effectiveOutputQty: number[];
+        fuseAmounts: [number, number][];
+      }
+    > = {};
     for (const shard of shards) {
       const recipes = data.recipes[shard] || [];
       precomputed[shard] = {
         recipes,
-        effectiveOutputQty: recipes.map(recipe =>
-            recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity
-        ),
-        fuseAmounts: recipes.map(recipe => [
-          data.shards[recipe.inputs[0]].fuse_amount,
-          data.shards[recipe.inputs[1]].fuse_amount
-        ])
+        effectiveOutputQty: recipes.map((recipe) => (recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity)),
+        fuseAmounts: recipes.map((recipe) => [data.shards[recipe.inputs[0]].fuse_amount, data.shards[recipe.inputs[1]].fuse_amount]),
       };
     }
 
