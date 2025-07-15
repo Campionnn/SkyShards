@@ -6,7 +6,16 @@ import type { RecipeTreeNodeProps } from "../../types/types";
 import { Tooltip } from "../ui/Tooltip";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 
-export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel = false, totalShardsProduced = tree.quantity, nodeId, expandedStates, onToggle, onShowAlternatives }) => {
+export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
+  tree,
+  data,
+  isTopLevel = false,
+  totalShardsProduced = tree.quantity,
+  nodeId,
+  expandedStates,
+  onToggle,
+  onShowAlternatives,
+}) => {
   const shard = data.shards[tree.shard];
 
   // Helper function to get expansion state and ensure it's initialized
@@ -202,9 +211,54 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
     );
   };
 
+  // Helper function to determine if a recipe is a reptile recipe
+  const isReptileRecipe = (recipe: any, input1Shard: any, input2Shard: any) => {
+    console.log(input1Shard);
+    return (
+      recipe?.isReptile ||
+      input1Shard?.family?.toLowerCase().includes("reptile") ||
+      input2Shard?.family?.toLowerCase().includes("reptile")
+    );
+  };
+
+  // Helper function to calculate Crocodile procs needed
+  const getCrocodileProcs = (tree: any): number | null => {
+    if (tree.method === "cycle") {
+      // Only show at top level of cycle
+      // If any step in the cycle is a reptile recipe, show procs
+      const hasReptile = tree.cycles.some(cycle =>
+        cycle.steps.some(step => {
+          const recipe = step.recipe;
+          const input1Shard = data.shards[recipe.inputs[0]];
+          const input2Shard = data.shards[recipe.inputs[1]];
+          return isReptileRecipe(recipe, input1Shard, input2Shard);
+        })
+      );
+      return hasReptile ? Math.ceil(tree.quantity / 2) : null;
+    }
+    if (tree.method === "recipe") {
+      const recipe = tree.recipe;
+      const input1Shard = data.shards[recipe.inputs[0]];
+      const input2Shard = data.shards[recipe.inputs[1]];
+      if (isReptileRecipe(recipe, input1Shard, input2Shard)) {
+        const requiredOutputQuantity = tree.quantity;
+        // Find the input that is a reptile
+        let inputQuantityOfReptile = 0;
+        if (input1Shard?.family?.toLowerCase().includes("reptile")) {
+          inputQuantityOfReptile = input1Shard.fuse_amount;
+        } else if (input2Shard?.family?.toLowerCase().includes("reptile")) {
+          inputQuantityOfReptile = input2Shard.fuse_amount;
+        }
+        return Math.ceil((requiredOutputQuantity - inputQuantityOfReptile) / 2);
+      }
+    }
+    return null;
+  };
+
   if (tree.method === "cycle") {
     const isExpanded = getExpansionState(nodeId, true);
     const runCount = tree.cycles.reduce((sum, cycle) => sum + cycle.expectedCrafts, 0);
+    const crocProcs = getCrocodileProcs(tree);
 
     return (
       <div className="flex flex-col border border-slate-400/50 rounded-md bg-slate-900">
@@ -224,6 +278,11 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                 <div className="flex items-center space-x-2">
                   {renderShardInfo(Math.floor(tree.quantity), shard, false)}
                   <span className="px-1 bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">CYCLE !</span>
+                  {crocProcs !== null && (
+                    <span className="ml-2 px-1 py-0.5 text-xs bg-blue-500/20 text-blue-400 border border-blue-400/30 rounded-md flex-shrink-0">
+                      Crocodile procs needed: <span className="font-bold">{crocProcs}</span>
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
