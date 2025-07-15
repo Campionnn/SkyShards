@@ -150,7 +150,7 @@ export class CalculationService {
     return tier.multiplier * (3600 / (tier.baseTime + costTime));
   }
 
-  private calculateMultipliers(params: CalculationParams) {
+  public calculateMultipliers(params: CalculationParams) {
     const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
     const seaSerpentMultiplier = 1 + ((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier;
     const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100) * seaSerpentMultiplier;
@@ -507,7 +507,7 @@ export class CalculationService {
     }
   }
 
-  private findCycleNodes(choices: Map<string, RecipeChoice>): string[][] {
+  public findCycleNodes(choices: Map<string, RecipeChoice>): string[][] {
     const graph = new Map<string, string[]>();
 
     for (const [shard, choice] of choices) {
@@ -774,7 +774,7 @@ export class CalculationService {
     }
   }
 
-  private collectTotalQuantities(tree: RecipeTree, data: Data): Map<string, number> {
+  public collectTotalQuantities(tree: RecipeTree, data: Data): Map<string, number> {
     const totals = new Map<string, number>();
 
     const traverse = (node: RecipeTree) => {
@@ -906,3 +906,7 @@ export class CalculationService {
     return await this.calculateOptimalPath(targetShard, requiredQuantity, params, updatedOverrides);
   }
 }
+
+// Create and export a default instance
+export const calculationService = new CalculationService();
+export default calculationService;
