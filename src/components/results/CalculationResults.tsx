@@ -101,6 +101,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           </h3>
           <div className="flex gap-2">
             {(() => {
+              // Don't show Forest Essence if wooden bait is excluded
+              if (params.noWoodenBait) return null;
+
               const forestEssenceShards = Array.from(result.totalQuantities).filter(([shardId]) =>
                 ["shinyfish", "inferno koi", "abyssal lanternfish", "silentdepth"].includes(data.shards[shardId]?.name?.toLowerCase())
               );
@@ -203,6 +206,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
                     expandedStates={expandedStates}
                     onToggle={handleNodeToggle}
                     onShowAlternatives={showAlternatives}
+                    noWoodenBait={params.noWoodenBait}
                   />
                 </>
               )}

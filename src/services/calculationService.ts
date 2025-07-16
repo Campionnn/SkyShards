@@ -85,9 +85,9 @@ export class CalculationService {
         }
 
         if (rate > 0) {
-          // Apply wooden bait modifier
+          // Apply wooden bait modifier - reduce rate but don't exclude completely
           if (params.noWoodenBait && WOODEN_BAIT_SHARDS.includes(shardId)) {
-            rate *= 0.2;
+            rate *= 0.2; // Reduce rate to 20% when wooden bait is excluded
           }
 
           // Apply fortune calculations

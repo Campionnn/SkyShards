@@ -166,6 +166,7 @@ export interface RecipeTreeNodeProps {
   expandedStates: Map<string, boolean>;
   onToggle: (nodeId: string) => void;
   onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
+  noWoodenBait?: boolean;
 }
 
 // searchbar

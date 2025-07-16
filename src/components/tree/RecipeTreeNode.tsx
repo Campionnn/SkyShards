@@ -4,9 +4,19 @@ import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
 import { formatNumber } from "../../utilities";
 import type { RecipeTreeNodeProps } from "../../types/types";
 import { Tooltip } from "../ui/Tooltip";
-import { SHARD_DESCRIPTIONS } from "../../constants";
+import { SHARD_DESCRIPTIONS, WOODEN_BAIT_SHARDS } from "../../constants";
 
-export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTopLevel = false, totalShardsProduced = tree.quantity, nodeId, expandedStates, onToggle, onShowAlternatives }) => {
+export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
+  tree,
+  data,
+  isTopLevel = false,
+  totalShardsProduced = tree.quantity,
+  nodeId,
+  expandedStates,
+  onToggle,
+  onShowAlternatives,
+  noWoodenBait = false,
+}) => {
   const shard = data.shards[tree.shard];
 
   // Helper function to get expansion state and ensure it's initialized
@@ -15,6 +25,21 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
       expandedStates.set(id, defaultState);
     }
     return expandedStates.get(id)!;
+  };
+
+  // Helper function to determine if a shard should be treated as direct
+  const isDirectShard = (shardId: string) => {
+    const shard = data.shards[shardId];
+    if (!shard) return false;
+
+    // Don't show as direct if rate is 0 (completely excluded)
+    if (shard.rate === 0) return false;
+
+    // If wooden bait is excluded, don't show wooden bait shards as direct
+    if (noWoodenBait && WOODEN_BAIT_SHARDS.includes(shardId)) return false;
+
+    // A shard is direct if it has a rate (meaning it can be obtained directly)
+    return shard.rate && shard.rate > 0;
   };
 
   const findRecipeForShard = (shardId: string) => {
@@ -187,7 +212,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
               if (!directShard) return null;
 
               const subRecipe = findRecipeForShard(directInputId);
-              const isDirect = directInputId === "C11" || directInputId === "U38" || directInputId === "C23";
+              const isDirect = isDirectShard(directInputId);
 
               if (isDirect) {
                 return <div key={`direct-${directInputId}`}>{renderDirectShard(directShard.fuse_amount, directShard)}</div>;
@@ -330,7 +355,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                                   const inputShard = data.shards[inputId];
                                   const inputRecipe = findRecipeForShard(inputId);
 
-                                  if (inputRecipe && inputShard && inputId !== "C11" && inputId !== "U38" && inputId !== "C23") {
+                                  if (inputRecipe && inputShard && !isDirectShard(inputId)) {
                                     return (
                                       <div key={inputId} className="space-y-1">
                                         {renderSubRecipe(inputRecipe, inputShard, stepNodeId)}
@@ -394,12 +419,17 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
                       // Add to set of external inputs (will automatically handle duplicates)
                       externalInputs.add(inputId);
                     });
-                  });
-
-                  // Now count each external input only once
+                  }); // Now count each external input only once, but only if it's a direct shard
                   externalInputs.forEach((inputId) => {
                     const inputShard = data.shards[inputId];
-                    if (inputShard) {
+
+                    // FIRST: Skip wooden bait shards entirely if they're excluded
+                    if (noWoodenBait && WOODEN_BAIT_SHARDS.includes(inputId)) {
+                      return;
+                    }
+
+                    // SECOND: Check if it's a direct shard
+                    if (inputShard && inputShard.rate > 0) {
                       inputShardTotals[inputId] = {
                         quantity: inputShard.fuse_amount,
                         shard: inputShard,
@@ -573,8 +603,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({ tree, data, isTo
       </div>
       {isExpanded && (
         <div className="border-t border-slate-600 pl-3 pr-0.5 py-0.5 space-y-0.5">
-          <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} />
-          <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} />
+          <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} />
+          <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} />
         </div>
       )}
     </div>
