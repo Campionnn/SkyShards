@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Search, RefreshCw, DollarSign, TrendingUp, TrendingDown, Clock, Info } from "lucide-react";
-import { useFusionData } from "../hooks/useFusionData";
+import { useFusionData } from "../hooks";
 import HypixelApiService from "../services/hypixelApiService";
 import type { ShardPriceData } from "../services/hypixelApiService";
-import { getRarityColor } from "../utils";
+import { getRarityColor } from "../utilities";
 
 const ShardPricesPage: React.FC = () => {
   const { fusionData, loading: dataLoading } = useFusionData();
