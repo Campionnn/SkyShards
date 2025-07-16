@@ -81,14 +81,16 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
       const input2Shard = data.shards[recipe.inputs[1]];
       if (isReptileRecipe(recipe, input1Shard, input2Shard)) {
         const requiredOutputQuantity = tree.quantity;
-        // Find the input that is a reptile
         let inputQuantityOfReptile = 0;
+        let inputFuseAmount = 0;
         if (input1Shard?.family?.toLowerCase().includes("reptile")) {
-          inputQuantityOfReptile = input1Shard.fuse_amount;
+          inputQuantityOfReptile = tree.inputs[0].quantity;
+          inputFuseAmount = input1Shard.fuse_amount;
         } else if (input2Shard?.family?.toLowerCase().includes("reptile")) {
-          inputQuantityOfReptile = input2Shard.fuse_amount;
+          inputQuantityOfReptile = tree.inputs[1].quantity;
+          inputFuseAmount = input2Shard.fuse_amount;
         }
-        return Math.ceil((requiredOutputQuantity - inputQuantityOfReptile) / 2);
+        return Math.ceil((requiredOutputQuantity / tree.recipe.outputQuantity) - (inputQuantityOfReptile / inputFuseAmount));
       }
     }
     return null;
@@ -291,13 +293,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                   <span className="px-1 bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">CYCLE !</span>
                   {crocProcs !== null && (
                     <Tooltip
-                      content={`Crocodile bonus doubles the output of reptile recipes. You need ${crocProcs} extra reptile shards to trigger enough bonuses for optimal efficiency. The number of bonuses needed depends on your crocodile level and the recipe output quantity.`}
-                      title="Crocodile Bonus"
+                      content={`Crocodile has a chance to double the output of reptile recipes. You need ${crocProcs} Pure Reptile triggers to have enough shards for the craft. This is based on average luck`}
+                      title="Crocodile - Pure Reptile"
                       className="cursor-help"
                       showRomanNumerals={false}
                     >
                       <span className="px-1 text-[11px] font-medium bg-blue-500/15 text-blue-300 border border-blue-400/40 rounded-md flex-shrink-0">
-                        <span className="text-blue-400 font-medium">Crocodile bonus</span>
+                        <span className="text-blue-400 font-medium">Pure Reptile needed</span>
                         <span className="ml-1 font-bold text-blue-300">{crocProcs}</span>
                       </span>
                     </Tooltip>
@@ -533,6 +535,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   const input2Shard = data.shards[input2.shard];
   const crafts = "craftsNeeded" in tree ? tree.craftsNeeded ?? 1 : 1;
   const displayQuantity = isTopLevel ? totalShardsProduced : tree.quantity;
+  const crocProcs = getCrocodileProcs(tree);
 
   const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
   const input1ShardDesc = SHARD_DESCRIPTIONS[input1Shard.id as keyof typeof SHARD_DESCRIPTIONS];
@@ -626,6 +629,19 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                     </span>
                   </div>
                 </Tooltip>
+                {crocProcs !== null && (
+                  <Tooltip
+                      content={`Crocodile has a chance to double the output of reptile recipes. You need ${crocProcs} Pure Reptile triggers to have enough shards for the craft. This is based on average luck`}
+                    title="Crocodile - Pure Reptile"
+                    className="cursor-help"
+                    showRomanNumerals={false}
+                  >
+                    <span className="px-1 text-[11px] font-medium bg-blue-500/15 text-blue-300 border border-blue-400/40 rounded-md flex-shrink-0 ml-2">
+                      <span className="text-blue-400 font-medium">Pure Reptile needed</span>
+                      <span className="ml-1 font-bold text-blue-300">{crocProcs}</span>
+                    </span>
+                  </Tooltip>
+                )}
               </span>
             </div>
           </div>
