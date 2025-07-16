@@ -57,11 +57,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
   // Helper function to determine if a recipe is a reptile recipe
   const isReptileRecipe = (recipe: any, input1Shard: any, input2Shard: any) => {
-    return (
-      recipe?.isReptile ||
-      input1Shard?.family?.toLowerCase().includes("reptile") ||
-      input2Shard?.family?.toLowerCase().includes("reptile")
-    );
+    return recipe?.isReptile || input1Shard?.family?.toLowerCase().includes("reptile") || input2Shard?.family?.toLowerCase().includes("reptile");
   };
 
   // Helper function to calculate Crocodile procs needed
@@ -278,7 +274,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     return (
       <div className="flex flex-col border border-slate-400/50 rounded-md bg-slate-900">
         <div
-          className="flex items-center justify-between w-full pl-3 pr-2 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer"
+          className="flex items-center justify-between w-full pl-3 pr-2 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
             onToggle(nodeId);
@@ -290,13 +286,21 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
               <div className="flex items-center gap-3">
                 <div className="text-xs text-amber-300">{runCount} crafts</div>
                 <MoveRight className="w-4 text-amber-400" />
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 text-sm">
                   {renderShardInfo(Math.floor(tree.quantity), shard, false)}
                   <span className="px-1 bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">CYCLE !</span>
                   {crocProcs !== null && (
-                    <span className="ml-2 px-1 py-0.5 text-xs bg-blue-500/20 text-blue-400 border border-blue-400/30 rounded-md flex-shrink-0">
-                      Crocodile procs needed: <span className="font-bold">{crocProcs}</span>
-                    </span>
+                    <Tooltip
+                      content={`Crocodile bonus doubles the output of reptile recipes. You need ${crocProcs} extra reptile shards to trigger enough bonuses for optimal efficiency. The number of bonuses needed depends on your crocodile level and the recipe output quantity.`}
+                      title="Crocodile Bonus"
+                      className="cursor-help"
+                      showRomanNumerals={false}
+                    >
+                      <span className="px-1 text-[11px] font-medium bg-blue-500/15 text-blue-300 border border-blue-400/40 rounded-md flex-shrink-0">
+                        <span className="text-blue-400 font-medium">Crocodile bonus</span>
+                        <span className="ml-1 font-bold text-blue-300">{crocProcs}</span>
+                      </span>
+                    </Tooltip>
                   )}
                 </div>
               </div>
@@ -362,7 +366,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                         return (
                           <div key={stepIndex} className="rounded border border-slate-400/50 overflow-hidden">
                             <div
-                              className="flex items-center justify-between w-full pl-3 pr-2 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer"
+                              className="flex items-center justify-between w-full pl-3 pr-2 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onToggle(stepNodeId);
@@ -419,7 +423,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                         );
                       } else {
                         return (
-                          <div key={stepIndex} className="pl-3 pr-2 py-1.5 rounded border border-slate-400/50 flex items-center justify-between">
+                          <div key={stepIndex} className="pl-3 pr-2 py-1 rounded border border-slate-400/50 flex items-center justify-between">
                             {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
                             <div className="flex items-center gap-2">
                               <div className="text-right min-w-[80px] ml-2">

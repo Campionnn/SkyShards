@@ -14,9 +14,10 @@ interface TooltipProps {
   type?: string;
   children?: React.ReactNode;
   shardId?: string; // Add shardId prop
+  showRomanNumerals?: boolean; // Add prop to control Roman numeral display
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, className = "", shardIcon, rarity, warning, family, type, children, shardId }) => {
+export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, className = "", shardIcon, rarity, warning, family, type, children, shardId, showRomanNumerals = true }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -116,9 +117,11 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
               {title && (
                 <div className="text-yellow-500 text-xs flex gap-1 items-center">
                   {title}
-                  <span className="flex items-center">
-                    I<MoveRight className="w-3" />X
-                  </span>
+                  {showRomanNumerals && (
+                    <span className="flex items-center">
+                      I<MoveRight className="w-3" />X
+                    </span>
+                  )}
                 </div>
               )}
             </div>
