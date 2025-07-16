@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Search, RotateCcw, Save } from "lucide-react";
 import { useShardsWithRecipes, useCustomRates } from "../hooks";
-import { debounce, formatShardDescription } from "../utils";
-import { RarityDropdown, TypeDropdown, ShardItem, ShardPopup } from "../components";
+import { debounce, formatShardDescription } from "../utilities";
+import { RarityDropdown, TypeDropdown, ShardItem, ShardModal } from "../components";
 import { SHARD_DESCRIPTIONS } from "../constants";
 
 export const SettingsPage: React.FC = () => {
@@ -14,7 +14,7 @@ export const SettingsPage: React.FC = () => {
   const [rarityFilter, setRarityFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [hasChanges, setHasChanges] = useState(false);
-  const [popupShard, setPopupShard] = useState<null | any>(null);
+  const [modalShard, setModalShard] = useState<null | any>(null);
 
   const [debouncedFilter, setDebouncedFilter] = useState("");
 
@@ -224,7 +224,7 @@ export const SettingsPage: React.FC = () => {
                   rate={customRates[shard.key] !== undefined ? customRates[shard.key]! : defaultRates[shard.key]}
                   defaultRate={defaultRates[shard.key]}
                   onRateChange={handleRateChange}
-                  onCardClick={() => setPopupShard(shard)}
+                  onCardClick={() => setModalShard(shard)}
                 />
               </div>
             ))}
@@ -232,24 +232,24 @@ export const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {popupShard &&
+      {modalShard &&
         (() => {
-          const desc = SHARD_DESCRIPTIONS[popupShard.key as keyof typeof SHARD_DESCRIPTIONS];
-          const icon = `${import.meta.env.BASE_URL}shardIcons/${popupShard.key}.png`;
+          const desc = SHARD_DESCRIPTIONS[modalShard.key as keyof typeof SHARD_DESCRIPTIONS];
+          const icon = `${import.meta.env.BASE_URL}shardIcons/${modalShard.key}.png`;
           return (
-            <ShardPopup
-              open={!!popupShard}
-              onClose={() => setPopupShard(null)}
-              title={desc?.title || popupShard.name}
-              name={popupShard.name}
+            <ShardModal
+              open={!!modalShard}
+              onClose={() => setModalShard(null)}
+              title={desc?.title || modalShard.name}
+              name={modalShard.name}
               description={formatShardDescription(desc?.description || "No description.")}
-              rarity={popupShard.rarity}
+              rarity={modalShard.rarity}
               icon={icon}
-              rate={customRates[popupShard.key] !== undefined ? customRates[popupShard.key] : defaultRates[popupShard.key]}
-              onRateChange={(newRate) => handleRateChange(popupShard.key, newRate)}
-              isDirect={popupShard.isDirect}
-              family={popupShard.family}
-              type={popupShard.type}
+              rate={customRates[modalShard.key] !== undefined ? customRates[modalShard.key] : defaultRates[modalShard.key]}
+              onRateChange={(newRate) => handleRateChange(modalShard.key, newRate)}
+              isDirect={modalShard.isDirect}
+              family={modalShard.family}
+              type={modalShard.type}
             />
           );
         })()}

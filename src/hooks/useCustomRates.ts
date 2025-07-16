@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { DataService } from "../services/dataService";
+import { DataService } from "../services";
 
 export const useCustomRates = () => {
-  // Allow undefined to represent 'unset' custom rates
   const [customRates, setCustomRates] = useState<Record<string, number | undefined>>({});
   const [defaultRates, setDefaultRates] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -17,16 +16,8 @@ export const useCustomRates = () => {
 
         // Load custom rates from localStorage
         const stored = localStorage.getItem("customRates");
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            setCustomRates({ ...parsed });
-          } catch {
-            setCustomRates({});
-          }
-        } else {
-          setCustomRates({});
-        }
+        const parsed = stored ? JSON.parse(stored) : {};
+        setCustomRates(parsed);
       } catch (error) {
         console.error("Failed to load rates:", error);
         setCustomRates({});
@@ -39,25 +30,13 @@ export const useCustomRates = () => {
     loadRates();
   }, []);
 
-  // Accept undefined to unset a custom rate
   const updateRate = (shardId: string, rate: number | undefined) => {
-    let newRates: Record<string, number | undefined>;
-    if (rate === undefined) {
-      // Remove the custom rate for this shard
-      const { [shardId]: _, ...rest } = customRates;
-      newRates = { ...rest };
-    } else {
-      newRates = { ...customRates, [shardId]: rate };
-    }
+    const newRates = rate === undefined ? { ...customRates, [shardId]: undefined } : { ...customRates, [shardId]: rate };
+
     setCustomRates(newRates);
 
-    // Save only custom changes (diff from default)
-    const customChanges = Object.entries(newRates).reduce((acc, [id, value]) => {
-      if (value !== undefined && value !== defaultRates[id]) {
-        acc[id] = value;
-      }
-      return acc;
-    }, {} as Record<string, number>);
+    // Save only defined values that differ from defaults
+    const customChanges = Object.fromEntries(Object.entries(newRates).filter(([id, value]) => value !== undefined && value !== defaultRates[id]));
 
     if (Object.keys(customChanges).length > 0) {
       localStorage.setItem("customRates", JSON.stringify(customChanges));

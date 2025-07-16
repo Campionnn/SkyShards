@@ -1,8 +1,8 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Layout } from "./components";
-import { CalculatorStateProvider } from "./context/CalculatorStateContext";
-import { RecipeStateProvider } from "./context/RecipeStateContext";
+import { CalculatorStateProvider, RecipeStateProvider } from "./context";
+import { usePageTitle } from "./hooks/usePageTitle";
 
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));
@@ -15,16 +15,21 @@ const LoadingSpinner = () => (
   </div>
 );
 
-const ProtectedLayout = () => (
-  <CalculatorStateProvider>
-    <RecipeStateProvider>
-      <Layout />
-    </RecipeStateProvider>
-  </CalculatorStateProvider>
-);
+const ProtectedLayout = () => {
+  usePageTitle(); // Update page title based on route
+
+  return (
+    <CalculatorStateProvider>
+      <RecipeStateProvider>
+        <Layout />
+      </RecipeStateProvider>
+    </CalculatorStateProvider>
+  );
+};
 
 const isProd = import.meta.env.PROD;
-const basename = isProd ? "/SkyShards" : "";
+const isGitHubPages = import.meta.env.BASE_URL.includes("/SkyShards/");
+const basename = isProd && isGitHubPages ? "/SkyShards" : "";
 
 const router = createBrowserRouter(
   [
@@ -41,7 +46,7 @@ const router = createBrowserRouter(
           ),
         },
         {
-          path: "settings",
+          path: "shards",
           element: (
             <Suspense fallback={<LoadingSpinner />}>
               <SettingsPage />

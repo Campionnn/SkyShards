@@ -9,10 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
     <script>
-      // Redirect all 404s to the SPA entry point, preserving the path for React Router
-      if (location.pathname !== "/SkyShards/" && !location.pathname.endsWith(".html")) {
-        location.replace("/SkyShards/" + "#" + location.pathname.replace("/SkyShards", "") + location.search + location.hash);
-      }
+      // Store the current path and redirect to index.html for SPA routing
+      const currentPath = window.location.pathname + window.location.search + window.location.hash;
+      sessionStorage.setItem("pathToRedirect", currentPath);
+
+      // Redirect to the root, but React Router will handle the actual routing
+      window.location.replace("/");
     </script>
   </head>
   <body>

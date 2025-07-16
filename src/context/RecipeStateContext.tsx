@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import type { ShardWithKey } from "../types";
+import type { ShardWithKey } from "../types/types";
 
 interface RecipeStateContextType {
   selectedShard: ShardWithKey | null;
