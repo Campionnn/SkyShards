@@ -2,12 +2,13 @@ import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom"
 import { Suspense, lazy } from "react";
 import { Layout } from "./components";
 import { CalculatorStateProvider, RecipeStateProvider } from "./context";
-import { usePageTitle } from "./hooks/usePageTitle";
+import { usePageTitle } from "./hooks";
 
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));
 const RecipePage = lazy(() => import("./pages/RecipePage"));
 const ShardPricesPage = lazy(() => import("./pages/ShardPricesPage"));
+const CostCalculatorPage = lazy(() => import("./pages/CostCalculatorPage"));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center py-12">
@@ -66,6 +67,14 @@ const router = createBrowserRouter(
           element: (
             <Suspense fallback={<LoadingSpinner />}>
               <ShardPricesPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "cost",
+          element: (
+            <Suspense fallback={<LoadingSpinner />}>
+              <CostCalculatorPage />
             </Suspense>
           ),
         },
