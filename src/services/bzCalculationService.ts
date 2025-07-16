@@ -91,13 +91,11 @@ export class CalculationService {
         const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
         const seaSerpentMultiplier = 1 + ((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier;
         const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100) * seaSerpentMultiplier;
-        const craftPenalty = 0.8 / 3600;
 
         return {
             tiamatMultiplier,
             seaSerpentMultiplier,
             crocodileMultiplier,
-            craftPenalty,
         };
     }
 
@@ -169,7 +167,7 @@ export class CalculationService {
                 const [input1, input2] = recipe.inputs;
                 const costInput1 = minCosts.get(input1)! * fuse1;
                 const costInput2 = minCosts.get(input2)! * fuse2;
-                const totalCost = costInput1 + costInput2; // Removed craftPenalty as it's time-based
+                const totalCost = costInput1 + costInput2;
                 const costPerUnit = totalCost / effectiveOutputQty[i];
 
                 if (costPerUnit < bestCost - tolerance) {
