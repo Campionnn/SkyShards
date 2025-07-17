@@ -8,7 +8,7 @@ const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module)
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));
 const RecipePage = lazy(() => import("./pages/RecipePage"));
 const ShardPricesPage = lazy(() => import("./pages/ShardPricesPage"));
-const CostCalculatorPage = lazy(() => import("./pages/CostCalculatorPage"));
+const CostCalculatorPage = lazy(() => import("./pages/CostCalculatorPage").then((module) => ({ default: module.CostCalculatorPage })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center py-12">
