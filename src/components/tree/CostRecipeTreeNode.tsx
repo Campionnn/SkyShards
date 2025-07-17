@@ -219,59 +219,6 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     </div>
   );
 
-  // const renderSubRecipe = (recipe: Recipe, inputShard: Shard, nodePrefix: string, level = 1) => {
-  //   const maxOutputQuantity = recipe.outputQuantity;
-  //   const input1Shard = data.shards[recipe.inputs[0]];
-  //   const input2Shard = data.shards[recipe.inputs[1]];
-  //   const input1Quantity = input1Shard.fuse_amount;
-  //   const input2Quantity = input2Shard.fuse_amount;
-  //   const subNodeId = `${nodePrefix}-${inputShard.id}`;
-  //   const isExpanded = getExpansionState(subNodeId, true);
-  //
-  //   return (
-  //     <div className="rounded border border-slate-400/50 overflow-hidden">
-  //       <div
-  //         className="flex items-center justify-between w-full px-3 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer"
-  //         onClick={(e) => {
-  //           e.stopPropagation();
-  //           onToggle(subNodeId);
-  //         }}
-  //       >
-  //         <div className="flex-1 text-left">
-  //           <div className="flex items-center space-x-2">
-  //             {renderChevron(isExpanded)}
-  //             {renderRecipeDisplay(maxOutputQuantity, inputShard, input1Quantity, input1Shard, input2Quantity, input2Shard)}
-  //           </div>
-  //         </div>
-  //         <div className="text-right min-w-[80px] ml-2">
-  //           <div className="flex items-center justify-end space-x-1.5">
-  //             <span className="text-xs text-slate-500">fusions</span>
-  //             <span className="font-medium text-white text-xs">1</span>
-  //           </div>
-  //         </div>
-  //       </div>
-  //       {isExpanded && (
-  //         <div className="border-t border-slate-400/70 pl-3 pr-0.5 py-0.5 flex flex-col gap-0.5">
-  //           {recipe.inputs.map((directInputId: string) => {
-  //             const directShard = data.shards[directInputId];
-  //             if (!directShard) return null;
-  //
-  //             const subRecipe = findRecipeForShard(directInputId);
-  //             const isDirect = isDirectShard(directInputId);
-  //
-  //             if (isDirect) {
-  //               return <div key={`direct-${directInputId}`}>{renderDirectShard(directShard.fuse_amount, directShard)}</div>;
-  //             } else if (subRecipe && level < 2) {
-  //               return <div key={`sub-${directInputId}`}>{renderSubRecipe(subRecipe, directShard, subNodeId, level + 1)}</div>;
-  //             }
-  //             return null;
-  //           })}
-  //         </div>
-  //       )}
-  //     </div>
-  //   );
-  // };
-
   if (tree.method === "cycle") {
     const isExpanded = getExpansionState(nodeId, true);
     const runCount = tree.cycles.reduce((sum, cycle) => sum + cycle.expectedCrafts, 0);
