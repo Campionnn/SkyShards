@@ -41,7 +41,7 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
             <div className="text-sm text-slate-400 whitespace-nowrap">
               {formatLargeNumber(quantity * shard.rate)}
             </div>
-            <div className="text-xs text-slate-400 whitespace-nowrap mt-1">{formatNumber(shard.rate)} <span className="text-slate-500"> / </span> <span className="text-slate-500">pc</span></div>
+            <div className="text-xs text-slate-400 whitespace-nowrap mt-1">{formatLargeNumber(shard.rate)} <span className="text-slate-500"> / </span> <span className="text-slate-500">pc</span></div>
           </>
         )}
         {ironManView && (

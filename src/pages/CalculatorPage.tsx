@@ -47,7 +47,7 @@ const performCalculation = async (
   const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
 
   const params = {
-    customRates: filteredCustomRates,
+    customRates: isIronMan ? filteredCustomRates : (await dataService.loadShardCosts()),
     hunterFortune: formData.hunterFortune,
     excludeChameleon: formData.excludeChameleon,
     frogBonus: formData.frogBonus,
