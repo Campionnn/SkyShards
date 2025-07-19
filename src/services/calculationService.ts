@@ -216,7 +216,8 @@ export class CalculationService {
     crocodileLevel: number,
     seaSerpentLevel: number,
     tiamatLevel: number,
-    recipeOverrides: RecipeOverride[] = []
+    recipeOverrides: RecipeOverride[] = [],
+    ratesAsCoinValue: boolean
   ): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
@@ -255,7 +256,12 @@ export class CalculationService {
 
     // Initialize with direct costs
     shards.forEach((shard) => {
-      const cost = data.shards[shard].rate > 0 ? 1 / data.shards[shard].rate : Infinity;
+      const cost =
+        data.shards[shard].rate <= 0
+          ? Infinity
+          : ratesAsCoinValue
+          ? data.shards[shard].rate
+          : 1 / data.shards[shard].rate;
       minCosts.set(shard, cost);
       choices.set(shard, { recipe: null });
     });
@@ -448,7 +454,7 @@ export class CalculationService {
     recipeFilter?: (recipe: Recipe) => boolean
   ): Promise<{ direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> }> {
     const data = await this.parseData(params);
-    const { minCosts } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
+    const { minCosts } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides, params.rateAsCoinValue);
     const context = this.getCostCalculationContext(params);
     const alternatives: AlternativeRecipeOption[] = [];
     const recipes = data.recipes[outputShard] || [];
@@ -589,10 +595,11 @@ export class CalculationService {
     choices1: Map<string, RecipeChoice>,
     cycleNodes: string[][],
     recipeOverrides: RecipeOverride[] = [],
+    ratesAsCoinValue: boolean,
     minCostsCache?: { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> }
   ): RecipeTree {
     if (!minCostsCache) {
-      const result = this.computeMinCosts(data, 0, 0, 0, recipeOverrides);
+      const result = this.computeMinCosts(data, 0, 0, 0, recipeOverrides, ratesAsCoinValue);
       minCostsCache = { minCosts: result.minCosts, choices: result.choices };
     }
 
@@ -604,9 +611,9 @@ export class CalculationService {
         return minCosts.get(shard)! < minCosts.get(minShard)! ? shard : minShard;
       }, cycleNodes.flat()[0]);
 
-      const tree = this.buildRecipeTree(data, targetShard, choices, [], recipeOverrides, minCostsCache);
+      const tree = this.buildRecipeTree(data, targetShard, choices, [], recipeOverrides, ratesAsCoinValue, minCostsCache);
       const craftCounter = { total: 0 };
-      this.assignQuantities(tree, data.shards[targetShard].fuse_amount, data, craftCounter, choices, 1, recipeOverrides);
+      this.assignQuantities(tree, data.shards[targetShard].fuse_amount, data, craftCounter, choices, 1, recipeOverrides, ratesAsCoinValue);
 
       return {
         shard,
@@ -631,8 +638,8 @@ export class CalculationService {
     } else {
       const recipe = choice.recipe;
       const [input1, input2] = recipe.inputs;
-      const tree1 = this.buildRecipeTree(data, input1, choices1, cycleNodes, recipeOverrides, minCostsCache);
-      const tree2 = this.buildRecipeTree(data, input2, choices1, cycleNodes, recipeOverrides, minCostsCache);
+      const tree1 = this.buildRecipeTree(data, input1, choices1, cycleNodes, recipeOverrides, ratesAsCoinValue, minCostsCache);
+      const tree2 = this.buildRecipeTree(data, input2, choices1, cycleNodes, recipeOverrides, ratesAsCoinValue, minCostsCache);
 
       if (cycleNodes.flat().includes(shard)) {
         return {
@@ -663,7 +670,8 @@ export class CalculationService {
     craftCounter: { total: number },
     choices: Map<string, RecipeChoice>,
     crocodileMultiplier: number,
-    recipeOverrides: RecipeOverride[] = []
+    recipeOverrides: RecipeOverride[] = [],
+    ratesAsCoinValue: boolean
   ): void {
     tree.quantity = requiredQuantity;
 
@@ -681,8 +689,8 @@ export class CalculationService {
         const input1Quantity = craftsNeeded * fuse1;
         const input2Quantity = craftsNeeded * fuse2;
 
-        this.assignQuantities(tree.inputs[0], input1Quantity, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
-        this.assignQuantities(tree.inputs[1], input2Quantity, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
+        this.assignQuantities(tree.inputs[0], input1Quantity, data, craftCounter, choices, crocodileMultiplier, recipeOverrides, ratesAsCoinValue);
+        this.assignQuantities(tree.inputs[1], input2Quantity, data, craftCounter, choices, crocodileMultiplier, recipeOverrides, ratesAsCoinValue);
         break;
       }
       case "cycleNode": {
@@ -696,8 +704,8 @@ export class CalculationService {
         const fuse1 = data.shards[input1].fuse_amount;
         const fuse2 = data.shards[input2].fuse_amount;
 
-        this.assignQuantities(tree.inputs[0], fuse1, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
-        this.assignQuantities(tree.inputs[1], fuse2, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
+        this.assignQuantities(tree.inputs[0], fuse1, data, craftCounter, choices, crocodileMultiplier, recipeOverrides, ratesAsCoinValue);
+        this.assignQuantities(tree.inputs[1], fuse2, data, craftCounter, choices, crocodileMultiplier, recipeOverrides, ratesAsCoinValue);
         break;
       }
 
@@ -763,8 +771,8 @@ export class CalculationService {
             const totalQuantityNeeded = quantityPerCycle * totalCycles;
             const inputChoice = choices.get(inputId);
             if (inputChoice && inputChoice.recipe) {
-              const inputTree = this.buildRecipeTree(data, inputId, choices, [], recipeOverrides);
-              this.assignQuantities(inputTree, totalQuantityNeeded, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
+              const inputTree = this.buildRecipeTree(data, inputId, choices, [], recipeOverrides, ratesAsCoinValue);
+              this.assignQuantities(inputTree, totalQuantityNeeded, data, craftCounter, choices, crocodileMultiplier, recipeOverrides, ratesAsCoinValue);
             }
           });
         }
@@ -845,13 +853,13 @@ export class CalculationService {
       };
     }
 
-    const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
+    const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides, params.rateAsCoinValue);
     const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0 ? this.findCycleNodes(choices) : [];
-    const tree = this.buildRecipeTree(data, targetShard, choices, cycleNodes, recipeOverrides);
+    const tree = this.buildRecipeTree(data, targetShard, choices, cycleNodes, recipeOverrides, params.rateAsCoinValue);
     const craftCounter = { total: 0 };
     const multipliers = this.calculateMultipliers(params);
     const { crocodileMultiplier } = multipliers;
-    this.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, crocodileMultiplier, recipeOverrides);
+    this.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, crocodileMultiplier, recipeOverrides, params.rateAsCoinValue);
 
     const totalQuantities = this.collectTotalQuantities(tree, data);
 

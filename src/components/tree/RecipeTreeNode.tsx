@@ -1,5 +1,5 @@
 import React from "react";
-import { getRarityColor, formatShardDescription } from "../../utilities";
+import { getRarityColor, formatShardDescription, formatLargeNumber } from "../../utilities";
 import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
 import { formatNumber } from "../../utilities";
 import type { RecipeTreeNodeProps } from "../../types/types";
@@ -16,6 +16,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   onToggle,
   onShowAlternatives,
   noWoodenBait = false,
+  ironManView
 }) => {
   const shard = data.shards[tree.shard];
 
@@ -119,9 +120,14 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         </Tooltip>
         {showRate && (
           <div className="text-right min-w-[80px] ml-2">
-            <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-            <span className="text-slate-500 text-xs mx-0.5">/</span>
-            <span className="text-slate-400 text-xs">hr</span>
+            {ironManView && <>
+              <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
+              <span className="text-slate-500 text-xs mx-0.5">/</span>
+              <span className="text-slate-400 text-xs">hr</span>
+            </>}
+            {!ironManView && (<>
+              <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(quantity * shard.rate)}</span>
+            </>)}
           </div>
         )}
       </>
@@ -206,9 +212,14 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
       </div>
       <div className="text-right min-w-[80px] ml-2">
-        <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-        <span className="text-slate-500 text-xs mx-0.5">/</span>
-        <span className="text-slate-400 text-xs">hr</span>
+        {ironManView && <>
+          <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
+          <span className="text-slate-500 text-xs mx-0.5">/</span>
+          <span className="text-slate-400 text-xs">hr</span>
+        </>}
+        {!ironManView && (<>
+          <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(quantity * shard.rate)}</span>
+        </>)}
       </div>
     </div>
   );
@@ -515,11 +526,14 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
           <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
         </div>
         <div className="text-right">
-          <div className="text-xs text-slate-300">
-            {formatNumber(shard.rate)}
+          {ironManView && <>
+            <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
             <span className="text-slate-500 text-xs mx-0.5">/</span>
             <span className="text-slate-400 text-xs">hr</span>
-          </div>
+          </>}
+          {!ironManView && (<>
+            <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(tree.quantity * shard.rate)}</span>
+          </>)}
         </div>
       </div>
     );
@@ -656,8 +670,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
       </div>
       {isExpanded && (
         <div className="border-t border-slate-600 pl-3 pr-0.5 py-0.5 space-y-0.5">
-          <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} />
-          <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} />
+          <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} ironManView={ironManView} />
+          <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} ironManView={ironManView}/>
         </div>
       )}
     </div>

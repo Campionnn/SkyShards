@@ -97,6 +97,7 @@ export interface CalculationParams {
   kuudraTier: "none" | "t1" | "t2" | "t3" | "t4" | "t5";
   moneyPerHour: number | null;
   noWoodenBait: boolean;
+  rateAsCoinValue: boolean
 }
 
 export interface CalculationResult {
@@ -154,6 +155,7 @@ export interface CalculationResultsProps {
   recipeOverrides: RecipeOverride[];
   onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
   onResetRecipeOverrides: () => void;
+  ironManView: boolean;
 }
 
 //fusiun tree
@@ -167,6 +169,7 @@ export interface RecipeTreeNodeProps {
   onToggle: (nodeId: string) => void;
   onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
   noWoodenBait?: boolean;
+  ironManView: boolean;
 }
 
 // searchbar
