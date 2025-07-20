@@ -220,9 +220,7 @@ export interface AlternativeRecipeModalProps {
   data: Data;
   loading: boolean;
   requiredQuantity?: number;
-  crocodileLevel: number;
-  seaSerpentLevel: number;
-  tiamatLevel: number;
+  params: CalculationParams;
 }
 
 export interface RecipeOverrideManagerProps {
