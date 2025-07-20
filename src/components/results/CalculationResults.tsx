@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Clock, Hammer, Target, BarChart3 } from "lucide-react";
+import { Clock, Coins, Hammer, Target, BarChart3 } from "lucide-react";
 import { formatLargeNumber, formatTime } from "../../utilities";
 import type { RecipeTree, CalculationResultsProps } from "../../types/types";
 import { RecipeTreeNode } from "../tree";
@@ -88,7 +88,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
         )}
         {!ironManView && (
           <>
-            <SummaryCard icon={Clock} iconColor="text-purple-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />
+            <SummaryCard icon={Coins} iconColor="text-purple-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />
             <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Cost" value={formatLargeNumber(result.totalTime)} />
           </>
         )}

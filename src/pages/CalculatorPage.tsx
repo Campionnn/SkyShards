@@ -199,15 +199,17 @@ const CalculatorPageContent: React.FC = () => {
             <CalculatorFormWithContext onSubmit={handleCalculate} />
           </div>
         </div>
-
-        <button
-          className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 border border-gray-500/20 hover:border-gray-500/30"
-          onClick={handleToggleDisplayMode}
-        >
-          <span>Ironman View</span>
-        </button>
         {/* Results Panel */}
         <div className="xl:col-span-5 space-y-3">
+
+        <button
+          className={`px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer  hover:bg-blue-400/30 hover:border-gray-500/30 ${ironManView ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30" : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"}`}
+          onClick={handleToggleDisplayMode}
+        >
+          <span>Ironman Mode</span>
+          <img src={`${import.meta.env.BASE_URL}IronChestplate.webp`} alt='Ironman view' className="w-5 h-5 object-contain flex-shrink-0" loading="lazy"/>
+
+        </button>
           {/* Error Display */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-md p-3 flex items-start space-x-2">
