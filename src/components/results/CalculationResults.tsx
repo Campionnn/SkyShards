@@ -112,7 +112,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
 
               const totalForestEssence = forestEssenceShards.reduce((total, [shardId, quantity]) => {
                 const shardName = data.shards[shardId]?.name?.toLowerCase();
-                const multiplier = shardName === "shinyfish" ? 512 : 1024;
+                const multiplier = shardName === "shinyfish" ? 357 : 1024;
                 return total + quantity * multiplier;
               }, 0);
 
