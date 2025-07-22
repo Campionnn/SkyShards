@@ -42,6 +42,8 @@ export class CalculationService {
       crocodileLevel: params.crocodileLevel,
       kuudraTier: params.kuudraTier,
       moneyPerHour: params.moneyPerHour,
+      customKuudraTime: params.customKuudraTime,
+      kuudraTimeSeconds: params.kuudraTimeSeconds,
       noWoodenBait: params.noWoodenBait,
     });
   }
@@ -81,7 +83,7 @@ export class CalculationService {
         if (shardId === "L15" && rate === 0) {
           // If moneyPerHour is null, treat as Infinity (ignore key cost)
           const moneyPerHour = params.moneyPerHour == null ? Infinity : params.moneyPerHour;
-          rate = this.calculateKuudraRate(params.kuudraTier, moneyPerHour);
+          rate = this.calculateKuudraRate(params.kuudraTier, moneyPerHour, params.customKuudraTime ? params.kuudraTimeSeconds : null);
         }
 
         if (rate > 0) {
@@ -129,17 +131,20 @@ export class CalculationService {
     }
   }
 
-  private calculateKuudraRate(kuudraTier: string, moneyPerHour: number): number {
+  private calculateKuudraRate(kuudraTier: string, moneyPerHour: number, customTimeSeconds: number | null = null): number {
     const tierData: Record<string, { baseTime: number; cost: number; multiplier: number }> = {
-      t1: { baseTime: 135, cost: 155000, multiplier: 1 },
-      t2: { baseTime: 135, cost: 310000, multiplier: 1 },
-      t3: { baseTime: 135, cost: 582000, multiplier: 2 },
-      t4: { baseTime: 135, cost: 1164000, multiplier: 2 },
-      t5: { baseTime: 165, cost: 2328000, multiplier: 3 },
+      t1: { baseTime: 80, cost: 155000, multiplier: 1 },
+      t2: { baseTime: 80, cost: 310000, multiplier: 1 },
+      t3: { baseTime: 80, cost: 582000, multiplier: 2 },
+      t4: { baseTime: 80, cost: 1164000, multiplier: 2 },
+      t5: { baseTime: 120, cost: 2328000, multiplier: 3 },
     };
 
     const tier = tierData[kuudraTier];
     if (!tier) return 0;
+
+    // Use custom time if provided, otherwise use default baseTime
+    const baseTime = customTimeSeconds !== null ? customTimeSeconds : tier.baseTime;
 
     // If moneyPerHour is Infinity, ignore key cost (costTime = 0)
     // If moneyPerHour is 0, treat as lowest possible rate (costTime very large)
@@ -151,7 +156,7 @@ export class CalculationService {
     } else {
       costTime = (tier.cost / moneyPerHour) * 3600;
     }
-    return tier.multiplier * (3600 / (tier.baseTime + costTime));
+    return tier.multiplier * (3600 / (baseTime + costTime));
   }
 
   public calculateMultipliers(params: CalculationParams) {

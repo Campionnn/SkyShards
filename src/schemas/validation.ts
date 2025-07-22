@@ -17,6 +17,8 @@ export const calculationSchema = z.object({
   crocodileLevel: z.number().min(0).max(10),
   kuudraTier: z.enum(["none", "t1", "t2", "t3", "t4", "t5"]),
   moneyPerHour: z.number().min(0).nullable(),
+  customKuudraTime: z.boolean(),
+  kuudraTimeSeconds: z.number().min(1).nullable(),
   noWoodenBait: z.boolean(),
 });
 

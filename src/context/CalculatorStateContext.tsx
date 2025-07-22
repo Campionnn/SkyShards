@@ -19,6 +19,8 @@ const defaultForm: CalculationFormData = {
   crocodileLevel: 0,
   kuudraTier: "none", // No Kuudra by default
   moneyPerHour: Infinity,
+  customKuudraTime: false,
+  kuudraTimeSeconds: null,
   noWoodenBait: false,
 };
 

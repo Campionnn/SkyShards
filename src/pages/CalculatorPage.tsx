@@ -61,6 +61,8 @@ const performCalculation = async (
     crocodileLevel: formData.crocodileLevel,
     kuudraTier: formData.kuudraTier,
     moneyPerHour: formData.moneyPerHour,
+    customKuudraTime: formData.customKuudraTime,
+    kuudraTimeSeconds: formData.kuudraTimeSeconds,
     noWoodenBait: formData.noWoodenBait,
   };
 

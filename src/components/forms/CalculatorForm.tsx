@@ -35,7 +35,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
     const updatedForm = { ...form, [field]: value };
     setForm(updatedForm);
     // Only trigger immediate submit for fields that are not 'shard' and 'quantity'
-    if (field !== "shard" && field !== "quantity") {
+    // Also exclude customKuudraTime to prevent re-render cycles
+    if (field !== "shard" && field !== "quantity" && field !== "customKuudraTime") {
       onSubmit(updatedForm);
     }
   };
@@ -83,10 +84,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       crocodileLevel: 0,
       kuudraTier: "none",
       moneyPerHour: Infinity,
+      customKuudraTime: false,
+      kuudraTimeSeconds: null,
       noWoodenBait: false,
     };
     setForm(resetFormData);
     setMoneyInput(""); // Clear the input field
+    setKuudraTimeInput(""); // Clear the kuudra time input field
     setTimeout(() => {
       onSubmit(resetFormData);
     }, 0);
@@ -110,6 +114,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
 
   // For moneyPerHour, keep a local string state for user input
   const [moneyInput, setMoneyInput] = React.useState<string>(""); // always empty by default
+  const [kuudraTimeInput, setKuudraTimeInput] = React.useState<string>(""); // for custom kuudra time input
 
   // Set moneyPerHour to Infinity by default on mount and when target shard changes
   React.useEffect(() => {
@@ -346,6 +351,66 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               }}
               placeholder="200k, 2.5m, 2b..."
             />
+            <div>
+              <ToggleSwitch
+                id="customKuudraTime"
+                label="Custom Kuudra Completion"
+                checked={form.customKuudraTime || false}
+                onChange={(checked) => {
+                  handleInputChange("customKuudraTime", checked);
+                  if (!checked) {
+                    // Reset time input when disabling custom time
+                    handleInputChange("kuudraTimeSeconds", null);
+                    setKuudraTimeInput("");
+                  }
+                  // Manually trigger calculation after state update
+                  setTimeout(() => {
+                    const updatedForm = { ...form, customKuudraTime: checked };
+                    if (!checked) {
+                      updatedForm.kuudraTimeSeconds = null;
+                    }
+                    onSubmit(updatedForm);
+                  }, 0);
+                }}
+              />
+              {form.customKuudraTime && (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1">
+                    <label className="block text-xs font-medium text-gray-300">Time per Run</label>
+                    <Tooltip content="This should include both the run time and downtime between runs. For example, if your actual Kuudra run takes 60 seconds but you need 20 seconds of downtime between runs, enter 80 seconds total." />
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="1"
+                      value={kuudraTimeInput}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setKuudraTimeInput(value);
+                        if (value.trim() === "") {
+                          handleInputChange("kuudraTimeSeconds", null);
+                        } else {
+                          const parsed = parseInt(value);
+                          if (!isNaN(parsed) && parsed > 0) {
+                            handleInputChange("kuudraTimeSeconds", parsed);
+                          }
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          e.currentTarget.blur();
+                        }
+                      }}
+                      placeholder={form.kuudraTier === "t5" ? "120" : "80"}
+                      className="w-full px-3 py-2 pr-16 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 hover:border-white/20 hover:bg-white/10 transition-all duration-200"
+                    />
+                    <div className="absolute right-3 top-2.5 text-xs text-slate-500 pointer-events-none">s / run</div>
+                  </div>
+                  <p className="text-xs text-slate-400">Override default run time for selected Kuudra tier</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </form>
