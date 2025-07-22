@@ -133,18 +133,22 @@ export class CalculationService {
 
   private calculateKuudraRate(kuudraTier: string, moneyPerHour: number, customTimeSeconds: number | null = null): number {
     const tierData: Record<string, { baseTime: number; cost: number; multiplier: number }> = {
-      t1: { baseTime: 80, cost: 155000, multiplier: 1 },
-      t2: { baseTime: 80, cost: 310000, multiplier: 1 },
-      t3: { baseTime: 80, cost: 582000, multiplier: 2 },
-      t4: { baseTime: 80, cost: 1164000, multiplier: 2 },
-      t5: { baseTime: 120, cost: 2328000, multiplier: 3 },
+      t1: { baseTime: 60, cost: 155000, multiplier: 1 },
+      t2: { baseTime: 60, cost: 310000, multiplier: 1 },
+      t3: { baseTime: 60, cost: 582000, multiplier: 2 },
+      t4: { baseTime: 60, cost: 1164000, multiplier: 2 },
+      t5: { baseTime: 100, cost: 2328000, multiplier: 3 },
     };
 
     const tier = tierData[kuudraTier];
     if (!tier) return 0;
 
+    const downtime = 25; // Fixed downtime between runs in seconds
+
     // Use custom time if provided, otherwise use default baseTime
-    const baseTime = customTimeSeconds !== null ? customTimeSeconds : tier.baseTime;
+    // Always add downtime to the total time per run
+    const runTime = customTimeSeconds !== null ? customTimeSeconds : tier.baseTime;
+    const totalTime = runTime + downtime;
 
     // If moneyPerHour is Infinity, ignore key cost (costTime = 0)
     // If moneyPerHour is 0, treat as lowest possible rate (costTime very large)
@@ -156,7 +160,7 @@ export class CalculationService {
     } else {
       costTime = (tier.cost / moneyPerHour) * 3600;
     }
-    return tier.multiplier * (3600 / (baseTime + costTime));
+    return tier.multiplier * (3600 / (totalTime + costTime));
   }
 
   public calculateMultipliers(params: CalculationParams) {

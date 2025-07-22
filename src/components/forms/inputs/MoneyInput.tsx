@@ -25,6 +25,6 @@ export const MoneyInput: React.FC<MoneyInputProps> = ({ value, onChange, onEnter
       placeholder={placeholder}
     />
     <div className="absolute right-3 top-2.5 text-xs text-slate-500 pointer-events-none">coins / hr</div>
-    <p className="mt-1 text-xs text-slate-400">Empty to ignore key cost</p>
+    <p className="mt-1 text-xs text-slate-400">Empty = ignore key cost</p>
   </div>
 );
