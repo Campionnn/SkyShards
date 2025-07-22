@@ -354,7 +354,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             <div>
               <ToggleSwitch
                 id="customKuudraTime"
-                label="Custom Kuudra Completion"
+                label="Custom Kuudra Completion Time"
                 checked={form.customKuudraTime || false}
                 onChange={(checked) => {
                   handleInputChange("customKuudraTime", checked);
@@ -377,7 +377,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 <div className="space-y-1">
                   <div className="flex items-center gap-1">
                     <label className="block text-xs font-medium text-gray-300">Time per Run</label>
-                    <Tooltip content="This should include both the run time and downtime between runs. For example, if your actual Kuudra run takes 60 seconds but you need 20 seconds of downtime between runs, enter 80 seconds total." />
                   </div>
                   <div className="relative">
                     <input
@@ -402,12 +401,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                           e.currentTarget.blur();
                         }
                       }}
-                      placeholder={form.kuudraTier === "t5" ? "120" : "80"}
+                      placeholder={form.kuudraTier === "none" ? "0" : form.kuudraTier === "t5" ? "120" : "80"}
                       className="w-full px-3 py-2 pr-16 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 hover:border-white/20 hover:bg-white/10 transition-all duration-200"
                     />
                     <div className="absolute right-3 top-2.5 text-xs text-slate-500 pointer-events-none">s / run</div>
                   </div>
-                  <p className="text-xs text-slate-400">Override default run time for selected Kuudra tier</p>
                 </div>
               )}
             </div>
