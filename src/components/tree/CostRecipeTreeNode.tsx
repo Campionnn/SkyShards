@@ -121,7 +121,7 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         </Tooltip>
         {showRate && (
           <div className="text-right min-w-[80px] ml-2">
-            <span className="text-slate-300 text-xs font-medium">{formatMoney(quantity * shard.rate)}</span>
+            <span className="text-slate-300 text-xs font-medium">{formatMoney(shard.rate)}</span>
           </div>
         )}
       </>
@@ -215,7 +215,7 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
       </div>
       <div className="text-right min-w-[80px] ml-2">
-        <span className="text-slate-300 text-xs font-medium">{formatMoney(quantity * shard.rate)}</span>
+        <span className="text-slate-300 text-xs font-medium">{formatMoney(shard.rate)}</span>
       </div>
     </div>
   );
@@ -523,7 +523,7 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         </div>
         <div className="text-right">
           <div className="text-xs text-slate-300">
-            {formatMoney(tree.quantity * shard.rate)}
+            {formatMoney(shard.rate)}
           </div>
         </div>
       </div>

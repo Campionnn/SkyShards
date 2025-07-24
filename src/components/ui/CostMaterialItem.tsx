@@ -1,5 +1,5 @@
 import React from "react";
-import {getRarityColor, formatShardDescription, formatMoney} from "../../utilities";
+import { getRarityColor, formatShardDescription, formatMoney } from "../../utilities";
 import { Tooltip } from "./Tooltip";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 import type { Shard } from "../../types/types";
@@ -35,9 +35,8 @@ export const CostMaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity 
       </div>
       <div className="flex flex-col items-end ml-2 justify-center h-full">
         <div className="text-sm text-slate-400 whitespace-nowrap">
-          {formatMoney(quantity * shard.rate)}
+          {formatMoney(shard.rate)}
         </div>
-        <div className="text-xs text-slate-400 whitespace-nowrap mt-1">{formatMoney(shard.rate)} per</div>
       </div>
     </div>
   );
