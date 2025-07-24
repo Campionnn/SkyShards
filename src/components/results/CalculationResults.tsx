@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Clock, Coins, Hammer, Target, BarChart3 } from "lucide-react";
+import { Clock, Coins, Hammer, Target, BarChart3, TicketPercent } from "lucide-react";
 import { formatLargeNumber, formatTime } from "../../utilities";
 import type { RecipeTree, CalculationResultsProps } from "../../types/types";
 import { RecipeTreeNode } from "../tree";
@@ -79,7 +79,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   return (
     <div className="space-y-3">
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className={`grid grid-cols-2 ${ironManView ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-3`}>
         {ironManView && (
           <>
             <SummaryCard icon={Clock} iconColor="text-purple-400" label="Time per Shard" value={formatTime(result.timePerShard)} />
@@ -88,8 +88,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
         )}
         {!ironManView && (
           <>
-            <SummaryCard icon={Coins} iconColor="text-purple-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />
+            <SummaryCard icon={Coins} iconColor="text-yellow-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />
             <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Cost" value={formatLargeNumber(result.totalTime)} />
+            <SummaryCard icon={TicketPercent} iconColor="text-purple-400" label="Coins saved" value={formatLargeNumber((requiredQuantity * data.shards[targetShard].rate) - result.totalTime)} />
           </>
         )}
         <SummaryCard icon={BarChart3} iconColor="text-green-400" label="Shards Produced" value={Math.floor(result.totalShardsProduced).toString()} />

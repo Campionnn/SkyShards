@@ -43,16 +43,18 @@ export const getRarityColor = (rarity: string): string => {
 };
 
 export const formatLargeNumber = (num: number): string => {
-  if (num >= 1000000000) {
-    return (num / 1000000000).toFixed(1).replace(/\.0$/, "") + "B";
+  const absNum = Math.abs(num);
+  let formatted: string;
+  if (absNum >= 1000000000) {
+    formatted = (absNum / 1000000000).toFixed(2).replace(/\.0$/, "") + "B";
+  } else if (absNum >= 1000000) {
+    formatted = (absNum / 1000000).toFixed(2).replace(/\.0$/, "") + "M";
+  } else if (absNum >= 1000) {
+    formatted = (absNum / 1000).toFixed(2).replace(/\.0$/, "") + "K";
+  } else {
+    formatted = absNum.toFixed(2);
   }
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
-  }
-  return num.toFixed(2);
+  return num < 0 ? "-" + formatted : formatted;
 };
 
 export const getRarityBorderColor = (rarity: string): string => {
