@@ -12,7 +12,7 @@ import type {
   Shard,
   Shards,
 } from "../types/types";
-import { BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS, SHINY_FISH_SHARD } from "../constants";
+import { BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS } from "../constants";
 
 export class CalculationService {
   private static instance: CalculationService;
@@ -99,7 +99,7 @@ export class CalculationService {
         if (rate > 0) {
           // Apply wooden bait modifier - different rates for shiny fish vs other wooden bait
           if (params.noWoodenBait && WOODEN_BAIT_SHARDS.includes(shardId)) {
-            if (shardId === SHINY_FISH_SHARD) {
+            if (shardId === "L23") {
               rate *= 0.1; // Reduce rate to 10% for shiny fish when wooden bait is excluded
             } else {
               rate *= 0.05; // Reduce rate to 5% for other wooden bait shards
@@ -937,5 +937,5 @@ export class CalculationService {
 }
 
 // Create and export a default instance
-export const calculationService = new CalculationService();
+const calculationService = new CalculationService();
 export default calculationService;
