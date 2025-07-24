@@ -7,7 +7,7 @@ import { useFusionData, useDropdownManager } from "../hooks";
 import { processInputRecipes, processOutputRecipes, filterGroups, groupRecipesByInput, filterRecipeGroups, type OutputGroup, type Recipe } from "../utilities";
 import type { ShardWithKey } from "../types/types";
 
-const RecipePage = () => {
+export const RecipePage = () => {
   const { selectedShard, setSelectedShard, selectedOutputShard, setSelectedOutputShard } = useRecipeState();
   const { fusionData, loading } = useFusionData();
 

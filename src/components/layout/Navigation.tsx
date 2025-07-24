@@ -49,7 +49,7 @@ export const Navigation: React.FC = () => {
   const navItems = [
     { path: "/", label: "Calculator", icon: Calculator, color: "purple" },
     { path: "/recipes", label: "Recipes", icon: Shuffle, color: "green" },
-    { path: "/shards", label: "Shards", icon: Settings, color: "blue" },
+    { path: "/settings", label: "Shards", icon: Settings, color: "blue" },
   ];
 
   const colorClasses: Record<string, { bg: string; hoverBg: string; text: string; border: string; hoverBorder: string }> = {
@@ -66,6 +66,13 @@ export const Navigation: React.FC = () => {
       text: "text-green-300",
       border: "border border-green-500/20",
       hoverBorder: "hover:border-green-500/30",
+    },
+    yellow: {
+      bg: "bg-yellow-500/20",
+      hoverBg: "hover:bg-yellow-500/30",
+      text: "text-yellow-300",
+      border: "border border-yellow-500/20",
+      hoverBorder: "hover:border-yellow-500/30",
     },
     blue: {
       bg: "bg-blue-500/20",
