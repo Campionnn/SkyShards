@@ -77,11 +77,6 @@ export class CalculationService {
       for (const shardId in fusionJson.shards) {
         let rate = params.customRates[shardId] ?? defaultRates[shardId] ?? 0;
         
-        // Exclude chameleon
-        if (params.excludeChameleon && shardId === "L4") {
-          rate = 0;
-        }
-
         // skip rate modification if rate is a coin value
         if (params.rateAsCoinValue) {
           shards[shardId] = {
@@ -109,6 +104,11 @@ export class CalculationService {
           if (!NO_FORTUNE_SHARDS.includes(shardId)) {
             rate = this.applyFortuneModifiers(rate, shardId, fusionJson.shards[shardId], params);
           }
+        }
+
+        // Exclude chameleon
+        if (params.excludeChameleon && shardId === "L4") {
+          rate = 0;
         }
 
         shards[shardId] = {
