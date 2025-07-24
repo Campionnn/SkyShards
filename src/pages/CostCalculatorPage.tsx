@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { AlertCircle, Menu, X } from "lucide-react";
-import { CostCalculatorForm, CostCalculationResults } from "../components";
+import { CostCalculatorForm, CalculationResults } from "../components";
 import { useCalculation, useCustomRates } from "../hooks";
 import { DataService } from "../services";
 import type { CalculationFormData } from "../schemas";
@@ -191,7 +191,7 @@ const CalculatorPageContent: React.FC = () => {
 
             {/* Results */}
             {result && calculationData && currentParams && (
-                <CostCalculationResults
+                <CalculationResults
                     result={result}
                     data={calculationData}
                     targetShardName={targetShardName}
