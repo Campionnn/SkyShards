@@ -20,6 +20,8 @@ export const calculationSchema = z.object({
   customKuudraTime: z.boolean(),
   kuudraTimeSeconds: z.number().min(1).nullable(),
   noWoodenBait: z.boolean(),
+  ironManView: z.boolean(),
+  instantBuyPrices: z.boolean()
 });
 
 export type CalculationFormData = z.infer<typeof calculationSchema>;

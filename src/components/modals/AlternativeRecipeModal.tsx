@@ -1,14 +1,15 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Star, Search, Plus, Equal, ChevronDown } from "lucide-react";
-import { getRarityColor, formatTime } from "../../utilities";
+import { getRarityColor, formatTime, formatLargeNumber } from "../../utilities";
 import type { AlternativeRecipeModalProps, Recipe, AlternativeRecipeOption } from "../../types/types";
+import { CalculationService } from "../../services";
 
 export const AlternativeRecipeModal: React.FC<
   AlternativeRecipeModalProps & {
     alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
   }
-> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading, requiredQuantity = 1, crocodileLevel, seaSerpentLevel, tiamatLevel }) => {
+> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading, requiredQuantity = 1, params }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndices, setSelectedIndices] = useState<Record<string, number>>({});
   const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
@@ -19,9 +20,7 @@ export const AlternativeRecipeModal: React.FC<
       return option.timePerShard * requiredQuantity;
     }
 
-    const tiamatMultiplier = 1 + (5 * tiamatLevel) / 100;
-    const seaSerpentMultiplier = 1 + ((2 * seaSerpentLevel) / 100) * tiamatMultiplier;
-    const crocodileMultiplier = 1 + ((2 * crocodileLevel) / 100) * seaSerpentMultiplier;
+    const { crocodileMultiplier } = CalculationService.getInstance().calculateMultipliers(params)
 
     const outputPerCraft = option.recipe.outputQuantity * crocodileMultiplier;
     const craftsNeeded = Math.ceil(requiredQuantity / outputPerCraft);
@@ -173,6 +172,8 @@ export const AlternativeRecipeModal: React.FC<
     onClose();
   };
 
+  const formatFn = params.rateAsCoinValue ? formatLargeNumber : formatTime;
+
   const renderDirectOption = (option: AlternativeRecipeOption) => {
     const isCurrent = option.isCurrent;
 
@@ -196,8 +197,8 @@ export const AlternativeRecipeModal: React.FC<
           </div>
           <div className="flex items-center gap-1 text-slate-400 text-sm">
             <div className="text-right">
-              <div>{formatTime(option.timePerShard)}</div>
-              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(calculateTotalTime(option, requiredQuantity))}</div>}
+              <div>{formatFn(option.timePerShard)}</div>
+              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {(formatFn)(calculateTotalTime(option, requiredQuantity))}</div>}
             </div>
           </div>
         </div>
@@ -244,8 +245,8 @@ export const AlternativeRecipeModal: React.FC<
           </div>
           <div className="flex items-center gap-1 text-slate-400 text-sm">
             <div className="text-right">
-              <div>{formatTime(option.timePerShard)}</div>
-              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(calculateTotalTime(option, requiredQuantity))}</div>}
+              <div>{formatFn(option.timePerShard)}</div>
+              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>}
             </div>
           </div>
         </div>
@@ -508,9 +509,9 @@ export const AlternativeRecipeModal: React.FC<
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1 text-slate-400 text-xs">
                       <div className="text-right">
-                        <div>{selectedOption ? formatTime(selectedOption.timePerShard) : ""}</div>
+                        <div>{selectedOption ? formatFn(selectedOption.timePerShard) : ""}</div>
                         {selectedOption && requiredQuantity && requiredQuantity > 0 && (
-                          <div className="text-xs text-blue-400">Total: {formatTime(calculateTotalTime(selectedOption, requiredQuantity))}</div>
+                          <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(selectedOption, requiredQuantity))}</div>
                         )}
                       </div>
                     </div>
@@ -576,8 +577,8 @@ export const AlternativeRecipeModal: React.FC<
                               </div>
                               <div className="flex items-center gap-1 text-slate-400 text-xs">
                                 <div className="text-right">
-                                  <div>{formatTime(option.timePerShard)}</div>
-                                  {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatTime(calculateTotalTime(option, requiredQuantity))}</div>}
+                                  <div>{formatFn(option.timePerShard)}</div>
+                                  {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>}
                                 </div>
                               </div>
                             </div>

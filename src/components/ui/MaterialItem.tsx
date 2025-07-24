@@ -1,5 +1,5 @@
 import React from "react";
-import { formatNumber, getRarityColor, formatShardDescription, formatTime } from "../../utilities";
+import { formatNumber, getRarityColor, formatShardDescription, formatTime, formatLargeNumber } from "../../utilities";
 import { Tooltip } from "./Tooltip";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 import type { Shard } from "../../types/types";
@@ -7,9 +7,10 @@ import type { Shard } from "../../types/types";
 interface MaterialItemProps {
   shard: Shard;
   quantity: number;
+  ironManView: boolean;
 }
 
-export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity }) => {
+export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, ironManView }) => {
   const timeNeeded = quantity / shard.rate;
   const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
 
@@ -35,10 +36,22 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity }) =
         </Tooltip>
       </div>
       <div className="flex flex-col items-end ml-2 justify-center h-full">
-        <div className="text-sm text-slate-400 whitespace-nowrap">
-          {formatNumber(shard.rate)} <span className="text-slate-500"> / </span> <span className="text-slate-500">hr</span>
-        </div>
-        <div className="text-xs text-slate-400 whitespace-nowrap mt-1">{formatTime(timeNeeded)}</div>
+        {!ironManView && (
+          <>
+            <div className="text-sm text-slate-400 whitespace-nowrap">
+              {formatLargeNumber(quantity * shard.rate)}
+            </div>
+            <div className="text-xs text-slate-400 whitespace-nowrap mt-1">{formatLargeNumber(shard.rate)} <span className="text-slate-500"> / </span> <span className="text-slate-500">pc</span></div>
+          </>
+        )}
+        {ironManView && (
+          <>
+            <div className="text-sm text-slate-400 whitespace-nowrap">
+              {formatNumber(shard.rate)} <span className="text-slate-500"> / </span> <span className="text-slate-500">hr</span>
+            </div>
+            <div className="text-xs text-slate-400 whitespace-nowrap mt-1">{formatTime(timeNeeded)}</div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Clock, Hammer, Target, BarChart3 } from "lucide-react";
-import { formatTime } from "../../utilities";
+import { Clock, Coins, Hammer, Target, BarChart3 } from "lucide-react";
+import { formatLargeNumber, formatTime } from "../../utilities";
 import type { RecipeTree, CalculationResultsProps } from "../../types/types";
 import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";
@@ -72,6 +72,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   recipeOverrides,
   onRecipeOverridesUpdate,
   onResetRecipeOverrides,
+  ironManView
 }) => {
   const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
 
@@ -79,8 +80,18 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     <div className="space-y-3">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <SummaryCard icon={Clock} iconColor="text-purple-400" label="Time per Shard" value={formatTime(result.timePerShard)} />
-        <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Time" value={formatTime(result.totalTime)} />
+        {ironManView && (
+          <>
+            <SummaryCard icon={Clock} iconColor="text-purple-400" label="Time per Shard" value={formatTime(result.timePerShard)} />
+            <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Time" value={formatTime(result.totalTime)} />
+          </>
+        )}
+        {!ironManView && (
+          <>
+            <SummaryCard icon={Coins} iconColor="text-purple-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />
+            <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Cost" value={formatLargeNumber(result.totalTime)} />
+          </>
+        )}
         <SummaryCard icon={BarChart3} iconColor="text-green-400" label="Shards Produced" value={Math.floor(result.totalShardsProduced).toString()} />
         <SummaryCard
           icon={Hammer}
@@ -116,19 +127,6 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
                 return total + quantity * multiplier;
               }, 0);
 
-              const formatLargeNumber = (num: number): string => {
-                if (num >= 1000000000) {
-                  return (num / 1000000000).toFixed(1).replace(/\.0$/, "") + "b";
-                }
-                if (num >= 1000000) {
-                  return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "m";
-                }
-                if (num >= 1000) {
-                  return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k";
-                }
-                return num.toString();
-              };
-
               return (
                 <div className="flex gap-1 items-center px-3 py-1.5 bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-400 text-sm font-medium rounded-md min-w-0">
                   <span className="text-slate-300">{formatLargeNumber(totalForestEssence)}</span>
@@ -150,7 +148,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
           {Array.from(result.totalQuantities).map(([shardId, quantity]) => {
             const shard = data.shards[shardId];
-            return <MaterialItem key={shardId} shard={shard} quantity={quantity} />;
+            return <MaterialItem key={shardId} shard={shard} quantity={quantity} ironManView={ironManView} />;
           })}
         </div>
       </div>{" "}
@@ -207,6 +205,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
                     onToggle={handleNodeToggle}
                     onShowAlternatives={showAlternatives}
                     noWoodenBait={params.noWoodenBait}
+                    ironManView={ironManView}
                   />
                 </>
               )}

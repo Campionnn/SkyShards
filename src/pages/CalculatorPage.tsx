@@ -16,7 +16,7 @@ const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData
 const performCalculation = async (
   formData: CalculationFormData,
   customRates: { [shardId: string]: number | undefined },
-  recipeOverrides: RecipeOverride[] = [], // Add recipe overrides parameter
+  recipeOverrides: RecipeOverride[] = [], // Add recipe overrides parameter,
   callbacks: {
     setTargetShardName: (name: string) => void;
     setCurrentShardKey: (key: string) => void;
@@ -46,7 +46,7 @@ const performCalculation = async (
   const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
 
   const params = {
-    customRates: filteredCustomRates,
+    customRates: formData.ironManView ? filteredCustomRates : (await dataService.loadShardCosts(formData.instantBuyPrices)),
     hunterFortune: formData.hunterFortune,
     excludeChameleon: formData.excludeChameleon,
     frogBonus: formData.frogBonus,
@@ -64,6 +64,7 @@ const performCalculation = async (
     customKuudraTime: formData.customKuudraTime,
     kuudraTimeSeconds: formData.kuudraTimeSeconds,
     noWoodenBait: formData.noWoodenBait,
+    rateAsCoinValue: !formData.ironManView
   };
 
   callbacks.setCurrentParams(params);
@@ -187,9 +188,9 @@ const CalculatorPageContent: React.FC = () => {
             <CalculatorFormWithContext onSubmit={handleCalculate} />
           </div>
         </div>
-
         {/* Results Panel */}
         <div className="xl:col-span-5 space-y-3">
+
           {/* Error Display */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-md p-3 flex items-start space-x-2">
@@ -214,6 +215,7 @@ const CalculatorPageContent: React.FC = () => {
               recipeOverrides={recipeOverrides}
               onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
               onResetRecipeOverrides={resetRecipeOverrides}
+              ironManView={form.ironManView}
             />
           )}
 

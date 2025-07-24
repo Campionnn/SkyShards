@@ -99,6 +99,7 @@ export interface CalculationParams {
   customKuudraTime: boolean;
   kuudraTimeSeconds: number | null;
   noWoodenBait: boolean;
+  rateAsCoinValue: boolean
 }
 
 export interface CalculationResult {
@@ -156,6 +157,7 @@ export interface CalculationResultsProps {
   recipeOverrides: RecipeOverride[];
   onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
   onResetRecipeOverrides: () => void;
+  ironManView: boolean;
 }
 
 //fusiun tree
@@ -169,6 +171,7 @@ export interface RecipeTreeNodeProps {
   onToggle: (nodeId: string) => void;
   onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
   noWoodenBait?: boolean;
+  ironManView: boolean;
 }
 
 // searchbar
@@ -219,9 +222,7 @@ export interface AlternativeRecipeModalProps {
   data: Data;
   loading: boolean;
   requiredQuantity?: number;
-  crocodileLevel: number;
-  seaSerpentLevel: number;
-  tiamatLevel: number;
+  params: CalculationParams;
 }
 
 export interface RecipeOverrideManagerProps {
