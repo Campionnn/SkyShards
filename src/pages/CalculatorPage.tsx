@@ -17,7 +17,6 @@ const performCalculation = async (
   formData: CalculationFormData,
   customRates: { [shardId: string]: number | undefined },
   recipeOverrides: RecipeOverride[] = [], // Add recipe overrides parameter,
-  isIronMan: boolean,
   callbacks: {
     setTargetShardName: (name: string) => void;
     setCurrentShardKey: (key: string) => void;
@@ -47,7 +46,7 @@ const performCalculation = async (
   const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
 
   const params = {
-    customRates: isIronMan ? filteredCustomRates : (await dataService.loadShardCosts()),
+    customRates: formData.ironManView ? filteredCustomRates : (await dataService.loadShardCosts(formData.instantBuyPrices)),
     hunterFortune: formData.hunterFortune,
     excludeChameleon: formData.excludeChameleon,
     frogBonus: formData.frogBonus,
@@ -63,7 +62,7 @@ const performCalculation = async (
     kuudraTier: formData.kuudraTier,
     moneyPerHour: formData.moneyPerHour,
     noWoodenBait: formData.noWoodenBait,
-    rateAsCoinValue: !isIronMan
+    rateAsCoinValue: !formData.ironManView
   };
 
   callbacks.setCurrentParams(params);
@@ -85,7 +84,6 @@ const CalculatorPageContent: React.FC = () => {
   const [currentShardKey, setCurrentShardKey] = useState<string>("");
   const [currentQuantity, setCurrentQuantity] = useState<number>(1);
   const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
-  const [ironManView, setIronManView] = useState(true);
 
   // Debounced calculation
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -108,7 +106,7 @@ const CalculatorPageContent: React.FC = () => {
         };
 
         try {
-          await performCalculation(formData, customRates, recipeOverrides, ironManView, callbacks);
+          await performCalculation(formData, customRates, recipeOverrides, callbacks);
         } catch (err) {
           if (err instanceof Error && !err.message.includes("not found")) {
             console.error("Calculation failed:", err);
@@ -116,7 +114,7 @@ const CalculatorPageContent: React.FC = () => {
         }
       }, delay);
     },
-    [customRates, recipeOverrides, setTargetShardName, setCurrentShardKey, setCurrentQuantity, setCurrentParams, setResult, setCalculationData, ironManView]
+    [customRates, recipeOverrides, setTargetShardName, setCurrentShardKey, setCurrentQuantity, setCurrentParams, setResult, setCalculationData]
   );
 
   const handleCalculate = async (formData: CalculationFormData, setForm: (data: CalculationFormData) => void) => {
@@ -144,23 +142,12 @@ const CalculatorPageContent: React.FC = () => {
     setRecipeOverrides([]);
   };
 
-  const handleToggleDisplayMode = () => {
-    setIronManView(!ironManView);
-  };
-
   // Re-calculate when customRates change and form is valid
   useEffect(() => {
     if (form && form.shard && form.shard.trim() !== "") {
       debouncedCalculate(form, 150); // Shorter delay for rate changes
     }
   }, [customRates, form, debouncedCalculate]);
- 
-  // Re-calculate when ironManView changes and form is valid
-  useEffect(() => {
-    if (form && form.shard && form.shard.trim() !== "") {
-      debouncedCalculate(form, 150); // Shorter delay for rate changes
-    }
-  }, [ironManView, form, debouncedCalculate]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -202,14 +189,6 @@ const CalculatorPageContent: React.FC = () => {
         {/* Results Panel */}
         <div className="xl:col-span-5 space-y-3">
 
-        <button
-          className={`px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer  hover:bg-blue-400/30 hover:border-gray-500/30 ${ironManView ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30" : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"}`}
-          onClick={handleToggleDisplayMode}
-        >
-          <span>Ironman Mode</span>
-          <img src={`${import.meta.env.BASE_URL}IronChestplate.webp`} alt='Ironman view' className="w-5 h-5 object-contain flex-shrink-0" loading="lazy"/>
-
-        </button>
           {/* Error Display */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-md p-3 flex items-start space-x-2">
@@ -234,7 +213,7 @@ const CalculatorPageContent: React.FC = () => {
               recipeOverrides={recipeOverrides}
               onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
               onResetRecipeOverrides={resetRecipeOverrides}
-              ironManView={ironManView}
+              ironManView={form.ironManView}
             />
           )}
 

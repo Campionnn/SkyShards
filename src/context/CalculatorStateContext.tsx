@@ -20,6 +20,8 @@ const defaultForm: CalculationFormData = {
   kuudraTier: "none", // No Kuudra by default
   moneyPerHour: Infinity,
   noWoodenBait: false,
+  ironManView: true,
+  instantBuyPrices: false,
 };
 
 interface CalculatorStateContextType {

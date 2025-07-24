@@ -18,6 +18,8 @@ export const calculationSchema = z.object({
   kuudraTier: z.enum(["none", "t1", "t2", "t3", "t4", "t5"]),
   moneyPerHour: z.number().min(0).nullable(),
   noWoodenBait: z.boolean(),
+  ironManView: z.boolean(),
+  instantBuyPrices: z.boolean()
 });
 
 export type CalculationFormData = z.infer<typeof calculationSchema>;

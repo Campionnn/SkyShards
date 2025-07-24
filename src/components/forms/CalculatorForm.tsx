@@ -84,6 +84,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       kuudraTier: "none",
       moneyPerHour: Infinity,
       noWoodenBait: false,
+      ironManView: true,
+      instantBuyPrices: false,
     };
     setForm(resetFormData);
     setMoneyInput(""); // Clear the input field
@@ -147,29 +149,41 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 Target Shard
               </label>
 
-              {/* Auto Save Toggle */}
-              <div className="flex items-center gap-1.5">
-                <label htmlFor="saveSettings" className="text-xs font-medium text-slate-200 cursor-pointer">
-                  Auto Save
-                </label>
-                <Tooltip content="Automatically saves all your settings (fortune, shard levels, etc.) in your browser. Data is restored when the page reloads."></Tooltip>
+              <div className="flex items-center gap-5">
+                {/* Ironman Mode Toggle */}
                 <button
-                  type="button"
-                  role="switch"
-                  aria-checked={saveEnabled}
-                  onClick={() => setSaveEnabledState(!saveEnabled)}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
-                    ${saveEnabled ? "bg-emerald-600" : "bg-white/5"}
-                    hover:border-emerald-400`}
-                  style={{ boxShadow: "none" }}
+                  className={`px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer  hover:bg-blue-400/30 hover:border-gray-500/30 ${form.ironManView ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30" : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"}`}
+                  onClick={() => handleInputChange("ironManView", !form.ironManView)}
                 >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform duration-200 border border-white/10
-                    ${saveEnabled ? "bg-emerald-400" : "bg-slate-300/70"}
-                    ${saveEnabled ? "translate-x-4" : "translate-x-0.5"}`}
-                    style={{ paddingLeft: "1px" }}
-                  />
+                  <span>Ironman Mode</span>
+                  <img src={`${import.meta.env.BASE_URL}IronChestplate.webp`} alt='Ironman view' className="w-5 h-5 object-contain flex-shrink-0" loading="lazy"/>
+        
                 </button>
+
+                {/* Auto Save Toggle */}
+                <div className="flex items-center gap-1.5">
+                  <label htmlFor="saveSettings" className="text-xs font-medium text-slate-200 cursor-pointer">
+                    Auto Save
+                  </label>
+                  <Tooltip content="Automatically saves all your settings (fortune, shard levels, etc.) in your browser. Data is restored when the page reloads."></Tooltip>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={saveEnabled}
+                    onClick={() => setSaveEnabledState(!saveEnabled)}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
+                      ${saveEnabled ? "bg-emerald-600" : "bg-white/5"}
+                      hover:border-emerald-400`}
+                    style={{ boxShadow: "none" }}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform duration-200 border border-white/10
+                      ${saveEnabled ? "bg-emerald-400" : "bg-slate-300/70"}
+                      ${saveEnabled ? "translate-x-4" : "translate-x-0.5"}`}
+                      style={{ paddingLeft: "1px" }}
+                    />
+                  </button>
+                </div>
               </div>
             </div>
             <ShardAutocomplete
@@ -254,7 +268,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
 
           <div className="space-y-2">
             {/* Hunter Fortune */}
-            <div>
+            {form.ironManView && <div>
               <label className="flex items-center gap-2 text-sm font-medium text-fuchsia-300 mb-2">
                 <div className="w-2 h-2 bg-fuchsia-500 rounded-full"></div>
                 Hunter Fortune
@@ -273,14 +287,22 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   transition-colors duration-200
                 "
               />
-            </div>
+            </div>}
 
             {/* Checkboxes */}
             <div className="space-y-0">
-              {/* Exclude Chameleon Switch */}
-              <ToggleSwitch id="excludeChameleon" label="Exclude Chameleon" checked={form.excludeChameleon} onChange={(checked) => handleInputChange("excludeChameleon", checked)} />
-              {/* Exclude Wooden Bait Switch */}
-              <ToggleSwitch id="excludeWoodenBait" label="Exclude Wooden Bait" checked={form.noWoodenBait} onChange={(checked) => handleInputChange("noWoodenBait", checked)} />
+              {form.ironManView && (
+                <>
+                  {/* Exclude Chameleon Switch */}
+                  <ToggleSwitch id="excludeChameleon" label="Exclude Chameleon" checked={form.excludeChameleon} onChange={(checked) => handleInputChange("excludeChameleon", checked)} />
+                  {/* Exclude Wooden Bait Switch */}
+                  <ToggleSwitch id="excludeWoodenBait" label="Exclude Wooden Bait" checked={form.noWoodenBait} onChange={(checked) => handleInputChange("noWoodenBait", checked)} />
+                </>
+              )}
+              {/* Instant Buy Prices Switch */}
+              {!form.ironManView && (
+                <ToggleSwitch id="instantBuyPrices" label="Use Instant Buy Prices" checked={form.instantBuyPrices} onChange={(checked) => handleInputChange("instantBuyPrices", checked)} />
+              )}
             </div>
           </div>
         </div>
@@ -293,12 +315,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           </h3>
           <div className="grid grid-cols-3 gap-1.5">
             {[
-              { key: "newtLevel", label: "Newt", shardId: "C35" },
-              { key: "salamanderLevel", label: "Salamander", shardId: "U8" },
-              { key: "lizardKingLevel", label: "Lizard King", shardId: "R8" },
-              { key: "leviathanLevel", label: "Leviathan", shardId: "E5" },
-              { key: "pythonLevel", label: "Python", shardId: "R9" },
-              { key: "kingCobraLevel", label: "King Cobra", shardId: "R54" },
+              ...(form.ironManView ? [
+                { key: "newtLevel", label: "Newt", shardId: "C35" },
+                { key: "salamanderLevel", label: "Salamander", shardId: "U8" },
+                { key: "lizardKingLevel", label: "Lizard King", shardId: "R8" },
+                { key: "leviathanLevel", label: "Leviathan", shardId: "E5" },
+                { key: "pythonLevel", label: "Python", shardId: "R9" },
+                { key: "kingCobraLevel", label: "King Cobra", shardId: "R54" }
+              ] : []),
               { key: "seaSerpentLevel", label: "Sea Serpent", shardId: "E32" },
               { key: "tiamatLevel", label: "Tiamat", shardId: "L6" },
               { key: "crocodileLevel", label: "Crocodile", shardId: "R45" },
@@ -325,7 +349,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
         </div>
 
         {/* Kraken Shard */}
-        <div className="space-y-2">
+        {form.ironManView && <div className="space-y-2">
           <h3 className="flex items-center gap-2 text-sm font-medium text-orange-300">
             <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
             Kraken Shard
@@ -347,7 +371,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               placeholder="200k, 2.5m, 2b..."
             />
           </div>
-        </div>
+        </div>}
       </form>
     </div>
   );

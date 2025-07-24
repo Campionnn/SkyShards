@@ -6,7 +6,7 @@ export class DataService {
   private shardsCache: ShardWithKey[] | null = null;
   private shardNameToKeyCache: Record<string, string> | null = null;
   private defaultRatesCache: Record<string, number> | null = null;
-  private bazaarPriceCache: Record<string, number> | null = null;
+  private bazaarPriceCache: Record<string, Record<string, number>> | null = null;
 
   public static getInstance(): DataService {
     if (!DataService.instance) {
@@ -81,21 +81,24 @@ export class DataService {
     return this.defaultRatesCache;
   }
 
-  async loadShardCosts(): Promise<Record<string, number>> {
-    if (this.bazaarPriceCache) {
-      return this.bazaarPriceCache;
+  async loadShardCosts(useInstantBuyPrices: boolean): Promise<Record<string, number>> {
+    const cacheKey = useInstantBuyPrices ? "instant_buy" : "buy_offer";
+  
+    if (this.bazaarPriceCache?.[cacheKey]) {
+      return this.bazaarPriceCache[cacheKey];
     }
 
     const bazaarData = await this.fetchApi<BazaarData>("/bazaar");
     const shards = await this.loadShards();
-    this.bazaarPriceCache = {};
+    this.bazaarPriceCache = this.bazaarPriceCache ?? {};
+    this.bazaarPriceCache[cacheKey] = {};
 
     for (const shard of shards) {
-      const price = bazaarData.products[`${shard.internal_id}`]?.quick_status?.sellPrice;
-      this.bazaarPriceCache[shard.id] = price;
+      const price = bazaarData.products[`${shard.internal_id}`]?.quick_status;
+      this.bazaarPriceCache[cacheKey][shard.id] = useInstantBuyPrices ? price?.buyPrice : price?.sellPrice;
     }
   
-    return this.bazaarPriceCache;
+    return this.bazaarPriceCache[cacheKey];
   }
 
   async searchShards(query: string): Promise<ShardWithKey[]> {
