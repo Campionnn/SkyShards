@@ -603,7 +603,7 @@ export const AlternativeRecipeModal: React.FC<
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Star className="w-5 h-5 text-purple-400" />
-              <h2 className="text-lg font-semibold text-white">Alternative Recipe Modal</h2>
+              <h2 className="text-lg font-semibold text-white">Alternative Recipes</h2>
               <span className="text-slate-400 text-sm">for {shardName}</span>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer">
