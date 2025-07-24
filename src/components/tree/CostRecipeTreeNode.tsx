@@ -1,12 +1,12 @@
 import React from "react";
 import { getRarityColor, formatShardDescription } from "../../utilities";
-import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
-import { formatNumber } from "../../utilities";
+import { ChevronDown, ChevronRight, MoveRight } from "lucide-react";
+import { formatMoney } from "../../utilities";
 import type { RecipeTreeNodeProps, Recipe, Shard, RecipeTree } from "../../types/types";
 import { Tooltip } from "../ui";
-import { SHARD_DESCRIPTIONS, WOODEN_BAIT_SHARDS } from "../../constants";
+import { SHARD_DESCRIPTIONS } from "../../constants";
 
-export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
+export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   tree,
   data,
   isTopLevel = false,
@@ -14,8 +14,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   nodeId,
   expandedStates,
   onToggle,
-  onShowAlternatives,
-  noWoodenBait = false,
 }) => {
   const shard = data.shards[tree.shard];
 
@@ -34,9 +32,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
     // Don't show as direct if rate is 0 (completely excluded)
     if (shard.rate === 0) return false;
-
-    // If wooden bait is excluded, don't show wooden bait shards as direct
-    if (noWoodenBait && WOODEN_BAIT_SHARDS.includes(shardId)) return false;
 
     // A shard is direct if it has a rate (meaning it can be obtained directly)
     return shard.rate && shard.rate > 0;
@@ -121,9 +116,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         </Tooltip>
         {showRate && (
           <div className="text-right min-w-[80px] ml-2">
-            <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-            <span className="text-slate-500 text-xs mx-0.5">/</span>
-            <span className="text-slate-400 text-xs">hr</span>
+            <span className="text-slate-300 text-xs font-medium">{formatMoney(quantity * shard.rate)}</span>
           </div>
         )}
       </>
@@ -214,68 +207,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
       <div className="flex items-center gap-2 min-w-0">
         <div className="w-2 h-2 bg-green-400 rounded-full" />
         {renderShardInfo(quantity, shard, false)}
-        <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
+        <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Bazaar</span>
       </div>
       <div className="text-right min-w-[80px] ml-2">
-        <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-        <span className="text-slate-500 text-xs mx-0.5">/</span>
-        <span className="text-slate-400 text-xs">hr</span>
+        <span className="text-slate-300 text-xs font-medium">{formatMoney(quantity * shard.rate)}</span>
       </div>
     </div>
   );
-
-  const renderSubRecipe = (recipe: Recipe, inputShard: Shard, nodePrefix: string, level = 1) => {
-    const maxOutputQuantity = recipe.outputQuantity;
-    const input1Shard = data.shards[recipe.inputs[0]];
-    const input2Shard = data.shards[recipe.inputs[1]];
-    const input1Quantity = input1Shard.fuse_amount;
-    const input2Quantity = input2Shard.fuse_amount;
-    const subNodeId = `${nodePrefix}-${inputShard.id}`;
-    const isExpanded = getExpansionState(subNodeId, true);
-
-    return (
-      <div className="rounded border border-slate-400/50 overflow-hidden">
-        <div
-          className="flex items-center justify-between w-full px-3 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggle(subNodeId);
-          }}
-        >
-          <div className="flex-1 text-left">
-            <div className="flex items-center space-x-2">
-              {renderChevron(isExpanded)}
-              {renderRecipeDisplay(maxOutputQuantity, inputShard, input1Quantity, input1Shard, input2Quantity, input2Shard)}
-            </div>
-          </div>
-          <div className="text-right min-w-[80px] ml-2">
-            <div className="flex items-center justify-end space-x-1.5">
-              <span className="text-xs text-slate-500">fusions</span>
-              <span className="font-medium text-white text-xs">1</span>
-            </div>
-          </div>
-        </div>
-        {isExpanded && (
-          <div className="border-t border-slate-400/70 pl-3 pr-0.5 py-0.5 flex flex-col gap-0.5">
-            {recipe.inputs.map((directInputId: string) => {
-              const directShard = data.shards[directInputId];
-              if (!directShard) return null;
-
-              const subRecipe = findRecipeForShard(directInputId);
-              const isDirect = isDirectShard(directInputId);
-
-              if (isDirect) {
-                return <div key={`direct-${directInputId}`}>{renderDirectShard(directShard.fuse_amount, directShard)}</div>;
-              } else if (subRecipe && level < 2) {
-                return <div key={`sub-${directInputId}`}>{renderSubRecipe(subRecipe, directShard, subNodeId, level + 1)}</div>;
-              }
-              return null;
-            })}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   if (tree.method === "cycle") {
     const isExpanded = getExpansionState(nodeId, true);
@@ -307,9 +245,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                       className="cursor-help"
                       showRomanNumerals={false}
                     >
-                      <span className="px-1 py-0.4 text-xs bg-blue-500/15 text-blue-400 border border-blue-400/40 rounded-md flex-shrink-0 ml-2 flex items-center gap-1">
-                        <span className="font-medium">Pure Reptile needed</span>
-                        <span className="font-bold">{crocProcs}</span>
+                      <span className="px-1 text-[11px] font-medium bg-blue-500/15 text-blue-300 border border-blue-400/40 rounded-md flex-shrink-0">
+                        <span className="text-blue-400 font-medium">Pure Reptile needed</span>
+                        <span className="ml-1 font-bold text-blue-300">{crocProcs}</span>
                       </span>
                     </Tooltip>
                   )}
@@ -324,30 +262,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 <span className="font-medium text-white text-xs">{runCount}</span>
               </div>
             </div>
-            {onShowAlternatives && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Find the recipe that produces the target shard across all cycles
-                  let targetRecipe = null;
-                  for (const cycle of tree.cycles) {
-                    const step = cycle.steps.find((step) => step.outputShard === tree.shard);
-                    if (step) {
-                      targetRecipe = step.recipe;
-                      break;
-                    }
-                  }
-                  onShowAlternatives(tree.shard, {
-                    currentRecipe: targetRecipe,
-                    requiredQuantity: tree.quantity,
-                  });
-                }}
-                className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
-                title="Show alternatives"
-              >
-                <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
-              </button>
-            )}
           </div>
         </div>
 
@@ -396,21 +310,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                                     <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
                                   </div>
                                 </div>
-                                {onShowAlternatives && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onShowAlternatives(step.outputShard, {
-                                        currentRecipe: recipe,
-                                        requiredQuantity: cycle.expectedCrafts * outputQuantity,
-                                      });
-                                    }}
-                                    className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
-                                    title="Show alternatives"
-                                  >
-                                    <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
-                                  </button>
-                                )}
                               </div>
                             </div>
                             {stepIsExpanded && (
@@ -419,11 +318,11 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                                   const inputShard = data.shards[inputId];
                                   const inputRecipe = findRecipeForShard(inputId);
 
-                                  if (inputRecipe && inputShard && !isDirectShard(inputId)) {
+                                  if (inputRecipe && inputShard && isDirectShard(inputId)) {
                                     return (
-                                      <div key={inputId} className="space-y-1">
-                                        {renderSubRecipe(inputRecipe, inputShard, stepNodeId)}
-                                      </div>
+                                        <div key={inputId}>
+                                            {renderDirectShard(inputShard.fuse_amount, inputShard)}
+                                        </div>
                                     );
                                   }
                                   return null;
@@ -443,21 +342,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                                   <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
                                 </div>
                               </div>
-                              {onShowAlternatives && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onShowAlternatives(step.outputShard, {
-                                      currentRecipe: recipe,
-                                      requiredQuantity: cycle.expectedCrafts * outputQuantity,
-                                    });
-                                  }}
-                                  className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
-                                  title="Show alternatives"
-                                >
-                                  <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
-                                </button>
-                              )}
                             </div>
                           </div>
                         );
@@ -487,12 +371,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                   externalInputs.forEach((inputId) => {
                     const inputShard = data.shards[inputId];
 
-                    // FIRST: Skip wooden bait shards entirely if they're excluded
-                    if (noWoodenBait && WOODEN_BAIT_SHARDS.includes(inputId)) {
-                      return;
-                    }
-
-                    // SECOND: Check if it's a direct shard
                     if (inputShard && inputShard.rate > 0) {
                       inputShardTotals[inputId] = {
                         quantity: inputShard.fuse_amount,
@@ -523,13 +401,11 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         <div className="flex items-center space-x-2 p-0.5 text-sm">
           <div className="w-2 h-2 bg-green-400 rounded-full" />
           {renderShardInfo(tree.quantity, shard, false)}
-          <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
+          <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Bazaar</span>
         </div>
         <div className="text-right">
           <div className="text-xs text-slate-300">
-            {formatNumber(shard.rate)}
-            <span className="text-slate-500 text-xs mx-0.5">/</span>
-            <span className="text-slate-400 text-xs">hr</span>
+            {formatMoney(tree.quantity * shard.rate)}
           </div>
         </div>
       </div>
@@ -640,14 +516,14 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 </Tooltip>
                 {crocProcs !== null && (
                   <Tooltip
-                    content={`Crocodile has a chance to double the output of reptile recipes. You need ${crocProcs} Pure Reptile triggers to have enough shards for the craft. This is based on average luck`}
+                      content={`Crocodile has a chance to double the output of reptile recipes. You need ${crocProcs} Pure Reptile triggers to have enough shards for the craft. This is based on average luck`}
                     title="Crocodile - Pure Reptile"
                     className="cursor-help"
                     showRomanNumerals={false}
                   >
-                    <span className="px-1 py-0.4 text-xs bg-blue-500/15 text-blue-400 border border-blue-400/40 rounded-md flex-shrink-0 ml-2 flex items-center gap-1">
-                      <span className="font-medium">Pure Reptile needed</span>
-                      <span className="font-bold">{crocProcs}</span>
+                    <span className="px-1 text-[11px] font-medium bg-blue-500/15 text-blue-300 border border-blue-400/40 rounded-md flex-shrink-0 ml-2">
+                      <span className="text-blue-400 font-medium">Pure Reptile needed</span>
+                      <span className="ml-1 font-bold text-blue-300">{crocProcs}</span>
                     </span>
                   </Tooltip>
                 )}
@@ -662,27 +538,12 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
               <span className="font-medium text-white text-xs">{crafts}</span>
             </div>
           </div>
-          {onShowAlternatives && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onShowAlternatives(tree.shard, {
-                  currentRecipe: "recipe" in tree ? tree.recipe : null,
-                  requiredQuantity: tree.quantity,
-                });
-              }}
-              className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
-              title="Show alternatives"
-            >
-              <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
-            </button>
-          )}
         </div>
       </div>
       {isExpanded && (
         <div className="border-t border-slate-600 pl-3 pr-0.5 py-0.5 space-y-0.5">
-          <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} />
-          <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} />
+          <CostRecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} />
+          <CostRecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} />
         </div>
       )}
     </div>

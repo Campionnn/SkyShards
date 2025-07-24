@@ -20,6 +20,19 @@ export const formatTime = (decimalHours: number): string => {
   return `${hours} hr ${minutes} min`;
 };
 
+export const formatMoney = (amount: number): string => {
+    if (amount < 1000) {
+        return `${amount.toFixed(2)}`;
+    }
+    if (amount < 1_000_000) {
+        return `${(amount / 1000).toFixed(2)}K`;
+    }
+    if (amount < 1_000_000_000) {
+        return `${(amount / 1_000_000).toFixed(2)}M`;
+    }
+    return `${(amount / 1_000_000_000).toFixed(2)}B`;
+}
+
 export const getMaxQuantityForRarity = (rarity: string): number => {
   return MAX_QUANTITIES[rarity as keyof typeof MAX_QUANTITIES] || 1;
 };
