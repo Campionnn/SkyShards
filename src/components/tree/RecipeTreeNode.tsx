@@ -229,7 +229,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
       <div className="flex items-center gap-2 min-w-0">
         <div className="w-2 h-2 bg-green-400 rounded-full" />
         {renderShardInfo(quantity, shard, false)}
-        <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
+        <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">
+          {ironManView ? "Direct" : "Bazaar"}
+        </span>
       </div>
       <div className="text-right min-w-[80px] ml-2">
         {ironManView && <>
@@ -548,7 +550,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         <div className="flex items-center space-x-2 p-0.5 text-sm">
           <div className="w-2 h-2 bg-green-400 rounded-full" />
           {renderShardInfo(tree.quantity, shard, false)}
-          <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
+          <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">
+            {ironManView ? "Direct" : "Bazaar"}
+          </span>
         </div>
         <div className="text-right">
           {ironManView && <>
