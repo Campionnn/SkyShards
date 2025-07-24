@@ -446,12 +446,21 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                                   const inputShard = data.shards[inputId];
                                   const inputRecipe = findRecipeForShard(inputId);
 
-                                  if (inputRecipe && inputShard && !isDirectShard(inputId)) {
-                                    return (
-                                      <div key={inputId} className="space-y-1">
-                                        {renderSubRecipe(inputRecipe, inputShard, stepNodeId)}
-                                      </div>
-                                    );
+                                  if (inputRecipe && inputShard) {
+                                    if (!isDirectShard(inputId)) {
+                                      return (
+                                        <div key={inputId} className="space-y-1">
+                                          {renderSubRecipe(inputRecipe, inputShard, stepNodeId)}
+                                        </div>
+                                      );
+                                    }
+                                    else if (inputShard.family?.toLowerCase().includes("reptile")) {
+                                      return (
+                                        <div key={inputId}>
+                                          {renderDirectShard(inputShard.fuse_amount, inputShard)}
+                                        </div>
+                                      );
+                                    }
                                   }
                                   return null;
                                 })}
