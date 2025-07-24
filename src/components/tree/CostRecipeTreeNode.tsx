@@ -1,6 +1,6 @@
 import React from "react";
 import { getRarityColor, formatShardDescription } from "../../utilities";
-import { ChevronDown, ChevronRight, MoveRight } from "lucide-react";
+import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
 import { formatMoney } from "../../utilities";
 import type { RecipeTreeNodeProps, Recipe, Shard, RecipeTree } from "../../types/types";
 import { Tooltip } from "../ui";
@@ -14,6 +14,7 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   nodeId,
   expandedStates,
   onToggle,
+  onShowAlternatives,
   noWoodenBait = false,
 }) => {
   const shard = data.shards[tree.shard];
@@ -319,6 +320,30 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 <span className="font-medium text-white text-xs">{runCount}</span>
               </div>
             </div>
+            {onShowAlternatives && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Find the recipe that produces the target shard across all cycles
+                  let targetRecipe = null;
+                  for (const cycle of tree.cycles) {
+                    const step = cycle.steps.find((step) => step.outputShard === tree.shard);
+                    if (step) {
+                      targetRecipe = step.recipe;
+                      break;
+                    }
+                  }
+                  onShowAlternatives(tree.shard, {
+                    currentRecipe: targetRecipe,
+                    requiredQuantity: tree.quantity,
+                  });
+                }}
+                className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
+                title="Show alternatives"
+              >
+                <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -367,6 +392,21 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                                     <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
                                   </div>
                                 </div>
+                                {onShowAlternatives && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onShowAlternatives(step.outputShard, {
+                                        currentRecipe: recipe,
+                                        requiredQuantity: cycle.expectedCrafts * outputQuantity,
+                                      });
+                                    }}
+                                    className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
+                                    title="Show alternatives"
+                                  >
+                                    <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
+                                  </button>
+                                )}
                               </div>
                             </div>
                             {stepIsExpanded && (
@@ -399,6 +439,21 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                                   <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
                                 </div>
                               </div>
+                              {onShowAlternatives && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onShowAlternatives(step.outputShard, {
+                                      currentRecipe: recipe,
+                                      requiredQuantity: cycle.expectedCrafts * outputQuantity,
+                                    });
+                                  }}
+                                  className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
+                                  title="Show alternatives"
+                                >
+                                  <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
+                                </button>
+                              )}
                             </div>
                           </div>
                         );
@@ -601,12 +656,27 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
               <span className="font-medium text-white text-xs">{crafts}</span>
             </div>
           </div>
+          {onShowAlternatives && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onShowAlternatives(tree.shard, {
+                  currentRecipe: "recipe" in tree ? tree.recipe : null,
+                  requiredQuantity: tree.quantity,
+                });
+              }}
+              className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
+              title="Show alternatives"
+            >
+              <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
+            </button>
+          )}
         </div>
       </div>
       {isExpanded && (
         <div className="border-t border-slate-600 pl-3 pr-0.5 py-0.5 space-y-0.5">
-          <CostRecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={() => {}} noWoodenBait={noWoodenBait} />
-          <CostRecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={() => {}} noWoodenBait={noWoodenBait} />
+          <CostRecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} />
+          <CostRecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} />
         </div>
       )}
     </div>
