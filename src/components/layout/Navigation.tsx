@@ -48,7 +48,6 @@ export const Navigation: React.FC = () => {
 
   const navItems = [
     { path: "/", label: "Calculator", icon: Calculator, color: "purple" },
-    { path: "/cost", label: "Cost Optimizer", icon: DollarSign, color: "amber" },
     { path: "/recipes", label: "Recipes", icon: Shuffle, color: "green" },
     { path: "/prices", label: "Prices", icon: DollarSign, color: "yellow" },
     { path: "/settings", label: "Shards", icon: Settings, color: "blue" },
@@ -82,13 +81,6 @@ export const Navigation: React.FC = () => {
       text: "text-blue-300",
       border: "border border-blue-500/20",
       hoverBorder: "hover:border-blue-500/30",
-    },
-    amber: {
-      bg: "bg-amber-500/20",
-      hoverBg: "hover:bg-amber-500/30",
-      text: "text-amber-300",
-      border: "border border-amber-500/20",
-      hoverBorder: "hover:border-amber-500/30",
     },
   };
 
