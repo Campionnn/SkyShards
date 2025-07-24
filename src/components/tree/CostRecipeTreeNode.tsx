@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, MoveRight } from "lucide-react";
 import { formatMoney } from "../../utilities";
 import type { RecipeTreeNodeProps, Recipe, Shard, RecipeTree } from "../../types/types";
 import { Tooltip } from "../ui";
-import { SHARD_DESCRIPTIONS } from "../../constants";
+import { SHARD_DESCRIPTIONS, WOODEN_BAIT_SHARDS } from "../../constants";
 
 export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   tree,
@@ -14,6 +14,7 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   nodeId,
   expandedStates,
   onToggle,
+  noWoodenBait = false,
 }) => {
   const shard = data.shards[tree.shard];
 
@@ -32,6 +33,9 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
     // Don't show as direct if rate is 0 (completely excluded)
     if (shard.rate === 0) return false;
+
+    // If wooden bait is excluded, don't show wooden bait shards as direct
+    if (noWoodenBait && WOODEN_BAIT_SHARDS.includes(shardId)) return false;
 
     // A shard is direct if it has a rate (meaning it can be obtained directly)
     return shard.rate && shard.rate > 0;
@@ -371,6 +375,12 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                   externalInputs.forEach((inputId) => {
                     const inputShard = data.shards[inputId];
 
+                    // FIRST: Skip wooden bait shards entirely if they're excluded
+                    if (noWoodenBait && WOODEN_BAIT_SHARDS.includes(inputId)) {
+                      return;
+                    }
+
+                    // SECOND: Check if it's a direct shard
                     if (inputShard && inputShard.rate > 0) {
                       inputShardTotals[inputId] = {
                         quantity: inputShard.fuse_amount,
@@ -542,8 +552,8 @@ export const CostRecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
       </div>
       {isExpanded && (
         <div className="border-t border-slate-600 pl-3 pr-0.5 py-0.5 space-y-0.5">
-          <CostRecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} />
-          <CostRecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} />
+          <CostRecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={() => {}} noWoodenBait={noWoodenBait} />
+          <CostRecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={() => {}} noWoodenBait={noWoodenBait} />
         </div>
       )}
     </div>
