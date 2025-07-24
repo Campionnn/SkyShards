@@ -108,7 +108,7 @@ const STAT_ICON_CONFIG: Record<string, StatIconConfig> = {
   "❣": { color: "text-green-400", keywords: ["Health Regen"] },
   "∮": { color: "text-green-600", keywords: ["Sweep"] },
   "✎": { color: "text-blue-400", keywords: ["Intelligence"] },
-  α: { color: "text-blue-400", keywords: ["Sea Creature Chance"] },
+  "α": { color: "text-blue-400", keywords: ["Sea Creature Chance"] },
   "⚓": { color: "text-blue-400", keywords: ["Double Hook Chance"] },
   "⚶": { color: "text-blue-400", keywords: ["Respiration"] },
   "☂": { color: "text-sky-400", keywords: ["Fishing Speed"] },

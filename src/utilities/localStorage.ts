@@ -1,4 +1,4 @@
-import type { CalculationFormData } from "../schemas/validation";
+import type { CalculationFormData } from "../schemas";
 
 const STORAGE_KEY = "calculator_data";
 const SAVE_ENABLED_KEY = "calculator_save_enabled";
