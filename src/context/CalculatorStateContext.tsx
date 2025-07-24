@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
-import type { CalculationFormData } from "../schemas/validation";
+import type { CalculationFormData } from "../schemas";
+import type { CalculationResult, Data } from "../types/types";
 import { saveFormData, loadFormData, clearFormData, getSaveEnabled, setSaveEnabled } from "../utilities";
 
 const defaultForm: CalculationFormData = {
@@ -26,10 +27,10 @@ interface CalculatorStateContextType {
   form: CalculationFormData;
   setForm: (data: CalculationFormData) => void;
   resetForm: () => void;
-  result: any;
-  setResult: (result: any) => void;
-  calculationData: any;
-  setCalculationData: (data: any) => void;
+  result: CalculationResult | null;
+  setResult: (result: CalculationResult | null) => void;
+  calculationData: Data | null;
+  setCalculationData: (data: Data | null) => void;
   targetShardName: string;
   setTargetShardName: (name: string) => void;
   saveEnabled: boolean;
@@ -54,8 +55,8 @@ export const CalculatorStateProvider: React.FC<{ children: React.ReactNode }> = 
     }
     return defaultForm;
   });
-  const [result, setResult] = useState<any>(null);
-  const [calculationData, setCalculationData] = useState<any>(null);
+  const [result, setResult] = useState<CalculationResult | null>(null);
+  const [calculationData, setCalculationData] = useState<Data | null>(null);
   const [targetShardName, setTargetShardName] = useState<string>("");
   const [saveEnabled, setSaveEnabledLocal] = useState<boolean>(() => getSaveEnabled());
 
@@ -90,7 +91,19 @@ export const CalculatorStateProvider: React.FC<{ children: React.ReactNode }> = 
 
   return (
     <CalculatorStateContext.Provider
-      value={{ form, setForm: handleSetForm, resetForm, result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName, saveEnabled, setSaveEnabledState }}
+      value={{
+        form,
+        setForm: handleSetForm,
+        resetForm,
+        result,
+        setResult,
+        calculationData,
+        setCalculationData,
+        targetShardName,
+        setTargetShardName,
+        saveEnabled,
+        setSaveEnabledState,
+      }}
     >
       {children}
     </CalculatorStateContext.Provider>

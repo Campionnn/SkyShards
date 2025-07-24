@@ -2,8 +2,8 @@ import React from "react";
 import { getRarityColor, formatShardDescription } from "../../utilities";
 import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
 import { formatNumber } from "../../utilities";
-import type { RecipeTreeNodeProps } from "../../types/types";
-import { Tooltip } from "../ui/Tooltip";
+import type { RecipeTreeNodeProps, Recipe, Shard, RecipeTree } from "../../types/types";
+import { Tooltip } from "../ui";
 import { SHARD_DESCRIPTIONS, WOODEN_BAIT_SHARDS } from "../../constants";
 
 export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
@@ -42,31 +42,40 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     return shard.rate && shard.rate > 0;
   };
 
-  const findRecipeForShard = (shardId: string) => {
+  // Helper function to find a recipe for a shard
+  const findRecipeForShard = (shardId: string): Recipe | null => {
     const recipesForShard = data.recipes[shardId];
     if (!recipesForShard?.length) return null;
 
-    const specificRecipes = {
-      U8: (recipe: any) => recipe.inputs.includes("C35") && recipe.inputs.includes("U38"),
-      C35: (recipe: any) => recipe.inputs.includes("C23") && recipe.inputs.includes("U38"),
+    const specificRecipes: Record<string, (recipe: Recipe) => boolean> = {
+      U8: (recipe: Recipe) => recipe.inputs.includes("C35") && recipe.inputs.includes("U38"),
+      C35: (recipe: Recipe) => recipe.inputs.includes("C23") && recipe.inputs.includes("U38"),
     };
 
     const finder = specificRecipes[shardId as keyof typeof specificRecipes];
-    return finder ? recipesForShard.find(finder) : recipesForShard.sort((a, b) => b.outputQuantity - a.outputQuantity)[0];
+    return finder ? recipesForShard.find(finder) ?? null : recipesForShard.sort((a, b) => b.outputQuantity - a.outputQuantity)[0];
   };
 
   // Helper function to determine if a recipe is a reptile recipe
-  const isReptileRecipe = (recipe: any, input1Shard: any, input2Shard: any) => {
-    return recipe?.isReptile || input1Shard?.family?.toLowerCase().includes("reptile") || input2Shard?.family?.toLowerCase().includes("reptile");
+  const isReptileRecipe = (
+    recipe: Recipe | undefined,
+    input1Shard: Shard | undefined,
+    input2Shard: Shard | undefined
+  ): boolean => {
+    return (
+        recipe?.isReptile ||
+        input1Shard?.family?.toLowerCase().includes("reptile") ||
+        input2Shard?.family?.toLowerCase().includes("reptile")
+    ) as boolean;
   };
 
   // Helper function to calculate Crocodile procs needed
-  const getCrocodileProcs = (tree: any): number | null => {
+  const getCrocodileProcs = (tree: RecipeTree): number | null => {
     if (tree.method === "cycle") {
       // Only show at top level of cycle
       // If any step in the cycle is a reptile recipe, show procs
-      const hasReptile = tree.cycles.some((cycle: any) =>
-        cycle.steps.some((step: any) => {
+      const hasReptile = tree.cycles.some((cycle) =>
+        cycle.steps.some((step) => {
           const recipe = step.recipe;
           const input1Shard = data.shards[recipe.inputs[0]];
           const input2Shard = data.shards[recipe.inputs[1]];
@@ -98,7 +107,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
   const renderChevron = (isExpanded: boolean) => (isExpanded ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-amber-400" />);
 
-  const renderShardInfo = (quantity: number, shard: any, showRate = true) => {
+  const renderShardInfo = (quantity: number, shard: Shard, showRate = true) => {
     const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
     return (
       <>
@@ -130,7 +139,16 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     );
   };
 
-  const renderRecipeDisplay = (outputQuantity: number, outputShard: any, input1Quantity: number, input1Shard: any, input2Quantity: number, input2Shard: any, showStep = false, stepNumber?: number) => {
+  const renderRecipeDisplay = (
+    outputQuantity: number,
+    outputShard: Shard,
+    input1Quantity: number,
+    input1Shard: Shard,
+    input2Quantity: number,
+    input2Shard: Shard,
+    showStep = false,
+    stepNumber?: number
+  ) => {
     const outputShardDesc = SHARD_DESCRIPTIONS[outputShard.id as keyof typeof SHARD_DESCRIPTIONS];
     const input1ShardDesc = SHARD_DESCRIPTIONS[input1Shard.id as keyof typeof SHARD_DESCRIPTIONS];
     const input2ShardDesc = SHARD_DESCRIPTIONS[input2Shard.id as keyof typeof SHARD_DESCRIPTIONS];
@@ -200,7 +218,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     );
   };
 
-  const renderDirectShard = (quantity: number, shard: any) => (
+  const renderDirectShard = (quantity: number, shard: Shard) => (
     <div className="rounded border border-slate-400/50 flex items-center justify-between px-3 py-1.5 text-sm font-medium gap-2">
       <div className="flex items-center gap-2 min-w-0">
         <div className="w-2 h-2 bg-green-400 rounded-full" />
@@ -215,7 +233,12 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     </div>
   );
 
-  const renderSubRecipe = (recipe: any, inputShard: any, nodePrefix: string, level = 1) => {
+  const renderSubRecipe = (
+    recipe: Recipe,
+    inputShard: Shard,
+    nodePrefix: string,
+    level = 1
+  ) => {
     const maxOutputQuantity = recipe.outputQuantity;
     const input1Shard = data.shards[recipe.inputs[0]];
     const input2Shard = data.shards[recipe.inputs[1]];
@@ -290,7 +313,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 <MoveRight className="w-4 text-amber-400" />
                 <div className="flex items-center space-x-2 text-sm">
                   {renderShardInfo(Math.floor(tree.quantity), shard, false)}
-                  <span className="px-1 bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">CYCLE !</span>
+                  <span className="px-1 py-0.4 text-xs bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">CYCLE !</span>
                   {crocProcs !== null && (
                     <Tooltip
                       content={`Crocodile has a chance to double the output of reptile recipes. You need ${crocProcs} Pure Reptile triggers to have enough shards for the craft. This is based on average luck`}
@@ -459,7 +482,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 {/* Cycle summary */}
                 {(() => {
                   const outputShardIds = new Set(cycle.steps.map((step) => step.outputShard));
-                  const inputShardTotals: Record<string, { quantity: number; shard: any }> = {};
+                  const inputShardTotals: Record<string, { quantity: number; shard: Shard }> = {};
 
                   // Only count external inputs (not produced within the cycle)
                   // Use a Set to avoid counting the same external input multiple times
