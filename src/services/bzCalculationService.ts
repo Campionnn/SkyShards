@@ -566,5 +566,5 @@ export class CalculationService {
 }
 
 // Create and export a default instance
-export const costCalculationService = new CalculationService();
-export default costCalculationService;
+export const bzCalculationService = new CalculationService();
+export default bzCalculationService;
