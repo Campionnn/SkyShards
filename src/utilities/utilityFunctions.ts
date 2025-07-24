@@ -46,13 +46,16 @@ export const formatLargeNumber = (num: number): string => {
   const absNum = Math.abs(num);
   let formatted: string;
   if (absNum >= 1000000000) {
-    formatted = (absNum / 1000000000).toFixed(2).replace(/\.0$/, "") + "B";
+    formatted = (absNum / 1000000000).toFixed(2) + "B";
   } else if (absNum >= 1000000) {
-    formatted = (absNum / 1000000).toFixed(2).replace(/\.0$/, "") + "M";
+    formatted = (absNum / 1000000).toFixed(2) + "M";
   } else if (absNum >= 1000) {
-    formatted = (absNum / 1000).toFixed(2).replace(/\.0$/, "") + "K";
+    formatted = (absNum / 1000).toFixed(2) + "K";
   } else {
     formatted = absNum.toFixed(2);
+    if (/^\d+\.00$/.test(formatted)) {
+      formatted = String(Math.round(absNum));
+    }
   }
   return num < 0 ? "-" + formatted : formatted;
 };

@@ -66,6 +66,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
     // Preserve current shard and quantity values
     const currentShard = form.shard;
     const currentQuantity = form.quantity;
+    const currentIronManView = form.ironManView;
+    const currentInstantBuyPrices = form.instantBuyPrices;
     // Reset to default, then immediately restore shard and quantity
     const resetFormData: CalculationFormData = {
       shard: currentShard,
@@ -87,8 +89,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       customKuudraTime: false,
       kuudraTimeSeconds: null,
       noWoodenBait: false,
-      ironManView: true,
-      instantBuyPrices: false,
+      ironManView: currentIronManView,
+      instantBuyPrices: currentInstantBuyPrices,
     };
     setForm(resetFormData);
     setMoneyInput(""); // Clear the input field
