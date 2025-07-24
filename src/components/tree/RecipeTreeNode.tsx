@@ -298,9 +298,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                       className="cursor-help"
                       showRomanNumerals={false}
                     >
-                      <span className="px-1 text-[11px] font-medium bg-blue-500/15 text-blue-300 border border-blue-400/40 rounded-md flex-shrink-0">
-                        <span className="text-blue-400 font-medium">Pure Reptile needed</span>
-                        <span className="ml-1 font-bold text-blue-300">{crocProcs}</span>
+                      <span className="px-1 py-0.4 text-xs bg-blue-500/15 text-blue-400 border border-blue-400/40 rounded-md flex-shrink-0 ml-2 flex items-center gap-1">
+                        <span className="font-medium">Pure Reptile needed</span>
+                        <span className="font-bold">{crocProcs}</span>
                       </span>
                     </Tooltip>
                   )}
@@ -631,14 +631,14 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 </Tooltip>
                 {crocProcs !== null && (
                   <Tooltip
-                      content={`Crocodile has a chance to double the output of reptile recipes. You need ${crocProcs} Pure Reptile triggers to have enough shards for the craft. This is based on average luck`}
+                    content={`Crocodile has a chance to double the output of reptile recipes. You need ${crocProcs} Pure Reptile triggers to have enough shards for the craft. This is based on average luck`}
                     title="Crocodile - Pure Reptile"
                     className="cursor-help"
                     showRomanNumerals={false}
                   >
-                    <span className="px-1 text-[11px] font-medium bg-blue-500/15 text-blue-300 border border-blue-400/40 rounded-md flex-shrink-0 ml-2">
-                      <span className="text-blue-400 font-medium">Pure Reptile needed</span>
-                      <span className="ml-1 font-bold text-blue-300">{crocProcs}</span>
+                    <span className="px-1 py-0.4 text-xs bg-blue-500/15 text-blue-400 border border-blue-400/40 rounded-md flex-shrink-0 ml-2 flex items-center gap-1">
+                      <span className="font-medium">Pure Reptile needed</span>
+                      <span className="font-bold">{crocProcs}</span>
                     </span>
                   </Tooltip>
                 )}
