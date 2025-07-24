@@ -166,7 +166,7 @@ export class CalculationService {
     const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100) * seaSerpentMultiplier;
     const pythonMultiplier = ((2 * params.pythonLevel) / 100) * seaSerpentMultiplier;
     const kingCobraMultiplier = (params.kingCobraLevel / 100) * seaSerpentMultiplier;
-    const craftPenalty = params.rateAsCoinValue ? 0 : 0.8 / 3600;
+    const craftPenalty = params.rateAsCoinValue ? 1000 : 0.8 / 3600;
 
     return {
       tiamatMultiplier,
