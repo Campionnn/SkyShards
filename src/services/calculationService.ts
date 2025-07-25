@@ -78,7 +78,7 @@ export class CalculationService {
       const shards: Shards = {};
       for (const shardId in fusionJson.shards) {
         let rate = params.customRates[shardId] ?? defaultRates[shardId] ?? 0;
-        
+
         // skip rate modification if rate is a coin value
         if (params.rateAsCoinValue) {
           shards[shardId] = {
