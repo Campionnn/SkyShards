@@ -4,8 +4,6 @@ export { SHARD_DESCRIPTIONS } from "./shardDescriptions";
 
 export const WOODEN_BAIT_SHARDS = ["R29", "L23", "R59", "R23", "R49"];
 
-export const SHINY_FISH_SHARD = "L23"; // The Shinyfish shard
-
 export const BLACK_HOLE_SHARD: { [key: string]: boolean } = {
   L26: false,
   L27: false,

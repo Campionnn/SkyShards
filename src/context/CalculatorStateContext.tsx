@@ -23,6 +23,8 @@ const defaultForm: CalculationFormData = {
   customKuudraTime: false,
   kuudraTimeSeconds: null,
   noWoodenBait: false,
+  ironManView: true,
+  instantBuyPrices: false,
 };
 
 interface CalculatorStateContextType {

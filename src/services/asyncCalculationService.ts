@@ -60,7 +60,7 @@ export class AsyncCalculationService {
           try {
             await this.yieldToUI();
 
-            const result = originalComputeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides);
+            const result = originalComputeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides, params.rateAsCoinValue);
 
             resolve(result);
           } catch (error) {
@@ -96,7 +96,7 @@ export class AsyncCalculationService {
       await this.yieldToUI();
 
       const cycleNodes = calculationService.findCycleNodes(choices);
-      const tree = calculationService.buildRecipeTree(data, targetShard, choices, cycleNodes, recipeOverrides);
+      const tree = calculationService.buildRecipeTree(data, targetShard, choices, cycleNodes, recipeOverrides, params.rateAsCoinValue);
 
       if (this.abortController.signal.aborted) {
         throw new Error("Calculation cancelled");
@@ -109,7 +109,7 @@ export class AsyncCalculationService {
       const multipliers = calculationService.calculateMultipliers(params);
       const craftCounter = { total: 0 };
 
-      calculationService.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, multipliers.crocodileMultiplier, recipeOverrides);
+      calculationService.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, multipliers.crocodileMultiplier, recipeOverrides, params.rateAsCoinValue);
 
       if (this.abortController.signal.aborted) {
         throw new Error("Calculation cancelled");

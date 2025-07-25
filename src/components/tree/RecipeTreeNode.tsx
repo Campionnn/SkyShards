@@ -1,5 +1,5 @@
 import React from "react";
-import { getRarityColor, formatShardDescription } from "../../utilities";
+import { getRarityColor, formatShardDescription, formatLargeNumber } from "../../utilities";
 import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
 import { formatNumber } from "../../utilities";
 import type { RecipeTreeNodeProps, Recipe, Shard, RecipeTree } from "../../types/types";
@@ -16,6 +16,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   onToggle,
   onShowAlternatives,
   noWoodenBait = false,
+  ironManView
 }) => {
   const shard = data.shards[tree.shard];
 
@@ -130,9 +131,14 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         </Tooltip>
         {showRate && (
           <div className="text-right min-w-[80px] ml-2">
-            <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-            <span className="text-slate-500 text-xs mx-0.5">/</span>
-            <span className="text-slate-400 text-xs">hr</span>
+            {ironManView && <>
+              <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
+              <span className="text-slate-500 text-xs mx-0.5">/</span>
+              <span className="text-slate-400 text-xs">hr</span>
+            </>}
+            {!ironManView && (<>
+              <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(quantity * shard.rate)}</span>
+            </>)}
           </div>
         )}
       </>
@@ -223,12 +229,19 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
       <div className="flex items-center gap-2 min-w-0">
         <div className="w-2 h-2 bg-green-400 rounded-full" />
         {renderShardInfo(quantity, shard, false)}
-        <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
+        <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">
+          {ironManView ? "Direct" : "Bazaar"}
+        </span>
       </div>
       <div className="text-right min-w-[80px] ml-2">
-        <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-        <span className="text-slate-500 text-xs mx-0.5">/</span>
-        <span className="text-slate-400 text-xs">hr</span>
+        {ironManView && <>
+          <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
+          <span className="text-slate-500 text-xs mx-0.5">/</span>
+          <span className="text-slate-400 text-xs">hr</span>
+        </>}
+        {!ironManView && (<>
+          <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(quantity * shard.rate)}</span>
+        </>)}
       </div>
     </div>
   );
@@ -433,12 +446,21 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                                   const inputShard = data.shards[inputId];
                                   const inputRecipe = findRecipeForShard(inputId);
 
-                                  if (inputRecipe && inputShard && !isDirectShard(inputId)) {
-                                    return (
-                                      <div key={inputId} className="space-y-1">
-                                        {renderSubRecipe(inputRecipe, inputShard, stepNodeId)}
-                                      </div>
-                                    );
+                                  if (inputRecipe && inputShard) {
+                                    if (!isDirectShard(inputId)) {
+                                      return (
+                                        <div key={inputId} className="space-y-1">
+                                          {renderSubRecipe(inputRecipe, inputShard, stepNodeId)}
+                                        </div>
+                                      );
+                                    }
+                                    else if (inputShard.family?.toLowerCase().includes("reptile")) {
+                                      return (
+                                        <div key={inputId}>
+                                          {renderDirectShard(inputShard.fuse_amount, inputShard)}
+                                        </div>
+                                      );
+                                    }
                                   }
                                   return null;
                                 })}
@@ -537,14 +559,19 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         <div className="flex items-center space-x-2 p-0.5 text-sm">
           <div className="w-2 h-2 bg-green-400 rounded-full" />
           {renderShardInfo(tree.quantity, shard, false)}
-          <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
+          <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">
+            {ironManView ? "Direct" : "Bazaar"}
+          </span>
         </div>
         <div className="text-right">
-          <div className="text-xs text-slate-300">
-            {formatNumber(shard.rate)}
+          {ironManView && <>
+            <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
             <span className="text-slate-500 text-xs mx-0.5">/</span>
             <span className="text-slate-400 text-xs">hr</span>
-          </div>
+          </>}
+          {!ironManView && (<>
+            <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(tree.quantity * shard.rate)}</span>
+          </>)}
         </div>
       </div>
     );
@@ -695,8 +722,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
       </div>
       {isExpanded && (
         <div className="border-t border-slate-600 pl-3 pr-0.5 py-0.5 space-y-0.5">
-          <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} />
-          <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} />
+          <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} ironManView={ironManView} />
+          <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} ironManView={ironManView}/>
         </div>
       )}
     </div>

@@ -42,6 +42,24 @@ export const getRarityColor = (rarity: string): string => {
   return colors[rarity as keyof typeof colors] || "text-white";
 };
 
+export const formatLargeNumber = (num: number): string => {
+  const absNum = Math.abs(num);
+  let formatted: string;
+  if (absNum >= 1000000000) {
+    formatted = (absNum / 1000000000).toFixed(2) + "B";
+  } else if (absNum >= 1000000) {
+    formatted = (absNum / 1000000).toFixed(2) + "M";
+  } else if (absNum >= 1000) {
+    formatted = (absNum / 1000).toFixed(2) + "K";
+  } else {
+    formatted = absNum.toFixed(2);
+    if (/^\d+\.00$/.test(formatted)) {
+      formatted = String(Math.round(absNum));
+    }
+  }
+  return num < 0 ? "-" + formatted : formatted;
+};
+
 export const getRarityBorderColor = (rarity: string): string => {
   const colors = {
     common: "border-gray-400/20",
@@ -95,7 +113,7 @@ const STAT_ICON_CONFIG: Record<string, StatIconConfig> = {
   "❣": { color: "text-green-400", keywords: ["Health Regen"] },
   "∮": { color: "text-green-600", keywords: ["Sweep"] },
   "✎": { color: "text-blue-400", keywords: ["Intelligence"] },
-  α: { color: "text-blue-400", keywords: ["Sea Creature Chance"] },
+  "α": { color: "text-blue-400", keywords: ["Sea Creature Chance"] },
   "⚓": { color: "text-blue-400", keywords: ["Double Hook Chance"] },
   "⚶": { color: "text-blue-400", keywords: ["Respiration"] },
   "☂": { color: "text-sky-400", keywords: ["Fishing Speed"] },
