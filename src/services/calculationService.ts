@@ -343,9 +343,11 @@ export class CalculationService {
       const { recipes, effectiveOutputQty, fuseAmounts } = precomputed[outputShard];
       let bestCost = currentCost;
       let bestRecipe: Recipe | null = currentChoice.recipe;
+      // recipes was being mutated in the loop somewhere, so make a copy. idk why
+      const arr = recipes.slice()
 
-      for (let i = 0; i < recipes.length; i++) {
-        const recipe = recipes[i];
+      for (let i = 0; i < arr.length; i++) {
+        const recipe = arr[i];
         const [fuse1, fuse2] = fuseAmounts[i];
         const [input1, input2] = recipe.inputs;
         const costInput1 = minCosts.get(input1)! * fuse1;
