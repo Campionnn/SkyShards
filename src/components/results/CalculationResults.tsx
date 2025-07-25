@@ -90,7 +90,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           <>
             <SummaryCard icon={Coins} iconColor="text-yellow-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />
             <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Cost" value={formatLargeNumber(result.totalTime)} />
-            <SummaryCard icon={TicketPercent} iconColor="text-purple-400" label="Coins saved" value={formatLargeNumber((requiredQuantity * data.shards[targetShard].rate) - result.totalTime)} />
+            <SummaryCard icon={TicketPercent} iconColor="text-purple-400" label="Total Coins Saved" value={formatLargeNumber((requiredQuantity * data.shards[targetShard].rate) - result.totalTime)} />
           </>
         )}
         <SummaryCard icon={BarChart3} iconColor="text-green-400" label="Shards Produced" value={Math.floor(result.totalShardsProduced).toString()} />

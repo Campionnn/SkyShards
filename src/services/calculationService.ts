@@ -179,7 +179,7 @@ export class CalculationService {
     const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100) * seaSerpentMultiplier;
     const pythonMultiplier = ((2 * params.pythonLevel) / 100) * seaSerpentMultiplier;
     const kingCobraMultiplier = (params.kingCobraLevel / 100) * seaSerpentMultiplier;
-    const craftPenalty = params.rateAsCoinValue ? 1000 : 0.8 / 3600;
+    const craftPenalty = params.rateAsCoinValue ? 0 : 0.8 / 3600;
 
     return {
       tiamatMultiplier,
@@ -250,7 +250,7 @@ export class CalculationService {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
     const shards = Object.keys(data.shards);
-    const multipliers = this.calculateMultipliers({ crocodileLevel, seaSerpentLevel, tiamatLevel } as CalculationParams);
+    const multipliers = this.calculateMultipliers({ crocodileLevel, seaSerpentLevel, tiamatLevel, rateAsCoinValue } as CalculationParams);
     const { crocodileMultiplier, craftPenalty } = multipliers;
 
     const precomputed: Record<
@@ -898,7 +898,7 @@ export class CalculationService {
       totalShardsProduced = craftsNeeded * outputQuantity;
     }
 
-    const timePerShard = minCosts.get(targetShard) ?? 0;
+    const timePerShard = minCosts.get(targetShard) ?? (params.rateAsCoinValue ? Infinity : 0);
     const totalTime = timePerShard * totalShardsProduced;
     const craftTime = (craftCounter.total * 0.8) / 3600;
 
