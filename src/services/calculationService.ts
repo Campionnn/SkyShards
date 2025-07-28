@@ -77,7 +77,7 @@ export class CalculationService {
 
       const shards: Shards = {};
       for (const shardId in fusionJson.shards) {
-        let rate = params.customRates[shardId] ?? defaultRates[shardId] ?? 0;
+        let rate = params.rateAsCoinValue ? (params.customRates[shardId] ?? Infinity) : (params.customRates[shardId] ?? defaultRates[shardId] ?? 0);
 
         // skip rate modification if rate is a coin value
         if (params.rateAsCoinValue) {
@@ -291,7 +291,7 @@ export class CalculationService {
 
     const queue: string[] = [...shards];
     const inQueue = new Set<string>(queue);
-    const tolerance = 1e-10;
+    const tolerance = rateAsCoinValue ? 1 : 1e-10;
 
     while (queue.length > 0) {
       const outputShard = queue.shift()!;
@@ -900,7 +900,7 @@ export class CalculationService {
 
     const timePerShard = minCosts.get(targetShard) ?? (params.rateAsCoinValue ? Infinity : 0);
     const totalTime = timePerShard * totalShardsProduced;
-    const craftTime = (craftCounter.total * 0.8) / 3600;
+    const craftTime = params.rateAsCoinValue ? 0 : (craftCounter.total * 0.8) / 3600;
 
     return {
       timePerShard,
