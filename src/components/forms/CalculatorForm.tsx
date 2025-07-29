@@ -395,6 +395,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           <h3 className="flex items-center gap-2 text-sm font-medium text-yellow-300">
             <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
             Craft Penalty
+            <Tooltip
+              content={
+                form.ironManView
+                  ? "Craft Penalty is the time (in seconds) added for each fusion. Higher values will make the algorithm favor doing less crafts."
+                  : "Craft Penalty is the coin cost added for each fusion. Higher values will make the algorithm favor doing less crafts."
+              }
+            />
           </h3>
           <div className="flex items-center gap-2">
             <input
