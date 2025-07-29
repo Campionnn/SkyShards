@@ -879,7 +879,7 @@ export class CalculationService {
       };
     }
 
-    const { minCosts, choices } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides, params.rateAsCoinValue);
+    const { choices } = this.computeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides, params.rateAsCoinValue);
     const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0 ? this.findCycleNodes(choices) : [];
     const tree = this.buildRecipeTree(data, targetShard, choices, cycleNodes, recipeOverrides, params.rateAsCoinValue);
     const craftCounter = { total: 0 };
@@ -899,9 +899,18 @@ export class CalculationService {
       totalShardsProduced = craftsNeeded * outputQuantity;
     }
 
-    const timePerShard = minCosts.get(targetShard) ?? (params.rateAsCoinValue ? Infinity : 0);
-    const totalTime = timePerShard * totalShardsProduced;
     const craftTime = params.rateAsCoinValue ? 0 : (craftCounter.total * 0.8) / 3600;
+
+    const shardWeights: Map<string, number> = new Map();
+    for (const [shardId, quantity] of totalQuantities.entries()) {
+        const shard = data.shards[shardId];
+        if (shard) {
+            const weight = this.getDirectCost(shard, params.rateAsCoinValue) * quantity;
+            shardWeights.set(shardId, weight);
+        }
+    }
+    const totalTime = Array.from(shardWeights.values()).reduce((sum, weight) => sum + weight, 0) + craftTime;
+    const timePerShard = totalTime / totalShardsProduced;
 
     return {
       timePerShard,

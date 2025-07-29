@@ -131,7 +131,6 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
               return (
                 <div className="flex gap-1 items-center px-3 py-1.5 bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-400 text-sm font-medium rounded-md min-w-0">
                   <span className="text-slate-300">{formatLargeNumber(totalForestEssence)}</span>
-                  {/* <img src={`${import.meta.env.BASE_URL}shardIcons/C1.png`} alt="Forest Essence" className="w-4 h-4 object-contain inline-block align-middle" loading="lazy" /> */}
                   <span className="truncate">Forest Essence</span>
                 </div>
               );
