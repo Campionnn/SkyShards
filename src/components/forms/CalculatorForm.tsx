@@ -160,6 +160,16 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
     // eslint-disable-next-line
   }, [form.ironManView]);
 
+  // For craftPenalty, keep a local string state for user input
+  const [craftPenaltyInput, setCraftPenaltyInput] = React.useState<string>("");
+
+  // On mode switch, reset input to empty and set default in form state, but do NOT set input value
+  React.useEffect(() => {
+    setCraftPenaltyInput(""); // keep input empty
+    handleInputChange("craftPenalty", form.ironManView ? 0.8 : 1000);
+    // eslint-disable-next-line
+  }, [form.ironManView]);
+
   return (
     <div className="bg-slate-800/40 border border-slate-600/30 rounded-md p-3 space-y-3">
       <form onSubmit={(e) => e.preventDefault()} className="space-y-3">
@@ -388,16 +398,20 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           </h3>
           <div className="flex items-center gap-2">
             <input
-              type="number"
-              min="0"
-              step="any"
-              value={form.craftPenalty === 0 ? "" : form.craftPenalty}
+              type="text"
+              inputMode="decimal"
+              value={craftPenaltyInput}
               onChange={e => {
                 const value = e.target.value;
-                if (value === "" || value === undefined || value === null) {
+                setCraftPenaltyInput(value);
+                // If empty, use default for calculation
+                if (value.trim() === "") {
                   handleInputChange("craftPenalty", form.ironManView ? 0.8 : 1000);
                 } else {
-                  handleInputChange("craftPenalty", Number(value));
+                  const num = Number(value);
+                  if (!isNaN(num) && num >= 0) {
+                    handleInputChange("craftPenalty", num);
+                  }
                 }
               }}
               placeholder={form.ironManView ? "0.8" : "1000"}

@@ -99,7 +99,11 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           iconColor="text-orange-400"
           label="Total Fusions"
           value={`${result.totalFusions}x`}
-          additionalValue={result.craftTime > 1 / 12 ? formatTime(result.craftTime) : undefined}
+          additionalValue={
+            ironManView
+              ? formatTime(result.craftTime)
+              : formatLargeNumber(result.craftTime)
+          }
         />
       </div>
       {/* Materials Needed */}

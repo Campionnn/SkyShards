@@ -53,10 +53,8 @@ export const formatLargeNumber = (num: number): string => {
     formatted = (absNum / 1000).toFixed(2) + "K";
   } else {
     formatted = absNum.toFixed(2);
-    if (/^\d+\.00$/.test(formatted)) {
-      formatted = String(Math.round(absNum));
-    }
   }
+  // formatted = formatted.replace(/\.00(?=[KMB]|$)/, "");
   return num < 0 ? "-" + formatted : formatted;
 };
 
