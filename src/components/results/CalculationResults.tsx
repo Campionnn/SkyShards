@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Clock, Coins, Hammer, Target, BarChart3, TicketPercent } from "lucide-react";
-import { formatLargeNumber, formatTime } from "../../utilities";
+import {formatLargeNumber, formatNumber, formatTime} from "../../utilities";
 import type { RecipeTree, CalculationResultsProps } from "../../types/types";
 import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";
@@ -93,7 +93,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
             <SummaryCard icon={TicketPercent} iconColor="text-purple-400" label="Total Coins Saved" value={formatLargeNumber((requiredQuantity * data.shards[targetShard].rate) - result.totalTime)} />
           </>
         )}
-        <SummaryCard icon={BarChart3} iconColor="text-green-400" label="Shards Produced" value={Math.floor(result.totalShardsProduced).toString()} />
+        <SummaryCard icon={BarChart3} iconColor="text-green-400" label="Shards Produced" value={formatNumber(result.totalShardsProduced).toString()} />
         <SummaryCard
           icon={Hammer}
           iconColor="text-orange-400"

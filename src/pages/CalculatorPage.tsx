@@ -64,7 +64,8 @@ const performCalculation = async (
     customKuudraTime: formData.customKuudraTime,
     kuudraTimeSeconds: formData.kuudraTimeSeconds,
     noWoodenBait: formData.noWoodenBait,
-    rateAsCoinValue: !formData.ironManView
+    rateAsCoinValue: !formData.ironManView,
+    craftPenalty: formData.craftPenalty,
   };
 
   callbacks.setCurrentParams(params);

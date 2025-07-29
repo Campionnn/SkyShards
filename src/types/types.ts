@@ -100,7 +100,8 @@ export interface CalculationParams {
   customKuudraTime: boolean;
   kuudraTimeSeconds: number | null;
   noWoodenBait: boolean;
-  rateAsCoinValue: boolean
+  rateAsCoinValue: boolean;
+  craftPenalty: number;
 }
 
 export interface CalculationResult {

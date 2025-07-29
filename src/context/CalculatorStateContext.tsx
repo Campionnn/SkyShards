@@ -25,6 +25,7 @@ const defaultForm: CalculationFormData = {
   noWoodenBait: false,
   ironManView: true,
   instantBuyPrices: false,
+  craftPenalty: 0.8,
 };
 
 interface CalculatorStateContextType {
