@@ -291,7 +291,7 @@ export class CalculationService {
 
     const queue: string[] = [...shards];
     const inQueue = new Set<string>(queue);
-    const tolerance = rateAsCoinValue ? 1 : 1e-10;
+    const tolerance = rateAsCoinValue ? 1e-2 : 1e-10;
 
     while (queue.length > 0) {
       const outputShard = queue.shift()!;
@@ -843,12 +843,13 @@ export class CalculationService {
                 }
               });
 
-              // Now count each external input only once per cycle
+              // Count each external input for every occurrence in the cycle
               externalInputs.forEach((inputId) => {
                 const inputShard = data.shards[inputId];
                 if (inputShard) {
-                  const quantity = inputShard.fuse_amount;
-                  totals.set(inputId, (totals.get(inputId) || 0) + quantity * totalCrafts);
+                  const stepCount = cycleRecipes.steps.length;
+                  const quantity = (totalCrafts / stepCount) * inputShard.fuse_amount;
+                  totals.set(inputId, (totals.get(inputId) || 0) + quantity);
                 }
               });
             }
