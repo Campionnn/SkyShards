@@ -854,8 +854,12 @@ export class CalculationService {
               externalInputs.forEach((inputId) => {
                 const inputShard = data.shards[inputId];
                 if (inputShard) {
-                  const stepCount = cycleRecipes.steps.length;
-                  const quantity = (totalCrafts / stepCount) * inputShard.fuse_amount;
+                  // Count how many times this input appears in the cycle steps
+                  const occurrences = cycleRecipes.steps.reduce((count, step) => {
+                    const inputs = step.recipe.inputs;
+                    return count + (inputs[0] === inputId ? 1 : 0) + (inputs[1] === inputId ? 1 : 0);
+                  }, 0);
+                  const quantity = (totalCrafts / cycleRecipes.steps.length) * inputShard.fuse_amount * occurrences;
                   totals.set(inputId, (totals.get(inputId) || 0) + quantity);
                 }
               });
