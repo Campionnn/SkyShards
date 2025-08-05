@@ -1229,6 +1229,7 @@ export const SHARD_DESCRIPTIONS = {
     title: "Bayou Biter",
     description: "Grants +0.5 ⚓ Double Hook Chance while on the Backwater Bayou",
     family: "Reptile Family",
-    type: "Fishing"
+    type: "Fishing",
+    rarity: "LEGENDARY",
   }
 };
