@@ -78,7 +78,7 @@ export const SHARD_DESCRIPTIONS = {
     rarity: "COMMON",
   },
   C14: {
-    title: "Monster Bait",
+    title: "Creature Fisher",
     description: "Grants +0.5 α Sea Creature Chance",
     family: "Unknown Family",
     type: "Fishing",
@@ -756,6 +756,13 @@ export const SHARD_DESCRIPTIONS = {
     type: "Hunting",
     rarity: "RARE",
   },
+  R64: {
+    title: "Chop",
+    description: "Grants a +10% chance to Chop an extra log, on top of the ones you swept",
+    family: "Bird Family",
+    type: "Foraging",
+    rarity: "RARE",
+  },
   E1: {
     title: "Earth Elemental",
     description: "Grants +2 ❤ Health",
@@ -1218,4 +1225,10 @@ export const SHARD_DESCRIPTIONS = {
     type: "Global",
     rarity: "LEGENDARY",
   },
+  L47: {
+    title: "Bayou Biter",
+    description: "Grants +0.5 ⚓ Double Hook Chance while on the Backwater Bayou",
+    family: "Reptile Family",
+    type: "Fishing"
+  }
 };

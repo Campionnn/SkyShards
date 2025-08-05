@@ -74692,7 +74692,7 @@
     "R59": { "name": "Inferno Koi", "family": "Treasure Fish Family", "type": "Global", "rarity": "rare", "fuse_amount": 5, "internal_id": "SHARD_INFERNO_KOI" },
     "R60": { "name": "Wither", "family": "Unknown Family", "type": "Global", "rarity": "rare", "fuse_amount": 5, "internal_id": "SHARD_WITHER" },
     "R61": { "name": "Gecko", "family": "Reptile and Scaled Family", "type": "Hunting", "rarity": "rare", "fuse_amount": 2, "internal_id": "SHARD_GECKO" },
-    "R64": { "name": "Hummingbird", "family": "Bird", "type": "Foraging", "rarity": "rare", "fuse_amount": 5, "internal_id": "SHARD_HUMMINGBIRD" },
+    "R64": { "name": "Hummingbird", "family": "Bird Family", "type": "Foraging", "rarity": "rare", "fuse_amount": 5, "internal_id": "SHARD_HUMMINGBIRD" },
     "E1": { "name": "Terra", "family": "Elemental Family", "type": "Global", "rarity": "epic", "fuse_amount": 2, "internal_id": "SHARD_TERRA" },
     "E2": { "name": "Cryo", "family": "Elemental Family", "type": "Global", "rarity": "epic", "fuse_amount": 2, "internal_id": "SHARD_CRYO" },
     "E3": { "name": "Aero", "family": "Elemental Family", "type": "Global", "rarity": "epic", "fuse_amount": 2, "internal_id": "SHARD_AERO" },
@@ -74759,6 +74759,6 @@
     "L41": { "name": "Galaxy Fish", "family": "Unknown Family", "type": "Global", "rarity": "legendary", "fuse_amount": 5, "internal_id": "SHARD_GALAXY_FISH" },
     "L42": { "name": "Molthorn", "family": "Demon and Dragon Family", "type": "Global", "rarity": "legendary", "fuse_amount": 5, "internal_id": "SHARD_MOLTHORN" },
     "L44": { "name": "Starborn", "family": "Elemental Family", "type": "Global", "rarity": "legendary", "fuse_amount": 2, "internal_id": "SHARD_STARBORN" },
-    "L47": { "name": "Titanoboa", "family": "Reptile", "type": "Fishing", "rarity": "legendary", "fuse_amount": 2, "internal_id": "SHARD_TITANOBOA" }
+    "L47": { "name": "Titanoboa", "family": "Reptile Family", "type": "Fishing", "rarity": "legendary", "fuse_amount": 2, "internal_id": "SHARD_TITANOBOA" }
   }
 }

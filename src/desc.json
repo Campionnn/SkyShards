@@ -66,7 +66,7 @@
     "type": "Combat"
   },
   "C14": {
-    "title": "Monster Bait",
+    "title": "Creature Fisher",
     "description": "Grants +0.5 α Sea Creature Chance",
     "family": "Unknown Family",
     "type": "Fishing"
@@ -647,6 +647,12 @@
     "family": "Reptile and Scaled Family",
     "type": "Hunting"
   },
+  "R64": {
+    "title": "Chop",
+    "description": "Grants a +10% chance to Chop an extra log, on top of the ones you swept",
+    "family": "Bird Family",
+    "type": "Foraging"
+  },
   "E1": {
     "title": "Earth Elemental",
     "description": "Grants +2 ❤ Health",
@@ -1042,5 +1048,11 @@
     "description": "Buffs all other shards in the Elemental Family by +2%",
     "family": "Elemental Family",
     "type": "Global"
+  },
+  "L47": {
+    "title": "Bayou Biter",
+    "description": "Grants +0.5 ⚓ Double Hook Chance while on the Backwater Bayou",
+    "family": "Reptile Family",
+    "type": "Fishing"
   }
 }
