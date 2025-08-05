@@ -54,7 +54,7 @@ export const formatLargeNumber = (num: number): string => {
   } else {
     formatted = absNum.toFixed(2);
   }
-  // formatted = formatted.replace(/\.00(?=[KMB]|$)/, "");
+  formatted = formatted.replace(/\.00(?=[KMB]|$)/, "");
   return num < 0 ? "-" + formatted : formatted;
 };
 
