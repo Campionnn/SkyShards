@@ -145,9 +145,9 @@ export class CalculationService {
     const tierData: Record<string, { baseTime: number; cost: number; multiplier: number }> = {
       t1: { baseTime: 60, cost: 155000, multiplier: 1 },
       t2: { baseTime: 60, cost: 310000, multiplier: 1 },
-      t3: { baseTime: 60, cost: 582000, multiplier: 2 },
-      t4: { baseTime: 60, cost: 1164000, multiplier: 2 },
-      t5: { baseTime: 100, cost: 2328000, multiplier: 3 },
+      t3: { baseTime: 60, cost: 582000, multiplier: 1 },
+      t4: { baseTime: 60, cost: 1164000, multiplier: 1.25 },
+      t5: { baseTime: 100, cost: 2328000, multiplier: 1.5 },
     };
 
     const tier = tierData[kuudraTier];
@@ -177,7 +177,7 @@ export class CalculationService {
     const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
     const seaSerpentMultiplier = 1 + ((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier;
     const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100) * seaSerpentMultiplier;
-    const pythonMultiplier = ((2 * params.pythonLevel) / 100) * seaSerpentMultiplier;
+    const pythonMultiplier = ((5 * params.pythonLevel) / 100) * seaSerpentMultiplier;
     const kingCobraMultiplier = (params.kingCobraLevel / 100) * seaSerpentMultiplier;
     let craftPenalty: number;
     if (params.rateAsCoinValue) {
