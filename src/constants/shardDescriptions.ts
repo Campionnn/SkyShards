@@ -485,7 +485,7 @@ export const SHARD_DESCRIPTIONS = {
   },
   R9: {
     title: "Hunter's Pressure",
-    description: "Your Black Holes capture creatures +2% faster",
+    description: "Your Black Holes capture creatures +5% faster",
     family: "Reptile and Serpent Family",
     type: "Hunting",
     rarity: "RARE",
