@@ -5,6 +5,7 @@ export { SHARD_DESCRIPTIONS } from "./shardDescriptions";
 export const WOODEN_BAIT_SHARDS = ["R29", "L23", "R59", "R23", "R49"];
 
 export const BLACK_HOLE_SHARD: { [key: string]: boolean } = {
+  L47: false,
   L26: false,
   L27: false,
   E33: true,

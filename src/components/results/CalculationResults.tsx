@@ -136,9 +136,8 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
 
               const totalForestEssence = forestEssenceShards.reduce((total, [shardId, quantity]) => {
                 const shardName = data.shards[shardId]?.name?.toLowerCase();
-                let essenceNeeded = quantity * (shardName === "shinyfish" ? 446 : 1024);
                 const effectiveFortune = 1 + (params.hunterFortune + rarityBonuses[data.shards[shardId]?.rarity]) / 100;
-                essenceNeeded = essenceNeeded / effectiveFortune;
+                const essenceNeeded = (quantity * (shardName === "shinyfish" ? 446 : 1024)) / effectiveFortune;
                 return total + essenceNeeded;
               }, 0);
 

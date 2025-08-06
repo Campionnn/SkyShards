@@ -192,7 +192,7 @@ export const AlternativeRecipeModal: React.FC<
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full" />
-            <span className="text-green-400 font-medium text-sm">Buy from Bazaar</span>
+            <span className="text-green-400 font-medium text-sm">{params.rateAsCoinValue ? "Buy from Bazaar" : "Direct"}</span>
             {isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
           </div>
           <div className="flex items-center gap-1 text-slate-400 text-sm">
