@@ -126,10 +126,20 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
 
               if (forestEssenceShards.length === 0) return null;
 
+              const rarityBonuses = {
+                common: 2 * params.newtLevel,
+                uncommon: 2 * params.salamanderLevel,
+                rare: params.lizardKingLevel,
+                epic: params.leviathanLevel,
+                legendary: 0,
+              };
+
               const totalForestEssence = forestEssenceShards.reduce((total, [shardId, quantity]) => {
                 const shardName = data.shards[shardId]?.name?.toLowerCase();
-                const multiplier = shardName === "shinyfish" ? 446 : 1024;
-                return total + quantity * multiplier;
+                let essenceNeeded = quantity * (shardName === "shinyfish" ? 446 : 1024);
+                const effectiveFortune = 1 + (params.hunterFortune + rarityBonuses[data.shards[shardId]?.rarity]) / 100;
+                essenceNeeded = essenceNeeded / effectiveFortune;
+                return total + essenceNeeded;
               }, 0);
 
               return (
