@@ -114,29 +114,14 @@ export const AlternativeRecipeModal: React.FC<
       }
     }
 
-    // Normalize recipes to put most common shard first
-    const normalizedRecipes = dedupedRecipes.map((option) => {
-      if (!option.recipe) return option;
-      const [a, b] = option.recipe.inputs;
-      if ((shardCount[b] ?? 0) > (shardCount[a] ?? 0)) {
-        return {
-          ...option,
-          recipe: {
-            ...option.recipe,
-            inputs: [b, a] as [string, string],
-          },
-        };
-      }
-      return option;
-    });
-
-    // Re-group by first input shard
+    // Re-group by most common shard
     const newGrouped: Record<string, AlternativeRecipeOption[]> = {};
-    for (const option of normalizedRecipes) {
+    for (const option of dedupedRecipes) {
       if (!option.recipe) continue;
-      const first = option.recipe.inputs[0];
-      if (!newGrouped[first]) newGrouped[first] = [];
-      newGrouped[first].push(option);
+      const [a, b] = option.recipe.inputs;
+      const mostCommon = (shardCount[a] ?? 0) > (shardCount[b] ?? 0) ? a : b;
+      if (!newGrouped[mostCommon]) newGrouped[mostCommon] = [];
+      newGrouped[mostCommon].push(option);
     }
 
     // Filter grouped fusion options by search query
@@ -269,9 +254,11 @@ export const AlternativeRecipeModal: React.FC<
       return fastestTimeA - fastestTimeB;
     });
 
-    return groupKeys.map((firstShard) => {
+    return groupKeys.map((groupShard) => {
+      const getPartner = ([a, b]: [string, string]) => groupShard === a ? b : a;
+
       // Get all options for this group and sort by cost (lowest first)
-      const group = [...grouped[firstShard]].sort((a, b) => {
+      const group = [...grouped[groupShard]].sort((a, b) => {
         // First sort by time (ascending - fastest first)
         const timeDiff = a.timePerShard - b.timePerShard;
         if (timeDiff !== 0) return timeDiff;
@@ -282,10 +269,10 @@ export const AlternativeRecipeModal: React.FC<
 
         return 0;
       });
-      const firstShardObj = data?.shards?.[firstShard];
+      const firstShardObj = data?.shards?.[groupShard];
 
       // Get selected index - find current recipe or default to 0 (best option)
-      let selectedIndex = selectedIndices[firstShard];
+      let selectedIndex = selectedIndices[groupShard];
 
       // If no manual selection, try to find the current recipe
       if (selectedIndex === undefined) {
@@ -294,14 +281,14 @@ export const AlternativeRecipeModal: React.FC<
       }
 
       const selectedOption = group[selectedIndex] || group[0];
-      const isOpen = openDropdowns[firstShard] || false;
-      const dropdownSearchQuery = dropdownSearchQueries[firstShard] || "";
+      const isOpen = openDropdowns[groupShard] || false;
+      const dropdownSearchQuery = dropdownSearchQueries[groupShard] || "";
 
       // Filter group options based on dropdown search query
       const filteredGroup = dropdownSearchQuery.trim()
         ? group.filter((option) => {
             if (!option.recipe) return false;
-            const [, partnerShard] = option.recipe.inputs;
+            const partnerShard = getPartner(option.recipe.inputs);
             const partner = data?.shards?.[partnerShard];
             return partner?.name.toLowerCase().includes(dropdownSearchQuery.toLowerCase());
           })
@@ -416,13 +403,13 @@ export const AlternativeRecipeModal: React.FC<
         setOpenDropdowns((prev) => {
           const newState = {
             ...prev,
-            [firstShard]: !prev[firstShard],
+            [groupShard]: !prev[groupShard],
           };
 
           // Auto-scroll to show the full dropdown when opening
-          if (!prev[firstShard] && newState[firstShard]) {
+          if (!prev[groupShard] && newState[groupShard]) {
             setTimeout(() => {
-              const dropdownButton = document.querySelector(`[data-dropdown-button="${firstShard}"]`);
+              const dropdownButton = document.querySelector(`[data-dropdown-button="${groupShard}"]`);
               const popupContent = document.querySelector(".overflow-y-auto.flex-1.min-h-0") as HTMLElement;
 
               if (dropdownButton && popupContent) {
@@ -452,20 +439,20 @@ export const AlternativeRecipeModal: React.FC<
       const selectOption = (index: number) => {
         setSelectedIndices((prev) => ({
           ...prev,
-          [firstShard]: index,
+          [groupShard]: index,
         }));
         setOpenDropdowns((prev) => ({
           ...prev,
-          [firstShard]: false,
+          [groupShard]: false,
         }));
       };
 
       return (
-        <div key={firstShard} className="mb-6">
+        <div key={groupShard} className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             {firstShardObj && (
               <>
-                <img src={`${import.meta.env.BASE_URL}shardIcons/${firstShard}.png`} alt={firstShardObj.name} className="w-5 h-5 object-contain" loading="lazy" />
+                <img src={`${import.meta.env.BASE_URL}shardIcons/${groupShard}.png`} alt={firstShardObj.name} className="w-5 h-5 object-contain" loading="lazy" />
                 <span className={getRarityColor(firstShardObj.rarity) + " font-semibold text-base"}>{firstShardObj.name}</span>
                 <span className="text-xs text-slate-400">
                   ({group.length} recipe{group.length !== 1 ? "s" : ""})
@@ -483,14 +470,14 @@ export const AlternativeRecipeModal: React.FC<
               <button
                 type="button"
                 onClick={toggleDropdown}
-                data-dropdown-button={firstShard}
+                data-dropdown-button={groupShard}
                 className="w-full px-4 py-3 bg-slate-800/95 border border-slate-600/70 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 hover:border-slate-500/80 hover:bg-slate-700/80 transition-all duration-200 cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {selectedOption?.recipe &&
                       (() => {
-                        const [, partnerShard] = selectedOption.recipe.inputs;
+                        const partnerShard = getPartner(selectedOption.recipe.inputs);
                         const partner = data?.shards?.[partnerShard];
                         return (
                           <>
@@ -534,7 +521,7 @@ export const AlternativeRecipeModal: React.FC<
                         onChange={(e) =>
                           setDropdownSearchQueries((prev) => ({
                             ...prev,
-                            [firstShard]: e.target.value,
+                            [groupShard]: e.target.value,
                           }))
                         }
                         className="w-full pl-7 pr-2 py-1.5 bg-slate-800 border border-slate-700 rounded text-white placeholder-slate-400 text-xs focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent"
@@ -550,7 +537,7 @@ export const AlternativeRecipeModal: React.FC<
                     ) : (
                       processedGroup.map((option, idx) => {
                         if (!option.recipe) return null;
-                        const [, partnerShard] = option.recipe.inputs;
+                        const partnerShard = getPartner(option.recipe.inputs);
                         const partner = data?.shards?.[partnerShard];
                         const originalIndex = group.findIndex((groupOption) => groupOption === option);
                         const isSelected = originalIndex === selectedIndex;
