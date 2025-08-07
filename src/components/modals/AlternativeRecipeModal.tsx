@@ -255,6 +255,8 @@ export const AlternativeRecipeModal: React.FC<
     });
 
     return groupKeys.map((groupShard) => {
+      const getPartner = ([a, b]: [string, string]) => groupShard === a ? b : a;
+
       // Get all options for this group and sort by cost (lowest first)
       const group = [...grouped[groupShard]].sort((a, b) => {
         // First sort by time (ascending - fastest first)
@@ -286,7 +288,7 @@ export const AlternativeRecipeModal: React.FC<
       const filteredGroup = dropdownSearchQuery.trim()
         ? group.filter((option) => {
             if (!option.recipe) return false;
-            const [, partnerShard] = option.recipe.inputs;
+            const partnerShard = getPartner(option.recipe.inputs);
             const partner = data?.shards?.[partnerShard];
             return partner?.name.toLowerCase().includes(dropdownSearchQuery.toLowerCase());
           })
@@ -444,8 +446,6 @@ export const AlternativeRecipeModal: React.FC<
           [groupShard]: false,
         }));
       };
-
-      const getPartner = ([a, b]: [string, string]) => groupShard === a ? b : a;
 
       return (
         <div key={groupShard} className="mb-6">
