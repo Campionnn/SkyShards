@@ -238,7 +238,7 @@ export class CalculationService {
     return inputsMatch && a.outputQuantity === b.outputQuantity && a.isReptile === b.isReptile;
   }
 
-  private getDirectCost(shard: Shard, ratesAsCoinValue: boolean): number {
+  getDirectCost(shard: Shard, ratesAsCoinValue: boolean): number {
     if (shard.rate <= 0) return Infinity;
     return ratesAsCoinValue ? shard.rate : 1 / shard.rate;
   }
