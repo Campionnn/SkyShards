@@ -119,7 +119,8 @@ export const AlternativeRecipeModal: React.FC<
     for (const option of dedupedRecipes) {
       if (!option.recipe) continue;
       const [a, b] = option.recipe.inputs;
-      const mostCommon = (shardCount[a] ?? 0) > (shardCount[b] ?? 0) ? a : b;
+      // Default to left shard if both are equally common.
+      const mostCommon = (shardCount[a] ?? 0) >= (shardCount[b] ?? 0) ? a : b;
       if (!newGrouped[mostCommon]) newGrouped[mostCommon] = [];
       newGrouped[mostCommon].push(option);
     }
