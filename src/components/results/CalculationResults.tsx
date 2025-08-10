@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Clock, Coins, Hammer, Target, BarChart3, TicketPercent } from "lucide-react";
-import { formatLargeNumber, formatTime } from "../../utilities";
+import {formatLargeNumber, formatNumber, formatTime} from "../../utilities";
 import type { RecipeTree, CalculationResultsProps } from "../../types/types";
 import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";
@@ -90,16 +90,20 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           <>
             <SummaryCard icon={Coins} iconColor="text-yellow-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />
             <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Cost" value={formatLargeNumber(result.totalTime)} />
-            <SummaryCard icon={TicketPercent} iconColor="text-purple-400" label="Coins saved" value={formatLargeNumber((requiredQuantity * data.shards[targetShard].rate) - result.totalTime)} />
+            <SummaryCard icon={TicketPercent} iconColor="text-purple-400" label="Total Coins Saved" value={formatLargeNumber((result.totalShardsProduced * data.shards[targetShard].rate) - result.totalTime)} />
           </>
         )}
-        <SummaryCard icon={BarChart3} iconColor="text-green-400" label="Shards Produced" value={Math.floor(result.totalShardsProduced).toString()} />
+        <SummaryCard icon={BarChart3} iconColor="text-green-400" label="Shards Produced" value={formatNumber(result.totalShardsProduced).toString()} />
         <SummaryCard
           icon={Hammer}
           iconColor="text-orange-400"
           label="Total Fusions"
           value={`${result.totalFusions}x`}
-          additionalValue={result.craftTime > 1 / 12 ? formatTime(result.craftTime) : undefined}
+          additionalValue={
+            ironManView
+              ? formatTime(result.craftTime)
+              : formatLargeNumber(result.craftTime)
+          }
         />
       </div>
       {/* Materials Needed */}
@@ -122,16 +126,24 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
 
               if (forestEssenceShards.length === 0) return null;
 
+              const rarityBonuses = {
+                common: 2 * params.newtLevel,
+                uncommon: 2 * params.salamanderLevel,
+                rare: params.lizardKingLevel,
+                epic: params.leviathanLevel,
+                legendary: 0,
+              };
+
               const totalForestEssence = forestEssenceShards.reduce((total, [shardId, quantity]) => {
                 const shardName = data.shards[shardId]?.name?.toLowerCase();
-                const multiplier = shardName === "shinyfish" ? 446 : 1024;
-                return total + quantity * multiplier;
+                const effectiveFortune = 1 + (params.hunterFortune + rarityBonuses[data.shards[shardId]?.rarity]) / 100;
+                const essenceNeeded = (quantity * (shardName === "shinyfish" ? 446 : 1024)) / effectiveFortune;
+                return total + essenceNeeded;
               }, 0);
 
               return (
                 <div className="flex gap-1 items-center px-3 py-1.5 bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-400 text-sm font-medium rounded-md min-w-0">
                   <span className="text-slate-300">{formatLargeNumber(totalForestEssence)}</span>
-                  {/* <img src={`${import.meta.env.BASE_URL}shardIcons/C1.png`} alt="Forest Essence" className="w-4 h-4 object-contain inline-block align-middle" loading="lazy" /> */}
                   <span className="truncate">Forest Essence</span>
                 </div>
               );

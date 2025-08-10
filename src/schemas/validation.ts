@@ -21,7 +21,8 @@ export const calculationSchema = z.object({
   kuudraTimeSeconds: z.number().min(1).nullable(),
   noWoodenBait: z.boolean(),
   ironManView: z.boolean(),
-  instantBuyPrices: z.boolean()
+  instantBuyPrices: z.boolean(),
+  craftPenalty: z.number().min(0),
 });
 
 export type CalculationFormData = z.infer<typeof calculationSchema>;

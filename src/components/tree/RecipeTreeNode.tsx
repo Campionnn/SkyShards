@@ -506,35 +506,25 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                   const outputShardIds = new Set(cycle.steps.map((step) => step.outputShard));
                   const inputShardTotals: Record<string, { quantity: number; shard: Shard }> = {};
 
-                  // Only count external inputs (not produced within the cycle)
-                  // Use a Set to avoid counting the same external input multiple times
-                  const externalInputs = new Set<string>();
-
+                  // Count all external inputs (not produced within the cycle), including duplicates
                   cycle.steps.forEach((step) => {
                     step.recipe.inputs.forEach((inputId: string) => {
                       const inputShard = data.shards[inputId];
                       // Skip if input shard doesn't exist OR if it's produced by another step in this cycle
                       if (!inputShard || outputShardIds.has(inputId)) return;
 
-                      // Add to set of external inputs (will automatically handle duplicates)
-                      externalInputs.add(inputId);
+                      // Check if it's a direct shard
+                      if (inputShard.rate > 0) {
+                        if (!inputShardTotals[inputId]) {
+                          inputShardTotals[inputId] = {
+                            quantity: 0,
+                            shard: inputShard,
+                          };
+                        }
+                        // Calculate quantity as (cycle.expectedCrafts / cycle.steps.length) * fuse_amount
+                        inputShardTotals[inputId].quantity += inputShard.fuse_amount / cycle.steps.length;
+                      }
                     });
-                  }); // Now count each external input only once, but only if it's a direct shard
-                  externalInputs.forEach((inputId) => {
-                    const inputShard = data.shards[inputId];
-
-                    // FIRST: Skip wooden bait shards entirely if they're excluded
-                    if (noWoodenBait && WOODEN_BAIT_SHARDS.includes(inputId)) {
-                      return;
-                    }
-
-                    // SECOND: Check if it's a direct shard
-                    if (inputShard && inputShard.rate > 0) {
-                      inputShardTotals[inputId] = {
-                        quantity: inputShard.fuse_amount,
-                        shard: inputShard,
-                      };
-                    }
                   });
 
                   return (

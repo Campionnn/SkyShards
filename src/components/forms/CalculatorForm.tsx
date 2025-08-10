@@ -91,6 +91,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       noWoodenBait: false,
       ironManView: currentIronManView,
       instantBuyPrices: currentInstantBuyPrices,
+      craftPenalty: currentIronManView ? 0.8 : 1000,
     };
     setForm(resetFormData);
     setMoneyInput(""); // Clear the input field
@@ -143,6 +144,31 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       handleInputChange("shard", "");
     }
   };
+
+  // Handle craftPenalty default and mode switching
+  React.useEffect(() => {
+    if (form.craftPenalty === undefined || form.craftPenalty === null) {
+      handleInputChange("craftPenalty", form.ironManView ? 0.8 : 1000);
+    } else {
+      // If switching modes, update default only if current value matches previous default
+      if (form.ironManView && form.craftPenalty === 1000) {
+        handleInputChange("craftPenalty", 0.8);
+      } else if (!form.ironManView && form.craftPenalty === 0.8) {
+        handleInputChange("craftPenalty", 1000);
+      }
+    }
+    // eslint-disable-next-line
+  }, [form.ironManView]);
+
+  // For craftPenalty, keep a local string state for user input
+  const [craftPenaltyInput, setCraftPenaltyInput] = React.useState<string>("");
+
+  // On mode switch, reset input to empty and set default in form state, but do NOT set input value
+  React.useEffect(() => {
+    setCraftPenaltyInput(""); // keep input empty
+    handleInputChange("craftPenalty", form.ironManView ? 0.8 : 1000);
+    // eslint-disable-next-line
+  }, [form.ironManView]);
 
   return (
     <div className="bg-slate-800/40 border border-slate-600/30 rounded-md p-3 space-y-3">
@@ -361,6 +387,46 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 />
               );
             })}
+          </div>
+        </div>
+
+        {/* Craft Penalty Input */}
+        <div className="space-y-2">
+          <h3 className="flex items-center gap-2 text-sm font-medium text-yellow-300">
+            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+            Craft Penalty
+            <Tooltip
+              content={
+                form.ironManView
+                  ? "Craft Penalty is the time (in seconds) added for each fusion. Higher values will make the algorithm favor doing less crafts."
+                  : "Craft Penalty is the coin cost added for each fusion. Higher values will make the algorithm favor doing less crafts."
+              }
+            />
+          </h3>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={craftPenaltyInput}
+              onChange={e => {
+                const value = e.target.value;
+                setCraftPenaltyInput(value);
+                // If empty, use default for calculation
+                if (value.trim() === "") {
+                  handleInputChange("craftPenalty", form.ironManView ? 0.8 : 1000);
+                } else {
+                  const num = Number(value);
+                  if (!isNaN(num) && num >= 0) {
+                    handleInputChange("craftPenalty", num);
+                  }
+                }
+              }}
+              placeholder={form.ironManView ? "0.8" : "1000"}
+              className="w-32 px-3 py-1.5 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-colors duration-200"
+            />
+            <span className="text-xs text-slate-400">
+              {form.ironManView ? "seconds per craft" : "coins per craft"}
+            </span>
           </div>
         </div>
 

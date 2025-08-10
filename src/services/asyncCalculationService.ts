@@ -60,7 +60,7 @@ export class AsyncCalculationService {
           try {
             await this.yieldToUI();
 
-            const result = originalComputeMinCosts(data, params.crocodileLevel, params.seaSerpentLevel, params.tiamatLevel, recipeOverrides, params.rateAsCoinValue);
+            const result = originalComputeMinCosts(data, params, recipeOverrides);
 
             resolve(result);
           } catch (error) {
@@ -82,7 +82,7 @@ export class AsyncCalculationService {
         }
       }, 100);
 
-      const { minCosts, choices } = await costComputation;
+      const { choices } = await costComputation;
       clearInterval(progressInterval);
 
       if (this.abortController.signal.aborted) {
@@ -96,7 +96,7 @@ export class AsyncCalculationService {
       await this.yieldToUI();
 
       const cycleNodes = calculationService.findCycleNodes(choices);
-      const tree = calculationService.buildRecipeTree(data, targetShard, choices, cycleNodes, recipeOverrides, params.rateAsCoinValue);
+      const tree = calculationService.buildRecipeTree(data, targetShard, choices, cycleNodes, params, recipeOverrides);
 
       if (this.abortController.signal.aborted) {
         throw new Error("Calculation cancelled");
@@ -109,7 +109,7 @@ export class AsyncCalculationService {
       const multipliers = calculationService.calculateMultipliers(params);
       const craftCounter = { total: 0 };
 
-      calculationService.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, multipliers.crocodileMultiplier, recipeOverrides, params.rateAsCoinValue);
+      calculationService.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, multipliers.crocodileMultiplier, params, recipeOverrides);
 
       if (this.abortController.signal.aborted) {
         throw new Error("Calculation cancelled");
@@ -122,17 +122,38 @@ export class AsyncCalculationService {
       await this.yieldToUI();
 
       const totalQuantities = calculationService.collectTotalQuantities(tree, data);
-      const timePerShard = minCosts.get(targetShard) || 0;
-      const totalTime = timePerShard * requiredQuantity;
+
+      let totalShardsProduced = requiredQuantity;
+      let craftsNeeded = 1;
+      const choice = choices.get(targetShard);
+
+      if (choice?.recipe) {
+        const outputQuantity = choice.recipe.isReptile ? choice.recipe.outputQuantity * multipliers.crocodileMultiplier : choice.recipe.outputQuantity;
+        craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
+        totalShardsProduced = craftsNeeded * outputQuantity;
+      }
+
+      const craftTime = params.rateAsCoinValue ? craftCounter.total * params.craftPenalty : (craftCounter.total * params.craftPenalty) / 3600;
+
+      const shardWeights: Map<string, number> = new Map();
+      for (const [shardId, quantity] of totalQuantities.entries()) {
+        const shard = data.shards[shardId];
+        if (shard) {
+          const weight = calculationService.getDirectCost(shard, params.rateAsCoinValue) * quantity;
+          shardWeights.set(shardId, weight);
+        }
+      }
+      const totalTime = Array.from(shardWeights.values()).reduce((sum, weight) => sum + weight, 0) + craftTime;
+      const timePerShard = totalTime / totalShardsProduced;
 
       const result: CalculationResult = {
         timePerShard,
         totalTime,
-        totalShardsProduced: requiredQuantity,
+        totalShardsProduced: totalShardsProduced,
         craftsNeeded: craftCounter.total,
         totalQuantities,
         totalFusions: craftCounter.total,
-        craftTime: totalTime,
+        craftTime: craftTime,
         tree,
       };
 

@@ -1,10 +1,11 @@
-export const NO_FORTUNE_SHARDS = ["C19", "U4", "U16", "U28", "R25", "R27", "R60", "E12", "L4", "L15", "L30", "L33"];
+export const NO_FORTUNE_SHARDS = ["C19", "U4", "U16", "U28", "R25", "R27", "R60", "R64", "E12", "L4", "L15", "L30", "L33"];
 
 export { SHARD_DESCRIPTIONS } from "./shardDescriptions";
 
 export const WOODEN_BAIT_SHARDS = ["R29", "L23", "R59", "R23", "R49"];
 
 export const BLACK_HOLE_SHARD: { [key: string]: boolean } = {
+  L47: false,
   L26: false,
   L27: false,
   E33: true,
