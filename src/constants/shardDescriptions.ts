@@ -506,7 +506,7 @@ export const SHARD_DESCRIPTIONS = {
   },
   R13: {
     title: "Catacombs Box",
-    description: "ncreases the quality of boss rewards in The Catacombs by +1",
+    description: "Increases the quality of boss rewards in The Catacombs by +1",
     family: "Shulker Family",
     type: "Global",
     rarity: "RARE",
