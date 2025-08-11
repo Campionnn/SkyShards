@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
 import { formatNumber } from "../../utilities";
 import type { RecipeTreeNodeProps, Recipe, Shard, RecipeTree } from "../../types/types";
 import { Tooltip } from "../ui";
-import { SHARD_DESCRIPTIONS, WOODEN_BAIT_SHARDS } from "../../constants";
+import { SHARD_DESCRIPTIONS } from "../../constants";
 
 export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   tree,
@@ -36,25 +36,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     // Don't show as direct if rate is 0 (completely excluded)
     if (shard.rate === 0) return false;
 
-    // If wooden bait is excluded, don't show wooden bait shards as direct
-    if (noWoodenBait && WOODEN_BAIT_SHARDS.includes(shardId)) return false;
-
     // A shard is direct if it has a rate (meaning it can be obtained directly)
     return shard.rate && shard.rate > 0;
-  };
-
-  // Helper function to find a recipe for a shard
-  const findRecipeForShard = (shardId: string): Recipe | null => {
-    const recipesForShard = data.recipes[shardId];
-    if (!recipesForShard?.length) return null;
-
-    const specificRecipes: Record<string, (recipe: Recipe) => boolean> = {
-      U8: (recipe: Recipe) => recipe.inputs.includes("C35") && recipe.inputs.includes("U38"),
-      C35: (recipe: Recipe) => recipe.inputs.includes("C23") && recipe.inputs.includes("U38"),
-    };
-
-    const finder = specificRecipes[shardId as keyof typeof specificRecipes];
-    return finder ? recipesForShard.find(finder) ?? null : recipesForShard.sort((a, b) => b.outputQuantity - a.outputQuantity)[0];
   };
 
   // Helper function to determine if a recipe is a reptile recipe
@@ -287,14 +270,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
             {recipe.inputs.map((directInputId: string) => {
               const directShard = data.shards[directInputId];
               if (!directShard) return null;
-
-              const subRecipe = findRecipeForShard(directInputId);
               const isDirect = isDirectShard(directInputId);
 
               if (isDirect) {
                 return <div key={`direct-${directInputId}`}>{renderDirectShard(directShard.fuse_amount, directShard)}</div>;
-              } else if (subRecipe && level < 2) {
-                return <div key={`sub-${directInputId}`}>{renderSubRecipe(subRecipe, directShard, subNodeId, level + 1)}</div>;
+              } else if (level < 2) {
+                if (!recipe) return null;
+                return <div key={`sub-${directInputId}`}>{renderSubRecipe(recipe, directShard, subNodeId, level + 1)}</div>;
               }
               return null;
             })}
@@ -444,7 +426,11 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                               <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-1">
                                 {recipe.inputs.map((inputId: string) => {
                                   const inputShard = data.shards[inputId];
-                                  const inputRecipe = findRecipeForShard(inputId);
+                                  const inputRecipeTree = tree.inputRecipe;
+                                  let inputRecipe: Recipe | null = null;
+                                  if ("recipe" in inputRecipeTree && inputRecipeTree.recipe) {
+                                    inputRecipe = inputRecipeTree.recipe;
+                                  }
 
                                   if (inputRecipe && inputShard) {
                                     if (!isDirectShard(inputId)) {
