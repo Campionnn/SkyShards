@@ -56,16 +56,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   // Helper function to calculate Crocodile procs needed
   const getCrocodileProcs = (tree: RecipeTree): number | null => {
     if (tree.method === "cycle") {
-      // Only show at top level of cycle
-      // If any step in the cycle is a reptile recipe, show procs
-      const hasReptile = tree.cycles.some((cycle) =>
-        cycle.steps.some((step) => {
-          const recipe = step.recipe;
-          const input1Shard = data.shards[recipe.inputs[0]];
-          const input2Shard = data.shards[recipe.inputs[1]];
-          return isReptileRecipe(recipe, input1Shard, input2Shard);
-        })
-      );
+      // Check if any step in the cycle is a reptile recipe
+      const hasReptile = tree.cycle.steps.some((step) => {
+        const recipe = step.recipe;
+        const input1Shard = data.shards[recipe.inputs[0]];
+        const input2Shard = data.shards[recipe.inputs[1]];
+        return isReptileRecipe(recipe, input1Shard, input2Shard);
+      });
       return hasReptile ? Math.ceil(tree.quantity / 2) : null;
     }
     if (tree.method === "recipe") {
@@ -288,7 +285,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
   if (tree.method === "cycle") {
     const isExpanded = getExpansionState(nodeId, true);
-    const runCount = tree.cycles.reduce((sum, cycle) => sum + cycle.expectedCrafts, 0);
+    const runCount = tree.cycle.expectedCrafts;
     const crocProcs = getCrocodileProcs(tree);
 
     return (
@@ -337,15 +334,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  // Find the recipe that produces the target shard across all cycles
-                  let targetRecipe = null;
-                  for (const cycle of tree.cycles) {
-                    const step = cycle.steps.find((step) => step.outputShard === tree.shard);
-                    if (step) {
-                      targetRecipe = step.recipe;
-                      break;
-                    }
-                  }
+                  // Find the recipe that produces the target shard in the cycle
+                  const step = tree.cycle.steps.find((step) => step.outputShard === tree.shard);
+                  const targetRecipe = step?.recipe || null;
                   onShowAlternatives(tree.shard, {
                     currentRecipe: targetRecipe,
                     requiredQuantity: tree.quantity,
@@ -360,169 +351,166 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
           </div>
         </div>
 
-        {isExpanded && tree.cycles.length > 0 && (
+        {isExpanded && (
           <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-2">
-            {tree.cycles.map((cycle, cycleIndex) => (
-              <div key={cycleIndex}>
-                <div className="space-y-0.5">
-                  {[...cycle.steps]
-                    .slice()
-                    .reverse()
-                    .map((step, stepIndex) => {
-                      const recipe = step.recipe;
-                      const outputShardData = data.shards[step.outputShard];
-                      const input1Shard = data.shards[recipe.inputs[0]];
-                      const input2Shard = data.shards[recipe.inputs[1]];
-                      const input1Quantity = input1Shard.fuse_amount;
-                      const input2Quantity = input2Shard.fuse_amount;
-                      let outputQuantity = recipe.outputQuantity;
-                      if (recipe.isReptile) outputQuantity *= cycle.multiplier;
-                      const stepNumber = cycle.steps.length - stepIndex;
+            <div className="space-y-0.5">
+              {[...tree.cycle.steps]
+                .slice()
+                .reverse()
+                .map((step, stepIndex) => {
+                  const recipe = step.recipe;
+                  const outputShardData = data.shards[step.outputShard];
+                  const input1Shard = data.shards[recipe.inputs[0]];
+                  const input2Shard = data.shards[recipe.inputs[1]];
+                  const input1Quantity = input1Shard.fuse_amount;
+                  const input2Quantity = input2Shard.fuse_amount;
+                  let outputQuantity = recipe.outputQuantity;
+                  if (recipe.isReptile) outputQuantity *= tree.cycle.multiplier;
+                  const stepNumber = tree.cycle.steps.length - stepIndex;
 
-                      if (stepNumber === 1) {
-                        const stepNodeId = `${nodeId}-step-${stepNumber}`;
-                        const stepIsExpanded = getExpansionState(stepNodeId, true);
+                  if (stepNumber === 1) {
+                    const stepNodeId = `${nodeId}-step-${stepNumber}`;
+                    const stepIsExpanded = getExpansionState(stepNodeId, true);
 
-                        return (
-                          <div key={stepIndex} className="rounded border border-slate-400/50 overflow-hidden">
-                            <div
-                              className="flex items-center justify-between w-full pl-3 pr-2 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onToggle(stepNodeId);
-                              }}
-                            >
-                              <div className="flex-1 text-left">
-                                <div className="flex items-center space-x-2">
-                                  {renderChevron(stepIsExpanded)}
-                                  {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <div className="text-right min-w-[80px] ml-2">
-                                  <div className="flex items-center justify-end space-x-1.5">
-                                    <span className="text-xs text-slate-500">fusions</span>
-                                    <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
-                                  </div>
-                                </div>
-                                {onShowAlternatives && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onShowAlternatives(step.outputShard, {
-                                        currentRecipe: recipe,
-                                        requiredQuantity: cycle.expectedCrafts * outputQuantity,
-                                      });
-                                    }}
-                                    className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
-                                    title="Show alternatives"
-                                  >
-                                    <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
-                                  </button>
-                                )}
+                    return (
+                      <div key={stepIndex} className="rounded border border-slate-400/50 overflow-hidden">
+                        <div
+                          className="flex items-center justify-between w-full pl-3 pr-2 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggle(stepNodeId);
+                          }}
+                        >
+                          <div className="flex-1 text-left">
+                            <div className="flex items-center space-x-2">
+                              {renderChevron(stepIsExpanded)}
+                              {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-right min-w-[80px] ml-2">
+                              <div className="flex items-center justify-end space-x-1.5">
+                                <span className="text-xs text-slate-500">fusions</span>
+                                <span className="font-medium text-white text-xs">{tree.cycle.expectedCrafts}</span>
                               </div>
                             </div>
-                            {stepIsExpanded && (
-                              <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-1">
-                                {recipe.inputs.map((inputId: string) => {
-                                  const inputShard = data.shards[inputId];
-                                  const inputRecipeTree = tree.inputRecipe;
-                                  let inputRecipe: Recipe | null = null;
-                                  if ("recipe" in inputRecipeTree && inputRecipeTree.recipe) {
-                                    inputRecipe = inputRecipeTree.recipe;
-                                  }
-
-                                  if (inputRecipe && inputShard) {
-                                    if (!isDirectShard(inputId)) {
-                                      return (
-                                        <div key={inputId} className="space-y-1">
-                                          {renderSubRecipe(inputRecipe, inputShard, stepNodeId)}
-                                        </div>
-                                      );
-                                    }
-                                    else if (inputShard.family?.toLowerCase().includes("reptile")) {
-                                      return (
-                                        <div key={inputId}>
-                                          {renderDirectShard(inputShard.fuse_amount, inputShard)}
-                                        </div>
-                                      );
-                                    }
-                                  }
-                                  return null;
-                                })}
-                              </div>
+                            {onShowAlternatives && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onShowAlternatives(step.outputShard, {
+                                    currentRecipe: recipe,
+                                    requiredQuantity: tree.cycle.expectedCrafts * outputQuantity,
+                                  });
+                                }}
+                                className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
+                                title="Show alternatives"
+                              >
+                                <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
+                              </button>
                             )}
                           </div>
-                        );
-                      } else {
-                        return (
-                          <div key={stepIndex} className="pl-3 pr-2 py-1 rounded border border-slate-400/50 flex items-center justify-between">
-                            {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
-                            <div className="flex items-center gap-2">
-                              <div className="text-right min-w-[80px] ml-2">
-                                <div className="flex items-center justify-end space-x-1.5">
-                                  <span className="text-xs text-slate-500">fusions</span>
-                                  <span className="font-medium text-white text-xs">{cycle.expectedCrafts}</span>
-                                </div>
-                              </div>
-                              {onShowAlternatives && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onShowAlternatives(step.outputShard, {
-                                      currentRecipe: recipe,
-                                      requiredQuantity: cycle.expectedCrafts * outputQuantity,
-                                    });
-                                  }}
-                                  className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
-                                  title="Show alternatives"
-                                >
-                                  <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
-                                </button>
-                              )}
+                        </div>
+                        {stepIsExpanded && (
+                          <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-1">
+                            {recipe.inputs.map((inputId: string) => {
+                              const inputShard = data.shards[inputId];
+                              const inputRecipeTree = tree.inputRecipe;
+                              let inputRecipe: Recipe | null = null;
+                              if ("recipe" in inputRecipeTree && inputRecipeTree.recipe) {
+                                inputRecipe = inputRecipeTree.recipe;
+                              }
+
+                              if (inputRecipe && inputShard) {
+                                if (!isDirectShard(inputId)) {
+                                  return (
+                                    <div key={inputId} className="space-y-1">
+                                      {renderSubRecipe(inputRecipe, inputShard, stepNodeId)}
+                                    </div>
+                                  );
+                                }
+                                else if (inputShard.family?.toLowerCase().includes("reptile")) {
+                                  return (
+                                    <div key={inputId}>
+                                      {renderDirectShard(inputShard.fuse_amount, inputShard)}
+                                    </div>
+                                  );
+                                }
+                              }
+                              return null;
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div key={stepIndex} className="pl-3 pr-2 py-1 rounded border border-slate-400/50 flex items-center justify-between">
+                        {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
+                        <div className="flex items-center gap-2">
+                          <div className="text-right min-w-[80px] ml-2">
+                            <div className="flex items-center justify-end space-x-1.5">
+                              <span className="text-xs text-slate-500">fusions</span>
+                              <span className="font-medium text-white text-xs">{tree.cycle.expectedCrafts}</span>
                             </div>
                           </div>
-                        );
-                      }
-                    })}
+                          {onShowAlternatives && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onShowAlternatives(step.outputShard, {
+                                  currentRecipe: recipe,
+                                  requiredQuantity: tree.cycle.expectedCrafts * outputQuantity,
+                                });
+                              }}
+                              className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
+                              title="Show alternatives"
+                            >
+                              <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                })}
+            </div>
+
+            {/* Cycle summary */}
+            {(() => {
+              const cycle = tree.cycle;
+              const outputShardIds = new Set(cycle.steps.map((step) => step.outputShard));
+              const inputShardTotals: Record<string, { quantity: number; shard: Shard }> = {};
+
+              // Count all external inputs (not produced within the cycle), including duplicates
+              cycle.steps.forEach((step) => {
+                step.recipe.inputs.forEach((inputId: string) => {
+                  const inputShard = data.shards[inputId];
+                  // Skip if input shard doesn't exist OR if it's produced by another step in this cycle
+                  if (!inputShard || outputShardIds.has(inputId)) return;
+
+                  // Check if it's a direct shard
+                  if (inputShard.rate > 0) {
+                    if (!inputShardTotals[inputId]) {
+                      inputShardTotals[inputId] = {
+                        quantity: 0,
+                        shard: inputShard,
+                      };
+                    }
+                    // Calculate quantity as (cycle.expectedCrafts / cycle.steps.length) * fuse_amount
+                    inputShardTotals[inputId].quantity += inputShard.fuse_amount / cycle.steps.length;
+                  }
+                });
+              });
+
+              return (
+                <div className="flex flex-col gap-0.5 mt-0.5">
+                  {Object.values(inputShardTotals).map(({ quantity, shard }) => (
+                    <div key={shard.id}>{renderDirectShard(quantity * cycle.expectedCrafts, shard)}</div>
+                  ))}
                 </div>
-
-                {/* Cycle summary */}
-                {(() => {
-                  const outputShardIds = new Set(cycle.steps.map((step) => step.outputShard));
-                  const inputShardTotals: Record<string, { quantity: number; shard: Shard }> = {};
-
-                  // Count all external inputs (not produced within the cycle), including duplicates
-                  cycle.steps.forEach((step) => {
-                    step.recipe.inputs.forEach((inputId: string) => {
-                      const inputShard = data.shards[inputId];
-                      // Skip if input shard doesn't exist OR if it's produced by another step in this cycle
-                      if (!inputShard || outputShardIds.has(inputId)) return;
-
-                      // Check if it's a direct shard
-                      if (inputShard.rate > 0) {
-                        if (!inputShardTotals[inputId]) {
-                          inputShardTotals[inputId] = {
-                            quantity: 0,
-                            shard: inputShard,
-                          };
-                        }
-                        // Calculate quantity as (cycle.expectedCrafts / cycle.steps.length) * fuse_amount
-                        inputShardTotals[inputId].quantity += inputShard.fuse_amount / cycle.steps.length;
-                      }
-                    });
-                  });
-
-                  return (
-                    <div className="flex flex-col gap-0.5 mt-0.5">
-                      {Object.values(inputShardTotals).map(({ quantity, shard }) => (
-                        <div key={shard.id}>{renderDirectShard(quantity * cycle.expectedCrafts, shard)}</div>
-                      ))}
-                    </div>
-                  );
-                })()}
-              </div>
-            ))}
+              );
+            })()}
           </div>
         )}
       </div>
