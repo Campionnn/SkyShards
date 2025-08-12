@@ -6,15 +6,20 @@ export const WOODEN_BAIT_SHARDS = ["R29", "L23", "R59", "R23", "R49"];
 
 export const BLACK_HOLE_SHARD: { [key: string]: boolean } = {
   L47: false,
-  L26: false,
   L27: false,
+  L26: false,
+  L17: false,
   E33: true,
+  E29: false,
   E20: false,
+  E18: true,
   E17: false,
   E14: false,
   R56: false,
   R49: false,
+  R42: false,
   R39: true,
+  R38: false,
   R36: true,
   R31: true,
   R21: false,
@@ -35,9 +40,12 @@ export const BLACK_HOLE_SHARD: { [key: string]: boolean } = {
   C30: true,
   C27: false,
   C21: true,
+  C20: false,
   C15: true,
+  C14: false,
   C12: true,
   C9: true,
+  C8: false,
 };
 
 export const MAX_QUANTITIES = {
