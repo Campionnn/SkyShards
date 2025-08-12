@@ -108,6 +108,9 @@ export const PrivacyPage: React.FC = () => {
                 • <strong className="text-white">Ezoic:</strong> For website optimization and advertising
               </p>
               <p>
+                • <strong className="text-white">Cookiebot:</strong> For cookie consent management and compliance
+              </p>
+              <p>
                 • <strong className="text-white">Cloudflare:</strong> For content delivery and security
               </p>
             </div>
