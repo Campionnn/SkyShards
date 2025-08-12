@@ -227,14 +227,15 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   );
 
   const renderSubRecipe = (
-    recipe: Recipe,
+    recipeTree: RecipeTree,
     inputShard: Shard,
     nodePrefix: string,
     level = 1
   ) => {
-    const maxOutputQuantity = recipe.outputQuantity;
-    const input1Shard = data.shards[recipe.inputs[0]];
-    const input2Shard = data.shards[recipe.inputs[1]];
+    if (recipeTree.method !== "recipe") return null;
+    const maxOutputQuantity = recipeTree.recipe.outputQuantity;
+    const input1Shard = data.shards[recipeTree.recipe.inputs[0]];
+    const input2Shard = data.shards[recipeTree.recipe.inputs[1]];
     const input1Quantity = input1Shard.fuse_amount;
     const input2Quantity = input2Shard.fuse_amount;
     const subNodeId = `${nodePrefix}-${inputShard.id}`;
@@ -264,18 +265,17 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         </div>
         {isExpanded && (
           <div className="border-t border-slate-400/70 pl-3 pr-0.5 py-0.5 flex flex-col gap-0.5">
-            {recipe.inputs.map((directInputId: string) => {
-              const directShard = data.shards[directInputId];
+            {recipeTree.inputs.map((subTree: RecipeTree) => {
+              const directShard = data.shards[subTree.shard];
               if (!directShard) return null;
-              const isDirect = isDirectShard(directInputId);
+              const isDirect = isDirectShard(subTree.shard);
 
               if (isDirect) {
-                return <div key={`direct-${directInputId}`}>{renderDirectShard(directShard.fuse_amount, directShard)}</div>;
-              } else if (level < 2) {
-                if (!recipe) return null;
-                return <div key={`sub-${directInputId}`}>{renderSubRecipe(recipe, directShard, subNodeId, level + 1)}</div>;
+                return <div key={`direct-${subTree.shard}`}>{renderDirectShard(directShard.fuse_amount, directShard)}</div>;
+              } else{
+                if (!recipeTree) return null;
+                return <div key={`sub-${subTree.shard}`}>{renderSubRecipe(subTree, directShard, subNodeId, level + 1)}</div>;
               }
-              return null;
             })}
           </div>
         )}
@@ -416,16 +416,12 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                             {recipe.inputs.map((inputId: string) => {
                               const inputShard = data.shards[inputId];
                               const inputRecipeTree = tree.inputRecipe;
-                              let inputRecipe: Recipe | null = null;
-                              if ("recipe" in inputRecipeTree && inputRecipeTree.recipe) {
-                                inputRecipe = inputRecipeTree.recipe;
-                              }
 
-                              if (inputRecipe && inputShard) {
+                              if (inputRecipeTree && inputShard) {
                                 if (!isDirectShard(inputId)) {
                                   return (
                                     <div key={inputId} className="space-y-1">
-                                      {renderSubRecipe(inputRecipe, inputShard, stepNodeId)}
+                                      {renderSubRecipe(inputRecipeTree, inputShard, stepNodeId)}
                                     </div>
                                   );
                                 }
