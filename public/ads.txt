@@ -1,4 +1,0 @@
-# Redirect to Ezoic Ads.txt Manager
-# This file redirects to: https://srv.adstxtmanager.com/77564/skyshards.com
-
-https://srv.adstxtmanager.com/77564/skyshards.com
