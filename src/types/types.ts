@@ -71,14 +71,6 @@ export type RecipeTree =
       };
       craftsNeeded: number;
       inputRecipe: RecipeTree;
-    }
-  | {
-      shard: string;
-      method: "cycleNode";
-      quantity: number;
-      recipe: Recipe;
-      inputs: [RecipeTree, RecipeTree];
-      craftsNeeded: number;
     };
 
 export interface CalculationParams {

@@ -671,17 +671,6 @@ export class CalculationService {
       const tree1 = this.buildRecipeTree(data, input1, choices1, cycleNodes, params, recipeOverrides, minCostsCache);
       const tree2 = this.buildRecipeTree(data, input2, choices1, cycleNodes, params, recipeOverrides, minCostsCache);
 
-      if (cycleNodes.flat().includes(shard)) {
-        return {
-          shard,
-          method: "cycleNode",
-          recipe,
-          inputs: [tree1, tree2],
-          quantity: 0,
-          craftsNeeded: 0,
-        };
-      }
-
       return {
         shard,
         method: "recipe",
@@ -721,21 +710,6 @@ export class CalculationService {
 
         this.assignQuantities(tree.inputs[0], input1Quantity, data, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
         this.assignQuantities(tree.inputs[1], input2Quantity, data, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
-        break;
-      }
-      case "cycleNode": {
-        const recipe = tree.recipe;
-        const outputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
-        const craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
-        tree.craftsNeeded = craftsNeeded;
-        craftCounter.total += craftsNeeded;
-
-        const [input1, input2] = recipe.inputs;
-        const fuse1 = data.shards[input1].fuse_amount;
-        const fuse2 = data.shards[input2].fuse_amount;
-
-        this.assignQuantities(tree.inputs[0], fuse1, data, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
-        this.assignQuantities(tree.inputs[1], fuse2, data, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
         break;
       }
 
@@ -814,7 +788,6 @@ export class CalculationService {
           break;
 
         case "recipe":
-        case "cycleNode":
           node.inputs.forEach(traverse);
           break;
 
