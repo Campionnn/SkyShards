@@ -629,7 +629,7 @@ export class CalculationService {
         tiamatLevel: 0,
         crocodileLevel: 0,
       };
-      const result = this.computeMinCosts(data, dummyParams, recipeOverrides);
+      const result = this.computeMinCosts(data, dummyParams);
       minCostsCache = { minCosts: result.minCosts, choices: result.choices };
     }
 
@@ -735,19 +735,21 @@ export class CalculationService {
 
         const netOutputPerCycle = expectedOutput - totalInputsConsumed;
         const expectedCrafts = netOutputPerCycle > 0 ? Math.ceil(requiredQuantity / netOutputPerCycle) : Math.ceil(requiredQuantity / expectedOutput);
+        const stepCount = cycle.steps.length;
+        const roundedCrafts = Math.ceil(expectedCrafts / stepCount) * stepCount;
 
         // Update cycle info
-        cycle.expectedCrafts = expectedCrafts;
+        cycle.expectedCrafts = roundedCrafts;
         cycle.expectedOutput = expectedOutput;
         cycle.baseOutput = baseOutput;
         cycle.multiplier = crocodileMultiplier;
 
         // Add total crafts for this cycle
-        craftCounter.total += expectedCrafts;
-        tree.craftsNeeded = expectedCrafts;
+        craftCounter.total += roundedCrafts;
+        tree.craftsNeeded = roundedCrafts;
 
         // Calculate total quantities needed for external inputs
-        const totalCycles = expectedCrafts;
+        const totalCycles = roundedCrafts;
         const inputQuantities = new Map<string, number>();
 
         // First, get all outputs produced within this cycle
