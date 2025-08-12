@@ -134,7 +134,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
       const base64Tree = btoa(binary);
 
       navigator.clipboard.writeText("(SkyOceanRecipe:v1):" + base64Tree).then(() => {
-        alert("Fusion tree copied to clipboard! Paste it into SkyOcean to help with shard fusion in game. String is gzipped and base64 encoded.");
+        alert("Fusion tree copied to clipboard! Paste it into SkyOcean(soon) to help with shard fusion in game. String is gzipped and base64 encoded.");
       }).catch((err) => {
         console.error("Failed to copy tree:", err);
         alert("Failed to copy tree to clipboard.");
