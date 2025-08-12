@@ -59,7 +59,7 @@ export type RecipeTree =
       shard: string;
       method: "cycle";
       quantity: number;
-      cycles: {
+      cycle: {
         steps: {
           outputShard: string;
           recipe: Recipe;
@@ -68,7 +68,7 @@ export type RecipeTree =
         expectedOutput: number;
         baseOutput: number;
         multiplier: number;
-      }[];
+      };
       craftsNeeded: number;
       inputRecipe: RecipeTree;
     }

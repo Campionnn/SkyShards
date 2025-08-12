@@ -76,6 +76,66 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
 }) => {
   const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
 
+  function copyTree() {
+    const convertTreeToNewFormat = (tree: RecipeTree): any => {
+      if (tree.method === "direct") {
+        return {
+          shard: tree.shard,
+          method: "direct",
+          quantity: tree.quantity
+        };
+      }
+
+      if (tree.method === "cycle") {
+        const pureReptile = tree.quantity / tree.cycle.steps[0].recipe.outputQuantity;
+
+        return {
+          shard: tree.shard,
+          method: "cycle",
+          quantity: tree.quantity,
+          craftsExpected: tree.craftsNeeded,
+          outputQuantity: tree.cycle.steps[0].recipe.outputQuantity,
+          pureReptile: pureReptile,
+          cycle: {
+            steps: tree.cycle.steps.map(step => ({
+              shard: step.outputShard,
+              recipe: {
+                inputs: step.recipe.inputs
+              }
+            }))
+          },
+          inputRecipe: tree.inputRecipe ? convertTreeToNewFormat(tree.inputRecipe) : undefined
+        };
+      }
+
+      if (tree.method === "recipe") {
+        const pureReptile = (tree.quantity - (tree.craftsNeeded * tree.recipe.outputQuantity)) / tree.recipe.outputQuantity;
+
+        return {
+          shard: tree.shard,
+          method: "recipe",
+          quantity: tree.quantity,
+          craftsExpected: tree.craftsNeeded,
+          outputQuantity: tree.recipe.outputQuantity,
+          pureReptile: pureReptile,
+          inputs: tree.inputs ? tree.inputs.map(input => convertTreeToNewFormat(input)) : []
+        };
+      }
+
+      return tree;
+    };
+
+    const convertedTree = convertTreeToNewFormat(result.tree);
+    const treeString = JSON.stringify(convertedTree, null, 0);
+    const base64Tree = btoa(treeString);
+    navigator.clipboard.writeText(base64Tree).then(() => {
+      alert("Fusion tree copied to clipboard!");
+    }).catch((err) => {
+      console.error("Failed to copy tree:", err);
+      alert("Failed to copy tree to clipboard.");
+    });
+  }
+
   return (
     <div className="space-y-3">
       {/* Summary Cards */}
@@ -189,20 +249,26 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
                     </h3>
                     <div className="flex gap-2 flex-wrap">
                       <button
+                        onClick={copyTree}
+                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/20 hover:border-blue-500/30 order-4 sm:order-1"
+                      >
+                        <span>Copy Tree</span>
+                      </button>
+                      <button
                         onClick={resetAlternatives}
-                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 hover:border-red-500/30 order-3 sm:order-1"
+                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 hover:border-red-500/30 order-3 sm:order-2"
                       >
                         <span>Reset Alternatives</span>
                       </button>
                       <button
                         onClick={handleExpandAll}
-                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 hover:border-green-500/30 order-2 sm:order-2"
+                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 hover:border-green-500/30 order-2 sm:order-3"
                       >
                         <span>Expand All</span>
                       </button>
                       <button
                         onClick={handleCollapseAll}
-                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/20 hover:border-orange-500/30 order-1 sm:order-3"
+                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/20 hover:border-orange-500/30 order-1 sm:order-4"
                       >
                         <span>Collapse All</span>
                       </button>
