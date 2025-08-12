@@ -1,5 +1,8 @@
 #Ads.txt skyshards.com
 
+# Ezoic - REQUIRED for monetization
+ezoic.com, 19390, DIRECT
+
 # 35
 themediagrid.com, 4M5PGT, DIRECT, 35d5010d7789b49d
 themediagrid.com, Q19AKF, DIRECT, 35d5010d7789b49d
