@@ -1,0 +1,12 @@
+# ads.txt file for skyshards.com
+# This file authorizes digital advertising sellers
+
+# Ezoic
+ezoic.com, 19390, DIRECT
+
+# Google AdSense (if you use it)
+# google.com, pub-your-adsense-id, DIRECT, f08c47fec0942fa0
+
+# This file should be kept updated with your authorized advertising partners
+# For Ezoic auto-management, this file can redirect to:
+# https://srv.adstxtmanager.com/19390/skyshards.com
