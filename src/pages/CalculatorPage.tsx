@@ -7,16 +7,6 @@ import type { CalculationFormData } from "../schemas";
 import type { CalculationResult, CalculationParams, RecipeOverride } from "../types/types";
 import { useCalculatorState } from "../context";
 
-// Declare global ezoic variables
-declare global {
-  interface Window {
-    ezstandalone?: {
-      cmd: Array<() => void>;
-      showAds: (...placementIds: number[]) => void;
-    };
-  }
-}
-
 const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
   const { setForm } = useCalculatorState();
   return <CalculatorForm onSubmit={(data) => onSubmit(data, setForm)} />;
@@ -171,32 +161,8 @@ const CalculatorPageContent: React.FC = () => {
     };
   }, []);
 
-  // Initialize Ezoic ads
-  useEffect(() => {
-    const loadAds = () => {
-      if (window.ezstandalone && window.ezstandalone.showAds) {
-        // Show all ad placements with a single call for better performance
-        window.ezstandalone.showAds(101, 102, 103);
-      }
-    };
-
-    // If ezstandalone is already available, load immediately
-    if (window.ezstandalone) {
-      loadAds();
-    } else {
-      // Otherwise, wait for it to be available
-      if (!window.ezstandalone) {
-        window.ezstandalone = { cmd: [], showAds: () => {} };
-      }
-      window.ezstandalone.cmd.push(loadAds);
-    }
-  }, []);
-
   return (
     <div className="min-h-screen space-y-3 py-4">
-      {/* Header Ad Placement */}
-      <div id="ezoic-pub-ad-placeholder-101" className="text-center"></div>
-
       <div className="grid grid-cols-1 xl:grid-cols-7 gap-1 lg:gap-4">
         {/* Configuration Panel */}
         <div className="xl:col-span-2">
@@ -234,9 +200,6 @@ const CalculatorPageContent: React.FC = () => {
             </div>
           )}
 
-          {/* Mid-Content Ad Placement */}
-          <div id="ezoic-pub-ad-placeholder-102" className="text-center"></div>
-
           {/* Results */}
           {result && calculationData && currentParams && (
             <CalculationResults
@@ -266,9 +229,6 @@ const CalculatorPageContent: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* Bottom Ad Placement */}
-          <div id="ezoic-pub-ad-placeholder-103" className="text-center"></div>
         </div>
       </div>
     </div>
