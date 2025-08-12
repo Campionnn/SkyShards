@@ -77,7 +77,56 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
 
   function copyTree() {
-    const treeString = JSON.stringify(result.tree);
+    const convertTreeToNewFormat = (tree: RecipeTree): any => {
+      if (tree.method === "direct") {
+        return {
+          shard: tree.shard,
+          method: "direct",
+          quantity: tree.quantity
+        };
+      }
+
+      if (tree.method === "cycle") {
+        const pureReptile = tree.quantity / tree.cycle.steps[0].recipe.outputQuantity;
+
+        return {
+          shard: tree.shard,
+          method: "cycle",
+          quantity: tree.quantity,
+          craftsExpected: tree.craftsNeeded,
+          outputQuantity: tree.cycle.steps[0].recipe.outputQuantity,
+          pureReptile: pureReptile,
+          cycle: {
+            steps: tree.cycle.steps.map(step => ({
+              shard: step.outputShard,
+              recipe: {
+                inputs: step.recipe.inputs
+              }
+            }))
+          },
+          inputRecipe: tree.inputRecipe ? convertTreeToNewFormat(tree.inputRecipe) : undefined
+        };
+      }
+
+      if (tree.method === "recipe") {
+        const pureReptile = (tree.quantity - (tree.craftsNeeded * tree.recipe.outputQuantity)) / tree.recipe.outputQuantity;
+
+        return {
+          shard: tree.shard,
+          method: "recipe",
+          quantity: tree.quantity,
+          craftsExpected: tree.craftsNeeded,
+          outputQuantity: tree.recipe.outputQuantity,
+          pureReptile: pureReptile,
+          inputs: tree.inputs ? tree.inputs.map(input => convertTreeToNewFormat(input)) : []
+        };
+      }
+
+      return tree;
+    };
+
+    const convertedTree = convertTreeToNewFormat(result.tree);
+    const treeString = JSON.stringify(convertedTree, null, 0);
     const base64Tree = btoa(treeString);
     navigator.clipboard.writeText(base64Tree).then(() => {
       alert("Fusion tree copied to clipboard!");
