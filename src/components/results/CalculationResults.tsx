@@ -5,6 +5,7 @@ import type { RecipeTree, CalculationResultsProps } from "../../types/types";
 import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";
 import { SummaryCard, MaterialItem } from "../ui";
+import pako from 'pako';
 
 // Utility function to manage expanded states
 const useTreeExpansion = (tree: RecipeTree | null) => {
@@ -127,13 +128,21 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
 
     const convertedTree = convertTreeToNewFormat(result.tree);
     const treeString = JSON.stringify(convertedTree, null, 0);
-    const base64Tree = btoa(treeString);
-    navigator.clipboard.writeText(base64Tree).then(() => {
-      alert("Fusion tree copied to clipboard!");
-    }).catch((err) => {
-      console.error("Failed to copy tree:", err);
-      alert("Failed to copy tree to clipboard.");
-    });
+    try {
+      const gzipped = pako.gzip(treeString);
+      const binary = String.fromCharCode(...gzipped);
+      const base64Tree = btoa(binary);
+
+      navigator.clipboard.writeText("(SkyOceanRecipe:v1):" + base64Tree).then(() => {
+        alert("Fusion tree copied to clipboard! Paste it into SkyOcean to help with shard fusion in game. String is gzipped and base64 encoded.");
+      }).catch((err) => {
+        console.error("Failed to copy tree:", err);
+        alert("Failed to copy tree to clipboard.");
+      });
+    } catch (err) {
+      console.error("Failed to compress and encode tree:", err);
+      alert("Failed to compress and encode tree.");
+    }
   }
 
   return (
