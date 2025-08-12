@@ -173,18 +173,25 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   return (
     <div className="bg-slate-800/40 border border-slate-600/30 rounded-md p-3 space-y-3">
       <form onSubmit={(e) => e.preventDefault()} className="space-y-3">
-        {/* Ironman Mode Toggle */}
-        <div>
+        {/* Profile Mode Buttons */}
+        <div className="flex space-x-2">
           <button
-            className={`px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer border ${
-              form.ironManView
-                ? "bg-white/20 hover:bg-white/30 text-white border-white/20 hover:border-white/30"
-                : "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-500/20 hover:border-blue-500/30"
+            type="button"
+            className={`px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex-1 border cursor-pointer ${
+              form.ironManView ? "bg-white/20 text-white border-white/30" : "bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 border-slate-600/50 hover:border-slate-500/50"
             }`}
-            onClick={() => handleInputChange("ironManView", !form.ironManView)}
+            onClick={() => handleInputChange("ironManView", true)}
           >
-            <img src={`${import.meta.env.BASE_URL}IronChestplate.webp`} alt="Ironman view" className="w-3 h-3 object-contain flex-shrink-0" loading="lazy" />
-            <span>{form.ironManView ? "Ironman Profile Mode" : "Normal Profile Mode"}</span>
+            Ironman Profile
+          </button>
+          <button
+            type="button"
+            className={`px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex-1 border cursor-pointer ${
+              !form.ironManView ? "bg-blue-500/30 text-blue-200 border-blue-400/50" : "bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 border-slate-600/50 hover:border-slate-500/50"
+            }`}
+            onClick={() => handleInputChange("ironManView", false)}
+          >
+            Normal Profile
           </button>
         </div>
 
@@ -408,7 +415,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               type="text"
               inputMode="decimal"
               value={craftPenaltyInput}
-              onChange={e => {
+              onChange={(e) => {
                 const value = e.target.value;
                 setCraftPenaltyInput(value);
                 // If empty, use default for calculation
@@ -424,9 +431,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               placeholder={form.ironManView ? "0.8" : "1000"}
               className="w-32 px-3 py-1.5 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-colors duration-200"
             />
-            <span className="text-xs text-slate-400">
-              {form.ironManView ? "seconds per craft" : "coins per craft"}
-            </span>
+            <span className="text-xs text-slate-400">{form.ironManView ? "seconds per craft" : "coins per craft"}</span>
           </div>
         </div>
 
