@@ -1,0 +1,26 @@
+name: Update Fusion Data
+
+on:
+  repository_dispatch:
+    types: [update-fusion-data]
+
+jobs:
+  update-fusion-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+
+      - name: Download latest fusion-data.json from source repo release
+        run: |
+          LATEST_RELEASE=$(curl -s https://api.github.com/repos/Campionnn/SkyShards-Parser/releases/latest | jq -r '.tag_name')
+          ASSET_URL=$(curl -s https://api.github.com/repos/Campionnn/SkyShards-Parser/releases/tags/$LATEST_RELEASE | jq -r '.assets[] | select(.name == "fusion-data.json") | .browser_download_url')
+          curl -L -o fusion-data.json "$ASSET_URL"
+
+      - name: Commit and push updated fusion-data.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add fusion-data.json
+          git commit -m "Update fusion-data.json from SkyShards-Parser release" || echo "No changes to commit"
+          git push
