@@ -102,11 +102,15 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
       <div
         ref={tooltipRef}
         className={`fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 transition-opacity duration-200 ${
-          isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+          isVisible ? "opacity-100" : "opacity-0 pointer-events-none select-none"
         }`}
         style={{
           top: position.top,
           left: position.left,
+          userSelect: isVisible ? "text" : "none",
+          WebkitUserSelect: isVisible ? "text" : "none",
+          MozUserSelect: isVisible ? "text" : "none",
+          msUserSelect: isVisible ? "text" : "none",
         }}
       >
         {(title || shardName) && (

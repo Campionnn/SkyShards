@@ -16,7 +16,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   onToggle,
   onShowAlternatives,
   noWoodenBait = false,
-  ironManView
+  ironManView,
 }) => {
   const shard = data.shards[tree.shard];
 
@@ -41,16 +41,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   };
 
   // Helper function to determine if a recipe is a reptile recipe
-  const isReptileRecipe = (
-    recipe: Recipe | undefined,
-    input1Shard: Shard | undefined,
-    input2Shard: Shard | undefined
-  ): boolean => {
-    return (
-        recipe?.isReptile ||
-        input1Shard?.family?.toLowerCase().includes("reptile") ||
-        input2Shard?.family?.toLowerCase().includes("reptile")
-    ) as boolean;
+  const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard | undefined, input2Shard: Shard | undefined): boolean => {
+    return (recipe?.isReptile || input1Shard?.family?.toLowerCase().includes("reptile") || input2Shard?.family?.toLowerCase().includes("reptile")) as boolean;
   };
 
   // Helper function to calculate Crocodile procs needed
@@ -80,7 +72,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
           inputQuantityOfReptile = tree.inputs[1].quantity;
           inputFuseAmount = input2Shard.fuse_amount;
         }
-        return Math.ceil((requiredOutputQuantity / tree.recipe.outputQuantity) - (inputQuantityOfReptile / inputFuseAmount));
+        return Math.ceil(requiredOutputQuantity / tree.recipe.outputQuantity - inputQuantityOfReptile / inputFuseAmount);
       }
     }
     return null;
@@ -111,14 +103,18 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         </Tooltip>
         {showRate && (
           <div className="text-right min-w-[80px] ml-2">
-            {ironManView && <>
-              <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-              <span className="text-slate-500 text-xs mx-0.5">/</span>
-              <span className="text-slate-400 text-xs">hr</span>
-            </>}
-            {!ironManView && (<>
-              <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(quantity * shard.rate)}</span>
-            </>)}
+            {ironManView && (
+              <>
+                <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
+                <span className="text-slate-500 text-xs mx-0.5">/</span>
+                <span className="text-slate-400 text-xs">hr</span>
+              </>
+            )}
+            {!ironManView && (
+              <>
+                <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(quantity * shard.rate)}</span>
+              </>
+            )}
           </div>
         )}
       </>
@@ -208,30 +204,27 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     <div className="rounded border border-slate-400/50 flex items-center justify-between px-3 py-1.5 text-sm font-medium gap-2">
       <div className="flex items-center gap-2 min-w-0">
         <div className="w-2 h-2 bg-green-400 rounded-full" />
-        {renderShardInfo(quantity, shard, false)}
-        <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">
-          {ironManView ? "Direct" : "Bazaar"}
-        </span>
+        {renderShardInfo(Math.ceil(quantity), shard, false)}
+        <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">{ironManView ? "Direct" : "Bazaar"}</span>
       </div>
       <div className="text-right min-w-[80px] ml-2">
-        {ironManView && <>
-          <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-          <span className="text-slate-500 text-xs mx-0.5">/</span>
-          <span className="text-slate-400 text-xs">hr</span>
-        </>}
-        {!ironManView && (<>
-          <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(quantity * shard.rate)}</span>
-        </>)}
+        {ironManView && (
+          <>
+            <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
+            <span className="text-slate-500 text-xs mx-0.5">/</span>
+            <span className="text-slate-400 text-xs">hr</span>
+          </>
+        )}
+        {!ironManView && (
+          <>
+            <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(quantity * shard.rate)}</span>
+          </>
+        )}
       </div>
     </div>
   );
 
-  const renderSubRecipe = (
-    recipeTree: RecipeTree,
-    inputShard: Shard,
-    nodePrefix: string,
-    level = 1
-  ) => {
+  const renderSubRecipe = (recipeTree: RecipeTree, inputShard: Shard, nodePrefix: string, level = 1) => {
     if (recipeTree.method !== "recipe") return null;
     const maxOutputQuantity = recipeTree.recipe.outputQuantity;
     const input1Shard = data.shards[recipeTree.recipe.inputs[0]];
@@ -272,7 +265,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
               if (isDirect) {
                 return <div key={`direct-${subTree.shard}`}>{renderDirectShard(directShard.fuse_amount, directShard)}</div>;
-              } else{
+              } else {
                 if (!recipeTree) return null;
                 return <div key={`sub-${subTree.shard}`}>{renderSubRecipe(subTree, directShard, subNodeId, level + 1)}</div>;
               }
@@ -424,13 +417,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                                       {renderSubRecipe(inputRecipeTree, inputShard, stepNodeId)}
                                     </div>
                                   );
-                                }
-                                else if (inputShard.family?.toLowerCase().includes("reptile")) {
-                                  return (
-                                    <div key={inputId}>
-                                      {renderDirectShard(inputShard.fuse_amount, inputShard)}
-                                    </div>
-                                  );
+                                } else if (inputShard.family?.toLowerCase().includes("reptile")) {
+                                  return <div key={inputId}>{renderDirectShard(inputShard.fuse_amount, inputShard)}</div>;
                                 }
                               }
                               return null;
@@ -519,19 +507,21 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         <div className="flex items-center space-x-2 p-0.5 text-sm">
           <div className="w-2 h-2 bg-green-400 rounded-full" />
           {renderShardInfo(tree.quantity, shard, false)}
-          <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">
-            {ironManView ? "Direct" : "Bazaar"}
-          </span>
+          <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">{ironManView ? "Direct" : "Bazaar"}</span>
         </div>
         <div className="text-right">
-          {ironManView && <>
-            <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-            <span className="text-slate-500 text-xs mx-0.5">/</span>
-            <span className="text-slate-400 text-xs">hr</span>
-          </>}
-          {!ironManView && (<>
-            <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(tree.quantity * shard.rate)}</span>
-          </>)}
+          {ironManView && (
+            <>
+              <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
+              <span className="text-slate-500 text-xs mx-0.5">/</span>
+              <span className="text-slate-400 text-xs">hr</span>
+            </>
+          )}
+          {!ironManView && (
+            <>
+              <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(tree.quantity * shard.rate)}</span>
+            </>
+          )}
         </div>
       </div>
     );
@@ -682,8 +672,26 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
       </div>
       {isExpanded && (
         <div className="border-t border-slate-600 pl-3 pr-0.5 py-0.5 space-y-0.5">
-          <RecipeTreeNode tree={input1} data={data} nodeId={`${nodeId}-0`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} ironManView={ironManView} />
-          <RecipeTreeNode tree={input2} data={data} nodeId={`${nodeId}-1`} expandedStates={expandedStates} onToggle={onToggle} onShowAlternatives={onShowAlternatives} noWoodenBait={noWoodenBait} ironManView={ironManView}/>
+          <RecipeTreeNode
+            tree={input1}
+            data={data}
+            nodeId={`${nodeId}-0`}
+            expandedStates={expandedStates}
+            onToggle={onToggle}
+            onShowAlternatives={onShowAlternatives}
+            noWoodenBait={noWoodenBait}
+            ironManView={ironManView}
+          />
+          <RecipeTreeNode
+            tree={input2}
+            data={data}
+            nodeId={`${nodeId}-1`}
+            expandedStates={expandedStates}
+            onToggle={onToggle}
+            onShowAlternatives={onShowAlternatives}
+            noWoodenBait={noWoodenBait}
+            ironManView={ironManView}
+          />
         </div>
       )}
     </div>
