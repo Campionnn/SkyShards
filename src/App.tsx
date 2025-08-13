@@ -8,6 +8,7 @@ const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module)
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));
 const RecipePage = lazy(() => import("./pages/RecipePage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage").then((module) => ({ default: module.PrivacyPage })));
+const GuidePage = lazy(() => import("./pages/GuidePage").then((module) => ({ default: module.GuidePage })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center py-12">
@@ -66,6 +67,14 @@ const router = createBrowserRouter(
           element: (
             <Suspense fallback={<LoadingSpinner />}>
               <PrivacyPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "guide",
+          element: (
+            <Suspense fallback={<LoadingSpinner />}>
+              <GuidePage />
             </Suspense>
           ),
         },
