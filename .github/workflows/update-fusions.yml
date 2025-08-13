@@ -25,4 +25,4 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add public/fusion-data.json
           git commit -m "Update fusion-data.json from SkyShards-Parser release" || echo "No changes to commit"
-          git push
+          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:${{ github.ref_name }}
