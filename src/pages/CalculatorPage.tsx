@@ -225,7 +225,7 @@ const CalculatorPageContent: React.FC = () => {
                   <Menu className="w-6 h-6 text-purple-400" />
                 </div>
                 <h3 className="text-lg font-medium text-white">Ready to Calculate</h3>
-                <h5 className="text-sm font-medium text-white">If this is your first time using SkyShards, check out the <a href="/guide" className="underline text-purple-300 hover:text-purple-200">guide!</a></h5>
+                <h5 className="text-sm font-medium text-white">If this is your first time using SkyShards, check out the <Link to="/guide" className="underline text-purple-300 hover:text-purple-200">guide!</Link></h5>
                 <p className="text-slate-400 text-sm mt-1">Configure your settings and select a shard to see optimal fusion paths</p>
               </div>
             </div>
