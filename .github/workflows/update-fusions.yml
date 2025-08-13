@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout target repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
 
       - name: Download latest fusion-data.json from source repo release
         run: |
@@ -18,11 +20,9 @@ jobs:
           curl -L -o public/fusion-data.json "$ASSET_URL"
 
       - name: Commit and push updated fusion-data.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "Campionnn"
+          git config --global user.email "campionnn@users.noreply.github.com"
           git add public/fusion-data.json
           git commit -m "Update fusion-data.json from SkyShards-Parser release" || echo "No changes to commit"
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:master
+          git push
