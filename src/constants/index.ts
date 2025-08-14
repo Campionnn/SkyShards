@@ -1,4 +1,4 @@
-export const NO_FORTUNE_SHARDS = ["C19", "U4", "U16", "U28", "R25", "R27", "R60", "R64", "E12", "L4", "L15", "L30", "L33"];
+export const NO_FORTUNE_SHARDS = ["C19", "U4", "U16", "U28", "R24", "R25", "R27", "R60", "R64", "E12", "L4", "L15", "L30", "L33"];
 
 export { SHARD_DESCRIPTIONS } from "./shardDescriptions";
 
