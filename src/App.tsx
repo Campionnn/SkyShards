@@ -16,13 +16,21 @@ const LoadingSpinner = () => (
   </div>
 );
 
+const AppWithProviders = () => {
+  return (
+    <>
+      <Layout />
+    </>
+  );
+};
+
 const ProtectedLayout = () => {
   usePageTitle(); // Update page title based on route
 
   return (
     <CalculatorStateProvider>
       <RecipeStateProvider>
-        <Layout />
+        <AppWithProviders />
       </RecipeStateProvider>
     </CalculatorStateProvider>
   );

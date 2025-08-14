@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { AlertCircle, Menu, X } from "lucide-react";
 import { CalculatorForm, CalculationResults } from "../components";
+import { WelcomeProfileModal } from "../components";
 import { useCalculation, useCustomRates } from "../hooks";
 import { DataService } from "../services";
 import type { CalculationFormData } from "../schemas";
-import type { CalculationResult, CalculationParams, RecipeOverride } from "../types/types";
+import type { CalculationResult, CalculationParams, RecipeOverride, Data } from "../types/types";
 import { useCalculatorState } from "../context";
+import { isFirstVisit, setSaveEnabled } from "../utilities";
 
 const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
   const { setForm } = useCalculatorState();
@@ -23,7 +25,7 @@ const performCalculation = async (
     setCurrentQuantity: (quantity: number) => void;
     setCurrentParams: (params: CalculationParams) => void;
     setResult: (result: CalculationResult) => void;
-    setCalculationData: (data: any) => void;
+    setCalculationData: (data: Data) => void;
   }
 ) => {
   if (!formData.shard || formData.shard.trim() === "") {
@@ -79,7 +81,7 @@ const performCalculation = async (
 };
 
 const CalculatorPageContent: React.FC = () => {
-  const { result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName, form } = useCalculatorState();
+  const { result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName, form, setForm } = useCalculatorState();
   const { loading, error } = useCalculation();
   const { customRates } = useCustomRates();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -87,6 +89,24 @@ const CalculatorPageContent: React.FC = () => {
   const [currentShardKey, setCurrentShardKey] = useState<string>("");
   const [currentQuantity, setCurrentQuantity] = useState<number>(1);
   const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
+
+  // Welcome modal state (first visit only)
+  const [showWelcome, setShowWelcome] = useState(false);
+  useEffect(() => {
+    if (isFirstVisit()) {
+      setShowWelcome(true);
+    }
+  }, []);
+
+  const handleSelectProfile = (profile: "ironman" | "normal") => {
+    localStorage.setItem("skyshards_profile_type", profile);
+    setSaveEnabled(true);
+    setForm({
+      ...form,
+      ironManView: profile === "ironman",
+    });
+    setShowWelcome(false);
+  };
 
   // Debounced calculation
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -162,77 +182,80 @@ const CalculatorPageContent: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen space-y-3 py-4">
-      <div className="grid grid-cols-1 xl:grid-cols-7 gap-1 lg:gap-4">
-        {/* Configuration Panel */}
-        <div className="xl:col-span-2">
-          {/* Mobile toggle */}
-          <div className="xl:hidden mb-3">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="
-                w-full px-3 py-2.5 
+    <>
+      <WelcomeProfileModal open={showWelcome} onSelectProfile={handleSelectProfile} onClose={() => setShowWelcome(false)} />
+      <div className="min-h-screen space-y-3 py-4">
+        <div className="grid grid-cols-1 xl:grid-cols-7 gap-1 lg:gap-4">
+          {/* Configuration Panel */}
+          <div className="xl:col-span-2">
+            {/* Mobile toggle */}
+            <div className="xl:hidden mb-3">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="
+                w-full px-3 py-2.5
                 bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30
                 rounded-md text-white hover:bg-purple-500/20 
                 flex items-center justify-center space-x-2 
                 transition-colors duration-200 font-medium text-sm cursor-pointer
               "
-            >
-              {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-              <span>{sidebarOpen ? "Hide" : "Show"} Configuration</span>
-            </button>
-          </div>
-
-          <div className={`${sidebarOpen ? "block" : "hidden xl:block"}`}>
-            <CalculatorFormWithContext onSubmit={handleCalculate} />
-          </div>
-        </div>
-        {/* Results Panel */}
-        <div className="xl:col-span-5 space-y-3">
-          {/* Error Display */}
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-md p-3 flex items-start space-x-2">
-              <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-medium text-red-400">Calculation Error</h3>
-                <p className="text-red-300 text-sm mt-1">{error}</p>
-              </div>
+              >
+                {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                <span>{sidebarOpen ? "Hide" : "Show"} Configuration</span>
+              </button>
             </div>
-          )}
 
-          {/* Results */}
-          {result && calculationData && currentParams && (
-            <CalculationResults
-              result={result}
-              data={calculationData}
-              targetShardName={targetShardName}
-              targetShard={currentShardKey}
-              requiredQuantity={currentQuantity}
-              params={currentParams}
-              onResultUpdate={handleResultUpdate}
-              recipeOverrides={recipeOverrides}
-              onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
-              onResetRecipeOverrides={resetRecipeOverrides}
-              ironManView={form.ironManView}
-            />
-          )}
-
-          {/* Empty State */}
-          {!result && !loading && !error && (
-            <div className="text-center py-10 bg-white/5 border border-white/10 rounded-md">
-              <div className="max-w-md mx-auto space-y-3">
-                <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/20 rounded-md flex items-center justify-center mx-auto">
-                  <Menu className="w-6 h-6 text-purple-400" />
+            <div className={`${sidebarOpen ? "block" : "hidden xl:block"}`}>
+              <CalculatorFormWithContext onSubmit={handleCalculate} />
+            </div>
+          </div>
+          {/* Results Panel */}
+          <div className="xl:col-span-5 space-y-3">
+            {/* Error Display */}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-md p-3 flex items-start space-x-2">
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-medium text-red-400">Calculation Error</h3>
+                  <p className="text-red-300 text-sm mt-1">{error}</p>
                 </div>
-                <h3 className="text-lg font-medium text-white">Ready to Calculate</h3>
-                <h5 className="text-sm font-medium text-white">If this is your first time using SkyShards, check out the <a href="/guide" className="underline text-purple-300 hover:text-purple-200">guide!</a></h5>
-                <p className="text-slate-400 text-sm mt-1">Configure your settings and select a shard to see optimal fusion paths</p>
               </div>
-            </div>
-          )}
+            )}
+
+            {/* Results */}
+            {result && calculationData && currentParams && (
+              <CalculationResults
+                result={result}
+                data={calculationData}
+                targetShardName={targetShardName}
+                targetShard={currentShardKey}
+                requiredQuantity={currentQuantity}
+                params={currentParams}
+                onResultUpdate={handleResultUpdate}
+                recipeOverrides={recipeOverrides}
+                onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
+                onResetRecipeOverrides={resetRecipeOverrides}
+                ironManView={form.ironManView}
+              />
+            )}
+
+            {/* Empty State */}
+            {!result && !loading && !error && (
+              <div className="text-center py-10 bg-white/5 border border-white/10 rounded-md">
+                <div className="max-w-md mx-auto space-y-3">
+                  <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/20 rounded-md flex items-center justify-center mx-auto">
+                    <Menu className="w-6 h-6 text-purple-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-white">Ready to Calculate</h3>
+                  <h5 className="text-sm font-medium text-white">If this is your first time using SkyShards, check out the <a href="/guide" className="underline text-purple-300 hover:text-purple-200">guide!</a></h5>
+                  <p className="text-slate-400 text-sm mt-1">Configure your settings and select a shard to see optimal fusion paths</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

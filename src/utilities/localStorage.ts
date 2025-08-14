@@ -30,18 +30,28 @@ export const saveFormData = (data: CalculationFormData): void => {
 export const getSaveEnabled = (): boolean => {
   try {
     const saved = localStorage.getItem(SAVE_ENABLED_KEY);
-    return saved === "true";
+    // Default to true (enabled) if no value is saved
+    return saved === null ? true : saved === "true";
   } catch (error) {
     console.warn("Failed to load save enabled state from localStorage:", error);
-    return false;
+    return true;
   }
 };
 
 export const setSaveEnabled = (enabled: boolean): void => {
   try {
-    localStorage.setItem(SAVE_ENABLED_KEY, enabled.toString());
+    localStorage.setItem(SAVE_ENABLED_KEY, enabled ? "true" : "false");
   } catch (error) {
-    console.warn("Failed to save enabled state to localStorage:", error);
+    console.warn("Failed to set save enabled state in localStorage:", error);
+  }
+};
+
+export const isFirstVisit = (): boolean => {
+  try {
+    // If the save enabled key is not set, it's the first visit
+    return localStorage.getItem(SAVE_ENABLED_KEY) === null;
+  } catch (error) {
+    return true;
   }
 };
 
@@ -64,4 +74,4 @@ export const clearFormData = (): void => {
   } catch (error) {
     console.warn("Failed to clear form data from localStorage:", error);
   }
-}; 
+};
