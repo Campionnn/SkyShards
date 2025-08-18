@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: Checkout target repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
 
       - name: Download latest fusion-data.json from source repo release
         run: |
