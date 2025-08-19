@@ -4,7 +4,7 @@ import {formatLargeNumber, formatNumber, formatTime, calculateExternalCycleInput
 import type {RecipeTree, CalculationResultsProps} from "../../types/types";
 import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";
-import { SummaryCard, MaterialItem } from "../ui";
+import { SummaryCard, MaterialItem, useToast } from "../ui";
 import pako from 'pako';
 import { CopyTreeModal } from "../modals";
 
@@ -78,6 +78,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
 }) => {
   const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
   const [copyModalOpen, setCopyModalOpen] = useState(false);
+  const { toast } = useToast();
 
   const gzipBase64 = (text: string) => {
     const gzipped = pako.gzip(text);
@@ -215,15 +216,15 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
       const text = buildSkyOceanString();
       navigator.clipboard.writeText(text)
         .then(() => {
-          alert("SkyOcean recipe string copied to clipboard.");
+          toast({ title: "Copied", description: "SkyOcean recipe copied to clipboard.", variant: "success" });
         })
         .catch((err) => {
           console.error("Failed to copy SkyOcean string:", err);
-          alert("Failed to copy to clipboard.");
+          toast({ title: "Copy failed", description: "Failed to copy to clipboard.", variant: "error" });
         });
     } catch (err) {
       console.error("Failed to build SkyOcean string:", err);
-      alert("Failed to build SkyOcean string.");
+      toast({ title: "Build failed", description: "Failed to build SkyOcean string.", variant: "error" });
     }
   };
 
@@ -232,15 +233,15 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
       const text = buildNoFrillsString();
       navigator.clipboard.writeText(text)
         .then(() => {
-          alert("NoFrills materials list copied to clipboard.");
+          toast({ title: "Copied", description: "NoFrills recipe copied to clipboard.", variant: "success" });
         })
         .catch((err) => {
           console.error("Failed to copy NoFrills list:", err);
-          alert("Failed to copy to clipboard.");
+          toast({ title: "Copy failed", description: "Failed to copy to clipboard.", variant: "error" });
         });
     } catch (err) {
       console.error("Failed to build NoFrills list:", err);
-      alert("Failed to build NoFrills list.");
+      toast({ title: "Build failed", description: "Failed to build NoFrills list.", variant: "error" });
     }
   };
 
