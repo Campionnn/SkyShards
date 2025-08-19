@@ -5,6 +5,7 @@ import { formatNumber } from "../../utilities";
 import type { RecipeTreeNodeProps, Recipe, Shard, RecipeTree } from "../../types/types";
 import { Tooltip } from "../ui";
 import { SHARD_DESCRIPTIONS } from "../../constants";
+import { calculateExternalCycleInputs } from "../../utilities";
 
 export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   tree,
@@ -463,34 +464,11 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
             {/* Cycle summary */}
             {(() => {
               const cycle = tree.cycle;
-              const outputShardIds = new Set(cycle.steps.map((step) => step.outputShard));
-              const inputShardTotals: Record<string, { quantity: number; shard: Shard }> = {};
-
-              // Count all external inputs (not produced within the cycle), including duplicates
-              cycle.steps.forEach((step) => {
-                step.recipe.inputs.forEach((inputId: string) => {
-                  const inputShard = data.shards[inputId];
-                  // Skip if input shard doesn't exist OR if it's produced by another step in this cycle
-                  if (!inputShard || outputShardIds.has(inputId)) return;
-
-                  // Check if it's a direct shard
-                  if (inputShard.rate > 0) {
-                    if (!inputShardTotals[inputId]) {
-                      inputShardTotals[inputId] = {
-                        quantity: 0,
-                        shard: inputShard,
-                      };
-                    }
-                    // Calculate quantity as (cycle.expectedCrafts / cycle.steps.length) * fuse_amount
-                    inputShardTotals[inputId].quantity += inputShard.fuse_amount / cycle.steps.length;
-                  }
-                });
-              });
-
+              const inputsPerCraft = calculateExternalCycleInputs(cycle, data.shards);
               return (
                 <div className="flex flex-col gap-0.5 mt-0.5">
-                  {Object.values(inputShardTotals).map(({ quantity, shard }) => (
-                    <div key={shard.id}>{renderDirectShard(quantity * cycle.expectedCrafts, shard)}</div>
+                  {Object.values(inputsPerCraft).map(({ quantityPerCraft, shard }) => (
+                    <div key={shard.id}>{renderDirectShard(quantityPerCraft * cycle.expectedCrafts, shard)}</div>
                   ))}
                 </div>
               );

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Clock, Coins, Hammer, Target, BarChart3, TicketPercent } from "lucide-react";
-import {formatLargeNumber, formatNumber, formatTime} from "../../utilities";
-import type {RecipeTree, CalculationResultsProps, Shard} from "../../types/types";
+import {formatLargeNumber, formatNumber, formatTime, calculateExternalCycleInputs} from "../../utilities";
+import type {RecipeTree, CalculationResultsProps} from "../../types/types";
 import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";
 import { SummaryCard, MaterialItem } from "../ui";
@@ -78,12 +78,35 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
 
   function copyTree() {
-    const convertTreeToSkyOcean = (tree: RecipeTree): any => {
+    type SkyOceanDirect = { shard: string; method: "direct"; quantity: number };
+    type SkyOceanCycleStep = { shard: string; recipe: { inputs: [string, string] } };
+    type SkyOceanCycle = {
+      shard: string;
+      method: "cycle";
+      quantity: number;
+      craftsExpected: number;
+      outputQuantity: number;
+      pureReptile: number;
+      cycle: { steps: SkyOceanCycleStep[] };
+      inputRecipe?: SkyOceanTree;
+    };
+    type SkyOceanRecipe = {
+      shard: string;
+      method: "recipe";
+      quantity: number;
+      craftsExpected: number;
+      outputQuantity: number;
+      pureReptile: number;
+      inputs: SkyOceanTree[];
+    };
+    type SkyOceanTree = SkyOceanDirect | SkyOceanCycle | SkyOceanRecipe;
+
+    const convertTreeToSkyOcean = (tree: RecipeTree): SkyOceanTree => {
       if (tree.method === "direct") {
         return {
           shard: tree.shard,
           method: "direct",
-          quantity: tree.quantity
+          quantity: tree.quantity,
         };
       }
 
@@ -98,35 +121,34 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           outputQuantity: tree.cycle.steps[0].recipe.outputQuantity,
           pureReptile: pureReptile,
           cycle: {
-            steps: tree.cycle.steps.map(step => ({
+            steps: tree.cycle.steps.map((step) => ({
               shard: step.outputShard,
               recipe: {
-                inputs: step.recipe.inputs
-              }
-            }))
+                inputs: step.recipe.inputs,
+              },
+            })),
           },
-          inputRecipe: tree.inputRecipe ? convertTreeToSkyOcean(tree.inputRecipe) : undefined
+          inputRecipe: tree.inputRecipe ? convertTreeToSkyOcean(tree.inputRecipe) : undefined,
         };
       }
 
-      if (tree.method === "recipe") {
-        const pureReptile = (tree.quantity - (tree.craftsNeeded * tree.recipe.outputQuantity)) / tree.recipe.outputQuantity;
+      // recipe
+      const pureReptile = (tree.quantity - tree.craftsNeeded * tree.recipe.outputQuantity) / tree.recipe.outputQuantity;
 
-        return {
-          shard: tree.shard,
-          method: "recipe",
-          quantity: tree.quantity,
-          craftsExpected: tree.craftsNeeded,
-          outputQuantity: tree.recipe.outputQuantity,
-          pureReptile: pureReptile,
-          inputs: tree.inputs ? tree.inputs.map(input => convertTreeToSkyOcean(input)) : []
-        };
-      }
-
-      return tree;
+      return {
+        shard: tree.shard,
+        method: "recipe",
+        quantity: tree.quantity,
+        craftsExpected: tree.craftsNeeded,
+        outputQuantity: tree.recipe.outputQuantity,
+        pureReptile: pureReptile,
+        inputs: tree.inputs ? tree.inputs.map((input) => convertTreeToSkyOcean(input)) : [],
+      };
     };
 
-    const convertTreeToNoFrills = (tree: RecipeTree): any => {
+    type NoFrillsItem = { name: string; needed: number; source: "Direct" | "Fuse" | "Cycle" };
+
+    const convertTreeToNoFrills = (tree: RecipeTree): NoFrillsItem[] => {
       // Use a Map with key `${shardId}|${method}` to track quantities per method
       const shardQuantities: Map<string, number> = new Map();
       const traverse = (node: RecipeTree) => {
@@ -139,50 +161,33 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           const currentQuantity = shardQuantities.get(key) || 0;
           shardQuantities.set(key, currentQuantity + node.quantity);
           if (node.inputs) {
-            node.inputs.forEach(input => traverse(input));
+            node.inputs.forEach((input) => traverse(input));
           }
         } else if (node.method === "cycle") {
-          const cycle = node.cycle;
-          const outputShardIds = new Set(cycle.steps.map((step) => step.outputShard));
-          const inputShardTotals: Record<string, { quantity: number; shard: Shard }> = {};
-          cycle.steps.forEach((step) => {
-            step.recipe.inputs.forEach((inputId: string) => {
-              const inputShard = data.shards[inputId];
-              if (!inputShard || outputShardIds.has(inputId)) return;
-              if (inputShard.rate > 0) {
-                if (!inputShardTotals[inputId]) {
-                  inputShardTotals[inputId] = {
-                    quantity: 0,
-                    shard: inputShard,
-                  };
-                }
-                inputShardTotals[inputId].quantity += inputShard.fuse_amount / cycle.steps.length;
-              }
-            });
-          });
+          const inputsPerCraft = calculateExternalCycleInputs(node.cycle, data.shards);
           const key = `${node.shard}|Cycle`;
           shardQuantities.set(key, (shardQuantities.get(key) || 0) + node.quantity);
-          Object.values(inputShardTotals).forEach(({ quantity, shard }) => {
-            const key = `${shard.id}|Direct`;
-            const currentQuantity = shardQuantities.get(key) || 0;
-            shardQuantities.set(key, currentQuantity + quantity * node.craftsNeeded);
+          Object.values(inputsPerCraft).forEach(({ quantityPerCraft, shard }) => {
+            const k = `${shard.id}|Direct`;
+            const currentQuantity = shardQuantities.get(k) || 0;
+            shardQuantities.set(k, currentQuantity + quantityPerCraft * node.craftsNeeded);
           });
-          traverse(node.inputRecipe)
+          traverse(node.inputRecipe);
         }
-      }
+      };
       traverse(tree);
 
-      const result: any[] = [];
+      const list: NoFrillsItem[] = [];
       shardQuantities.forEach((quantity, key) => {
-        const [shard, method] = key.split("|");
-        result.push({
-          name: data.shards[shard].name,
+        const [shardId, method] = key.split("|");
+        list.push({
+          name: data.shards[shardId].name,
           needed: quantity,
-          source: method,
+          source: method as NoFrillsItem["source"],
         });
       });
-      return result;
-    }
+      return list;
+    };
 
     const convertedTree = convertTreeToSkyOcean(result.tree);
     console.log(convertTreeToNoFrills(result.tree));
@@ -192,12 +197,15 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
       const binary = String.fromCharCode(...gzipped);
       const base64Tree = btoa(binary);
 
-      navigator.clipboard.writeText("(SkyOceanRecipe:v1):" + base64Tree).then(() => {
-        alert("Fusion tree copied to clipboard! Paste it into SkyOcean(soon) to help with shard fusion in game. String is gzipped and base64 encoded.");
-      }).catch((err) => {
-        console.error("Failed to copy tree:", err);
-        alert("Failed to copy tree to clipboard.");
-      });
+      navigator.clipboard
+        .writeText("(SkyOceanRecipe:v1):" + base64Tree)
+        .then(() => {
+          alert("Fusion tree copied to clipboard! Paste it into SkyOcean(soon) to help with shard fusion in game. String is gzipped and base64 encoded.");
+        })
+        .catch((err) => {
+          console.error("Failed to copy tree:", err);
+          alert("Failed to copy tree to clipboard.");
+        });
     } catch (err) {
       console.error("Failed to compress and encode tree:", err);
       alert("Failed to compress and encode tree.");

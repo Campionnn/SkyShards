@@ -1,5 +1,5 @@
 import { MAX_QUANTITIES } from "../constants";
-import type { Shard } from "../types/types";
+import type { Shard, Shards } from "../types/types";
 
 export const formatTime = (decimalHours: number): string => {
   const totalSeconds = Math.round(decimalHours * 3600);
@@ -87,7 +87,7 @@ export const getShardDetails = (shard: Shard, isDirect: boolean = false): string
   return details.join("\n");
 };
 
-export const debounce = <T extends (...args: any[]) => any>(func: T, wait: number): ((...args: Parameters<T>) => void) => {
+export const debounce = <T extends (...args: unknown[]) => unknown>(func: T, wait: number): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
@@ -247,3 +247,35 @@ export const convertToRangeDescription = (description: string): string => {
 };
 
 export { isValidShardName } from "./isValidShardName";
+
+export type CycleStep = { outputShard: string; recipe: { inputs: [string, string] } };
+export type CycleLike = { steps: CycleStep[] };
+
+export type ExternalCycleInput = { shard: Shard; quantityPerCraft: number };
+
+export const calculateExternalCycleInputs = (
+  cycle: CycleLike,
+  shards: Shards
+): Record<string, ExternalCycleInput> => {
+  const outputShardIds = new Set(cycle.steps.map((step) => step.outputShard));
+  const inputTotals: Record<string, ExternalCycleInput> = {};
+
+  cycle.steps.forEach((step) => {
+    step.recipe.inputs.forEach((inputId) => {
+      const shard = shards[inputId];
+      if (!shard) return;
+      // Skip if this input is produced within the cycle
+      if (outputShardIds.has(inputId)) return;
+      // Only count direct-obtainable shards
+      if (shard.rate <= 0) return;
+
+      if (!inputTotals[inputId]) {
+        inputTotals[inputId] = { shard, quantityPerCraft: 0 };
+      }
+      // Evenly distribute per step to get per-craft amount
+      inputTotals[inputId].quantityPerCraft += shard.fuse_amount / Math.max(1, cycle.steps.length);
+    });
+  });
+
+  return inputTotals;
+};
