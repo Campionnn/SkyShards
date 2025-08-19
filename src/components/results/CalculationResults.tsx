@@ -127,30 +127,28 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     };
 
     const convertTreeToNoFrills = (tree: RecipeTree): any => {
+      // Use a Map with key `${shardId}|${method}` to track quantities per method
       const shardQuantities: Map<string, number> = new Map();
-      const shardMethods: Map<string, string> = new Map();
       const traverse = (node: RecipeTree) => {
         if (node.method === "direct") {
-          const currentQuantity = shardQuantities.get(node.shard) || 0;
-          shardQuantities.set(node.shard, currentQuantity + node.quantity);
-            shardMethods.set(node.shard, "Direct");
+          const key = `${node.shard}|Direct`;
+          const currentQuantity = shardQuantities.get(key) || 0;
+          shardQuantities.set(key, currentQuantity + node.quantity);
         } else if (node.method === "recipe") {
-          const currentQuantity = shardQuantities.get(node.shard) || 0;
-          shardQuantities.set(node.shard, currentQuantity + node.quantity);
-            shardMethods.set(node.shard, "Fuse");
+          const key = `${node.shard}|Fuse`;
+          const currentQuantity = shardQuantities.get(key) || 0;
+          shardQuantities.set(key, currentQuantity + node.quantity);
           if (node.inputs) {
             node.inputs.forEach(input => traverse(input));
           }
         } else if (node.method === "cycle") {
           const cycle = node.cycle;
-          // fix duplicate code later
           const outputShardIds = new Set(cycle.steps.map((step) => step.outputShard));
           const inputShardTotals: Record<string, { quantity: number; shard: Shard }> = {};
           cycle.steps.forEach((step) => {
             step.recipe.inputs.forEach((inputId: string) => {
               const inputShard = data.shards[inputId];
               if (!inputShard || outputShardIds.has(inputId)) return;
-
               if (inputShard.rate > 0) {
                 if (!inputShardTotals[inputId]) {
                   inputShardTotals[inputId] = {
@@ -163,23 +161,24 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
             });
           });
           Object.values(inputShardTotals).forEach(({ quantity, shard }) => {
-            const currentQuantity = shardQuantities.get(shard.id) || 0;
-            shardQuantities.set(shard.id, currentQuantity + quantity * node.craftsNeeded);
-            shardMethods.set(shard.id, "Direct");
+            const key = `${shard.id}|Direct`;
+            const currentQuantity = shardQuantities.get(key) || 0;
+            shardQuantities.set(key, currentQuantity + quantity * node.craftsNeeded);
           });
-          shardQuantities.set(node.shard, (shardQuantities.get(node.shard) || 0) + node.quantity);
-          shardMethods.set(node.shard, "Cycle");
+          const key = `${node.shard}|Cycle`;
+          shardQuantities.set(key, (shardQuantities.get(key) || 0) + node.quantity);
           traverse(node.inputRecipe)
         }
       }
       traverse(tree);
 
       const result: any[] = [];
-      shardQuantities.forEach((quantity, shard) => {
+      shardQuantities.forEach((quantity, key) => {
+        const [shard, method] = key.split("|");
         result.push({
           name: data.shards[shard].name,
           needed: quantity,
-          source: shardMethods.get(shard) || "Unknown",
+          source: method,
         });
       });
       return result;
