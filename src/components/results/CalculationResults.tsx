@@ -6,6 +6,7 @@ import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";
 import { SummaryCard, MaterialItem } from "../ui";
 import pako from 'pako';
+import { CopyTreeModal } from "../modals";
 
 // Utility function to manage expanded states
 const useTreeExpansion = (tree: RecipeTree | null) => {
@@ -76,141 +77,172 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   ironManView
 }) => {
   const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
+  const [copyModalOpen, setCopyModalOpen] = useState(false);
 
-  function copyTree() {
-    type SkyOceanDirect = { shard: string; method: "direct"; quantity: number };
-    type SkyOceanCycleStep = { shard: string; recipe: { inputs: [string, string] } };
-    type SkyOceanCycle = {
-      shard: string;
-      method: "cycle";
-      quantity: number;
-      craftsExpected: number;
-      outputQuantity: number;
-      pureReptile: number;
-      cycle: { steps: SkyOceanCycleStep[] };
-      inputRecipe?: SkyOceanTree;
-    };
-    type SkyOceanRecipe = {
-      shard: string;
-      method: "recipe";
-      quantity: number;
-      craftsExpected: number;
-      outputQuantity: number;
-      pureReptile: number;
-      inputs: SkyOceanTree[];
-    };
-    type SkyOceanTree = SkyOceanDirect | SkyOceanCycle | SkyOceanRecipe;
+  const gzipBase64 = (text: string) => {
+    const gzipped = pako.gzip(text);
+    const binary = String.fromCharCode(...gzipped);
+    return btoa(binary);
+  };
 
-    const convertTreeToSkyOcean = (tree: RecipeTree): SkyOceanTree => {
-      if (tree.method === "direct") {
-        return {
-          shard: tree.shard,
-          method: "direct",
-          quantity: tree.quantity,
-        };
-      }
+  type SkyOceanDirect = { shard: string; method: "direct"; quantity: number };
+  type SkyOceanCycleStep = { shard: string; recipe: { inputs: [string, string] } };
+  type SkyOceanCycle = {
+    shard: string;
+    method: "cycle";
+    quantity: number;
+    craftsExpected: number;
+    outputQuantity: number;
+    pureReptile: number;
+    cycle: { steps: SkyOceanCycleStep[] };
+    inputRecipe?: SkyOceanTree;
+  };
+  type SkyOceanRecipe = {
+    shard: string;
+    method: "recipe";
+    quantity: number;
+    craftsExpected: number;
+    outputQuantity: number;
+    pureReptile: number;
+    inputs: SkyOceanTree[];
+  };
+  type SkyOceanTree = SkyOceanDirect | SkyOceanCycle | SkyOceanRecipe;
 
-      if (tree.method === "cycle") {
-        const pureReptile = tree.quantity / tree.cycle.steps[0].recipe.outputQuantity;
+  const convertTreeToSkyOcean = (tree: RecipeTree): SkyOceanTree => {
+    if (tree.method === "direct") {
+      return {
+        shard: tree.shard,
+        method: "direct",
+        quantity: tree.quantity,
+      };
+    }
 
-        return {
-          shard: tree.shard,
-          method: "cycle",
-          quantity: tree.quantity,
-          craftsExpected: tree.craftsNeeded,
-          outputQuantity: tree.cycle.steps[0].recipe.outputQuantity,
-          pureReptile: pureReptile,
-          cycle: {
-            steps: tree.cycle.steps.map((step) => ({
-              shard: step.outputShard,
-              recipe: {
-                inputs: step.recipe.inputs,
-              },
-            })),
-          },
-          inputRecipe: tree.inputRecipe ? convertTreeToSkyOcean(tree.inputRecipe) : undefined,
-        };
-      }
-
-      // recipe
-      const pureReptile = (tree.quantity - tree.craftsNeeded * tree.recipe.outputQuantity) / tree.recipe.outputQuantity;
+    if (tree.method === "cycle") {
+      const pureReptile = tree.quantity / tree.cycle.steps[0].recipe.outputQuantity;
 
       return {
         shard: tree.shard,
-        method: "recipe",
+        method: "cycle",
         quantity: tree.quantity,
         craftsExpected: tree.craftsNeeded,
-        outputQuantity: tree.recipe.outputQuantity,
+        outputQuantity: tree.cycle.steps[0].recipe.outputQuantity,
         pureReptile: pureReptile,
-        inputs: tree.inputs ? tree.inputs.map((input) => convertTreeToSkyOcean(input)) : [],
+        cycle: {
+          steps: tree.cycle.steps.map((step) => ({
+            shard: step.outputShard,
+            recipe: {
+              inputs: step.recipe.inputs,
+            },
+          })),
+        },
+        inputRecipe: tree.inputRecipe ? convertTreeToSkyOcean(tree.inputRecipe) : undefined,
       };
+    }
+
+    // recipe
+    const pureReptile = (tree.quantity - tree.craftsNeeded * tree.recipe.outputQuantity) / tree.recipe.outputQuantity;
+
+    return {
+      shard: tree.shard,
+      method: "recipe",
+      quantity: tree.quantity,
+      craftsExpected: tree.craftsNeeded,
+      outputQuantity: tree.recipe.outputQuantity,
+      pureReptile: pureReptile,
+      inputs: tree.inputs ? tree.inputs.map((input) => convertTreeToSkyOcean(input)) : [],
     };
+  };
 
-    type NoFrillsItem = { name: string; needed: number; source: "Direct" | "Fuse" | "Cycle" };
+  type NoFrillsItem = { name: string; needed: number; source: "Direct" | "Fuse" | "Cycle" };
 
-    const convertTreeToNoFrills = (tree: RecipeTree): NoFrillsItem[] => {
-      // Use a Map with key `${shardId}|${method}` to track quantities per method
-      const shardQuantities: Map<string, number> = new Map();
-      const traverse = (node: RecipeTree) => {
-        if (node.method === "direct") {
-          const key = `${node.shard}|Direct`;
-          const currentQuantity = shardQuantities.get(key) || 0;
-          shardQuantities.set(key, currentQuantity + node.quantity);
-        } else if (node.method === "recipe") {
-          const key = `${node.shard}|Fuse`;
-          const currentQuantity = shardQuantities.get(key) || 0;
-          shardQuantities.set(key, currentQuantity + node.quantity);
-          if (node.inputs) {
-            node.inputs.forEach((input) => traverse(input));
-          }
-        } else if (node.method === "cycle") {
-          const inputsPerCraft = calculateExternalCycleInputs(node.cycle, data.shards);
-          const key = `${node.shard}|Cycle`;
-          shardQuantities.set(key, (shardQuantities.get(key) || 0) + node.quantity);
-          Object.values(inputsPerCraft).forEach(({ quantityPerCraft, shard }) => {
-            const k = `${shard.id}|Direct`;
-            const currentQuantity = shardQuantities.get(k) || 0;
-            shardQuantities.set(k, currentQuantity + quantityPerCraft * node.craftsNeeded);
-          });
-          traverse(node.inputRecipe);
+  const convertTreeToNoFrills = (tree: RecipeTree): NoFrillsItem[] => {
+    const shardQuantities: Map<string, number> = new Map();
+    const traverse = (node: RecipeTree | undefined) => {
+      if (!node) return;
+      if (node.method === "direct") {
+        const key = `${node.shard}|Direct`;
+        const currentQuantity = shardQuantities.get(key) || 0;
+        shardQuantities.set(key, currentQuantity + node.quantity);
+      } else if (node.method === "recipe") {
+        const key = `${node.shard}|Fuse`;
+        const currentQuantity = shardQuantities.get(key) || 0;
+        shardQuantities.set(key, currentQuantity + node.quantity);
+        if (node.inputs) {
+          node.inputs.forEach((input) => traverse(input));
         }
-      };
-      traverse(tree);
-
-      const list: NoFrillsItem[] = [];
-      shardQuantities.forEach((quantity, key) => {
-        const [shardId, method] = key.split("|");
-        list.push({
-          name: data.shards[shardId].name,
-          needed: quantity,
-          source: method as NoFrillsItem["source"],
+      } else if (node.method === "cycle") {
+        const inputsPerCraft = calculateExternalCycleInputs(node.cycle, data.shards);
+        const key = `${node.shard}|Cycle`;
+        shardQuantities.set(key, (shardQuantities.get(key) || 0) + node.quantity);
+        Object.values(inputsPerCraft).forEach(({ quantityPerCraft, shard }) => {
+          const k = `${shard.id}|Direct`;
+          const currentQuantity = shardQuantities.get(k) || 0;
+          shardQuantities.set(k, currentQuantity + quantityPerCraft * node.craftsNeeded);
         });
-      });
-      return list;
+        if (node.inputRecipe) traverse(node.inputRecipe);
+      }
     };
+    traverse(tree);
 
+    const list: NoFrillsItem[] = [];
+    shardQuantities.forEach((quantity, key) => {
+      const [shardId, method] = key.split("|");
+      list.push({
+        name: data.shards[shardId].name,
+        needed: quantity,
+        source: method as NoFrillsItem["source"],
+      });
+    });
+    return list;
+  };
+
+  const buildSkyOceanString = () => {
     const convertedTree = convertTreeToSkyOcean(result.tree);
-    console.log(convertTreeToNoFrills(result.tree));
-    const treeString = JSON.stringify(convertedTree, null, 0);
-    try {
-      const gzipped = pako.gzip(treeString);
-      const binary = String.fromCharCode(...gzipped);
-      const base64Tree = btoa(binary);
+    const treeString = JSON.stringify(convertedTree);
+    const base64Tree = gzipBase64(treeString);
+    return "<SkyOceanRecipe>(V1):" + base64Tree;
+  };
 
-      navigator.clipboard
-        .writeText("(SkyOceanRecipe:v1):" + base64Tree)
+  const buildNoFrillsString = () => {
+    const list = convertTreeToNoFrills(result.tree);
+    const listString = JSON.stringify(list);
+    const base64List = gzipBase64(listString);
+    return "<NoFrillsRecipe>(V1):" + base64List;
+  };
+
+  const handleCopySkyOcean = () => {
+    try {
+      const text = buildSkyOceanString();
+      navigator.clipboard.writeText(text)
         .then(() => {
-          alert("Fusion tree copied to clipboard! Paste it into SkyOcean(soon) to help with shard fusion in game. String is gzipped and base64 encoded.");
+          alert("SkyOcean recipe string copied to clipboard.");
         })
         .catch((err) => {
-          console.error("Failed to copy tree:", err);
-          alert("Failed to copy tree to clipboard.");
+          console.error("Failed to copy SkyOcean string:", err);
+          alert("Failed to copy to clipboard.");
         });
     } catch (err) {
-      console.error("Failed to compress and encode tree:", err);
-      alert("Failed to compress and encode tree.");
+      console.error("Failed to build SkyOcean string:", err);
+      alert("Failed to build SkyOcean string.");
     }
-  }
+  };
+
+  const handleCopyNoFrills = () => {
+    try {
+      const text = buildNoFrillsString();
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          alert("NoFrills materials list copied to clipboard.");
+        })
+        .catch((err) => {
+          console.error("Failed to copy NoFrills list:", err);
+          alert("Failed to copy to clipboard.");
+        });
+    } catch (err) {
+      console.error("Failed to build NoFrills list:", err);
+      alert("Failed to build NoFrills list.");
+    }
+  };
 
   return (
     <div className="space-y-3">
@@ -325,7 +357,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
                     </h3>
                     <div className="flex gap-2 flex-wrap">
                       <button
-                        onClick={copyTree}
+                        onClick={() => setCopyModalOpen(true)}
                         className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/20 hover:border-blue-500/30 order-4 sm:order-1"
                       >
                         <span>Copy Tree</span>
@@ -368,6 +400,13 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           </div>
         </div>
       </div>
+
+      <CopyTreeModal
+        open={copyModalOpen}
+        onClose={() => setCopyModalOpen(false)}
+        onCopySkyOcean={handleCopySkyOcean}
+        onCopyNoFrills={handleCopyNoFrills}
+      />
     </div>
   );
 };
