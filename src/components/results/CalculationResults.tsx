@@ -160,13 +160,13 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
               }
             });
           });
+          const key = `${node.shard}|Cycle`;
+          shardQuantities.set(key, (shardQuantities.get(key) || 0) + node.quantity);
           Object.values(inputShardTotals).forEach(({ quantity, shard }) => {
             const key = `${shard.id}|Direct`;
             const currentQuantity = shardQuantities.get(key) || 0;
             shardQuantities.set(key, currentQuantity + quantity * node.craftsNeeded);
           });
-          const key = `${node.shard}|Cycle`;
-          shardQuantities.set(key, (shardQuantities.get(key) || 0) + node.quantity);
           traverse(node.inputRecipe)
         }
       }
