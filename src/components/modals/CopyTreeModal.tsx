@@ -66,7 +66,6 @@ export const CopyTreeModal: React.FC<CopyTreeModalProps> = ({ open, onClose, onC
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-white font-medium">NoFrills format</div>
-                  <div className="text-xs text-slate-400">Coming Soon</div>
                   <div className="text-xs text-blue-400 hover:underline">
                     <a
                       href="https://modrinth.com/mod/nofrills"
