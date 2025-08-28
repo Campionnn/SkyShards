@@ -8,10 +8,15 @@ jobs:
   update-fusion-data:
     runs-on: ubuntu-latest
     steps:
+      - name: Set target branch
+        run: |
+          echo "TARGET_BRANCH=${{ github.event.client_payload.target_branch || 'master' }}" >> $GITHUB_ENV
+
       - name: Checkout target repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PAT }}
+          ref: ${{ env.TARGET_BRANCH }}
 
       - name: Download latest fusion-data.json from source repo release
         run: |
@@ -25,4 +30,4 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add public/fusion-data.json
           git commit -m "Update fusion-data.json from SkyShards-Parser release" || echo "No changes to commit"
-          git push
+          git push origin HEAD:${{ env.TARGET_BRANCH }}
