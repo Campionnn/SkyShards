@@ -28,6 +28,11 @@ export interface GroupedRecipe {
   commonShard: string;
   commonPosition: "input1" | "input2" | "";
   fusionType: "special" | "id" | "chameleon";
+  // matrix grouping (both sides variable)
+  matrix?: boolean;
+  variantLeft?: string[]; // set A
+  variantRight?: string[]; // set B
+  output?: string; // common output for matrix
 }
 
 export interface CategorizedRecipes {
@@ -188,13 +193,98 @@ export const categorizeAndGroupRecipes = (recipes: Recipe[], fusionData: FusionD
     recipeMap.set(key, best);
   });
   const culled = Array.from(recipeMap.values());
-  const special = culled.filter(r => classifyFusion(r) === "special");
-  const id = culled.filter(r => classifyFusion(r) === "id");
-  const chameleon = culled.filter(r => classifyFusion(r) === "chameleon");
+  const byType: Record<string, Recipe[]> = { special: [], id: [], chameleon: [] };
+  culled.forEach(r => byType[classifyFusion(r)].push(r));
+
+  const build = (list: Recipe[]): GroupedRecipe[] => {
+    // Partition by output only (ignore quantity to allow flexible grouping)
+    const partitions = new Map<string, Recipe[]>();
+    list.forEach(r => {
+      const k = r.output;
+      (partitions.get(k) || partitions.set(k, []).get(k)!).push(r);
+    });
+    const result: GroupedRecipe[] = [];
+
+    partitions.forEach(recList => {
+      const used = new Set<number>();
+
+      // Build partner map: each shard -> set of its partners
+      const partnerMap = new Map<string, Set<string>>();
+      recList.forEach(r => {
+        if (!partnerMap.has(r.input1)) partnerMap.set(r.input1, new Set());
+        if (!partnerMap.has(r.input2)) partnerMap.set(r.input2, new Set());
+        partnerMap.get(r.input1)!.add(r.input2);
+        partnerMap.get(r.input2)!.add(r.input1);
+      });
+
+      // Group shards by identical partner sets
+      const signatureMap = new Map<string, string[]>(); // signature -> shards sharing it
+      partnerMap.forEach((partners, shard) => {
+        const arr = Array.from(partners).sort();
+        if (arr.length < 2) return; // need at least 2 partners to be worth grouping
+        const sig = arr.join("|");
+        (signatureMap.get(sig) || signatureMap.set(sig, []).get(sig)!).push(shard);
+      });
+
+      // Create matrix groups from signatures with multiple shards
+      signatureMap.forEach((shards, sig) => {
+        if (shards.length < 2) return; // need at least 2 shards sharing the same partners
+        const partners = sig.split("|");
+        if (partners.length < 2) return; // need at least 2 partners
+
+        const variantLeft = shards.sort();
+        const variantRight = partners.sort();
+
+        // Avoid duplicate groups by consistent ordering
+        if (variantLeft[0] > variantRight[0]) return;
+
+        // Collect all recipes that connect these variant sets
+        const groupRecipes: Recipe[] = [];
+        recList.forEach((r, idx) => {
+          const aInLeft = variantLeft.includes(r.input1) && variantRight.includes(r.input2);
+          const bInLeft = variantLeft.includes(r.input2) && variantRight.includes(r.input1);
+          if (aInLeft || bInLeft) {
+            groupRecipes.push(r);
+            used.add(idx);
+          }
+        });
+
+        if (groupRecipes.length >= 2) {
+          result.push({
+            recipes: groupRecipes,
+            isGroup: true,
+            commonShard: "",
+            commonPosition: "",
+            fusionType: classifyFusion(groupRecipes[0]),
+            matrix: true,
+            variantLeft,
+            variantRight,
+            output: groupRecipes[0].output,
+          });
+        }
+      });
+
+      // Handle remaining ungrouped recipes
+      const remaining = recList.filter((_, idx) => !used.has(idx));
+      if (remaining.length) {
+        // Group by quantity for traditional grouping
+        const byQty = new Map<number, Recipe[]>();
+        remaining.forEach(r => {
+          (byQty.get(r.quantity) || byQty.set(r.quantity, []).get(r.quantity)!).push(r);
+        });
+        byQty.forEach(sub => {
+          result.push(...groupRecipesByCommonShard(sub));
+        });
+      }
+    });
+
+    return result;
+  };
+
   return {
-    special: groupRecipesByCommonShard(special),
-    id: groupRecipesByCommonShard(id),
-    chameleon: groupRecipesByCommonShard(chameleon),
+    special: build(byType.special),
+    id: build(byType.id),
+    chameleon: build(byType.chameleon),
   };
 };
 
@@ -205,7 +295,7 @@ export const filterCategorizedRecipes = (categorized: CategorizedRecipes, filter
     arr.filter(g => g.recipes.some(r => {
       const s1 = fusionData.shards[r.input1]?.name.toLowerCase() || "";
       const s2 = fusionData.shards[r.input2]?.name.toLowerCase() || "";
-      const outId = (r as any).output as string | undefined;
+      const outId = (r as Recipe).output as string | undefined;
       const outName = outId ? (fusionData.shards[outId]?.name.toLowerCase() || "") : "";
       return s1.includes(term) || s2.includes(term) || outName.includes(term);
     }));

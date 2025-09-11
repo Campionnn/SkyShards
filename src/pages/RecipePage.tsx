@@ -145,7 +145,102 @@ export const RecipePage = () => {
         <div className="inline-grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-x-6 bg-slate-700/50 border border-slate-600/50 rounded-md p-2 lg:p-3 w-full max-w-fit mx-auto">
           {groups.map((group, idx) => {
             const gKey = `${fusionType}-${idx}`;
-            
+
+            // Matrix group (both sides variable, all combinations present)
+            if (group.matrix && group.variantLeft && group.variantRight) {
+              const outputId = group.output || group.recipes[0].output;
+
+              // Get unique quantities in this matrix group
+              const quantities = [...new Set(group.recipes.map(r => r.quantity))];
+              const hasMultipleQuantities = quantities.length > 1;
+
+              // Matrix group uses dropdowns for both sides
+              const leftDropdownId = `${gKey}-left`;
+              const rightDropdownId = `${gKey}-right`;
+              const selectedLeftIndex = groupSelectionIndex[`${gKey}-left`] || 0;
+              const selectedRightIndex = groupSelectionIndex[`${gKey}-right`] || 0;
+              const currentLeft = group.variantLeft[selectedLeftIndex];
+              const currentRight = group.variantRight[selectedRightIndex];
+
+              return (
+                <div key={gKey} className="px-2">
+                  <div className="flex flex-wrap items-center gap-2 lg:gap-3 min-w-0 min-h-[40px]">
+                    {/* Left side dropdown */}
+                    <div className="relative" ref={el => groupDropdowns.setRef(leftDropdownId, el)}>
+                      <DropdownButton
+                        isOpen={groupDropdowns.dropdownOpen[leftDropdownId]}
+                        onClick={() => groupDropdowns.toggleDropdown(leftDropdownId)}
+                        className="min-w-[120px] bg-slate-600 border-slate-500 text-white"
+                      >
+                        <ShardDisplay shardId={currentLeft} fusionData={fusionData} />
+                      </DropdownButton>
+                      {groupDropdowns.dropdownOpen[leftDropdownId] && (
+                        <div className="absolute z-50 top-full mt-1 left-0 bg-slate-900 border border-slate-600 rounded shadow-xl max-h-48 overflow-auto min-w-max">
+                          {group.variantLeft.map((shardId, index) => (
+                            <button
+                              key={shardId}
+                              type="button"
+                              className="flex w-full items-center gap-2 px-3 py-2 hover:bg-slate-600 text-sm"
+                              onClick={() => {
+                                setGroupSelectionIndex(p => ({ ...p, [`${gKey}-left`]: index }));
+                                groupDropdowns.closeDropdown(leftDropdownId);
+                              }}
+                            >
+                              <ShardDisplay shardId={shardId} fusionData={fusionData} />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <span className="text-purple-400">+</span>
+
+                    {/* Right side dropdown */}
+                    <div className="relative" ref={el => groupDropdowns.setRef(rightDropdownId, el)}>
+                      <DropdownButton
+                        isOpen={groupDropdowns.dropdownOpen[rightDropdownId]}
+                        onClick={() => groupDropdowns.toggleDropdown(rightDropdownId)}
+                        className="min-w-[120px] bg-slate-600 border-slate-500 text-white"
+                      >
+                        <ShardDisplay shardId={currentRight} fusionData={fusionData} />
+                      </DropdownButton>
+                      {groupDropdowns.dropdownOpen[rightDropdownId] && (
+                        <div className="absolute z-50 top-full mt-1 left-0 bg-slate-900 border border-slate-600 rounded shadow-xl max-h-48 overflow-auto min-w-max">
+                          {group.variantRight.map((shardId, index) => (
+                            <button
+                              key={shardId}
+                              type="button"
+                              className="flex w-full items-center gap-2 px-3 py-2 hover:bg-slate-600 text-sm"
+                              onClick={() => {
+                                setGroupSelectionIndex(p => ({ ...p, [`${gKey}-right`]: index }));
+                                groupDropdowns.closeDropdown(rightDropdownId);
+                              }}
+                            >
+                              <ShardDisplay shardId={shardId} fusionData={fusionData} />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <span className="text-purple-400">=</span>
+
+                    {/* Output display */}
+                    {hasMultipleQuantities ? (
+                      <div className="flex items-center gap-1">
+                        <ShardDisplay shardId={outputId} fusionData={fusionData} />
+                        <span className="text-xs text-slate-400">({quantities.sort((a, b) => b - a).join('/')})x</span>
+                      </div>
+                    ) : (
+                      <ShardDisplay shardId={outputId} quantity={quantities[0]} fusionData={fusionData} />
+                    )}
+
+                    <span className="text-xs text-slate-400 ml-1">({group.recipes.length} combos)</span>
+                  </div>
+                </div>
+              );
+            }
+
             if (group.isGroup) {
               const selectedIdx = groupSelectionIndex[gKey] || 0;
               const activeRecipe = group.recipes[selectedIdx];
