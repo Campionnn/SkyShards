@@ -4,73 +4,97 @@ import { getRarityColor } from "../utilities";
 import { useRecipeState } from "../context";
 import { useFusionData, useDropdownManager } from "../hooks";
 import {
-  processInputRecipes,
   processOutputRecipes,
-  filterGroups,
   categorizeAndGroupRecipes,
   filterCategorizedRecipes,
-  type OutputGroup,
   type Recipe,
   type CategorizedRecipes,
   type GroupedRecipe,
+  type FusionData,
 } from "../utilities";
 import type { ShardWithKey } from "../types/types";
+
+type RecipeMode = "input" | "output" | null;
 
 export const RecipePage = () => {
   const { selectedShard, setSelectedShard, selectedOutputShard, setSelectedOutputShard } = useRecipeState();
   const { fusionData, loading } = useFusionData();
 
-  // Input side state
   const [searchValue, setSearchValue] = useState("");
-  const [filterValue, setFilterValue] = useState("");
-  const [outputGroups, setOutputGroups] = useState<OutputGroup[]>([]);
-  const [selectedPartner, setSelectedPartner] = useState<{ [output: string]: string }>({});
-
-  // Output side state
   const [outputSearchValue, setOutputSearchValue] = useState("");
-  const [outputFilterValue, setOutputFilterValue] = useState("");
-  const [outputRecipes, setOutputRecipes] = useState<Recipe[]>([]);
+  const [filterValue, setFilterValue] = useState("");
+
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [categorizedRecipes, setCategorizedRecipes] = useState<CategorizedRecipes>({ special: [], id: [], chameleon: [] });
+  const [mode, setMode] = useState<RecipeMode>(null);
+
   const [groupSelectionIndex, setGroupSelectionIndex] = useState<{ [groupKey: string]: number }>({});
+  const groupDropdowns = useDropdownManager();
 
-  const inputDropdowns = useDropdownManager();
-  const outputGroupDropdowns = useDropdownManager();
+  const getInputRecipes = (shard: ShardWithKey, fusionData: FusionData): Recipe[] => {
+    const recipes: Recipe[] = [];
+    Object.entries(fusionData.recipes).forEach(([outputShardId, recipeData]) => {
+      Object.entries(recipeData).forEach(([quantityStr, recipeList]) => {
+        const outputQuantity = parseInt(quantityStr, 10);
+        recipeList.forEach((recipe) => {
+          if (recipe.length === 2) {
+            const [input1, input2] = recipe;
+            if (input1 === shard.key || input2 === shard.key) {
+              recipes.push({ input1, input2, quantity: outputQuantity, output: outputShardId });
+            }
+          }
+        });
+      });
+    });
+    return recipes;
+  };
 
-  // Load input (what can I make with X?) data
   useEffect(() => {
-    if (!selectedShard || !fusionData) {
-      setOutputGroups([]);
-      return;
-    }
-    setOutputGroups(processInputRecipes(selectedShard, fusionData));
-  }, [selectedShard, fusionData]);
-
-  // Load output (how to make X?) data and categorize
-  useEffect(() => {
-    if (!selectedOutputShard || !fusionData) {
-      setOutputRecipes([]);
+    if (!fusionData) {
+      setRecipes([]);
       setCategorizedRecipes({ special: [], id: [], chameleon: [] });
+      setMode(null);
       return;
     }
-    const recipes = processOutputRecipes(selectedOutputShard, fusionData);
-    setOutputRecipes(recipes);
-    setCategorizedRecipes(categorizeAndGroupRecipes(recipes, fusionData));
-  }, [selectedOutputShard, fusionData]);
 
-  // Handlers
+    let newRecipes: Recipe[] = [];
+    let newMode: RecipeMode = null;
+
+    if (selectedShard && !selectedOutputShard) {
+      newRecipes = getInputRecipes(selectedShard, fusionData);
+      newMode = "input";
+    } else if (selectedOutputShard && !selectedShard) {
+      newRecipes = processOutputRecipes(selectedOutputShard, fusionData);
+      newMode = "output";
+    }
+
+    setRecipes(newRecipes);
+    setMode(newMode);
+    
+    if (newRecipes.length > 0) {
+      setCategorizedRecipes(categorizeAndGroupRecipes(newRecipes, fusionData));
+    } else {
+      setCategorizedRecipes({ special: [], id: [], chameleon: [] });
+    }
+  }, [selectedShard, selectedOutputShard, fusionData]);
+
   const handleShardSelect = (shard: ShardWithKey) => {
+    setMode("input");
     setSelectedShard(shard);
     setSelectedOutputShard(null);
     setOutputSearchValue("");
-    setOutputFilterValue("");
+    setFilterValue("");
   };
-  const handleSearchInputFocus = () => searchValue && setSearchValue("");
+
   const handleOutputShardSelect = (shard: ShardWithKey) => {
+    setMode("output");
     setSelectedOutputShard(shard);
     setSelectedShard(null);
     setSearchValue("");
     setFilterValue("");
   };
+
+  const handleSearchInputFocus = () => searchValue && setSearchValue("");
   const handleOutputSearchInputFocus = () => outputSearchValue && setOutputSearchValue("");
 
   if (loading && !fusionData) {
@@ -97,16 +121,12 @@ export const RecipePage = () => {
       </div>
     );
   }
+
   if (!fusionData) return null;
 
-  // Filter input-side groups
-  const filteredInputGroups = filterGroups(outputGroups, filterValue, fusionData);
+  const filteredCategories = filterCategorizedRecipes(categorizedRecipes, filterValue, fusionData);
+  const totalGroupBlocks = filteredCategories.special.length + filteredCategories.id.length + filteredCategories.chameleon.length;
 
-  // Filter output categories (respect search filter)
-  const filteredCategories = filterCategorizedRecipes(categorizedRecipes, outputFilterValue, fusionData);
-  const totalCategoryGroupBlocks = filteredCategories.special.length + filteredCategories.id.length + filteredCategories.chameleon.length;
-
-  // Render helpers for grouped categories
   const renderCategory = (
     groups: GroupedRecipe[],
     fusionType: "special" | "id" | "chameleon",
@@ -115,6 +135,7 @@ export const RecipePage = () => {
     colorClass: string
   ) => {
     if (!groups.length) return null;
+    
     return (
       <div className="space-y-3">
         <div className="text-center">
@@ -124,28 +145,30 @@ export const RecipePage = () => {
         <div className="inline-grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-x-6 bg-slate-700/50 border border-slate-600/50 rounded-md p-2 lg:p-3 w-full max-w-fit mx-auto">
           {groups.map((group, idx) => {
             const gKey = `${fusionType}-${idx}`;
+            
             if (group.isGroup) {
               const selectedIdx = groupSelectionIndex[gKey] || 0;
-              const active = group.recipes[selectedIdx];
+              const activeRecipe = group.recipes[selectedIdx];
               const leftCommon = group.commonPosition === "input1";
               const rightCommon = group.commonPosition === "input2";
 
               const renderVariantDropdown = (side: "left" | "right") => {
-                const list = [...new Set(group.recipes.map(r => side === "left" ? r.input1 : r.input2))];
+                const shardList = [...new Set(group.recipes.map(r => side === "left" ? r.input1 : r.input2))];
                 const dropdownId = `${gKey}-${side}`;
-                const currentShard = side === "left" ? active.input1 : active.input2;
+                const currentShard = side === "left" ? activeRecipe.input1 : activeRecipe.input2;
+                
                 return (
-                  <div className="relative" ref={el => outputGroupDropdowns.setRef(dropdownId, el)}>
+                  <div className="relative" ref={el => groupDropdowns.setRef(dropdownId, el)}>
                     <DropdownButton
-                      isOpen={outputGroupDropdowns.dropdownOpen[dropdownId]}
-                      onClick={() => outputGroupDropdowns.toggleDropdown(dropdownId)}
+                      isOpen={groupDropdowns.dropdownOpen[dropdownId]}
+                      onClick={() => groupDropdowns.toggleDropdown(dropdownId)}
                       className="min-w-[120px] bg-slate-600 border-slate-500 text-white"
                     >
                       <ShardDisplay shardId={currentShard} fusionData={fusionData} />
                     </DropdownButton>
-                    {outputGroupDropdowns.dropdownOpen[dropdownId] && (
+                    {groupDropdowns.dropdownOpen[dropdownId] && (
                       <div className="absolute z-50 top-full mt-1 left-0 bg-slate-900 border border-slate-600 rounded shadow-xl max-h-48 overflow-auto min-w-max">
-                        {list.map(shardId => {
+                        {shardList.map(shardId => {
                           const recipeIdx = group.recipes.findIndex(r => (side === "left" ? r.input1 : r.input2) === shardId);
                           return (
                             <button
@@ -154,7 +177,7 @@ export const RecipePage = () => {
                               className="flex w-full items-center gap-2 px-3 py-2 hover:bg-slate-600 text-sm"
                               onClick={() => {
                                 setGroupSelectionIndex(p => ({ ...p, [gKey]: recipeIdx }));
-                                outputGroupDropdowns.closeDropdown(dropdownId);
+                                groupDropdowns.closeDropdown(dropdownId);
                               }}
                             >
                               <ShardDisplay shardId={shardId} fusionData={fusionData} />
@@ -167,28 +190,61 @@ export const RecipePage = () => {
                 );
               };
 
+              let actualOutput = "";
+              if (mode === "output" && selectedOutputShard) {
+                actualOutput = selectedOutputShard.key;
+              } else if (mode === "input") {
+                actualOutput = activeRecipe.output;
+              } else if (activeRecipe.output) {
+                actualOutput = activeRecipe.output;
+              }
+
               return (
                 <div key={gKey} className="px-2">
                   <div className="flex flex-wrap items-center gap-2 lg:gap-3 min-w-0 min-h-[40px]">
-                    {leftCommon ? <ShardDisplay shardId={group.commonShard} fusionData={fusionData} /> : renderVariantDropdown("left")}
+                    {leftCommon ? 
+                      <ShardDisplay shardId={group.commonShard} fusionData={fusionData} /> : 
+                      renderVariantDropdown("left")
+                    }
                     <span className="text-purple-400">+</span>
-                    {rightCommon ? <ShardDisplay shardId={group.commonShard} fusionData={fusionData} /> : renderVariantDropdown("right")}
+                    {rightCommon ? 
+                      <ShardDisplay shardId={group.commonShard} fusionData={fusionData} /> : 
+                      renderVariantDropdown("right")
+                    }
                     <span className="text-purple-400">=</span>
-                    <ShardDisplay shardId={selectedOutputShard!.key} quantity={active.quantity} fusionData={fusionData} />
+                    <ShardDisplay 
+                      shardId={actualOutput} 
+                      quantity={activeRecipe.quantity} 
+                      fusionData={fusionData} 
+                    />
                   </div>
                 </div>
               );
             }
-            // Single recipe (not a group)
-            const r = group.recipes[0];
+
+            const recipe = group.recipes[0];
+
+            let actualOutput = "";
+            if (mode === "output" && selectedOutputShard) {
+              actualOutput = selectedOutputShard.key;
+            } else if (mode === "input") {
+              actualOutput = recipe.output;
+            } else if (recipe.output) {
+              actualOutput = recipe.output;
+            }
+
             return (
               <div key={gKey} className="px-2">
                 <div className="flex items-center gap-2 lg:gap-3 min-w-0 min-h-[40px]">
-                  <ShardDisplay shardId={r.input1} fusionData={fusionData} />
+                  <ShardDisplay shardId={recipe.input1} fusionData={fusionData} />
                   <span className="text-purple-400">+</span>
-                  <ShardDisplay shardId={r.input2} fusionData={fusionData} />
+                  <ShardDisplay shardId={recipe.input2} fusionData={fusionData} />
                   <span className="text-purple-400">=</span>
-                  <ShardDisplay shardId={selectedOutputShard!.key} quantity={r.quantity} fusionData={fusionData} />
+                  <ShardDisplay 
+                    shardId={actualOutput} 
+                    quantity={recipe.quantity} 
+                    fusionData={fusionData} 
+                  />
                 </div>
               </div>
             );
@@ -229,15 +285,15 @@ export const RecipePage = () => {
                 </div>
               </div>
             )}
-            {!loading && outputGroups.length > 0 && (
+            {!loading && mode === "input" && recipes.length > 0 && (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-2 lg:gap-4">
-                <RecipeCountBadge count={filteredInputGroups.length} label="Available Recipes" variant="green" />
-                <SearchFilterInput value={filterValue} onChange={setFilterValue} placeholder="Filter fusions..." variant="green" />
+                <RecipeCountBadge count={totalGroupBlocks} label="Recipe Groups" variant="green" />
+                <SearchFilterInput value={filterValue} onChange={setFilterValue} placeholder="Filter recipes..." variant="green" />
               </div>
             )}
           </div>
 
-            {/* Output panel */}
+          {/* Output panel */}
           <div className="bg-slate-800/40 border border-slate-600/30 rounded-md p-3 lg:p-4 flex flex-col gap-2 w-full lg:max-w-lg">
             <div className="w-full">
               <label className="flex items-center gap-2 text-sm font-medium text-fuchsia-300 mb-2">
@@ -264,136 +320,37 @@ export const RecipePage = () => {
                 </div>
               </div>
             )}
-            {!loading && outputRecipes.length > 0 && (
+            {!loading && mode === "output" && recipes.length > 0 && (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-2 lg:gap-4">
-                <RecipeCountBadge count={totalCategoryGroupBlocks} label="Groups" variant="fuchsia" />
-                <SearchFilterInput value={outputFilterValue} onChange={setOutputFilterValue} placeholder="Filter recipes..." variant="fuchsia" />
+                <RecipeCountBadge count={totalGroupBlocks} label="Recipe Groups" variant="fuchsia" />
+                <SearchFilterInput value={filterValue} onChange={setFilterValue} placeholder="Filter recipes..." variant="fuchsia" />
               </div>
             )}
           </div>
         </div>
 
-        {(selectedShard || selectedOutputShard) ? (
+        {/* Results section */}
+        {mode && recipes.length > 0 ? (
           <div className="flex justify-center">
-            {/* Input side result list */}
-            {selectedShard && !selectedOutputShard && !loading && outputGroups.length > 0 && (
-              <div className="w-full max-w-fit mx-auto">
-                <div className="inline-grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-x-6 bg-slate-700/50 border border-slate-600/50 rounded-md p-2 lg:p-3">
-                  {filteredInputGroups
-                    .sort((a, b) => {
-                      const rarityOrder = ["common", "uncommon", "rare", "epic", "legendary"];
-                      const ra = rarityOrder.indexOf((fusionData.shards[a.output]?.rarity || "common").toLowerCase());
-                      const rb = rarityOrder.indexOf((fusionData.shards[b.output]?.rarity || "common").toLowerCase());
-                      if (ra !== rb) return ra - rb;
-                      const na = fusionData.shards[a.output]?.name || "";
-                      const nb = fusionData.shards[b.output]?.name || "";
-                      return na.localeCompare(nb);
-                    })
-                    .map((og) => {
-                      const partnerId = selectedPartner[og.output] || og.partners[0];
-                      const isOpen = inputDropdowns.dropdownOpen[og.output] || false;
-                      const pos = og.selectedPosition;
-                      return (
-                        <div key={og.output} className="px-2">
-                          <div className="flex items-center gap-2 lg:gap-3 min-w-0 min-h-[40px]">
-                            {/* First position */}
-                            <div className="flex items-center gap-1 lg:gap-2 flex-shrink-0">
-                              {pos === "first" ? (
-                                <ShardDisplay shardId={selectedShard.key} fusionData={fusionData} />
-                              ) : og.partners.length > 1 ? (
-                                <div className="relative flex-shrink-0" ref={el => inputDropdowns.setRef(og.output, el)}>
-                                  <DropdownButton isOpen={isOpen} onClick={() => inputDropdowns.toggleDropdown(og.output)}>
-                                    <ShardDisplay shardId={partnerId} fusionData={fusionData} size="sm" />
-                                  </DropdownButton>
-                                  {isOpen && (
-                                    <div className="absolute z-50 top-full mt-1 left-0 bg-slate-900 border border-slate-600 rounded shadow-xl max-h-40 overflow-auto min-w-max">
-                                      {og.partners.map(pid => (
-                                        <button
-                                          key={pid}
-                                          type="button"
-                                          className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-700 transition-colors ${(pid === partnerId) ? "bg-slate-700 border-l-2 border-blue-400" : "text-slate-200"}`}
-                                          onClick={() => { setSelectedPartner(p => ({ ...p, [og.output]: pid })); inputDropdowns.closeDropdown(og.output); }}
-                                        >
-                                          <span className="text-sm text-slate-400 font-medium flex-shrink-0">{fusionData.shards[pid]?.fuse_amount || 2}x</span>
-                                          <img src={`${import.meta.env.BASE_URL}shardIcons/${pid}.png`} alt={fusionData.shards[pid]?.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-                                          <span className={`text-sm flex-1 ${(pid === partnerId) ? "text-blue-300" : getRarityColor(fusionData.shards[pid]?.rarity || "common")}`}>{fusionData.shards[pid]?.name}</span>
-                                        </button>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                <ShardDisplay shardId={partnerId} fusionData={fusionData} />
-                              )}
-                            </div>
-                            <span className="text-purple-400">+</span>
-                            {/* Second position */}
-                            <div className="flex items-center gap-1 lg:gap-2 flex-shrink-0">
-                              {pos === "second" ? (
-                                <ShardDisplay shardId={selectedShard.key} fusionData={fusionData} />
-                              ) : og.partners.length > 1 ? (
-                                <div className="relative flex-shrink-0" ref={el => inputDropdowns.setRef(og.output + "-second", el)}>
-                                  <DropdownButton isOpen={inputDropdowns.dropdownOpen[og.output + "-second"]} onClick={() => inputDropdowns.toggleDropdown(og.output + "-second")}>
-                                    <ShardDisplay shardId={partnerId} fusionData={fusionData} size="sm" />
-                                  </DropdownButton>
-                                  {inputDropdowns.dropdownOpen[og.output + "-second"] && (
-                                    <div className="absolute z-50 top-full mt-1 left-0 bg-slate-900 border border-slate-600 rounded shadow-xl max-h-40 overflow-auto min-w-max">
-                                      {og.partners.map(pid => (
-                                        <button
-                                          key={pid}
-                                          type="button"
-                                          className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-slate-700 transition-colors ${(pid === partnerId) ? "bg-slate-700 border-l-2 border-blue-400" : "text-slate-200"}`}
-                                          onClick={() => { setSelectedPartner(p => ({ ...p, [og.output]: pid })); inputDropdowns.closeDropdown(og.output + "-second"); }}
-                                        >
-                                          <span className="text-sm text-slate-400 font-medium flex-shrink-0">{fusionData.shards[pid]?.fuse_amount || 2}x</span>
-                                          <img src={`${import.meta.env.BASE_URL}shardIcons/${pid}.png`} alt={fusionData.shards[pid]?.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
-                                          <span className={`text-sm flex-1 ${(pid === partnerId) ? "text-blue-300" : getRarityColor(fusionData.shards[pid]?.rarity || "common")}`}>{fusionData.shards[pid]?.name}</span>
-                                        </button>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                <ShardDisplay shardId={partnerId} fusionData={fusionData} />
-                              )}
-                            </div>
-                            <span className="text-purple-400">=</span>
-                            <ShardDisplay shardId={og.output} quantity={og.quantities.get(partnerId) || 1} fusionData={fusionData} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            )}
-
-            {/* Output categorized list */}
-            {selectedOutputShard && !selectedShard && !loading && outputRecipes.length > 0 && (
-              <div className="w-full max-w-fit mx-auto space-y-8">
-                {renderCategory(filteredCategories.special, "special", "Special Fusions (2x Output)", "Produce 2 of the output shard", "text-yellow-400")}
-                {renderCategory(filteredCategories.id, "id", "ID Fusions (1x Output)", "Produce 1 of the output shard", "text-blue-400")}
-                {renderCategory(filteredCategories.chameleon, "chameleon", "Chameleon Fusions", "Recipes involving L4 (Chameleon)", "text-purple-400")}
-              </div>
-            )}
+            <div className="w-full max-w-fit mx-auto space-y-8">
+              {renderCategory(filteredCategories.special, "special", "Special Fusions", "Produces 2 shards", "text-yellow-400")}
+              {renderCategory(filteredCategories.id, "id", "ID Fusions", "Produces 1 shard", "text-blue-400")}
+              {renderCategory(filteredCategories.chameleon, "chameleon", "Chameleon Fusions", "Produces 1 shard", "text-green-400")}
+            </div>
+          </div>
+        ) : mode && recipes.length === 0 ? (
+          <div className="text-center py-12 lg:py-16">
+            <div className="text-slate-400 text-base lg:text-lg">
+              {mode === "input" ? "No fusion recipes found using this shard." : "No recipes found to create this shard."}
+            </div>
+            <div className="text-slate-500 text-xs lg:text-sm mt-2">
+              {mode === "input" ? "This shard might not be used in any fusion recipes." : "This shard might be obtained directly or not fuseable."}
+            </div>
           </div>
         ) : (
           <div className="text-center py-12 lg:py-20">
             <div className="text-slate-400 text-lg lg:text-xl">Select an input shard or output shard to see recipes</div>
-            <div className="text-slate-500 text-xs lg:text-sm mt-2 lg:mt-3 px-4">Choose a shard on the left to see outputs, or on the right to see how to make it.</div>
-          </div>
-        )}
-
-        {!loading && selectedShard && !selectedOutputShard && outputGroups.length === 0 && (
-          <div className="text-center py-12 lg:py-16">
-            <div className="text-slate-400 text-base lg:text-lg">No fusion recipes found using this shard.</div>
-            <div className="text-slate-500 text-xs lg:text-sm mt-2">This shard might not be used in any fusion recipes.</div>
-          </div>
-        )}
-
-        {!loading && selectedOutputShard && !selectedShard && outputRecipes.length === 0 && (
-          <div className="text-center py-12 lg:py-16">
-            <div className="text-slate-400 text-base lg:text-lg">No recipes found to create this shard.</div>
-            <div className="text-slate-500 text-xs lg:text-sm mt-2">This shard might be obtained directly or not fuseable.</div>
+            <div className="text-slate-500 text-xs lg:text-sm mt-2 lg:mt-3 px-4">Choose a shard on the left to see what you can make, or on the right to see how to make it.</div>
           </div>
         )}
       </div>
