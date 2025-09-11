@@ -235,7 +235,7 @@ export const RecipePage = () => {
                       <ShardDisplay shardId={outputId} quantity={quantities[0]} fusionData={fusionData} />
                     )}
 
-                    <span className="text-xs text-slate-400 ml-1">({group.recipes.length} combos)</span>
+                    <span className="text-xs text-slate-400 ml-1">({group.recipes.length} recipes)</span>
                   </div>
                 </div>
               );
