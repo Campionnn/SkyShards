@@ -105,6 +105,17 @@ const chooseBetterRecipe = (recipe1: Recipe, recipe2: Recipe, fusionData: Fusion
 
   const getRarityIndex = (rarity?: string) => RARITY_ORDER.indexOf((rarity || "common").toLowerCase());
 
+  const isRecipe1Chameleon = recipe1.input1 === "L4" || recipe1.input2 === "L4";
+  const isRecipe2Chameleon = recipe2.input1 === "L4" || recipe2.input2 === "L4";
+
+  if (isRecipe1Chameleon && isRecipe2Chameleon) {
+    const recipe1HasL4First = recipe1.input1 === "L4";
+    const recipe2HasL4First = recipe2.input1 === "L4";
+
+    if (recipe1HasL4First && !recipe2HasL4First) return recipe1;
+    if (recipe2HasL4First && !recipe1HasL4First) return recipe2;
+  }
+
   const rarity1A = getRarityIndex(shard1A?.rarity);
   const rarity1B = getRarityIndex(shard1B?.rarity);
   const rarity2A = getRarityIndex(shard2A?.rarity);
@@ -232,8 +243,8 @@ export const categorizeAndGroupRecipes = (recipes: Recipe[], fusionData: FusionD
         const partners = sig.split("|");
         if (partners.length < 2) return; // need at least 2 partners
 
-        const variantLeft = shards.sort();
-        const variantRight = partners.sort();
+        const variantLeft = shards;
+        const variantRight = partners;
 
         // Avoid duplicate groups by consistent ordering
         if (variantLeft[0] > variantRight[0]) return;
