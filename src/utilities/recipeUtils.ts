@@ -29,6 +29,20 @@ export interface Recipe {
   quantity: number;
 }
 
+export interface GroupedRecipe {
+  recipes: Recipe[];
+  isGroup: boolean;
+  commonShard: string;
+  commonPosition: "input1" | "input2" | "";
+  fusionType: "special" | "id" | "chameleon";
+}
+
+export interface CategorizedRecipes {
+  special: GroupedRecipe[];
+  id: GroupedRecipe[];
+  chameleon: GroupedRecipe[];
+}
+
 const RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary"];
 
 const iterateRecipes = (fusionData: FusionData, callback: (outputId: string, recipe: string[], quantity: number) => void) => {
@@ -127,32 +141,204 @@ export const filterGroups = (groups: OutputGroup[], filterValue: string, fusionD
   });
 };
 
-export const groupRecipesByInput = (recipes: Recipe[]): Map<string, Array<{ input2: string; quantity: number }>> => {
-  const groupedRecipes = new Map<string, Array<{ input2: string; quantity: number }>>();
-
-  recipes.forEach((recipe) => {
-    if (!groupedRecipes.has(recipe.input1)) {
-      groupedRecipes.set(recipe.input1, []);
-    }
-    groupedRecipes.get(recipe.input1)!.push({
-      input2: recipe.input2,
-      quantity: recipe.quantity,
-    });
-  });
-
-  return groupedRecipes;
+// Determine fusion type per spec.
+const classifyFusion = (recipe: Recipe): "special" | "id" | "chameleon" => {
+  const isChameleon = recipe.input1 === "L4" || recipe.input2 === "L4";
+  if (isChameleon) return "chameleon"; // Chameleon overrides other types
+  if (recipe.quantity === 2) return "special";
+  return "id"; // quantity === 1 (or other) default to id per description
 };
 
-export const filterRecipeGroups = (
-  groupedRecipes: Map<string, Array<{ input2: string; quantity: number }>>,
-  filterValue: string,
-  fusionData: FusionData
-): Array<[string, Array<{ input2: string; quantity: number }>]> => {
-  if (!filterValue.trim()) return Array.from(groupedRecipes.entries());
+// Create a normalized key for recipe comparison (always put lexicographically smaller shard first)
+const createRecipeKey = (input1: string, input2: string, quantity: number): string => {
+  const sortedInputs = [input1, input2].sort();
+  return `${sortedInputs[0]}-${sortedInputs[1]}-${quantity}`;
+};
 
-  const searchTerm = filterValue.toLowerCase();
-  return Array.from(groupedRecipes.entries()).filter(([input1, partners]) => {
-    const input1Shard = fusionData.shards[input1];
-    return input1Shard?.name.toLowerCase().includes(searchTerm) || partners.some((partner) => fusionData.shards[partner.input2]?.name.toLowerCase().includes(searchTerm));
+// Analyze shard position frequency across all recipes
+const analyzeShardPositions = (recipes: Recipe[]) => {
+  const position1Count = new Map<string, number>();
+  const position2Count = new Map<string, number>();
+  
+  recipes.forEach(recipe => {
+    position1Count.set(recipe.input1, (position1Count.get(recipe.input1) || 0) + 1);
+    position2Count.set(recipe.input2, (position2Count.get(recipe.input2) || 0) + 1);
   });
+  
+  return { position1Count, position2Count };
+};
+
+// Determine the preferred position for a shard based on frequency
+const getPreferredPosition = (shardId: string, position1Count: Map<string, number>, position2Count: Map<string, number>): "input1" | "input2" => {
+  const count1 = position1Count.get(shardId) || 0;
+  const count2 = position2Count.get(shardId) || 0;
+  return count1 >= count2 ? "input1" : "input2";
+};
+
+// Choose the better recipe variant based on rarity and position frequency
+const chooseBetterRecipe = (recipe1: Recipe, recipe2: Recipe, fusionData: FusionData, positionAnalysis: { position1Count: Map<string, number>, position2Count: Map<string, number> }): Recipe => {
+  const shard1A = fusionData.shards[recipe1.input1];
+  const shard1B = fusionData.shards[recipe1.input2];
+  const shard2A = fusionData.shards[recipe2.input1];
+  const shard2B = fusionData.shards[recipe2.input2];
+  
+  // Get rarity indices (lower = more common)
+  const getRarityIndex = (rarity?: string) => RARITY_ORDER.indexOf((rarity || "common").toLowerCase());
+  
+  // Strategy 1: Prefer recipe where lower rarity shard comes first
+  const rarity1A = getRarityIndex(shard1A?.rarity);
+  const rarity1B = getRarityIndex(shard1B?.rarity);
+  const rarity2A = getRarityIndex(shard2A?.rarity);
+  const rarity2B = getRarityIndex(shard2B?.rarity);
+  
+  if (rarity1A < rarity1B && rarity2A >= rarity2B) return recipe1;
+  if (rarity2A < rarity2B && rarity1A >= rarity1B) return recipe2;
+  
+  // Strategy 2: Prefer recipe where shards are in their most frequent positions
+  const { position1Count, position2Count } = positionAnalysis;
+  
+  const recipe1Score = 
+    (getPreferredPosition(recipe1.input1, position1Count, position2Count) === "input1" ? 1 : 0) +
+    (getPreferredPosition(recipe1.input2, position1Count, position2Count) === "input2" ? 1 : 0);
+    
+  const recipe2Score = 
+    (getPreferredPosition(recipe2.input1, position1Count, position2Count) === "input1" ? 1 : 0) +
+    (getPreferredPosition(recipe2.input2, position1Count, position2Count) === "input2" ? 1 : 0);
+  
+  if (recipe1Score !== recipe2Score) {
+    return recipe1Score > recipe2Score ? recipe1 : recipe2;
+  }
+  
+  // Strategy 3: Lexicographic fallback for consistency
+  return recipe1.input1.localeCompare(recipe2.input1) <= 0 ? recipe1 : recipe2;
+};
+
+// Group recipes that share a common shard in the same position
+const groupRecipesByCommonShard = (recipes: Recipe[]): GroupedRecipe[] => {
+  const groups: GroupedRecipe[] = [];
+  const processed = new Set<string>();
+  
+  recipes.forEach((recipe, index) => {
+    if (processed.has(index.toString())) return;
+    
+    // Find all recipes that share input1 with this recipe
+    const sameInput1 = recipes.filter((r, i) => 
+      i !== index && !processed.has(i.toString()) && r.input1 === recipe.input1
+    );
+    
+    // Find all recipes that share input2 with this recipe
+    const sameInput2 = recipes.filter((r, i) => 
+      i !== index && !processed.has(i.toString()) && r.input2 === recipe.input2
+    );
+    
+    if (sameInput1.length > 0) {
+      // Group by common input1
+      const groupRecipes = [recipe, ...sameInput1];
+      groups.push({
+        recipes: groupRecipes,
+        isGroup: true,
+        commonShard: recipe.input1,
+        commonPosition: "input1",
+        fusionType: classifyFusion(recipe),
+      });
+      
+      // Mark as processed
+      processed.add(index.toString());
+      sameInput1.forEach((_, i) => {
+        const originalIndex = recipes.findIndex(r => r === sameInput1[i]);
+        processed.add(originalIndex.toString());
+      });
+    } else if (sameInput2.length > 0) {
+      // Group by common input2
+      const groupRecipes = [recipe, ...sameInput2];
+      groups.push({
+        recipes: groupRecipes,
+        isGroup: true,
+        commonShard: recipe.input2,
+        commonPosition: "input2",
+        fusionType: classifyFusion(recipe),
+      });
+      
+      // Mark as processed
+      processed.add(index.toString());
+      sameInput2.forEach((_, i) => {
+        const originalIndex = recipes.findIndex(r => r === sameInput2[i]);
+        processed.add(originalIndex.toString());
+      });
+    } else {
+      // Single recipe, no grouping
+      groups.push({
+        recipes: [recipe],
+        isGroup: false,
+        commonShard: "",
+        commonPosition: "",
+        fusionType: classifyFusion(recipe),
+      });
+      processed.add(index.toString());
+    }
+  });
+  
+  return groups;
+};
+
+export const categorizeAndGroupRecipes = (recipes: Recipe[], fusionData: FusionData): CategorizedRecipes => {
+  // Step 1: Analyze position frequencies for intelligent culling
+  const positionAnalysis = analyzeShardPositions(recipes);
+  
+  // Step 2: Cull duplicate recipes (mirrored recipes like A+B vs B+A)
+  const recipeMap = new Map<string, Recipe>();
+  const duplicates = new Map<string, Recipe[]>();
+  
+  recipes.forEach(recipe => {
+    const key = createRecipeKey(recipe.input1, recipe.input2, recipe.quantity);
+    if (recipeMap.has(key)) {
+      // Found duplicate, store both for comparison
+      const existing = recipeMap.get(key)!;
+      if (!duplicates.has(key)) {
+        duplicates.set(key, [existing]);
+      }
+      duplicates.get(key)!.push(recipe);
+    } else {
+      recipeMap.set(key, recipe);
+    }
+  });
+  
+  // Step 3: For each duplicate group, choose the better recipe
+  duplicates.forEach((recipeGroup, key) => {
+    let bestRecipe = recipeGroup[0];
+    for (let i = 1; i < recipeGroup.length; i++) {
+      bestRecipe = chooseBetterRecipe(bestRecipe, recipeGroup[i], fusionData, positionAnalysis);
+    }
+    recipeMap.set(key, bestRecipe);
+  });
+  
+  // Step 4: Group culled recipes by common shards
+  const culledRecipes = Array.from(recipeMap.values());
+  
+  // Separate by fusion type first
+  const specialRecipes = culledRecipes.filter(r => classifyFusion(r) === "special");
+  const idRecipes = culledRecipes.filter(r => classifyFusion(r) === "id");
+  const chameleonRecipes = culledRecipes.filter(r => classifyFusion(r) === "chameleon");
+  
+  return {
+    special: groupRecipesByCommonShard(specialRecipes),
+    id: groupRecipesByCommonShard(idRecipes),
+    chameleon: groupRecipesByCommonShard(chameleonRecipes),
+  };
+};
+
+export const filterCategorizedRecipes = (categorized: CategorizedRecipes, filterValue: string, fusionData: FusionData): CategorizedRecipes => {
+  if (!filterValue.trim()) return categorized;
+  const term = filterValue.toLowerCase();
+  const filter = (arr: GroupedRecipe[]) =>
+    arr.filter(g => g.recipes.some(r => {
+      const s1 = fusionData.shards[r.input1]?.name.toLowerCase() || "";
+      const s2 = fusionData.shards[r.input2]?.name.toLowerCase() || "";
+      return s1.includes(term) || s2.includes(term);
+    }));
+  return {
+    special: filter(categorized.special),
+    id: filter(categorized.id),
+    chameleon: filter(categorized.chameleon),
+  };
 };
