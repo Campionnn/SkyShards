@@ -87,7 +87,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   };
 
   type SkyOceanDirect = { shard: string; method: "direct"; quantity: number };
-  type SkyOceanCycleStep = { shard: string; recipe: { inputs: [string, string] } };
+  type SkyOceanCycleStep = { shard: string; inputs: [string, string] };
   type SkyOceanCycle = {
     shard: string;
     method: "cycle";
@@ -95,7 +95,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     craftsExpected: number;
     outputQuantity: number;
     pureReptile: number;
-    cycle: { steps: SkyOceanCycleStep[] };
+    steps: SkyOceanCycleStep[];
     inputRecipe?: SkyOceanTree;
   };
   type SkyOceanRecipe = {
@@ -128,14 +128,10 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
         craftsExpected: tree.craftsNeeded,
         outputQuantity: tree.cycle.steps[0].recipe.outputQuantity,
         pureReptile: pureReptile,
-        cycle: {
-          steps: tree.cycle.steps.map((step) => ({
-            shard: step.outputShard,
-            recipe: {
-              inputs: step.recipe.inputs,
-            },
-          })),
-        },
+        steps: tree.cycle.steps.map((step) => ({
+          shard: step.outputShard,
+          inputs: step.recipe.inputs,
+        })),
         inputRecipe: tree.inputRecipe ? convertTreeToSkyOcean(tree.inputRecipe) : undefined,
       };
     }
