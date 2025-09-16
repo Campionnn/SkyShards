@@ -121,7 +121,7 @@ export class AsyncCalculationService {
 
       await this.yieldToUI();
 
-      const totalQuantities = calculationService.collectTotalQuantities(tree, data);
+      const totalQuantities = calculationService.collectTotalQuantities(tree);
 
       let totalShardsProduced = requiredQuantity;
       let craftsNeeded = 1;

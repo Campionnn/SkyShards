@@ -2,10 +2,11 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import { ChevronDown } from "lucide-react";
 import type { LevelDropdownProps } from "../../types/types";
 import { Tooltip } from "../ui";
+import { SHARD_LEVELS } from "../../constants";
 
 export const LevelDropdown: React.FC<LevelDropdownProps> = React.memo(
   ({ value, onChange, label, tooltipTitle, tooltipContent, tooltipShardName, tooltipShardIcon, tooltipRarity, tooltipWarning, tooltipFamily, tooltipType }) => {
-    const levels = useMemo(() => Array.from({ length: 11 }, (_, i) => i), []); // 0-10
+    const levels = useMemo(() => SHARD_LEVELS, []); // 0-10
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 

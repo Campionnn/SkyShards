@@ -65,7 +65,4 @@ export const KUUDRA_TIERS = [
   { value: "t5", label: "T5" },
 ] as const;
 
-export const SHARD_LEVELS = Array.from({ length: 11 }, (_, i) => ({
-  value: i,
-  label: i.toString(),
-})).reverse();
+export const SHARD_LEVELS = Array.from({ length: 11 }, (_, i) => i).reverse();

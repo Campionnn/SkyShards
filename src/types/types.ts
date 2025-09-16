@@ -1,4 +1,3 @@
-import type { CalculationFormData } from "../schemas";
 import React from "react";
 
 export interface Shard {
@@ -45,7 +44,7 @@ export type RecipeTree =
       shard: string;
       method: "direct";
       quantity: number;
-      craftsNeeded?: number; // Not needed for direct, but for type safety
+      craftsNeeded?: number;
     }
   | {
       shard: string;
@@ -59,18 +58,14 @@ export type RecipeTree =
       shard: string;
       method: "cycle";
       quantity: number;
-      cycle: {
-        steps: {
-          outputShard: string;
-          recipe: Recipe;
-        }[];
-        expectedCrafts: number;
-        expectedOutput: number;
-        baseOutput: number;
-        multiplier: number;
-      };
+      steps: {
+        outputShard: string;
+        recipe: Recipe;
+      }[];
+      multiplier: number;
       craftsNeeded: number;
       inputRecipe: RecipeTree;
+      cycleInputs: RecipeTree[];
     };
 
 export interface CalculationParams {
@@ -115,10 +110,6 @@ export interface ShardWithDirectInfo extends ShardWithKey {
   isDirect: boolean;
 }
 
-// calculator form
-export interface CalculatorFormProps {
-  onSubmit: (data: CalculationFormData) => void;
-}
 export interface LevelDropdownProps {
   value: number;
   onChange: (value: number) => void;
@@ -131,12 +122,6 @@ export interface LevelDropdownProps {
   tooltipWarning?: string;
   tooltipFamily?: string;
   tooltipType?: string;
-}
-
-export interface KuudraDropdownProps {
-  value: string;
-  onChange: (value: string) => void;
-  label: string;
 }
 
 //calcutation results
