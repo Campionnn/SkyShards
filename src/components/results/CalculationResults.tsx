@@ -97,7 +97,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     pureReptile: number;
     steps: SkyOceanCycleStep[];
     inputRecipe?: SkyOceanTree;
-    // cycleInputs: SkyOceanTree[];
+    cycleInputs: SkyOceanTree[];
   };
   type SkyOceanRecipe = {
     shard: string;
@@ -134,7 +134,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           inputs: step.recipe.inputs,
         })),
         inputRecipe: tree.inputRecipe ? convertTreeToSkyOcean(tree.inputRecipe) : undefined,
-        // cycleInputs: tree.cycleInputs ? tree.cycleInputs.map((input) => convertTreeToSkyOcean(input)) : [],
+        cycleInputs: tree.cycleInputs ? tree.cycleInputs.map((input) => convertTreeToSkyOcean(input)) : [],
       };
     }
 
@@ -196,7 +196,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     const convertedTree = convertTreeToSkyOcean(result.tree);
     const treeString = JSON.stringify(convertedTree);
     const base64Tree = gzipBase64(treeString);
-    return "<SkyOceanRecipe>(V1):" + base64Tree;
+    return "<SkyOceanRecipe>(V2):" + base64Tree;
   };
 
   const buildNoFrillsString = () => {
