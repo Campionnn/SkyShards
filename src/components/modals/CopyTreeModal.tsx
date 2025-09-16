@@ -60,6 +60,31 @@ export const CopyTreeModal: React.FC<CopyTreeModalProps> = ({ open, onClose, onC
           <div className="space-y-3">
             <button
                 type="button"
+                onClick={handleCopySkyOcean}
+                className="w-full p-3 rounded-lg border text-left transition-all duration-200 bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500 cursor-pointer"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-white font-medium">SkyOcean format 🎉</div>
+                  <div className="text-xs text-blue-400 hover:underline">
+                    <a
+                        href="https://modrinth.com/mod/skyocean"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                    >
+                      Download SkyOcean
+                    </a>
+                  </div>
+                </div>
+                <span className="px-1 py-0.5 text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-md">Shard Tracker + Fusion Helper</span>
+              </div>
+            </button>
+
+            <button
+                type="button"
                 onClick={handleCopyNoFrills}
                 className="w-full p-3 rounded-lg border text-left transition-all duration-200 bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500 cursor-pointer"
             >
@@ -80,32 +105,6 @@ export const CopyTreeModal: React.FC<CopyTreeModalProps> = ({ open, onClose, onC
                   </div>
                 </div>
                 <span className="px-1 py-0.5 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md">Shard Tracker</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleCopySkyOcean}
-              className="w-full p-3 rounded-lg border text-left transition-all duration-200 bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500 cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-white font-medium">SkyOcean format</div>
-                  <div className="text-xs text-slate-400">Coming Soon</div>
-                  <div className="text-xs text-blue-400 hover:underline">
-                    <a
-                      href="https://modrinth.com/mod/skyocean"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onKeyDown={(e) => e.stopPropagation()}
-                    >
-                      Download SkyOcean
-                    </a>
-                  </div>
-                </div>
-                <span className="px-1 py-0.5 text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-md">Shard Tracker + Fusion Helper</span>
               </div>
             </button>
           </div>
