@@ -5,7 +5,6 @@ import { formatNumber } from "../../utilities";
 import type { RecipeTreeNodeProps, Recipe, Shard, RecipeTree } from "../../types/types";
 import { Tooltip } from "../ui";
 import { SHARD_DESCRIPTIONS } from "../../constants";
-import { calculateExternalCycleInputs } from "../../utilities";
 
 export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   tree,
@@ -29,28 +28,20 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     return expandedStates.get(id)!;
   };
 
-  // Helper function to determine if a shard should be treated as direct
   const isDirectShard = (shardId: string) => {
     const shard = data.shards[shardId];
     if (!shard) return false;
-
-    // Don't show as direct if rate is 0 (completely excluded)
     if (shard.rate === 0) return false;
-
-    // A shard is direct if it has a rate (meaning it can be obtained directly)
     return shard.rate && shard.rate > 0;
   };
 
-  // Helper function to determine if a recipe is a reptile recipe
   const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard | undefined, input2Shard: Shard | undefined): boolean => {
     return (recipe?.isReptile || input1Shard?.family?.toLowerCase().includes("reptile") || input2Shard?.family?.toLowerCase().includes("reptile")) as boolean;
   };
 
-  // Helper function to calculate Crocodile procs needed
   const getCrocodileProcs = (tree: RecipeTree): number | null => {
     if (tree.method === "cycle") {
-      // Check if any step in the cycle is a reptile recipe
-      const hasReptile = tree.cycle.steps.some((step) => {
+      const hasReptile = tree.steps.some((step) => {
         const recipe = step.recipe;
         const input1Shard = data.shards[recipe.inputs[0]];
         const input2Shard = data.shards[recipe.inputs[1]];
@@ -225,13 +216,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     </div>
   );
 
-  const renderSubRecipe = (recipeTree: RecipeTree, inputShard: Shard, nodePrefix: string, level = 1) => {
+  const renderSubRecipe = (recipeTree: RecipeTree, inputShard: Shard, nodePrefix: string) => {
+    if (recipeTree.method === "direct") return renderDirectShard(recipeTree.quantity, inputShard);
     if (recipeTree.method !== "recipe") return null;
-    const maxOutputQuantity = recipeTree.recipe.outputQuantity;
     const input1Shard = data.shards[recipeTree.recipe.inputs[0]];
     const input2Shard = data.shards[recipeTree.recipe.inputs[1]];
-    const input1Quantity = input1Shard.fuse_amount;
-    const input2Quantity = input2Shard.fuse_amount;
+    const input1Quantity = input1Shard.fuse_amount * recipeTree.craftsNeeded;
+    const input2Quantity = input2Shard.fuse_amount * recipeTree.craftsNeeded;
     const subNodeId = `${nodePrefix}-${inputShard.id}`;
     const isExpanded = getExpansionState(subNodeId, true);
 
@@ -247,13 +238,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
           <div className="flex-1 text-left">
             <div className="flex items-center space-x-2">
               {renderChevron(isExpanded)}
-              {renderRecipeDisplay(maxOutputQuantity, inputShard, input1Quantity, input1Shard, input2Quantity, input2Shard)}
+              {renderRecipeDisplay(recipeTree.quantity, inputShard, input1Quantity, input1Shard, input2Quantity, input2Shard)}
             </div>
           </div>
           <div className="text-right min-w-[80px] ml-2">
             <div className="flex items-center justify-end space-x-1.5">
               <span className="text-xs text-slate-500">fusions</span>
-              <span className="font-medium text-white text-xs">1</span>
+              <span className="font-medium text-white text-xs">{recipeTree.craftsNeeded}</span>
             </div>
           </div>
         </div>
@@ -265,10 +256,10 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
               const isDirect = isDirectShard(subTree.shard);
 
               if (isDirect) {
-                return <div key={`direct-${subTree.shard}`}>{renderDirectShard(directShard.fuse_amount, directShard)}</div>;
+                return <div key={`direct-${subTree.shard}`}>{renderDirectShard(directShard.fuse_amount * recipeTree.craftsNeeded, directShard)}</div>;
               } else {
                 if (!recipeTree) return null;
-                return <div key={`sub-${subTree.shard}`}>{renderSubRecipe(subTree, directShard, subNodeId, level + 1)}</div>;
+                return <div key={`sub-${subTree.shard}`}>{renderSubRecipe(subTree, directShard, subNodeId)}</div>;
               }
             })}
           </div>
@@ -279,7 +270,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
   if (tree.method === "cycle") {
     const isExpanded = getExpansionState(nodeId, true);
-    const runCount = tree.cycle.expectedCrafts;
+    const runCount = tree.craftsNeeded;
     const crocProcs = getCrocodileProcs(tree);
 
     return (
@@ -329,7 +320,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   // Find the recipe that produces the target shard in the cycle
-                  const step = tree.cycle.steps.find((step) => step.outputShard === tree.shard);
+                  const step = tree.steps.find((step) => step.outputShard === tree.shard);
                   const targetRecipe = step?.recipe || null;
                   onShowAlternatives(tree.shard, {
                     currentRecipe: targetRecipe,
@@ -348,7 +339,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         {isExpanded && (
           <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-2">
             <div className="space-y-0.5">
-              {[...tree.cycle.steps]
+              {[...tree.steps]
                 .slice()
                 .reverse()
                 .map((step, stepIndex) => {
@@ -359,8 +350,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                   const input1Quantity = input1Shard.fuse_amount;
                   const input2Quantity = input2Shard.fuse_amount;
                   let outputQuantity = recipe.outputQuantity;
-                  if (recipe.isReptile) outputQuantity *= tree.cycle.multiplier;
-                  const stepNumber = tree.cycle.steps.length - stepIndex;
+                  if (recipe.isReptile) outputQuantity *= tree.multiplier;
+                  const stepNumber = tree.steps.length - stepIndex;
 
                   if (stepNumber === 1) {
                     const stepNodeId = `${nodeId}-step-${stepNumber}`;
@@ -382,19 +373,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="text-right min-w-[80px] ml-2">
-                              <div className="flex items-center justify-end space-x-1.5">
-                                <span className="text-xs text-slate-500">fusions</span>
-                                <span className="font-medium text-white text-xs">{tree.cycle.expectedCrafts}</span>
-                              </div>
-                            </div>
                             {onShowAlternatives && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onShowAlternatives(step.outputShard, {
                                     currentRecipe: recipe,
-                                    requiredQuantity: tree.cycle.expectedCrafts * outputQuantity,
+                                    requiredQuantity: tree.craftsNeeded * outputQuantity,
                                   });
                                 }}
                                 className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
@@ -407,23 +392,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                         </div>
                         {stepIsExpanded && (
                           <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-1">
-                            {recipe.inputs.map((inputId: string) => {
-                              const inputShard = data.shards[inputId];
-                              const inputRecipeTree = tree.inputRecipe;
-
-                              if (inputRecipeTree && inputShard) {
-                                if (!isDirectShard(inputId)) {
-                                  return (
-                                    <div key={inputId} className="space-y-1">
-                                      {renderSubRecipe(inputRecipeTree, inputShard, stepNodeId)}
-                                    </div>
-                                  );
-                                } else if (inputShard.family?.toLowerCase().includes("reptile")) {
-                                  return <div key={inputId}>{renderDirectShard(inputShard.fuse_amount, inputShard)}</div>;
-                                }
-                              }
-                              return null;
-                            })}
+                            <div key={tree.inputRecipe.shard} className="space-y-1">
+                              {renderSubRecipe(tree.inputRecipe, data.shards[tree.inputRecipe.shard], stepNodeId)}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -433,19 +404,13 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                       <div key={stepIndex} className="pl-3 pr-2 py-1 rounded border border-slate-400/50 flex items-center justify-between">
                         {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
                         <div className="flex items-center gap-2">
-                          <div className="text-right min-w-[80px] ml-2">
-                            <div className="flex items-center justify-end space-x-1.5">
-                              <span className="text-xs text-slate-500">fusions</span>
-                              <span className="font-medium text-white text-xs">{tree.cycle.expectedCrafts}</span>
-                            </div>
-                          </div>
                           {onShowAlternatives && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onShowAlternatives(step.outputShard, {
                                   currentRecipe: recipe,
-                                  requiredQuantity: tree.cycle.expectedCrafts * outputQuantity,
+                                  requiredQuantity: tree.craftsNeeded * outputQuantity,
                                 });
                               }}
                               className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
@@ -463,13 +428,12 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
             {/* Cycle summary */}
             {(() => {
-              const cycle = tree.cycle;
-              const inputsPerCraft = calculateExternalCycleInputs(cycle, data.shards);
               return (
                 <div className="flex flex-col gap-0.5 mt-0.5">
-                  {Object.values(inputsPerCraft).map(({ quantityPerCraft, shard }) => (
-                    <div key={shard.id}>{renderDirectShard(quantityPerCraft * cycle.expectedCrafts, shard)}</div>
-                  ))}
+                  {Object.values(tree.cycleInputs).map((cycleTree) => {
+                    const subNodeId = `${nodeId}-cycle-input`;
+                    return <div key={cycleTree.shard}>{renderSubRecipe(cycleTree, data.shards[cycleTree.shard], subNodeId)}</div>;
+                  })}
                 </div>
               );
             })()}

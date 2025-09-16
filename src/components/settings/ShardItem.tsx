@@ -20,8 +20,7 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, rate, de
   const handleRateChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setInputValue(e.target.value);
-      if (e.target.value === "") {
-      } else {
+      if (e.target.value !== "") {
         onRateChange(shard.key, parseFloat(e.target.value) || 0);
       }
     },

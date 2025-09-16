@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Clock, Coins, Hammer, Target, BarChart3, TicketPercent } from "lucide-react";
-import {formatLargeNumber, formatNumber, formatTime, calculateExternalCycleInputs} from "../../utilities";
+import {formatLargeNumber, formatNumber, formatTime } from "../../utilities";
 import type {RecipeTree, CalculationResultsProps} from "../../types/types";
 import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";
@@ -97,6 +97,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     pureReptile: number;
     steps: SkyOceanCycleStep[];
     inputRecipe?: SkyOceanTree;
+    cycleInputs: SkyOceanTree[];
   };
   type SkyOceanRecipe = {
     shard: string;
@@ -119,20 +120,21 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     }
 
     if (tree.method === "cycle") {
-      const pureReptile = tree.quantity / tree.cycle.steps[0].recipe.outputQuantity;
+      const pureReptile = tree.quantity / tree.steps[0].recipe.outputQuantity;
 
       return {
         shard: tree.shard,
         method: "cycle",
         quantity: tree.quantity,
         craftsExpected: tree.craftsNeeded,
-        outputQuantity: tree.cycle.steps[0].recipe.outputQuantity,
+        outputQuantity: tree.steps[0].recipe.outputQuantity,
         pureReptile: pureReptile,
-        steps: tree.cycle.steps.map((step) => ({
+        steps: tree.steps.map((step) => ({
           shard: step.outputShard,
           inputs: step.recipe.inputs,
         })),
         inputRecipe: tree.inputRecipe ? convertTreeToSkyOcean(tree.inputRecipe) : undefined,
+        cycleInputs: tree.cycleInputs ? tree.cycleInputs.map((input) => convertTreeToSkyOcean(input)) : [],
       };
     }
 
@@ -168,15 +170,12 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           node.inputs.forEach((input) => traverse(input));
         }
       } else if (node.method === "cycle") {
-        const inputsPerCraft = calculateExternalCycleInputs(node.cycle, data.shards);
         const key = `${node.shard}|Cycle`;
         shardQuantities.set(key, (shardQuantities.get(key) || 0) + node.quantity);
-        Object.values(inputsPerCraft).forEach(({ quantityPerCraft, shard }) => {
-          const k = `${shard.id}|Direct`;
-          const currentQuantity = shardQuantities.get(k) || 0;
-          shardQuantities.set(k, currentQuantity + quantityPerCraft * node.craftsNeeded);
-        });
         if (node.inputRecipe) traverse(node.inputRecipe);
+        node.cycleInputs.forEach((cycleInput) => {
+          traverse(cycleInput);
+        });
       }
     };
     traverse(tree);
@@ -197,7 +196,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     const convertedTree = convertTreeToSkyOcean(result.tree);
     const treeString = JSON.stringify(convertedTree);
     const base64Tree = gzipBase64(treeString);
-    return "<SkyOceanRecipe>(V1):" + base64Tree;
+    return "<SkyOceanRecipe>(V2):" + base64Tree;
   };
 
   const buildNoFrillsString = () => {

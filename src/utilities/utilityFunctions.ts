@@ -1,6 +1,3 @@
-import { MAX_QUANTITIES } from "../constants";
-import type { Shard, Shards } from "../types/types";
-
 export const formatTime = (decimalHours: number): string => {
   const totalSeconds = Math.round(decimalHours * 3600);
 
@@ -18,10 +15,6 @@ export const formatTime = (decimalHours: number): string => {
     return `${hours} hr`;
   }
   return `${hours} hr ${minutes} min`;
-};
-
-export const getMaxQuantityForRarity = (rarity: string): number => {
-  return MAX_QUANTITIES[rarity as keyof typeof MAX_QUANTITIES] || 1;
 };
 
 export const formatNumber = (num: number): string => {
@@ -67,24 +60,6 @@ export const getRarityBorderColor = (rarity: string): string => {
     legendary: "border-yellow-400/20",
   };
   return colors[rarity as keyof typeof colors] || "border-gray-400/20";
-};
-
-export const getShardDetails = (shard: Shard, isDirect: boolean = false): string => {
-  const details = [
-    `Name: ${shard.name}`,
-    `Family: ${shard.family}`,
-    `Type: ${shard.type}`,
-    `Rarity: ${shard.rarity}`,
-    `Fuse Amount: ${shard.fuse_amount}`,
-    `Internal ID: ${shard.internal_id}`,
-    `Rate: ${shard.rate}`,
-  ];
-
-  if (!isDirect) {
-    details.unshift(`ID: ${shard.id}`);
-  }
-
-  return details.join("\n");
 };
 
 export const debounce = <T extends (...args: any[]) => any>(func: T, wait: number): ((...args: Parameters<T>) => void) => {
@@ -219,63 +194,4 @@ const determineStatColor = (context: string): string => {
   return "text-green-400"; // default
 };
 
-export const convertToRangeDescription = (description: string): string => {
-  let result = description.replace(/\+(\d+)\s*([%]?)\s*([^/]*?)\s*per level/gi, (_, amount, percent, rest) => {
-    const min = amount;
-    const max = parseInt(amount) * 10;
-    const restText = rest.trim();
-
-    if (restText.toLowerCase().includes("hunter fortune")) {
-      return `<span class="text-fuchsia-400">+${min}${percent} to +${max}${percent} ${restText}</span>`;
-    }
-    return `<span class="text-green-400">+${min}${percent} to +${max}${percent}</span> ${restText}`;
-  });
-
-  // Apply rarity and pet name coloring
-  result = result
-    .replace(/\bCOMMON\b/gi, '<span class="text-white">COMMON</span>')
-    .replace(/\bUNCOMMON\b/gi, '<span class="text-green-400">UNCOMMON</span>')
-    .replace(/\bRARE\b/gi, '<span class="text-blue-400">RARE</span>')
-    .replace(/\bEPIC\b/gi, '<span class="text-purple-400">EPIC</span>')
-    .replace(/\bLEGENDARY\b/gi, '<span class="text-yellow-400">LEGENDARY</span>')
-    .replace(/\bSea Serpent\b/gi, '<span class="text-purple-400">Sea Serpent</span>')
-    .replace(/\bTiamat\b/gi, '<span class="text-yellow-400">Tiamat</span>')
-    .replace(/\bPython\b/gi, '<span class="text-blue-400">Python</span>')
-    .replace(/\bKing Cobra\b/gi, '<span class="text-blue-400">King Cobra</span>');
-
-  return result;
-};
-
 export { isValidShardName } from "./isValidShardName";
-
-export type CycleStep = { outputShard: string; recipe: { inputs: [string, string] } };
-export type CycleLike = { steps: CycleStep[] };
-
-export type ExternalCycleInput = { shard: Shard; quantityPerCraft: number };
-
-export const calculateExternalCycleInputs = (
-  cycle: CycleLike,
-  shards: Shards
-): Record<string, ExternalCycleInput> => {
-  const outputShardIds = new Set(cycle.steps.map((step) => step.outputShard));
-  const inputTotals: Record<string, ExternalCycleInput> = {};
-
-  cycle.steps.forEach((step) => {
-    step.recipe.inputs.forEach((inputId) => {
-      const shard = shards[inputId];
-      if (!shard) return;
-      // Skip if this input is produced within the cycle
-      if (outputShardIds.has(inputId)) return;
-      // Only count direct-obtainable shards
-      if (shard.rate <= 0) return;
-
-      if (!inputTotals[inputId]) {
-        inputTotals[inputId] = { shard, quantityPerCraft: 0 };
-      }
-      // Evenly distribute per step to get per-craft amount
-      inputTotals[inputId].quantityPerCraft += shard.fuse_amount / Math.max(1, cycle.steps.length);
-    });
-  });
-
-  return inputTotals;
-};

@@ -6,8 +6,6 @@ import { RarityDropdown, TypeDropdown, ShardItem, ShardModal } from "../componen
 import { SHARD_DESCRIPTIONS } from "../constants";
 
 export const SettingsPage: React.FC = () => {
-  console.log("SettingsPage rendered");
-
   const { shards, loading: shardsLoading } = useShardsWithRecipes();
   const { customRates, defaultRates, updateRate, resetRates } = useCustomRates();
   const [filter, setFilter] = useState("");
