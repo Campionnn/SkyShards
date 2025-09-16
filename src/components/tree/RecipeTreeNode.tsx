@@ -426,6 +426,12 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 })}
             </div>
 
+            <div className="flex items-center my-1">
+              <div className="flex-grow border-t border-slate-400/30" />
+              <span className="mx-2 text-slate-400 text-xs">Cycle Fodder</span>
+              <div className="flex-grow border-t border-slate-400/30" />
+            </div>
+
             {/* Cycle summary */}
             {(() => {
               return (
