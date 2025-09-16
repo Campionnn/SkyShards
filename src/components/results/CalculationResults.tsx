@@ -196,7 +196,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     const convertedTree = convertTreeToSkyOcean(result.tree);
     const treeString = JSON.stringify(convertedTree);
     const base64Tree = gzipBase64(treeString);
-    return "<SkyOceanRecipe>(V2):" + base64Tree;
+    return "<SkyOceanRecipe>(V1):" + base64Tree;
   };
 
   const buildNoFrillsString = () => {
