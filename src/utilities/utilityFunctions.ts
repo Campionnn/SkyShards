@@ -62,13 +62,15 @@ export const getRarityBorderColor = (rarity: string): string => {
   return colors[rarity as keyof typeof colors] || "border-gray-400/20";
 };
 
-export const debounce = <T extends (...args: any[]) => any>(func: T, wait: number): ((...args: Parameters<T>) => void) => {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
+export function debounce<TArgs extends unknown[], TReturn>(func: (...args: TArgs) => TReturn, wait: number): (...args: TArgs) => void {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  return (...args: TArgs) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      func(...args);
+    }, wait);
   };
-};
+}
 
 // Stat icon configurations for color mapping
 interface StatIconConfig {

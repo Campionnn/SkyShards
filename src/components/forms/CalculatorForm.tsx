@@ -2,22 +2,39 @@ import React from "react";
 import { Zap, RotateCcw, Settings } from "lucide-react";
 import { type CalculationFormData } from "../../schemas";
 import { ShardAutocomplete, MoneyInput } from "./inputs";
-import { useCalculatorState } from "../../context";
+import { useCalculatorState } from "../../hooks";
 import { LevelDropdown, KuudraDropdown } from "../calculator";
 import { MAX_QUANTITIES, SHARD_DESCRIPTIONS } from "../../constants";
 import { isValidShardName, formatShardDescription } from "../../utilities";
 import { Tooltip, ToggleSwitch } from "../ui";
+import type { ShardWithKey } from "../../types/types";
 
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
 }
 
+type LevelKey = keyof Pick<
+  CalculationFormData,
+  | "newtLevel"
+  | "salamanderLevel"
+  | "lizardKingLevel"
+  | "leviathanLevel"
+  | "pythonLevel"
+  | "kingCobraLevel"
+  | "seaSerpentLevel"
+  | "tiamatLevel"
+  | "crocodileLevel"
+>;
+
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   const { form, setForm, saveEnabled, setSaveEnabledState } = useCalculatorState();
 
-  // Removed debug logs
+  // Keep a ref of the latest form to use inside effects without depending on the whole object
+  const latestFormRef = React.useRef<CalculationFormData>(form);
+  React.useEffect(() => {
+    latestFormRef.current = form;
+  }, [form]);
 
-  // Calculation trigger based on valid shard name (instant, no debounce)
   React.useEffect(() => {
     const checkAndSubmit = async () => {
       if (form.shard && form.shard.trim() !== "") {
@@ -31,14 +48,16 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   }, [form.shard, form.quantity]);
 
   // Only call onSubmit immediately for non-shard/quantity fields
-  const handleInputChange = (field: keyof CalculationFormData, value: any) => {
-    const updatedForm = { ...form, [field]: value };
+  const handleInputChange = <K extends keyof CalculationFormData,>(field: K, value: CalculationFormData[K]) => {
+    const updatedForm = { ...form, [field]: value } as CalculationFormData;
     setForm(updatedForm);
-    // Only trigger immediate submit for fields that are not 'shard' and 'quantity'
-    // Also exclude customKuudraTime to prevent re-render cycles
     if (field !== "shard" && field !== "quantity" && field !== "customKuudraTime") {
       onSubmit(updatedForm);
     }
+  };
+
+  const handleLevelChange = <K extends LevelKey,>(key: K) => (value: number) => {
+    handleInputChange(key, value as CalculationFormData[K]);
   };
 
   const handleMaxStats = () => {
@@ -55,7 +74,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       tiamatLevel: 10,
       crocodileLevel: 10,
       kuudraTier: "t5" as CalculationFormData["kuudraTier"], // Set Kuudra to t5 on max stats, type-safe
-    };
+    } as CalculationFormData;
     setForm(updatedForm);
     setTimeout(() => {
       onSubmit(updatedForm);
@@ -122,53 +141,77 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   const [kuudraTimeInput, setKuudraTimeInput] = React.useState<string>(""); // for custom kuudra time input
 
   // Set moneyPerHour to Infinity by default on mount and when target shard changes
-  React.useEffect(() => {
-    if ((form.moneyPerHour === undefined || form.moneyPerHour === null || form.moneyPerHour === 0) && moneyInput === "") {
-      handleInputChange("moneyPerHour", Infinity);
-      // Also force update tree if needed
-      onSubmit({ ...form, moneyPerHour: Infinity });
+  const setMoneyToInfinity = React.useCallback(() => {
+    const moneyNullishOrZero = form.moneyPerHour === undefined || form.moneyPerHour === null || form.moneyPerHour === 0;
+    if (moneyNullishOrZero && moneyInput === "") {
+      const updated = { ...latestFormRef.current, moneyPerHour: Infinity } as CalculationFormData;
+      setForm(updated);
+      onSubmit(updated);
     }
-    // eslint-disable-next-line
-  }, [form.shard]);
+  }, [form.moneyPerHour, form.shard, moneyInput, onSubmit, setForm]);
 
-  // Only clear the input when moneyPerHour is reset to null
   React.useEffect(() => {
-    if ((form.moneyPerHour === null || form.moneyPerHour === undefined) && moneyInput !== "") setMoneyInput("");
-    // Do not sync for numbers, so user input (e.g. 50m) is preserved
-    // eslint-disable-next-line
+    setMoneyToInfinity();
+  }, [setMoneyToInfinity]);
+
+  // Only clear the input when moneyPerHour is reset to null/undefined
+  React.useEffect(() => {
+    if (form.moneyPerHour === null || form.moneyPerHour === undefined) {
+      setMoneyInput("");
+    }
   }, [form.moneyPerHour]);
 
   // Clear shard input on focus if a shard is already selected
   const handleShardInputFocus = () => {
     if (form.shard) {
-      handleInputChange("shard", "");
+      handleInputChange("shard", "" as CalculationFormData["shard"]);
     }
   };
 
   // Handle craftPenalty default and mode switching
   React.useEffect(() => {
-    if (form.craftPenalty === undefined || form.craftPenalty === null) {
-      handleInputChange("craftPenalty", form.ironManView ? 0.8 : 1000);
-    } else {
-      // If switching modes, update default only if current value matches previous default
-      if (form.ironManView && form.craftPenalty === 1000) {
-        handleInputChange("craftPenalty", 0.8);
-      } else if (!form.ironManView && form.craftPenalty === 0.8) {
-        handleInputChange("craftPenalty", 1000);
-      }
+    const desiredDefault = form.ironManView ? 0.8 : 1000;
+    const isNullish = form.craftPenalty === undefined || form.craftPenalty === null;
+
+    if (isNullish) {
+      const updated = { ...form, craftPenalty: desiredDefault } as CalculationFormData;
+      setForm(updated);
+      onSubmit(updated);
+    } else if (form.ironManView && form.craftPenalty === 1000) {
+      const updated = { ...form, craftPenalty: 0.8 } as CalculationFormData;
+      setForm(updated);
+      onSubmit(updated);
+    } else if (!form.ironManView && form.craftPenalty === 0.8) {
+      const updated = { ...form, craftPenalty: 1000 } as CalculationFormData;
+      setForm(updated);
+      onSubmit(updated);
     }
-    // eslint-disable-next-line
-  }, [form.ironManView]);
+  }, [form.ironManView, form.craftPenalty, form, onSubmit, setForm]);
 
   // For craftPenalty, keep a local string state for user input
   const [craftPenaltyInput, setCraftPenaltyInput] = React.useState<string>("");
 
-  // On mode switch, reset input to empty and set default in form state, but do NOT set input value
+  // On mode switch, reset input to empty only; craft penalty default handled above
   React.useEffect(() => {
-    setCraftPenaltyInput(""); // keep input empty
-    handleInputChange("craftPenalty", form.ironManView ? 0.8 : 1000);
-    // eslint-disable-next-line
+    setCraftPenaltyInput("");
   }, [form.ironManView]);
+
+  // Build level items with strict typing for keys
+  const levelItems: Array<{ key: LevelKey; label: string; shardId: string }> = [
+    ...(form.ironManView
+      ? ([
+          { key: "newtLevel", label: "Newt", shardId: "C35" },
+          { key: "salamanderLevel", label: "Salamander", shardId: "U8" },
+          { key: "lizardKingLevel", label: "Lizard King", shardId: "R8" },
+          { key: "leviathanLevel", label: "Leviathan", shardId: "E5" },
+          { key: "pythonLevel", label: "Python", shardId: "R9" },
+          { key: "kingCobraLevel", label: "King Cobra", shardId: "R54" },
+        ] as Array<{ key: LevelKey; label: string; shardId: string }>)
+      : []),
+    { key: "seaSerpentLevel", label: "Sea Serpent", shardId: "E32" },
+    { key: "tiamatLevel", label: "Tiamat", shardId: "L6" },
+    { key: "crocodileLevel", label: "Crocodile", shardId: "R45" },
+  ];
 
   return (
     <div className="bg-slate-800/40 border border-slate-600/30 rounded-md p-3 space-y-3">
@@ -234,15 +277,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             <ShardAutocomplete
               value={form.shard}
               onChange={(value: string) => handleInputChange("shard", value)}
-              onSelect={(shard: any) => {
+              onSelect={(shard: ShardWithKey) => {
                 // Use the rarity directly from the selected shard (provided by autocomplete)
                 let rarityKey = "common";
-                if (shard && typeof shard.rarity === "string") {
+                if (shard) {
                   const normalized = shard.rarity.toLowerCase();
-                  if (normalized in MAX_QUANTITIES) rarityKey = normalized;
+                  if (normalized in MAX_QUANTITIES) rarityKey = normalized as keyof typeof MAX_QUANTITIES as string;
                 }
                 const maxQuantity: number = MAX_QUANTITIES[rarityKey as keyof typeof MAX_QUANTITIES];
-                const updated = { ...form, shard: shard.name, quantity: maxQuantity };
+                const updated = { ...form, shard: shard.name, quantity: maxQuantity } as CalculationFormData;
                 setForm(updated);
                 setTimeout(() => onSubmit(updated), 0);
                 // Removed auto-select of quantity input
@@ -260,7 +303,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 min="1"
                 value={form.quantity === 0 ? "" : form.quantity}
                 placeholder="1"
-                onChange={(e) => handleInputChange("quantity", Number(e.target.value))}
+                onChange={(e) => handleInputChange("quantity", Number(e.target.value) as CalculationFormData["quantity"])}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -324,7 +367,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   min="0"
                   value={form.hunterFortune === 0 ? "" : form.hunterFortune}
                   placeholder="0"
-                  onChange={(e) => handleInputChange("hunterFortune", Number(e.target.value))}
+                  onChange={(e) => handleInputChange("hunterFortune", Number(e.target.value) as CalculationFormData["hunterFortune"])}
                   className="
                   w-full px-3 py-2 text-sm
                   bg-white/5 border border-white/10 rounded-md
@@ -361,27 +404,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             Shard Levels
           </h3>
           <div className="grid grid-cols-3 gap-1.5">
-            {[
-              ...(form.ironManView
-                ? [
-                    { key: "newtLevel", label: "Newt", shardId: "C35" },
-                    { key: "salamanderLevel", label: "Salamander", shardId: "U8" },
-                    { key: "lizardKingLevel", label: "Lizard King", shardId: "R8" },
-                    { key: "leviathanLevel", label: "Leviathan", shardId: "E5" },
-                    { key: "pythonLevel", label: "Python", shardId: "R9" },
-                    { key: "kingCobraLevel", label: "King Cobra", shardId: "R54" },
-                  ]
-                : []),
-              { key: "seaSerpentLevel", label: "Sea Serpent", shardId: "E32" },
-              { key: "tiamatLevel", label: "Tiamat", shardId: "L6" },
-              { key: "crocodileLevel", label: "Crocodile", shardId: "R45" },
-            ].map(({ key, label, shardId }) => {
+            {levelItems.map(({ key, label, shardId }) => {
               const shardDesc = SHARD_DESCRIPTIONS[shardId as keyof typeof SHARD_DESCRIPTIONS];
               return (
                 <LevelDropdown
                   key={key}
-                  value={(form[key as keyof CalculationFormData] as number) || 0}
-                  onChange={(value: number) => handleInputChange(key as keyof CalculationFormData, value)}
+                  value={(form[key] as number)}
+                  onChange={handleLevelChange(key)}
                   label={label}
                   tooltipTitle={shardDesc?.title}
                   tooltipContent={formatShardDescription(shardDesc?.description || "No description available.")}
@@ -420,11 +449,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 setCraftPenaltyInput(value);
                 // If empty, use default for calculation
                 if (value.trim() === "") {
-                  handleInputChange("craftPenalty", form.ironManView ? 0.8 : 1000);
+                  handleInputChange("craftPenalty", (form.ironManView ? 0.8 : 1000) as CalculationFormData["craftPenalty"]);
                 } else {
                   const num = Number(value);
                   if (!isNaN(num) && num >= 0) {
-                    handleInputChange("craftPenalty", num);
+                    handleInputChange("craftPenalty", num as CalculationFormData["craftPenalty"]);
                   }
                 }
               }}
@@ -443,17 +472,21 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               Kraken Shard
             </h3>
             <div className="space-y-2">
-              <KuudraDropdown value={form.kuudraTier || "none"} onChange={(value) => handleInputChange("kuudraTier", value)} label="Kuudra Tier" />
+              <KuudraDropdown
+                value={(form.kuudraTier ?? "none") as CalculationFormData["kuudraTier"]}
+                onChange={(value: string) => handleInputChange("kuudraTier", value as CalculationFormData["kuudraTier"])}
+                label="Kuudra Tier"
+              />
               <MoneyInput
                 value={moneyInput}
                 onChange={(value: string) => {
                   setMoneyInput(value);
                   if (value.trim() === "") {
-                    handleInputChange("moneyPerHour", Infinity); // Infinity means ignore key cost
+                    handleInputChange("moneyPerHour", Infinity as CalculationFormData["moneyPerHour"]); // Infinity means ignore key cost
                     onSubmit({ ...form, moneyPerHour: Infinity }); // force update tree
                   } else {
                     const parsed = parseShorthandNumber(value);
-                    handleInputChange("moneyPerHour", parsed);
+                    handleInputChange("moneyPerHour", parsed as CalculationFormData["moneyPerHour"]);
                   }
                 }}
                 placeholder="200k, 2.5m, 2b..."
@@ -464,15 +497,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   label="Custom Kuudra Completion Time"
                   checked={form.customKuudraTime || false}
                   onChange={(checked) => {
-                    handleInputChange("customKuudraTime", checked);
+                    handleInputChange("customKuudraTime", checked as CalculationFormData["customKuudraTime"]);
                     if (!checked) {
                       // Reset time input when disabling custom time
-                      handleInputChange("kuudraTimeSeconds", null);
+                      handleInputChange("kuudraTimeSeconds", null as CalculationFormData["kuudraTimeSeconds"]);
                       setKuudraTimeInput("");
                     }
                     // Manually trigger calculation after state update
                     setTimeout(() => {
-                      const updatedForm = { ...form, customKuudraTime: checked };
+                      const updatedForm = { ...form, customKuudraTime: checked } as CalculationFormData;
                       if (!checked) {
                         updatedForm.kuudraTimeSeconds = null;
                       }
@@ -494,11 +527,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                           const value = e.target.value;
                           setKuudraTimeInput(value);
                           if (value.trim() === "") {
-                            handleInputChange("kuudraTimeSeconds", null);
+                            handleInputChange("kuudraTimeSeconds", null as CalculationFormData["kuudraTimeSeconds"]);
                           } else {
                             const parsed = parseInt(value);
                             if (!isNaN(parsed) && parsed > 0) {
-                              handleInputChange("kuudraTimeSeconds", parsed);
+                              handleInputChange("kuudraTimeSeconds", parsed as CalculationFormData["kuudraTimeSeconds"]);
                             }
                           }
                         }}

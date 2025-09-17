@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { ShardAutocomplete, RecipeCountBadge, SearchFilterInput, ShardDisplay, DropdownButton } from "../components";
 import { getRarityColor } from "../utilities";
-import { useRecipeState } from "../context";
-import { useFusionData, useDropdownManager } from "../hooks";
+import { useFusionData, useDropdownManager, useRecipeState } from "../hooks";
 import {
   processOutputRecipes,
   categorizeAndGroupRecipes,

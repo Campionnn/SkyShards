@@ -2,11 +2,10 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { AlertCircle, Menu, X } from "lucide-react";
 import { CalculatorForm, CalculationResults } from "../components";
 import { WelcomeProfileModal } from "../components";
-import { useCalculation, useCustomRates } from "../hooks";
+import { useCalculation, useCustomRates, useCalculatorState } from "../hooks";
 import { DataService } from "../services";
 import type { CalculationFormData } from "../schemas";
 import type { CalculationResult, CalculationParams, RecipeOverride, Data } from "../types/types";
-import { useCalculatorState } from "../context";
 import { isFirstVisit, setSaveEnabled } from "../utilities";
 import { calculateOptimalPathWithWorker, type WorkerProgress } from "../services/workerCalculationService";
 

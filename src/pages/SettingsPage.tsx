@@ -4,6 +4,7 @@ import { useShardsWithRecipes, useCustomRates } from "../hooks";
 import { debounce, formatShardDescription } from "../utilities";
 import { RarityDropdown, TypeDropdown, ShardItem, ShardModal } from "../components";
 import { SHARD_DESCRIPTIONS } from "../constants";
+import type { ShardWithDirectInfo } from "../types/types";
 
 export const SettingsPage: React.FC = () => {
   const { shards, loading: shardsLoading } = useShardsWithRecipes();
@@ -12,7 +13,7 @@ export const SettingsPage: React.FC = () => {
   const [rarityFilter, setRarityFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [hasChanges, setHasChanges] = useState(false);
-  const [modalShard, setModalShard] = useState<null | any>(null);
+  const [modalShard, setModalShard] = useState<ShardWithDirectInfo | null>(null);
 
   const [debouncedFilter, setDebouncedFilter] = useState("");
 

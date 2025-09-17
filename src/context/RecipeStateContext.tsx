@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useState } from "react";
 import type { ShardWithKey } from "../types/types";
 
 interface RecipeStateContextType {
@@ -9,6 +9,8 @@ interface RecipeStateContextType {
 }
 
 const RecipeStateContext = createContext<RecipeStateContextType | undefined>(undefined);
+
+export { RecipeStateContext };
 
 export const RecipeStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedShard, setSelectedShard] = useState<ShardWithKey | null>(null);
@@ -26,12 +28,4 @@ export const RecipeStateProvider: React.FC<{ children: React.ReactNode }> = ({ c
       {children}
     </RecipeStateContext.Provider>
   );
-};
-
-export const useRecipeState = () => {
-  const context = useContext(RecipeStateContext);
-  if (context === undefined) {
-    throw new Error("useRecipeState must be used within a RecipeStateProvider");
-  }
-  return context;
 };
