@@ -32,7 +32,7 @@ export const useShardsWithRecipes = () => {
       }
     };
 
-    loadData();
+    loadData().catch(console.error);
   }, []);
 
   return { shards, loading, error };

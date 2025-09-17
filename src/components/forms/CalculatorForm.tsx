@@ -44,7 +44,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
         }
       }
     };
-    checkAndSubmit();
+    checkAndSubmit().catch(console.error);
   }, [form.shard, form.quantity]);
 
   // Only call onSubmit immediately for non-shard/quantity fields
@@ -148,7 +148,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       setForm(updated);
       onSubmit(updated);
     }
-  }, [form.moneyPerHour, form.shard, moneyInput, onSubmit, setForm]);
+  }, [form.moneyPerHour, moneyInput, onSubmit, setForm]);
 
   React.useEffect(() => {
     setMoneyToInfinity();

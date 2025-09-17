@@ -136,7 +136,7 @@ const CalculatorPageContent: React.FC = () => {
     setResult(null);
     setCalculationData(null);
 
-    debouncedCalculate(newForm, 100);
+    debouncedCalculate(newForm, 100).catch(console.error);
 
     setShowWelcome(false);
   };
@@ -210,7 +210,7 @@ const CalculatorPageContent: React.FC = () => {
   // Re-calculate when customRates change and form is valid
   useEffect(() => {
     if (form && form.shard && form.shard.trim() !== "") {
-      debouncedCalculate(form, 150);
+      debouncedCalculate(form, 150).catch(console.error);
     }
   }, [customRates, form, debouncedCalculate]);
 
