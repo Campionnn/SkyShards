@@ -173,9 +173,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
         const key = `${node.shard}|Cycle`;
         shardQuantities.set(key, (shardQuantities.get(key) || 0) + node.quantity);
         if (node.inputRecipe) traverse(node.inputRecipe);
-        node.cycleInputs.forEach((cycleInput) => {
-          traverse(cycleInput);
-        });
+        node.cycleInputs.forEach((cycleInput) => traverse(cycleInput));
       }
     };
     traverse(tree);
