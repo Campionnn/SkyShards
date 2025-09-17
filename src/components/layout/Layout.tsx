@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet, useLocation, Link } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Navigation } from "./Navigation";
 import { ErrorBoundary } from "./ErrorBoundary";
 
@@ -22,10 +22,6 @@ export const Layout: React.FC = () => {
           <p className="mt-1 text-slate-500">Thanks to HsFearless, MaxLunar, and WhatYouThing for the data</p>
 
           <div className="flex justify-center items-center space-x-4 mt-3 pt-3 border-t border-slate-800/50">
-            <Link to="/privacy" className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium">
-              Privacy Policy
-            </Link>
-            <span className="text-slate-600">•</span>
             <a
               href="https://github.com/Campionnn/SkyShards"
               target="_blank"
