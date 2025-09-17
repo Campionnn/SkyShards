@@ -310,6 +310,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                     e.currentTarget.blur();
                   }
                 }}
+                onWheel={e => (e.target as HTMLInputElement).blur()}
                 className="w-full px-3 py-1.5 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors duration-200"
               />
             </div>
@@ -368,6 +369,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   value={form.hunterFortune === 0 ? "" : form.hunterFortune}
                   placeholder="0"
                   onChange={(e) => handleInputChange("hunterFortune", Number(e.target.value) as CalculationFormData["hunterFortune"])}
+                  onWheel={e => (e.target as HTMLInputElement).blur()}
                   className="
                   w-full px-3 py-2 text-sm
                   bg-white/5 border border-white/10 rounded-md
