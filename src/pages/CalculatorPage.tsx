@@ -25,8 +25,8 @@ const performCalculation = async (
     setCurrentShardKey: (key: string) => void;
     setCurrentQuantity: (quantity: number) => void;
     setCurrentParams: (params: CalculationParams) => void;
-    setResult: (result: CalculationResult) => void;
-    setCalculationData: (data: Data) => void;
+    setResult: (result: CalculationResult | null) => void;
+    setCalculationData: (data: Data | null) => void;
     setCalculating: (v: boolean) => void;
     setProgress: (p: WorkerProgress | null) => void;
   }
@@ -75,6 +75,10 @@ const performCalculation = async (
 
   callbacks.setCurrentParams(params);
 
+  // Clear previous results immediately so the fusion tree is hidden during recalculation
+  callbacks.setResult(null);
+  callbacks.setCalculationData(null);
+
   // Run calculation in Web Worker with progress
   callbacks.setCalculating(true);
   callbacks.setProgress({ phase: "parsing", progress: 0, message: "Starting..." });
@@ -102,7 +106,7 @@ const performCalculation = async (
 
 const CalculatorPageContent: React.FC = () => {
   const { result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName, form, setForm } = useCalculatorState();
-  const { loading, error } = useCalculation();
+  const { error } = useCalculation();
   const { customRates } = useCustomRates();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentParams, setCurrentParams] = useState<CalculationParams | null>(null);
@@ -123,15 +127,26 @@ const CalculatorPageContent: React.FC = () => {
   const handleSelectProfile = (profile: "ironman" | "normal") => {
     localStorage.setItem("skyshards_profile_type", profile);
     setSaveEnabled(true);
-    setForm({
+
+    const newForm = {
       ...form,
       ironManView: profile === "ironman",
-    });
+    };
+
+    // Update form and clear previous results immediately
+    setForm(newForm);
+    setResult(null);
+    setCalculationData(null);
+
+    // Kick off a fresh calculation with the new profile
+    debouncedCalculate(newForm, 100);
+
     setShowWelcome(false);
   };
 
   // Debounced calculation
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const cancelRef = useRef<(() => void) | null>(null);
 
   const debouncedCalculate = useCallback(
     async (formData: CalculationFormData, delay = 300) => {
@@ -139,6 +154,17 @@ const CalculatorPageContent: React.FC = () => {
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
+
+      // Cancel in-flight worker before starting a new one
+      if (cancelRef?.current) {
+        cancelRef.current();
+        cancelRef.current = null;
+      }
+
+      // Immediately clear previous UI so old fusion tree doesn't flash during debounce window
+      setResult(null);
+      setCalculationData(null);
+      setProgress(null);
 
       debounceTimeoutRef.current = setTimeout(async () => {
         const callbacks = {
@@ -281,7 +307,7 @@ const CalculatorPageContent: React.FC = () => {
             )}
 
             {/* Empty State */}
-            {!result && !loading && !error && (
+            {!result && !isCalculating && !error && (
               <div className="text-center py-10 bg-white/5 border border-white/10 rounded-md">
                 <div className="max-w-md mx-auto space-y-3">
                   <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/20 rounded-md flex items-center justify-center mx-auto">
