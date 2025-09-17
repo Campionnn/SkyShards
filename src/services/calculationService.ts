@@ -530,6 +530,10 @@ export class CalculationService {
     recipeOverrides: RecipeOverride[] = []
   ): Promise<{ direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> }> {
     try {
+      if (context?.isDirectInput) {
+        return await this.getAlternativeRecipe(shardId, params, recipeOverrides, () => true);
+      }
+
       return await this.getAlternativeRecipeWithContext(shardId, params, context.currentRecipe, recipeOverrides);
     } catch (error) {
       console.error("Error getting alternatives for tree node:", error);

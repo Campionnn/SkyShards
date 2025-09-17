@@ -133,12 +133,10 @@ const CalculatorPageContent: React.FC = () => {
       ironManView: profile === "ironman",
     };
 
-    // Update form and clear previous results immediately
     setForm(newForm);
     setResult(null);
     setCalculationData(null);
 
-    // Kick off a fresh calculation with the new profile
     debouncedCalculate(newForm, 100);
 
     setShowWelcome(false);
@@ -155,13 +153,11 @@ const CalculatorPageContent: React.FC = () => {
         clearTimeout(debounceTimeoutRef.current);
       }
 
-      // Cancel in-flight worker before starting a new one
       if (cancelRef?.current) {
         cancelRef.current();
         cancelRef.current = null;
       }
 
-      // Immediately clear previous UI so old fusion tree doesn't flash during debounce window
       setResult(null);
       setCalculationData(null);
       setProgress(null);
