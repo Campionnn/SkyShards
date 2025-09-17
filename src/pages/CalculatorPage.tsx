@@ -8,6 +8,7 @@ import type { CalculationFormData } from "../schemas";
 import type { CalculationResult, CalculationParams, RecipeOverride, Data } from "../types/types";
 import { useCalculatorState } from "../context";
 import { isFirstVisit, setSaveEnabled } from "../utilities";
+import { calculateOptimalPathWithWorker, type WorkerProgress } from "../services/workerCalculationService";
 
 const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
   const { setForm } = useCalculatorState();
@@ -18,7 +19,7 @@ const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData
 const performCalculation = async (
   formData: CalculationFormData,
   customRates: { [shardId: string]: number | undefined },
-  recipeOverrides: RecipeOverride[] = [], // Add recipe overrides parameter,
+  recipeOverrides: RecipeOverride[] = [],
   callbacks: {
     setTargetShardName: (name: string) => void;
     setCurrentShardKey: (key: string) => void;
@@ -26,6 +27,8 @@ const performCalculation = async (
     setCurrentParams: (params: CalculationParams) => void;
     setResult: (result: CalculationResult) => void;
     setCalculationData: (data: Data) => void;
+    setCalculating: (v: boolean) => void;
+    setProgress: (p: WorkerProgress | null) => void;
   }
 ) => {
   if (!formData.shard || formData.shard.trim() === "") {
@@ -72,12 +75,29 @@ const performCalculation = async (
 
   callbacks.setCurrentParams(params);
 
-  const calculationService = await import("../services/calculationService");
-  const service = calculationService.CalculationService.getInstance();
-  const calculationResult = await service.calculateOptimalPath(shardKey, formData.quantity, params, recipeOverrides);
-  callbacks.setResult(calculationResult);
-  const data = await service.parseData(params);
-  callbacks.setCalculationData(data);
+  // Run calculation in Web Worker with progress
+  callbacks.setCalculating(true);
+  callbacks.setProgress({ phase: "parsing", progress: 0, message: "Starting..." });
+  try {
+    const { promise } = calculateOptimalPathWithWorker(
+      shardKey,
+      formData.quantity,
+      params,
+      recipeOverrides,
+      (p) => callbacks.setProgress(p)
+    );
+    const calculationResult = await promise;
+    callbacks.setResult(calculationResult);
+
+    // Also load parsed data for UI rendering details
+    const calculationService = await import("../services/calculationService");
+    const service = calculationService.CalculationService.getInstance();
+    const data = await service.parseData(params);
+    callbacks.setCalculationData(data);
+  } finally {
+    callbacks.setProgress(null);
+    callbacks.setCalculating(false);
+  }
 };
 
 const CalculatorPageContent: React.FC = () => {
@@ -89,6 +109,8 @@ const CalculatorPageContent: React.FC = () => {
   const [currentShardKey, setCurrentShardKey] = useState<string>("");
   const [currentQuantity, setCurrentQuantity] = useState<number>(1);
   const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [progress, setProgress] = useState<WorkerProgress | null>(null);
 
   // Welcome modal state (first visit only)
   const [showWelcome, setShowWelcome] = useState(false);
@@ -126,6 +148,8 @@ const CalculatorPageContent: React.FC = () => {
           setCurrentParams,
           setResult,
           setCalculationData,
+          setCalculating: setIsCalculating,
+          setProgress,
         };
 
         try {
@@ -142,14 +166,11 @@ const CalculatorPageContent: React.FC = () => {
 
   const handleCalculate = async (formData: CalculationFormData, setForm: (data: CalculationFormData) => void) => {
     setForm(formData);
-    // Don't close mobile sidebar after calculation to allow multiple changes
-    // setSidebarOpen(false);
-
     // For immediate fields like shard selection, calculate immediately
     if (formData.shard !== form?.shard || formData.quantity !== form?.quantity) {
-      await debouncedCalculate(formData, 100); // Short delay for shard/quantity changes
+      await debouncedCalculate(formData, 100);
     } else {
-      await debouncedCalculate(formData, 300); // Longer delay for other fields
+      await debouncedCalculate(formData, 300);
     }
   };
 
@@ -168,7 +189,7 @@ const CalculatorPageContent: React.FC = () => {
   // Re-calculate when customRates change and form is valid
   useEffect(() => {
     if (form && form.shard && form.shard.trim() !== "") {
-      debouncedCalculate(form, 150); // Shorter delay for rate changes
+      debouncedCalculate(form, 150);
     }
   }, [customRates, form, debouncedCalculate]);
 
@@ -218,6 +239,26 @@ const CalculatorPageContent: React.FC = () => {
                 <div>
                   <h3 className="font-medium text-red-400">Calculation Error</h3>
                   <p className="text-red-300 text-sm mt-1">{error}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Loading Indicator */}
+            {isCalculating && (
+              <div className="bg-purple-500/10 border border-purple-500/20 rounded-md p-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-white text-sm font-medium">
+                    {progress?.message || "Calculating..."}
+                  </div>
+                  {typeof progress?.progress === "number" && (
+                    <div className="text-purple-300 text-xs">{Math.round((progress.progress || 0) * 100)}%</div>
+                  )}
+                </div>
+                <div className="mt-2 h-2 bg-white/10 rounded">
+                  <div
+                    className="h-2 bg-purple-400 rounded"
+                    style={{ width: `${Math.min(100, Math.round((progress?.progress || 0) * 100))}%` }}
+                  />
                 </div>
               </div>
             )}
