@@ -661,6 +661,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                   requiredQuantity: tree.quantity,
                 });
               }}
+              className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
               title="Show alternatives"
             >
               <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
