@@ -414,7 +414,7 @@ export const AlternativeRecipeModal: React.FC<
               const popupContent = document.querySelector(".overflow-y-auto.flex-1.min-h-0") as HTMLElement;
 
               if (dropdownButton && popupContent) {
-                const buttonRect = dropdownButton.getBoundingClientRect();
+                const buttonRect = (dropdownButton as HTMLElement).getBoundingClientRect();
                 const popupRect = popupContent.getBoundingClientRect();
                 const dropdownHeight = 260; // Max height of dropdown
 
@@ -593,7 +593,19 @@ export const AlternativeRecipeModal: React.FC<
             <div className="flex items-center gap-2">
               <Star className="w-5 h-5 text-purple-400" />
               <h2 className="text-lg font-semibold text-white">Alternative Recipes</h2>
-              <span className="text-slate-400 text-sm">for {shardName}</span>
+              {/* Shard icon next to the shard name */}
+              <span className="flex items-center gap-1 text-slate-400 text-sm">
+                <span>for</span>
+                {outputShard && (
+                  <img
+                    src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`}
+                    alt={outputShard.name}
+                    className="w-5 h-5 object-contain"
+                    loading="lazy"
+                  />
+                )}
+                <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-400"}>{shardName}</span>
+              </span>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer">
               <X className="w-5 h-5 text-slate-400" />
