@@ -31,6 +31,20 @@ export const Layout: React.FC = () => {
               GitHub
             </a>
             <span className="text-slate-600">•</span>
+            <a
+              href="/about"
+              className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium"
+            >
+              About
+            </a>
+            <span className="text-slate-600">•</span>
+            <a
+              href="/contact"
+              className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium"
+            >
+              Contact
+            </a>
+            <span className="text-slate-600">•</span>
             <span className="text-slate-600 text-xs">© {new Date().getFullYear()} SkyShards</span>
           </div>
         </div>
