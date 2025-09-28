@@ -21,7 +21,9 @@ export const ShardDisplay = ({ shardId, quantity, fusionData, size = "md" }: Sha
 
   return (
     <div className="flex items-center gap-1 lg:gap-2 xl:gap-3 min-w-0">
-      <span className="text-xs lg:text-sm xl:text-base text-slate-400 font-medium flex-shrink-0">{actualQuantity}x</span>
+      <span className="text-xs lg:text-sm xl:text-base text-slate-400 font-medium flex-shrink-0">
+        {actualQuantity}x
+      </span>
       <Tooltip
         content={formatShardDescription(shardDesc?.description || "No description available.")}
         title={shardDesc?.title}
@@ -34,8 +36,16 @@ export const ShardDisplay = ({ shardId, quantity, fusionData, size = "md" }: Sha
         className="cursor-pointer"
       >
         <div className="flex items-center gap-1 lg:gap-2 xl:gap-3">
-          <img src={`${import.meta.env.BASE_URL}shardIcons/${shardId}.png`} alt={shard.name} className={`${iconSize} object-contain flex-shrink-0`} loading="lazy" />
-          <span className={`text-xs lg:text-sm xl:text-base font-medium truncate ${getRarityColor(shard.rarity)}`} title={shard.name}>
+          <img
+            src={`${import.meta.env.BASE_URL}shardIcons/${shardId}.png`}
+            alt={shard.name}
+            className={`${iconSize} object-contain flex-shrink-0`}
+            loading="lazy"
+          />
+          <span
+            className={`text-xs lg:text-sm xl:text-base font-medium truncate ${getRarityColor(shard.rarity)}`}
+            title={shard.name}
+          >
             {shard.name}
           </span>
         </div>

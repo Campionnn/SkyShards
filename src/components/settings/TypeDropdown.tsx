@@ -99,7 +99,7 @@ export const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, on
                   ${type !== types[types.length - 1] ? "border-b border-emerald-500/10" : ""}
                   ${type === types[0] ? "rounded-t-md" : ""}
                   ${type === types[types.length - 1] ? "rounded-b-md" : ""}
-                `}
+                cursor-pointer`}
               >
                 {type.label}
               </button>

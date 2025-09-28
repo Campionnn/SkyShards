@@ -102,7 +102,7 @@ export const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value
                   ${rarity !== rarities[rarities.length - 1] ? "border-b border-purple-500/10" : ""}
                   ${rarity === rarities[0] ? "rounded-t-md" : ""}
                   ${rarity === rarities[rarities.length - 1] ? "rounded-b-md" : ""}
-                `}
+                cursor-pointer`}
               >
                 {rarity.label}
               </button>

@@ -2,9 +2,8 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Search, RotateCcw, Save, AlignLeft } from "lucide-react";
 import { useShardsWithRecipes, useCustomRates } from "../hooks";
 import { debounce, formatShardDescription } from "../utilities";
-import { RarityDropdown, TypeDropdown, ShardItem, ShardModal } from "../components";
+import { RarityDropdown, TypeDropdown, ShardItem } from "../components";
 import { SHARD_DESCRIPTIONS } from "../constants";
-import type { ShardWithDirectInfo } from "../types/types";
 
 export const SettingsPage: React.FC = () => {
   const { shards, loading: shardsLoading } = useShardsWithRecipes();
@@ -13,8 +12,7 @@ export const SettingsPage: React.FC = () => {
   const [rarityFilter, setRarityFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [hasChanges, setHasChanges] = useState(false);
-  const [modalShard, setModalShard] = useState<ShardWithDirectInfo | null>(null);
-  const [detailedShard, setDetailedShard] = useState(false);
+  const [detailedShard, setDetailedShard] = useState(true);
 
   const [debouncedFilter, setDebouncedFilter] = useState("");
 
@@ -257,7 +255,6 @@ export const SettingsPage: React.FC = () => {
                     rate={customRates[shard.key] !== undefined ? customRates[shard.key]! : defaultRates[shard.key]}
                     defaultRate={defaultRates[shard.key]}
                     onRateChange={handleRateChange}
-                    onCardClick={() => setModalShard(shard)}
                   />
                 </div>
               );
@@ -265,31 +262,6 @@ export const SettingsPage: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {modalShard &&
-        (() => {
-          const desc = SHARD_DESCRIPTIONS[modalShard.key as keyof typeof SHARD_DESCRIPTIONS];
-
-          const icon = `${import.meta.env.BASE_URL}shardIcons/${modalShard.key}.png`;
-          return (
-            <ShardModal
-              open={!!modalShard}
-              onClose={() => setModalShard(null)}
-              title={desc?.title || modalShard.name}
-              name={modalShard.name}
-              description={formatShardDescription(desc?.description || "No description.")}
-              rarity={modalShard.rarity}
-              icon={icon}
-              rate={
-                customRates[modalShard.key] !== undefined ? customRates[modalShard.key] : defaultRates[modalShard.key]
-              }
-              onRateChange={(newRate) => handleRateChange(modalShard.key, newRate)}
-              isDirect={modalShard.isDirect}
-              family={modalShard.family}
-              type={modalShard.type}
-            />
-          );
-        })()}
 
       {filteredShards.length === 0 && (
         <div className="text-center py-12">
