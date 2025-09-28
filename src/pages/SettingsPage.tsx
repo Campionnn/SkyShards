@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { Search, RotateCcw, Save } from "lucide-react";
+import { Search, RotateCcw, Save, AlignLeft } from "lucide-react";
 import { useShardsWithRecipes, useCustomRates } from "../hooks";
 import { debounce, formatShardDescription } from "../utilities";
 import { RarityDropdown, TypeDropdown, ShardItem, ShardModal } from "../components";
@@ -14,6 +14,7 @@ export const SettingsPage: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [hasChanges, setHasChanges] = useState(false);
   const [modalShard, setModalShard] = useState<ShardWithDirectInfo | null>(null);
+  const [detailedShard, setDetailedShard] = useState(false);
 
   const [debouncedFilter, setDebouncedFilter] = useState("");
 
@@ -35,7 +36,10 @@ export const SettingsPage: React.FC = () => {
 
       const matchesSearch = matchesName || matchesFamily || matchesTypeField || matchesTitle || matchesDescription;
       const matchesRarity = rarityFilter === "all" || shard.rarity === rarityFilter;
-      const matchesType = typeFilter === "all" || (typeFilter === "direct" && shard.isDirect) || (typeFilter === "fuse" && !shard.isDirect);
+      const matchesType =
+        typeFilter === "all" ||
+        (typeFilter === "direct" && shard.isDirect) ||
+        (typeFilter === "fuse" && !shard.isDirect);
       return matchesSearch && matchesRarity && matchesType;
     });
   }, [shards, debouncedFilter, rarityFilter, typeFilter]);
@@ -119,6 +123,19 @@ export const SettingsPage: React.FC = () => {
             <RarityDropdown value={rarityFilter} onChange={setRarityFilter} />
             <TypeDropdown value={typeFilter} onChange={setTypeFilter} />
             <button
+              onClick={() => setDetailedShard((prev) => !prev)}
+              className="
+                px-3 py-2.5 bg-indigo-500/20 hover:bg-indigo-500/30 
+                text-white font-medium rounded-md 
+                border border-indigo-500/20 hover:border-indigo-500/30
+                transition-colors duration-200
+                flex items-center space-x-2 cursor-pointer
+              "
+            >
+              <AlignLeft className="w-5 h-5 text-indigo-400" />
+              <span>{detailedShard ? "Hide Details" : "Show Details"}</span>
+            </button>
+            <button
               onClick={handleResetRates}
               className="
                 px-3 py-2.5 bg-red-500/20 hover:bg-red-500/30 
@@ -172,7 +189,19 @@ export const SettingsPage: React.FC = () => {
 
           <RarityDropdown value={rarityFilter} onChange={setRarityFilter} />
           <TypeDropdown value={typeFilter} onChange={setTypeFilter} />
-
+          <button
+            onClick={() => setDetailedShard((prev) => !prev)}
+            className="
+                px-3 py-2.5 bg-indigo-500/20 hover:bg-indigo-500/30 
+                text-white font-medium rounded-md 
+                border border-indigo-500/20 hover:border-indigo-500/30
+                transition-colors duration-200
+                flex items-center space-x-2 cursor-pointer
+              "
+          >
+            <AlignLeft className="w-5 h-5 text-indigo-400" />
+            <span>{detailedShard ? "Hide Details" : "Show Details"}</span>
+          </button>
           <div className="flex gap-2">
             <button
               onClick={handleResetRates}
@@ -215,18 +244,24 @@ export const SettingsPage: React.FC = () => {
 
       <div className="bg-white/5 border border-white/10 rounded-md overflow-hidden flex-1">
         <div className="h-full overflow-y-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-3">
-            {filteredShards.map((shard) => (
-              <div key={shard.key}>
-                <ShardItem
-                  shard={shard}
-                  rate={customRates[shard.key] !== undefined ? customRates[shard.key]! : defaultRates[shard.key]}
-                  defaultRate={defaultRates[shard.key]}
-                  onRateChange={handleRateChange}
-                  onCardClick={() => setModalShard(shard)}
-                />
-              </div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-3 items-stretch">
+            {filteredShards.map((shard) => {
+              const desc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
+              return (
+                <div key={shard.key}>
+                  <ShardItem
+                    shard={shard}
+                    title={desc?.title || shard.name}
+                    description={formatShardDescription(desc?.description || "No description.")}
+                    detailed={detailedShard}
+                    rate={customRates[shard.key] !== undefined ? customRates[shard.key]! : defaultRates[shard.key]}
+                    defaultRate={defaultRates[shard.key]}
+                    onRateChange={handleRateChange}
+                    onCardClick={() => setModalShard(shard)}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -234,6 +269,7 @@ export const SettingsPage: React.FC = () => {
       {modalShard &&
         (() => {
           const desc = SHARD_DESCRIPTIONS[modalShard.key as keyof typeof SHARD_DESCRIPTIONS];
+
           const icon = `${import.meta.env.BASE_URL}shardIcons/${modalShard.key}.png`;
           return (
             <ShardModal
@@ -244,7 +280,9 @@ export const SettingsPage: React.FC = () => {
               description={formatShardDescription(desc?.description || "No description.")}
               rarity={modalShard.rarity}
               icon={icon}
-              rate={customRates[modalShard.key] !== undefined ? customRates[modalShard.key] : defaultRates[modalShard.key]}
+              rate={
+                customRates[modalShard.key] !== undefined ? customRates[modalShard.key] : defaultRates[modalShard.key]
+              }
               onRateChange={(newRate) => handleRateChange(modalShard.key, newRate)}
               isDirect={modalShard.isDirect}
               family={modalShard.family}

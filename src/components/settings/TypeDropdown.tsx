@@ -68,14 +68,16 @@ export const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, on
             <Layers className="w-5 h-5 text-emerald-400" />
             <span className="font-medium">{currentType?.label || "All Types"}</span>
           </div>
-          <ChevronDown className={`w-4 h-4 text-emerald-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+          <ChevronDown
+            className={`w-4 h-4 text-emerald-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+          />
         </button>
       </div>
 
       {isOpen &&
         createPortal(
           <div
-            className="type-dropdown-portal fixed z-[9999] bg-slate-800/95 border border-emerald-500/20 rounded-md shadow-2xl"
+            className="type-dropdown-portal fixed z-[9999] backdrop-blur-sm bg-slate-800/95 border border-emerald-500/20 rounded-md shadow-2xl"
             style={{
               top: dropdownPosition.top,
               left: dropdownPosition.left,

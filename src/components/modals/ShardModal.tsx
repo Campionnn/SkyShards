@@ -25,7 +25,20 @@ interface ShardModalProps {
   type?: string;
 }
 
-export const ShardModal: React.FC<ShardModalProps> = ({ open, onClose, title, name, description, rarity, icon, rate, onRateChange, isDirect, family, type }) => {
+export const ShardModal: React.FC<ShardModalProps> = ({
+  open,
+  onClose,
+  title,
+  name,
+  description,
+  rarity,
+  icon,
+  rate,
+  onRateChange,
+  isDirect,
+  family,
+  type,
+}) => {
   const [inputValue, setInputValue] = useState<string>("");
 
   React.useEffect(() => {
@@ -78,10 +91,14 @@ export const ShardModal: React.FC<ShardModalProps> = ({ open, onClose, title, na
       onClose();
     }
   };
-
   return (
     <div className="fixed inset-0 z-50 px-1 flex items-center justify-center bg-black/65" onClick={handleOverlayClick}>
-      <div className={`bg-slate-900 border ${getRarityBorderColor(rarity)} rounded-xl shadow-2xl px-10 py-8 min-w-[500px]  max-w-[700px] relative animate-fadeIn`} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`bg-slate-900 border ${getRarityBorderColor(
+          rarity
+        )} rounded-xl shadow-2xl px-10 py-8 min-w-[500px]  max-w-[700px] relative animate-fadeIn`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button onClick={onClose} className="absolute top-0 right-2 text-2xl text-slate-500 cursor-pointer">
           &times;
         </button>
@@ -90,7 +107,11 @@ export const ShardModal: React.FC<ShardModalProps> = ({ open, onClose, title, na
           <div className="flex flex-col flex-1 min-w-0 justify-center">
             <div className="text-xl font-bold text-white mb-0.5 truncate flex gap-2">
               {name}
-              <span className={`space-x-2 px-1.5 py-1 font-medium uppercase tracking-wider text-xs ${getRarityColor(rarity)} ${rarityBg[rarity] || rarityBg.common} border rounded-md self-start`}>
+              <span
+                className={`space-x-2 px-1.5 py-1 font-medium uppercase tracking-wider text-xs ${getRarityColor(
+                  rarity
+                )} ${rarityBg[rarity] || rarityBg.common} border rounded-md self-start`}
+              >
                 {rarity}
               </span>
             </div>
@@ -108,13 +129,20 @@ export const ShardModal: React.FC<ShardModalProps> = ({ open, onClose, title, na
               )}
             </div>
 
-            <p className="text-slate-300 text-base leading-snug break-words max-w-xl my-3" dangerouslySetInnerHTML={{ __html: description }}></p>
+            <p
+              className="text-slate-300 text-base leading-snug break-words max-w-xl my-3"
+              dangerouslySetInnerHTML={{ __html: description }}
+            ></p>
             <div className="flex items-center gap-2 mt-2">
               {typeof isDirect === "boolean" &&
                 (isDirect ? (
-                  <span className="px-1.5 py-1 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md font-medium mr">Direct</span>
+                  <span className="px-1.5 py-1 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md font-medium mr">
+                    Direct
+                  </span>
                 ) : (
-                  <span className="px-1.5 py-1 text-xs bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-md font-medium">Fuse</span>
+                  <span className="px-1.5 py-1 text-xs bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-md font-medium">
+                    Fuse
+                  </span>
                 ))}
               <input
                 type="number"
