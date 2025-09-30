@@ -350,7 +350,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 "
               >
                 <RotateCcw className="w-3 h-3" />
-                <span>Reset</span>
+                <span>Reset Stats</span>
               </button>
             </div>
           </div>
@@ -554,6 +554,23 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             </div>
           </div>
         )}
+
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => {
+              if (window.confirm('Are you sure you want to reset everything? This will clear all saved data and reload the page.')) {
+                localStorage.clear();
+                const url = window.location.href.split('?')[0];
+                window.location.href = url + '?nocache=' + Date.now();
+              }
+            }}
+            className="px-2 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium rounded-md text-xs border border-red-500/20 hover:border-red-500/30 transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer"
+          >
+            <RotateCcw className="w-3 h-3" />
+            <span>Reset Everything</span>
+          </button>
+        </div>
       </form>
     </div>
   );
