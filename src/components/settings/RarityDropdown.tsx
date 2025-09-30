@@ -71,7 +71,9 @@ export const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value
             <Filter className="w-5 h-5 text-purple-400" />
             <span className="font-medium">{currentRarity?.label || "All Rarities"}</span>
           </div>
-          <ChevronDown className={`w-4 h-4 text-purple-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+          <ChevronDown
+            className={`w-4 h-4 text-purple-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+          />
         </button>
       </div>
 
@@ -100,7 +102,7 @@ export const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value
                   ${rarity !== rarities[rarities.length - 1] ? "border-b border-purple-500/10" : ""}
                   ${rarity === rarities[0] ? "rounded-t-md" : ""}
                   ${rarity === rarities[rarities.length - 1] ? "rounded-b-md" : ""}
-                `}
+                cursor-pointer`}
               >
                 {rarity.label}
               </button>

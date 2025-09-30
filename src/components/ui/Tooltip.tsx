@@ -17,7 +17,20 @@ interface TooltipProps {
   showRomanNumerals?: boolean; // Add prop to control Roman numeral display
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, className = "", shardIcon, rarity, warning, family, type, children, shardId, showRomanNumerals = true }) => {
+export const Tooltip: React.FC<TooltipProps> = ({
+  content,
+  title,
+  shardName,
+  className = "",
+  shardIcon,
+  rarity,
+  warning,
+  family,
+  type,
+  children,
+  shardId,
+  showRomanNumerals = true,
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -87,7 +100,12 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
 
   return (
     <>
-      <div ref={triggerRef} onClick={toggleTooltip} className={`cursor-pointer ${className}`} aria-label="Show description">
+      <div
+        ref={triggerRef}
+        onClick={toggleTooltip}
+        className={`cursor-pointer ${className}`}
+        aria-label="Show description"
+      >
         {children || (
           <button
             type="button"
@@ -114,10 +132,21 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
         }}
       >
         {(title || shardName) && (
-          <div className="flex items-center gap-2 mb-2">
-            {shardIcon && <img src={`${import.meta.env.BASE_URL}shardIcons/${shardIcon}.png`} alt={title || shardName} className="w-8 h-8 object-contain flex-shrink-0" loading="lazy" />}
+          <div className="flex items-center gap-2 mb-2 text-left">
+            {shardIcon && (
+              <img
+                src={`${import.meta.env.BASE_URL}shardIcons/${shardIcon}.png`}
+                alt={title || shardName}
+                className="w-8 h-8 object-contain flex-shrink-0"
+                loading="lazy"
+              />
+            )}
             <div className="flex flex-col">
-              {shardName && <div className={`font-medium text-sm ${rarity ? getRarityColor(rarity) : "text-white"}`}>{shardName}</div>}
+              {shardName && (
+                <div className={`font-medium text-sm ${rarity ? getRarityColor(rarity) : "text-white"}`}>
+                  {shardName}
+                </div>
+              )}
               {title && (
                 <div className="text-yellow-500 text-xs flex gap-1 items-center">
                   {title}
@@ -131,7 +160,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, cla
             </div>
           </div>
         )}
-        <div className="text-slate-300 text-xs flex flex-col gap-1">
+        <div className="text-slate-300 text-xs flex flex-col gap-1 text-left">
           {metaInfo && <div className="text-slate-400 text-xs">{metaInfo}</div>}
           <div dangerouslySetInnerHTML={{ __html: content }} />
           {warning && <div className="text-red-400">{warning}</div>}
