@@ -299,12 +299,13 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
               const totalForestEssence = forestEssenceShards.reduce((total, [shardId, quantity]) => {
                 const shardName = data.shards[shardId]?.name?.toLowerCase();
                 const effectiveFortune = 1 + (params.hunterFortune + rarityBonuses[data.shards[shardId]?.rarity]) / 100;
-                const essenceNeeded = (quantity * (shardName === "shinyfish" ? 446 : 1024)) / effectiveFortune;
+                const essenceNeeded = (quantity * (shardName === "shinyfish" ? 350 : 1024)) / effectiveFortune;
                 return total + essenceNeeded;
               }, 0);
 
               return (
                 <div className="flex gap-1 items-center px-3 py-1.5 bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-400 text-sm font-medium rounded-md min-w-0">
+                  <span className="truncate">About</span>
                   <span className="text-slate-300">{formatLargeNumber(totalForestEssence)}</span>
                   <span className="truncate">Forest Essence</span>
                 </div>
