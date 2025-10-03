@@ -30,7 +30,7 @@ const PrivacyPolicy: React.FC = () => (
     <ul className="list-disc pl-6 mb-4 text-slate-400">
       <li>
         If you support us via{" "}
-        <a href="https://ko-fi.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline font-bold">
+        <a href="https://ko-fi.com/" target="_blank" rel="noopener noreferrer" className="text-amber-300/70 underline font-bold">
           Ko-fi
         </a>
         , review Ko-fi’s own privacy policy.

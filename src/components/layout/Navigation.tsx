@@ -132,7 +132,7 @@ export const Navigation: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
               className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/20 hover:border-amber-500/30"
-              title="Buy me a coffee"
+              title="Buy us a coffee!"
             >
               <KofiIcon className="w-3.5 h-3.5 mask-type-luminance" />
               <span>Buy us a coffee!</span>

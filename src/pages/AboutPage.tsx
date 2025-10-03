@@ -1,16 +1,24 @@
-import React, { useState } from "react";
-import { Info, Copy, Check } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { Info, Check, Mail, Copy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { DiscordIcon } from "../components/ui/DiscordIcon";
 
 const Divider = () => <hr className="my-6 border-slate-700" />;
 
 export const AboutPage: React.FC = () => {
-  const [copied, setCopied] = useState<string | null>(null);
+  const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
+  const timeouts = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   const handleCopy = (tag: string) => {
     navigator.clipboard.writeText(tag);
-    setCopied(tag);
-    setTimeout(() => setCopied(null), 1200);
+    setCopied((prev) => ({ ...prev, [tag]: true }));
+    if (timeouts.current[tag]) {
+      clearTimeout(timeouts.current[tag]);
+    }
+    timeouts.current[tag] = setTimeout(() => {
+      setCopied((prev) => ({ ...prev, [tag]: false }));
+      delete timeouts.current[tag];
+    }, 1200);
   };
 
   return (
@@ -25,21 +33,21 @@ export const AboutPage: React.FC = () => {
         SkyShards is a tool designed to help you calculate, plan, and optimize your shard fusions in the game. This project is open source and not affiliated with the game developers.
       </p>
       <Divider />
-      <div className="mb-4">
-        <span className="font-semibold text-slate-300">More info:</span>
-        <a href="https://github.com/Campionnn/SkyShards" target="_blank" rel="noopener noreferrer" className="text-purple-400 underline ml-2">
-          Project Repository
+      <div className="mb-4 flex items-center gap-2">
+        <Mail className="w-5 h-5 text-white mx-[3.5px]" />
+        <a href="mailto:skyshards.contact@gmail.com" className="text-purple-400 underline">
+          skyshards.contact@gmail.com
         </a>
       </div>
       <div className="mb-4 flex gap-2 items-center">
-        <span className="font-semibold text-slate-300">Discord:</span>
+        <DiscordIcon className="w-7 h-7" />
         <div className="relative flex flex-col items-center min-w-[80px]">
           <button className="font-mono cursor-pointer text-fuchsia-200 bg-slate-700 rounded-sm px-1 flex items-center gap-1 hover:bg-slate-800 transition" onClick={() => handleCopy("campionn")}>
             campionn
-            <Copy className="w-4 h-4 text-slate-400" />
+            <Copy className="w-4 h-4 text-white" />
           </button>
           <AnimatePresence>
-            {copied === "campionn" && (
+            {copied["campionn"] && (
               <motion.span
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -56,10 +64,10 @@ export const AboutPage: React.FC = () => {
         <div className="relative flex flex-col items-center min-w-[80px]">
           <button className="font-mono cursor-pointer text-fuchsia-200 bg-slate-700 rounded-sm px-1 flex items-center gap-1 hover:bg-slate-800 transition" onClick={() => handleCopy("xkapy")}>
             xkapy
-            <Copy className="w-4 h-4 text-slate-400" />
+            <Copy className="w-4 h-4 text-white" />
           </button>
           <AnimatePresence>
-            {copied === "xkapy" && (
+            {copied["xkapy"] && (
               <motion.span
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
