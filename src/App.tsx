@@ -10,8 +10,9 @@ const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => 
 const RecipePage = lazy(() => import("./pages/RecipePage"));
 const GuidePage = lazy(() => import("./pages/GuidePage").then((module) => ({ default: module.GuidePage })));
 const AboutPage = lazy(() => import("./pages/AboutPage").then((module) => ({ default: module.AboutPage })));
-const ContactPage = lazy(() => import("./pages/ContactPage").then((module) => ({ default: module.ContactPage })));
 
+const ContactPage = lazy(() => import("./pages/ContactPage").then((module) => ({ default: module.ContactPage })));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center py-12">
@@ -94,6 +95,14 @@ const router = createBrowserRouter(
           element: (
             <Suspense fallback={<LoadingSpinner />}>
               <ContactPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "privacy-policy",
+          element: (
+            <Suspense fallback={<LoadingSpinner />}>
+              <PrivacyPolicy />
             </Suspense>
           ),
         },

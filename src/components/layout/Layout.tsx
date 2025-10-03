@@ -16,12 +16,12 @@ export const Layout: React.FC = () => {
         </div>
       </main>
 
-      <footer className="text-center py-6 text-slate-400 text-sm border-t border-slate-800 mt-8">
-        <div className="max-w-screen-2xl mx-auto px-1 sm:px-2 lg:px-4">
+      <footer className="text-center py-6 text-slate-400 text-sm border-t border-slate-800/50">
+        <div className="max-w-screen-2xl mx-auto">
           <p className="font-medium">Made by Campion and xKapy</p>
           <p className="mt-1 text-slate-500">Thanks to HsFearless, MaxLunar, and WhatYouThing for the data</p>
-
-          <div className="flex justify-center items-center space-x-4 mt-3 pt-3 border-t border-slate-800/50">
+          <div className="h-px w-1/2 bg-slate-800/50 mx-auto my-3"></div>
+          <div className="flex justify-center items-center space-x-4">
             <a
               href="https://github.com/Campionnn/SkyShards"
               target="_blank"
@@ -31,18 +31,16 @@ export const Layout: React.FC = () => {
               GitHub
             </a>
             <span className="text-slate-600">•</span>
-            <a
-              href="/about"
-              className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium"
-            >
+            <a href="/about" className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium">
               About
             </a>
             <span className="text-slate-600">•</span>
-            <a
-              href="/contact"
-              className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium"
-            >
+            <a href="/contact" className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium">
               Contact
+            </a>
+            <span className="text-slate-600">•</span>
+            <a href="/privacy-policy" className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium">
+              Privacy Policy
             </a>
             <span className="text-slate-600">•</span>
             <span className="text-slate-600 text-xs">© {new Date().getFullYear()} SkyShards</span>
