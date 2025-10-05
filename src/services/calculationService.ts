@@ -290,6 +290,39 @@ export class CalculationService {
       choices.set(shard, { recipe: null });
     });
 
+    // prevent infinite costs from being stuck when overrides create cycles
+    if (recipeOverrides.length > 0) {
+      // graph of override dependencies
+      const overrideGraph = new Map<string, string[]>();
+      for (const override of recipeOverrides) {
+        if (override.recipe !== null) {
+          overrideGraph.set(override.shardId, override.recipe.inputs);
+          choices.set(override.shardId, { recipe: override.recipe });
+        }
+      }
+
+      const cyclesInOverrides = this.findCycleNodes(choices);
+
+      // if all cycle nodes have infinite cost, initialize with temporary cost
+      for (const cycle of cyclesInOverrides) {
+        const allInfinite = cycle.every(shardId => !isFinite(minCosts.get(shardId) || Infinity));
+
+        if (allInfinite) {
+          for (const shardId of cycle) {
+            minCosts.set(shardId, 1e10);
+          }
+        }
+      }
+
+      // reset choices back to direct for the main loop
+      shards.forEach((shard) => {
+        const hasOverride = recipeOverrides.some(ro => ro.shardId === shard);
+        if (!hasOverride) {
+          choices.set(shard, { recipe: null });
+        }
+      });
+    }
+
     const queue: string[] = [...shards];
     const inQueue = new Set<string>(queue);
     const tolerance = params.rateAsCoinValue ? 1e-2 : 1e-10;
@@ -328,7 +361,7 @@ export class CalculationService {
         const effectiveOutputQuantity = overrideRecipe.isReptile ? overrideRecipe.outputQuantity * crocodileMultiplier : overrideRecipe.outputQuantity;
         const newCost = totalCost / effectiveOutputQuantity;
 
-        if (Math.abs(newCost - currentCost) > tolerance) {
+        if (newCost < currentCost - tolerance || !this.areRecipesEqual(overrideRecipe, currentChoice.recipe)) {
           minCosts.set(outputShard, newCost);
           choices.set(outputShard, { recipe: overrideRecipe });
           for (const dep of dependents[outputShard]) {
