@@ -33,8 +33,8 @@ export const ContactPage: React.FC = () => {
       <Divider />
       <div className="mb-4 flex items-center gap-2">
         <Mail className="w-5 h-5 text-white mx-[3.5px]" />
-        <a href="mailto:skyshards.contact@gmail.com" className="text-purple-400 underline">
-          skyshards.contact@gmail.com
+        <a href="mailto:skyshardsdev@gmail.com" className="text-purple-400 underline">
+          skyshardsdev@gmail.com
         </a>
       </div>
       <div className="mb-4 flex gap-2 items-center">
