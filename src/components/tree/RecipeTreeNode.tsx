@@ -28,13 +28,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     return expandedStates.get(id)!;
   };
 
-  const isDirectShard = (shardId: string) => {
-    const shard = data.shards[shardId];
-    if (!shard) return false;
-    if (shard.rate === 0) return false;
-    return shard.rate && shard.rate > 0;
-  };
-
   const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard | undefined, input2Shard: Shard | undefined): boolean => {
     return (recipe?.isReptile || input1Shard?.family?.toLowerCase().includes("reptile") || input2Shard?.family?.toLowerCase().includes("reptile")) as boolean;
   };
@@ -214,21 +207,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
             </>
           )}
         </div>
-        {onShowAlternatives && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onShowAlternatives(shard.id, {
-                currentRecipe: null,
-                requiredQuantity: Math.ceil(quantity),
-              });
-            }}
-            className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
-            title="Show alternatives"
-          >
-            <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
-          </button>
-        )}
       </div>
     </div>
   );
@@ -265,36 +243,14 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 <span className="font-medium text-white text-xs">{recipeTree.craftsNeeded}</span>
               </div>
             </div>
-            {onShowAlternatives && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onShowAlternatives(inputShard.id, {
-                    currentRecipe: recipeTree.method === "recipe" ? recipeTree.recipe : null,
-                    requiredQuantity: recipeTree.quantity,
-                  });
-                }}
-                className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
-                title="Show alternatives"
-              >
-                <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
-              </button>
-            )}
           </div>
         </div>
         {isExpanded && (
           <div className="border-t border-slate-400/70 pl-3 pr-0.5 py-0.5 flex flex-col gap-0.5">
             {recipeTree.inputs.map((subTree: RecipeTree) => {
               const directShard = data.shards[subTree.shard];
-              if (!directShard) return null;
-              const isDirect = isDirectShard(subTree.shard);
-
-              if (isDirect) {
-                return <div key={`direct-${subTree.shard}`}>{renderDirectShard(directShard.fuse_amount * recipeTree.craftsNeeded, directShard)}</div>;
-              } else {
-                if (!recipeTree) return null;
-                return <div key={`sub-${subTree.shard}`}>{renderSubRecipe(subTree, directShard, subNodeId)}</div>;
-              }
+              if (!directShard || !recipeTree) return null;
+              return <div key={`sub-${subTree.shard}`}>{renderSubRecipe(subTree, directShard, subNodeId)}</div>;
             })}
           </div>
         )}
