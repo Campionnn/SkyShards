@@ -15,23 +15,12 @@ interface TooltipProps {
   children?: React.ReactNode;
   shardId?: string; // Add shardId prop
   showRomanNumerals?: boolean; // Add prop to control Roman numeral display
+  visible?: boolean;
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({
-  content,
-  title,
-  shardName,
-  className = "",
-  shardIcon,
-  rarity,
-  warning,
-  family,
-  type,
-  children,
-  shardId,
-  showRomanNumerals = true,
-}) => {
-  const [isVisible, setIsVisible] = useState(false);
+export const Tooltip: React.FC<TooltipProps> = ({ content, title, shardName, className = "", shardIcon, rarity, warning, family, type, children, shardId, showRomanNumerals = true, visible }) => {
+  const [internalVisible, setInternalVisible] = useState(false);
+  const isVisible = visible === false ? false : internalVisible;
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -58,9 +47,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
   };
 
   const toggleTooltip = (e: React.MouseEvent) => {
+    if (visible === false) return;
     e.preventDefault();
     e.stopPropagation();
-    setIsVisible(!isVisible);
+    setInternalVisible(!internalVisible);
   };
 
   useEffect(() => {
@@ -74,7 +64,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
     const handleOutsideClick = (event: MouseEvent) => {
       const target = event.target as Node;
       if (!triggerRef.current?.contains(target) && !tooltipRef.current?.contains(target)) {
-        setIsVisible(false);
+        setInternalVisible(false);
       }
     };
 
@@ -100,12 +90,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   return (
     <>
-      <div
-        ref={triggerRef}
-        onClick={toggleTooltip}
-        className={`cursor-pointer ${className}`}
-        aria-label="Show description"
-      >
+      <div ref={triggerRef} onClick={toggleTooltip} className={`cursor-pointer ${className}`} aria-label="Show description">
         {children || (
           <button
             type="button"
@@ -133,20 +118,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
       >
         {(title || shardName) && (
           <div className="flex items-center gap-2 mb-2 text-left">
-            {shardIcon && (
-              <img
-                src={`${import.meta.env.BASE_URL}shardIcons/${shardIcon}.png`}
-                alt={title || shardName}
-                className="w-8 h-8 object-contain flex-shrink-0"
-                loading="lazy"
-              />
-            )}
+            {shardIcon && <img src={`${import.meta.env.BASE_URL}shardIcons/${shardIcon}.png`} alt={title || shardName} className="w-8 h-8 object-contain flex-shrink-0" loading="lazy" />}
             <div className="flex flex-col">
-              {shardName && (
-                <div className={`font-medium text-sm ${rarity ? getRarityColor(rarity) : "text-white"}`}>
-                  {shardName}
-                </div>
-              )}
+              {shardName && <div className={`font-medium text-sm ${rarity ? getRarityColor(rarity) : "text-white"}`}>{shardName}</div>}
               {title && (
                 <div className="text-yellow-500 text-xs flex gap-1 items-center">
                   {title}
