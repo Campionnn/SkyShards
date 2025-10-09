@@ -59,11 +59,11 @@ self.onmessage = async (e: MessageEvent<StartMsg>) => {
     }
 
     // Phase: computing min costs
-    post({ type: "progress", phase: "computing", progress: 0.1, message: "Computing optimal costs..." });
+    post({ type: "progress", phase: "computing", progress: 0, message: "Computing optimal costs..." });
     const { choices } = service.computeMinCosts(parsed, params, recipeOverrides);
 
     // Phase: building recipe tree
-    post({ type: "progress", phase: "building", progress: 0.5, message: "Building recipe tree..." });
+    post({ type: "progress", phase: "building", progress: 0.4, message: "Building recipe tree..." });
     const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0 ? service.findCycleNodes(choices) : [];
     const tree = service.buildRecipeTree(parsed, targetShard, choices, cycleNodes, params, recipeOverrides);
 
