@@ -1,3 +1,5 @@
+import React from "react";
+
 export const DiscordIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg width={props.width || 20} height={props.height || 20} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
     <title>{"discord"}</title>

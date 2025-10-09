@@ -51,17 +51,6 @@ export const formatLargeNumber = (num: number): string => {
   return num < 0 ? "-" + formatted : formatted;
 };
 
-export const getRarityBorderColor = (rarity: string): string => {
-  const colors = {
-    common: "border-gray-400/20",
-    uncommon: "border-green-400/20",
-    rare: "border-blue-400/20",
-    epic: "border-purple-400/20",
-    legendary: "border-yellow-400/20",
-  };
-  return colors[rarity as keyof typeof colors] || "border-gray-400/20";
-};
-
 export function debounce<TArgs extends unknown[], TReturn>(func: (...args: TArgs) => TReturn, wait: number): (...args: TArgs) => void {
   let timeout: ReturnType<typeof setTimeout> | undefined;
   return (...args: TArgs) => {

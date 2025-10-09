@@ -68,9 +68,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   data,
   targetShardName,
   targetShard,
-  requiredQuantity,
   params,
-  onResultUpdate,
   recipeOverrides,
   onRecipeOverridesUpdate,
   onResetRecipeOverrides,
@@ -333,10 +331,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
         <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
           <div className="min-w-[650px]">
             <RecipeOverrideManager
-              targetShard={targetShard}
-              requiredQuantity={requiredQuantity}
               params={params}
-              onResultUpdate={onResultUpdate}
               recipeOverrides={recipeOverrides}
               onRecipeOverridesUpdate={onRecipeOverridesUpdate}
               onResetRecipeOverrides={onResetRecipeOverrides}

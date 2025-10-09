@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { CalculationService } from "../../services";
 import { AlternativeRecipeModal } from "../modals";
-import type { RecipeOverrideManagerProps, AlternativeRecipeOption, AlternativeSelectionContext, Recipe, RecipeOverride, Data } from "../../types/types";
+import type { RecipeOverrideManagerProps, AlternativeRecipeOption, AlternativeSelectionContext, Recipe, Data } from "../../types/types";
 
 interface ModalState {
   isOpen: boolean;
@@ -14,10 +14,7 @@ interface ModalState {
 }
 
 export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
-  targetShard,
-  requiredQuantity,
   params,
-  onResultUpdate,
   recipeOverrides,
   onRecipeOverridesUpdate,
   onResetRecipeOverrides,
@@ -87,36 +84,20 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
 
       try {
         const calculationService = CalculationService.getInstance();
-        const newResult = await calculationService.applyRecipeOverride(modalState.shardId, selectedRecipe, targetShard, requiredQuantity, params, recipeOverrides);
+        const updatedOverrides = calculationService.applyRecipeOverride(modalState.shardId, selectedRecipe, recipeOverrides);
 
-        const newOverride: RecipeOverride = {
-          shardId: modalState.shardId,
-          recipe: selectedRecipe,
-        };
-
-        const filtered = recipeOverrides.filter((o) => o.shardId !== modalState.shardId);
-        const updatedOverrides = [...filtered, newOverride];
         onRecipeOverridesUpdate(updatedOverrides);
-
-        onResultUpdate(newResult);
         closeModal();
       } catch (error) {
         console.error("Failed to apply recipe override:", error);
       }
     },
-    [modalState.shardId, targetShard, requiredQuantity, params, recipeOverrides, onRecipeOverridesUpdate, onResultUpdate, closeModal]
+    [modalState.shardId, recipeOverrides, onRecipeOverridesUpdate, closeModal]
   );
 
-  const resetAlternatives = useCallback(async () => {
-    try {
-      onResetRecipeOverrides();
-      const calculationService = CalculationService.getInstance();
-      const newResult = await calculationService.calculateOptimalPath(targetShard, requiredQuantity, params);
-      onResultUpdate(newResult);
-    } catch (error) {
-      console.error("Failed to reset alternatives:", error);
-    }
-  }, [targetShard, requiredQuantity, params, onResetRecipeOverrides, onResultUpdate]);
+  const resetAlternatives = useCallback(() => {
+    onResetRecipeOverrides();
+  }, [onResetRecipeOverrides]);
 
   return (
     <>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { AlertCircle, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { CalculatorForm, CalculationResults } from "../components";
 import { WelcomeProfileModal } from "../components";
-import { useCalculation, useCustomRates, useCalculatorState } from "../hooks";
+import { useCustomRates, useCalculatorState } from "../hooks";
 import { DataService } from "../services";
 import type { CalculationFormData } from "../schemas";
 import type { CalculationResult, CalculationParams, RecipeOverride, Data } from "../types/types";
@@ -74,11 +74,10 @@ const performCalculation = async (
 
   callbacks.setCurrentParams(params);
 
-  // Clear previous results immediately so the fusion tree is hidden during recalculation
   callbacks.setResult(null);
   callbacks.setCalculationData(null);
 
-  // Run calculation in Web Worker with progress
+  // calculation in web worker with progress
   callbacks.setCalculating(true);
   callbacks.setProgress({ phase: "parsing", progress: 0, message: "Starting..." });
   try {
@@ -99,7 +98,6 @@ const performCalculation = async (
 
 const CalculatorPageContent: React.FC = () => {
   const { result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName, form, setForm } = useCalculatorState();
-  const { error } = useCalculation();
   const { customRates } = useCustomRates();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentParams, setCurrentParams] = useState<CalculationParams | null>(null);
@@ -201,12 +199,12 @@ const CalculatorPageContent: React.FC = () => {
     setRecipeOverrides([]);
   };
 
-  // Re-calculate when customRates change and form is valid
+  // Re-calculate when customRates, recipeOverrides change and form is valid
   useEffect(() => {
     if (form && form.shard && form.shard.trim() !== "") {
       debouncedCalculate(form, 150).catch(console.error);
     }
-  }, [customRates, form, debouncedCalculate]);
+  }, [customRates, recipeOverrides, form, debouncedCalculate]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -247,17 +245,6 @@ const CalculatorPageContent: React.FC = () => {
           </div>
           {/* Results Panel */}
           <div className="xl:col-span-5 space-y-3">
-            {/* Error Display */}
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-md p-3 flex items-start space-x-2">
-                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="font-medium text-red-400">Calculation Error</h3>
-                  <p className="text-red-300 text-sm mt-1">{error}</p>
-                </div>
-              </div>
-            )}
-
             {/* Loading Indicator */}
             {isCalculating && (
               <div className="bg-purple-500/10 border border-purple-500/20 rounded-md p-3">
@@ -289,7 +276,7 @@ const CalculatorPageContent: React.FC = () => {
             )}
 
             {/* Empty State */}
-            {!result && !isCalculating && !error && (
+            {!result && !isCalculating && (
               <div className="text-center py-10 bg-white/5 border border-white/10 rounded-md">
                 <div className="max-w-md mx-auto space-y-3">
                   <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/20 rounded-md flex items-center justify-center mx-auto">

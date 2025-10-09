@@ -1,7 +1,6 @@
 import type { CalculationParams, CalculationResult, RecipeOverride } from "../types/types";
 import { CalculationService } from "../services";
 
-// Message shapes
 interface StartMsg {
   type: "start";
   targetShard: string;
@@ -15,7 +14,7 @@ type ProgressPhase = "parsing" | "computing" | "building" | "assigning" | "final
 interface ProgressMsg {
   type: "progress";
   phase: ProgressPhase;
-  progress: number; // 0..1 best effort
+  progress: number;
   message: string;
 }
 interface ResultMsg {
@@ -43,49 +42,53 @@ self.onmessage = async (e: MessageEvent<StartMsg>) => {
     // Phase: parsing data
     post({ type: "progress", phase: "parsing", progress: 0, message: "Parsing data..." });
     const parsed = await service.parseData(params);
-    post({ type: "progress", phase: "parsing", progress: 0.1, message: "Data parsed" });
+
+    if (!parsed.shards[targetShard]) {
+      const emptyResult: CalculationResult = {
+        timePerShard: 0,
+        totalTime: 0,
+        totalShardsProduced: 0,
+        craftsNeeded: 0,
+        totalQuantities: new Map<string, number>(),
+        totalFusions: 0,
+        craftTime: 0,
+        tree: { shard: targetShard, method: "direct", quantity: 0 },
+      };
+      post({ type: "result", result: emptyResult });
+      return;
+    }
 
     // Phase: computing min costs
     post({ type: "progress", phase: "computing", progress: 0.1, message: "Computing optimal costs..." });
     const { choices } = service.computeMinCosts(parsed, params, recipeOverrides);
-    post({ type: "progress", phase: "computing", progress: 0.5, message: "Costs computed" });
 
     // Phase: building recipe tree
     post({ type: "progress", phase: "building", progress: 0.5, message: "Building recipe tree..." });
     const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0 ? service.findCycleNodes(choices) : [];
     const tree = service.buildRecipeTree(parsed, targetShard, choices, cycleNodes, params, recipeOverrides);
-    post({ type: "progress", phase: "building", progress: 0.7, message: "Tree built" });
 
     // Phase: assigning quantities
     post({ type: "progress", phase: "assigning", progress: 0.7, message: "Assigning quantities..." });
     const craftCounter = { total: 0 };
     const { crocodileMultiplier } = service.calculateMultipliers(params);
     service.assignQuantities(tree, requiredQuantity, parsed, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
-    post({ type: "progress", phase: "assigning", progress: 0.8, message: "Quantities assigned" });
 
     // Phase: finalizing
     post({ type: "progress", phase: "finalizing", progress: 0.9, message: "Aggregating results..." });
     const totalQuantities = service.collectTotalQuantities(tree);
 
-    let totalShardsProduced = requiredQuantity;
-    let craftsNeeded = 1;
-    const choice = choices.get(targetShard);
-    if (choice?.recipe) {
-      const outputQuantity = choice.recipe.isReptile ? choice.recipe.outputQuantity * crocodileMultiplier : choice.recipe.outputQuantity;
-      craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
-      totalShardsProduced = craftsNeeded * outputQuantity;
-    }
+    const { totalShardsProduced, craftsNeeded, shardWeights } = service.calculateShardProductionStats({
+      requiredQuantity,
+      targetShard,
+      choices,
+      crocodileMultiplier,
+      totalQuantities,
+      data: parsed,
+      params,
+      getDirectCostFn: service.getDirectCost.bind(service)
+    });
 
     const craftTime = params.rateAsCoinValue ? craftCounter.total * params.craftPenalty : (craftCounter.total * params.craftPenalty) / 3600;
-
-    const shardWeights: Map<string, number> = new Map();
-    for (const [shardId, quantity] of totalQuantities.entries()) {
-      const shard = parsed.shards[shardId];
-      if (shard) {
-        const weight = service.getDirectCost(shard, params.rateAsCoinValue) * quantity;
-        shardWeights.set(shardId, weight);
-      }
-    }
     const totalTime = Array.from(shardWeights.values()).reduce((sum, weight) => sum + weight, 0) + craftTime;
     const timePerShard = totalTime / totalShardsProduced;
 
