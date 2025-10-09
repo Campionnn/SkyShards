@@ -215,13 +215,13 @@ export const AlternativeRecipeModal: React.FC<
           <div className="flex items-center gap-0 sm:gap-3">
             <div className="w-2 h-2 bg-purple-400 rounded-full ml-0.5" />
             <div className="flex sm:hidden">
-              <div className="flex flex-col items-center text-slate-400 ml-4 mr-0.5">
-                <p className="text-slate-400 pb-0.5">+</p>
-                <p className="text-slate-400">=</p>
+              <div className="flex flex-col items-center text-slate-400 gap-[3px] ml-4 mr-0.5">
+                <p className="text-slate-400 flex items-center">+</p>
+                <p className="text-slate-400 flex items-center">=</p>
               </div>
               <div className="flex flex-col items-center text-slate-400 gap-1 mr-0.5">
-                <div className="w-1 h-6 border-l-1 border-t-1 border-b-1 border-slate-400"></div>
-                <div className="w-1 h-6 border-l-1 border-t-1 border-b-1 border-slate-400"></div>
+                <div className="w-1 h-6 border-l-1 border-t-1 border-b-1 border-slate-500"></div>
+                <div className="w-1 h-6 border-l-1 border-t-1 border-b-1 border-slate-500"></div>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-1.5 text-sm">
