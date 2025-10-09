@@ -6,10 +6,7 @@ export type WorkerProgress = {
   message: string;
 };
 
-type WorkerMsg =
-  | ({ type: "progress" } & WorkerProgress)
-  | { type: "result"; result: CalculationResult }
-  | { type: "error"; message: string };
+type WorkerMsg = ({ type: "progress" } & WorkerProgress) | { type: "result"; result: CalculationResult } | { type: "error"; message: string };
 
 type WorkerStartMsg = {
   type: "start";
