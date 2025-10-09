@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Star, Search, Plus, Equal, ChevronDown } from "lucide-react";
+import { X, Star, Search, Plus, ChevronDown } from "lucide-react";
 import { getRarityColor, formatTime, formatLargeNumber } from "../../utilities";
 import type { AlternativeRecipeModalProps, Recipe, AlternativeRecipeOption } from "../../types/types";
 import { CalculationService } from "../../services";
@@ -171,32 +171,20 @@ export const AlternativeRecipeModal: React.FC<
         key="direct"
         onClick={() => handleSelect(option.recipe)}
         className={`w-full p-3 rounded-lg border text-left transition-all duration-200 ${
-          isCurrent
-            ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30"
-            : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
+          isCurrent ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30" : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
         }`}
         disabled={isCurrent}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-400 rounded-full" />
-            <span className="text-green-400 font-medium text-sm">
-              {params.rateAsCoinValue ? "Buy from Bazaar" : "Direct"}
-            </span>
-            {isCurrent && (
-              <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">
-                Current
-              </span>
-            )}
+            <span className="text-green-400 font-medium text-sm">{params.rateAsCoinValue ? "Buy from Bazaar" : "Direct"}</span>
+            {isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
           </div>
           <div className="flex items-center gap-1 text-slate-400 text-sm">
             <div className="text-right">
               <div>{formatFn(option.timePerShard)}</div>
-              {requiredQuantity && requiredQuantity > 0 && (
-                <div className="text-xs text-blue-400">
-                  Total: {formatFn(calculateTotalTime(option, requiredQuantity))}
-                </div>
-              )}
+              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>}
             </div>
           </div>
         </div>
@@ -219,59 +207,32 @@ export const AlternativeRecipeModal: React.FC<
       <button
         onClick={() => handleSelect(option.recipe)}
         className={`w-full p-3 rounded-lg border text-left transition-all duration-200 cursor-pointer ${
-          isCurrent
-            ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30"
-            : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
+          isCurrent ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30" : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
         }`}
         disabled={isCurrent}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between text-nowrap overflow-x-auto">
+          <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-purple-400 rounded-full" />
-            <div className="flex items-center gap-1 text-sm">
+            <div className="flex items-center gap-1.5 text-sm">
               <span className="text-slate-400 text-xs">{firstInputShard.fuse_amount}x</span>
-              <img
-                src={`${import.meta.env.BASE_URL}shardIcons/${firstInput}.png`}
-                alt={firstInputShard.name}
-                className="w-4 h-4 object-contain"
-                loading="lazy"
-              />
+              <img src={`${import.meta.env.BASE_URL}shardIcons/${firstInput}.png`} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
               <span className={getRarityColor(firstInputShard.rarity)}>{firstInputShard.name}</span>
-              <Plus className="w-3 h-3 text-slate-400 mx-1" />
+              <span className="text-slate-400 mb-0.5 mx-0.5">+</span>
               <span className="text-slate-400 text-xs">{partnerShard.fuse_amount}x</span>
-              <img
-                src={`${import.meta.env.BASE_URL}shardIcons/${partner}.png`}
-                alt={partnerShard.name}
-                className="w-4 h-4 object-contain"
-                loading="lazy"
-              />
+              <img src={`${import.meta.env.BASE_URL}shardIcons/${partner}.png`} alt={partnerShard.name} className="w-4 h-4 object-contain" loading="lazy" />
               <span className={getRarityColor(partnerShard.rarity)}>{partnerShard.name}</span>
-              <Equal className="w-3 h-3 text-slate-400 mx-1" />
+              <span className="text-slate-400 mb-0.5 mx-0.5">=</span>
               <span className="text-slate-400 text-xs">{option.recipe.outputQuantity}x</span>
-              {outputShard && (
-                <img
-                  src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`}
-                  alt={outputShard.name}
-                  className="w-4 h-4 object-contain"
-                  loading="lazy"
-                />
-              )}
+              {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
               <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300"}>{shardName}</span>
             </div>
-            {isCurrent && (
-              <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">
-                Current
-              </span>
-            )}
+            {isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
           </div>
-          <div className="flex items-center gap-1 text-slate-400 text-sm">
+          <div className="text-slate-400 text-sm ml-20">
             <div className="text-right">
               <div>{formatFn(option.timePerShard)}</div>
-              {requiredQuantity && requiredQuantity > 0 && (
-                <div className="text-xs text-blue-400">
-                  Total: {formatFn(calculateTotalTime(option, requiredQuantity))}
-                </div>
-              )}
+              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>}
             </div>
           </div>
         </div>
@@ -492,15 +453,8 @@ export const AlternativeRecipeModal: React.FC<
           <div className="flex items-center gap-2 mb-3">
             {firstShardObj && (
               <>
-                <img
-                  src={`${import.meta.env.BASE_URL}shardIcons/${groupShard}.png`}
-                  alt={firstShardObj.name}
-                  className="w-5 h-5 object-contain"
-                  loading="lazy"
-                />
-                <span className={getRarityColor(firstShardObj.rarity) + " font-semibold text-base"}>
-                  {firstShardObj.name}
-                </span>
+                <img src={`${import.meta.env.BASE_URL}shardIcons/${groupShard}.png`} alt={firstShardObj.name} className="w-5 h-5 object-contain" loading="lazy" />
+                <span className={getRarityColor(firstShardObj.rarity) + " font-semibold text-base"}>{firstShardObj.name}</span>
                 <span className="text-xs text-slate-400">
                   ({group.length} recipe{group.length !== 1 ? "s" : ""})
                 </span>
@@ -530,25 +484,12 @@ export const AlternativeRecipeModal: React.FC<
                           <>
                             <Plus className="w-4 h-4 text-fuchsia-400" />
                             <span className="text-slate-400 text-xs">{partner?.fuse_amount || 2}x</span>
-                            <img
-                              src={`${import.meta.env.BASE_URL}shardIcons/${partnerShard}.png`}
-                              alt={partner?.name}
-                              className="w-4 h-4 object-contain"
-                              loading="lazy"
-                            />
-                            <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>
-                              {partner?.name || partnerShard}
-                            </span>
+                            <img src={`${import.meta.env.BASE_URL}shardIcons/${partnerShard}.png`} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
+                            <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>{partner?.name || partnerShard}</span>
                             {partner?.family?.includes("Reptile") && (
-                              <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">
-                                Reptile
-                              </span>
+                              <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">Reptile</span>
                             )}
-                            {selectedOption.isCurrent && (
-                              <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">
-                                Current
-                              </span>
-                            )}
+                            {selectedOption.isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
                           </>
                         );
                       })()}
@@ -558,17 +499,11 @@ export const AlternativeRecipeModal: React.FC<
                       <div className="text-right">
                         <div>{selectedOption ? formatFn(selectedOption.timePerShard) : ""}</div>
                         {selectedOption && requiredQuantity && requiredQuantity > 0 && (
-                          <div className="text-xs text-blue-400">
-                            Total: {formatFn(calculateTotalTime(selectedOption, requiredQuantity))}
-                          </div>
+                          <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(selectedOption, requiredQuantity))}</div>
                         )}
                       </div>
                     </div>
-                    <ChevronDown
-                      className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-                        isOpen ? "rotate-180" : ""
-                      }`}
-                    />
+                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
                   </div>
                 </div>
               </button>
@@ -621,36 +556,17 @@ export const AlternativeRecipeModal: React.FC<
                               <div className="flex items-center gap-2">
                                 <Plus className="w-4 h-4 text-fuchsia-400" />
                                 <span className="text-slate-400 text-xs">{partner?.fuse_amount || 2}x</span>
-                                <img
-                                  src={`${import.meta.env.BASE_URL}shardIcons/${partnerShard}.png`}
-                                  alt={partner?.name}
-                                  className="w-4 h-4 object-contain"
-                                  loading="lazy"
-                                />
-                                <span
-                                  className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}
-                                >
-                                  {partner?.name || partnerShard}
-                                </span>
+                                <img src={`${import.meta.env.BASE_URL}shardIcons/${partnerShard}.png`} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
+                                <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>{partner?.name || partnerShard}</span>
                                 {partner?.family?.includes("Reptile") && (
-                                  <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">
-                                    Reptile
-                                  </span>
+                                  <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">Reptile</span>
                                 )}
-                                {option.isCurrent && (
-                                  <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">
-                                    Current
-                                  </span>
-                                )}
+                                {option.isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
                               </div>
                               <div className="flex items-center gap-1 text-slate-400 text-xs">
                                 <div className="text-right">
                                   <div>{formatFn(option.timePerShard)}</div>
-                                  {requiredQuantity && requiredQuantity > 0 && (
-                                    <div className="text-xs text-blue-400">
-                                      Total: {formatFn(calculateTotalTime(option, requiredQuantity))}
-                                    </div>
-                                  )}
+                                  {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>}
                                 </div>
                               </div>
                             </div>
@@ -670,10 +586,7 @@ export const AlternativeRecipeModal: React.FC<
 
   return createPortal(
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div
-        className="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex-shrink-0">
           <div className="flex items-center justify-between mb-3">
@@ -683,14 +596,7 @@ export const AlternativeRecipeModal: React.FC<
               {/* Shard icon next to the shard name */}
               <span className="flex items-center gap-1 text-slate-400 text-sm">
                 <span>for</span>
-                {outputShard && (
-                  <img
-                    src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`}
-                    alt={outputShard.name}
-                    className="w-5 h-5 object-contain"
-                    loading="lazy"
-                  />
-                )}
+                {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-5 h-5 object-contain" loading="lazy" />}
                 <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-400"}>{shardName}</span>
               </span>
             </div>
@@ -719,9 +625,7 @@ export const AlternativeRecipeModal: React.FC<
               <div className="w-8 h-8 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
             </div>
           ) : processedAlternatives.direct === null && Object.keys(processedAlternatives.grouped).length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
-              {searchQuery ? `No alternatives found matching "${searchQuery}"` : "No alternatives found"}
-            </div>
+            <div className="text-center py-12 text-slate-400">{searchQuery ? `No alternatives found matching "${searchQuery}"` : "No alternatives found"}</div>
           ) : (
             <div className="space-y-4">
               {/* Direct collection option */}
@@ -738,13 +642,9 @@ export const AlternativeRecipeModal: React.FC<
           <div className="flex items-center justify-between text-sm text-slate-400">
             <span>Recipes grouped by most common input • Best options shown first</span>
             <span>
-              {processedAlternatives.direct && processedAlternatives.direct.timePerShard !== Infinity
-                ? "1 direct + "
-                : ""}
+              {processedAlternatives.direct && processedAlternatives.direct.timePerShard !== Infinity ? "1 direct + " : ""}
               {Object.values(processedAlternatives.grouped).reduce((sum, group) => sum + group.length, 0)} fusion recipe
-              {Object.values(processedAlternatives.grouped).reduce((sum, group) => sum + group.length, 0) !== 1
-                ? "s"
-                : ""}
+              {Object.values(processedAlternatives.grouped).reduce((sum, group) => sum + group.length, 0) !== 1 ? "s" : ""}
               {searchQuery && ` (filtered)`}
             </span>
           </div>

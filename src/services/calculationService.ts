@@ -77,7 +77,7 @@ export class CalculationService {
 
       const shards: Shards = {};
       for (const shardId in fusionJson.shards) {
-        let rate = params.rateAsCoinValue ? (params.customRates[shardId] ?? Infinity) : (params.customRates[shardId] ?? defaultRates[shardId] ?? 0);
+        let rate = params.rateAsCoinValue ? params.customRates[shardId] ?? Infinity : params.customRates[shardId] ?? defaultRates[shardId] ?? 0;
 
         // skip rate modification if rate is a coin value
         if (params.rateAsCoinValue) {
@@ -243,11 +243,7 @@ export class CalculationService {
     return ratesAsCoinValue ? shard.rate : 1 / shard.rate;
   }
 
-  computeMinCosts(
-    data: Data,
-    params: CalculationParams,
-    recipeOverrides: RecipeOverride[] = []
-  ): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
+  computeMinCosts(data: Data, params: CalculationParams, recipeOverrides: RecipeOverride[] = []): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
     const shards = Object.keys(data.shards);
@@ -305,7 +301,7 @@ export class CalculationService {
 
       // if all cycle nodes have infinite cost, initialize with temporary cost
       for (const cycle of cyclesInOverrides) {
-        const allInfinite = cycle.every(shardId => !isFinite(minCosts.get(shardId) || Infinity));
+        const allInfinite = cycle.every((shardId) => !isFinite(minCosts.get(shardId) || Infinity));
 
         if (allInfinite) {
           for (const shardId of cycle) {
@@ -316,7 +312,7 @@ export class CalculationService {
 
       // reset choices back to direct for the main loop
       shards.forEach((shard) => {
-        const hasOverride = recipeOverrides.some(ro => ro.shardId === shard);
+        const hasOverride = recipeOverrides.some((ro) => ro.shardId === shard);
         if (!hasOverride) {
           choices.set(shard, { recipe: null });
         }
@@ -378,7 +374,7 @@ export class CalculationService {
       let bestCost = currentCost;
       let bestRecipe: Recipe | null = currentChoice.recipe;
       // recipes was being mutated in the loop somewhere, so make a copy. idk why
-      const arr = recipes.slice()
+      const arr = recipes.slice();
 
       for (let i = 0; i < arr.length; i++) {
         const recipe = arr[i];
@@ -650,10 +646,7 @@ export class CalculationService {
     return [];
   }
 
-  private findExternalCycleInputs(
-    steps: { outputShard: string; recipe: Recipe }[],
-    data: Data
-  ): { shard: Shard; quantityPerCraft: number }[] {
+  private findExternalCycleInputs(steps: { outputShard: string; recipe: Recipe }[], data: Data): { shard: Shard; quantityPerCraft: number }[] {
     const outputShards = new Set(steps.map((step) => step.outputShard));
     const inputTotals: Map<string, { shard: Shard; quantityPerCraft: number }> = new Map();
 
@@ -757,7 +750,7 @@ export class CalculationService {
     choices: Map<string, RecipeChoice>,
     crocodileMultiplier: number,
     params: CalculationParams,
-    recipeOverrides: RecipeOverride[] = [],
+    recipeOverrides: RecipeOverride[] = []
   ): void {
     tree.quantity = requiredQuantity;
 
@@ -780,8 +773,8 @@ export class CalculationService {
         break;
       }
 
-      case "cycle":
-        { const outputStep = tree.steps.find((step) => step.outputShard === tree.shard);
+      case "cycle": {
+        const outputStep = tree.steps.find((step) => step.outputShard === tree.shard);
         if (!outputStep) break;
 
         const recipe = outputStep.recipe;
@@ -826,7 +819,8 @@ export class CalculationService {
           const totalInputQuantity = inputQuantity * (roundedCrafts / stepCount);
           this.assignQuantities(cycleInput, totalInputQuantity, data, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
         });
-        break; }
+        break;
+      }
     }
   }
 
@@ -894,11 +888,11 @@ export class CalculationService {
 
     const shardWeights: Map<string, number> = new Map();
     for (const [shardId, quantity] of totalQuantities.entries()) {
-        const shard = data.shards[shardId];
-        if (shard) {
-            const weight = this.getDirectCost(shard, params.rateAsCoinValue) * quantity;
-            shardWeights.set(shardId, weight);
-        }
+      const shard = data.shards[shardId];
+      if (shard) {
+        const weight = this.getDirectCost(shard, params.rateAsCoinValue) * quantity;
+        shardWeights.set(shardId, weight);
+      }
     }
     const totalTime = Array.from(shardWeights.values()).reduce((sum, weight) => sum + weight, 0) + craftTime;
     const timePerShard = totalTime / totalShardsProduced;
