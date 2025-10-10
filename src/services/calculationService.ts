@@ -2,7 +2,6 @@ import type {
   AlternativeRecipeOption,
   AlternativeSelectionContext,
   CalculationParams,
-  CalculationResult,
   Data,
   Recipe,
   RecipeChoice,
@@ -290,6 +289,39 @@ export class CalculationService {
       choices.set(shard, { recipe: null });
     });
 
+    // prevent infinite costs from being stuck when overrides create cycles
+    if (recipeOverrides.length > 0) {
+      // graph of override dependencies
+      const overrideGraph = new Map<string, string[]>();
+      for (const override of recipeOverrides) {
+        if (override.recipe !== null) {
+          overrideGraph.set(override.shardId, override.recipe.inputs);
+          choices.set(override.shardId, { recipe: override.recipe });
+        }
+      }
+
+      const cyclesInOverrides = this.findCycleNodes(choices);
+
+      // if all cycle nodes have infinite cost, initialize with temporary cost
+      for (const cycle of cyclesInOverrides) {
+        const allInfinite = cycle.every(shardId => !isFinite(minCosts.get(shardId) || Infinity));
+
+        if (allInfinite) {
+          for (const shardId of cycle) {
+            minCosts.set(shardId, 1e10);
+          }
+        }
+      }
+
+      // reset choices back to direct for the main loop
+      shards.forEach((shard) => {
+        const hasOverride = recipeOverrides.some(ro => ro.shardId === shard);
+        if (!hasOverride) {
+          choices.set(shard, { recipe: null });
+        }
+      });
+    }
+
     const queue: string[] = [...shards];
     const inQueue = new Set<string>(queue);
     const tolerance = params.rateAsCoinValue ? 1e-2 : 1e-10;
@@ -328,7 +360,7 @@ export class CalculationService {
         const effectiveOutputQuantity = overrideRecipe.isReptile ? overrideRecipe.outputQuantity * crocodileMultiplier : overrideRecipe.outputQuantity;
         const newCost = totalCost / effectiveOutputQuantity;
 
-        if (Math.abs(newCost - currentCost) > tolerance) {
+        if (newCost < currentCost - tolerance || !this.areRecipesEqual(overrideRecipe, currentChoice.recipe)) {
           minCosts.set(outputShard, newCost);
           choices.set(outputShard, { recipe: overrideRecipe });
           for (const dep of dependents[outputShard]) {
@@ -821,76 +853,50 @@ export class CalculationService {
     return totals;
   }
 
-  async calculateOptimalPath(targetShard: string, requiredQuantity: number, params: CalculationParams, recipeOverrides: RecipeOverride[] = []): Promise<CalculationResult> {
-    const data = await this.parseData(params);
-
-    if (!data.shards[targetShard]) {
-      return {
-        timePerShard: 0,
-        totalTime: 0,
-        totalShardsProduced: 0,
-        craftsNeeded: 0,
-        totalQuantities: new Map<string, number>(),
-        totalFusions: 0,
-        craftTime: 0,
-        tree: { shard: targetShard, method: "direct", quantity: 0 },
-      };
-    }
-
-    const { choices } = this.computeMinCosts(data, params, recipeOverrides);
-    const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0 ? this.findCycleNodes(choices) : [];
-    const tree = this.buildRecipeTree(data, targetShard, choices, cycleNodes, params, recipeOverrides);
-    const craftCounter = { total: 0 };
-    const multipliers = this.calculateMultipliers(params);
-    const { crocodileMultiplier } = multipliers;
-    this.assignQuantities(tree, requiredQuantity, data, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
-
-    const totalQuantities = this.collectTotalQuantities(tree);
-
+  public calculateShardProductionStats({
+   requiredQuantity,
+   targetShard,
+   choices,
+   crocodileMultiplier,
+   totalQuantities,
+   data,
+   params,
+   getDirectCostFn
+  }: {
+    requiredQuantity: number;
+    targetShard: string;
+    choices: Map<string, RecipeChoice>;
+    crocodileMultiplier: number;
+    totalQuantities: Map<string, number>;
+    data: Data;
+    params: CalculationParams;
+    getDirectCostFn: (shard: Shard, asCoin: boolean) => number;
+  }) {
     let totalShardsProduced = requiredQuantity;
     let craftsNeeded = 1;
     const choice = choices.get(targetShard);
-
     if (choice?.recipe) {
       const outputQuantity = choice.recipe.isReptile ? choice.recipe.outputQuantity * crocodileMultiplier : choice.recipe.outputQuantity;
       craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
       totalShardsProduced = craftsNeeded * outputQuantity;
     }
-
-    const craftTime = params.rateAsCoinValue ? craftCounter.total * params.craftPenalty : (craftCounter.total * params.craftPenalty) / 3600;
-
     const shardWeights: Map<string, number> = new Map();
     for (const [shardId, quantity] of totalQuantities.entries()) {
-        const shard = data.shards[shardId];
-        if (shard) {
-            const weight = this.getDirectCost(shard, params.rateAsCoinValue) * quantity;
-            shardWeights.set(shardId, weight);
-        }
+      const shard = data.shards[shardId];
+      if (shard) {
+        const weight = getDirectCostFn(shard, params.rateAsCoinValue) * quantity;
+        shardWeights.set(shardId, weight);
+      }
     }
-    const totalTime = Array.from(shardWeights.values()).reduce((sum, weight) => sum + weight, 0) + craftTime;
-    const timePerShard = totalTime / totalShardsProduced;
-
-    return {
-      timePerShard,
-      totalTime,
-      totalShardsProduced,
-      craftsNeeded,
-      totalQuantities,
-      totalFusions: craftCounter.total,
-      craftTime,
-      tree,
-    };
+    return { totalShardsProduced, craftsNeeded, shardWeights };
   }
 
   // Recipe overrides management
-  async applyRecipeOverride(
+  applyRecipeOverride(
     shardId: string,
     selectedRecipe: Recipe | null,
-    targetShard: string,
-    requiredQuantity: number,
-    params: CalculationParams,
     existingOverrides: RecipeOverride[] = []
-  ): Promise<CalculationResult> {
+  ): RecipeOverride[] {
     // Create new override
     const newOverride: RecipeOverride = {
       shardId,
@@ -901,8 +907,7 @@ export class CalculationService {
     const updatedOverrides = existingOverrides.filter((o) => o.shardId !== shardId);
     updatedOverrides.push(newOverride);
 
-    // Recalculate with the new overrides
-    return await this.calculateOptimalPath(targetShard, requiredQuantity, params, updatedOverrides);
+    return updatedOverrides;
   }
 }
 

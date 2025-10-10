@@ -1,5 +1,6 @@
 import React from "react";
 import { getRarityColor, formatShardDescription, formatLargeNumber } from "../../utilities";
+import { GiGecko } from "react-icons/gi";
 import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
 import { formatNumber } from "../../utilities";
 import type { RecipeTreeNodeProps, Recipe, Shard, RecipeTree } from "../../types/types";
@@ -26,13 +27,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
       expandedStates.set(id, defaultState);
     }
     return expandedStates.get(id)!;
-  };
-
-  const isDirectShard = (shardId: string) => {
-    const shard = data.shards[shardId];
-    if (!shard) return false;
-    if (shard.rate === 0) return false;
-    return shard.rate && shard.rate > 0;
   };
 
   const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard | undefined, input2Shard: Shard | undefined): boolean => {
@@ -143,7 +137,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
           shardId={outputShard.id}
           className="cursor-pointer"
         >
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
             <span className={getRarityColor(outputShard.rarity)}>{outputShard.name}</span>
           </div>
@@ -163,7 +157,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
           shardId={input1Shard.id}
           className="cursor-pointer"
         >
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <img src={`${import.meta.env.BASE_URL}shardIcons/${input1Shard.id}.png`} alt={input1Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
             <span className={getRarityColor(input1Shard.rarity)}>{input1Shard.name}</span>
           </div>
@@ -183,7 +177,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
           shardId={input2Shard.id}
           className="cursor-pointer"
         >
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <img src={`${import.meta.env.BASE_URL}shardIcons/${input2Shard.id}.png`} alt={input2Shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
             <span className={getRarityColor(input2Shard.rarity)}>{input2Shard.name}</span>
           </div>
@@ -214,21 +208,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
             </>
           )}
         </div>
-        {onShowAlternatives && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onShowAlternatives(shard.id, {
-                currentRecipe: null,
-                requiredQuantity: Math.ceil(quantity),
-              });
-            }}
-            className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
-            title="Show alternatives"
-          >
-            <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
-          </button>
-        )}
       </div>
     </div>
   );
@@ -265,36 +244,14 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 <span className="font-medium text-white text-xs">{recipeTree.craftsNeeded}</span>
               </div>
             </div>
-            {onShowAlternatives && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onShowAlternatives(inputShard.id, {
-                    currentRecipe: recipeTree.method === "recipe" ? recipeTree.recipe : null,
-                    requiredQuantity: recipeTree.quantity,
-                  });
-                }}
-                className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
-                title="Show alternatives"
-              >
-                <Settings className="w-4 h-4 text-blue-300 hover:text-blue-200" />
-              </button>
-            )}
           </div>
         </div>
         {isExpanded && (
           <div className="border-t border-slate-400/70 pl-3 pr-0.5 py-0.5 flex flex-col gap-0.5">
             {recipeTree.inputs.map((subTree: RecipeTree) => {
               const directShard = data.shards[subTree.shard];
-              if (!directShard) return null;
-              const isDirect = isDirectShard(subTree.shard);
-
-              if (isDirect) {
-                return <div key={`direct-${subTree.shard}`}>{renderDirectShard(directShard.fuse_amount * recipeTree.craftsNeeded, directShard)}</div>;
-              } else {
-                if (!recipeTree) return null;
-                return <div key={`sub-${subTree.shard}`}>{renderSubRecipe(subTree, directShard, subNodeId)}</div>;
-              }
+              if (!directShard || !recipeTree) return null;
+              return <div key={`sub-${subTree.shard}`}>{renderSubRecipe(subTree, directShard, subNodeId)}</div>;
             })}
           </div>
         )}
@@ -310,7 +267,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
     return (
       <div className="flex flex-col border border-slate-400/50 rounded-md bg-slate-900">
         <div
-          className="flex items-center justify-between w-full pl-3 pr-2 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer"
+          className="flex items-center justify-between w-full pl-3 pr-1 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
             onToggle(nodeId);
@@ -332,7 +289,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                       className="cursor-help"
                       showRomanNumerals={false}
                     >
-                      <span className="px-1 py-0.4 text-xs bg-blue-500/15 text-blue-400 border border-blue-400/40 rounded-md flex-shrink-0 ml-2 flex items-center gap-1">
+                      <span className="px-1 py-0.4 text-xs bg-blue-500/15 text-blue-400 border border-blue-400/40 rounded-md mx-2 flex items-center gap-1">
                         <span className="font-medium">Pure Reptile needed</span>
                         <span className="font-bold">{crocProcs}</span>
                       </span>
@@ -342,9 +299,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <div className="text-right">
-              <div className="flex items-center justify-end space-x-1.5">
+              <div className="flex items-center justify-end space-x-1.5 pl-3">
                 <span className="text-xs text-slate-500">fusions</span>
                 <span className="font-medium text-white text-xs">{runCount}</span>
               </div>
@@ -371,8 +328,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
         </div>
 
         {isExpanded && (
-          <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-2">
-            <div className="space-y-0.5">
+          <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-0.5">
+            <div className="">
               {[...tree.steps]
                 .slice()
                 .reverse()
@@ -394,7 +351,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                     return (
                       <div key={stepIndex} className="rounded border border-slate-400/50 overflow-hidden">
                         <div
-                          className="flex items-center justify-between w-full pl-3 pr-2 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer"
+                          className="flex items-center justify-between w-full pl-3 pr-1 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer"
                           onClick={(e) => {
                             e.stopPropagation();
                             onToggle(stepNodeId);
@@ -435,7 +392,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                     );
                   } else {
                     return (
-                      <div key={stepIndex} className="pl-3 pr-2 py-1 rounded border border-slate-400/50 flex items-center justify-between">
+                      <div key={stepIndex} className="pl-3 pr-1 py-1 rounded border border-slate-400/50 flex items-center justify-between">
                         {renderRecipeDisplay(outputQuantity, outputShardData, input1Quantity, input1Shard, input2Quantity, input2Shard, true, stepNumber)}
                         <div className="flex items-center gap-2">
                           {onShowAlternatives && (
@@ -460,10 +417,8 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 })}
             </div>
 
-            <div className="flex items-center my-1">
-              <div className="flex-grow border-t border-slate-400/30" />
-              <span className="mx-2 text-slate-400 text-xs">Cycle Fodder</span>
-              <div className="flex-grow border-t border-slate-400/30" />
+            <div className="flex gap-1.5 py-1 pl-2">
+              <div className="text-slate-400 text-xs border-l-1 border-slate-500 pl-1.5">Cycle Fodder</div>
             </div>
 
             {/* Cycle summary */}
@@ -485,25 +440,25 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
   if (tree.method === "direct") {
     return (
-      <div className="flex items-center justify-between px-3 py-1 bg-slate-800 rounded-md border border-slate-600">
+      <div className="flex items-center justify-between pl-3.5 pr-1 py-1 bg-slate-800 rounded-md border border-slate-600">
         <div className="flex items-center space-x-2 p-0.5 text-sm">
-          <div className="w-2 h-2 bg-green-400 rounded-full" />
+          <div className="w-2 h-2 bg-green-400 rounded-full mr-2.5" />
           {renderShardInfo(tree.quantity, shard, false)}
           <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">{ironManView ? "Direct" : "Bazaar"}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="text-right">
             {ironManView && (
-              <>
+              <div>
                 <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
                 <span className="text-slate-500 text-xs mx-0.5">/</span>
                 <span className="text-slate-400 text-xs">hr</span>
-              </>
+              </div>
             )}
             {!ironManView && (
-              <>
+              <div>
                 <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(tree.quantity * shard.rate)}</span>
-              </>
+              </div>
             )}
           </div>
           {onShowAlternatives && (
@@ -543,7 +498,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   return (
     <div className="bg-slate-800 border border-slate-600 rounded-md overflow-hidden">
       <div
-        className="flex items-center justify-between w-full pl-3 pr-2 py-1 hover:bg-slate-700/30 transition-colors cursor-pointer"
+        className="flex items-center justify-between w-full pl-3 pr-1 py-1 hover:bg-slate-700/30 transition-colors cursor-pointer"
         onClick={(e) => {
           e.stopPropagation();
           onToggle(nodeId);
@@ -628,30 +583,33 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                     </span>
                   </div>
                 </Tooltip>
-                {crocProcs !== null && (
-                  <Tooltip
-                    content={`Crocodile has a chance to double the output of reptile recipes. You need ${crocProcs} Pure Reptile triggers to have enough shards for the craft. This is based on average luck`}
-                    title="Crocodile - Pure Reptile"
-                    className="cursor-help"
-                    showRomanNumerals={false}
-                  >
-                    <span className="px-1 py-0.4 text-xs bg-blue-500/15 text-blue-400 border border-blue-400/40 rounded-md flex-shrink-0 ml-2 flex items-center gap-1">
-                      <span className="font-medium">Pure Reptile needed</span>
-                      <span className="font-bold">{crocProcs}</span>
-                    </span>
-                  </Tooltip>
-                )}
               </span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <div className="text-right">
-            <div className="flex items-center justify-end space-x-1.5">
-              <span className="text-xs text-slate-500">fusions</span>
-              <span className="font-medium text-white text-xs">{crafts}</span>
+            <div className="flex py-1 px-1.5 gap-1 items-center cursor-pointer">
+              <span className="text-xs text-slate-400">fusions</span>
+              <span className="font-medium text-slate-300 text-xs">{crafts}</span>
             </div>
           </div>
+          {crocProcs !== null && (
+            <Tooltip
+              content={`Crocodile has a chance to double the output of reptile recipes. You need <span class="text-green-400">${crocProcs} Pure Reptile </span> triggers to have enough shards for the craft. This is based on average luck`}
+              title={`Pure Reptile`}
+              shardName="Crocodile"
+              shardIcon="R45"
+              rarity="rare"
+              className="cursor-help"
+              showRomanNumerals={false}
+            >
+              <div className="flex items-center gap-1 px-[5px] py-1 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded">
+                <span className="text-xs text-green-300 font-extralight">{crocProcs}</span>
+                <GiGecko className="w-3 h-3 text-green-400" />
+              </div>
+            </Tooltip>
+          )}
           {onShowAlternatives && (
             <button
               onClick={(e) => {

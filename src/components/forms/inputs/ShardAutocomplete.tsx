@@ -152,8 +152,9 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
+      const searchTimeout = searchTimeoutRef.current;
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
       }
     };
   }, []);

@@ -27,7 +27,7 @@ export const useCustomRates = () => {
       }
     };
 
-    loadRates();
+    loadRates().catch(console.error);
   }, []);
 
   const updateRate = (shardId: string, rate: number | undefined) => {

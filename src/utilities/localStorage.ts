@@ -9,8 +9,8 @@ const filterFormDataForSave = (data: CalculationFormData): Partial<CalculationFo
   const result: Partial<CalculationFormData> = {};
   
   for (const [key, value] of Object.entries(data)) {
-    if (!EXCLUDED_FIELDS.includes(key as any)) {
-      (result as any)[key] = value;
+    if (!EXCLUDED_FIELDS.includes(key as typeof EXCLUDED_FIELDS[number])) {
+      (result as Record<string, unknown>)[key] = value;
     }
   }
   
@@ -50,7 +50,7 @@ export const isFirstVisit = (): boolean => {
   try {
     // If the save enabled key is not set, it's the first visit
     return localStorage.getItem(SAVE_ENABLED_KEY) === null;
-  } catch (error) {
+  } catch {
     return true;
   }
 };

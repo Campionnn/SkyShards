@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useState, useCallback, useEffect } from "react";
 import type { CalculationFormData } from "../schemas";
 import type { CalculationResult, Data } from "../types/types";
 import { saveFormData, loadFormData, clearFormData, getSaveEnabled, setSaveEnabled } from "../utilities";
@@ -43,6 +43,8 @@ interface CalculatorStateContextType {
 }
 
 const CalculatorStateContext = createContext<CalculatorStateContextType | undefined>(undefined);
+
+export { CalculatorStateContext };
 
 export const CalculatorStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Initialize with localStorage data only if save is enabled
@@ -113,10 +115,4 @@ export const CalculatorStateProvider: React.FC<{ children: React.ReactNode }> = 
       {children}
     </CalculatorStateContext.Provider>
   );
-};
-
-export const useCalculatorState = () => {
-  const ctx = useContext(CalculatorStateContext);
-  if (!ctx) throw new Error("useCalculatorState must be used within CalculatorStateProvider");
-  return ctx;
 };

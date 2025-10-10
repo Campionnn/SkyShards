@@ -8,8 +8,11 @@ import { ToastProvider } from "./components";
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));
 const RecipePage = lazy(() => import("./pages/RecipePage"));
-const PrivacyPage = lazy(() => import("./pages/PrivacyPage").then((module) => ({ default: module.PrivacyPage })));
 const GuidePage = lazy(() => import("./pages/GuidePage").then((module) => ({ default: module.GuidePage })));
+const AboutPage = lazy(() => import("./pages/AboutPage").then((module) => ({ default: module.AboutPage })));
+
+const ContactPage = lazy(() => import("./pages/ContactPage").then((module) => ({ default: module.ContactPage })));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center py-12">
@@ -72,18 +75,34 @@ const router = createBrowserRouter(
           ),
         },
         {
-          path: "privacy",
-          element: (
-            <Suspense fallback={<LoadingSpinner />}>
-              <PrivacyPage />
-            </Suspense>
-          ),
-        },
-        {
           path: "guide",
           element: (
             <Suspense fallback={<LoadingSpinner />}>
               <GuidePage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "about",
+          element: (
+            <Suspense fallback={<LoadingSpinner />}>
+              <AboutPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "contact",
+          element: (
+            <Suspense fallback={<LoadingSpinner />}>
+              <ContactPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "privacy-policy",
+          element: (
+            <Suspense fallback={<LoadingSpinner />}>
+              <PrivacyPolicy />
             </Suspense>
           ),
         },

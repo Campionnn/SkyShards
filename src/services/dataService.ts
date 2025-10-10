@@ -1,5 +1,10 @@
 import type { BazaarData } from "../types/hypixelApiTypes.ts";
-import type { ShardWithKey } from "../types/types";
+import type { ShardWithKey, Shard } from "../types/types";
+
+interface FusionData {
+  shards: Record<string, Shard>;
+  recipes: Record<string, unknown>;
+}
 
 export class DataService {
   private static instance: DataService;
@@ -46,9 +51,9 @@ export class DataService {
       return this.shardsCache;
     }
 
-    const [fusionData, defaultRates] = await Promise.all([this.fetchJson<any>("fusion-data.json"), this.loadDefaultRates()]);
+    const [fusionData, defaultRates] = await Promise.all([this.fetchJson<FusionData>("fusion-data.json"), this.loadDefaultRates()]);
 
-    this.shardsCache = Object.entries(fusionData.shards).map(([key, shard]: [string, any]) => ({
+    this.shardsCache = Object.entries(fusionData.shards).map(([key, shard]: [string, Shard]) => ({
         key,
         ...shard,
         id: key,

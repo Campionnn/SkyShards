@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { Clock, Coins, Hammer, Target, BarChart3, TicketPercent } from "lucide-react";
-import {formatLargeNumber, formatNumber, formatTime } from "../../utilities";
-import type {RecipeTree, CalculationResultsProps} from "../../types/types";
+import { formatLargeNumber, formatNumber, formatTime } from "../../utilities";
+import type { RecipeTree, CalculationResultsProps } from "../../types/types";
 import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";
 import { SummaryCard, MaterialItem, useToast } from "../ui";
-import pako from 'pako';
+import pako from "pako";
 import { CopyTreeModal } from "../modals";
 
 // Utility function to manage expanded states
@@ -68,13 +68,11 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   data,
   targetShardName,
   targetShard,
-  requiredQuantity,
   params,
-  onResultUpdate,
   recipeOverrides,
   onRecipeOverridesUpdate,
   onResetRecipeOverrides,
-  ironManView
+  ironManView,
 }) => {
   const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
   const [copyModalOpen, setCopyModalOpen] = useState(false);
@@ -207,7 +205,8 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   const handleCopySkyOcean = () => {
     try {
       const text = buildSkyOceanString();
-      navigator.clipboard.writeText(text)
+      navigator.clipboard
+        .writeText(text)
         .then(() => {
           toast({ title: "Copied", description: "SkyOcean recipe copied to clipboard.", variant: "success" });
         })
@@ -224,7 +223,8 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   const handleCopyNoFrills = () => {
     try {
       const text = buildNoFrillsString();
-      navigator.clipboard.writeText(text)
+      navigator.clipboard
+        .writeText(text)
         .then(() => {
           toast({ title: "Copied", description: "NoFrills recipe copied to clipboard.", variant: "success" });
         })
@@ -252,7 +252,12 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           <>
             <SummaryCard icon={Coins} iconColor="text-yellow-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />
             <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Cost" value={formatLargeNumber(result.totalTime)} />
-            <SummaryCard icon={TicketPercent} iconColor="text-purple-400" label="Total Coins Saved" value={formatLargeNumber((result.totalShardsProduced * data.shards[targetShard].rate) - result.totalTime)} />
+            <SummaryCard
+              icon={TicketPercent}
+              iconColor="text-purple-400"
+              label="Total Coins Saved"
+              value={formatLargeNumber(result.totalShardsProduced * data.shards[targetShard].rate - result.totalTime)}
+            />
           </>
         )}
         <SummaryCard icon={BarChart3} iconColor="text-green-400" label="Shards Produced" value={formatNumber(result.totalShardsProduced).toString()} />
@@ -261,11 +266,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           iconColor="text-orange-400"
           label="Total Fusions"
           value={`${result.totalFusions}x`}
-          additionalValue={
-            ironManView
-              ? formatTime(result.craftTime)
-              : formatLargeNumber(result.craftTime)
-          }
+          additionalValue={ironManView ? formatTime(result.craftTime) : formatLargeNumber(result.craftTime)}
         />
       </div>
       {/* Materials Needed */}
@@ -299,12 +300,13 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
               const totalForestEssence = forestEssenceShards.reduce((total, [shardId, quantity]) => {
                 const shardName = data.shards[shardId]?.name?.toLowerCase();
                 const effectiveFortune = 1 + (params.hunterFortune + rarityBonuses[data.shards[shardId]?.rarity]) / 100;
-                const essenceNeeded = (quantity * (shardName === "shinyfish" ? 446 : 1024)) / effectiveFortune;
+                const essenceNeeded = (quantity * (shardName === "shinyfish" ? 350 : 1024)) / effectiveFortune;
                 return total + essenceNeeded;
               }, 0);
 
               return (
                 <div className="flex gap-1 items-center px-3 py-1.5 bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-400 text-sm font-medium rounded-md min-w-0">
+                  <span className="truncate">About</span>
                   <span className="text-slate-300">{formatLargeNumber(totalForestEssence)}</span>
                   <span className="truncate">Forest Essence</span>
                 </div>
@@ -330,12 +332,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
       {/* Fusion Tree */}
       <div className="bg-slate-800 border border-slate-600 rounded-md p-3">
         <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
-          <div className="min-w-[650px]">
+          <div className="min-w-[810px]">
             <RecipeOverrideManager
-              targetShard={targetShard}
-              requiredQuantity={requiredQuantity}
               params={params}
-              onResultUpdate={onResultUpdate}
               recipeOverrides={recipeOverrides}
               onRecipeOverridesUpdate={onRecipeOverridesUpdate}
               onResetRecipeOverrides={onResetRecipeOverrides}
@@ -394,13 +393,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           </div>
         </div>
       </div>
-
-      <CopyTreeModal
-        open={copyModalOpen}
-        onClose={() => setCopyModalOpen(false)}
-        onCopySkyOcean={handleCopySkyOcean}
-        onCopyNoFrills={handleCopyNoFrills}
-      />
+      <CopyTreeModal open={copyModalOpen} onClose={() => setCopyModalOpen(false)} onCopySkyOcean={handleCopySkyOcean} onCopyNoFrills={handleCopyNoFrills} />
     </div>
   );
 };

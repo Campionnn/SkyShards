@@ -22,7 +22,7 @@ export const useFusionData = () => {
         setLoading(false);
       }
     };
-    loadData();
+    loadData().catch(console.error);
   }, []);
 
   return { fusionData, loading };

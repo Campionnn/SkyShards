@@ -22,7 +22,7 @@ export const useShards = () => {
       }
     };
 
-    loadShards();
+    loadShards().catch(console.error);
   }, []);
 
   return { shards, loading, error };

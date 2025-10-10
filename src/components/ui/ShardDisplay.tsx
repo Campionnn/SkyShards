@@ -8,9 +8,10 @@ interface ShardDisplayProps {
   quantity?: number;
   fusionData: FusionData;
   size?: "sm" | "md";
+  tooltipVisible?: boolean;
 }
 
-export const ShardDisplay = ({ shardId, quantity, fusionData, size = "md" }: ShardDisplayProps) => {
+export const ShardDisplay = ({ shardId, quantity, fusionData, size = "md", tooltipVisible }: ShardDisplayProps) => {
   const shard = fusionData.shards[shardId];
   const actualQuantity = quantity ?? shard?.fuse_amount ?? 2;
   const shardDesc = SHARD_DESCRIPTIONS[shardId as keyof typeof SHARD_DESCRIPTIONS];
@@ -31,7 +32,8 @@ export const ShardDisplay = ({ shardId, quantity, fusionData, size = "md" }: Sha
         family={shardDesc?.family}
         type={shardDesc?.type}
         shardId={shardId}
-        className="cursor-pointer"
+        className={tooltipVisible === false ? "" : "cursor-pointer"}
+        visible={tooltipVisible}
       >
         <div className="flex items-center gap-1 lg:gap-2 xl:gap-3">
           <img src={`${import.meta.env.BASE_URL}shardIcons/${shardId}.png`} alt={shard.name} className={`${iconSize} object-contain flex-shrink-0`} loading="lazy" />

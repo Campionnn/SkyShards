@@ -24,7 +24,7 @@ export const GuidePage: React.FC = () => {
       }
     };
 
-    fetchGuideContent();
+    fetchGuideContent().catch(console.error);
   }, []);
 
   if (loading) {

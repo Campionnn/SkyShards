@@ -124,7 +124,7 @@ export interface LevelDropdownProps {
   tooltipType?: string;
 }
 
-//calcutation results
+// calculation results
 export interface CalculationResultsProps {
   result: CalculationResult;
   data: Data;
@@ -139,7 +139,7 @@ export interface CalculationResultsProps {
   ironManView: boolean;
 }
 
-//fusiun tree
+// fusion tree
 export interface RecipeTreeNodeProps {
   tree: RecipeTree;
   data: Data;
@@ -205,10 +205,7 @@ export interface AlternativeRecipeModalProps {
 }
 
 export interface RecipeOverrideManagerProps {
-  targetShard: string;
-  requiredQuantity: number;
   params: CalculationParams;
-  onResultUpdate: (result: CalculationResult) => void;
   recipeOverrides: RecipeOverride[];
   onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
   onResetRecipeOverrides: () => void;
