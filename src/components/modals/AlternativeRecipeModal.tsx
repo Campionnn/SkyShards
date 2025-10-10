@@ -212,24 +212,40 @@ export const AlternativeRecipeModal: React.FC<
         disabled={isCurrent}
       >
         <div className="flex items-center justify-between text-nowrap overflow-x-auto">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-purple-400 rounded-full" />
-            <div className="flex items-center gap-1.5 text-sm">
-              <span className="text-slate-400 text-xs">{firstInputShard.fuse_amount}x</span>
-              <img src={`${import.meta.env.BASE_URL}shardIcons/${firstInput}.png`} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
-              <span className={getRarityColor(firstInputShard.rarity)}>{firstInputShard.name}</span>
-              <span className="text-slate-400 mb-0.5 mx-0.5">+</span>
-              <span className="text-slate-400 text-xs">{partnerShard.fuse_amount}x</span>
-              <img src={`${import.meta.env.BASE_URL}shardIcons/${partner}.png`} alt={partnerShard.name} className="w-4 h-4 object-contain" loading="lazy" />
-              <span className={getRarityColor(partnerShard.rarity)}>{partnerShard.name}</span>
-              <span className="text-slate-400 mb-0.5 mx-0.5">=</span>
-              <span className="text-slate-400 text-xs">{option.recipe.outputQuantity}x</span>
-              {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
-              <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300"}>{shardName}</span>
+          <div className="flex items-center gap-0 sm:gap-3">
+            <div className="w-2 h-2 bg-purple-400 rounded-full ml-0.5" />
+            <div className="flex sm:hidden">
+              <div className="flex flex-col items-center text-slate-400 gap-[3px] ml-4 mr-0.5">
+                <p className="text-slate-400 flex items-center">+</p>
+                <p className="text-slate-400 flex items-center">=</p>
+              </div>
+              <div className="flex flex-col items-center text-slate-400 gap-1 mr-0.5">
+                <div className="w-1 h-6 border-l-1 border-t-1 border-b-1 border-slate-500"></div>
+                <div className="w-1 h-6 border-l-1 border-t-1 border-b-1 border-slate-500"></div>
+              </div>
             </div>
-            {isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
+            <div className="flex flex-col sm:flex-row gap-1.5 text-sm">
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-300 text-xs">{firstInputShard.fuse_amount}x</span>
+                <img src={`${import.meta.env.BASE_URL}shardIcons/${firstInput}.png`} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
+                <span className={getRarityColor(firstInputShard.rarity)}>{firstInputShard.name}</span>
+              </div>
+              <p className="hidden sm:block text-slate-400 mb-0.5 mx-0.5">+</p>
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-300 text-xs">{partnerShard.fuse_amount}x</span>
+                <img src={`${import.meta.env.BASE_URL}shardIcons/${partner}.png`} alt={partnerShard.name} className="w-4 h-4 object-contain" loading="lazy" />
+                <span className={getRarityColor(partnerShard.rarity)}>{partnerShard.name}</span>
+              </div>
+              <p className="hidden sm:block text-slate-400 mb-0.5 mx-0.5">=</p>
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-300 text-xs">{option.recipe.outputQuantity}x</span>
+                {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
+                <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300"}>{shardName}</span>
+              </div>
+            </div>
+            {isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0 ml-3 sm:ml-0">Current</span>}
           </div>
-          <div className="text-slate-400 text-sm ml-20">
+          <div className="text-slate-400 text-sm">
             <div className="text-right">
               <div>{formatFn(option.timePerShard)}</div>
               {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>}
