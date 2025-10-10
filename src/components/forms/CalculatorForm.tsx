@@ -1,5 +1,5 @@
 import React from "react";
-import { Zap, RotateCcw, Settings } from "lucide-react";
+import { Zap, RotateCcw, Settings, TriangleAlert } from "lucide-react";
 import { type CalculationFormData } from "../../schemas";
 import { ShardAutocomplete, MoneyInput } from "./inputs";
 import { useCalculatorState } from "../../hooks";
@@ -15,15 +15,7 @@ interface CalculatorFormProps {
 
 type LevelKey = keyof Pick<
   CalculationFormData,
-  | "newtLevel"
-  | "salamanderLevel"
-  | "lizardKingLevel"
-  | "leviathanLevel"
-  | "pythonLevel"
-  | "kingCobraLevel"
-  | "seaSerpentLevel"
-  | "tiamatLevel"
-  | "crocodileLevel"
+  "newtLevel" | "salamanderLevel" | "lizardKingLevel" | "leviathanLevel" | "pythonLevel" | "kingCobraLevel" | "seaSerpentLevel" | "tiamatLevel" | "crocodileLevel"
 >;
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
@@ -48,7 +40,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   }, [form.shard, form.quantity]);
 
   // Only call onSubmit immediately for non-shard/quantity fields
-  const handleInputChange = <K extends keyof CalculationFormData,>(field: K, value: CalculationFormData[K]) => {
+  const handleInputChange = <K extends keyof CalculationFormData>(field: K, value: CalculationFormData[K]) => {
     const updatedForm = { ...form, [field]: value } as CalculationFormData;
     setForm(updatedForm);
     if (field !== "shard" && field !== "quantity" && field !== "customKuudraTime") {
@@ -56,9 +48,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
     }
   };
 
-  const handleLevelChange = <K extends LevelKey,>(key: K) => (value: number) => {
-    handleInputChange(key, value as CalculationFormData[K]);
-  };
+  const handleLevelChange =
+    <K extends LevelKey>(key: K) =>
+    (value: number) => {
+      handleInputChange(key, value as CalculationFormData[K]);
+    };
 
   const handleMaxStats = () => {
     const updatedForm = {
@@ -310,7 +304,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                     e.currentTarget.blur();
                   }
                 }}
-                onWheel={e => (e.target as HTMLInputElement).blur()}
+                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                 className="w-full px-3 py-1.5 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors duration-200"
               />
             </div>
@@ -369,7 +363,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   value={form.hunterFortune === 0 ? "" : form.hunterFortune}
                   placeholder="0"
                   onChange={(e) => handleInputChange("hunterFortune", Number(e.target.value) as CalculationFormData["hunterFortune"])}
-                  onWheel={e => (e.target as HTMLInputElement).blur()}
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   className="
                   w-full px-3 py-2 text-sm
                   bg-white/5 border border-white/10 rounded-md
@@ -411,7 +405,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               return (
                 <LevelDropdown
                   key={key}
-                  value={(form[key] as number)}
+                  value={form[key] as number}
                   onChange={handleLevelChange(key)}
                   label={label}
                   tooltipTitle={shardDesc?.title}
@@ -555,20 +549,20 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           </div>
         )}
 
-        <div className="flex justify-center">
+        <div className="flex justify-end mt-6">
           <button
             type="button"
             onClick={() => {
-              if (window.confirm('Are you sure you want to reset everything? This will clear all saved data and reload the page.')) {
+              if (window.confirm("Are you sure you want to restart everything? This will clear all saved data and reload the page.")) {
                 localStorage.clear();
-                const url = window.location.href.split('?')[0];
-                window.location.href = url + '?nocache=' + Date.now();
+                const url = window.location.href.split("?")[0];
+                window.location.href = url + "?nocache=" + Date.now();
               }
             }}
             className="px-2 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium rounded-md text-xs border border-red-500/20 hover:border-red-500/30 transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer"
           >
-            <RotateCcw className="w-3 h-3" />
-            <span>Reset Everything</span>
+            <TriangleAlert className="w-3 h-3" />
+            <span>Restart Everything</span>
           </button>
         </div>
       </form>

@@ -1,5 +1,6 @@
 import React from "react";
 import { getRarityColor, formatShardDescription, formatLargeNumber } from "../../utilities";
+import { GiGecko } from "react-icons/gi";
 import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
 import { formatNumber } from "../../utilities";
 import type { RecipeTreeNodeProps, Recipe, Shard, RecipeTree } from "../../types/types";
@@ -445,19 +446,19 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
           {renderShardInfo(tree.quantity, shard, false)}
           <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">{ironManView ? "Direct" : "Bazaar"}</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <div className="text-right">
             {ironManView && (
-              <>
+              <div>
                 <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
                 <span className="text-slate-500 text-xs mx-0.5">/</span>
                 <span className="text-slate-400 text-xs">hr</span>
-              </>
+              </div>
             )}
             {!ironManView && (
-              <>
+              <div>
                 <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(tree.quantity * shard.rate)}</span>
-              </>
+              </div>
             )}
           </div>
           {onShowAlternatives && (
@@ -582,30 +583,33 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                     </span>
                   </div>
                 </Tooltip>
-                {crocProcs !== null && (
-                  <Tooltip
-                    content={`Crocodile has a chance to double the output of reptile recipes. You need ${crocProcs} Pure Reptile triggers to have enough shards for the craft. This is based on average luck`}
-                    title="Crocodile - Pure Reptile"
-                    className="cursor-help"
-                    showRomanNumerals={false}
-                  >
-                    <span className="px-1 py-0.4 text-xs bg-blue-500/15 text-blue-400 border border-blue-400/40 rounded-md flex-shrink-0 mx-2 flex items-center gap-1">
-                      <span className="font-medium text-nowrap">Pure Reptile needed</span>
-                      <span className="font-bold">{crocProcs}</span>
-                    </span>
-                  </Tooltip>
-                )}
               </span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1">
           <div className="text-right">
-            <div className="flex items-center justify-end space-x-1.5">
-              <span className="text-xs text-slate-500">fusions</span>
-              <span className="font-medium text-white text-xs">{crafts}</span>
+            <div className="flex py-1 px-1.5 gap-1 items-center cursor-pointer">
+              <span className="text-xs text-slate-400">fusions</span>
+              <span className="font-medium text-slate-300 text-xs">{crafts}</span>
             </div>
           </div>
+          {crocProcs !== null && (
+            <Tooltip
+              content={`Crocodile has a chance to double the output of reptile recipes. You need <span class="text-green-400">${crocProcs} Pure Reptile </span> triggers to have enough shards for the craft. This is based on average luck`}
+              title={`Pure Reptile`}
+              shardName="Crocodile"
+              shardIcon="R45"
+              rarity="rare"
+              className="cursor-help"
+              showRomanNumerals={false}
+            >
+              <div className="flex items-center gap-1 px-[5px] py-1 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded">
+                <span className="text-xs text-green-300 font-extralight">{crocProcs}</span>
+                <GiGecko className="w-3 h-3 text-green-400" />
+              </div>
+            </Tooltip>
+          )}
           {onShowAlternatives && (
             <button
               onClick={(e) => {
