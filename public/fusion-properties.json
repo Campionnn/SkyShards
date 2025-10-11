@@ -307,7 +307,9 @@
     "input1": "",
     "input2": "",
     "id_result": "Bezal",
-    "id_origin": []
+    "id_origin": [
+      "Golden Ghoul"
+    ]
   },
   "C30": {
     "name": "Bezal",
@@ -318,7 +320,7 @@
     "input2": "",
     "id_result": "Yog",
     "id_origin": [
-      "Golden Ghoul"
+      "Azure"
     ]
   },
   "C33": {
@@ -1084,7 +1086,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Kada Knight",
     "id_origin": []
   },
   "R33": {
@@ -1135,6 +1137,7 @@
     "id_result": "Wither Specter",
     "id_origin": [
       "Skeletor",
+      "Thyst",
       "Quartzfang"
     ]
   },
@@ -1225,7 +1228,7 @@
     ],
     "input1": "Frog",
     "input2": "Rare+&Forest",
-    "id_result": "",
+    "id_result": "Joydive",
     "id_origin": []
   },
   "R49": {
@@ -1257,7 +1260,8 @@
     "input2": "",
     "id_result": "Eel",
     "id_origin": [
-      "Lumisquid"
+      "Lumisquid",
+      "Bullfrog"
     ]
   },
   "R51": {
@@ -1438,7 +1442,7 @@
     ],
     "input1": "Combat&Epic",
     "input2": "Legendary+",
-    "id_result": "Thorn",
+    "id_result": "Bal",
     "id_origin": []
   },
   "E4": {
@@ -1476,7 +1480,7 @@
     ],
     "input1": "Crocodile Shard",
     "input2": "Rare+&Combat",
-    "id_result": "Thorn",
+    "id_result": "Bal",
     "id_origin": []
   },
   "E7": {
@@ -1502,7 +1506,7 @@
     ],
     "input1": "King Cobra Shard",
     "input2": "Rare+&Combat",
-    "id_result": "Thorn",
+    "id_result": "Bal",
     "id_origin": []
   },
   "E10": {
@@ -1530,20 +1534,6 @@
     "input2": "Rare+&Water",
     "id_result": "Water Hydra",
     "id_origin": []
-  },
-  "E12": {
-    "name": "Thorn",
-    "rarity": "Epic",
-    "category": "Combat",
-    "family": [],
-    "input1": "",
-    "input2": "",
-    "id_result": "Bal",
-    "id_origin": [
-      "Alligator",
-      "Basilisk",
-      "Aero"
-    ]
   },
   "E13": {
     "name": "Lunar Moth",
@@ -1585,7 +1575,9 @@
     "input2": "",
     "id_result": "Flare",
     "id_origin": [
-      "Thorn"
+      "Aero",
+      "Alligator",
+      "Basilisk"
     ]
   },
   "E16": {
@@ -1609,6 +1601,10 @@
     "input2": "",
     "id_result": "Loch Emperor",
     "id_origin": [
+      "Cryo",
+      "Leviathan",
+      "Fenlord",
+      "Moray Eel",
       "Fire Eel"
     ]
   },
@@ -1720,7 +1716,9 @@
     "input1": "",
     "input2": "",
     "id_result": "Ghost",
-    "id_origin": []
+    "id_origin": [
+      "Barbarian Duke X"
+    ]
   },
   "E30": {
     "name": "Caiman",
@@ -1772,8 +1770,8 @@
     "input2": "",
     "id_result": "",
     "id_origin": [
-      "Caiman",
-      "Barbarian Duke X"
+      "Hellwisp",
+      "Caiman"
     ]
   },
   "E34": {
@@ -2136,7 +2134,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Thorn",
     "id_origin": [
       "Burningsoul"
     ]
@@ -2172,7 +2170,7 @@
     ],
     "input1": "Power Dragon Shard",
     "input2": "",
-    "id_result": "",
+    "id_result": "Thorn",
     "id_origin": []
   },
   "L34": {
@@ -2197,7 +2195,7 @@
     ],
     "input1": "Power Dragon Shard",
     "input2": "Kraken Shard",
-    "id_result": "",
+    "id_result": "Thorn",
     "id_origin": []
   },
   "L39": {
@@ -2210,7 +2208,7 @@
     ],
     "input1": "Apex Dragon Shard",
     "input2": "Kraken Shard",
-    "id_result": "",
+    "id_result": "Thorn",
     "id_origin": []
   },
   "L41": {
@@ -2233,19 +2231,19 @@
     ],
     "input1": "Etherdrake Shard",
     "input2": "Jormung Shard",
-    "id_result": "",
+    "id_result": "Thorn",
     "id_origin": []
   },
   "L44": {
     "name": "Starborn",
     "rarity": "Legendary",
-    "category": "Combat",
+    "category": "Water",
     "family": [
       "Elemental"
     ],
     "input1": "Elemental&Legendary",
     "input2": "Galaxy Fish Shard",
-    "id_result": "",
+    "id_result": "Titanoboa",
     "id_origin": []
   },
   "L47": {
@@ -2259,10 +2257,39 @@
     "input2": "",
     "id_result": "",
     "id_origin": [
+      "Lord Jawbus",
       "Megalith",
       "Sun Fish",
       "Galaxy Fish",
-      "Lord Jawbus"
+      "Starborn"
+    ]
+  },
+  "L48": {
+    "name": "Thorn",
+    "rarity": "Legendary",
+    "category": "Combat",
+    "family": [],
+    "input1": "",
+    "input2": "",
+    "id_result": "Scarf",
+    "id_origin": [
+      "Power Dragon",
+      "Apex Dragon",
+      "Jormung",
+      "Etherdrake",
+      "Molthorn"
+    ]
+  },
+  "L51": {
+    "name": "Scarf",
+    "rarity": "Legendary",
+    "category": "Combat",
+    "family": [],
+    "input1": "",
+    "input2": "",
+    "id_result": "",
+    "id_origin": [
+      "Thorn"
     ]
   }
 }
