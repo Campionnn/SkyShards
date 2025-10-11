@@ -222,7 +222,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
     if (allShards.length === 0) {
       const dataService = DataService.getInstance();
       const shards = await dataService.loadShards();
-      setAllShards(shards);
+      // Filter out Chameleon shard (L4) as it's only used for fusions
+      const filteredShards = shards.filter(shard => shard.key !== 'L4');
+      setAllShards(filteredShards);
     }
     setIsMultiSelectModalOpen(true);
   }, [allShards]);
