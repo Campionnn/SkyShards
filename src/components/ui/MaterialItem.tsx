@@ -29,9 +29,9 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
           shardId={shard.id}
           className="cursor-pointer"
         >
-          <span className={`mt-0 font-medium text-sm ${getRarityColor(shard.rarity)} flex items-center flex-shrink-0`}>
+          <span className={`mt-0 font-medium text-sm ${getRarityColor(shard.rarity)} flex items-center min-w-0`}>
             <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-2" loading="lazy" />
-            {shard.name}
+            <span className="truncate">{shard.name}</span>
           </span>
         </Tooltip>
       </div>
