@@ -405,7 +405,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           onClose={() => setIsMultiSelectModalOpen(false)}
           shards={allShards}
           onDone={handleMultiSelectDone}
-          initialSelected={form.selectedShardKeys || []}
+          initialSelections={
+            new Map(
+              (form.shardQuantities || []).map((item) => [item.shard.key, item.quantity])
+            )
+          }
         />
 
         {/* Settings */}

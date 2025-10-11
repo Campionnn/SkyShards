@@ -10,12 +10,12 @@ interface MultiSelectShardModalProps {
   onClose: () => void;
   shards: ShardWithKey[];
   onDone: (selectedShards: Array<{ shard: ShardWithKey; quantity: number }>) => void;
-  initialSelected?: string[]; // Array of shard keys
+  initialSelections?: Map<string, number>; // Map of shard key to quantity
 }
 
-export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ isOpen, onClose, shards, onDone, initialSelected = [] }) => {
+export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ isOpen, onClose, shards, onDone, initialSelections = new Map() }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selections, setSelections] = useState<Map<string, number>>(new Map(initialSelected.map(key => [key, 1])));
+  const [selections, setSelections] = useState<Map<string, number>>(new Map(initialSelections));
 
   const sortByShardId = (a: ShardWithKey, b: ShardWithKey) => {
     const aMatch = a.key.match(/^([CUREL])(\d+)$/);
@@ -54,12 +54,12 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
     }
   }, [isOpen]);
 
-  // Update selections when initialSelected changes
+  // Update selections when initialSelections changes and modal opens
   useEffect(() => {
     if (isOpen) {
-      setSelections(new Map(initialSelected.map(key => [key, 1])));
+      setSelections(new Map(initialSelections));
     }
-  }, [isOpen, initialSelected]);
+  }, [isOpen, initialSelections]);
 
   const filteredShards = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -183,7 +183,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
                       )}
                     </div>
                     <div className="min-w-0 flex-1 text-left">
-                      <div className={`font-medium text-sm truncate ${getRarityColor(shard.rarity)} ${isSelected ? 'text-white' : 'group-hover:text-white'} transition-colors`}>{shard.name}</div>
+                      <div className={`font-medium text-sm truncate ${getRarityColor(shard.rarity)} group-hover:brightness-125 transition-all`}>{shard.name}</div>
                       <div className="text-xs text-slate-400 truncate">
                         {shard.family} • {shard.type}
                       </div>
