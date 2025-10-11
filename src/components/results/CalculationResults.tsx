@@ -318,9 +318,11 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
             <div className="px-3 py-1.5 flex gap-1 bg-sky-500/20 border border-sky-500/30 text-sky-400 text-sm font-medium rounded-md min-w-0">
               <span className="text-slate-300">{Math.floor(result.totalShardsProduced)}x</span>
               <span className="truncate">{targetShardName}</span>
-              <span className="text-slate-400 whitespace-nowrap">
-                {Math.floor(result.craftsNeeded)} craft{Math.floor(result.craftsNeeded) > 1 ? "s" : ""}
-              </span>
+              {result.craftsNeeded > 0 && (
+                <span className="text-slate-400 whitespace-nowrap">
+                  {Math.floor(result.craftsNeeded)} craft{Math.floor(result.craftsNeeded) > 1 ? "s" : ""}
+                </span>
+              )}
             </div>
           </div>
         </div>
