@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, Search, Check } from "lucide-react";
+import { X, Search, Check, RotateCcw } from "lucide-react";
 import { getRarityColor } from "../../utilities";
 import type { ShardWithKey } from "../../types/types";
 import { MAX_QUANTITIES } from "../../constants";
@@ -15,6 +15,7 @@ interface MultiSelectShardModalProps {
 
 export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ isOpen, onClose, shards, onDone, initialSelections = new Map() }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [rarityFilter, setRarityFilter] = useState("all");
   const [selections, setSelections] = useState<Map<string, number>>(new Map(initialSelections));
 
   const sortByShardId = (a: ShardWithKey, b: ShardWithKey) => {
@@ -62,13 +63,24 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
   }, [isOpen, initialSelections]);
 
   const filteredShards = useMemo(() => {
+    // Apply filters
+    const filtered = shards.filter((shard) => {
+      // Search filter
+      const lowerQuery = searchQuery.toLowerCase();
+      const matchesSearch = !searchQuery.trim() || shard.name.toLowerCase().includes(lowerQuery);
+      
+      // Rarity filter
+      const matchesRarity = rarityFilter === "all" || shard.rarity.toLowerCase() === rarityFilter;
+      
+      return matchesSearch && matchesRarity;
+    });
+
+    // Sort results
     if (!searchQuery.trim()) {
-      return [...shards].sort(sortByShardId);
+      return filtered.sort(sortByShardId);
     }
 
     const lowerQuery = searchQuery.toLowerCase();
-    const filtered = shards.filter((shard) => shard.name.toLowerCase().includes(lowerQuery));
-
     return filtered.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
@@ -79,7 +91,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
       if (!aStarts && bStarts) return 1;
       return sortByShardId(a, b);
     });
-  }, [shards, searchQuery]);
+  }, [shards, searchQuery, rarityFilter]);
 
   const toggleShard = (shardKey: string) => {
     setSelections((prev) => {
@@ -137,8 +149,8 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
           </button>
         </div>
 
-        {/* Search Bar */}
-        <div className="p-4 border-b border-slate-700">
+        {/* Search and Filters */}
+        <div className="p-4 border-b border-slate-700 space-y-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -150,7 +162,34 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
               autoFocus
             />
           </div>
-          <div className="mt-2 text-sm text-slate-400">
+          <div className="flex justify-between items-center gap-2">
+            {/* Rarity Filter */}
+            <select
+              value={rarityFilter}
+              onChange={(e) => setRarityFilter(e.target.value)}
+              className="flex-1 px-3 py-2 text-sm bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30 rounded-md text-white hover:bg-purple-500/20 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+            >
+              <option value="all">All Rarities</option>
+              <option value="common">Common</option>
+              <option value="uncommon">Uncommon</option>
+              <option value="rare">Rare</option>
+              <option value="epic">Epic</option>
+              <option value="legendary">Legendary</option>
+            </select>
+            {/* Reset Filter Button */}
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setRarityFilter("all");
+              }}
+              className="px-3 py-2 text-sm bg-slate-600/50 hover:bg-slate-600 border border-slate-500/50 hover:border-slate-500 rounded-md text-slate-300 hover:text-white transition-colors cursor-pointer flex items-center gap-2"
+              title="Reset filters"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Reset</span>
+            </button>
+          </div>
+          <div className="text-sm text-slate-400">
             Showing {filteredShards.length} of {shards.length} shards
           </div>
         </div>
