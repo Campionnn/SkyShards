@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, LayoutGrid } from "lucide-react";
 import { DataService } from "../../../services";
 import { debounce } from "../../../utilities";
 import type { ShardWithKey, ShardAutocompleteProps } from "../../../types/types";
 import { SuggestionItem } from "../search";
+import { BrowseAllShardsModal } from "../../modals";
 
 export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onChange, onSelect, onFocus, placeholder = "Search for a shard...", className = "", searchMode = "enhanced" }) => {
   const [suggestions, setSuggestions] = useState<ShardWithKey[]>([]);
@@ -12,6 +13,8 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
   const [isSelecting, setIsSelecting] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [dropdownWidth, setDropdownWidth] = useState<number | undefined>(undefined);
+  const [isBrowseModalOpen, setIsBrowseModalOpen] = useState(false);
+  const [allShards, setAllShards] = useState<ShardWithKey[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -140,6 +143,29 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
     }
   }, [isSelecting, value, debouncedSearch]);
 
+  const handleBrowseClick = useCallback(async () => {
+    if (allShards.length === 0) {
+      const dataService = DataService.getInstance();
+      const shards = await dataService.loadShards();
+      setAllShards(shards);
+    }
+    setIsBrowseModalOpen(true);
+  }, [allShards]);
+
+  const handleShardSelect = useCallback(
+    (shard: ShardWithKey) => {
+      setIsSelecting(true);
+      setIsBrowseModalOpen(false);
+      onChange(shard.name);
+      onSelect(shard);
+
+      setTimeout(() => {
+        setIsSelecting(false);
+      }, 50);
+    },
+    [onChange, onSelect]
+  );
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -176,15 +202,24 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
             handleInputFocus();
           }}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 hover:bg-slate-700/70 transition-colors"
+          className="w-full pl-10 pr-20 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 hover:bg-slate-700/70 transition-colors"
           autoComplete="off"
           spellCheck={false}
         />
-        {value && (
-          <button onClick={handleClear} className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white">
-            <X className="h-4 w-4" />
+        <div className="absolute inset-y-0 right-0 flex items-center">
+          <button
+            onClick={handleBrowseClick}
+            className="px-3 flex items-center text-slate-400 hover:text-white transition-colors border-r border-slate-600/50 cursor-pointer"
+            title="Browse all shards"
+          >
+            <LayoutGrid className="h-4 w-4" />
           </button>
-        )}
+          {value && (
+            <button onClick={handleClear} className="px-3 flex items-center text-slate-400 hover:text-white transition-colors cursor-pointer">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {isOpen && suggestions.length > 0 && !isSelecting && (
@@ -198,6 +233,8 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           ))}
         </ul>
       )}
+
+      <BrowseAllShardsModal isOpen={isBrowseModalOpen} onClose={() => setIsBrowseModalOpen(false)} shards={allShards} onSelectShard={handleShardSelect} />
     </div>
   );
 };
