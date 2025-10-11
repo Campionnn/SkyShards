@@ -73,6 +73,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   onRecipeOverridesUpdate,
   onResetRecipeOverrides,
   ironManView,
+  materialsOnly = false,
 }) => {
   const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
   const [copyModalOpen, setCopyModalOpen] = useState(false);
@@ -189,6 +190,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   };
 
   const buildSkyOceanString = () => {
+    if (!result.tree) return "";
     const convertedTree = convertTreeToSkyOcean(result.tree);
     const treeString = JSON.stringify(convertedTree);
     const base64Tree = gzipBase64(treeString);
@@ -196,6 +198,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   };
 
   const buildNoFrillsString = () => {
+    if (!result.tree) return "";
     const list = convertTreeToNoFrills(result.tree);
     const listString = JSON.stringify(list);
     const base64List = gzipBase64(listString);
@@ -330,6 +333,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
         </div>
       </div>{" "}
       {/* Fusion Tree */}
+      {!materialsOnly && result.tree && (
       <div className="bg-slate-800 border border-slate-600 rounded-md p-3">
         <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
           <div className="min-w-[810px]">
@@ -375,9 +379,10 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
                       </button>
                     </div>
                   </div>
-                  <RecipeTreeNode
-                    tree={result.tree}
-                    data={data}
+                  {result.tree && (
+                    <RecipeTreeNode
+                      tree={result.tree}
+                      data={data}
                     isTopLevel={true}
                     totalShardsProduced={result.totalShardsProduced}
                     nodeId="root"
@@ -387,13 +392,17 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
                     noWoodenBait={params.noWoodenBait}
                     ironManView={ironManView}
                   />
+                  )}
                 </>
               )}
             </RecipeOverrideManager>
           </div>
         </div>
       </div>
-      <CopyTreeModal open={copyModalOpen} onClose={() => setCopyModalOpen(false)} onCopySkyOcean={handleCopySkyOcean} onCopyNoFrills={handleCopyNoFrills} />
+      )}
+      {!materialsOnly && result.tree && (
+        <CopyTreeModal open={copyModalOpen} onClose={() => setCopyModalOpen(false)} onCopySkyOcean={handleCopySkyOcean} onCopyNoFrills={handleCopyNoFrills} />
+      )}
     </div>
   );
 };

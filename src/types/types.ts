@@ -99,7 +99,7 @@ export interface CalculationResult {
   totalQuantities: Map<string, number>;
   totalFusions: number;
   craftTime: number;
-  tree: RecipeTree;
+  tree: RecipeTree | null; // Allow null for Materials Only mode
 }
 
 export interface ShardWithKey extends Shard {
@@ -137,6 +137,7 @@ export interface CalculationResultsProps {
   onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
   onResetRecipeOverrides: () => void;
   ironManView: boolean;
+  materialsOnly?: boolean;
 }
 
 // fusion tree

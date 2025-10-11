@@ -1,5 +1,5 @@
 import React from "react";
-import { Zap, RotateCcw, Settings, TriangleAlert } from "lucide-react";
+import { Zap, RotateCcw, Settings, TriangleAlert, Layers } from "lucide-react";
 import { type CalculationFormData } from "../../schemas";
 import { ShardAutocomplete, MoneyInput } from "./inputs";
 import { useCalculatorState } from "../../hooks";
@@ -8,6 +8,8 @@ import { MAX_QUANTITIES, SHARD_DESCRIPTIONS } from "../../constants";
 import { isValidShardName, formatShardDescription } from "../../utilities";
 import { Tooltip, ToggleSwitch } from "../ui";
 import type { ShardWithKey } from "../../types/types";
+import { MultiSelectShardModal } from "../modals";
+import { DataService } from "../../services";
 
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
@@ -76,12 +78,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   };
 
   const handleReset = () => {
-    // Preserve current shard and quantity values
+    // Preserve current shard and quantity values, and Materials Only mode
     const currentShard = form.shard;
     const currentQuantity = form.quantity;
     const currentIronManView = form.ironManView;
     const currentInstantBuyPrices = form.instantBuyPrices;
-    // Reset to default, then immediately restore shard and quantity
+    const currentMaterialsOnly = form.materialsOnly;
+    const currentSelectedShardKeys = form.selectedShardKeys;
+    // Reset to default, then immediately restore preserved values
     const resetFormData: CalculationFormData = {
       shard: currentShard,
       quantity: currentQuantity,
@@ -105,6 +109,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       ironManView: currentIronManView,
       instantBuyPrices: currentInstantBuyPrices,
       craftPenalty: currentIronManView ? 0.8 : 1000,
+      materialsOnly: currentMaterialsOnly,
+      selectedShardKeys: currentSelectedShardKeys,
+      shardQuantities: form.shardQuantities || [],
     };
     setForm(resetFormData);
     setMoneyInput(""); // Clear the input field
@@ -207,6 +214,30 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
     { key: "crocodileLevel", label: "Crocodile", shardId: "R45" },
   ];
 
+  // Materials Only mode state
+  const [isMultiSelectModalOpen, setIsMultiSelectModalOpen] = React.useState(false);
+  const [allShards, setAllShards] = React.useState<ShardWithKey[]>([]);
+
+  const handleOpenMultiSelect = React.useCallback(async () => {
+    if (allShards.length === 0) {
+      const dataService = DataService.getInstance();
+      const shards = await dataService.loadShards();
+      setAllShards(shards);
+    }
+    setIsMultiSelectModalOpen(true);
+  }, [allShards]);
+
+  const handleMultiSelectDone = React.useCallback(
+    (selectedData: Array<{ shard: ShardWithKey; quantity: number }>) => {
+      const selectedKeys = selectedData.map((item) => item.shard.key);
+      const updated = { ...form, selectedShardKeys: selectedKeys, shardQuantities: selectedData } as CalculationFormData;
+      setForm(updated);
+      setIsMultiSelectModalOpen(false);
+      setTimeout(() => onSubmit(updated), 0);
+    },
+    [form, setForm, onSubmit]
+  );
+
   return (
     <div className="bg-slate-800/40 border border-slate-600/30 rounded-md p-3 space-y-3">
       <form onSubmit={(e) => e.preventDefault()} className="space-y-3">
@@ -232,13 +263,39 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           </button>
         </div>
 
-        {/* Target Shard */}
+        {/* Materials Only Mode Toggle */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-blue-400" />
+            <span className="text-sm font-medium text-white">Materials Only</span>
+            <Tooltip content="Calculate combined materials for multiple shards without showing the fusion tree."></Tooltip>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={form.materialsOnly}
+            onClick={() => handleInputChange("materialsOnly", !form.materialsOnly)}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
+              ${form.materialsOnly ? "bg-blue-600" : "bg-white/5"}
+              hover:border-blue-400`}
+            style={{ boxShadow: "none" }}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform duration-200 border border-white/10
+              ${form.materialsOnly ? "bg-blue-400" : "bg-slate-300/70"}
+              ${form.materialsOnly ? "translate-x-4" : "translate-x-0.5"}`}
+              style={{ paddingLeft: "1px" }}
+            />
+          </button>
+        </div>
+
+        {/* Target Shard or Select Shards */}
         <div className="space-y-2">
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="flex items-center gap-2 text-sm font-medium text-emerald-300">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                Target Shard
+                {form.materialsOnly ? "Select Shards" : "Target Shard"}
               </label>
 
               <div className="flex items-center gap-5">
@@ -268,48 +325,88 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 </div>
               </div>
             </div>
-            <ShardAutocomplete
-              value={form.shard}
-              onChange={(value: string) => handleInputChange("shard", value)}
-              onSelect={(shard: ShardWithKey) => {
-                // Use the rarity directly from the selected shard (provided by autocomplete)
-                let rarityKey = "common";
-                if (shard) {
-                  const normalized = shard.rarity.toLowerCase();
-                  if (normalized in MAX_QUANTITIES) rarityKey = normalized as keyof typeof MAX_QUANTITIES as string;
-                }
-                const maxQuantity: number = MAX_QUANTITIES[rarityKey as keyof typeof MAX_QUANTITIES];
-                const updated = { ...form, shard: shard.name, quantity: maxQuantity } as CalculationFormData;
-                setForm(updated);
-                setTimeout(() => onSubmit(updated), 0);
-                // Removed auto-select of quantity input
-              }}
-              onFocus={handleShardInputFocus}
-              placeholder="Search for a shard..."
-              searchMode="name-only"
-            />
+            {form.materialsOnly ? (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleOpenMultiSelect}
+                  className="flex-1 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 hover:border-blue-500/40 rounded-md text-blue-300 font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"
+                >
+                  <Layers className="w-4 h-4" />
+                  <span>{form.selectedShardKeys && form.selectedShardKeys.length > 0 ? `${form.selectedShardKeys.length} Shard${form.selectedShardKeys.length > 1 ? 's' : ''} Selected` : 'Select Shards'}</span>
+                </button>
+                {form.selectedShardKeys && form.selectedShardKeys.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = { ...form, selectedShardKeys: [], shardQuantities: [] } as CalculationFormData;
+                      setForm(updated);
+                      setTimeout(() => onSubmit(updated), 0);
+                    }}
+                    className="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/20 hover:border-red-500/30 rounded-md text-red-400 font-medium transition-colors flex items-center justify-center cursor-pointer text-sm"
+                    title="Clear selection"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                <ShardAutocomplete
+                  value={form.shard}
+                  onChange={(value: string) => handleInputChange("shard", value)}
+                  onSelect={(shard: ShardWithKey) => {
+                    // Use the rarity directly from the selected shard (provided by autocomplete)
+                    let rarityKey = "common";
+                    if (shard) {
+                      const normalized = shard.rarity.toLowerCase();
+                      if (normalized in MAX_QUANTITIES) rarityKey = normalized as keyof typeof MAX_QUANTITIES as string;
+                    }
+                    const maxQuantity: number = MAX_QUANTITIES[rarityKey as keyof typeof MAX_QUANTITIES];
+                    const updated = { ...form, shard: shard.name, quantity: maxQuantity } as CalculationFormData;
+                    setForm(updated);
+                    setTimeout(() => onSubmit(updated), 0);
+                    // Removed auto-select of quantity input
+                  }}
+                  onFocus={handleShardInputFocus}
+                  placeholder="Search for a shard..."
+                  searchMode="name-only"
+                />
+              </>
+            )}
           </div>
-          <div className="flex gap-1.5">
-            <div className="flex-1">
-              <label className="block text-xs font-medium text-slate-300 mb-1">Quantity</label>
-              <input
-                type="number"
-                min="1"
-                value={form.quantity === 0 ? "" : form.quantity}
-                placeholder="1"
-                onChange={(e) => handleInputChange("quantity", Number(e.target.value) as CalculationFormData["quantity"])}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    e.currentTarget.blur();
-                  }
-                }}
-                onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                className="w-full px-3 py-1.5 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors duration-200"
-              />
+          {!form.materialsOnly && (
+            <div className="flex gap-1.5">
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-slate-300 mb-1">Quantity</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={form.quantity === 0 ? "" : form.quantity}
+                  placeholder="1"
+                  onChange={(e) => handleInputChange("quantity", Number(e.target.value) as CalculationFormData["quantity"])}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      e.currentTarget.blur();
+                    }
+                  }}
+                  onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                  className="w-full px-3 py-1.5 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors duration-200"
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
+
+        {/* Multi-Select Shard Modal */}
+        <MultiSelectShardModal
+          isOpen={isMultiSelectModalOpen}
+          onClose={() => setIsMultiSelectModalOpen(false)}
+          shards={allShards}
+          onDone={handleMultiSelectDone}
+          initialSelected={form.selectedShardKeys || []}
+        />
 
         {/* Settings */}
         <div className="space-y-2">
