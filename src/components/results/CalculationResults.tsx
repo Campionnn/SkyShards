@@ -244,16 +244,16 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   return (
     <div className="space-y-3">
       {/* Summary Cards */}
-      <div className={`grid grid-cols-2 ${ironManView ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-3`}>
+      <div className={`grid grid-cols-2 ${materialsOnly ? "lg:grid-cols-3" : ironManView ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-3`}>
         {ironManView && (
           <>
-            <SummaryCard icon={Clock} iconColor="text-purple-400" label="Time per Shard" value={formatTime(result.timePerShard)} />
+            {!materialsOnly && <SummaryCard icon={Clock} iconColor="text-purple-400" label="Time per Shard" value={formatTime(result.timePerShard)} />}
             <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Time" value={formatTime(result.totalTime)} />
           </>
         )}
         {!ironManView && (
           <>
-            <SummaryCard icon={Coins} iconColor="text-yellow-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />
+            {!materialsOnly && <SummaryCard icon={Coins} iconColor="text-yellow-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />}
             <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Cost" value={formatLargeNumber(result.totalTime)} />
             <SummaryCard
               icon={TicketPercent}
@@ -328,10 +328,12 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-          {Array.from(result.totalQuantities).map(([shardId, quantity]) => {
-            const shard = data.shards[shardId];
-            return <MaterialItem key={shardId} shard={shard} quantity={quantity} ironManView={ironManView} />;
-          })}
+          {Array.from(result.totalQuantities)
+            .sort(([, quantityA], [, quantityB]) => quantityB - quantityA)
+            .map(([shardId, quantity]) => {
+              const shard = data.shards[shardId];
+              return <MaterialItem key={shardId} shard={shard} quantity={quantity} ironManView={ironManView} />;
+            })}
         </div>
       </div>{" "}
       {/* Fusion Tree */}

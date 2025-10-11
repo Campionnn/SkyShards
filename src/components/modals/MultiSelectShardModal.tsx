@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { X, Search, Check } from "lucide-react";
 import { getRarityColor } from "../../utilities";
 import type { ShardWithKey } from "../../types/types";
+import { MAX_QUANTITIES } from "../../constants";
 
 interface MultiSelectShardModalProps {
   isOpen: boolean;
@@ -100,6 +101,16 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
       }
       return newMap;
     });
+  };
+
+  const handleSelectAll = () => {
+    const allSelections = new Map<string, number>();
+    shards.forEach(shard => {
+      const rarity = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
+      const maxQty = MAX_QUANTITIES[rarity] || 1;
+      allSelections.set(shard.key, maxQty);
+    });
+    setSelections(allSelections);
   };
 
   const handleDone = () => {
@@ -204,13 +215,21 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
 
         {/* Footer with Done Button */}
         <div className="p-4 border-t border-slate-700 flex items-center justify-between">
-          <button
-            onClick={() => setSelections(new Map())}
-            className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors cursor-pointer"
-            disabled={selections.size === 0}
-          >
-            Clear All
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleSelectAll}
+              className="px-4 py-2 text-sm bg-green-500/20 hover:bg-green-500/30 border border-green-500/20 hover:border-green-500/30 rounded-md text-green-400 font-medium transition-colors cursor-pointer"
+            >
+              Select All
+            </button>
+            <button
+              onClick={() => setSelections(new Map())}
+              className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors cursor-pointer"
+              disabled={selections.size === 0}
+            >
+              Clear All
+            </button>
+          </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-slate-400">
               Total: {Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0)} shard{Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0) !== 1 ? 's' : ''}
