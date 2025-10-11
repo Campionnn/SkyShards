@@ -102,7 +102,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           e.preventDefault();
           if (focusedIndex >= 0 && focusedIndex < suggestions.length) {
             handleSelect(suggestions[focusedIndex]);
-          } else if (suggestions.length === 1) {
+          } else if (suggestions.length > 0) {
             handleSelect(suggestions[0]);
           }
           break;
