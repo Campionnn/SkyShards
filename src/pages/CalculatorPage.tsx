@@ -73,6 +73,7 @@ const performCalculation = async (
       let totalTime = 0;
       let totalFusions = 0;
       let totalCraftTime = 0;
+      let totalCraftsNeeded = 0;
 
       // Get quantity for each shard from shardQuantities if available
       const shardQuantitiesMap = new Map<string, number>();
@@ -107,6 +108,7 @@ const performCalculation = async (
         totalTime += result.totalTime || 0;
         totalFusions += result.totalFusions || 0;
         totalCraftTime += result.craftTime || 0;
+        totalCraftsNeeded += result.craftsNeeded || 0;
       }
 
       // Create a combined result matching the CalculationResult interface
@@ -122,7 +124,7 @@ const performCalculation = async (
         timePerShard: totalShardsRequested > 0 ? totalTime / totalShardsRequested : 0,
         totalTime: totalTime,
         totalShardsProduced: totalShardsRequested,
-        craftsNeeded: 0,
+        craftsNeeded: totalCraftsNeeded,
         totalQuantities: materialQuantities,
         totalFusions: totalFusions,
         craftTime: totalCraftTime,
