@@ -2,9 +2,9 @@ import React from "react";
 import { Zap, RotateCcw, Settings, TriangleAlert } from "lucide-react";
 import { type CalculationFormData } from "../../schemas";
 import { ShardAutocomplete, MoneyInput } from "./inputs";
-import { useCalculatorState } from "../../hooks";
+import { useCalculatorState, useShards } from "../../hooks";
 import { LevelDropdown, KuudraDropdown } from "../calculator";
-import { MAX_QUANTITIES, SHARD_DESCRIPTIONS } from "../../constants";
+import {MAX_QUANTITIES, SHARD_DESCRIPTIONS} from "../../constants";
 import { isValidShardName, formatShardDescription } from "../../utilities";
 import { Tooltip, ToggleSwitch } from "../ui";
 import type { ShardWithKey } from "../../types/types";
@@ -20,6 +20,7 @@ type LevelKey = keyof Pick<
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   const { form, setForm, saveEnabled, setSaveEnabledState } = useCalculatorState();
+  const { shards } = useShards();
 
   // Keep a ref of the latest form to use inside effects without depending on the whole object
   const latestFormRef = React.useRef<CalculationFormData>(form);
@@ -401,6 +402,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           </h3>
           <div className="grid grid-cols-3 gap-1.5">
             {levelItems.map(({ key, label, shardId }) => {
+              const shard = shards.find((s) => s.id === shardId);
               const shardDesc = SHARD_DESCRIPTIONS[shardId as keyof typeof SHARD_DESCRIPTIONS];
               return (
                 <LevelDropdown
@@ -412,9 +414,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   tooltipContent={formatShardDescription(shardDesc?.description || "No description available.")}
                   tooltipShardName={label}
                   tooltipShardIcon={shardId}
-                  tooltipRarity={shardDesc?.rarity?.toLowerCase() || "common"}
-                  tooltipFamily={shardDesc?.family}
-                  tooltipType={shardDesc?.type}
+                  tooltipRarity={shard?.rarity}
+                  tooltipFamily={shard?.family}
+                  tooltipType={shard?.type}
                   tooltipWarning={key === "crocodileLevel" ? "Warning: May slow calculations significantly" : undefined}
                 />
               );
@@ -562,7 +564,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             className="px-2 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium rounded-md text-xs border border-red-500/20 hover:border-red-500/30 transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer"
           >
             <TriangleAlert className="w-3 h-3" />
-            <span>Restart Everything</span>
+            <span>Reset Everything</span>
           </button>
         </div>
       </form>
