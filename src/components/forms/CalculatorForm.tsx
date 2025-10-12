@@ -197,15 +197,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
     setCraftPenaltyInput("");
   }, [form.ironManView]);
 
-  // Disable Materials Only mode when switching to Normal Profile
-  React.useEffect(() => {
-    if (!form.ironManView && form.materialsOnly) {
-      const updated = { ...form, materialsOnly: false } as CalculationFormData;
-      setForm(updated);
-      onSubmit(updated);
-    }
-  }, [form.ironManView, form.materialsOnly, form, setForm, onSubmit]);
-
   // Build level items with strict typing for keys
   const levelItems: Array<{ key: LevelKey; label: string; shardId: string }> = [
     ...(form.ironManView
@@ -338,7 +329,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 </div>
               </div>
             </div>
-            {form.materialsOnly ? (
+            {form.materialsOnly && form.ironManView ? (
               <div className="flex gap-2">
                 <button
                   type="button"
