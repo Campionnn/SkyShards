@@ -332,6 +332,21 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
             .sort(([, quantityA], [, quantityB]) => quantityB - quantityA)
             .map(([shardId, quantity]) => {
               const shard = data.shards[shardId];
+              const breakdown = result.materialBreakdown?.get(shardId);
+
+              if (materialsOnly && breakdown && breakdown.size > 0) {
+                return (
+                  <MaterialItem
+                    key={shardId}
+                    shard={shard}
+                    quantity={quantity}
+                    ironManView={ironManView}
+                    breakdown={breakdown}
+                    allShards={data.shards}
+                  />
+                );
+              }
+
               return <MaterialItem key={shardId} shard={shard} quantity={quantity} ironManView={ironManView} />;
             })}
         </div>

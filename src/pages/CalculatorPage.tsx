@@ -122,6 +122,7 @@ const performCalculation = async (
               combinedMaterials[matKey] = (combinedMaterials[matKey] || 0) + quantity;
             });
           }
+
           totalTime += result.totalTime || 0;
           totalFusions += result.totalFusions || 0;
           totalCraftTime += result.craftTime || 0;
@@ -132,6 +133,9 @@ const performCalculation = async (
         const selectedShardKeys = formData.selectedShardKeys || [];
         const totalShardsRequested = Array.from(shardQuantitiesMap.values()).reduce((sum, qty) => sum + qty, 0) || selectedShardKeys.length;
 
+        // Use the materialBreakdown from the first result since the worker service already merged them globally
+        const globalMaterialBreakdown = results.length > 0 ? results[0].materialBreakdown : undefined;
+
         const combinedResult: CalculationResult = {
           timePerShard: totalShardsRequested > 0 ? totalTime / totalShardsRequested : 0,
           totalTime,
@@ -141,6 +145,7 @@ const performCalculation = async (
           totalFusions,
           craftTime: totalCraftTime,
           tree: null,
+          materialBreakdown: globalMaterialBreakdown,
         };
 
         callbacks.setResult(combinedResult);

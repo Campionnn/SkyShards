@@ -31,7 +31,7 @@ type WorkerBatchStartWithDataMsg = {
 
 type WorkerBatchMsg =
   | ({ type: "progress" } & WorkerProgress)
-  | { type: "batch-result"; results: CalculationResult[] }
+  | { type: "batch-result"; results: CalculationResult[]; materialBreakdown?: Map<string, Map<string, number>> }
   | { type: "error"; message: string };
 
 export function calculateOptimalPathWithWorker(
@@ -91,6 +91,7 @@ export function calculateMultipleShardsParallel(
 
   const workers: Worker[] = [];
   const completedChunks: Map<number, CalculationResult[]> = new Map();
+  const completedBreakdowns: Map<number, Map<string, Map<string, number>>> = new Map();
   const chunkProgress: Map<number, number> = new Map(); // Track progress per chunk
   const chunkPhases: Map<number, ProgressPhase> = new Map(); // Track phase per chunk
   let cancelled = false;
@@ -180,6 +181,9 @@ export function calculateMultipleShardsParallel(
             } else if (data.type === "batch-result") {
               worker.terminate();
               completedChunks.set(chunkIndex, data.results);
+              if (data.materialBreakdown) {
+                completedBreakdowns.set(chunkIndex, data.materialBreakdown);
+              }
               chunkProgress.set(chunkIndex, 1); // Mark as 100% complete
 
               // Calculate how many total shards are done
@@ -205,6 +209,26 @@ export function calculateMultipleShardsParallel(
                     allResults.push(...chunkResults);
                   }
                 }
+
+                // Merge all material breakdowns
+                const globalMaterialBreakdown = new Map<string, Map<string, number>>();
+                completedBreakdowns.forEach((breakdown) => {
+                  breakdown.forEach((targetMap, materialId) => {
+                    if (!globalMaterialBreakdown.has(materialId)) {
+                      globalMaterialBreakdown.set(materialId, new Map());
+                    }
+                    const globalTargetMap = globalMaterialBreakdown.get(materialId)!;
+                    targetMap.forEach((qty, targetId) => {
+                      globalTargetMap.set(targetId, (globalTargetMap.get(targetId) || 0) + qty);
+                    });
+                  });
+                });
+
+                // Add the merged breakdown to all results
+                allResults.forEach(result => {
+                  result.materialBreakdown = globalMaterialBreakdown;
+                });
+
                 resolve(allResults);
               }
             } else if (data.type === "error") {

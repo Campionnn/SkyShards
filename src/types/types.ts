@@ -99,7 +99,8 @@ export interface CalculationResult {
   totalQuantities: Map<string, number>;
   totalFusions: number;
   craftTime: number;
-  tree: RecipeTree | null; // Allow null for Materials Only mode
+  tree: RecipeTree | null;
+  materialBreakdown?: Map<string, Map<string, number>>;
 }
 
 export interface ShardWithKey extends Shard {

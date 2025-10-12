@@ -34,6 +34,7 @@ interface ResultMsg {
 interface BatchResultMsg {
   type: "batch-result";
   results: CalculationResult[];
+  materialBreakdown?: Map<string, Map<string, number>>;
 }
 interface ErrorMsg {
   type: "error";
@@ -82,6 +83,9 @@ async function handleBatchCalculationWithData(data: BatchStartWithDataMsg) {
     const results: CalculationResult[] = [];
     const { crocodileMultiplier } = service.calculateMultipliers(params);
 
+    // Track material breakdown: Map<materialShardId, Map<targetShardId, quantity>>
+    const materialBreakdown = new Map<string, Map<string, number>>();
+
     for (let i = 0; i < targets.length; i++) {
       const { shard: targetShard, quantity: requiredQuantity } = targets[i];
 
@@ -95,6 +99,7 @@ async function handleBatchCalculationWithData(data: BatchStartWithDataMsg) {
           totalFusions: 0,
           craftTime: 0,
           tree: { shard: targetShard, method: "direct", quantity: 0 },
+          materialBreakdown: new Map(),
         };
         results.push(emptyResult);
 
@@ -112,6 +117,15 @@ async function handleBatchCalculationWithData(data: BatchStartWithDataMsg) {
 
       // collect results
       const totalQuantities = service.collectTotalQuantities(tree);
+
+      // Track materials for this target shard
+      totalQuantities.forEach((quantity, materialShardId) => {
+        if (!materialBreakdown.has(materialShardId)) {
+          materialBreakdown.set(materialShardId, new Map());
+        }
+        const targetMap = materialBreakdown.get(materialShardId)!;
+        targetMap.set(targetShard, (targetMap.get(targetShard) || 0) + quantity);
+      });
 
       const { totalShardsProduced, craftsNeeded, shardWeights } = service.calculateShardProductionStats({
         requiredQuantity,
@@ -146,7 +160,7 @@ async function handleBatchCalculationWithData(data: BatchStartWithDataMsg) {
     }
 
     post({ type: "progress", phase: "finalizing", progress: 1, message: "Done" });
-    post({ type: "batch-result", results });
+    post({ type: "batch-result", results, materialBreakdown });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Batch calculation failed";
     post({ type: "error", message });
