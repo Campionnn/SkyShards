@@ -96,7 +96,9 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
       const lowerQuery = searchQuery.toLowerCase();
       const matchesName = shard.name.toLowerCase().includes(lowerQuery);
       const matchesId = shard.key.toLowerCase().includes(lowerQuery);
-      const matchesSearch = !searchQuery.trim() || matchesName || matchesId;
+      const matchesFamily = shard.family.toLowerCase().includes(lowerQuery);
+      const matchesType = shard.type.toLowerCase().includes(lowerQuery);
+      const matchesSearch = !searchQuery.trim() || matchesName || matchesId || matchesFamily || matchesType;
       
       // Rarity filter
       const matchesRarity = rarityFilter === "all" || shard.rarity.toLowerCase() === rarityFilter;
