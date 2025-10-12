@@ -128,7 +128,15 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
       if (newMap.has(shardKey)) {
         newMap.delete(shardKey);
       } else {
-        newMap.set(shardKey, 1);
+        // Find the shard and set to max quantity based on rarity
+        const shard = shards.find(s => s.key === shardKey);
+        if (shard) {
+          const rarity = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
+          const maxQty = MAX_QUANTITIES[rarity] || 1;
+          newMap.set(shardKey, maxQty);
+        } else {
+          newMap.set(shardKey, 1);
+        }
       }
       return newMap;
     });
@@ -256,16 +264,14 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
               return (
                 <div
                   key={shard.key}
-                  className={`flex items-center gap-2 p-2.5 rounded-lg transition-all border ${
+                  onClick={() => toggleShard(shard.key)}
+                  className={`flex items-center gap-2 p-2.5 rounded-lg transition-all border cursor-pointer ${
                     isSelected
-                      ? "bg-blue-500/20 border-blue-500/50"
-                      : "bg-slate-700/30 border-slate-600/50"
+                      ? "bg-blue-500/20 border-blue-500/50 hover:border-blue-500/70"
+                      : "bg-slate-700/30 border-slate-600/50 hover:border-slate-500"
                   }`}
                 >
-                  <button
-                    onClick={() => toggleShard(shard.key)}
-                    className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer group"
-                  >
+                  <div className="flex items-center gap-2 flex-1 min-w-0 group">
                     <div className="relative flex-shrink-0">
                       <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.key}.png`} alt={shard.name} className="w-7 h-7 object-contain" loading="lazy" />
                       {isSelected && (
@@ -280,7 +286,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
                         {shard.family} • {shard.type}
                       </div>
                     </div>
-                  </button>
+                  </div>
                   {isSelected && (
                     <input
                       type="number"
