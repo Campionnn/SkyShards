@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, Search } from "lucide-react";
+import { X, Search, Filter, ChevronDown, RotateCcw } from "lucide-react";
 import { getRarityColor } from "../../utilities";
 import type { ShardWithKey } from "../../types/types";
 
@@ -13,6 +13,20 @@ interface BrowseAllShardsModalProps {
 
 export const BrowseAllShardsModal: React.FC<BrowseAllShardsModalProps> = ({ isOpen, onClose, shards, onSelectShard }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [rarityFilter, setRarityFilter] = useState("all");
+  const [isRarityDropdownOpen, setIsRarityDropdownOpen] = useState(false);
+  const rarityDropdownRef = useRef<HTMLDivElement>(null);
+
+  const rarityOptions = [
+    { value: "all", label: "All Rarities", color: "text-violet-400" },
+    { value: "common", label: "Common", color: "text-white" },
+    { value: "uncommon", label: "Uncommon", color: "text-green-400" },
+    { value: "rare", label: "Rare", color: "text-blue-400" },
+    { value: "epic", label: "Epic", color: "text-purple-400" },
+    { value: "legendary", label: "Legendary", color: "text-yellow-400" },
+  ];
+
+  const currentRarity = rarityOptions.find((r) => r.value === rarityFilter) || rarityOptions[0];
 
   // Disable body scroll when modal is open
   useEffect(() => {
@@ -23,6 +37,20 @@ export const BrowseAllShardsModal: React.FC<BrowseAllShardsModalProps> = ({ isOp
       };
     }
   }, [isOpen]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (rarityDropdownRef.current && !rarityDropdownRef.current.contains(event.target as Node)) {
+        setIsRarityDropdownOpen(false);
+      }
+    };
+
+    if (isRarityDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isRarityDropdownOpen]);
 
   // Reset search when modal closes
   useEffect(() => {
@@ -56,14 +84,28 @@ export const BrowseAllShardsModal: React.FC<BrowseAllShardsModalProps> = ({ isOp
   };
 
   const filteredShards = useMemo(() => {
+    // Apply filters
+    const filtered = shards.filter((shard) => {
+      // Search filter
+      const lowerQuery = searchQuery.toLowerCase();
+      const matchesName = shard.name.toLowerCase().includes(lowerQuery);
+      const matchesId = shard.key.toLowerCase().includes(lowerQuery);
+      const matchesFamily = shard.family.toLowerCase().includes(lowerQuery);
+      const matchesType = shard.type.toLowerCase().includes(lowerQuery);
+      const matchesSearch = !searchQuery.trim() || matchesName || matchesId || matchesFamily || matchesType;
+
+      // Rarity filter
+      const matchesRarity = rarityFilter === "all" || shard.rarity.toLowerCase() === rarityFilter;
+
+      return matchesSearch && matchesRarity;
+    });
+
+    // Sort results
     if (!searchQuery.trim()) {
-      return [...shards].sort(sortByShardId);
+      return filtered.sort(sortByShardId);
     }
 
     const lowerQuery = searchQuery.toLowerCase();
-    const filtered = shards.filter((shard) => shard.name.toLowerCase().includes(lowerQuery));
-
-    // Sort results: prioritize shards that start with the query, then by ID
     return filtered.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
@@ -74,7 +116,7 @@ export const BrowseAllShardsModal: React.FC<BrowseAllShardsModalProps> = ({ isOp
       if (!aStarts && bStarts) return 1;
       return sortByShardId(a, b);
     });
-  }, [shards, searchQuery]);
+  }, [shards, searchQuery, rarityFilter]);
 
   const handleSelectShard = (shard: ShardWithKey) => {
     onSelectShard(shard);
@@ -94,20 +136,67 @@ export const BrowseAllShardsModal: React.FC<BrowseAllShardsModalProps> = ({ isOp
           </button>
         </div>
 
-        {/* Search Bar */}
-        <div className="p-4 border-b border-slate-700">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search shards..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
-              autoFocus
-            />
+        {/* Search and Filters */}
+        <div className="p-4 border-b border-slate-700 space-y-3">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search shards..."
+                className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+                autoFocus
+              />
+            </div>
+
+            {/* Rarity Filter Dropdown */}
+            <div className="relative" ref={rarityDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsRarityDropdownOpen(!isRarityDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-2 h-[42px] min-w-[140px] bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30 rounded-md hover:bg-purple-500/20 transition-colors cursor-pointer"
+              >
+                <Filter className={`w-4 h-4 ${currentRarity.color}`} />
+                <span className={`text-sm font-medium ${currentRarity.color}`}>{currentRarity.label}</span>
+                <ChevronDown className={`w-4 h-4 ${currentRarity.color} transition-transform ${isRarityDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {isRarityDropdownOpen && (
+                <div className="absolute right-0 mt-1 w-48 bg-slate-800 border border-purple-500/20 rounded-md shadow-xl z-50 overflow-hidden">
+                  {rarityOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setRarityFilter(option.value);
+                        setIsRarityDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-2.5 text-sm text-left font-medium transition-colors cursor-pointer ${
+                        rarityFilter === option.value ? "bg-purple-500/30 " + option.color : option.color + " hover:bg-purple-500/10 hover:brightness-125"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Reset Filter Button */}
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setRarityFilter("all");
+              }}
+              className="px-3 py-2 h-[42px] text-sm bg-slate-600/50 hover:bg-slate-600 border border-slate-500/50 hover:border-slate-500 rounded-md text-slate-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5"
+              title="Reset filters"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
           </div>
-          <div className="mt-2 text-sm text-slate-400">
+          <div className="text-sm text-slate-400">
             Showing {filteredShards.length} of {shards.length} shards
           </div>
         </div>
@@ -119,13 +208,13 @@ export const BrowseAllShardsModal: React.FC<BrowseAllShardsModalProps> = ({ isOp
               <button
                 key={shard.key}
                 onClick={() => handleSelectShard(shard)}
-                className="flex items-center gap-2 p-2.5 bg-slate-700/30 hover:bg-slate-700/60 border border-slate-600/50 hover:border-slate-500 rounded-lg transition-all text-left group cursor-pointer"
+                className="flex items-center gap-2 p-2.5 bg-slate-700/30 hover:bg-slate-700/60 border border-slate-600/50 hover:border-slate-500 rounded-lg transition-all duration-300 text-left group cursor-pointer"
               >
                 <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.key}.png`} alt={shard.name} className="w-7 h-7 object-contain flex-shrink-0" loading="lazy" />
                 <div className="min-w-0 flex-1">
-                  <div className={`font-medium text-sm truncate ${getRarityColor(shard.rarity)} group-hover:text-white transition-colors`}>{shard.name}</div>
+                  <div className={`font-medium text-sm truncate ${getRarityColor(shard.rarity)}`}>{shard.name}</div>
                   <div className="text-xs text-slate-400 truncate">
-                    {shard.family} • {shard.type}
+                    {shard.key} • {shard.family} • {shard.type}
                   </div>
                 </div>
               </button>

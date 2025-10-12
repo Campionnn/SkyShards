@@ -29,7 +29,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
     { value: "legendary", label: "Legendary", color: "text-yellow-400" },
   ];
 
-  const currentRarity = rarityOptions.find(r => r.value === rarityFilter) || rarityOptions[0];
+  const currentRarity = rarityOptions.find((r) => r.value === rarityFilter) || rarityOptions[0];
 
   const sortByShardId = (a: ShardWithKey, b: ShardWithKey) => {
     const aMatch = a.key.match(/^([CUREL])(\d+)$/);
@@ -99,10 +99,10 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
       const matchesFamily = shard.family.toLowerCase().includes(lowerQuery);
       const matchesType = shard.type.toLowerCase().includes(lowerQuery);
       const matchesSearch = !searchQuery.trim() || matchesName || matchesId || matchesFamily || matchesType;
-      
+
       // Rarity filter
       const matchesRarity = rarityFilter === "all" || shard.rarity.toLowerCase() === rarityFilter;
-      
+
       return matchesSearch && matchesRarity;
     });
 
@@ -131,7 +131,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
         newMap.delete(shardKey);
       } else {
         // Find the shard and set to max quantity based on rarity
-        const shard = shards.find(s => s.key === shardKey);
+        const shard = shards.find((s) => s.key === shardKey);
         if (shard) {
           const rarity = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
           const maxQty = MAX_QUANTITIES[rarity] || 1;
@@ -156,7 +156,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
 
   const handleSelectAll = () => {
     const allSelections = new Map<string, number>();
-    shards.forEach(shard => {
+    shards.forEach((shard) => {
       const rarity = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
       const maxQty = MAX_QUANTITIES[rarity] || 1;
       allSelections.set(shard.key, maxQty);
@@ -165,10 +165,12 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
   };
 
   const handleDone = () => {
-    const selectedData = Array.from(selections.entries()).map(([key, quantity]) => {
-      const shard = shards.find(s => s.key === key);
-      return { shard: shard!, quantity };
-    }).filter(item => item.shard);
+    const selectedData = Array.from(selections.entries())
+      .map(([key, quantity]) => {
+        const shard = shards.find((s) => s.key === key);
+        return { shard: shard!, quantity };
+      })
+      .filter((item) => item.shard);
     onDone(selectedData);
   };
 
@@ -181,7 +183,9 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
           <div>
             <h2 className="text-xl font-bold text-white">Select Shards</h2>
-            <p className="text-sm text-slate-400 mt-1">{selections.size} shard{selections.size !== 1 ? 's' : ''} selected</p>
+            <p className="text-sm text-slate-400 mt-1">
+              {selections.size} shard{selections.size !== 1 ? "s" : ""} selected
+            </p>
           </div>
           <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors cursor-pointer" aria-label="Close modal">
             <X className="w-6 h-6" />
@@ -202,7 +206,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
                 autoFocus
               />
             </div>
-            
+
             {/* Rarity Filter Dropdown */}
             <div className="relative" ref={rarityDropdownRef}>
               <button
@@ -211,12 +215,10 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
                 className="flex items-center gap-2 px-3 py-2 h-[42px] min-w-[140px] bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30 rounded-md hover:bg-purple-500/20 transition-colors cursor-pointer"
               >
                 <Filter className={`w-4 h-4 ${currentRarity.color}`} />
-                <span className={`text-sm font-medium ${currentRarity.color}`}>
-                  {currentRarity.label}
-                </span>
+                <span className={`text-sm font-medium ${currentRarity.color}`}>{currentRarity.label}</span>
                 <ChevronDown className={`w-4 h-4 ${currentRarity.color} transition-transform ${isRarityDropdownOpen ? "rotate-180" : ""}`} />
               </button>
-              
+
               {isRarityDropdownOpen && (
                 <div className="absolute right-0 mt-1 w-48 bg-slate-800 border border-purple-500/20 rounded-md shadow-xl z-50 overflow-hidden">
                   {rarityOptions.map((option) => (
@@ -228,9 +230,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
                         setIsRarityDropdownOpen(false);
                       }}
                       className={`w-full px-4 py-2.5 text-sm text-left font-medium transition-colors cursor-pointer ${
-                        rarityFilter === option.value 
-                          ? "bg-purple-500/30 " + option.color
-                          : option.color + " hover:bg-purple-500/10 hover:brightness-125"
+                        rarityFilter === option.value ? "bg-purple-500/30 " + option.color : option.color + " hover:bg-purple-500/10 hover:brightness-125"
                       }`}
                     >
                       {option.label}
@@ -239,7 +239,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
                 </div>
               )}
             </div>
-            
+
             {/* Reset Filter Button */}
             <button
               onClick={() => {
@@ -267,10 +267,8 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
                 <div
                   key={shard.key}
                   onClick={() => toggleShard(shard.key)}
-                  className={`flex items-center gap-2 p-2.5 rounded-lg transition-all border cursor-pointer ${
-                    isSelected
-                      ? "bg-blue-500/20 border-blue-500/50 hover:border-blue-500/70"
-                      : "bg-slate-700/30 border-slate-600/50 hover:border-slate-500"
+                  className={`flex items-center gap-2 p-2.5 rounded-lg transition-all duration-300 border cursor-pointer ${
+                    isSelected ? "bg-blue-500/20 border-blue-500/50 hover:border-blue-500/70" : "bg-slate-700/30 hover:bg-slate-700/60 border border-slate-600/50 hover:border-slate-500"
                   }`}
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0 group">
@@ -322,17 +320,13 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
             >
               Select All
             </button>
-            <button
-              onClick={() => setSelections(new Map())}
-              className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors cursor-pointer"
-              disabled={selections.size === 0}
-            >
+            <button onClick={() => setSelections(new Map())} className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors cursor-pointer" disabled={selections.size === 0}>
               Clear All
             </button>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-slate-400">
-              Total: {Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0)} shard{Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0) !== 1 ? 's' : ''}
+              Total: {Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0)} shard{Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0) !== 1 ? "s" : ""}
             </span>
             <button
               onClick={handleDone}
