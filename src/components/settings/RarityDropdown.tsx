@@ -19,7 +19,7 @@ export const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value
       { value: "uncommon", label: "Uncommon", color: "text-green-400" },
       { value: "rare", label: "Rare", color: "text-blue-400" },
       { value: "epic", label: "Epic", color: "text-purple-400" },
-      { value: "legendary", label: "Legendary", color: "text-orange-400" },
+      { value: "legendary", label: "Legendary", color: "text-yellow-400" },
     ],
     []
   );

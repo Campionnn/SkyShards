@@ -26,7 +26,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
     { value: "uncommon", label: "Uncommon", color: "text-green-400" },
     { value: "rare", label: "Rare", color: "text-blue-400" },
     { value: "epic", label: "Epic", color: "text-purple-400" },
-    { value: "legendary", label: "Legendary", color: "text-orange-400" },
+    { value: "legendary", label: "Legendary", color: "text-yellow-400" },
   ];
 
   const currentRarity = rarityOptions.find(r => r.value === rarityFilter) || rarityOptions[0];
