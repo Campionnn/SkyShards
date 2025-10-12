@@ -29,15 +29,34 @@ const performCalculation = async (
     setCalculating: (v: boolean) => void;
     setProgress: (p: WorkerProgress | null) => void;
   }
-) => {
+): Promise<(() => void) | null> => {
+  let isCancelled = false;
+
+  const checkCancelled = () => isCancelled;
+
+  const handleError = (err: unknown) => {
+    if (!isCancelled && err instanceof Error && err.message !== "Worker calculation failed") {
+      console.error("Calculation error:", err);
+    }
+  };
+
+  const cleanup = () => {
+    if (!isCancelled) {
+      callbacks.setProgress(null);
+      callbacks.setCalculating(false);
+    }
+  };
+
   // Handle Materials Only mode
   if (formData.materialsOnly) {
     if (!formData.selectedShardKeys || formData.selectedShardKeys.length === 0) {
-      return;
+      return null;
     }
 
     const dataService = DataService.getInstance();
-    const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
+    const filteredCustomRates = Object.fromEntries(
+      Object.entries(customRates).filter(([, v]) => v !== undefined)
+    ) as { [shardId: string]: number };
 
     const params = {
       customRates: formData.ironManView ? filteredCustomRates : await dataService.loadShardCosts(formData.instantBuyPrices),
@@ -64,89 +83,92 @@ const performCalculation = async (
 
     callbacks.setCurrentParams(params);
     callbacks.setCalculating(true);
-    callbacks.setProgress(null); // Let workers set initial progress
+    callbacks.setProgress(null);
 
-    try {
-      const shardQuantitiesMap = new Map<string, number>();
-      if (formData.shardQuantities) {
-        formData.shardQuantities.forEach((item: { shard?: { key: string }; quantity?: number }) => {
-          if (item.shard && item.quantity) {
-            shardQuantitiesMap.set(item.shard.key, item.quantity);
-          }
-        });
-      }
-
-      const targets = formData.selectedShardKeys.map(shardKey => ({
-        shard: shardKey,
-        quantity: shardQuantitiesMap.get(shardKey) || 1
-      }));
-
-      // Use parallel calculation - spawns multiple workers to process shards concurrently
-      const { promise } = calculateMultipleShardsParallel(targets, params, recipeOverrides, (p) => callbacks.setProgress(p));
-      const results = await promise;
-
-      const combinedMaterials: Record<string, number> = {};
-      let totalTime = 0;
-      let totalFusions = 0;
-      let totalCraftTime = 0;
-      let totalCraftsNeeded = 0;
-
-      results.forEach((result) => {
-        // Aggregate materials from totalQuantities
-        if (result.totalQuantities) {
-          result.totalQuantities.forEach((quantity, matKey) => {
-            combinedMaterials[matKey] = (combinedMaterials[matKey] || 0) + quantity;
-          });
+    const shardQuantitiesMap = new Map<string, number>();
+    if (formData.shardQuantities) {
+      formData.shardQuantities.forEach((item: { shard?: { key: string }; quantity?: number }) => {
+        if (item.shard && item.quantity) {
+          shardQuantitiesMap.set(item.shard.key, item.quantity);
         }
-
-        totalTime += result.totalTime || 0;
-        totalFusions += result.totalFusions || 0;
-        totalCraftTime += result.craftTime || 0;
-        totalCraftsNeeded += result.craftsNeeded || 0;
       });
-
-      // Create a combined result matching the CalculationResult interface
-      const materialQuantities = new Map<string, number>();
-      Object.entries(combinedMaterials).forEach(([key, value]) => {
-        materialQuantities.set(key, value);
-      });
-
-      // Calculate total shards from quantities
-      const totalShardsRequested = Array.from(shardQuantitiesMap.values()).reduce((sum, qty) => sum + qty, 0) || formData.selectedShardKeys.length;
-
-      const combinedResult: CalculationResult = {
-        timePerShard: totalShardsRequested > 0 ? totalTime / totalShardsRequested : 0,
-        totalTime: totalTime,
-        totalShardsProduced: totalShardsRequested,
-        craftsNeeded: totalCraftsNeeded,
-        totalQuantities: materialQuantities,
-        totalFusions: totalFusions,
-        craftTime: totalCraftTime,
-        tree: null, // No tree in Materials Only mode
-      };
-
-      callbacks.setResult(combinedResult);
-
-      // Load parsed data for UI rendering
-      const calculationService = await import("../services/calculationService");
-      const service = calculationService.CalculationService.getInstance();
-      const data = await service.parseData(params);
-      callbacks.setCalculationData(data);
-
-      // Set a display name for multiple shards
-      callbacks.setTargetShardName(`${formData.selectedShardKeys.length} Shards`);
-      callbacks.setCurrentShardKey(formData.selectedShardKeys[0]); // Use first for display
-      callbacks.setCurrentQuantity(formData.selectedShardKeys.length);
-    } finally {
-      callbacks.setProgress(null);
-      callbacks.setCalculating(false);
     }
-    return;
+
+    const targets = formData.selectedShardKeys.map(shardKey => ({
+      shard: shardKey,
+      quantity: shardQuantitiesMap.get(shardKey) || 1
+    }));
+
+    const { promise, cancel: workerCancel } = calculateMultipleShardsParallel(
+      targets,
+      params,
+      recipeOverrides,
+      (p) => !checkCancelled() && callbacks.setProgress(p)
+    );
+
+    promise
+      .then(results => {
+        if (checkCancelled()) return;
+
+        const combinedMaterials: Record<string, number> = {};
+        let totalTime = 0;
+        let totalFusions = 0;
+        let totalCraftTime = 0;
+        let totalCraftsNeeded = 0;
+
+        results.forEach((result) => {
+          if (result.totalQuantities) {
+            result.totalQuantities.forEach((quantity, matKey) => {
+              combinedMaterials[matKey] = (combinedMaterials[matKey] || 0) + quantity;
+            });
+          }
+          totalTime += result.totalTime || 0;
+          totalFusions += result.totalFusions || 0;
+          totalCraftTime += result.craftTime || 0;
+          totalCraftsNeeded += result.craftsNeeded || 0;
+        });
+
+        const materialQuantities = new Map<string, number>(Object.entries(combinedMaterials));
+        const selectedShardKeys = formData.selectedShardKeys || [];
+        const totalShardsRequested = Array.from(shardQuantitiesMap.values()).reduce((sum, qty) => sum + qty, 0) || selectedShardKeys.length;
+
+        const combinedResult: CalculationResult = {
+          timePerShard: totalShardsRequested > 0 ? totalTime / totalShardsRequested : 0,
+          totalTime,
+          totalShardsProduced: totalShardsRequested,
+          craftsNeeded: totalCraftsNeeded,
+          totalQuantities: materialQuantities,
+          totalFusions,
+          craftTime: totalCraftTime,
+          tree: null,
+        };
+
+        callbacks.setResult(combinedResult);
+
+        return import("../services/calculationService").then(({ CalculationService }) => {
+          if (checkCancelled()) return;
+          const service = CalculationService.getInstance();
+          return service.parseData(params);
+        }).then(data => {
+          if (checkCancelled() || !data) return;
+          callbacks.setCalculationData(data);
+          callbacks.setTargetShardName(`${selectedShardKeys.length} Shards`);
+          callbacks.setCurrentShardKey(selectedShardKeys[0] || "");
+          callbacks.setCurrentQuantity(selectedShardKeys.length);
+        });
+      })
+      .catch(handleError)
+      .finally(cleanup);
+
+    return () => {
+      isCancelled = true;
+      workerCancel();
+    };
   }
 
-  // Original single-shard logic
+  // Single shard logic
   if (!formData.shard || formData.shard.trim() === "") {
-    return;
+    return null;
   }
 
   const dataService = DataService.getInstance();
@@ -154,14 +176,16 @@ const performCalculation = async (
   const shardKey = nameToKeyMap[formData.shard.toLowerCase()];
 
   if (!shardKey) {
-    return;
+    return null;
   }
 
   callbacks.setTargetShardName(formData.shard);
   callbacks.setCurrentShardKey(shardKey);
   callbacks.setCurrentQuantity(formData.quantity);
 
-  const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
+  const filteredCustomRates = Object.fromEntries(
+    Object.entries(customRates).filter(([, v]) => v !== undefined)
+  ) as { [shardId: string]: number };
 
   const params = {
     customRates: formData.ironManView ? filteredCustomRates : await dataService.loadShardCosts(formData.instantBuyPrices),
@@ -187,27 +211,40 @@ const performCalculation = async (
   };
 
   callbacks.setCurrentParams(params);
-
   callbacks.setResult(null);
   callbacks.setCalculationData(null);
-
-  // calculation in web worker with progress
   callbacks.setCalculating(true);
   callbacks.setProgress({ phase: "parsing", progress: 0, message: "Starting..." });
-  try {
-    const { promise } = calculateOptimalPathWithWorker(shardKey, formData.quantity, params, recipeOverrides, (p) => callbacks.setProgress(p));
-    const calculationResult = await promise;
-    callbacks.setResult(calculationResult);
 
-    // Also load parsed data for UI rendering details
-    const calculationService = await import("../services/calculationService");
-    const service = calculationService.CalculationService.getInstance();
-    const data = await service.parseData(params);
-    callbacks.setCalculationData(data);
-  } finally {
-    callbacks.setProgress(null);
-    callbacks.setCalculating(false);
-  }
+  const { promise, cancel: workerCancel } = calculateOptimalPathWithWorker(
+    shardKey,
+    formData.quantity,
+    params,
+    recipeOverrides,
+    (p) => !checkCancelled() && callbacks.setProgress(p)
+  );
+
+  promise
+    .then(calculationResult => {
+      if (checkCancelled()) return;
+      callbacks.setResult(calculationResult);
+
+      return import("../services/calculationService").then(({ CalculationService }) => {
+        if (checkCancelled()) return;
+        const service = CalculationService.getInstance();
+        return service.parseData(params);
+      }).then(data => {
+        if (checkCancelled() || !data) return;
+        callbacks.setCalculationData(data);
+      });
+    })
+    .catch(handleError)
+    .finally(cleanup);
+
+  return () => {
+    isCancelled = true;
+    workerCancel();
+  };
 };
 
 const CalculatorPageContent: React.FC = () => {
@@ -258,6 +295,7 @@ const CalculatorPageContent: React.FC = () => {
         clearTimeout(debounceTimeoutRef.current);
       }
 
+      // Cancel any ongoing calculation
       if (cancelRef?.current) {
         cancelRef.current();
         cancelRef.current = null;
@@ -280,7 +318,8 @@ const CalculatorPageContent: React.FC = () => {
         };
 
         try {
-          await performCalculation(formData, customRates, recipeOverrides, callbacks);
+          // Store the cancel function so it can be called if parameters change
+          cancelRef.current = await performCalculation(formData, customRates, recipeOverrides, callbacks);
         } catch (err) {
           if (err instanceof Error && !err.message.includes("not found")) {
             console.error("Calculation failed:", err);
