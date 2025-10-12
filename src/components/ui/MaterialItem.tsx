@@ -15,7 +15,7 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
   const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
 
   return (
-    <div className="bg-slate-700 border border-slate-600 rounded-md px-3 pt-1 pb-2 flex flex-row items-center justify-between">
+    <div className="bg-slate-700/50 border border-slate-600/60 rounded-md px-3 pt-1 pb-2 flex flex-row items-center justify-between">
       <div className="flex flex-col items-start min-w-0 justify-center h-full">
         <span className="text-slate-300 font-medium text-base flex-shrink-0">{quantity}x</span>
         <Tooltip
@@ -38,10 +38,10 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
       <div className="flex flex-col items-end ml-2 justify-center h-full">
         {!ironManView && (
           <>
-            <div className="text-sm text-slate-400 whitespace-nowrap">
-              {formatLargeNumber(quantity * shard.rate)}
+            <div className="text-sm text-slate-400 whitespace-nowrap">{formatLargeNumber(quantity * shard.rate)}</div>
+            <div className="text-xs text-slate-400 whitespace-nowrap mt-1">
+              {formatLargeNumber(shard.rate)} <span className="text-slate-500">per</span>
             </div>
-            <div className="text-xs text-slate-400 whitespace-nowrap mt-1">{formatLargeNumber(shard.rate)} <span className="text-slate-500">per</span></div>
           </>
         )}
         {ironManView && (
