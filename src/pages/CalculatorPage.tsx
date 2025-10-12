@@ -7,7 +7,7 @@ import { DataService } from "../services";
 import type { CalculationFormData } from "../schemas";
 import type { CalculationResult, CalculationParams, RecipeOverride, Data } from "../types/types";
 import { isFirstVisit, setSaveEnabled } from "../utilities";
-import { calculateOptimalPathWithWorker, type WorkerProgress } from "../services/workerCalculationService";
+import { calculateOptimalPathWithWorker, calculateMultipleShardsParallel, type WorkerProgress } from "../services/workerCalculationService";
 
 const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
   const { setForm } = useCalculatorState();
@@ -33,7 +33,6 @@ const performCalculation = async (
   // Handle Materials Only mode
   if (formData.materialsOnly) {
     if (!formData.selectedShardKeys || formData.selectedShardKeys.length === 0) {
-      console.warn("Calculation skipped: No shards selected in Materials Only mode");
       return;
     }
 
@@ -65,39 +64,34 @@ const performCalculation = async (
 
     callbacks.setCurrentParams(params);
     callbacks.setCalculating(true);
-    callbacks.setProgress({ phase: "parsing", progress: 0, message: "Calculating materials..." });
+    callbacks.setProgress(null); // Let workers set initial progress
 
     try {
-      // Calculate for each selected shard and combine materials
-      const combinedMaterials: Record<string, number> = {};
-      let totalTime = 0;
-      let totalFusions = 0;
-      let totalCraftTime = 0;
-      let totalCraftsNeeded = 0;
-
-      // Get quantity for each shard from shardQuantities if available
       const shardQuantitiesMap = new Map<string, number>();
       if (formData.shardQuantities) {
-        formData.shardQuantities.forEach((item: any) => {
+        formData.shardQuantities.forEach((item: { shard?: { key: string }; quantity?: number }) => {
           if (item.shard && item.quantity) {
             shardQuantitiesMap.set(item.shard.key, item.quantity);
           }
         });
       }
 
-      for (let i = 0; i < formData.selectedShardKeys.length; i++) {
-        const shardKey = formData.selectedShardKeys[i];
-        const shardQuantity = shardQuantitiesMap.get(shardKey) || 1;
-        
-        callbacks.setProgress({ 
-          phase: "computing", 
-          progress: i / formData.selectedShardKeys.length, 
-          message: `Calculating ${i + 1} of ${formData.selectedShardKeys.length} shards...` 
-        });
+      const targets = formData.selectedShardKeys.map(shardKey => ({
+        shard: shardKey,
+        quantity: shardQuantitiesMap.get(shardKey) || 1
+      }));
 
-        const { promise } = calculateOptimalPathWithWorker(shardKey, shardQuantity, params, recipeOverrides, () => {});
-        const result = await promise;
+      // Use parallel calculation - spawns multiple workers to process shards concurrently
+      const { promise } = calculateMultipleShardsParallel(targets, params, recipeOverrides, (p) => callbacks.setProgress(p));
+      const results = await promise;
 
+      const combinedMaterials: Record<string, number> = {};
+      let totalTime = 0;
+      let totalFusions = 0;
+      let totalCraftTime = 0;
+      let totalCraftsNeeded = 0;
+
+      results.forEach((result) => {
         // Aggregate materials from totalQuantities
         if (result.totalQuantities) {
           result.totalQuantities.forEach((quantity, matKey) => {
@@ -109,7 +103,7 @@ const performCalculation = async (
         totalFusions += result.totalFusions || 0;
         totalCraftTime += result.craftTime || 0;
         totalCraftsNeeded += result.craftsNeeded || 0;
-      }
+      });
 
       // Create a combined result matching the CalculationResult interface
       const materialQuantities = new Map<string, number>();
@@ -152,7 +146,6 @@ const performCalculation = async (
 
   // Original single-shard logic
   if (!formData.shard || formData.shard.trim() === "") {
-    console.warn("Calculation skipped: No shard selected");
     return;
   }
 
