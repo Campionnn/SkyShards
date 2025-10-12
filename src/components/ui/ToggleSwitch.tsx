@@ -18,7 +18,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ label, checked, onCh
   );
 
   return (
-    <div className="flex items-center justify-between py-1">
+    <div className="flex items-center justify-between gap-3 py-1">
       <span onClick={handleToggle} className="text-sm font-medium text-slate-200 flex-1 cursor-pointer">
         {label}
       </span>
@@ -35,7 +35,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ label, checked, onCh
       >
         <span
           className={`inline-block h-5 w-5 transform rounded-full shadow transition-transform duration-200 border border-white/10
-          ${checked ? "bg-fuchsia-400" : "bg-slate-300/70"}
+          ${checked ? "bg-fuchsia-200" : "bg-slate-300/70"}
           ${checked ? "translate-x-5" : "translate-x-0.5"}`}
           style={{ paddingLeft: "1px" }}
         />

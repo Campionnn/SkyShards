@@ -4,6 +4,7 @@ import { X, Search, Check, RotateCcw, Filter, ChevronDown } from "lucide-react";
 import { getRarityColor } from "../../utilities";
 import type { ShardWithKey } from "../../types/types";
 import { MAX_QUANTITIES } from "../../constants";
+import { ToggleSwitch } from "../ui";
 
 interface MultiSelectShardModalProps {
   isOpen: boolean;
@@ -18,7 +19,9 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
   const [rarityFilter, setRarityFilter] = useState("all");
   const [isRarityDropdownOpen, setIsRarityDropdownOpen] = useState(false);
   const [selections, setSelections] = useState<Map<string, number>>(new Map(initialSelections));
+  const [showSelectedFirst, setShowSelectedFirst] = useState(false);
   const rarityDropdownRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const rarityOptions = [
     { value: "all", label: "All Rarities", color: "text-violet-400" },
@@ -107,24 +110,37 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
     });
 
     // Sort results
+    let sorted: ShardWithKey[];
     if (!searchQuery.trim()) {
-      return filtered.sort(sortByShardId);
+      sorted = filtered.sort(sortByShardId);
+    } else {
+      const lowerQuery = searchQuery.toLowerCase();
+      sorted = filtered.sort((a, b) => {
+        const aName = a.name.toLowerCase();
+        const bName = b.name.toLowerCase();
+        const aStarts = aName.startsWith(lowerQuery);
+        const bStarts = bName.startsWith(lowerQuery);
+
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+        return sortByShardId(a, b);
+      });
     }
 
-    const lowerQuery = searchQuery.toLowerCase();
-    return filtered.sort((a, b) => {
-      const aName = a.name.toLowerCase();
-      const bName = b.name.toLowerCase();
-      const aStarts = aName.startsWith(lowerQuery);
-      const bStarts = bName.startsWith(lowerQuery);
+    // If showSelectedFirst is enabled, separate selected and unselected shards
+    if (showSelectedFirst) {
+      const selected = sorted.filter((shard) => selections.has(shard.key));
+      const unselected = sorted.filter((shard) => !selections.has(shard.key));
+      return [...selected, ...unselected];
+    }
 
-      if (aStarts && !bStarts) return -1;
-      if (!aStarts && bStarts) return 1;
-      return sortByShardId(a, b);
-    });
-  }, [shards, searchQuery, rarityFilter]);
+    return sorted;
+  }, [shards, searchQuery, rarityFilter, showSelectedFirst, selections]);
 
   const toggleShard = (shardKey: string) => {
+    // Store scroll position before toggling
+    const scrollPos = scrollContainerRef.current?.scrollTop || 0;
+    
     setSelections((prev) => {
       const newMap = new Map(prev);
       if (newMap.has(shardKey)) {
@@ -142,6 +158,15 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
       }
       return newMap;
     });
+
+    // Restore scroll position after state update
+    if (showSelectedFirst) {
+      requestAnimationFrame(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollPos;
+        }
+      });
+    }
   };
 
   const updateQuantity = (shardKey: string, quantity: number) => {
@@ -252,13 +277,18 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
               <RotateCcw className="w-4 h-4" />
             </button>
           </div>
-          <div className="text-sm text-slate-400">
-            Showing {filteredShards.length} of {shards.length} shards
+          <div className="flex items-center justify-between text-sm text-slate-400">
+            <span>Showing {filteredShards.length} of {shards.length} shards</span>
+            <ToggleSwitch
+              label="Show Selected First"
+              checked={showSelectedFirst}
+              onChange={setShowSelectedFirst}
+            />
           </div>
         </div>
 
         {/* Shards List */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {filteredShards.map((shard) => {
               const isSelected = selections.has(shard.key);
