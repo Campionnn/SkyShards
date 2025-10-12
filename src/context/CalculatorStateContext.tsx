@@ -26,6 +26,9 @@ const defaultForm: CalculationFormData = {
   ironManView: true,
   instantBuyPrices: false,
   craftPenalty: 0.8,
+  materialsOnly: false,
+  selectedShardKeys: [],
+  shardQuantities: [],
 };
 
 interface CalculatorStateContextType {

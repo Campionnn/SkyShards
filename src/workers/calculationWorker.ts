@@ -1,4 +1,4 @@
-import type { CalculationParams, CalculationResult, RecipeOverride } from "../types/types";
+import type { CalculationParams, CalculationResult, RecipeOverride, Data, RecipeChoice } from "../types/types";
 import { CalculationService } from "../services";
 
 interface StartMsg {
@@ -7,6 +7,16 @@ interface StartMsg {
   requiredQuantity: number;
   params: CalculationParams;
   recipeOverrides: RecipeOverride[];
+}
+
+interface BatchStartWithDataMsg {
+  type: "batch-start-with-data";
+  targets: Array<{ shard: string; quantity: number }>;
+  params: CalculationParams;
+  recipeOverrides: RecipeOverride[];
+  parsedData: Data;
+  choices: Record<string, RecipeChoice>;
+  cycleNodes: string[][];
 }
 
 type ProgressPhase = "parsing" | "computing" | "building" | "assigning" | "finalizing";
@@ -21,19 +31,129 @@ interface ResultMsg {
   type: "result";
   result: CalculationResult;
 }
+interface BatchResultMsg {
+  type: "batch-result";
+  results: CalculationResult[];
+}
 interface ErrorMsg {
   type: "error";
   message: string;
 }
 
-type OutMsg = ProgressMsg | ResultMsg | ErrorMsg;
+type OutMsg = ProgressMsg | ResultMsg | BatchResultMsg | ErrorMsg;
 
 const post = (msg: OutMsg) => (postMessage as (m: OutMsg) => void)(msg);
 
-self.onmessage = async (e: MessageEvent<StartMsg>) => {
-  const data = e.data;
-  if (!data || data.type !== "start") return;
+let lastProgressTime = 0;
+const PROGRESS_THROTTLE_MS = 100;
 
+const postProgress = (phase: ProgressPhase, progress: number, message: string, force = false) => {
+  const now = Date.now();
+  if (force || now - lastProgressTime >= PROGRESS_THROTTLE_MS) {
+    lastProgressTime = now;
+    post({ type: "progress", phase, progress, message });
+  }
+};
+
+self.onmessage = async (e: MessageEvent<StartMsg | BatchStartWithDataMsg>) => {
+  const data = e.data;
+  if (!data || !data.type) return;
+
+  if (data.type === "batch-start-with-data") {
+    await handleBatchCalculationWithData(data);
+  } else if (data.type === "start") {
+    await handleSingleCalculation(data);
+  }
+};
+
+async function handleBatchCalculationWithData(data: BatchStartWithDataMsg) {
+  const { targets, params, recipeOverrides, parsedData, choices: choicesObj, cycleNodes } = data;
+
+  try {
+    const service = CalculationService.getInstance();
+
+    // convert choices object back to Map
+    const choices = new Map<string, RecipeChoice>();
+    Object.entries(choicesObj).forEach(([key, value]) => {
+      choices.set(key, value);
+    });
+
+    // calculate each shard
+    const results: CalculationResult[] = [];
+    const { crocodileMultiplier } = service.calculateMultipliers(params);
+
+    for (let i = 0; i < targets.length; i++) {
+      const { shard: targetShard, quantity: requiredQuantity } = targets[i];
+
+      if (!parsedData.shards[targetShard]) {
+        const emptyResult: CalculationResult = {
+          timePerShard: 0,
+          totalTime: 0,
+          totalShardsProduced: 0,
+          craftsNeeded: 0,
+          totalQuantities: new Map<string, number>(),
+          totalFusions: 0,
+          craftTime: 0,
+          tree: { shard: targetShard, method: "direct", quantity: 0 },
+        };
+        results.push(emptyResult);
+
+        // report progress after completing this shard
+        postProgress("building", (i + 1) / targets.length, `Calculating ${i + 1} of ${targets.length} shards...`);
+        continue;
+      }
+
+      // build recipe tree
+      const tree = service.buildRecipeTree(parsedData, targetShard, choices, cycleNodes, params, recipeOverrides);
+
+      // assign quantities
+      const craftCounter = { total: 0 };
+      service.assignQuantities(tree, requiredQuantity, parsedData, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
+
+      // collect results
+      const totalQuantities = service.collectTotalQuantities(tree);
+
+      const { totalShardsProduced, craftsNeeded, shardWeights } = service.calculateShardProductionStats({
+        requiredQuantity,
+        targetShard,
+        choices,
+        crocodileMultiplier,
+        totalQuantities,
+        data: parsedData,
+        params,
+        getDirectCostFn: service.getDirectCost.bind(service)
+      });
+
+      const craftTime = params.rateAsCoinValue ? craftCounter.total * params.craftPenalty : (craftCounter.total * params.craftPenalty) / 3600;
+      const totalTime = Array.from(shardWeights.values()).reduce((sum, weight) => sum + weight, 0) + craftTime;
+      const timePerShard = totalTime / totalShardsProduced;
+
+      const result: CalculationResult = {
+        timePerShard,
+        totalTime,
+        totalShardsProduced,
+        craftsNeeded,
+        totalQuantities,
+        totalFusions: craftCounter.total,
+        craftTime,
+        tree,
+      };
+
+      results.push(result);
+
+      // report progress after completing this shard
+      postProgress("building", (i + 1) / targets.length, `Calculating ${i + 1} of ${targets.length} shards...`);
+    }
+
+    post({ type: "progress", phase: "finalizing", progress: 1, message: "Done" });
+    post({ type: "batch-result", results });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Batch calculation failed";
+    post({ type: "error", message });
+  }
+}
+
+async function handleSingleCalculation(data: StartMsg) {
   const { targetShard, requiredQuantity, params, recipeOverrides } = data;
 
   try {
@@ -109,4 +229,4 @@ self.onmessage = async (e: MessageEvent<StartMsg>) => {
     const message = err instanceof Error ? err.message : "Calculation failed";
     post({ type: "error", message });
   }
-};
+}

@@ -14,12 +14,14 @@ export const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, on
 
   const types = useMemo(
     () => [
-      { value: "all", label: "All Types" },
-      { value: "direct", label: "Direct" },
-      { value: "fuse", label: "Fuse" },
+      { value: "all", label: "All Types", color: "text-emerald-400" },
+      { value: "direct", label: "Direct", color: "text-green-400" },
+      { value: "fuse", label: "Fuse", color: "text-fuchsia-400" },
     ],
     []
   );
+
+  const currentType = useMemo(() => types.find((t) => t.value === value) || types[0], [types, value]);
 
   const updatePosition = useCallback(() => {
     if (isOpen && buttonRef) {
@@ -48,7 +50,6 @@ export const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, on
     }
   }, [isOpen]);
 
-  const currentType = useMemo(() => types.find((t) => t.value === value), [types, value]);
 
   return (
     <>
@@ -65,11 +66,11 @@ export const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, on
           "
         >
           <div className="flex items-center space-x-2">
-            <Layers className="w-5 h-5 text-emerald-400" />
-            <span className="font-medium">{currentType?.label || "All Types"}</span>
+            <Layers className={`w-5 h-5 ${currentType.color}`} />
+            <span className={`font-medium ${currentType.color}`}>{currentType.label}</span>
           </div>
           <ChevronDown
-            className={`w-4 h-4 text-emerald-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+            className={`w-4 h-4 ${currentType.color} transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
           />
         </button>
       </div>
@@ -94,8 +95,8 @@ export const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, on
                 }}
                 className={`
                   w-full px-4 py-3 text-sm text-left font-medium
-                  hover:bg-emerald-500/20 transition-colors duration-200
-                  ${value === type.value ? "bg-emerald-500/30 text-emerald-200" : "text-white hover:text-emerald-200"}
+                  transition-colors duration-200
+                  ${value === type.value ? "bg-emerald-500/30 " + type.color : type.color + " hover:bg-emerald-500/10 hover:brightness-125"}
                   ${type !== types[types.length - 1] ? "border-b border-emerald-500/10" : ""}
                   ${type === types[0] ? "rounded-t-md" : ""}
                   ${type === types[types.length - 1] ? "rounded-b-md" : ""}

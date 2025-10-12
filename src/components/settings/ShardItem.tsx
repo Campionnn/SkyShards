@@ -80,7 +80,7 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(
               )}
             </div>
             <div className="text-xs text-slate-400 truncate">
-              {shard.type} • {shard.family}
+              {shard.key} • {shard.family} • {shard.type}
             </div>
             {detailed && (
               <div className="mt-0.5 text-xs text-slate-400">

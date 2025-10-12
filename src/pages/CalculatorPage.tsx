@@ -7,7 +7,7 @@ import { DataService } from "../services";
 import type { CalculationFormData } from "../schemas";
 import type { CalculationResult, CalculationParams, RecipeOverride, Data } from "../types/types";
 import { isFirstVisit, setSaveEnabled } from "../utilities";
-import { calculateOptimalPathWithWorker, type WorkerProgress } from "../services/workerCalculationService";
+import { calculateOptimalPathWithWorker, calculateMultipleShardsParallel, type WorkerProgress } from "../services/workerCalculationService";
 
 const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
   const { setForm } = useCalculatorState();
@@ -30,8 +30,122 @@ const performCalculation = async (
     setProgress: (p: WorkerProgress | null) => void;
   }
 ) => {
+  // Handle Materials Only mode
+  if (formData.materialsOnly) {
+    if (!formData.selectedShardKeys || formData.selectedShardKeys.length === 0) {
+      return;
+    }
+
+    const dataService = DataService.getInstance();
+    const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
+
+    const params = {
+      customRates: formData.ironManView ? filteredCustomRates : await dataService.loadShardCosts(formData.instantBuyPrices),
+      hunterFortune: formData.hunterFortune,
+      excludeChameleon: formData.excludeChameleon,
+      frogBonus: formData.frogBonus,
+      newtLevel: formData.newtLevel,
+      salamanderLevel: formData.salamanderLevel,
+      lizardKingLevel: formData.lizardKingLevel,
+      leviathanLevel: formData.leviathanLevel,
+      pythonLevel: formData.pythonLevel,
+      kingCobraLevel: formData.kingCobraLevel,
+      seaSerpentLevel: formData.seaSerpentLevel,
+      tiamatLevel: formData.tiamatLevel,
+      crocodileLevel: formData.crocodileLevel,
+      kuudraTier: formData.kuudraTier,
+      moneyPerHour: formData.moneyPerHour,
+      customKuudraTime: formData.customKuudraTime,
+      kuudraTimeSeconds: formData.kuudraTimeSeconds,
+      noWoodenBait: formData.noWoodenBait,
+      rateAsCoinValue: !formData.ironManView,
+      craftPenalty: formData.craftPenalty,
+    };
+
+    callbacks.setCurrentParams(params);
+    callbacks.setCalculating(true);
+    callbacks.setProgress(null); // Let workers set initial progress
+
+    try {
+      const shardQuantitiesMap = new Map<string, number>();
+      if (formData.shardQuantities) {
+        formData.shardQuantities.forEach((item: { shard?: { key: string }; quantity?: number }) => {
+          if (item.shard && item.quantity) {
+            shardQuantitiesMap.set(item.shard.key, item.quantity);
+          }
+        });
+      }
+
+      const targets = formData.selectedShardKeys.map(shardKey => ({
+        shard: shardKey,
+        quantity: shardQuantitiesMap.get(shardKey) || 1
+      }));
+
+      // Use parallel calculation - spawns multiple workers to process shards concurrently
+      const { promise } = calculateMultipleShardsParallel(targets, params, recipeOverrides, (p) => callbacks.setProgress(p));
+      const results = await promise;
+
+      const combinedMaterials: Record<string, number> = {};
+      let totalTime = 0;
+      let totalFusions = 0;
+      let totalCraftTime = 0;
+      let totalCraftsNeeded = 0;
+
+      results.forEach((result) => {
+        // Aggregate materials from totalQuantities
+        if (result.totalQuantities) {
+          result.totalQuantities.forEach((quantity, matKey) => {
+            combinedMaterials[matKey] = (combinedMaterials[matKey] || 0) + quantity;
+          });
+        }
+
+        totalTime += result.totalTime || 0;
+        totalFusions += result.totalFusions || 0;
+        totalCraftTime += result.craftTime || 0;
+        totalCraftsNeeded += result.craftsNeeded || 0;
+      });
+
+      // Create a combined result matching the CalculationResult interface
+      const materialQuantities = new Map<string, number>();
+      Object.entries(combinedMaterials).forEach(([key, value]) => {
+        materialQuantities.set(key, value);
+      });
+
+      // Calculate total shards from quantities
+      const totalShardsRequested = Array.from(shardQuantitiesMap.values()).reduce((sum, qty) => sum + qty, 0) || formData.selectedShardKeys.length;
+
+      const combinedResult: CalculationResult = {
+        timePerShard: totalShardsRequested > 0 ? totalTime / totalShardsRequested : 0,
+        totalTime: totalTime,
+        totalShardsProduced: totalShardsRequested,
+        craftsNeeded: totalCraftsNeeded,
+        totalQuantities: materialQuantities,
+        totalFusions: totalFusions,
+        craftTime: totalCraftTime,
+        tree: null, // No tree in Materials Only mode
+      };
+
+      callbacks.setResult(combinedResult);
+
+      // Load parsed data for UI rendering
+      const calculationService = await import("../services/calculationService");
+      const service = calculationService.CalculationService.getInstance();
+      const data = await service.parseData(params);
+      callbacks.setCalculationData(data);
+
+      // Set a display name for multiple shards
+      callbacks.setTargetShardName(`${formData.selectedShardKeys.length} Shards`);
+      callbacks.setCurrentShardKey(formData.selectedShardKeys[0]); // Use first for display
+      callbacks.setCurrentQuantity(formData.selectedShardKeys.length);
+    } finally {
+      callbacks.setProgress(null);
+      callbacks.setCalculating(false);
+    }
+    return;
+  }
+
+  // Original single-shard logic
   if (!formData.shard || formData.shard.trim() === "") {
-    console.warn("Calculation skipped: No shard selected");
     return;
   }
 
@@ -180,7 +294,10 @@ const CalculatorPageContent: React.FC = () => {
   const handleCalculate = async (formData: CalculationFormData, setForm: (data: CalculationFormData) => void) => {
     setForm(formData);
     // For immediate fields like shard selection, calculate immediately
-    if (formData.shard !== form?.shard || formData.quantity !== form?.quantity) {
+    const materialsOnlyChanged = formData.materialsOnly !== form?.materialsOnly;
+    const selectedShardsChanged = JSON.stringify(formData.selectedShardKeys) !== JSON.stringify(form?.selectedShardKeys);
+    
+    if (formData.shard !== form?.shard || formData.quantity !== form?.quantity || materialsOnlyChanged || selectedShardsChanged) {
       await debouncedCalculate(formData, 100);
     } else {
       await debouncedCalculate(formData, 300);
@@ -201,7 +318,12 @@ const CalculatorPageContent: React.FC = () => {
 
   // Re-calculate when customRates, recipeOverrides change and form is valid
   useEffect(() => {
-    if (form && form.shard && form.shard.trim() !== "") {
+    const isValidForm = form && (
+      (form.shard && form.shard.trim() !== "") || 
+      (form.materialsOnly && form.selectedShardKeys && form.selectedShardKeys.length > 0)
+    );
+    
+    if (isValidForm) {
       debouncedCalculate(form, 150).catch(console.error);
     }
   }, [customRates, recipeOverrides, form, debouncedCalculate]);
@@ -272,6 +394,7 @@ const CalculatorPageContent: React.FC = () => {
                 onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
                 onResetRecipeOverrides={resetRecipeOverrides}
                 ironManView={form.ironManView}
+                materialsOnly={form.materialsOnly}
               />
             )}
 

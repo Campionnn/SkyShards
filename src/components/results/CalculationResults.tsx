@@ -73,6 +73,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   onRecipeOverridesUpdate,
   onResetRecipeOverrides,
   ironManView,
+  materialsOnly = false,
 }) => {
   const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
   const [copyModalOpen, setCopyModalOpen] = useState(false);
@@ -189,6 +190,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   };
 
   const buildSkyOceanString = () => {
+    if (!result.tree) return "";
     const convertedTree = convertTreeToSkyOcean(result.tree);
     const treeString = JSON.stringify(convertedTree);
     const base64Tree = gzipBase64(treeString);
@@ -196,6 +198,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   };
 
   const buildNoFrillsString = () => {
+    if (!result.tree) return "";
     const list = convertTreeToNoFrills(result.tree);
     const listString = JSON.stringify(list);
     const base64List = gzipBase64(listString);
@@ -241,16 +244,16 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   return (
     <div className="space-y-3">
       {/* Summary Cards */}
-      <div className={`grid grid-cols-2 ${ironManView ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-3`}>
+      <div className={`grid grid-cols-2 ${materialsOnly ? "lg:grid-cols-3" : ironManView ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-3`}>
         {ironManView && (
           <>
-            <SummaryCard icon={Clock} iconColor="text-purple-400" label="Time per Shard" value={formatTime(result.timePerShard)} />
+            {!materialsOnly && <SummaryCard icon={Clock} iconColor="text-purple-400" label="Time per Shard" value={formatTime(result.timePerShard)} />}
             <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Time" value={formatTime(result.totalTime)} />
           </>
         )}
         {!ironManView && (
           <>
-            <SummaryCard icon={Coins} iconColor="text-yellow-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />
+            {!materialsOnly && <SummaryCard icon={Coins} iconColor="text-yellow-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />}
             <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Cost" value={formatLargeNumber(result.totalTime)} />
             <SummaryCard
               icon={TicketPercent}
@@ -315,21 +318,26 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
             <div className="px-3 py-1.5 flex gap-1 bg-sky-500/20 border border-sky-500/30 text-sky-400 text-sm font-medium rounded-md min-w-0">
               <span className="text-slate-300">{Math.floor(result.totalShardsProduced)}x</span>
               <span className="truncate">{targetShardName}</span>
-              <span className="text-slate-400 whitespace-nowrap">
-                {Math.floor(result.craftsNeeded)} craft{Math.floor(result.craftsNeeded) > 1 ? "s" : ""}
-              </span>
+              {result.craftsNeeded > 0 && (
+                <span className="text-slate-400 whitespace-nowrap">
+                  {Math.floor(result.craftsNeeded)} craft{Math.floor(result.craftsNeeded) > 1 ? "s" : ""}
+                </span>
+              )}
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-          {Array.from(result.totalQuantities).map(([shardId, quantity]) => {
-            const shard = data.shards[shardId];
-            return <MaterialItem key={shardId} shard={shard} quantity={quantity} ironManView={ironManView} />;
-          })}
+          {Array.from(result.totalQuantities)
+            .sort(([, quantityA], [, quantityB]) => quantityB - quantityA)
+            .map(([shardId, quantity]) => {
+              const shard = data.shards[shardId];
+              return <MaterialItem key={shardId} shard={shard} quantity={quantity} ironManView={ironManView} />;
+            })}
         </div>
       </div>{" "}
       {/* Fusion Tree */}
+      {!materialsOnly && result.tree && (
       <div className="bg-slate-800 border border-slate-600 rounded-md p-3">
         <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
           <div className="min-w-[810px]">
@@ -375,9 +383,10 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
                       </button>
                     </div>
                   </div>
-                  <RecipeTreeNode
-                    tree={result.tree}
-                    data={data}
+                  {result.tree && (
+                    <RecipeTreeNode
+                      tree={result.tree}
+                      data={data}
                     isTopLevel={true}
                     totalShardsProduced={result.totalShardsProduced}
                     nodeId="root"
@@ -387,13 +396,17 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
                     noWoodenBait={params.noWoodenBait}
                     ironManView={ironManView}
                   />
+                  )}
                 </>
               )}
             </RecipeOverrideManager>
           </div>
         </div>
       </div>
-      <CopyTreeModal open={copyModalOpen} onClose={() => setCopyModalOpen(false)} onCopySkyOcean={handleCopySkyOcean} onCopyNoFrills={handleCopyNoFrills} />
+      )}
+      {!materialsOnly && result.tree && (
+        <CopyTreeModal open={copyModalOpen} onClose={() => setCopyModalOpen(false)} onCopySkyOcean={handleCopySkyOcean} onCopyNoFrills={handleCopyNoFrills} />
+      )}
     </div>
   );
 };

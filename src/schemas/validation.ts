@@ -23,6 +23,9 @@ export const calculationSchema = z.object({
   ironManView: z.boolean(),
   instantBuyPrices: z.boolean(),
   craftPenalty: z.number().min(0),
+  materialsOnly: z.boolean(),
+  selectedShardKeys: z.array(z.string()).optional(),
+  shardQuantities: z.array(z.any()).optional(),
 });
 
 export type CalculationFormData = z.infer<typeof calculationSchema>;
