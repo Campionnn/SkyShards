@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, Search, Check, RotateCcw } from "lucide-react";
+import { X, Search, Check, RotateCcw, Filter, ChevronDown } from "lucide-react";
 import { getRarityColor } from "../../utilities";
 import type { ShardWithKey } from "../../types/types";
 import { MAX_QUANTITIES } from "../../constants";
@@ -16,7 +16,20 @@ interface MultiSelectShardModalProps {
 export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ isOpen, onClose, shards, onDone, initialSelections = new Map() }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [rarityFilter, setRarityFilter] = useState("all");
+  const [isRarityDropdownOpen, setIsRarityDropdownOpen] = useState(false);
   const [selections, setSelections] = useState<Map<string, number>>(new Map(initialSelections));
+  const rarityDropdownRef = useRef<HTMLDivElement>(null);
+
+  const rarityOptions = [
+    { value: "all", label: "All Rarities", color: "text-violet-400" },
+    { value: "common", label: "Common", color: "text-white" },
+    { value: "uncommon", label: "Uncommon", color: "text-green-400" },
+    { value: "rare", label: "Rare", color: "text-blue-400" },
+    { value: "epic", label: "Epic", color: "text-purple-400" },
+    { value: "legendary", label: "Legendary", color: "text-orange-400" },
+  ];
+
+  const currentRarity = rarityOptions.find(r => r.value === rarityFilter) || rarityOptions[0];
 
   const sortByShardId = (a: ShardWithKey, b: ShardWithKey) => {
     const aMatch = a.key.match(/^([CUREL])(\d+)$/);
@@ -48,6 +61,20 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
     }
   }, [isOpen]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (rarityDropdownRef.current && !rarityDropdownRef.current.contains(event.target as Node)) {
+        setIsRarityDropdownOpen(false);
+      }
+    };
+
+    if (isRarityDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [isRarityDropdownOpen]);
+
   // Reset search when modal closes
   useEffect(() => {
     if (!isOpen) {
@@ -67,7 +94,9 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
     const filtered = shards.filter((shard) => {
       // Search filter
       const lowerQuery = searchQuery.toLowerCase();
-      const matchesSearch = !searchQuery.trim() || shard.name.toLowerCase().includes(lowerQuery);
+      const matchesName = shard.name.toLowerCase().includes(lowerQuery);
+      const matchesId = shard.key.toLowerCase().includes(lowerQuery);
+      const matchesSearch = !searchQuery.trim() || matchesName || matchesId;
       
       // Rarity filter
       const matchesRarity = rarityFilter === "all" || shard.rarity.toLowerCase() === rarityFilter;
@@ -151,42 +180,66 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
 
         {/* Search and Filters */}
         <div className="p-4 border-b border-slate-700 space-y-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search shards..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
-              autoFocus
-            />
-          </div>
-          <div className="flex justify-between items-center gap-2">
-            {/* Rarity Filter */}
-            <select
-              value={rarityFilter}
-              onChange={(e) => setRarityFilter(e.target.value)}
-              className="flex-1 px-3 py-2 text-sm bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30 rounded-md text-white hover:bg-purple-500/20 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-            >
-              <option value="all">All Rarities</option>
-              <option value="common">Common</option>
-              <option value="uncommon">Uncommon</option>
-              <option value="rare">Rare</option>
-              <option value="epic">Epic</option>
-              <option value="legendary">Legendary</option>
-            </select>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search shards..."
+                className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+                autoFocus
+              />
+            </div>
+            
+            {/* Rarity Filter Dropdown */}
+            <div className="relative" ref={rarityDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsRarityDropdownOpen(!isRarityDropdownOpen)}
+                className="flex items-center gap-2 px-3 py-2 h-[42px] min-w-[140px] bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30 rounded-md hover:bg-purple-500/20 transition-colors cursor-pointer"
+              >
+                <Filter className={`w-4 h-4 ${currentRarity.color}`} />
+                <span className={`text-sm font-medium ${currentRarity.color}`}>
+                  {currentRarity.label}
+                </span>
+                <ChevronDown className={`w-4 h-4 ${currentRarity.color} transition-transform ${isRarityDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+              
+              {isRarityDropdownOpen && (
+                <div className="absolute right-0 mt-1 w-48 bg-slate-800 border border-purple-500/20 rounded-md shadow-xl z-50 overflow-hidden">
+                  {rarityOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setRarityFilter(option.value);
+                        setIsRarityDropdownOpen(false);
+                      }}
+                      className={`w-full px-4 py-2.5 text-sm text-left font-medium transition-colors cursor-pointer ${
+                        rarityFilter === option.value 
+                          ? "bg-purple-500/30 " + option.color
+                          : option.color + " hover:bg-purple-500/10 hover:brightness-125"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
             {/* Reset Filter Button */}
             <button
               onClick={() => {
                 setSearchQuery("");
                 setRarityFilter("all");
               }}
-              className="px-3 py-2 text-sm bg-slate-600/50 hover:bg-slate-600 border border-slate-500/50 hover:border-slate-500 rounded-md text-slate-300 hover:text-white transition-colors cursor-pointer flex items-center gap-2"
+              className="px-3 py-2 h-[42px] text-sm bg-slate-600/50 hover:bg-slate-600 border border-slate-500/50 hover:border-slate-500 rounded-md text-slate-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5"
               title="Reset filters"
             >
               <RotateCcw className="w-4 h-4" />
-              <span>Reset</span>
             </button>
           </div>
           <div className="text-sm text-slate-400">

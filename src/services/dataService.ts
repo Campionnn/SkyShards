@@ -109,14 +109,19 @@ export class DataService {
   async searchShards(query: string): Promise<ShardWithKey[]> {
     const shards = await this.loadShards();
     const lowerQuery = query.toLowerCase();
-    const filtered = shards.filter((shard) => shard.name.toLowerCase().includes(lowerQuery));
+    const filtered = shards.filter((shard) => 
+      shard.name.toLowerCase().includes(lowerQuery) || 
+      shard.key.toLowerCase().includes(lowerQuery)
+    );
     
     // Sort results: prioritize shards that start with the query
     return filtered.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
-      const aStarts = aName.startsWith(lowerQuery);
-      const bStarts = bName.startsWith(lowerQuery);
+      const aKey = a.key.toLowerCase();
+      const bKey = b.key.toLowerCase();
+      const aStarts = aName.startsWith(lowerQuery) || aKey.startsWith(lowerQuery);
+      const bStarts = bName.startsWith(lowerQuery) || bKey.startsWith(lowerQuery);
       
       if (aStarts && !bStarts) return -1;
       if (!aStarts && bStarts) return 1;
@@ -127,14 +132,19 @@ export class DataService {
   async searchShardsByNameOnly(query: string): Promise<ShardWithKey[]> {
     const shards = await this.loadShards();
     const lowerQuery = query.toLowerCase();
-    const filtered = shards.filter((shard) => shard.name.toLowerCase().includes(lowerQuery));
+    const filtered = shards.filter((shard) => 
+      shard.name.toLowerCase().includes(lowerQuery) || 
+      shard.key.toLowerCase().includes(lowerQuery)
+    );
     
     // Sort results: prioritize shards that start with the query
     return filtered.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
-      const aStarts = aName.startsWith(lowerQuery);
-      const bStarts = bName.startsWith(lowerQuery);
+      const aKey = a.key.toLowerCase();
+      const bKey = b.key.toLowerCase();
+      const aStarts = aName.startsWith(lowerQuery) || aKey.startsWith(lowerQuery);
+      const bStarts = bName.startsWith(lowerQuery) || bKey.startsWith(lowerQuery);
       
       if (aStarts && !bStarts) return -1;
       if (!aStarts && bStarts) return 1;

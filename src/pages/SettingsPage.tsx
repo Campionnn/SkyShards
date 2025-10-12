@@ -27,12 +27,13 @@ export const SettingsPage: React.FC = () => {
       const matchesName = shard.name.toLowerCase().includes(search);
       const matchesFamily = shard.family.toLowerCase().includes(search);
       const matchesTypeField = shard.type.toLowerCase().includes(search);
+      const matchesId = shard.key.toLowerCase().includes(search);
 
       const shardDesc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
       const matchesTitle = shardDesc?.title?.toLowerCase().includes(search) || false;
       const matchesDescription = shardDesc?.description?.toLowerCase().includes(search) || false;
 
-      const matchesSearch = matchesName || matchesFamily || matchesTypeField || matchesTitle || matchesDescription;
+      const matchesSearch = matchesName || matchesFamily || matchesTypeField || matchesId || matchesTitle || matchesDescription;
       const matchesRarity = rarityFilter === "all" || shard.rarity === rarityFilter;
       const matchesType =
         typeFilter === "all" ||
@@ -124,7 +125,7 @@ export const SettingsPage: React.FC = () => {
               onClick={() => setDetailedShard((prev) => !prev)}
               className="
                 px-3 py-2.5 bg-indigo-500/20 hover:bg-indigo-500/30 
-                text-white font-medium rounded-md 
+                text-indigo-400 font-medium rounded-md 
                 border border-indigo-500/20 hover:border-indigo-500/30
                 transition-colors duration-200
                 flex items-center space-x-2 cursor-pointer
@@ -191,7 +192,7 @@ export const SettingsPage: React.FC = () => {
             onClick={() => setDetailedShard((prev) => !prev)}
             className="
                 px-3 py-2.5 bg-indigo-500/20 hover:bg-indigo-500/30 
-                text-white font-medium rounded-md 
+                text-indigo-400 font-medium rounded-md 
                 border border-indigo-500/20 hover:border-indigo-500/30
                 transition-colors duration-200
                 flex items-center space-x-2 cursor-pointer
