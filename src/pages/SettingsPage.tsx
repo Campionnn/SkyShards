@@ -243,21 +243,20 @@ export const SettingsPage: React.FC = () => {
 
       <div className="bg-white/5 border border-white/10 rounded-md overflow-hidden flex-1">
         <div className="h-full overflow-y-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-3 items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-3 auto-rows-fr">
             {filteredShards.map((shard) => {
               const desc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
               return (
-                <div key={shard.key}>
-                  <ShardItem
-                    shard={shard}
-                    title={desc?.title || shard.name}
-                    description={formatShardDescription(desc?.description || "No description.")}
-                    detailed={detailedShard}
-                    rate={customRates[shard.key] !== undefined ? customRates[shard.key]! : defaultRates[shard.key]}
-                    defaultRate={defaultRates[shard.key]}
-                    onRateChange={handleRateChange}
-                  />
-                </div>
+                <ShardItem
+                  key={shard.key}
+                  shard={shard}
+                  title={desc?.title || shard.name}
+                  description={formatShardDescription(desc?.description || "No description.")}
+                  detailed={detailedShard}
+                  rate={customRates[shard.key] !== undefined ? customRates[shard.key]! : defaultRates[shard.key]}
+                  defaultRate={defaultRates[shard.key]}
+                  onRateChange={handleRateChange}
+                />
               );
             })}
           </div>
