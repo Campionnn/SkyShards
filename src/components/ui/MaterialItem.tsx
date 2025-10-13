@@ -67,7 +67,7 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
                   <span className="text-slate-500">hr</span>
                 </div>
                 {hasBreakdown && (
-                  <button className="flex-shrink-0 transition-colors text-slate-400 hover:text-slate-200 cursor-pointer" onClick={() => setIsModalOpen(true)} title="View usage breakdown">
+                  <button className="flex-shrink-0 transition-colors text-amber-400 hover:text-amber-200 cursor-pointer" onClick={() => setIsModalOpen(true)} title="View usage breakdown">
                     <Info className="w-3.5 h-3.5" />
                   </button>
                 )}
