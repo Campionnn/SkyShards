@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Search, Filter, ChevronDown, RotateCcw } from "lucide-react";
-import { getRarityColor } from "../../utilities";
+import { getRarityColor, sortShardsByNameWithPrefixAwareness } from "../../utilities";
 import type { ShardWithKey } from "../../types/types";
 
 interface BrowseAllShardsModalProps {
@@ -114,7 +114,7 @@ export const BrowseAllShardsModal: React.FC<BrowseAllShardsModalProps> = ({ isOp
 
       if (aStarts && !bStarts) return -1;
       if (!aStarts && bStarts) return 1;
-      return sortByShardId(a, b);
+      return sortShardsByNameWithPrefixAwareness(a, b);
     });
   }, [shards, searchQuery, rarityFilter]);
 
@@ -156,10 +156,12 @@ export const BrowseAllShardsModal: React.FC<BrowseAllShardsModalProps> = ({ isOp
               <button
                 type="button"
                 onClick={() => setIsRarityDropdownOpen(!isRarityDropdownOpen)}
-                className="flex items-center gap-2 px-3 py-2 h-[42px] min-w-[140px] bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30 rounded-md hover:bg-purple-500/20 transition-colors cursor-pointer"
+                className="flex items-center justify-between gap-2 px-3 py-2 h-[42px] min-w-[140px] bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30 rounded-md hover:bg-purple-500/20 transition-colors cursor-pointer"
               >
-                <Filter className={`w-4 h-4 ${currentRarity.color}`} />
-                <span className={`text-sm font-medium ${currentRarity.color}`}>{currentRarity.label}</span>
+                <div className="flex items-center gap-2">
+                  <Filter className={`w-4 h-4 ${currentRarity.color}`} />
+                  <span className={`text-sm font-medium ${currentRarity.color}`}>{currentRarity.label}</span>
+                </div>
                 <ChevronDown className={`w-4 h-4 ${currentRarity.color} transition-transform ${isRarityDropdownOpen ? "rotate-180" : ""}`} />
               </button>
 

@@ -185,4 +185,30 @@ const determineStatColor = (context: string): string => {
   return "text-green-400"; // default
 };
 
+// Function to find the longest common prefix between two strings
+const findCommonPrefix = (str1: string, str2: string): string => {
+  let i = 0;
+  while (i < str1.length && i < str2.length && str1[i].toLowerCase() === str2[i].toLowerCase()) {
+    i++;
+  }
+  return str1.substring(0, i);
+};
+
+// Sorting function that sorts by ID when names share a common prefix, otherwise alphabetically
+export const sortShardsByNameWithPrefixAwareness = (a: { name: string; key: string }, b: { name: string; key: string }): number => {
+  const aName = a.name.toLowerCase();
+  const bName = b.name.toLowerCase();
+  
+  // Find the common prefix
+  const commonPrefix = findCommonPrefix(aName, bName);
+  
+  // If they share a common prefix of at least 3 characters, sort by ID
+  if (commonPrefix.length >= 3) {
+    return a.key.localeCompare(b.key);
+  }
+  
+  // Otherwise, sort alphabetically by name
+  return aName.localeCompare(bName);
+};
+
 export { isValidShardName } from "./isValidShardName";
