@@ -194,6 +194,27 @@ const findCommonPrefix = (str1: string, str2: string): string => {
   return str1.substring(0, i);
 };
 
+// Helper function to sort by shard ID (rarity letter + number)
+const sortByShardKey = (a: { key: string }, b: { key: string }): number => {
+  const aMatch = a.key.match(/^([CUREL])(\d+)$/);
+  const bMatch = b.key.match(/^([CUREL])(\d+)$/);
+
+  if (!aMatch || !bMatch) {
+    return a.key.localeCompare(b.key);
+  }
+
+  const [, aRarity, aNum] = aMatch;
+  const [, bRarity, bNum] = bMatch;
+
+  const rarityOrder: Record<string, number> = { C: 1, U: 2, R: 3, E: 4, L: 5 };
+
+  if (rarityOrder[aRarity] !== rarityOrder[bRarity]) {
+    return rarityOrder[aRarity] - rarityOrder[bRarity];
+  }
+
+  return parseInt(aNum) - parseInt(bNum);
+};
+
 // Sorting function that sorts by ID when names share a common prefix, otherwise alphabetically
 export const sortShardsByNameWithPrefixAwareness = (a: { name: string; key: string }, b: { name: string; key: string }): number => {
   const aName = a.name.toLowerCase();
@@ -204,7 +225,7 @@ export const sortShardsByNameWithPrefixAwareness = (a: { name: string; key: stri
   
   // If they share a common prefix of at least 3 characters, sort by ID
   if (commonPrefix.length >= 3) {
-    return a.key.localeCompare(b.key);
+    return sortByShardKey(a, b);
   }
   
   // Otherwise, sort alphabetically by name
