@@ -9,7 +9,6 @@ const ImagePreloadContext = createContext<ImagePreloadContextValue>({
   isReady: false,
 });
 
-// Export hook with eslint disable for react-refresh
 // eslint-disable-next-line react-refresh/only-export-components
 export const useImagePreload = () => useContext(ImagePreloadContext);
 

@@ -12,7 +12,6 @@ export function getShardIconIds(): string[] {
       return match ? match[1] : null;
     })
     .filter((id): id is string => id !== null)
-    .sort(); // Sort for consistent ordering
 }
 
 // Export a cached version for performance

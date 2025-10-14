@@ -57,20 +57,6 @@ export class ImagePreloader {
     await Promise.all(imagePromises);
     this.loading = null;
   }
-
-  getImageSrc(shardId: string): string {
-    const baseUrl = import.meta.env.BASE_URL;
-    return `${baseUrl}shardIcons/${shardId}.png`;
-  }
-
-  isLoaded(): boolean {
-    return this.loading === null && this.loadedImages.size > 0;
-  }
-
-  clear(): void {
-    this.loadedImages.clear();
-    this.loading = null;
-  }
 }
 
 export const imagePreloader = ImagePreloader.getInstance();
