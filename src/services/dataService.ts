@@ -1,5 +1,6 @@
 import type { BazaarData } from "../types/hypixelApiTypes.ts";
 import type { ShardWithKey, Shard } from "../types/types";
+import { sortShardsByNameWithPrefixAwareness } from "../utilities/utilityFunctions";
 
 interface FusionData {
   shards: Record<string, Shard>;
@@ -125,7 +126,7 @@ export class DataService {
       
       if (aStarts && !bStarts) return -1;
       if (!aStarts && bStarts) return 1;
-      return aName.localeCompare(bName);
+      return sortShardsByNameWithPrefixAwareness(a, b);
     });
   }
 
@@ -148,7 +149,7 @@ export class DataService {
       
       if (aStarts && !bStarts) return -1;
       if (!aStarts && bStarts) return 1;
-      return aName.localeCompare(bName);
+      return sortShardsByNameWithPrefixAwareness(a, b);
     });
   }
 }

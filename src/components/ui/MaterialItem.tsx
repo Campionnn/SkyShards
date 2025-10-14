@@ -42,47 +42,45 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
             </span>
           </Tooltip>
         </div>
-        <div className="flex flex-row items-center gap-2 ml-2">
-          <div className="flex flex-col items-end justify-center h-full">
-            {!ironManView && (
-              <>
+        <div className="flex flex-col items-end justify-center h-full ml-2">
+          {!ironManView && (
+            <>
+              <div className="flex items-center gap-1.5">
                 <div className="text-sm text-slate-400 whitespace-nowrap">{formatLargeNumber(quantity * shard.rate)}</div>
-                <div className="text-xs text-slate-400 whitespace-nowrap mt-1">
-                  {formatLargeNumber(shard.rate)} <span className="text-slate-500">per</span>
+                {hasBreakdown && (
+                  <button className="flex-shrink-0 transition-colors text-slate-400 hover:text-slate-200 cursor-pointer" onClick={() => setIsModalOpen(true)} title="View usage breakdown">
+                    <Info className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              <div className="text-xs text-slate-400 whitespace-nowrap mt-1">
+                {formatLargeNumber(shard.rate)} <span className="text-slate-500">per</span>
+              </div>
+            </>
+          )}
+          {ironManView && (
+            <>
+              <div className="flex items-center gap-1.5">
+                <div className="flex gap-0.5 text-sm text-slate-400 whitespace-nowrap">
+                  {formatNumber(shard.rate)}
+                  <span className="text-slate-500">/</span>
+                  <span className="text-slate-500">hr</span>
                 </div>
-              </>
-            )}
-            {ironManView && (
-              <>
-                <div className="text-sm text-slate-400 whitespace-nowrap">
-                  {formatNumber(shard.rate)} <span className="text-slate-500"> / </span> <span className="text-slate-500">hr</span>
-                </div>
-                <div className="text-xs text-slate-400 whitespace-nowrap mt-1">{formatTime(timeNeeded)}</div>
-              </>
-            )}
-          </div>
-          {hasBreakdown && (
-            <button
-              className="flex-shrink-0 p-1.5 hover:bg-slate-600/50 rounded transition-colors text-slate-400 hover:text-slate-200"
-              onClick={() => setIsModalOpen(true)}
-              title="View usage breakdown"
-            >
-              <Info className="w-4 h-4" />
-            </button>
+                {hasBreakdown && (
+                  <button className="flex-shrink-0 transition-colors text-amber-400 hover:text-amber-200 cursor-pointer" onClick={() => setIsModalOpen(true)} title="View usage breakdown">
+                    <Info className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              <div className="text-xs text-slate-400 whitespace-nowrap mt-1">{formatTime(timeNeeded)}</div>
+            </>
           )}
         </div>
       </div>
 
       {/* Breakdown Modal */}
       {hasBreakdown && breakdown && allShards && (
-        <MaterialBreakdownModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          materialShard={shard}
-          breakdown={breakdown}
-          allShards={allShards}
-          ironManView={ironManView}
-        />
+        <MaterialBreakdownModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} materialShard={shard} breakdown={breakdown} allShards={allShards} ironManView={ironManView} />
       )}
     </>
   );
