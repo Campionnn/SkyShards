@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Layout } from "./components";
-import { CalculatorStateProvider, RecipeStateProvider } from "./context";
+import { CalculatorStateProvider, RecipeStateProvider, ImagePreloadProvider } from "./context";
 import { usePageTitle } from "./hooks";
 import { ToastProvider } from "./components";
 
@@ -32,11 +32,13 @@ const ProtectedLayout = () => {
   usePageTitle(); // Update page title based on route
 
   return (
-    <CalculatorStateProvider>
-      <RecipeStateProvider>
-        <AppWithProviders />
-      </RecipeStateProvider>
-    </CalculatorStateProvider>
+    <ImagePreloadProvider>
+      <CalculatorStateProvider>
+        <RecipeStateProvider>
+          <AppWithProviders />
+        </RecipeStateProvider>
+      </CalculatorStateProvider>
+    </ImagePreloadProvider>
   );
 };
 
