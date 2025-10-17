@@ -106,6 +106,8 @@ const STAT_ICON_CONFIG: Record<string, StatIconConfig> = {
   "✦": { color: "text-white", keywords: ["Speed"] },
   "❂": { color: "text-white", keywords: ["True Defense"] },
   "✧": { color: "text-white", keywords: ["Pristine"] },
+  "❃": { color: "text-fuchsia-400", keywords: ["Tracking"] },
+  "✿": { color: "text-green-600", keywords: ["Mythological"] },
 };
 
 const RARITY_COLORS = {

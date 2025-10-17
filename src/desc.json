@@ -115,6 +115,10 @@
     "title": "Rotten Pickaxe",
     "description": "Grants +3 ⸕ Mining Speed"
   },
+  "C100": {
+    "title": "Mythological Resistance",
+    "description": "Grants +4 ❈ Defense against ✿ Mythological mobs"
+  },
   "U1": {
     "title": "Wood Elemental",
     "description": "Grants +2 ❤ Health"
@@ -431,6 +435,10 @@
     "title": "Echo of Sharpening",
     "description": "Your Sharpening Attributes are +2% stronger"
   },
+  "R63": {
+    "title": "Mythological Fortune",
+    "description": "Grants +0.5 ✯ Magic Find against ✿ Mythological mobs"
+  },
   "R64": {
     "title": "Chop",
     "description": "Grants a +10% chance to Chop an extra log, on top of the ones you swept"
@@ -562,6 +570,14 @@
   "E37": {
     "title": "Garden Wisdom",
     "description": "Grants +0.5 ☯ Farming Wisdom"
+  },
+  "E100": {
+    "title": "King of Greed",
+    "description": "Increases Coin gain from Griffin Burrows by +1%"
+  },
+  "E101": {
+    "title": "Big Game Hunter",
+    "description": "Grants +0.5 ❃ Tracking on Griffin Burrows"
   },
   "L1": {
     "title": "Shadow Elemental",
