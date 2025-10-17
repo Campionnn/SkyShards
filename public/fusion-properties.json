@@ -374,16 +374,6 @@
       "Yog"
     ]
   },
-  "C100": {
-    "name": "Cretan Bull",
-    "rarity": "Common",
-    "category": "Combat",
-    "family": [],
-    "input1": "",
-    "input2": "",
-    "id_result": "",
-    "id_origin": []
-  },
   "U1": {
     "name": "Bramble",
     "rarity": "Uncommon",
@@ -1389,7 +1379,7 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "Minotaur",
+    "id_result": "",
     "id_origin": [
       "Draconic"
     ]
@@ -1406,18 +1396,6 @@
     "input2": "",
     "id_result": "",
     "id_origin": []
-  },
-  "R63": {
-    "name": "Minotaur",
-    "rarity": "Rare",
-    "category": "Combat",
-    "family": [],
-    "input1": "",
-    "input2": "",
-    "id_result": "",
-    "id_origin": [
-      "Wither"
-    ]
   },
   "R64": {
     "name": "Hummingbird",
@@ -1737,7 +1715,7 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "King Minos",
+    "id_result": "Ghost",
     "id_origin": [
       "Barbarian Duke X"
     ]
@@ -1752,7 +1730,7 @@
     ],
     "input1": "Alligator Shard",
     "input2": "Rare+&Combat",
-    "id_result": "King Minos",
+    "id_result": "Ghost",
     "id_origin": []
   },
   "E31": {
@@ -1790,9 +1768,10 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Sphinx",
+    "id_result": "",
     "id_origin": [
-      "King Minos"
+      "Hellwisp",
+      "Caiman"
     ]
   },
   "E34": {
@@ -1850,31 +1829,6 @@
     "input2": "Dragon",
     "id_result": "",
     "id_origin": []
-  },
-  "E100": {
-    "name": "King Minos",
-    "rarity": "Epic",
-    "category": "Combat",
-    "family": [],
-    "input1": "",
-    "input2": "",
-    "id_result": "Ghost",
-    "id_origin": [
-      "Hellwisp",
-      "Caiman"
-    ]
-  },
-  "E101": {
-    "name": "Sphinx",
-    "rarity": "Epic",
-    "category": "Combat",
-    "family": [],
-    "input1": "",
-    "input2": "",
-    "id_result": "",
-    "id_origin": [
-      "Ghost"
-    ]
   },
   "L1": {
     "name": "Tenebris",
