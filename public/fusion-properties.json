@@ -369,12 +369,12 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Cretan Bull",
     "id_origin": [
       "Yog"
     ]
   },
-  "C100": {
+  "C39": {
     "name": "Cretan Bull",
     "rarity": "Common",
     "category": "Combat",
@@ -382,7 +382,9 @@
     "input1": "",
     "input2": "",
     "id_result": "",
-    "id_origin": []
+    "id_origin": [
+      "Miner Zombie"
+    ]
   },
   "U1": {
     "name": "Bramble",
@@ -1737,7 +1739,7 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "King Minos",
+    "id_result": "Ghost",
     "id_origin": [
       "Barbarian Duke X"
     ]
@@ -1752,7 +1754,7 @@
     ],
     "input1": "Alligator Shard",
     "input2": "Rare+&Combat",
-    "id_result": "King Minos",
+    "id_result": "Ghost",
     "id_origin": []
   },
   "E31": {
@@ -1792,7 +1794,8 @@
     "input2": "",
     "id_result": "Sphinx",
     "id_origin": [
-      "King Minos"
+      "Hellwisp",
+      "Caiman"
     ]
   },
   "E34": {
@@ -1836,7 +1839,7 @@
     ],
     "input1": "Cave Dweller&Rare+",
     "input2": "Cave Dweller&Epic+",
-    "id_result": "",
+    "id_result": "Sphinx",
     "id_origin": []
   },
   "E37": {
@@ -1851,21 +1854,21 @@
     "id_result": "",
     "id_origin": []
   },
-  "E100": {
-    "name": "King Minos",
+  "E39": {
+    "name": "Sphinx",
     "rarity": "Epic",
     "category": "Combat",
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "Ghost",
+    "id_result": "King Minos",
     "id_origin": [
-      "Hellwisp",
-      "Caiman"
+      "Ghost",
+      "Cavernshade"
     ]
   },
-  "E101": {
-    "name": "Sphinx",
+  "E42": {
+    "name": "King Minos",
     "rarity": "Epic",
     "category": "Combat",
     "family": [],
@@ -1873,7 +1876,7 @@
     "input2": "",
     "id_result": "",
     "id_origin": [
-      "Ghost"
+      "Sphinx"
     ]
   },
   "L1": {
