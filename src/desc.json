@@ -115,7 +115,7 @@
     "title": "Rotten Pickaxe",
     "description": "Grants +3 ⸕ Mining Speed"
   },
-  "C100": {
+  "C39": {
     "title": "Mythological Resistance",
     "description": "Grants +4 ❈ Defense against ✿ Mythological mobs"
   },
@@ -571,11 +571,11 @@
     "title": "Garden Wisdom",
     "description": "Grants +0.5 ☯ Farming Wisdom"
   },
-  "E100": {
+  "E42": {
     "title": "King of Greed",
     "description": "Increases Coin gain from Griffin Burrows by +1%"
   },
-  "E101": {
+  "E39": {
     "title": "Big Game Hunter",
     "description": "Grants +0.5 ❃ Tracking on Griffin Burrows"
   },
