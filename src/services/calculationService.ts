@@ -207,7 +207,7 @@ export class CalculationService {
       legendary: 0,
     };
 
-    effectiveFortune += rarityBonuses[shard.rarity] || 0;
+    effectiveFortune += rarityBonuses[shard.rarity] * multipliers.seaSerpentMultiplier || 0;
 
     // Apply frog bonus
     if (params.frogBonus) {
