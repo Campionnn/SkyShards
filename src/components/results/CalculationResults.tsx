@@ -189,7 +189,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     return list;
   };
 
-  const convertTreeToSkyHanni = (tree: RecipeTree): NoFrillsItem[] => {
+  type SkyHanniItem = { name: string; needed: number };
+
+  const convertTreeToSkyHanni = (tree: RecipeTree): SkyHanniItem[] => {
     const shardQuantities: Map<string, number> = new Map();
     const traverse = (node: RecipeTree | undefined) => {
       if (!node) return;
@@ -208,12 +210,11 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     };
     traverse(tree);
 
-    const list: NoFrillsItem[] = [];
+    const list: SkyHanniItem[] = [];
     shardQuantities.forEach((quantity, shardId) => {
       list.push({
         name: data.shards[shardId].name,
         needed: quantity,
-        source: "Direct",
       });
     });
     return list;
@@ -236,7 +237,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   };
 
   const buildSkyHanniString = () => {
-    let list: NoFrillsItem[];
+    let list: SkyHanniItem[];
 
     if (result.tree) {
       list = convertTreeToSkyHanni(result.tree);
@@ -246,7 +247,6 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
         list.push({
           name: data.shards[shardId].name,
           needed: quantity,
-          source: "Direct",
         });
       });
     }
