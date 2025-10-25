@@ -229,8 +229,21 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   };
 
   const buildNoFrillsString = () => {
-    if (!result.tree) return "";
-    const list = convertTreeToNoFrills(result.tree);
+    let list: NoFrillsItem[];
+
+    if (result.tree) {
+      list = convertTreeToNoFrills(result.tree);
+    } else {
+      list = [];
+      result.totalQuantities.forEach((quantity, shardId) => {
+        list.push({
+          name: data.shards[shardId].name,
+          needed: quantity,
+          source: "Direct",
+        });
+      });
+    }
+
     const listString = JSON.stringify(list);
     const base64List = gzipBase64(listString);
     return "<NoFrillsRecipe>(V1):" + base64List;
