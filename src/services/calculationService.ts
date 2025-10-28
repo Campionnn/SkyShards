@@ -152,20 +152,19 @@ export class CalculationService {
     const tier = tierData[kuudraTier];
     if (!tier) return 0;
 
-    const downtime = 25; // Fixed downtime between runs in seconds
+    const downtime = 25;
 
     // Use custom time if provided, otherwise use default baseTime
-    // Always add downtime to the total time per run
     const runTime = customTimeSeconds !== null ? customTimeSeconds : tier.baseTime;
     const totalTime = runTime + downtime;
 
-    // If moneyPerHour is Infinity, ignore key cost (costTime = 0)
-    // If moneyPerHour is 0, treat as lowest possible rate (costTime very large)
+    // If moneyPerHour is Infinity, ignore key cost
+    // If moneyPerHour is 0, treat as lowest possible rate
     let costTime: number;
     if (moneyPerHour === Infinity) {
       costTime = 0;
     } else if (moneyPerHour === 0) {
-      costTime = 1e12; // effectively makes the rate approach zero
+      costTime = 1e12;
     } else {
       costTime = (tier.cost / moneyPerHour) * 3600;
     }
