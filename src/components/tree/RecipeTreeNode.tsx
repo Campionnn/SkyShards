@@ -281,31 +281,34 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 <MoveRight className="w-4 text-amber-400" />
                 <div className="flex items-center space-x-2 text-sm">
                   {renderShardInfo(Math.floor(tree.quantity), shard, false)}
-                  <span className="px-1 py-0.4 text-xs bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">CYCLE !</span>
-                  {crocProcs !== null && (
-                    <Tooltip
-                      content={`Crocodile has a chance to double the output of reptile recipes. You need ${crocProcs} Pure Reptile triggers to have enough shards for the craft. This is based on average luck`}
-                      title="Crocodile - Pure Reptile"
-                      className="cursor-help"
-                      showRomanNumerals={false}
-                    >
-                      <span className="px-1 py-0.4 text-xs bg-blue-500/15 text-blue-400 border border-blue-400/40 rounded-md mx-2 flex items-center gap-1">
-                        <span className="font-medium">Pure Reptile needed</span>
-                        <span className="font-bold">{crocProcs}</span>
-                      </span>
-                    </Tooltip>
-                  )}
+                  <span className="px-1 py-0.4 text-xs bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">Cycle</span>
                 </div>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
             <div className="text-right">
-              <div className="flex items-center justify-end space-x-1.5 pl-3">
-                <span className="text-xs text-slate-500">fusions</span>
-                <span className="font-medium text-white text-xs">{runCount}</span>
+              <div className="flex py-1 px-1.5 gap-1 items-center cursor-pointer">
+                <span className="text-xs text-slate-400">fusions</span>
+                <span className="font-medium text-slate-300 text-xs">{runCount}</span>
               </div>
             </div>
+            {crocProcs !== null && (
+              <Tooltip
+                content={`Crocodile has a chance to double the output of reptile recipes. You need <span class="text-green-400">${crocProcs} Pure Reptile </span> triggers to have enough shards for the craft. This is based on average luck`}
+                title={`Pure Reptile`}
+                shardName="Crocodile"
+                shardIcon="R45"
+                rarity="rare"
+                className="cursor-help"
+                showRomanNumerals={false}
+              >
+                <div className="flex items-center gap-1 px-[5px] py-1 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded">
+                  <span className="text-xs text-green-300 font-extralight">{crocProcs}</span>
+                  <GiGecko className="w-3 h-3 text-green-400" />
+                </div>
+              </Tooltip>
+            )}
             {onShowAlternatives && (
               <button
                 onClick={(e) => {

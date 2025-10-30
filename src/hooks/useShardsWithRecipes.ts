@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { DataService } from "../services";
 import type { ShardWithDirectInfo } from "../types/types";
 
-export const useShardsWithRecipes = () => {
+export const useShardsWithRecipes = (): { shards: ShardWithDirectInfo[]; loading: boolean; error: string | null } => {
   const [shards, setShards] = useState<ShardWithDirectInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -14,9 +14,6 @@ export const useShardsWithRecipes = () => {
         const dataService = DataService.getInstance();
         const [shardsData, defaultRates] = await Promise.all([dataService.loadShards(), dataService.loadDefaultRates()]);
 
-        // Add isDirect property to each shard
-        // A shard is "direct" if it can be obtained directly (has a rate > 0)
-        // regardless of whether it also has fusion recipes
         const shardsWithDirectInfo = shardsData.map((shard) => ({
           ...shard,
           rate: defaultRates[shard.key] || 0,

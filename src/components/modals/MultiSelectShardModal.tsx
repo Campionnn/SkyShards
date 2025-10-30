@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Search, Check, RotateCcw, Filter, ChevronDown } from "lucide-react";
-import { getRarityColor, sortShardsByNameWithPrefixAwareness } from "../../utilities";
+import { getRarityColor, sortShardsByNameWithPrefixAwareness, filterShards, DEFAULT_FILTER_CONFIG } from "../../utilities";
 import type { ShardWithKey } from "../../types/types";
 import { MAX_QUANTITIES } from "../../constants";
 import { ToggleSwitch } from "../ui";
@@ -93,20 +93,11 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
   }, [isOpen, initialSelections]);
 
   const filteredShards = useMemo(() => {
-    // Apply filters
-    const filtered = shards.filter((shard) => {
-      // Search filter
-      const lowerQuery = searchQuery.toLowerCase();
-      const matchesName = shard.name.toLowerCase().includes(lowerQuery);
-      const matchesId = shard.key.toLowerCase().includes(lowerQuery);
-      const matchesFamily = shard.family.toLowerCase().includes(lowerQuery);
-      const matchesType = shard.type.toLowerCase().includes(lowerQuery);
-      const matchesSearch = !searchQuery.trim() || matchesName || matchesId || matchesFamily || matchesType;
-
-      // Rarity filter
-      const matchesRarity = rarityFilter === "all" || shard.rarity.toLowerCase() === rarityFilter;
-
-      return matchesSearch && matchesRarity;
+    // Apply filters using centralized function
+    const filtered = filterShards(shards, {
+      query: searchQuery,
+      rarity: rarityFilter,
+      searchConfig: DEFAULT_FILTER_CONFIG,
     });
 
     // Sort results
