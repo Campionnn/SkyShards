@@ -95,7 +95,7 @@ const STAT_ICON_CONFIG: Record<string, StatIconConfig> = {
     },
   },
   "⚔": { color: "text-orange-400", keywords: ["Bonus Attack Speed", "Attack Speed"] },
-  "✯": { color: "text-yellow-400", keywords: ["Magic Find"] },
+  "✯": { color: "text-cyan-300", keywords: ["Magic Find"] },
   "♔": { color: "text-yellow-400", keywords: ["Trophy Fish Chance"] },
   "⸕": { color: "text-yellow-400", keywords: ["Mining Speed"] },
   "♣": { color: "text-pink-400", keywords: ["Pet Luck"] },
