@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Search, RotateCcw, Save, AlignLeft } from "lucide-react";
 import { useShardsWithRecipes, useCustomRates } from "../hooks";
-import { debounce, formatShardDescription } from "../utilities";
+import { debounce, formatShardDescription, filterShards, DEFAULT_FILTER_CONFIG } from "../utilities";
 import { RarityDropdown, TypeDropdown, ShardItem } from "../components";
 import { SHARD_DESCRIPTIONS } from "../constants";
+import type { ShardWithDirectInfo } from "../types/types";
 
 export const SettingsPage: React.FC = () => {
   const { shards, loading: shardsLoading } = useShardsWithRecipes();
@@ -22,24 +23,11 @@ export const SettingsPage: React.FC = () => {
   }, [filter, debouncedSetFilter]);
 
   const filteredShards = useMemo(() => {
-    return shards.filter((shard) => {
-      const search = debouncedFilter.toLowerCase();
-      const matchesName = shard.name.toLowerCase().includes(search);
-      const matchesFamily = shard.family.toLowerCase().includes(search);
-      const matchesTypeField = shard.type.toLowerCase().includes(search);
-      const matchesId = shard.key.toLowerCase().includes(search);
-
-      const shardDesc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
-      const matchesTitle = shardDesc?.title?.toLowerCase().includes(search) || false;
-      const matchesDescription = shardDesc?.description?.toLowerCase().includes(search) || false;
-
-      const matchesSearch = matchesName || matchesFamily || matchesTypeField || matchesId || matchesTitle || matchesDescription;
-      const matchesRarity = rarityFilter === "all" || shard.rarity === rarityFilter;
-      const matchesType =
-        typeFilter === "all" ||
-        (typeFilter === "direct" && shard.isDirect) ||
-        (typeFilter === "fuse" && !shard.isDirect);
-      return matchesSearch && matchesRarity && matchesType;
+    return filterShards<ShardWithDirectInfo>(shards, {
+      query: debouncedFilter,
+      rarity: rarityFilter,
+      type: typeFilter as "all" | "direct" | "fuse",
+      searchConfig: DEFAULT_FILTER_CONFIG,
     });
   }, [shards, debouncedFilter, rarityFilter, typeFilter]);
 

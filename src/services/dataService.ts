@@ -1,6 +1,6 @@
 import type { BazaarData } from "../types/hypixelApiTypes.ts";
 import type { ShardWithKey, Shard } from "../types/types";
-import { sortShardsByNameWithPrefixAwareness } from "../utilities/utilityFunctions";
+import { sortShardsByNameWithPrefixAwareness, filterShards, BASIC_FILTER_CONFIG, NAME_ONLY_FILTER_CONFIG } from "../utilities";
 
 interface FusionData {
   shards: Record<string, Shard>;
@@ -109,13 +109,13 @@ export class DataService {
 
   async searchShards(query: string): Promise<ShardWithKey[]> {
     const shards = await this.loadShards();
-    const lowerQuery = query.toLowerCase();
-    const filtered = shards.filter((shard) => 
-      shard.name.toLowerCase().includes(lowerQuery) || 
-      shard.key.toLowerCase().includes(lowerQuery)
-    );
-    
+    const filtered = filterShards(shards, {
+      query,
+      searchConfig: BASIC_FILTER_CONFIG,
+    });
+
     // Sort results: prioritize shards that start with the query
+    const lowerQuery = query.toLowerCase();
     return filtered.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
@@ -132,13 +132,13 @@ export class DataService {
 
   async searchShardsByNameOnly(query: string): Promise<ShardWithKey[]> {
     const shards = await this.loadShards();
-    const lowerQuery = query.toLowerCase();
-    const filtered = shards.filter((shard) => 
-      shard.name.toLowerCase().includes(lowerQuery) || 
-      shard.key.toLowerCase().includes(lowerQuery)
-    );
-    
+    const filtered = filterShards(shards, {
+      query,
+      searchConfig: NAME_ONLY_FILTER_CONFIG,
+    });
+
     // Sort results: prioritize shards that start with the query
+    const lowerQuery = query.toLowerCase();
     return filtered.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();

@@ -195,7 +195,7 @@ const findCommonPrefix = (str1: string, str2: string): string => {
 };
 
 // Helper function to sort by shard ID (rarity letter + number)
-const sortByShardKey = (a: { key: string }, b: { key: string }): number => {
+export const sortByShardKey = (a: { key: string }, b: { key: string }): number => {
   const aMatch = a.key.match(/^([CUREL])(\d+)$/);
   const bMatch = b.key.match(/^([CUREL])(\d+)$/);
 
