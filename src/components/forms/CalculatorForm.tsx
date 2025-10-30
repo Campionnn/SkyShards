@@ -462,6 +462,46 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                 <label className="flex items-center gap-2 text-sm font-medium text-fuchsia-300 mb-2">
                   <div className="w-2 h-2 bg-fuchsia-500 rounded-full"></div>
                   Hunter Fortune
+                  {/* Tooltip updated per request: no boxes, +X first, no per-rarity x+y, with boosters */}
+                  <Tooltip
+                    shardName="Hunter Fortune"
+                    rarity="legendary"
+                    title="Sources, bonuses, and boosters"
+                    showRomanNumerals={false}
+                    content={`
+                      <div class="space-y-2">
+                        <div class="text-slate-200 font-semibold">Sources</div>
+                        <ul class="list-disc pl-4 space-y-0.5">
+                          <li><span class="font-semibold">+50</span> <span class="text-slate-300">— HotF 6 perk</span></li>
+                          <li><span class="font-semibold">+30</span> <span class="text-slate-300">— David's Cloak (Attribute Stacks 30)</span></li>
+                          <li><span class="font-semibold">+25</span> <span class="text-slate-300">— Hunting level 25</span></li>
+                          <li><span class="font-semibold">+13</span> <span class="text-slate-300">— Megalith (Sea Serpent + Tiamat max)</span></li>
+                          <li><span class="font-semibold">+3</span> <span class="text-slate-300">— Infernal Kuudra Core</span></li>
+                        </ul>
+                        <div class="h-px bg-white/10"></div>
+                        <div class="text-slate-300">Universal fortune total: <span class="text-amber-300 font-semibold">121</span></div>
+
+                        <div class="text-slate-200 font-semibold pt-1">Rarity bonuses</div>
+                        <ul class="pl-0 space-y-0.5 text-xs">
+                          <li class="flex items-center justify-between"><span><span class="font-semibold text-slate-200">+26</span> <span class="text-slate-200">Common</span></span><span class="text-slate-400">Newt</span></li>
+                          <li class="flex items-center justify-between"><span><span class="font-semibold text-emerald-300">+26</span> <span class="text-emerald-300">Uncommon</span></span><span class="text-slate-400">Salamander</span></li>
+                          <li class="flex items-center justify-between"><span><span class="font-semibold text-blue-300">+13</span> <span class="text-blue-300">Rare</span></span><span class="text-slate-400">Lizard King</span></li>
+                          <li class="flex items-center justify-between"><span><span class="font-semibold text-purple-300">+13</span> <span class="text-purple-300">Epic</span></span><span class="text-slate-400">Leviathan</span></li>
+                          <li class="flex items-center justify-between"><span><span class="font-semibold text-amber-300">+0</span> <span class="text-amber-300">Legendary</span></span><span class="text-slate-500">—</span></li>
+                        </ul>
+
+                        <div class="text-slate-200 font-semibold pt-1">Totals</div>
+                        <ul class="pl-0 space-y-0.5 text-xs">
+                          <li class="flex items-center justify-between"><span class="text-slate-200">Common</span><span class="text-slate-200 font-semibold">147</span></li>
+                          <li class="flex items-center justify-between"><span class="text-emerald-300">Uncommon</span><span class="text-emerald-300 font-semibold">147</span></li>
+                          <li class="flex items-center justify-between"><span class="text-blue-300">Rare</span><span class="text-blue-300 font-semibold">134</span></li>
+                          <li class="flex items-center justify-between"><span class="text-purple-300">Epic</span><span class="text-purple-300 font-semibold">134</span></li>
+                          <li class="flex items-center justify-between"><span class="text-amber-300">Legendary</span><span class="text-amber-300 font-semibold">121</span></li>
+                        </ul>
+
+                      </div>
+                    `}
+                  />
                 </label>
                 <input
                   type="number"
