@@ -213,3 +213,49 @@ export interface RecipeOverrideManagerProps {
   onResetRecipeOverrides: () => void;
   children: (props: { showAlternatives: (shardId: string, context: AlternativeSelectionContext) => void; recipeOverrides: RecipeOverride[]; resetAlternatives: () => void }) => React.ReactNode;
 }
+
+export interface InventoryCalculationResult {
+  timePerShard: number;
+  totalTime: number;
+  totalShardsProduced: number;
+  craftsNeeded: number;
+  totalQuantities: Map<string, number>;
+  totalFusions: number;
+  craftTime: number;
+  tree: InventoryRecipeTree | null;
+}
+
+export type InventoryRecipeTree =
+  | InventoryRecipeTree[]
+  | {
+      shard: string;
+      method: "direct";
+      quantity: number;
+      craftsNeeded?: number;
+    }
+  | {
+      shard: string;
+      method: "inventory";
+      quantity: number;
+    }
+  | {
+      shard: string;
+      method: "recipe";
+      quantity: number;
+      recipe: Recipe;
+      inputs: [InventoryRecipeTree, InventoryRecipeTree];
+      craftsNeeded: number;
+    }
+  | {
+      shard: string;
+      method: "cycle";
+      quantity: number;
+      steps: {
+        outputShard: string;
+        recipe: Recipe;
+      }[];
+      multiplier: number;
+      craftsNeeded: number;
+      inputRecipe: InventoryRecipeTree;
+      cycleInputs: InventoryRecipeTree[];
+    };
