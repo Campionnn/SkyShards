@@ -107,16 +107,9 @@ export class DataService {
     return this.bazaarPriceCache[cacheKey];
   }
 
-  async searchShards(query: string): Promise<ShardWithKey[]> {
-    const shards = await this.loadShards();
-    const filtered = filterShards(shards, {
-      query,
-      searchConfig: BASIC_FILTER_CONFIG,
-    });
-
-    // Sort results: prioritize shards that start with the query
+  private sortShardsByQuery(shards: ShardWithKey[], query: string): ShardWithKey[] {
     const lowerQuery = query.toLowerCase();
-    return filtered.sort((a, b) => {
+    return shards.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
       const aKey = a.key.toLowerCase();
@@ -130,6 +123,16 @@ export class DataService {
     });
   }
 
+  async searchShards(query: string): Promise<ShardWithKey[]> {
+    const shards = await this.loadShards();
+    const filtered = filterShards(shards, {
+      query,
+      searchConfig: BASIC_FILTER_CONFIG,
+    });
+
+    return this.sortShardsByQuery(filtered, query);
+  }
+
   async searchShardsByNameOnly(query: string): Promise<ShardWithKey[]> {
     const shards = await this.loadShards();
     const filtered = filterShards(shards, {
@@ -137,19 +140,6 @@ export class DataService {
       searchConfig: NAME_ONLY_FILTER_CONFIG,
     });
 
-    // Sort results: prioritize shards that start with the query
-    const lowerQuery = query.toLowerCase();
-    return filtered.sort((a, b) => {
-      const aName = a.name.toLowerCase();
-      const bName = b.name.toLowerCase();
-      const aKey = a.key.toLowerCase();
-      const bKey = b.key.toLowerCase();
-      const aStarts = aName.startsWith(lowerQuery) || aKey.startsWith(lowerQuery);
-      const bStarts = bName.startsWith(lowerQuery) || bKey.startsWith(lowerQuery);
-      
-      if (aStarts && !bStarts) return -1;
-      if (!aStarts && bStarts) return 1;
-      return sortShardsByNameWithPrefixAwareness(a, b);
-    });
+    return this.sortShardsByQuery(filtered, query);
   }
 }
