@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Search, Filter, ChevronDown, RotateCcw } from "lucide-react";
-import { getRarityColor, sortShardsByNameWithPrefixAwareness } from "../../utilities";
+import { getRarityColor, sortShardsByNameWithPrefixAwareness, sortByShardKey, filterShards, DEFAULT_FILTER_CONFIG } from "../../utilities";
 import type { ShardWithKey } from "../../types/types";
 
 interface BrowseAllShardsModalProps {
@@ -59,50 +59,17 @@ export const BrowseAllShardsModal: React.FC<BrowseAllShardsModalProps> = ({ isOp
     }
   }, [isOpen]);
 
-  const sortByShardId = (a: ShardWithKey, b: ShardWithKey) => {
-    // Extract rarity letter and number from ID (e.g., "C1" -> "C" and 1)
-    const aMatch = a.key.match(/^([CUREL])(\d+)$/);
-    const bMatch = b.key.match(/^([CUREL])(\d+)$/);
-
-    if (!aMatch || !bMatch) {
-      return a.key.localeCompare(b.key);
-    }
-
-    const [, aRarity, aNum] = aMatch;
-    const [, bRarity, bNum] = bMatch;
-
-    // Define rarity order
-    const rarityOrder: Record<string, number> = { C: 1, U: 2, R: 3, E: 4, L: 5 };
-
-    // First sort by rarity
-    if (rarityOrder[aRarity] !== rarityOrder[bRarity]) {
-      return rarityOrder[aRarity] - rarityOrder[bRarity];
-    }
-
-    // Then sort by number
-    return parseInt(aNum) - parseInt(bNum);
-  };
-
   const filteredShards = useMemo(() => {
-    // Apply filters
-    const filtered = shards.filter((shard) => {
-      // Search filter
-      const lowerQuery = searchQuery.toLowerCase();
-      const matchesName = shard.name.toLowerCase().includes(lowerQuery);
-      const matchesId = shard.key.toLowerCase().includes(lowerQuery);
-      const matchesFamily = shard.family.toLowerCase().includes(lowerQuery);
-      const matchesType = shard.type.toLowerCase().includes(lowerQuery);
-      const matchesSearch = !searchQuery.trim() || matchesName || matchesId || matchesFamily || matchesType;
-
-      // Rarity filter
-      const matchesRarity = rarityFilter === "all" || shard.rarity.toLowerCase() === rarityFilter;
-
-      return matchesSearch && matchesRarity;
+    // Apply filters using centralized function
+    const filtered = filterShards(shards, {
+      query: searchQuery,
+      rarity: rarityFilter,
+      searchConfig: DEFAULT_FILTER_CONFIG,
     });
 
     // Sort results
     if (!searchQuery.trim()) {
-      return filtered.sort(sortByShardId);
+      return filtered.sort(sortByShardKey);
     }
 
     const lowerQuery = searchQuery.toLowerCase();

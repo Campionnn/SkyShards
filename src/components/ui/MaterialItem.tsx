@@ -30,9 +30,9 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
             title={shardDesc?.title}
             shardName={shard.name}
             shardIcon={shard.id}
-            rarity={shardDesc?.rarity?.toLowerCase() || shard.rarity}
-            family={shardDesc?.family}
-            type={shardDesc?.type}
+            rarity={shard.rarity}
+            family={shard.family}
+            type={shard.type}
             shardId={shard.id}
             className="cursor-pointer"
           >

@@ -96,7 +96,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     pureReptile: number;
     steps: SkyOceanCycleStep[];
     inputRecipe?: SkyOceanTree;
-    // cycleInputs: SkyOceanTree[];
+    cycleInputs: SkyOceanTree[];
   };
   type SkyOceanRecipe = {
     shard: string;
@@ -133,7 +133,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           inputs: step.recipe.inputs,
         })),
         inputRecipe: tree.inputRecipe ? convertTreeToSkyOcean(tree.inputRecipe) : undefined,
-        // cycleInputs: tree.cycleInputs ? tree.cycleInputs.map((input) => convertTreeToSkyOcean(input)) : [],
+        cycleInputs: tree.cycleInputs ? tree.cycleInputs.map((input) => convertTreeToSkyOcean(input)) : [],
       };
     }
 
@@ -189,20 +189,84 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     return list;
   };
 
+  type SkyHanniItem = { name: string; needed: number };
+
+  const convertTreeToSkyHanni = (tree: RecipeTree): SkyHanniItem[] => {
+    const shardQuantities: Map<string, number> = new Map();
+    const traverse = (node: RecipeTree | undefined) => {
+      if (!node) return;
+      if (node.method === "direct") {
+        const key = node.shard;
+        const currentQuantity = shardQuantities.get(key) || 0;
+        shardQuantities.set(key, currentQuantity + node.quantity);
+      } else if (node.method === "recipe") {
+        if (node.inputs) {
+          node.inputs.forEach((input) => traverse(input));
+        }
+      } else if (node.method === "cycle") {
+        if (node.inputRecipe) traverse(node.inputRecipe);
+        node.cycleInputs.forEach((cycleInput) => traverse(cycleInput));
+      }
+    };
+    traverse(tree);
+
+    const list: SkyHanniItem[] = [];
+    shardQuantities.forEach((quantity, shardId) => {
+      list.push({
+        name: data.shards[shardId].name,
+        needed: quantity,
+      });
+    });
+    return list;
+  };
+
   const buildSkyOceanString = () => {
     if (!result.tree) return "";
     const convertedTree = convertTreeToSkyOcean(result.tree);
     const treeString = JSON.stringify(convertedTree);
     const base64Tree = gzipBase64(treeString);
-    return "<SkyOceanRecipe>(V1):" + base64Tree;
+    return "<SkyOceanRecipe>(V2):" + base64Tree;
   };
 
   const buildNoFrillsString = () => {
-    if (!result.tree) return "";
-    const list = convertTreeToNoFrills(result.tree);
+    let list: NoFrillsItem[];
+
+    if (result.tree) {
+      list = convertTreeToNoFrills(result.tree);
+    } else {
+      list = [];
+      result.totalQuantities.forEach((quantity, shardId) => {
+        list.push({
+          name: data.shards[shardId].name,
+          needed: quantity,
+          source: "Direct",
+        });
+      });
+    }
+
     const listString = JSON.stringify(list);
     const base64List = gzipBase64(listString);
     return "<NoFrillsRecipe>(V1):" + base64List;
+  };
+
+  const buildSkyHanniString = () => {
+    let list: SkyHanniItem[];
+
+    if (result.tree) {
+      list = convertTreeToSkyHanni(result.tree);
+    } else {
+      list = [];
+      result.totalQuantities.forEach((quantity, shardId) => {
+        list.push({
+          name: data.shards[shardId].name,
+          needed: quantity,
+        });
+      });
+    }
+
+    const listString = JSON.stringify(list);
+    const base64List = gzipBase64(listString);
+    return "<SkyHanniRecipe>(V1):" + base64List;
   };
 
   const handleCopySkyOcean = () => {
@@ -238,6 +302,24 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     } catch (err) {
       console.error("Failed to build NoFrills list:", err);
       toast({ title: "Build failed", description: "Failed to build NoFrills list.", variant: "error" });
+    }
+  };
+
+  const handleCopySkyHanni = () => {
+    try {
+      const text = buildSkyHanniString();
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          toast({ title: "Copied", description: "SkyHanni recipe copied to clipboard.", variant: "success" });
+        })
+        .catch((err) => {
+          console.error("Failed to copy SkyHanni list:", err);
+          toast({ title: "Copy failed", description: "Failed to copy to clipboard.", variant: "error" });
+        });
+    } catch (err) {
+      console.error("Failed to build SkyHanni list:", err);
+      toast({ title: "Build failed", description: "Failed to build SkyHanni list.", variant: "error" });
     }
   };
 
@@ -281,7 +363,15 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
             </div>
             Materials Needed
           </h3>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            {materialsOnly && (
+              <button
+                onClick={() => setCopyModalOpen(true)}
+                className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/20 hover:border-purple-500/30"
+              >
+                <span>Copy Materials</span>
+              </button>
+            )}
             {(() => {
               // Don't show Forest Essence if wooden bait is excluded
               if (params.noWoodenBait) return null;
@@ -419,9 +509,14 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
         </div>
       </div>
       )}
-      {!materialsOnly && result.tree && (
-        <CopyTreeModal open={copyModalOpen} onClose={() => setCopyModalOpen(false)} onCopySkyOcean={handleCopySkyOcean} onCopyNoFrills={handleCopyNoFrills} />
-      )}
+      <CopyTreeModal
+        open={copyModalOpen}
+        onClose={() => setCopyModalOpen(false)}
+        onCopySkyOcean={handleCopySkyOcean}
+        onCopyNoFrills={handleCopyNoFrills}
+        onCopySkyHanni={handleCopySkyHanni}
+        materialsOnly={materialsOnly}
+      />
     </div>
   );
 };

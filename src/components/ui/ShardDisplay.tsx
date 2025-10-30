@@ -28,9 +28,9 @@ export const ShardDisplay = ({ shardId, quantity, fusionData, size = "md", toolt
         title={shardDesc?.title}
         shardName={shard.name}
         shardIcon={shardId}
-        rarity={shardDesc?.rarity?.toLowerCase() || shard.rarity}
-        family={shardDesc?.family}
-        type={shardDesc?.type}
+        rarity={shard.rarity}
+        family={shard.family}
+        type={shard.type}
         shardId={shardId}
         className={tooltipVisible === false ? "" : "cursor-pointer"}
         visible={tooltipVisible}

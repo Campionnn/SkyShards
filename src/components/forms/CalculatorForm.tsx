@@ -2,9 +2,9 @@ import React from "react";
 import { Zap, RotateCcw, Settings, TriangleAlert, Layers } from "lucide-react";
 import { type CalculationFormData } from "../../schemas";
 import { ShardAutocomplete, MoneyInput } from "./inputs";
-import { useCalculatorState } from "../../hooks";
+import { useCalculatorState, useShards } from "../../hooks";
 import { LevelDropdown, KuudraDropdown } from "../calculator";
-import { MAX_QUANTITIES, SHARD_DESCRIPTIONS } from "../../constants";
+import {MAX_QUANTITIES, SHARD_DESCRIPTIONS} from "../../constants";
 import { isValidShardName, formatShardDescription } from "../../utilities";
 import { Tooltip, ToggleSwitch } from "../ui";
 import type { ShardWithKey } from "../../types/types";
@@ -22,6 +22,7 @@ type LevelKey = keyof Pick<
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
   const { form, setForm, saveEnabled, setSaveEnabledState } = useCalculatorState();
+  const { shards } = useShards();
 
   // Keep a ref of the latest form to use inside effects without depending on the whole object
   const latestFormRef = React.useRef<CalculationFormData>(form);
@@ -458,11 +459,52 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             {/* Hunter Fortune */}
             {form.ironManView && (
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-fuchsia-300 mb-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-fuchsia-300 mb-2">
                   <div className="w-2 h-2 bg-fuchsia-500 rounded-full"></div>
-                  Hunter Fortune
-                </label>
-                <input
+                  <span>Hunter Fortune</span>
+                  <div className="-mb-[5px]">
+                  <Tooltip
+                    shardName="Hunter Fortune"
+                    rarity="legendary"
+                    title=""
+                    showRomanNumerals={false}
+                    content={`
+                      <div class="space-y-2">
+                        <div class="text-slate-200 font-semibold">Sources</div>
+                        <ul class="space-y-0.5">
+                          <li><span class="font-semibold">+50</span> <span class="text-slate-300">— HotF 6 perk</span></li>
+                          <li><span class="font-semibold">+30</span> <span class="text-slate-300">— David's Cloak (Attribute Stacks 30)</span></li>
+                          <li><span class="font-semibold">+25</span> <span class="text-slate-300">— Hunting level 25</span></li>
+                          <li><span class="font-semibold">+13</span> <span class="text-slate-300">— Megalith (Sea Serpent + Tiamat max)</span></li>
+                          <li><span class="font-semibold">+3</span> <span class="text-slate-300">— Infernal Kuudra Core</span></li>
+                        </ul>
+                        <div class="h-px bg-white/10"></div>
+                        <div class="text-slate-300">Universal fortune total: <span class="text-amber-300 font-semibold">121</span></div>
+
+                        <div class="text-slate-200 font-semibold pt-1">Rarity bonuses</div>
+                        <ul class="pl-0 space-y-0.5 text-xs">
+                          <li class="flex items-center justify-between"><span><span class="font-semibold text-white">+26</span> <span class="text-white">Common</span></span><span class="text-slate-400">Newt</span></li>
+                          <li class="flex items-center justify-between"><span><span class="font-semibold text-green-400">+26</span> <span class="text-green-400">Uncommon</span></span><span class="text-slate-400">Salamander</span></li>
+                          <li class="flex items-center justify-between"><span><span class="font-semibold text-blue-400">+13</span> <span class="text-blue-400">Rare</span></span><span class="text-slate-400">Lizard King</span></li>
+                          <li class="flex items-center justify-between"><span><span class="font-semibold text-purple-400">+13</span> <span class="text-purple-400">Epic</span></span><span class="text-slate-400">Leviathan</span></li>
+                          <li class="flex items-center justify-between"><span><span class="font-semibold text-yellow-400">+0</span> <span class="text-yellow-400">Legendary</span></span><span class="text-slate-500">—</span></li>
+                        </ul>
+
+                        <div class="text-slate-200 font-semibold pt-1">Totals</div>
+                        <ul class="pl-0 space-y-0.5 text-xs">
+                          <li class="flex items-center justify-between"><span class="text-white">Common</span><span class="text-white font-semibold">147</span></li>
+                          <li class="flex items-center justify-between"><span class="text-green-400">Uncommon</span><span class="text-green-400 font-semibold">147</span></li>
+                          <li class="flex items-center justify-between"><span class="text-blue-400">Rare</span><span class="text-blue-400 font-semibold">134</span></li>
+                          <li class="flex items-center justify-between"><span class="text-purple-400">Epic</span><span class="text-purple-400 font-semibold">134</span></li>
+                          <li class="flex items-center justify-between"><span class="text-yellow-400">Legendary</span><span class="text-yellow-400 font-semibold">121</span></li>
+                        </ul>
+
+                      </div>
+                    `}
+                  />
+                  </div>
+                </div>
+              <input
                   type="number"
                   min="0"
                   value={form.hunterFortune === 0 ? "" : form.hunterFortune}
@@ -506,6 +548,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
           </h3>
           <div className="grid grid-cols-3 gap-1.5">
             {levelItems.map(({ key, label, shardId }) => {
+              const shard = shards.find((s) => s.id === shardId);
               const shardDesc = SHARD_DESCRIPTIONS[shardId as keyof typeof SHARD_DESCRIPTIONS];
               return (
                 <LevelDropdown
@@ -517,9 +560,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   tooltipContent={formatShardDescription(shardDesc?.description || "No description available.")}
                   tooltipShardName={label}
                   tooltipShardIcon={shardId}
-                  tooltipRarity={shardDesc?.rarity?.toLowerCase() || "common"}
-                  tooltipFamily={shardDesc?.family}
-                  tooltipType={shardDesc?.type}
+                  tooltipRarity={shard?.rarity}
+                  tooltipFamily={shard?.family}
+                  tooltipType={shard?.type}
                   tooltipWarning={key === "crocodileLevel" ? "Warning: May slow calculations significantly" : undefined}
                 />
               );
@@ -667,7 +710,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
             className="px-2 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-medium rounded-md text-xs border border-red-500/20 hover:border-red-500/30 transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer"
           >
             <TriangleAlert className="w-3 h-3" />
-            <span>Restart Everything</span>
+            <span>Reset Everything</span>
           </button>
         </div>
       </form>

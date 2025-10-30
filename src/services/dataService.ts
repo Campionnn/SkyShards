@@ -1,6 +1,6 @@
 import type { BazaarData } from "../types/hypixelApiTypes.ts";
 import type { ShardWithKey, Shard } from "../types/types";
-import { sortShardsByNameWithPrefixAwareness } from "../utilities/utilityFunctions";
+import { sortShardsByNameWithPrefixAwareness, filterShards, BASIC_FILTER_CONFIG, NAME_ONLY_FILTER_CONFIG } from "../utilities";
 
 interface FusionData {
   shards: Record<string, Shard>;
@@ -107,16 +107,9 @@ export class DataService {
     return this.bazaarPriceCache[cacheKey];
   }
 
-  async searchShards(query: string): Promise<ShardWithKey[]> {
-    const shards = await this.loadShards();
+  private sortShardsByQuery(shards: ShardWithKey[], query: string): ShardWithKey[] {
     const lowerQuery = query.toLowerCase();
-    const filtered = shards.filter((shard) => 
-      shard.name.toLowerCase().includes(lowerQuery) || 
-      shard.key.toLowerCase().includes(lowerQuery)
-    );
-    
-    // Sort results: prioritize shards that start with the query
-    return filtered.sort((a, b) => {
+    return shards.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
       const aKey = a.key.toLowerCase();
@@ -130,26 +123,42 @@ export class DataService {
     });
   }
 
+  async searchShards(query: string): Promise<ShardWithKey[]> {
+    const shards = await this.loadShards();
+    const filtered = filterShards(shards, {
+      query,
+      searchConfig: BASIC_FILTER_CONFIG,
+    });
+
+    return this.sortShardsByQuery(filtered, query);
+  }
+
   async searchShardsByNameOnly(query: string): Promise<ShardWithKey[]> {
     const shards = await this.loadShards();
-    const lowerQuery = query.toLowerCase();
-    const filtered = shards.filter((shard) => 
-      shard.name.toLowerCase().includes(lowerQuery) || 
-      shard.key.toLowerCase().includes(lowerQuery)
-    );
-    
-    // Sort results: prioritize shards that start with the query
-    return filtered.sort((a, b) => {
-      const aName = a.name.toLowerCase();
-      const bName = b.name.toLowerCase();
-      const aKey = a.key.toLowerCase();
-      const bKey = b.key.toLowerCase();
-      const aStarts = aName.startsWith(lowerQuery) || aKey.startsWith(lowerQuery);
-      const bStarts = bName.startsWith(lowerQuery) || bKey.startsWith(lowerQuery);
-      
-      if (aStarts && !bStarts) return -1;
-      if (!aStarts && bStarts) return 1;
-      return sortShardsByNameWithPrefixAwareness(a, b);
+    const filtered = filterShards(shards, {
+      query,
+      searchConfig: NAME_ONLY_FILTER_CONFIG,
     });
+
+    // If no results found searching by name only, try searching title and description
+    if (filtered.length === 0) {
+      const fallbackConfig = {
+        name: false,
+        key: false,
+        family: false,
+        type: false,
+        title: true,
+        description: true,
+      };
+
+      const fallbackFiltered = filterShards(shards, {
+        query,
+        searchConfig: fallbackConfig,
+      });
+
+      return this.sortShardsByQuery(fallbackFiltered, query);
+    }
+
+    return this.sortShardsByQuery(filtered, query);
   }
 }
