@@ -471,7 +471,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                     content={`
                       <div class="space-y-2">
                         <div class="text-slate-200 font-semibold">Sources</div>
-                        <ul class="list-disc pl-4 space-y-0.5">
+                        <ul class="space-y-0.5">
                           <li><span class="font-semibold">+50</span> <span class="text-slate-300">— HotF 6 perk</span></li>
                           <li><span class="font-semibold">+30</span> <span class="text-slate-300">— David's Cloak (Attribute Stacks 30)</span></li>
                           <li><span class="font-semibold">+25</span> <span class="text-slate-300">— Hunting level 25</span></li>
