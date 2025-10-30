@@ -140,6 +140,25 @@ export class DataService {
       searchConfig: NAME_ONLY_FILTER_CONFIG,
     });
 
+    // If no results found searching by name only, try searching title and description
+    if (filtered.length === 0) {
+      const fallbackConfig = {
+        name: false,
+        key: false,
+        family: false,
+        type: false,
+        title: true,
+        description: true,
+      };
+
+      const fallbackFiltered = filterShards(shards, {
+        query,
+        searchConfig: fallbackConfig,
+      });
+
+      return this.sortShardsByQuery(fallbackFiltered, query);
+    }
+
     return this.sortShardsByQuery(filtered, query);
   }
 }
