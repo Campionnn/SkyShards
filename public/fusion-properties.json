@@ -369,9 +369,21 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Cretan Bull",
     "id_origin": [
       "Yog"
+    ]
+  },
+  "C39": {
+    "name": "Cretan Bull",
+    "rarity": "Common",
+    "category": "Combat",
+    "family": [],
+    "input1": "",
+    "input2": "",
+    "id_result": "",
+    "id_origin": [
+      "Miner Zombie"
     ]
   },
   "U1": {
@@ -1379,7 +1391,7 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Minotaur",
     "id_origin": [
       "Draconic"
     ]
@@ -1396,6 +1408,18 @@
     "input2": "",
     "id_result": "",
     "id_origin": []
+  },
+  "R63": {
+    "name": "Minotaur",
+    "rarity": "Rare",
+    "category": "Combat",
+    "family": [],
+    "input1": "",
+    "input2": "",
+    "id_result": "",
+    "id_origin": [
+      "Wither"
+    ]
   },
   "R64": {
     "name": "Hummingbird",
@@ -1768,7 +1792,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Sphinx",
     "id_origin": [
       "Hellwisp",
       "Caiman"
@@ -1815,7 +1839,7 @@
     ],
     "input1": "Cave Dweller&Rare+",
     "input2": "Cave Dweller&Epic+",
-    "id_result": "",
+    "id_result": "Sphinx",
     "id_origin": []
   },
   "E37": {
@@ -1829,6 +1853,31 @@
     "input2": "Dragon",
     "id_result": "",
     "id_origin": []
+  },
+  "E39": {
+    "name": "Sphinx",
+    "rarity": "Epic",
+    "category": "Combat",
+    "family": [],
+    "input1": "",
+    "input2": "",
+    "id_result": "King Minos",
+    "id_origin": [
+      "Ghost",
+      "Cavernshade"
+    ]
+  },
+  "E42": {
+    "name": "King Minos",
+    "rarity": "Epic",
+    "category": "Combat",
+    "family": [],
+    "input1": "",
+    "input2": "",
+    "id_result": "",
+    "id_origin": [
+      "Sphinx"
+    ]
   },
   "L1": {
     "name": "Tenebris",
