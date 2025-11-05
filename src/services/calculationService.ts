@@ -194,6 +194,10 @@ export class CalculationService {
     };
   }
 
+  public getEffectiveOutputQuantity(recipe: { isReptile: boolean; outputQuantity: number }, crocodileMultiplier: number): number {
+    return recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
+  }
+
   private applyFortuneModifiers(rate: number, shardId: string, shard: Shard, params: CalculationParams): number {
     let effectiveFortune = params.hunterFortune;
     const multipliers = this.calculateMultipliers(params);
@@ -265,7 +269,7 @@ export class CalculationService {
       const recipes = data.recipes[shard] || [];
       precomputed[shard] = {
         recipes,
-        effectiveOutputQty: recipes.map((recipe) => (recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity)),
+        effectiveOutputQty: recipes.map((recipe) => this.getEffectiveOutputQuantity(recipe, crocodileMultiplier)),
         fuseAmounts: recipes.map((recipe) => [data.shards[recipe.inputs[0]].fuse_amount, data.shards[recipe.inputs[1]].fuse_amount]),
       };
     }
@@ -357,7 +361,7 @@ export class CalculationService {
         const costInput1 = minCosts.get(input1)! * fuse1;
         const costInput2 = minCosts.get(input2)! * fuse2;
         const totalCost = costInput1 + costInput2 + craftPenalty;
-        const effectiveOutputQuantity = overrideRecipe.isReptile ? overrideRecipe.outputQuantity * crocodileMultiplier : overrideRecipe.outputQuantity;
+        const effectiveOutputQuantity = this.getEffectiveOutputQuantity(overrideRecipe, crocodileMultiplier);
         const newCost = totalCost / effectiveOutputQuantity;
 
         if (newCost < currentCost - tolerance || !this.areRecipesEqual(overrideRecipe, currentChoice.recipe)) {
@@ -426,7 +430,7 @@ export class CalculationService {
     const cost2 = minCosts.get(input2) || Infinity;
 
     const totalCost = cost1 * fuse1 + cost2 * fuse2 + context.craftPenalty;
-    const effectiveOutput = recipe.isReptile ? recipe.outputQuantity * context.crocodileMultiplier : recipe.outputQuantity;
+    const effectiveOutput = this.getEffectiveOutputQuantity(recipe, context.crocodileMultiplier);
 
     return totalCost / effectiveOutput;
   }
@@ -763,7 +767,7 @@ export class CalculationService {
     switch (tree.method) {
       case "recipe": {
         const recipe = tree.recipe;
-        const outputQuantity = recipe.isReptile ? recipe.outputQuantity * crocodileMultiplier : recipe.outputQuantity;
+        const outputQuantity = this.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
         const craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
         tree.craftsNeeded = craftsNeeded;
         craftCounter.total += craftsNeeded;
