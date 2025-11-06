@@ -97,7 +97,6 @@ export interface CalculationResult {
   totalShardsProduced: number;
   craftsNeeded: number;
   totalQuantities: Map<string, number>;
-  totalFusions: number;
   craftTime: number;
   tree: RecipeTree | null;
   materialBreakdown?: Map<string, Map<string, number>>;
@@ -220,7 +219,6 @@ export interface InventoryCalculationResult {
   totalShardsProduced: number;
   craftsNeeded: number;
   totalQuantities: Map<string, number>;
-  totalFusions: number;
   craftTime: number;
   tree: InventoryRecipeTree | null;
 }

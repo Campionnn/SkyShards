@@ -3,6 +3,7 @@ import type {
   AlternativeSelectionContext,
   CalculationParams,
   Data,
+  InventoryRecipeTree,
   Recipe,
   RecipeChoice,
   RecipeOverride,
@@ -833,28 +834,72 @@ export class CalculationService {
     }
   }
 
-  public collectTotalQuantities(tree: RecipeTree): Map<string, number> {
-    const totals = new Map<string, number>();
+  public collectTreeStats(
+    tree: RecipeTree | InventoryRecipeTree,
+    params: CalculationParams
+  ): {
+    craftsNeeded: number;
+    craftTime: number;
+    totalQuantities: Map<string, number>;
+  } {
+    let craftsNeeded = 0;
+    const totalQuantities = new Map<string, number>();
+    const { craftPenalty } = this.calculateMultipliers(params);
 
-    const traverse = (node: RecipeTree) => {
+    const traverse = (node: RecipeTree | InventoryRecipeTree) => {
+      if (Array.isArray(node)) {
+        node.forEach(traverse);
+        return;
+      }
+
       switch (node.method) {
         case "direct":
-          totals.set(node.shard, (totals.get(node.shard) || 0) + node.quantity);
+          totalQuantities.set(node.shard, (totalQuantities.get(node.shard) || 0) + node.quantity);
           break;
 
-        case "recipe":
+        case "inventory":
+          break;
+
+        case "recipe": {
+          const crafts = node.craftsNeeded || 0;
+          craftsNeeded += crafts;
           node.inputs.forEach(traverse);
           break;
+        }
 
-        case "cycle":
+        case "cycle": {
+          const crafts = node.craftsNeeded || 0;
+          craftsNeeded += crafts;
           traverse(node.inputRecipe);
           node.cycleInputs.forEach(traverse);
           break;
+        }
       }
     };
 
     traverse(tree);
-    return totals;
+    const craftTime = craftsNeeded * craftPenalty;
+
+    return { craftsNeeded, craftTime, totalQuantities };
+  }
+
+  private calculateShardWeights(
+    totalQuantities: Map<string, number>,
+    data: Data,
+    params: CalculationParams,
+    getDirectCostFn?: (shard: Shard, asCoin: boolean) => number
+  ): Map<string, number> {
+    const shardWeights = new Map<string, number>();
+    const costFn = getDirectCostFn || this.getDirectCost.bind(this);
+
+    for (const [shardId, quantity] of totalQuantities.entries()) {
+      const shard = data.shards[shardId];
+      if (shard) {
+        const weight = costFn(shard, params.rateAsCoinValue) * quantity;
+        shardWeights.set(shardId, weight);
+      }
+    }
+    return shardWeights;
   }
 
   public calculateShardProductionStats({
@@ -884,15 +929,19 @@ export class CalculationService {
       craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
       totalShardsProduced = craftsNeeded * outputQuantity;
     }
-    const shardWeights: Map<string, number> = new Map();
-    for (const [shardId, quantity] of totalQuantities.entries()) {
-      const shard = data.shards[shardId];
-      if (shard) {
-        const weight = getDirectCostFn(shard, params.rateAsCoinValue) * quantity;
-        shardWeights.set(shardId, weight);
-      }
-    }
+    const shardWeights = this.calculateShardWeights(totalQuantities, data, params, getDirectCostFn);
     return { totalShardsProduced, craftsNeeded, shardWeights };
+  }
+
+  public calculateTotalTimeFromQuantities(
+    totalQuantities: Map<string, number>,
+    craftTime: number,
+    data: Data,
+    params: CalculationParams
+  ): number {
+    const shardWeights = this.calculateShardWeights(totalQuantities, data, params);
+    const materialTime = Array.from(shardWeights.values()).reduce((sum, weight) => sum + weight, 0);
+    return materialTime + craftTime;
   }
 
   // Recipe overrides management

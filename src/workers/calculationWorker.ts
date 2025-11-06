@@ -84,7 +84,6 @@ async function handleSingleCalculation(data: StartMsg) {
         totalShardsProduced: 0,
         craftsNeeded: 0,
         totalQuantities: new Map<string, number>(),
-        totalFusions: 0,
         craftTime: 0,
         tree: { shard: targetShard, method: "direct", quantity: 0 },
       };
@@ -109,9 +108,9 @@ async function handleSingleCalculation(data: StartMsg) {
 
     // Phase: finalizing
     post({ type: "progress", phase: "finalizing", progress: 0.9, message: "Aggregating results..." });
-    const totalQuantities = service.collectTotalQuantities(tree);
 
-    const { totalShardsProduced, craftsNeeded, shardWeights } = service.calculateShardProductionStats({
+    const { craftsNeeded, craftTime, totalQuantities } = service.collectTreeStats(tree, params);
+    const { totalShardsProduced } = service.calculateShardProductionStats({
       requiredQuantity,
       targetShard,
       choices,
@@ -122,8 +121,7 @@ async function handleSingleCalculation(data: StartMsg) {
       getDirectCostFn: service.getDirectCost.bind(service)
     });
 
-    const craftTime = params.rateAsCoinValue ? craftCounter.total * params.craftPenalty : (craftCounter.total * params.craftPenalty) / 3600;
-    const totalTime = Array.from(shardWeights.values()).reduce((sum, weight) => sum + weight, 0) + craftTime;
+    const totalTime = service.calculateTotalTimeFromQuantities(totalQuantities, craftTime, parsed, params);
     const timePerShard = totalTime / totalShardsProduced;
 
     const result: CalculationResult = {
@@ -132,7 +130,6 @@ async function handleSingleCalculation(data: StartMsg) {
       totalShardsProduced,
       craftsNeeded,
       totalQuantities,
-      totalFusions: craftCounter.total,
       craftTime,
       tree,
     };
@@ -174,7 +171,6 @@ async function handleBatchCalculationWithData(data: BatchStartWithDataMsg) {
           totalShardsProduced: 0,
           craftsNeeded: 0,
           totalQuantities: new Map<string, number>(),
-          totalFusions: 0,
           craftTime: 0,
           tree: { shard: targetShard, method: "direct", quantity: 0 },
           materialBreakdown: new Map(),
@@ -193,8 +189,8 @@ async function handleBatchCalculationWithData(data: BatchStartWithDataMsg) {
       const craftCounter = { total: 0 };
       service.assignQuantities(tree, requiredQuantity, parsedData, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
 
-      // collect results
-      const totalQuantities = service.collectTotalQuantities(tree);
+      // collect results using shared method
+      const { craftsNeeded, craftTime, totalQuantities } = service.collectTreeStats(tree, params);
 
       // Track materials for this target shard
       totalQuantities.forEach((quantity, materialShardId) => {
@@ -205,7 +201,7 @@ async function handleBatchCalculationWithData(data: BatchStartWithDataMsg) {
         targetMap.set(targetShard, (targetMap.get(targetShard) || 0) + quantity);
       });
 
-      const { totalShardsProduced, craftsNeeded, shardWeights } = service.calculateShardProductionStats({
+      const { totalShardsProduced } = service.calculateShardProductionStats({
         requiredQuantity,
         targetShard,
         choices,
@@ -216,8 +212,7 @@ async function handleBatchCalculationWithData(data: BatchStartWithDataMsg) {
         getDirectCostFn: service.getDirectCost.bind(service)
       });
 
-      const craftTime = params.rateAsCoinValue ? craftCounter.total * params.craftPenalty : (craftCounter.total * params.craftPenalty) / 3600;
-      const totalTime = Array.from(shardWeights.values()).reduce((sum, weight) => sum + weight, 0) + craftTime;
+      const totalTime = service.calculateTotalTimeFromQuantities(totalQuantities, craftTime, parsedData, params);
       const timePerShard = totalTime / totalShardsProduced;
 
       const result: CalculationResult = {
@@ -226,7 +221,6 @@ async function handleBatchCalculationWithData(data: BatchStartWithDataMsg) {
         totalShardsProduced,
         craftsNeeded,
         totalQuantities,
-        totalFusions: craftCounter.total,
         craftTime,
         tree,
       };

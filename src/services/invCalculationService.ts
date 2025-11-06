@@ -193,7 +193,6 @@ export class InvCalculationService {
         totalShardsProduced: 0,
         craftsNeeded: 0,
         totalQuantities: new Map<string, number>(),
-        totalFusions: 0,
         craftTime: 0,
         tree: { shard: targetShard, method: "direct", quantity: 0 },
       };
@@ -204,16 +203,14 @@ export class InvCalculationService {
     // Clone inventory to avoid mutating the original
     const workingInventory = new Map(inventory);
 
-    // Track total time and plan
-    const totalTime = 0;
     const plan: InventoryRecipeTree[] = [];
-    const totalQuantities = new Map<string, number>();
-    const totalFusions = 0;
+    const originalRequiredQuantity = requiredQuantity;
+    let usedFromInventory = 0;
 
     // Use inventory first if available
     if (inventory.get(targetShard)! > 0) {
       const available = inventory.get(targetShard) || 0;
-      const usedFromInventory = Math.min(available, requiredQuantity);
+      usedFromInventory = Math.min(available, requiredQuantity);
       workingInventory.set(targetShard, available - usedFromInventory);
       requiredQuantity -= usedFromInventory;
       inventory.set(targetShard, available - usedFromInventory);
@@ -225,8 +222,9 @@ export class InvCalculationService {
       });
     }
 
+    let tree: InventoryRecipeTree | null = null;
     if (requiredQuantity > 0) {
-      const tree = this.buildRecipeTree(
+      tree = this.buildRecipeTree(
         parsed,
         targetShard,
         requiredQuantity,
@@ -235,19 +233,32 @@ export class InvCalculationService {
         params,
         inventory,
         kValues
-      )
+      );
       plan.push(tree);
     }
 
-    return {
-      timePerShard: 0,
-      totalTime,
-      totalShardsProduced: requiredQuantity,
-      craftsNeeded: totalFusions,
+    const fullTree = plan.length === 1 ? plan[0] : plan;
+    const { craftsNeeded, craftTime, totalQuantities } = this.service.collectTreeStats(
+      fullTree,
+      params
+    );
+
+    const totalTime = this.service.calculateTotalTimeFromQuantities(
       totalQuantities,
-      totalFusions,
-      craftTime: 0,
-      tree: plan.length === 1 ? plan[0] : plan,
+      craftTime,
+      parsed,
+      params
+    );
+    const timePerShard = originalRequiredQuantity > 0 ? totalTime / originalRequiredQuantity : 0;
+
+    return {
+      timePerShard,
+      totalTime,
+      totalShardsProduced: originalRequiredQuantity,
+      craftsNeeded,
+      totalQuantities,
+      craftTime,
+      tree: fullTree,
     };
   }
 }
