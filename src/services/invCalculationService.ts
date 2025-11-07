@@ -318,6 +318,317 @@ export class InvCalculationService {
     return newRoot;
   }
 
+  private calculateInventoryConsumption(
+    tree: InventoryRecipeTree,
+    consumption: Map<string, number>
+  ): void {
+    if (Array.isArray(tree)) {
+      tree.forEach(subtree => this.calculateInventoryConsumption(subtree, consumption));
+      return;
+    }
+
+    if (tree.method === "inventory") {
+      const current = consumption.get(tree.shard) || 0;
+      consumption.set(tree.shard, current + tree.quantity);
+    } else if (tree.method === "recipe") {
+      this.calculateInventoryConsumption(tree.inputs[0], consumption);
+      this.calculateInventoryConsumption(tree.inputs[1], consumption);
+    } else if (tree.method === "cycle") {
+      this.calculateInventoryConsumption(tree.inputRecipe, consumption);
+      tree.cycleInputs.forEach(input => this.calculateInventoryConsumption(input, consumption));
+    }
+  }
+
+  private refundInventoryFromSubtree(
+    tree: InventoryRecipeTree,
+    inventory: Map<string, number>
+  ): void {
+    const consumption = new Map<string, number>();
+    this.calculateInventoryConsumption(tree, consumption);
+
+    for (const [shard, qty] of consumption.entries()) {
+      const current = inventory.get(shard) || 0;
+      inventory.set(shard, current + qty);
+    }
+  }
+
+  private async evaluateAlternativeRecipes(
+    tree: InventoryRecipeTree,
+    inventory: Map<string, number>,
+    params: CalculationParams,
+    parsed: Data
+  ): Promise<InventoryRecipeTree> {
+    if (Array.isArray(tree)) {
+      return tree;
+    }
+
+    if (tree.method !== "recipe") {
+      return tree;
+    }
+
+    // Get all available recipes for this shard
+    const availableRecipes = parsed.recipes[tree.shard] || [];
+    if (availableRecipes.length <= 1) {
+      return tree; // No alternatives to consider
+    }
+
+    const { crocodileMultiplier, craftPenalty } = this.service.calculateMultipliers(params);
+    const currentRecipe = tree.recipe;
+
+    // Calculate cost of current recipe with current inventory
+    const currentCost = this.calculateRecipeCostWithInventory(
+      currentRecipe,
+      tree.quantity,
+      inventory,
+      parsed,
+      params,
+      crocodileMultiplier,
+      craftPenalty
+    );
+
+    let bestRecipe = currentRecipe;
+    let bestCost = currentCost;
+    let bestTree: InventoryRecipeTree | null = null;
+
+    // Evaluate all alternative recipes
+    for (const altRecipe of availableRecipes) {
+      if (this.areRecipesEqual(altRecipe, currentRecipe)) {
+        continue;
+      }
+
+      const altCost = this.calculateRecipeCostWithInventory(
+        altRecipe,
+        tree.quantity,
+        inventory,
+        parsed,
+        params,
+        crocodileMultiplier,
+        craftPenalty
+      );
+
+      if (altCost < bestCost) {
+        bestCost = altCost;
+        bestRecipe = altRecipe;
+      }
+    }
+
+    // If we found a better recipe, rebuild this subtree with it
+    if (!this.areRecipesEqual(bestRecipe, currentRecipe)) {
+      // Refund inventory consumed by the old tree
+      this.refundInventoryFromSubtree(tree, inventory);
+
+      // Build new tree with the alternative recipe
+      bestTree = await this.buildTreeForRecipe(
+        tree.shard,
+        tree.quantity,
+        bestRecipe,
+        inventory,
+        parsed,
+        params
+      );
+
+      return bestTree;
+    }
+
+    return tree;
+  }
+
+  private areRecipesEqual(recipe1: Recipe, recipe2: Recipe): boolean {
+    return (
+      recipe1.outputQuantity === recipe2.outputQuantity &&
+      recipe1.inputs[0] === recipe2.inputs[0] &&
+      recipe1.inputs[1] === recipe2.inputs[1]
+    );
+  }
+
+  private calculateRecipeCostWithInventory(
+    recipe: Recipe,
+    outputQuantity: number,
+    inventory: Map<string, number>,
+    parsed: Data,
+    params: CalculationParams,
+    crocodileMultiplier: number,
+    craftPenalty: number
+  ): number {
+    const effectiveOutput = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
+    const craftsNeeded = Math.ceil(outputQuantity / effectiveOutput);
+
+    const [input1Id, input2Id] = recipe.inputs;
+    const fuse1 = parsed.shards[input1Id].fuse_amount;
+    const fuse2 = parsed.shards[input2Id].fuse_amount;
+
+    const needed1 = craftsNeeded * fuse1;
+    const needed2 = craftsNeeded * fuse2;
+
+    const inv1 = inventory.get(input1Id) || 0;
+    const inv2 = inventory.get(input2Id) || 0;
+
+    // Calculate how much we'd need to grind
+    const toGrind1 = Math.max(0, needed1 - inv1);
+    const toGrind2 = Math.max(0, needed2 - inv2);
+
+    const directCost1 = this.service.getDirectCost(parsed.shards[input1Id], params.rateAsCoinValue);
+    const directCost2 = this.service.getDirectCost(parsed.shards[input2Id], params.rateAsCoinValue);
+
+    const cost1 = toGrind1 * directCost1;
+    const cost2 = toGrind2 * directCost2;
+
+    return (cost1 + cost2 + craftPenalty * craftsNeeded) / outputQuantity;
+  }
+
+  private async buildTreeForRecipe(
+    shardId: string,
+    quantity: number,
+    recipe: Recipe,
+    inventory: Map<string, number>,
+    parsed: Data,
+    params: CalculationParams
+  ): Promise<InventoryRecipeTree> {
+    const { crocodileMultiplier } = this.service.calculateMultipliers(params);
+    const effectiveOutput = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
+    const craftsNeeded = Math.ceil(quantity / effectiveOutput);
+
+    const [input1Id, input2Id] = recipe.inputs;
+    const fuse1 = parsed.shards[input1Id].fuse_amount;
+    const fuse2 = parsed.shards[input2Id].fuse_amount;
+
+    const needed1 = craftsNeeded * fuse1;
+    const needed2 = craftsNeeded * fuse2;
+
+    // Build input trees based on inventory availability
+    const input1Tree = await this.buildInputTree(input1Id, needed1, inventory, parsed, params);
+    const input2Tree = await this.buildInputTree(input2Id, needed2, inventory, parsed, params);
+
+    return {
+      shard: shardId,
+      method: "recipe",
+      quantity,
+      recipe,
+      inputs: [input1Tree, input2Tree],
+      craftsNeeded,
+    };
+  }
+
+  private async buildInputTree(
+    shardId: string,
+    quantity: number,
+    inventory: Map<string, number>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _parsed: Data,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _params: CalculationParams
+  ): Promise<InventoryRecipeTree> {
+    const inv = inventory.get(shardId) || 0;
+
+    if (inv >= quantity) {
+      // Use all from inventory
+      inventory.set(shardId, inv - quantity);
+      return {
+        shard: shardId,
+        method: "inventory",
+        quantity,
+      };
+    } else if (inv > 0) {
+      // Partial inventory + direct grinding
+      const inventoryPart: InventoryRecipeTree = {
+        shard: shardId,
+        method: "inventory",
+        quantity: inv,
+      };
+      const directPart: InventoryRecipeTree = {
+        shard: shardId,
+        method: "direct",
+        quantity: quantity - inv,
+      };
+      inventory.set(shardId, 0);
+      return [inventoryPart, directPart];
+    } else {
+      // All from direct grinding
+      return {
+        shard: shardId,
+        method: "direct",
+        quantity,
+      };
+    }
+  }
+
+  private async substituteAlternativeRecipesBFS(
+    tree: InventoryRecipeTree,
+    inventory: Map<string, number>,
+    params: CalculationParams,
+    parsed: Data
+  ): Promise<InventoryRecipeTree> {
+    interface QueueItem {
+      node: InventoryRecipeTree;
+      parent?: {
+        parentNode: InventoryRecipeTree;
+        inputIndex: 0 | 1;
+      };
+    }
+
+    const queue: QueueItem[] = [{ node: tree }];
+    let newRoot: InventoryRecipeTree = tree;
+
+    while (queue.length > 0) {
+      const { node, parent } = queue.shift()!;
+
+      if (Array.isArray(node)) {
+        // Process array elements
+        for (const element of node) {
+          queue.push({ node: element });
+        }
+        continue;
+      }
+
+      // Try to find a better recipe for this node
+      if (node.method === "recipe") {
+        const evaluatedNode = await this.evaluateAlternativeRecipes(node, inventory, params, parsed);
+
+        // If the recipe changed, update the parent or root
+        if (evaluatedNode !== node) {
+          if (parent) {
+            const parentNode = parent.parentNode;
+            if (!Array.isArray(parentNode) && parentNode.method === "recipe") {
+              parentNode.inputs[parent.inputIndex] = evaluatedNode;
+            }
+          } else {
+            newRoot = evaluatedNode;
+          }
+
+          // Queue the new node's children
+          if (!Array.isArray(evaluatedNode) && evaluatedNode.method === "recipe") {
+            queue.push({
+              node: evaluatedNode.inputs[0],
+              parent: { parentNode: evaluatedNode, inputIndex: 0 },
+            });
+            queue.push({
+              node: evaluatedNode.inputs[1],
+              parent: { parentNode: evaluatedNode, inputIndex: 1 },
+            });
+          }
+          continue;
+        }
+
+        // Queue children
+        queue.push({
+          node: node.inputs[0],
+          parent: { parentNode: node, inputIndex: 0 },
+        });
+        queue.push({
+          node: node.inputs[1],
+          parent: { parentNode: node, inputIndex: 1 },
+        });
+      } else if (node.method === "cycle") {
+        queue.push({ node: node.inputRecipe });
+        node.cycleInputs.forEach((cycleInput) => {
+          queue.push({ node: cycleInput });
+        });
+      }
+    }
+
+    return newRoot;
+  }
+
   async calculateOptimalPath(
     targetShard: string,
     requiredQuantity: number,
@@ -374,6 +685,14 @@ export class InvCalculationService {
 
     // Clone inventory before substitution to avoid mutating the original
     const workingInventory = new Map(inventory);
+
+    // First pass: substitute optimal shards from inventory
+    inventoryTree = await this.substituteInventoryBFS(inventoryTree, workingInventory, params);
+
+    // Second pass: check if alternative recipes are better given remaining inventory
+    inventoryTree = await this.substituteAlternativeRecipesBFS(inventoryTree, workingInventory, params, parsed);
+
+    // Third pass: substitute inventory again for any new recipes from alternative substitution
     inventoryTree = await this.substituteInventoryBFS(inventoryTree, workingInventory, params);
 
     // Collect stats from the tree with inventory substitutions

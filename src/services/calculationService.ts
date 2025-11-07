@@ -230,7 +230,7 @@ export class CalculationService {
     return rate * (1 + effectiveFortune / 100);
   }
 
-  private areRecipesEqual(a: Recipe | null, b: Recipe | null | undefined): boolean {
+  public areRecipesEqual(a: Recipe | null, b: Recipe | null | undefined): boolean {
     if (!a && !b) return true;
     if (!a || !b) return false;
 
