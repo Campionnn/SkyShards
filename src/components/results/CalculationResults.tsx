@@ -350,7 +350,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           icon={Hammer}
           iconColor="text-orange-400"
           label="Total Fusions"
-          value={`${result.totalFusions}x`}
+          value={`${result.craftsNeeded}x`}
           additionalValue={ironManView ? formatTime(result.craftTime) : formatLargeNumber(result.craftTime)}
         />
       </div>

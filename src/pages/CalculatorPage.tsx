@@ -112,7 +112,6 @@ const performCalculation = async (
 
         const combinedMaterials: Record<string, number> = {};
         let totalTime = 0;
-        let totalFusions = 0;
         let totalCraftTime = 0;
         let totalCraftsNeeded = 0;
 
@@ -124,7 +123,6 @@ const performCalculation = async (
           }
 
           totalTime += result.totalTime || 0;
-          totalFusions += result.totalFusions || 0;
           totalCraftTime += result.craftTime || 0;
           totalCraftsNeeded += result.craftsNeeded || 0;
         });
@@ -142,7 +140,6 @@ const performCalculation = async (
           totalShardsProduced: totalShardsRequested,
           craftsNeeded: totalCraftsNeeded,
           totalQuantities: materialQuantities,
-          totalFusions,
           craftTime: totalCraftTime,
           tree: null,
           materialBreakdown: globalMaterialBreakdown,

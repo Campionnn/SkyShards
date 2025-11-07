@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calculator, Settings, Shuffle, Menu, X } from "lucide-react";
+import { Calculator, Settings, Shuffle, Menu, X, Sparkles } from "lucide-react";
 
 const GitHubIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -48,6 +48,7 @@ export const Navigation: React.FC = () => {
 
   const navItems = [
     { path: "/", label: "Calculator", icon: Calculator, color: "purple" },
+    { path: "/smart", label: "Smart Calculator", icon: Sparkles, color: "yellow" },
     { path: "/recipes", label: "Recipes", icon: Shuffle, color: "green" },
     { path: "/shards", label: "Shards", icon: Settings, color: "blue" },
   ];
@@ -105,6 +106,8 @@ export const Navigation: React.FC = () => {
                   ? "ring-1 ring-offset-0 ring-blue-300"
                   : color === "green"
                   ? "ring-1 ring-offset-0 ring-green-300"
+                  : color === "yellow"
+                  ? "ring-1 ring-offset-0 ring-yellow-300"
                   : "ring-1 ring-offset-0 ring-purple-300"
                 : "";
               return (
@@ -161,6 +164,8 @@ export const Navigation: React.FC = () => {
                     ? "ring-1 ring-offset-0 ring-blue-300"
                     : color === "green"
                     ? "ring-1 ring-offset-0 ring-green-300"
+                    : color === "yellow"
+                    ? "ring-1 ring-offset-0 ring-yellow-300"
                     : "ring-1 ring-offset-0 ring-purple-300"
                   : "";
                 return (
