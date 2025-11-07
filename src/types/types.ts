@@ -154,6 +154,19 @@ export interface RecipeTreeNodeProps {
   ironManView: boolean;
 }
 
+export interface InventoryRecipeTreeNodeProps {
+  tree: InventoryRecipeTree;
+  data: Data;
+  isTopLevel?: boolean;
+  totalShardsProduced?: number;
+  nodeId: string;
+  expandedStates: Map<string, boolean>;
+  onToggle: (nodeId: string) => void;
+  onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
+  noWoodenBait?: boolean;
+  ironManView: boolean;
+}
+
 // searchbar
 export interface ShardAutocompleteProps {
   value: string;

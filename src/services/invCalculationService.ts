@@ -27,10 +27,38 @@ export class InvCalculationService {
   ): number {
     const inv = inventory.get(shardId) || 0;
     if (inv >= fuseAmount) {
-      const k = kValues.get(shardId) || 0.05;
+      const k = kValues.has(shardId) ? kValues.get(shardId)! : 0.05;
       return baseCost * (1 / (1 + k * inv));
     }
     return baseCost;
+  }
+
+  public async computeInventoryAdjustedMinCosts(
+    params: CalculationParams,
+    inventory: Map<string, number>,
+    kValues: Map<string, number> = new Map()
+  ): Promise<Map<string, number>> {
+    const parsed = await this.service.parseData(params);
+    const { minCosts } = this.service.computeMinCosts(parsed, params, []);
+
+    // Create adjusted costs map
+    const adjustedCosts = new Map<string, number>();
+
+    for (const [shardId, baseCost] of minCosts.entries()) {
+      const shard = parsed.shards[shardId];
+      if (shard) {
+        const adjustedCost = this.getInventoryAdjustedCost(
+          shardId,
+          baseCost,
+          inventory,
+          shard.fuse_amount,
+          kValues
+        );
+        adjustedCosts.set(shardId, adjustedCost);
+      }
+    }
+
+    return adjustedCosts;
   }
 
   private buildRecipeTree(
@@ -50,10 +78,10 @@ export class InvCalculationService {
       // Check if using inventory is better for the targetShard itself
       const invQty = inventory.get(targetShard) || 0;
       if (invQty > 0) {
-        const k = kValues.get(targetShard) || 0.05;
+        const k = kValues.has(targetShard) ? kValues.get(targetShard)! : 0.05;
         const invCost = minCosts.get(targetShard)! * (1 / (1 + k * invQty));
         const craftCost = minCosts.get(targetShard)!;
-        if (invCost < craftCost) {
+        if (invCost <= craftCost) {
           const useFromInventory = Math.min(invQty, remaining);
           inventory.set(targetShard, invQty - useFromInventory);
           plan.push({
@@ -263,5 +291,3 @@ export class InvCalculationService {
   }
 }
 
-const invCalculationService = new InvCalculationService();
-export default invCalculationService;

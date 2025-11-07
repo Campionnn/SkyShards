@@ -559,7 +559,6 @@ export class CalculationService {
     return result;
   }
 
-  // Method to get alternatives while handling cycle nodes properly
   async getAlternativesForTreeNode(
     shardId: string,
     params: CalculationParams,
