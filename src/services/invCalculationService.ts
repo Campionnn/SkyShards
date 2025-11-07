@@ -342,11 +342,17 @@ export class InvCalculationService {
     }
 
     const { choices } = this.service.computeMinCosts(parsed, params, recipeOverrides);
+
+    // Find cycle nodes to prevent infinite recursion in buildRecipeTree
+    const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0
+      ? this.service.findCycleNodes(choices)
+      : [];
+
     const recipeTree = this.service.buildRecipeTree(
       parsed,
       targetShard,
       choices,
-      [],
+      cycleNodes,
       params,
       recipeOverrides
     );

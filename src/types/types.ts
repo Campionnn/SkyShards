@@ -165,6 +165,7 @@ export interface InventoryRecipeTreeNodeProps {
   onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
   noWoodenBait?: boolean;
   ironManView: boolean;
+  isInCycle?: boolean;
 }
 
 // searchbar
