@@ -142,180 +142,221 @@ export class InvCalculationService {
     params: CalculationParams
   ): Promise<InventoryRecipeTree> {
     const workingInventory = new Map(inventory);
+    const parsed = await this.service.parseData(params);
 
-    // BFS queue
-    interface QueueItem {
-      node: InventoryRecipeTree;
-      parent?: {
-        parentNode: InventoryRecipeTree;
-        inputIndex: 0 | 1;
-      };
-    }
+    // Track processed nodes to avoid reprocessing the same object reference
+    const processedNodes = new WeakMap<object, InventoryRecipeTree>();
 
-    const queue: QueueItem[] = [{ node: tree }];
-    let newRoot: InventoryRecipeTree = tree;
-
-    while (queue.length > 0) {
-      const { node, parent } = queue.shift()!;
-
+    const processNode = async (node: InventoryRecipeTree, depth: number = 0): Promise<InventoryRecipeTree> => {
+      // Handle array nodes by processing each element
       if (Array.isArray(node)) {
-        continue;
+        console.log(`${'  '.repeat(depth)}[Array with ${node.length} elements]`);
+        const processedArray: InventoryRecipeTree[] = [];
+        for (const element of node) {
+          processedArray.push(await processNode(element, depth));
+        }
+        return processedArray as InventoryRecipeTree;
       }
 
-      // Check if we can substitute this node with inventory
-      const invQty = workingInventory.get(node.shard) || 0;
-      if (invQty > 0) {
-        let replacementNode: InventoryRecipeTree;
+      // Skip inventory nodes
+      if (node.method === "inventory") {
+        console.log(`${'  '.repeat(depth)}Skipping inventory node: ${node.shard}`);
+        return node;
+      }
+
+      // Handle direct nodes - try to substitute with inventory
+      if (node.method === "direct") {
+        const invQty = workingInventory.get(node.shard) || 0;
+        console.log(`${'  '.repeat(depth)}Direct node ${node.shard} (qty: ${node.quantity}, inv available: ${invQty})`);
 
         if (invQty >= node.quantity) {
-          replacementNode = {
+          // Full replacement
+          workingInventory.set(node.shard, invQty - node.quantity);
+          console.log(`${'  '.repeat(depth)}  -> Substituting direct node with inventory`);
+          const result = {
             shard: node.shard,
             method: "inventory",
             quantity: node.quantity,
-          };
-          workingInventory.set(node.shard, invQty - node.quantity);
-        } else {
+          } as InventoryRecipeTree;
+          processedNodes.set(node, result);
+          return result;
+        } else if (invQty > 0) {
+          // Partial replacement
+          console.log(`${'  '.repeat(depth)}  -> Partial substitution: ${invQty} from inv, ${node.quantity - invQty} still needed`);
           const inventoryPart: InventoryRecipeTree = {
             shard: node.shard,
             method: "inventory",
             quantity: invQty,
           };
+          const directPortion: InventoryRecipeTree = {
+            shard: node.shard,
+            method: "direct",
+            quantity: node.quantity - invQty,
+          };
+          workingInventory.set(node.shard, 0);
+          const result = [inventoryPart, directPortion] as InventoryRecipeTree;
+          processedNodes.set(node, result);
+          return result;
+        } else {
+          // No inventory available - return as-is
+          console.log(`${'  '.repeat(depth)}  -> No inventory available for direct node`);
+          processedNodes.set(node, node);
+          return node;
+        }
+      }
 
-          // Create a deep copy of the current node for the crafted portion
-          const craftedPortion = JSON.parse(JSON.stringify(node));
-          craftedPortion.quantity = node.quantity - invQty;
+      // Check if we've already processed this exact node object
+      if (processedNodes.has(node)) {
+        const cached = processedNodes.get(node)!;
+        console.log(`${'  '.repeat(depth)}CACHE HIT for ${node.shard} - returning cached result`);
+        return cached;
+      }
 
-          // Recalculate quantities for the crafted portion based on reduced quantity
-          if (craftedPortion.method === "recipe") {
-            const recipe = craftedPortion.recipe;
+      // Check inventory for THIS node
+      const invQty = workingInventory.get(node.shard) || 0;
+      console.log(`${'  '.repeat(depth)}Processing ${node.shard} (qty: ${node.quantity}, inv available: ${invQty}, method: ${node.method}, depth: ${depth})`);
+
+      // Full replacement with inventory
+      if (invQty >= node.quantity) {
+        workingInventory.set(node.shard, invQty - node.quantity);
+        console.log(`${'  '.repeat(depth)}  -> Full replacement from inventory`);
+        const result = {
+          shard: node.shard,
+          method: "inventory",
+          quantity: node.quantity,
+        } as InventoryRecipeTree;
+        processedNodes.set(node, result);
+        return result;
+      }
+
+      // Partial replacement
+      if (invQty > 0) {
+        console.log(`${'  '.repeat(depth)}  -> Partial: ${invQty} from inv, ${node.quantity - invQty} crafted`);
+        const inventoryPart: InventoryRecipeTree = {
+          shard: node.shard,
+          method: "inventory",
+          quantity: invQty,
+        };
+
+        // Deep copy for crafted portion
+        const craftedPortion = JSON.parse(JSON.stringify(node));
+        const remainingQuantity = node.quantity - invQty;
+        craftedPortion.quantity = remainingQuantity;
+
+        // Consume the inventory we're using
+        workingInventory.set(node.shard, 0);
+
+        // Recalculate quantities for crafted portion
+        if (craftedPortion.method === "recipe") {
+          const recipe = craftedPortion.recipe;
+          const { crocodileMultiplier } = this.service.calculateMultipliers(params);
+          const outputQuantity = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
+          const newCraftsNeeded = Math.ceil(remainingQuantity / outputQuantity);
+          craftedPortion.craftsNeeded = newCraftsNeeded;
+
+          const [input1Id, input2Id] = recipe.inputs;
+          const fuse1 = parsed.shards[input1Id].fuse_amount;
+          const fuse2 = parsed.shards[input2Id].fuse_amount;
+
+          this.recalculateTreeQuantities(craftedPortion.inputs[0], newCraftsNeeded * fuse1, parsed, params);
+          this.recalculateTreeQuantities(craftedPortion.inputs[1], newCraftsNeeded * fuse2, parsed, params);
+
+          // Process children - they can use remaining inventory
+          console.log(`${'  '.repeat(depth)}  -> Processing crafted portion's input 0 (${input1Id})`);
+          craftedPortion.inputs[0] = await processNode(craftedPortion.inputs[0], depth + 1);
+          console.log(`${'  '.repeat(depth)}  -> Finished input 0, processing input 1 (${input2Id})`);
+          craftedPortion.inputs[1] = await processNode(craftedPortion.inputs[1], depth + 1);
+          console.log(`${'  '.repeat(depth)}  -> Finished processing both inputs for crafted ${node.shard}`);
+        } else if (craftedPortion.method === "cycle") {
+          const outputStep = craftedPortion.steps.find((step: { outputShard: string }) => step.outputShard === craftedPortion.shard);
+          if (outputStep) {
             const { crocodileMultiplier } = this.service.calculateMultipliers(params);
-            const outputQuantity = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
-            const newCraftsNeeded = Math.ceil(craftedPortion.quantity / outputQuantity);
-            craftedPortion.craftsNeeded = newCraftsNeeded;
+            const recipe = outputStep.recipe;
+            const baseOutput = recipe.outputQuantity;
+            const expectedOutput = recipe.isReptile ? baseOutput * crocodileMultiplier : baseOutput;
 
-            // Recalculate input quantities based on the new craftsNeeded
-            const parsed = await this.service.parseData(params);
-            const [input1Id, input2Id] = recipe.inputs;
-            const fuse1 = parsed.shards[input1Id].fuse_amount;
-            const fuse2 = parsed.shards[input2Id].fuse_amount;
-
-            // Recursively update quantities in the input trees
-            this.recalculateTreeQuantities(craftedPortion.inputs[0], newCraftsNeeded * fuse1, parsed, params);
-            this.recalculateTreeQuantities(craftedPortion.inputs[1], newCraftsNeeded * fuse2, parsed, params);
-          } else if (craftedPortion.method === "cycle") {
-            // Recalculate cycle quantities
-            const outputStep = craftedPortion.steps.find((step: { outputShard: string }) => step.outputShard === craftedPortion.shard);
-            if (outputStep) {
-              const { crocodileMultiplier } = this.service.calculateMultipliers(params);
-              const recipe = outputStep.recipe;
-              const baseOutput = recipe.outputQuantity;
-              const expectedOutput = recipe.isReptile ? baseOutput * crocodileMultiplier : baseOutput;
-
-              const parsed = await this.service.parseData(params);
-              let totalInputsConsumed = 0;
-              craftedPortion.steps.forEach((step: { recipe: Recipe }) => {
-                step.recipe.inputs.forEach((inputId: string) => {
-                  if (inputId === craftedPortion.shard) {
-                    const inputShard = parsed.shards[inputId];
-                    totalInputsConsumed += inputShard.fuse_amount;
-                  }
-                });
-              });
-
-              const netOutputPerCycle = expectedOutput - totalInputsConsumed;
-              const expectedCrafts = netOutputPerCycle > 0 ? Math.ceil(craftedPortion.quantity / netOutputPerCycle) : Math.ceil(craftedPortion.quantity / expectedOutput);
-              const stepCount = craftedPortion.steps.length;
-              const roundedCrafts = Math.ceil(expectedCrafts / stepCount) * stepCount;
-              craftedPortion.craftsNeeded = roundedCrafts;
-
-              const inputQuantities = new Map<string, number>();
-              const outputShards = new Set(craftedPortion.steps.map((step: { outputShard: string }) => step.outputShard));
-
-              craftedPortion.steps.forEach((step: { recipe: Recipe }) => {
-                step.recipe.inputs.forEach((inputId: string) => {
-                  if (!outputShards.has(inputId)) {
-                    const inputShard = parsed.shards[inputId];
-                    const currentQuantity = inputQuantities.get(inputId) || 0;
-                    inputQuantities.set(inputId, currentQuantity + inputShard.fuse_amount);
-                  }
-                });
-              });
-
-              craftedPortion.cycleInputs.forEach((cycleInput: InventoryRecipeTree) => {
-                if (!Array.isArray(cycleInput) && cycleInput.method !== "inventory") {
-                  const inputQuantity = inputQuantities.get(cycleInput.shard) || 0;
-                  const totalInputQuantity = inputQuantity * (roundedCrafts / stepCount);
-                  this.recalculateTreeQuantities(cycleInput, totalInputQuantity, parsed, params);
+            let totalInputsConsumed = 0;
+            craftedPortion.steps.forEach((step: { recipe: Recipe }) => {
+              step.recipe.inputs.forEach((inputId: string) => {
+                if (inputId === craftedPortion.shard) {
+                  const inputShard = parsed.shards[inputId];
+                  totalInputsConsumed += inputShard.fuse_amount;
                 }
               });
+            });
+
+            const netOutputPerCycle = expectedOutput - totalInputsConsumed;
+            const expectedCrafts = netOutputPerCycle > 0
+              ? Math.ceil(remainingQuantity / netOutputPerCycle)
+              : Math.ceil(remainingQuantity / expectedOutput);
+            const stepCount = craftedPortion.steps.length;
+            const roundedCrafts = Math.ceil(expectedCrafts / stepCount) * stepCount;
+            craftedPortion.craftsNeeded = roundedCrafts;
+
+            const inputQuantities = new Map<string, number>();
+            const outputShards = new Set(craftedPortion.steps.map((step: { outputShard: string }) => step.outputShard));
+
+            craftedPortion.steps.forEach((step: { recipe: Recipe }) => {
+              step.recipe.inputs.forEach((inputId: string) => {
+                if (!outputShards.has(inputId)) {
+                  const inputShard = parsed.shards[inputId];
+                  const currentQuantity = inputQuantities.get(inputId) || 0;
+                  inputQuantities.set(inputId, currentQuantity + inputShard.fuse_amount);
+                }
+              });
+            });
+
+            craftedPortion.cycleInputs.forEach((cycleInput: InventoryRecipeTree) => {
+              if (!Array.isArray(cycleInput) && cycleInput.method !== "inventory") {
+                const inputQuantity = inputQuantities.get(cycleInput.shard) || 0;
+                const totalInputQuantity = inputQuantity * (roundedCrafts / stepCount);
+                this.recalculateTreeQuantities(cycleInput, totalInputQuantity, parsed, params);
+              }
+            });
+
+            // Process children
+            craftedPortion.inputRecipe = await processNode(craftedPortion.inputRecipe, depth + 1);
+            for (let i = 0; i < craftedPortion.cycleInputs.length; i++) {
+              craftedPortion.cycleInputs[i] = await processNode(craftedPortion.cycleInputs[i], depth + 1);
             }
           }
-
-          // Combine inventory and crafted portions in an array
-          replacementNode = [inventoryPart, craftedPortion];
-          workingInventory.set(node.shard, 0);
-
-          // For the crafted portion, we need to continue traversing its children
-          if (!Array.isArray(craftedPortion) && craftedPortion.method === "recipe") {
-            queue.push({
-              node: craftedPortion.inputs[0],
-              parent: undefined,
-            });
-            queue.push({
-              node: craftedPortion.inputs[1],
-              parent: undefined,
-            });
-          } else if (!Array.isArray(craftedPortion) && craftedPortion.method === "cycle") {
-            queue.push({ node: craftedPortion.inputRecipe, parent: undefined });
-            craftedPortion.cycleInputs.forEach((cycleInput: InventoryRecipeTree) => {
-              queue.push({ node: cycleInput, parent: undefined });
-            });
-          }
         }
 
-        // Replace in parent or update root
-        if (parent) {
-          const parentNode = parent.parentNode;
-          if (!Array.isArray(parentNode) && parentNode.method === "recipe") {
-            parentNode.inputs[parent.inputIndex] = replacementNode;
-          }
-        } else {
-          newRoot = replacementNode;
-        }
-
-        // For full replacement, don't traverse children since we're replacing this entire subtree
-        if (invQty >= node.quantity) {
-          continue;
-        }
-        // For partial replacement, we already queued the crafted portion's children above
-        continue;
+        const result = [inventoryPart, craftedPortion] as InventoryRecipeTree;
+        processedNodes.set(node, result);
+        return result;
       }
 
-      // If this is a recipe node, add children to queue
+      // No inventory - process children normally
+      console.log(`${'  '.repeat(depth)}  -> No inventory for ${node.shard}, checking method: ${node.method}`);
       if (node.method === "recipe") {
-        queue.push({
-          node: node.inputs[0],
-          parent: { parentNode: node, inputIndex: 0 },
-        });
-        queue.push({
-          node: node.inputs[1],
-          parent: { parentNode: node, inputIndex: 1 },
-        });
+        console.log(`${'  '.repeat(depth)}     -> Processing recipe inputs for ${node.shard}`);
+        node.inputs[0] = await processNode(node.inputs[0], depth + 1);
+        console.log(`${'  '.repeat(depth)}     -> Finished input 0, processing input 1`);
+        node.inputs[1] = await processNode(node.inputs[1], depth + 1);
+        console.log(`${'  '.repeat(depth)}     -> Finished both inputs for ${node.shard}`);
       } else if (node.method === "cycle") {
-        // For cycle nodes, process the input recipe and cycle inputs
-        queue.push({ node: node.inputRecipe });
-        node.cycleInputs.forEach((cycleInput) => {
-          queue.push({ node: cycleInput });
-        });
+        console.log(`${'  '.repeat(depth)}     -> Processing cycle node`);
+        node.inputRecipe = await processNode(node.inputRecipe, depth + 1);
+        for (let i = 0; i < node.cycleInputs.length; i++) {
+          node.cycleInputs[i] = await processNode(node.cycleInputs[i], depth + 1);
+        }
+      } else {
+        console.log(`${'  '.repeat(depth)}     -> Unknown method ${node.method}, no children to process`);
       }
-    }
+
+      processedNodes.set(node, node);
+      return node;
+    };
+
+    const result = await processNode(tree);
 
     // Update the original inventory map to reflect what was used
     for (const [shard, qty] of workingInventory.entries()) {
       inventory.set(shard, qty);
     }
 
-    return newRoot;
+    return result;
   }
 
   async calculateOptimalPath(
