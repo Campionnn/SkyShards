@@ -369,20 +369,10 @@ export class InvCalculationService {
       recipeOverrides
     );
 
-    // Convert to InventoryRecipeTree and substitute with inventory
     let inventoryTree: InventoryRecipeTree = recipeTree;
-
-    // Clone inventory before substitution to avoid mutating the original
     const workingInventory = new Map(inventory);
 
-    // First pass: substitute optimal shards from inventory
     inventoryTree = await this.substituteInventoryBFS(inventoryTree, workingInventory, params);
-
-    // Second pass: check if alternative recipes are better given remaining inventory
-    // inventoryTree = await this.substituteAlternativeRecipesBFS(inventoryTree, workingInventory, params, parsed);
-
-    // Third pass: substitute inventory again for any new recipes from alternative substitution
-    // inventoryTree = await this.substituteInventoryBFS(inventoryTree, workingInventory, params);
 
     // Collect stats from the tree with inventory substitutions
     const { craftsNeeded, craftTime, totalQuantities } = this.service.collectTreeStats(
