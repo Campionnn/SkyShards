@@ -75,3 +75,51 @@ export const clearFormData = (): void => {
     console.warn("Failed to clear form data from localStorage:", error);
   }
 };
+
+const INVENTORY_STORAGE_KEY = "inventory";
+const K_VALUES_STORAGE_KEY = "k_values";
+
+export const saveInventory = (inventory: Map<string, number>): void => {
+  try {
+    const obj = Object.fromEntries(inventory);
+    localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(obj));
+  } catch (error) {
+    console.warn("Failed to save inventory to localStorage:", error);
+  }
+};
+
+export const loadInventory = (): Map<string, number> => {
+  try {
+    const stored = localStorage.getItem(INVENTORY_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return new Map(Object.entries(parsed).map(([k, v]) => [k, Number(v)]));
+    }
+  } catch (error) {
+    console.warn("Failed to load inventory from localStorage:", error);
+  }
+  return new Map();
+};
+
+export const saveKValues = (kValues: Map<string, number>): void => {
+  try {
+    const obj = Object.fromEntries(kValues);
+    localStorage.setItem(K_VALUES_STORAGE_KEY, JSON.stringify(obj));
+  } catch (error) {
+    console.warn("Failed to save k values to localStorage:", error);
+  }
+};
+
+export const loadKValues = (): Map<string, number> => {
+  try {
+    const stored = localStorage.getItem(K_VALUES_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return new Map(Object.entries(parsed).map(([k, v]) => [k, Number(v)]));
+    }
+  } catch (error) {
+    console.warn("Failed to load k values from localStorage:", error);
+  }
+  return new Map();
+};
+
