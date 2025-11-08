@@ -40,7 +40,7 @@ export class InvCalculationService {
     kValues: Map<string, number> = new Map()
   ): Promise<Map<string, number>> {
     const parsed = await this.service.parseData(params);
-    const { minCosts } = this.service.computeMinCosts(parsed, params, []);
+    const {minCosts} = this.service.computeMinCosts(parsed, params, []);
 
     // Create adjusted costs map
     const adjustedCosts = new Map<string, number>();
@@ -77,7 +77,7 @@ export class InvCalculationService {
 
     if (tree.method === "recipe") {
       const recipe = tree.recipe;
-      const { crocodileMultiplier } = this.service.calculateMultipliers(params);
+      const {crocodileMultiplier} = this.service.calculateMultipliers(params);
       const outputQuantity = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
       const craftsNeeded = Math.ceil(newQuantity / outputQuantity);
       tree.craftsNeeded = craftsNeeded;
@@ -92,7 +92,7 @@ export class InvCalculationService {
       const outputStep = tree.steps.find((step) => step.outputShard === tree.shard);
       if (!outputStep) return;
 
-      const { crocodileMultiplier } = this.service.calculateMultipliers(params);
+      const {crocodileMultiplier} = this.service.calculateMultipliers(params);
       const recipe = outputStep.recipe;
       const baseOutput = recipe.outputQuantity;
       const expectedOutput = recipe.isReptile ? baseOutput * crocodileMultiplier : baseOutput;
@@ -160,7 +160,7 @@ export class InvCalculationService {
         return node;
       }
 
-      // Handle direct nodes
+      // Handle direct nodes - try to substitute with inventory
       if (node.method === "direct") {
         const invQty = workingInventory.get(node.shard) || 0;
 
@@ -229,7 +229,7 @@ export class InvCalculationService {
         // Recalculate quantities for crafted portion
         if (craftedPortion.method === "recipe") {
           const recipe = craftedPortion.recipe;
-          const { crocodileMultiplier } = this.service.calculateMultipliers(params);
+          const {crocodileMultiplier} = this.service.calculateMultipliers(params);
           const outputQuantity = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
           const newCraftsNeeded = Math.ceil(remainingQuantity / outputQuantity);
           craftedPortion.craftsNeeded = newCraftsNeeded;
@@ -244,9 +244,11 @@ export class InvCalculationService {
           craftedPortion.inputs[0] = await processNode(craftedPortion.inputs[0]);
           craftedPortion.inputs[1] = await processNode(craftedPortion.inputs[1]);
         } else if (craftedPortion.method === "cycle") {
-          const outputStep = craftedPortion.steps.find((step: { outputShard: string }) => step.outputShard === craftedPortion.shard);
+          const outputStep = craftedPortion.steps.find((step: {
+            outputShard: string
+          }) => step.outputShard === craftedPortion.shard);
           if (outputStep) {
-            const { crocodileMultiplier } = this.service.calculateMultipliers(params);
+            const {crocodileMultiplier} = this.service.calculateMultipliers(params);
             const recipe = outputStep.recipe;
             const baseOutput = recipe.outputQuantity;
             const expectedOutput = recipe.isReptile ? baseOutput * crocodileMultiplier : baseOutput;
@@ -346,11 +348,11 @@ export class InvCalculationService {
         craftsNeeded: 0,
         totalQuantities: new Map<string, number>(),
         craftTime: 0,
-        tree: { shard: targetShard, method: "direct", quantity: 0 },
-      };
+        tree: {shard: targetShard, method: "direct", quantity: 0},
+      }
     }
 
-    const { choices } = this.service.computeMinCosts(parsed, params, recipeOverrides);
+    const {choices} = this.service.computeMinCosts(parsed, params, recipeOverrides);
 
     // Find cycle nodes to prevent infinite recursion in buildRecipeTree
     const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0
@@ -365,8 +367,8 @@ export class InvCalculationService {
       params,
       recipeOverrides
     );
-    const craftCounter = { total: 0 };
-    const { crocodileMultiplier } = this.service.calculateMultipliers(params);
+    const craftCounter = {total: 0};
+    const {crocodileMultiplier} = this.service.calculateMultipliers(params);
     this.service.assignQuantities(
       recipeTree,
       requiredQuantity,
@@ -384,7 +386,7 @@ export class InvCalculationService {
     inventoryTree = await this.substituteInventoryBFS(inventoryTree, workingInventory, params);
 
     // Collect stats from the tree with inventory substitutions
-    const { craftsNeeded, craftTime, totalQuantities } = this.service.collectTreeStats(
+    const {craftsNeeded, craftTime, totalQuantities} = this.service.collectTreeStats(
       inventoryTree,
       params
     );
@@ -405,6 +407,7 @@ export class InvCalculationService {
       totalQuantities,
       craftTime,
       tree: inventoryTree,
+      remainingInventory: workingInventory,
     };
   }
 }

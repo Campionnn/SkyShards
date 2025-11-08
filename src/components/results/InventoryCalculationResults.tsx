@@ -131,6 +131,7 @@ export const InventoryCalculationResults: React.FC<InventoryCalculationResultsPr
                 expandedStates={expandedStates}
                 onToggle={onToggle}
                 ironManView={ironManView}
+                remainingInventory={result.remainingInventory}
               />
             </div>
           </div>

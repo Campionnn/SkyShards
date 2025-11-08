@@ -19,6 +19,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
   noWoodenBait = false,
   ironManView,
   isInCycle = false,
+  remainingInventory,
 }) => {
   // Handle array of trees
   if (Array.isArray(tree)) {
@@ -37,6 +38,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
             noWoodenBait={noWoodenBait}
             ironManView={ironManView}
             isInCycle={isInCycle}
+            remainingInventory={remainingInventory}
           />
         ))}
       </>
@@ -209,12 +211,21 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
     }
 
     if (recipeTree.method === "inventory") {
+      const remaining = remainingInventory?.get(inputShard.id) ?? 0;
       return (
         <div className={`flex items-center justify-between pl-3.5 pr-1 py-1 ${inCycle ? 'bg-purple-900/40' : 'bg-purple-900/30'} rounded-md border border-purple-500/50`}>
           <div className="flex items-center space-x-2 p-0.5 text-sm">
             <Package className="w-3.5 h-3.5 text-purple-400 mr-1" />
             {renderShardInfo(recipeTree.quantity, inputShard, false)}
             <span className="px-1 py-0.4 text-xs bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-md flex-shrink-0">Inventory</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-right">
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-slate-400">remaining:</span>
+                <span className="text-slate-300 text-xs font-medium">{remaining}</span>
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -266,6 +277,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
               noWoodenBait={noWoodenBait}
               ironManView={ironManView}
               isInCycle={inCycle}
+              remainingInventory={remainingInventory}
             />
             <InventoryRecipeTreeNode
               tree={recipeTree.inputs[1]}
@@ -277,6 +289,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
               noWoodenBait={noWoodenBait}
               ironManView={ironManView}
               isInCycle={inCycle}
+              remainingInventory={remainingInventory}
             />
           </div>
         )}
@@ -327,6 +340,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
 
   // Handle inventory method
   if (tree.method === "inventory") {
+    const remaining = remainingInventory?.get(shard.id) ?? 0;
     return (
       <div className={`flex items-center justify-between pl-3.5 pr-1 py-1 ${isInCycle ? 'bg-purple-900/40' : 'bg-purple-900/30'} rounded-md border border-purple-500/50`}>
         <div className="flex items-center space-x-2 p-0.5 text-sm">
@@ -336,18 +350,10 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
         </div>
         <div className="flex items-center gap-2">
           <div className="text-right">
-            {ironManView && (
-              <div>
-                <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-                <span className="text-slate-500 text-xs mx-0.5">/</span>
-                <span className="text-slate-400 text-xs">hr</span>
-              </div>
-            )}
-            {!ironManView && (
-              <div>
-                <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(tree.quantity * shard.rate)}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-slate-400">remaining:</span>
+              <span className="text-slate-300 text-xs font-medium">{remaining}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -578,6 +584,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
               noWoodenBait={noWoodenBait}
               ironManView={ironManView}
               isInCycle={isInCycle}
+              remainingInventory={remainingInventory}
             />
             <InventoryRecipeTreeNode
               tree={input2}
@@ -589,6 +596,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
               noWoodenBait={noWoodenBait}
               ironManView={ironManView}
               isInCycle={isInCycle}
+              remainingInventory={remainingInventory}
             />
           </div>
         )}

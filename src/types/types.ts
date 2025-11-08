@@ -166,6 +166,7 @@ export interface InventoryRecipeTreeNodeProps {
   noWoodenBait?: boolean;
   ironManView: boolean;
   isInCycle?: boolean;
+  remainingInventory?: Map<string, number>;
 }
 
 // searchbar
@@ -235,6 +236,7 @@ export interface InventoryCalculationResult {
   totalQuantities: Map<string, number>;
   craftTime: number;
   tree: InventoryRecipeTree | null;
+  remainingInventory?: Map<string, number>;
 }
 
 export type InventoryRecipeTree =
