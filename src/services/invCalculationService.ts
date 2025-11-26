@@ -5,8 +5,14 @@ import type {
   InventoryCalculationResult,
   InventoryRecipeTree,
   Recipe,
+  RecipeChoice,
   RecipeOverride,
 } from "../types/types";
+
+type InventoryRecipeNode = Extract<
+  InventoryRecipeTree,
+  { method: "recipe" }
+>;
 
 export class InvCalculationService {
   private static instance: InvCalculationService;
@@ -136,16 +142,211 @@ export class InvCalculationService {
     }
   }
 
+  private isRecipeTreeNode(node: InventoryRecipeTree): node is InventoryRecipeNode {
+    return !Array.isArray(node) && node.method === "recipe";
+  }
+
+  private async buildInputTree(
+    shardId: string,
+    quantity: number,
+    parsed: Data,
+    params: CalculationParams,
+    choices: Map<string, RecipeChoice>,
+    cycleNodes: string[][],
+    recipeOverrides: RecipeOverride[]
+  ): Promise<InventoryRecipeTree> {
+    const tree = this.service.buildRecipeTree(parsed, shardId, choices, cycleNodes, params, recipeOverrides);
+    const craftCounter = {total: 0};
+    const {crocodileMultiplier} = this.service.calculateMultipliers(params);
+    this.service.assignQuantities(
+      tree,
+      quantity,
+      parsed,
+      craftCounter,
+      choices,
+      crocodileMultiplier,
+      params,
+      recipeOverrides
+    );
+    return tree as InventoryRecipeTree;
+  }
+
+  private async buildCustomRecipeNode(
+    shardId: string,
+    recipe: Recipe,
+    craftsNeeded: number,
+    quantity: number,
+    parsed: Data,
+    params: CalculationParams,
+    choices: Map<string, RecipeChoice>,
+    cycleNodes: string[][],
+    recipeOverrides: RecipeOverride[]
+  ): Promise<InventoryRecipeTree> {
+    const [input1, input2] = recipe.inputs;
+    const fuse1 = parsed.shards[input1].fuse_amount;
+    const fuse2 = parsed.shards[input2].fuse_amount;
+    const inputQuantity1 = craftsNeeded * fuse1;
+    const inputQuantity2 = craftsNeeded * fuse2;
+
+    const inputTree1 = await this.buildInputTree(
+      input1,
+      inputQuantity1,
+      parsed,
+      params,
+      choices,
+      cycleNodes,
+      recipeOverrides
+    );
+    const inputTree2 = await this.buildInputTree(
+      input2,
+      inputQuantity2,
+      parsed,
+      params,
+      choices,
+      cycleNodes,
+      recipeOverrides
+    );
+
+    return {
+      shard: shardId,
+      method: "recipe",
+      recipe,
+      quantity,
+      craftsNeeded,
+      inputs: [inputTree1, inputTree2],
+    };
+  }
+
+  private async tryApplyInventoryAlternatives(
+    node: InventoryRecipeNode,
+    workingInventory: Map<string, number>,
+    params: CalculationParams,
+    parsed: Data,
+    choices: Map<string, RecipeChoice>,
+    cycleNodes: string[][],
+    recipeOverrides: RecipeOverride[],
+    processNode: (node: InventoryRecipeTree, allowAlternatives?: boolean) => Promise<InventoryRecipeTree>
+  ): Promise<InventoryRecipeTree | null> {
+    if (node.method !== "recipe" || !node.recipe) {
+      return null;
+    }
+
+    const availableRecipes = parsed.recipes[node.shard] || [];
+    if (availableRecipes.length <= 1) {
+      return null;
+    }
+
+    const hasOverride = recipeOverrides.some((override) => override.shardId === node.shard);
+    if (hasOverride) {
+      return null;
+    }
+
+    const alternatives = availableRecipes.filter(
+      (recipe) => !this.service.areRecipesEqual(recipe, node.recipe)
+    );
+    if (alternatives.length === 0) {
+      return null;
+    }
+
+    const {crocodileMultiplier} = this.service.calculateMultipliers(params);
+    let remainingQuantity = node.quantity;
+    const segments: InventoryRecipeTree[] = [];
+
+    while (remainingQuantity > 0) {
+      let bestCandidate:
+        | {recipe: Recipe; outputQuantity: number; craftsSupported: number}
+        | null = null;
+
+      for (const recipe of alternatives) {
+        const outputQuantity = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
+        const perInputCrafts = recipe.inputs.map((inputId) => {
+          const available = workingInventory.get(inputId) || 0;
+          if (available <= 0) {
+            return 0;
+          }
+          const fuseAmount = parsed.shards[inputId].fuse_amount;
+          return Math.floor(available / fuseAmount);
+        });
+        const craftsSupported = perInputCrafts.length > 0 ? Math.min(...perInputCrafts) : 0;
+
+        if (craftsSupported <= 0) {
+          continue;
+        }
+
+        if (
+          !bestCandidate ||
+          craftsSupported * outputQuantity >
+            bestCandidate.craftsSupported * bestCandidate.outputQuantity
+        ) {
+          bestCandidate = {recipe, outputQuantity, craftsSupported};
+        }
+      }
+
+      if (!bestCandidate) {
+        break;
+      }
+
+      const craftsForRemaining = Math.ceil(remainingQuantity / bestCandidate.outputQuantity);
+      const craftsToUse = Math.min(bestCandidate.craftsSupported, craftsForRemaining);
+
+      if (craftsToUse <= 0) {
+        break;
+      }
+
+      const quantityProduced = Math.min(
+        remainingQuantity,
+        craftsToUse * bestCandidate.outputQuantity
+      );
+
+      if (quantityProduced <= 0) {
+        break;
+      }
+
+      const customNode = await this.buildCustomRecipeNode(
+        node.shard,
+        bestCandidate.recipe,
+        craftsToUse,
+        quantityProduced,
+        parsed,
+        params,
+        choices,
+        cycleNodes,
+        recipeOverrides
+      );
+      const processedSegment = await processNode(customNode, false);
+      segments.push(processedSegment);
+      remainingQuantity -= quantityProduced;
+    }
+
+    if (segments.length === 0) {
+      return null;
+    }
+
+    if (remainingQuantity > 0) {
+      this.recalculateTreeQuantities(node, remainingQuantity, parsed, params);
+      const leftover = await processNode(node, false);
+      segments.push(leftover);
+    }
+
+    return segments.length === 1 ? segments[0] : (segments as InventoryRecipeTree);
+  }
+
   private async substituteInventoryBFS(
     tree: InventoryRecipeTree,
     inventory: Map<string, number>,
-    params: CalculationParams
+    params: CalculationParams,
+    parsed: Data,
+    choices: Map<string, RecipeChoice>,
+    cycleNodes: string[][],
+    recipeOverrides: RecipeOverride[]
   ): Promise<InventoryRecipeTree> {
     const workingInventory = new Map(inventory);
-    const parsed = await this.service.parseData(params);
     const processedNodes = new WeakMap<object, InventoryRecipeTree>();
 
-    const processNode = async (node: InventoryRecipeTree): Promise<InventoryRecipeTree> => {
+    const processNode = async (
+      node: InventoryRecipeTree,
+      allowAlternatives = true
+    ): Promise<InventoryRecipeTree> => {
       // Handle array nodes by processing each element
       if (Array.isArray(node)) {
         const processedArray: InventoryRecipeTree[] = [];
@@ -153,6 +354,24 @@ export class InvCalculationService {
           processedArray.push(await processNode(element));
         }
         return processedArray as InventoryRecipeTree;
+      }
+
+      // Attempt to split recipe nodes into inventory-aware segments before deeper processing
+      if (allowAlternatives && this.isRecipeTreeNode(node)) {
+        const alternative = await this.tryApplyInventoryAlternatives(
+          node,
+          workingInventory,
+          params,
+          parsed,
+          choices,
+          cycleNodes,
+          recipeOverrides,
+          processNode
+        );
+        if (alternative) {
+          processedNodes.set(node, alternative);
+          return alternative;
+        }
       }
 
       // Skip inventory nodes
@@ -383,7 +602,15 @@ export class InvCalculationService {
     let inventoryTree: InventoryRecipeTree = recipeTree;
     const workingInventory = new Map(inventory);
 
-    inventoryTree = await this.substituteInventoryBFS(inventoryTree, workingInventory, params);
+    inventoryTree = await this.substituteInventoryBFS(
+      inventoryTree,
+      workingInventory,
+      params,
+      parsed,
+      choices,
+      cycleNodes,
+      recipeOverrides
+    );
 
     // Collect stats from the tree with inventory substitutions
     const {craftsNeeded, craftTime, totalQuantities} = this.service.collectTreeStats(
