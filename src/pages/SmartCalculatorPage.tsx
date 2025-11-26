@@ -5,7 +5,7 @@ import { useCustomRates, useCalculatorState, useShards } from "../hooks";
 import { DataService, InvCalculationService, CalculationService } from "../services";
 import { loadInventory, saveInventory, loadKValues, saveKValues } from "../utilities";
 import type { CalculationFormData } from "../schemas";
-import type { InventoryCalculationResult, CalculationParams, Data } from "../types/types";
+import type { InventoryCalculationResult, CalculationParams, Data, RecipeOverride } from "../types/types";
 
 const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
   const { setForm } = useCalculatorState();
@@ -25,6 +25,7 @@ const SmartCalculatorPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importJsonText, setImportJsonText] = useState("");
+  const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
 
   const [inventory, setInventory] = useState<Map<string, number>>(loadInventory);
 
@@ -117,7 +118,8 @@ const SmartCalculatorPage: React.FC = () => {
         formData.quantity,
         params,
         new Map(inventory),
-        kValues
+        kValues,
+        recipeOverrides
       );
 
       setResult(calculationResult);
@@ -130,7 +132,7 @@ const SmartCalculatorPage: React.FC = () => {
     } finally {
       setIsCalculating(false);
     }
-  }, [customRates, inventory, kValues]);
+  }, [customRates, inventory, kValues, recipeOverrides]);
 
   const debouncedCalculate = useCallback(
     (formData: CalculationFormData, delay = 300) => {
@@ -183,6 +185,14 @@ const SmartCalculatorPage: React.FC = () => {
     setKValues(newKValues);
   };
 
+  const handleRecipeOverridesUpdate = (newOverrides: RecipeOverride[]) => {
+    setRecipeOverrides(newOverrides);
+  };
+
+  const resetRecipeOverrides = () => {
+    setRecipeOverrides([]);
+  };
+
   const handleNumberInputWheel = (e: React.WheelEvent<HTMLInputElement>) => {
     e.currentTarget.blur();
   };
@@ -199,7 +209,7 @@ const SmartCalculatorPage: React.FC = () => {
     if (form && form.shard && form.shard.trim() !== "") {
       void debouncedCalculate(form, 150);
     }
-  }, [inventory, kValues, form, debouncedCalculate]);
+  }, [inventory, kValues, form, debouncedCalculate, recipeOverrides]);
 
   // Initialize params from form state so we can display costs even before a calculation
   useEffect(() => {
@@ -617,6 +627,10 @@ const SmartCalculatorPage: React.FC = () => {
               onToggle={handleToggle}
               onExpandAll={handleExpandAll}
               onCollapseAll={handleCollapseAll}
+              params={currentParams}
+              recipeOverrides={recipeOverrides}
+              onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
+              onResetRecipeOverrides={resetRecipeOverrides}
             />
           )}
 

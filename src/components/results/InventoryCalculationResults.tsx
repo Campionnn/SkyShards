@@ -1,9 +1,10 @@
 import React from "react";
 import { Clock, Coins, Hammer, Target, BarChart3, TicketPercent } from "lucide-react";
 import { formatLargeNumber, formatNumber, formatTime } from "../../utilities";
-import type { InventoryCalculationResult, Data } from "../../types/types";
+import type { InventoryCalculationResult, Data, CalculationParams, RecipeOverride } from "../../types/types";
 import { InventoryRecipeTreeNode } from "../tree";
 import { SummaryCard, MaterialItem } from "../ui";
+import { RecipeOverrideManager } from "../forms";
 
 interface InventoryCalculationResultsProps {
   result: InventoryCalculationResult;
@@ -15,6 +16,10 @@ interface InventoryCalculationResultsProps {
   onToggle: (nodeId: string) => void;
   onExpandAll: () => void;
   onCollapseAll: () => void;
+  params: CalculationParams;
+  recipeOverrides: RecipeOverride[];
+  onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
+  onResetRecipeOverrides: () => void;
 }
 
 export const InventoryCalculationResults: React.FC<InventoryCalculationResultsProps> = ({
@@ -27,7 +32,14 @@ export const InventoryCalculationResults: React.FC<InventoryCalculationResultsPr
   onToggle,
   onExpandAll,
   onCollapseAll,
+  params,
+  recipeOverrides,
+  onRecipeOverridesUpdate,
+  onResetRecipeOverrides,
 }) => {
+  const targetShardData = data.shards[targetShard];
+  const targetShardRate = targetShardData?.rate ?? 0;
+  const inventoryTree = result.tree;
 
   return (
     <div className="space-y-3">
@@ -47,7 +59,7 @@ export const InventoryCalculationResults: React.FC<InventoryCalculationResultsPr
               icon={TicketPercent}
               iconColor="text-purple-400"
               label="Total Coins Saved"
-              value={formatLargeNumber(result.totalShardsProduced * data.shards[targetShard].rate - result.totalTime)}
+              value={formatLargeNumber(result.totalShardsProduced * targetShardRate - result.totalTime)}
             />
           </>
         )}
@@ -96,43 +108,63 @@ export const InventoryCalculationResults: React.FC<InventoryCalculationResultsPr
       )}
 
       {/* Fusion Tree */}
-      {result.tree && (
+      {inventoryTree && (
         <div className="bg-slate-800 border border-slate-600 rounded-md p-3">
           <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
             <div className="min-w-[810px]">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <div className="p-1 bg-slate-700 rounded-md">
-                    <BarChart3 className="w-5 h-5 text-purple-400" />
-                  </div>
-                  Optimal Fusion Path
-                </h3>
-                <div className="flex gap-2 flex-wrap">
-                  <button
-                    onClick={onExpandAll}
-                    className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 hover:border-green-500/30"
-                  >
-                    <span>Expand All</span>
-                  </button>
-                  <button
-                    onClick={onCollapseAll}
-                    className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/20 hover:border-orange-500/30"
-                  >
-                    <span>Collapse All</span>
-                  </button>
-                </div>
-              </div>
-              <InventoryRecipeTreeNode
-                tree={result.tree}
-                data={data}
-                isTopLevel={true}
-                totalShardsProduced={result.totalShardsProduced}
-                nodeId="root"
-                expandedStates={expandedStates}
-                onToggle={onToggle}
-                ironManView={ironManView}
-                remainingInventory={result.remainingInventory}
-              />
+              <RecipeOverrideManager
+                params={params}
+                recipeOverrides={recipeOverrides}
+                onRecipeOverridesUpdate={onRecipeOverridesUpdate}
+                onResetRecipeOverrides={onResetRecipeOverrides}
+              >
+                {({ showAlternatives, resetAlternatives }) => (
+                  <>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
+                      <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                        <div className="p-1 bg-slate-700 rounded-md">
+                          <BarChart3 className="w-5 h-5 text-purple-400" />
+                        </div>
+                        Fusion Tree
+                      </h3>
+                      <div className="flex gap-2 flex-wrap">
+                        {recipeOverrides.length > 0 && (
+                          <button
+                            onClick={resetAlternatives}
+                            className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 hover:border-red-500/30"
+                          >
+                            <span>Reset Alternatives</span>
+                          </button>
+                        )}
+                        <button
+                          onClick={onExpandAll}
+                          className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 hover:border-green-500/30"
+                        >
+                          <span>Expand All</span>
+                        </button>
+                        <button
+                          onClick={onCollapseAll}
+                          className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/20 hover:border-orange-500/30"
+                        >
+                          <span>Collapse All</span>
+                        </button>
+                      </div>
+                    </div>
+                    <InventoryRecipeTreeNode
+                      tree={inventoryTree}
+                      data={data}
+                      isTopLevel={true}
+                      totalShardsProduced={result.totalShardsProduced}
+                      nodeId="root"
+                      expandedStates={expandedStates}
+                      onToggle={onToggle}
+                      onShowAlternatives={showAlternatives}
+                      ironManView={ironManView}
+                      remainingInventory={result.remainingInventory}
+                    />
+                  </>
+                )}
+              </RecipeOverrideManager>
             </div>
           </div>
         </div>

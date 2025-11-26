@@ -222,7 +222,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
           <div className="flex items-center gap-2">
             <div className="text-right">
               <div className="flex items-center gap-1">
-                <span className="text-xs text-slate-400">remaining:</span>
+                <span className="text-xs text-slate-400">remaining</span>
                 <span className="text-slate-300 text-xs font-medium">{remaining}</span>
               </div>
             </div>
@@ -351,7 +351,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
         <div className="flex items-center gap-2">
           <div className="text-right">
             <div className="flex items-center gap-1">
-              <span className="text-xs text-slate-400">remaining:</span>
+              <span className="text-xs text-slate-400">remaining</span>
               <span className="text-slate-300 text-xs font-medium">{remaining}</span>
             </div>
           </div>
