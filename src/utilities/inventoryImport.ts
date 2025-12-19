@@ -29,6 +29,26 @@ export function validateShardKey(key: string): boolean {
 }
 
 /**
+ * Comparator for sorting shard keys by rarity order, then number
+ */
+function compareShardKeys(a: string, b: string): number {
+  const rarityOrder: Record<string, number> = { C: 1, U: 2, R: 3, E: 4, L: 5 };
+  const aMatch = a.match(/^([CUREL])(\d+)$/);
+  const bMatch = b.match(/^([CUREL])(\d+)$/);
+
+  if (!aMatch || !bMatch) return 0;
+
+  const [, aRarity, aNum] = aMatch;
+  const [, bRarity, bNum] = bMatch;
+
+  if (rarityOrder[aRarity] !== rarityOrder[bRarity]) {
+    return rarityOrder[aRarity] - rarityOrder[bRarity];
+  }
+
+  return parseInt(aNum) - parseInt(bNum);
+}
+
+/**
  * Merges multiple inventory boxes, summing quantities for duplicate keys
  */
 export function mergeInventories(
@@ -146,40 +166,8 @@ export function parseInventoryJson(
   }
 
   // Sort by shard key (rarity order, then number)
-  shardQuantities.sort((a, b) => {
-    const rarityOrder: Record<string, number> = { C: 1, U: 2, R: 3, E: 4, L: 5 };
-    const aMatch = a.shard.key.match(/^([CUREL])(\d+)$/);
-    const bMatch = b.shard.key.match(/^([CUREL])(\d+)$/);
-
-    if (!aMatch || !bMatch) return 0;
-
-    const [, aRarity, aNum] = aMatch;
-    const [, bRarity, bNum] = bMatch;
-
-    if (rarityOrder[aRarity] !== rarityOrder[bRarity]) {
-      return rarityOrder[aRarity] - rarityOrder[bRarity];
-    }
-
-    return parseInt(aNum) - parseInt(bNum);
-  });
-
-  // Sort selected keys to match
-  selectedShardKeys.sort((a, b) => {
-    const rarityOrder: Record<string, number> = { C: 1, U: 2, R: 3, E: 4, L: 5 };
-    const aMatch = a.match(/^([CUREL])(\d+)$/);
-    const bMatch = b.match(/^([CUREL])(\d+)$/);
-
-    if (!aMatch || !bMatch) return 0;
-
-    const [, aRarity, aNum] = aMatch;
-    const [, bRarity, bNum] = bMatch;
-
-    if (rarityOrder[aRarity] !== rarityOrder[bRarity]) {
-      return rarityOrder[aRarity] - rarityOrder[bRarity];
-    }
-
-    return parseInt(aNum) - parseInt(bNum);
-  });
+  shardQuantities.sort((a, b) => compareShardKeys(a.shard.key, b.shard.key));
+  selectedShardKeys.sort(compareShardKeys);
 
   return {
     success: shardQuantities.length > 0,

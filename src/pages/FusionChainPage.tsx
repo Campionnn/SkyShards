@@ -66,15 +66,13 @@ export default function FusionChainPage() {
       .catch(console.error);
   }, [setNodes, setEdges]);
 
-  // Handle node click - highlight chain
-  const onNodeClick = useCallback(
-    (_event: React.MouseEvent, node: Node<ShardNodeData>) => {
+  // Select/deselect a shard and highlight its chain
+  const selectShard = useCallback(
+    (shardId: string | null) => {
       if (!properties) return;
 
-      const shardId = node.id;
-
-      if (selectedShard === shardId) {
-        // Deselect if clicking same node
+      if (shardId === null || selectedShard === shardId) {
+        // Deselect
         setSelectedShard(null);
         setNodes(
           allNodes.map((n) => ({
@@ -122,6 +120,14 @@ export default function FusionChainPage() {
     [properties, selectedShard, allNodes, allEdges, setNodes, setEdges]
   );
 
+  // Handle node click - highlight chain
+  const onNodeClick = useCallback(
+    (_event: React.MouseEvent, node: Node<ShardNodeData>) => {
+      selectShard(node.id);
+    },
+    [selectShard]
+  );
+
   // Handle search
   const handleSearch = useCallback(() => {
     if (!searchQuery.trim() || !properties) return;
@@ -134,10 +140,9 @@ export default function FusionChainPage() {
     );
 
     if (matchingNode) {
-      // Trigger the node click to highlight chain
-      onNodeClick({ } as React.MouseEvent, matchingNode);
+      selectShard(matchingNode.id);
     }
-  }, [searchQuery, properties, allNodes, onNodeClick]);
+  }, [searchQuery, properties, allNodes, selectShard]);
 
   // Handle rarity filter
   useEffect(() => {
