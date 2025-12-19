@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calculator, Settings, Shuffle, Menu, X } from "lucide-react";
+import { Calculator, Settings, Shuffle, Menu, X, GitBranch } from "lucide-react";
 
 const GitHubIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -49,6 +49,7 @@ export const Navigation: React.FC = () => {
   const navItems = [
     { path: "/", label: "Calculator", icon: Calculator, color: "purple" },
     { path: "/recipes", label: "Recipes", icon: Shuffle, color: "green" },
+    { path: "/chains", label: "Chains", icon: GitBranch, color: "yellow" },
     { path: "/shards", label: "Shards", icon: Settings, color: "blue" },
   ];
 

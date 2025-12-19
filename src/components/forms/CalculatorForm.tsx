@@ -1,5 +1,5 @@
 import React from "react";
-import { Zap, RotateCcw, Settings, TriangleAlert, Layers } from "lucide-react";
+import { Zap, RotateCcw, Settings, TriangleAlert, Layers, Upload } from "lucide-react";
 import { type CalculationFormData } from "../../schemas";
 import { ShardAutocomplete, MoneyInput } from "./inputs";
 import { useCalculatorState, useShards } from "../../hooks";
@@ -8,7 +8,7 @@ import {MAX_QUANTITIES, SHARD_DESCRIPTIONS} from "../../constants";
 import { isValidShardName, formatShardDescription } from "../../utilities";
 import { Tooltip, ToggleSwitch } from "../ui";
 import type { ShardWithKey } from "../../types/types";
-import { MultiSelectShardModal } from "../modals";
+import { MultiSelectShardModal, ImportInventoryModal } from "../modals";
 import { DataService } from "../../services";
 
 interface CalculatorFormProps {
@@ -217,6 +217,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
 
   // Materials Only mode state
   const [isMultiSelectModalOpen, setIsMultiSelectModalOpen] = React.useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = React.useState(false);
   const [allShards, setAllShards] = React.useState<ShardWithKey[]>([]);
 
   const handleOpenMultiSelect = React.useCallback(async () => {
@@ -236,6 +237,33 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
       const updated = { ...form, selectedShardKeys: selectedKeys, shardQuantities: selectedData } as CalculationFormData;
       setForm(updated);
       setIsMultiSelectModalOpen(false);
+      setTimeout(() => onSubmit(updated), 0);
+    },
+    [form, setForm, onSubmit]
+  );
+
+  const handleOpenImport = React.useCallback(async () => {
+    if (allShards.length === 0) {
+      const dataService = DataService.getInstance();
+      const shards = await dataService.loadShards();
+      // Filter out Chameleon shard (L4) as it's only used for fusions
+      const filteredShards = shards.filter(shard => shard.key !== 'L4');
+      setAllShards(filteredShards);
+    }
+    setIsImportModalOpen(true);
+  }, [allShards]);
+
+  const handleImportDone = React.useCallback(
+    (selectedData: Array<{ shard: ShardWithKey; quantity: number }>) => {
+      const selectedKeys = selectedData.map((item) => item.shard.key);
+      const updated = {
+        ...form,
+        selectedShardKeys: selectedKeys,
+        shardQuantities: selectedData,
+        materialsOnly: true  // Auto-enable Materials Only mode
+      } as CalculationFormData;
+      setForm(updated);
+      setIsImportModalOpen(false);
       setTimeout(() => onSubmit(updated), 0);
     },
     [form, setForm, onSubmit]
@@ -340,6 +368,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   <Layers className="w-4 h-4" />
                   <span>{form.selectedShardKeys && form.selectedShardKeys.length > 0 ? `${form.selectedShardKeys.length} Shard${form.selectedShardKeys.length > 1 ? 's' : ''} Selected` : 'Select Shards'}</span>
                 </button>
+                <button
+                  type="button"
+                  onClick={handleOpenImport}
+                  className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 hover:border-green-500/40 rounded-md text-green-400 font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"
+                  title="Import inventory from JSON"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span className="hidden sm:inline">Import</span>
+                </button>
                 {form.selectedShardKeys && form.selectedShardKeys.length > 0 && (
                   <button
                     type="button"
@@ -415,6 +452,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               (form.shardQuantities || []).map((item) => [item.shard.key, item.quantity])
             )
           }
+        />
+
+        {/* Import Inventory Modal */}
+        <ImportInventoryModal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          onImport={handleImportDone}
+          allShards={allShards}
         />
 
         {/* Settings */}

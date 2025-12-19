@@ -13,6 +13,7 @@ const AboutPage = lazy(() => import("./pages/AboutPage").then((module) => ({ def
 
 const ContactPage = lazy(() => import("./pages/ContactPage").then((module) => ({ default: module.ContactPage })));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const FusionChainPage = lazy(() => import("./pages/FusionChainPage"));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center py-12">
@@ -71,6 +72,14 @@ const router = createBrowserRouter(
           element: (
             <Suspense fallback={<LoadingSpinner />}>
               <RecipePage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "chains",
+          element: (
+            <Suspense fallback={<LoadingSpinner />}>
+              <FusionChainPage />
             </Suspense>
           ),
         },
