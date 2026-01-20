@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: 'Minecraft';
-  src: url('/public/fonts/unifont-17.0.03.otf') format('opentype');
+  src: url('/fonts/unifont-17.0.03.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -30,7 +30,7 @@ body {
     width: 100%;
     display: grid;
     grid-template-columns: 100px minmax(0, 1fr) 300px;
-    column-gap: var(16px);
+    column-gap: 16px;
     align-items: start;
   }
 
@@ -46,11 +46,6 @@ body {
     min-height: 600px;
     position: sticky;
     top: 16px;
-  }
-
-  .pn-page::before {
-    content: "";
-    grid-column: 1;
   }
 }
 
