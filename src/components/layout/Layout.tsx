@@ -9,10 +9,19 @@ export const Layout: React.FC = () => {
     <div className="min-h-screen bg-slate-950">
       <Navigation />
       <main className="px-1 sm:px-2 lg:px-4 py-3">
-        <div className="max-w-screen-2xl mx-auto w-full">
-          <ErrorBoundary>
-            <Outlet key={location.pathname} />
-          </ErrorBoundary>
+        <div className="w-full">
+          <div className="pn-page">
+            <div className="pn-content">
+              <div className="max-w-screen-2xl mx-auto w-full">
+                <div className="pn-leaderboard" />
+
+                <ErrorBoundary>
+                  <Outlet key={location.pathname} />
+                </ErrorBoundary>
+              </div>
+            </div>
+            <aside className="pn-sidebar" aria-label="Advertisement" />
+          </div>
         </div>
       </main>
 
