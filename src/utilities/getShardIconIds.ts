@@ -1,4 +1,4 @@
-const shardIconModules = import.meta.glob('/public/shardIcons/*.png', {
+const shardIconModules = import.meta.glob('/shardIcons/*.png', {
   eager: true,
   query: '?url',
   import: 'default'
