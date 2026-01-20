@@ -25,7 +25,7 @@ body {
   display: none;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
   .pn-page {
     width: 100%;
     display: grid;
