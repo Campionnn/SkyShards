@@ -34,6 +34,10 @@ body {
     align-items: start;
   }
 
+  .pn-left {
+    grid-column: 1;
+  }
+
   .pn-content {
     grid-column: 2;
     min-width: 0;
@@ -46,6 +50,7 @@ body {
     min-height: 600px;
     position: sticky;
     top: 16px;
+    align-self: start;
   }
 }
 

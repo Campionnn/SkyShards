@@ -12,8 +12,9 @@ export const Layout: React.FC = () => {
       <main className="px-1 sm:px-2 lg:px-4 py-3">
         <div className="w-full">
           <div className="pn-page">
-            <PnPageAutoScale>
-              <div className="pn-content">
+            <div className="pn-left" aria-hidden />
+            <div className="pn-content">
+              <PnPageAutoScale>
                 <div className="max-w-screen-2xl mx-auto w-full">
                   <div className="pn-leaderboard" />
 
@@ -21,8 +22,8 @@ export const Layout: React.FC = () => {
                     <Outlet key={location.pathname} />
                   </ErrorBoundary>
                 </div>
-              </div>
-            </PnPageAutoScale>
+              </PnPageAutoScale>
+            </div>
             <aside className="pn-sidebar" aria-label="Advertisement" />
           </div>
         </div>
