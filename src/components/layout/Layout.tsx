@@ -9,10 +9,10 @@ export const Layout: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950">
       <Navigation />
-      <main className="px-1 sm:px-2 lg:px-4 py-3 overflow-hidden">
-        <PnPageAutoScale>
-          <div className="w-full">
-            <div className="pn-page">
+      <main className="px-1 sm:px-2 lg:px-4 py-3">
+        <div className="w-full">
+          <div className="pn-page">
+            <PnPageAutoScale>
               <div className="pn-content">
                 <div className="max-w-screen-2xl mx-auto w-full">
                   <div className="pn-leaderboard" />
@@ -22,10 +22,10 @@ export const Layout: React.FC = () => {
                   </ErrorBoundary>
                 </div>
               </div>
-              <aside className="pn-sidebar" aria-label="Advertisement" />
-            </div>
+            </PnPageAutoScale>
+            <aside className="pn-sidebar" aria-label="Advertisement" />
           </div>
-        </PnPageAutoScale>
+        </div>
       </main>
 
       <footer className="text-center py-6 text-slate-400 text-sm border-t border-slate-800/50">
