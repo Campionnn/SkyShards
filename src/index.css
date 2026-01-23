@@ -1,0 +1,86 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Minecraft';
+  src: url('/fonts/unifont-17.0.03.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: "Inter", "Minecraft", sans-serif;
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+.pn-leaderboard {
+  width: 100%;
+  min-height: 100px;
+  margin: 0 auto 12px;
+}
+
+.pn-sidebar {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .pn-page {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr) 300px;
+    column-gap: 16px;
+    align-items: start;
+  }
+
+  .pn-left {
+    grid-column: 1;
+  }
+
+  .pn-content {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  .pn-sidebar {
+    grid-column: 3;
+    display: block;
+    width: 300px;
+    min-height: 600px;
+    position: sticky;
+    top: 16px;
+    align-self: start;
+  }
+}
+
+/* Remove number input spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}

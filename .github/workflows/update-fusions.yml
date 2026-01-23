@@ -1,0 +1,36 @@
+name: Update Fusion Data
+
+on:
+  repository_dispatch:
+    types: [update-fusion-data]
+
+jobs:
+  update-fusion-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set target branch
+        run: |
+          echo "TARGET_BRANCH=${{ github.event.client_payload.target_branch || 'master' }}" >> $GITHUB_ENV
+
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+          ref: ${{ env.TARGET_BRANCH }}
+
+      - name: Download latest fusion-data.json from source repo release
+        run: |
+          LATEST_RELEASE=$(curl -s https://api.github.com/repos/Campionnn/SkyShards-Parser/releases/latest | jq -r '.tag_name')
+          ASSET_URL_DATA=$(curl -s https://api.github.com/repos/Campionnn/SkyShards-Parser/releases/tags/$LATEST_RELEASE | jq -r '.assets[] | select(.name == "fusion-data.json") | .browser_download_url')
+          ASSET_URL_PROP=$(curl -s https://api.github.com/repos/Campionnn/SkyShards-Parser/releases/tags/$LATEST_RELEASE | jq -r '.assets[] | select(.name == "fusion-properties.json") | .browser_download_url')
+          curl -L -o public/fusion-data.json "$ASSET_URL_DATA"
+          curl -L -o public/fusion-properties.json "$ASSET_URL_PROP"
+
+      - name: Commit and push updated fusion-data.json
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/fusion-data.json
+          git add public/fusion-properties.json
+          git commit -m "Update fusion-data.json and fusion-properties.json from SkyShards-Parser release" || echo "No changes to commit"
+          git push origin HEAD:${{ env.TARGET_BRANCH }}
