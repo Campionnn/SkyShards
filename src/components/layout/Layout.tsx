@@ -52,7 +52,7 @@ export const Layout: React.FC = () => {
               Contact
             </a>
             <span className="text-slate-600">•</span>
-            <a href="/privacy-policy" className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium">
+            <a href="https://skyshards.com/privacy-policy" className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium">
               Privacy Policy
             </a>
             <span className="text-slate-600">•</span>
