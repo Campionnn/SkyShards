@@ -1,38 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getRarityColor } from "../../utilities";
-import { MoveRight } from "lucide-react";
 
 interface TooltipProps {
   content: string;
   title?: string;
-  shardName?: string;
   className?: string;
-  iconSize?: string;
-  shardIcon?: string;
-  rarity?: string;
-  warning?: string;
-  family?: string;
-  type?: string;
   children?: React.ReactNode;
-  shardId?: string; // Add shardId prop
-  showRomanNumerals?: boolean; // Add prop to control Roman numeral display
   visible?: boolean;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
   content,
   title,
-  shardName,
   className = "",
-  shardIcon,
-  iconSize,
-  rarity,
-  warning,
-  family,
-  type,
   children,
-  shardId,
-  showRomanNumerals = true,
   visible,
 }) => {
   const [internalVisible, setInternalVisible] = useState(false);
@@ -72,7 +52,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
   useEffect(() => {
     if (!isVisible) return;
 
-    // Use requestAnimationFrame to ensure DOM is ready for measuring
     const raf = requestAnimationFrame(() => {
       updatePosition();
     });
@@ -102,16 +81,14 @@ export const Tooltip: React.FC<TooltipProps> = ({
     };
   }, [isVisible]);
 
-  const metaInfo = [shardId, family, type].filter(Boolean).join(" • ");
-
   return (
     <>
-      <div ref={triggerRef} onClick={toggleTooltip} className={`cursor-pointer ${className}`} aria-label="Show description">
+      <div ref={triggerRef} onClick={toggleTooltip} className={`cursor-pointer ${className}`} aria-label="Show tooltip">
         {children || (
           <button
             type="button"
-            className="inline-flex border mb-[7px] border-slate-400/20 cursor-pointer items-center justify-center w-4 h-4 rounded-full bg-slate-600/50 hover:bg-slate-500/50 text-slate-400 hover:text-slate-300 transition-colors duration-200"
-            aria-label="Show description"
+            className="inline-flex border border-slate-400/20 cursor-pointer items-center justify-center w-4 h-4 rounded-full bg-slate-600/50 hover:bg-slate-500/50 text-slate-400 hover:text-slate-300 transition-colors duration-200"
+            aria-label="Show tooltip"
           >
             <span className="text-[10px]">?</span>
           </button>
@@ -132,30 +109,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
           msUserSelect: isVisible ? "text" : "none",
         }}
       >
-        {(title || shardName) && (
-          <div className="flex items-center gap-2 mb-2 text-left">
-            {shardIcon && (
-              <img src={`${import.meta.env.BASE_URL}shardIcons/${shardIcon}.png`} alt={title || shardName} className={`${iconSize || "w-8 h-8"} object-contain flex-shrink-0`} loading="lazy" />
-            )}
-            <div className="flex flex-col">
-              {shardName && <div className={`font-medium text-sm ${rarity ? getRarityColor(rarity) : "text-white"}`}>{shardName}</div>}
-              {title && (
-                <div className="text-yellow-500 text-xs flex gap-1 items-center">
-                  <div dangerouslySetInnerHTML={{ __html: title }} />
-                  {showRomanNumerals && (
-                    <span className="flex items-center">
-                      I<MoveRight className="w-3" />X
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+        {title && (
+          <div className="font-medium text-sm text-white mb-2">{title}</div>
         )}
-        <div className="text-slate-300 text-xs flex flex-col gap-1 text-left">
-          {metaInfo && <div className="text-slate-400 text-xs">{metaInfo}</div>}
+        <div className="text-slate-300 text-xs text-left">
           <div dangerouslySetInnerHTML={{ __html: content }} />
-          {warning && <div className="text-red-400">{warning}</div>}
         </div>
       </div>
     </>

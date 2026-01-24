@@ -9,6 +9,17 @@ const isGitHubPages = process.env.GITHUB_PAGES === "true";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: isProd && isGitHubPages ? "/SkyShards/" : "/",
+  server: {
+    proxy: {
+      // Proxy API requests in development to avoid CORS issues
+      "/api": {
+        target: "https://api.skyshards.com",
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+  },
   build: {
     rollupOptions: {
       output: {

@@ -1,2 +1,1 @@
-export { CalculationService } from "./calculationService";
-export * from "./dataService";
+export * from "./greenhouseService";

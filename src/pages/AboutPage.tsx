@@ -24,18 +24,19 @@ export const AboutPage: React.FC = () => {
   return (
     <div className="max-w-xl mx-auto py-10 px-4 text-slate-200">
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-purple-500/20 border border-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-          <Info className="w-8 h-8 text-purple-400" />
+        <div className="w-16 h-16 bg-emerald-500/20 border border-emerald-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <Info className="w-8 h-8 text-emerald-400" />
         </div>
       </div>
-      <h1 className="text-2xl font-bold mb-4 text-slate-100">About SkyShards</h1>
+      <h1 className="text-2xl font-bold mb-4 text-slate-100">About Greenhouse</h1>
       <p className="mb-2 text-slate-400">
-        SkyShards is a tool designed to help you calculate, plan, and optimize your shard fusions in the game. This project is open source and not affiliated with the game developers.
+        Greenhouse is a tool designed to help you optimize crop placement and mutations in your greenhouse. 
+        This project is part of the SkyShards ecosystem and is open source.
       </p>
       <Divider />
       <div className="mb-4 flex items-center gap-2">
         <Mail className="w-5 h-5 text-white mx-[3.5px]" />
-        <a href="mailto:skyshardsdev@gmail.com" className="text-purple-400 underline">
+        <a href="mailto:skyshardsdev@gmail.com" className="text-emerald-400 underline">
           skyshardsdev@gmail.com
         </a>
       </div>

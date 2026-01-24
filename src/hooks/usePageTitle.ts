@@ -10,13 +10,17 @@ export const usePageTitle = () => {
 
       switch (path) {
         case "/":
-          return "SkyShards · Calculator";
-        case "/recipes":
-          return "SkyShards · Recipes";
-        case "/shards":
-          return "SkyShards · Shards";
+          return "Greenhouse · Grid";
+        case "/calculator":
+          return "Greenhouse · Calculator";
+        case "/about":
+          return "Greenhouse · About";
+        case "/contact":
+          return "Greenhouse · Contact";
+        case "/privacy-policy":
+          return "Greenhouse · Privacy Policy";
         default:
-          return "SkyShards · Calculator";
+          return "Greenhouse · Calculator";
       }
     };
 
