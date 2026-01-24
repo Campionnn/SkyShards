@@ -108,6 +108,14 @@ const router = createBrowserRouter(
             </Suspense>
           ),
         },
+        {
+          path: "client-privacy-policy",
+          element: (
+            <Suspense fallback={<LoadingSpinner />}>
+              <PrivacyPolicy />
+            </Suspense>
+          ),
+        },
       ],
     },
     {
