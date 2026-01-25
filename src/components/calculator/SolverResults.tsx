@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { CheckCircle2, AlertCircle, Grid3X3, Leaf, ImageOff, Eye, EyeOff } from "lucide-react";
 import { GRID_SIZE } from "../../constants";
 import { useGreenhouseData } from "../../context";
-import type { SolveResponse, CropPlacement } from "../../types/greenhouse";
+import type { SolveResponse, CropPlacement, MutationResult } from "../../types/greenhouse";
 import { getCropImagePath, getGroundImagePath } from "../../types/greenhouse";
 
 interface SolverResultsProps {
@@ -11,128 +11,88 @@ interface SolverResultsProps {
   isLoading: boolean;
 }
 
-interface MergedCrop {
-  crop: string;
+// Represents a crop/mutation placement on the grid
+interface PlacementItem {
+  name: string;
   size: number;
   startRow: number;
   startCol: number;
 }
 
 /**
- * Detect merged crops (2x2, 3x3) from placements.
- * Uses a greedy algorithm to find contiguous crop blocks.
+ * Helper to get all cells occupied by a placement at a position with given size.
  */
-function detectMergedCrops(
-  placements: CropPlacement[],
-  cropSizes: Map<string, number>
-): { mergedCrops: MergedCrop[]; occupiedCells: Set<string> } {
-  const mergedCrops: MergedCrop[] = [];
+function getOccupiedCells(position: [number, number], size: number): [number, number][] {
+  const cells: [number, number][] = [];
+  for (let dr = 0; dr < size; dr++) {
+    for (let dc = 0; dc < size; dc++) {
+      cells.push([position[0] + dr, position[1] + dc]);
+    }
+  }
+  return cells;
+}
+
+/**
+ * Convert placements from API format (position/size) to PlacementItem format.
+ * Also builds a set of all occupied cells.
+ */
+function processPlacementsToItems(
+  placements: CropPlacement[]
+): { items: PlacementItem[]; occupiedCells: Set<string> } {
+  const items: PlacementItem[] = [];
   const occupiedCells = new Set<string>();
 
-  // Filter out placements without cells (defensive check)
-  const validPlacements = placements.filter(p => p.cells && Array.isArray(p.cells));
-
-  // Build a map of cell -> crop for quick lookup
-  const cellToCrop = new Map<string, string>();
-  validPlacements.forEach((placement) => {
-    placement.cells.forEach(([row, col]) => {
-      cellToCrop.set(`${row},${col}`, placement.crop);
+  for (const p of placements) {
+    items.push({
+      name: p.crop,
+      size: p.size,
+      startRow: p.position[0],
+      startCol: p.position[1],
     });
-  });
-
-  // For each placement, try to find merged blocks
-  validPlacements.forEach((placement) => {
-    const cropSize = cropSizes.get(placement.crop) || 1;
     
-    if (cropSize === 1) {
-      // 1x1 crops are not merged
-      placement.cells.forEach(([row, col]) => {
-        const key = `${row},${col}`;
-        if (!occupiedCells.has(key)) {
-          mergedCrops.push({
-            crop: placement.crop,
-            size: 1,
-            startRow: row,
-            startCol: col,
-          });
-          occupiedCells.add(key);
-        }
-      });
-    } else {
-      // For 2x2 or 3x3 crops, find contiguous blocks
-      const cellSet = new Set(placement.cells.map(([r, c]) => `${r},${c}`));
-      const processed = new Set<string>();
-
-      placement.cells.forEach(([row, col]) => {
-        const key = `${row},${col}`;
-        if (processed.has(key) || occupiedCells.has(key)) return;
-
-        // Check if this cell is the top-left of a valid block
-        let isValidBlock = true;
-        for (let dr = 0; dr < cropSize && isValidBlock; dr++) {
-          for (let dc = 0; dc < cropSize && isValidBlock; dc++) {
-            const checkKey = `${row + dr},${col + dc}`;
-            if (!cellSet.has(checkKey) || processed.has(checkKey) || occupiedCells.has(checkKey)) {
-              isValidBlock = false;
-            }
-          }
-        }
-
-        if (isValidBlock) {
-          // Mark all cells in this block as processed
-          for (let dr = 0; dr < cropSize; dr++) {
-            for (let dc = 0; dc < cropSize; dc++) {
-              const blockKey = `${row + dr},${col + dc}`;
-              processed.add(blockKey);
-              occupiedCells.add(blockKey);
-            }
-          }
-          
-          mergedCrops.push({
-            crop: placement.crop,
-            size: cropSize,
-            startRow: row,
-            startCol: col,
-          });
-        } else {
-          // Fallback: treat as 1x1
-          processed.add(key);
-          occupiedCells.add(key);
-          mergedCrops.push({
-            crop: placement.crop,
-            size: 1,
-            startRow: row,
-            startCol: col,
-          });
-        }
-      });
+    // Mark all cells as occupied
+    const cells = getOccupiedCells(p.position, p.size);
+    for (const [row, col] of cells) {
+      occupiedCells.add(`${row},${col}`);
     }
-  });
+  }
 
-  return { mergedCrops, occupiedCells };
+  return { items, occupiedCells };
+}
+
+/**
+ * Convert mutations from API format (position/size) to PlacementItem format.
+ */
+function processMutationsToItems(mutations: MutationResult[]): PlacementItem[] {
+  return mutations.map(m => ({
+    name: m.mutation,
+    size: m.size,
+    startRow: m.position[0],
+    startCol: m.position[1],
+  }));
 }
 
 // Component for merged mutation cells (handles 1x1, 2x2, 3x3)
 const MutationMergedCell: React.FC<{
-  mutation: MergedCrop;
+  item: PlacementItem;
   groundType: string;
   cellSize: number;
   gap: number;
   showImage: boolean;
-}> = ({ mutation, groundType, cellSize, gap, showImage }) => {
+}> = ({ item, groundType, cellSize, gap, showImage }) => {
   const [imageError, setImageError] = useState(false);
   
-  const totalWidth = mutation.size * cellSize + (mutation.size - 1) * gap;
-  const totalHeight = mutation.size * cellSize + (mutation.size - 1) * gap;
+  const totalWidth = item.size * cellSize + (item.size - 1) * gap;
+  const totalHeight = item.size * cellSize + (item.size - 1) * gap;
   
-  const imageScale = mutation.size === 1 ? 0.8 : 0.6;
+  const imageScale = item.size === 1 ? 0.8 : 0.6;
   const imageWidth = totalWidth * imageScale;
   const imageHeight = totalHeight * imageScale;
   
   const style: React.CSSProperties = {
     position: "absolute",
-    top: mutation.startRow * (cellSize + gap),
-    left: mutation.startCol * (cellSize + gap),
+    top: item.startRow * (cellSize + gap),
+    left: item.startCol * (cellSize + gap),
     width: totalWidth,
     height: totalHeight,
     backgroundImage: `url(${getGroundImagePath(groundType)})`,
@@ -151,13 +111,13 @@ const MutationMergedCell: React.FC<{
   return (
     <div
       style={style}
-      title={`${mutation.crop} (${mutation.startRow}, ${mutation.startCol})${mutation.size > 1 ? ` - ${mutation.size}x${mutation.size}` : ""}`}
+      title={`${item.name} (${item.startRow}, ${item.startCol})${item.size > 1 ? ` - ${item.size}x${item.size}` : ""}`}
       className="transition-transform hover:scale-105 hover:z-10"
     >
       {showImage && !imageError ? (
         <img
-          src={getCropImagePath(mutation.crop)}
-          alt={mutation.crop}
+          src={getCropImagePath(item.name)}
+          alt={item.name}
           style={{ width: imageWidth, height: imageHeight }}
           className="object-contain"
           onError={() => setImageError(true)}
@@ -167,7 +127,7 @@ const MutationMergedCell: React.FC<{
         <div className="flex flex-col items-center justify-center text-purple-300/50">
           <Leaf className="w-5 h-5" />
           <span className="text-[7px] capitalize truncate max-w-full px-0.5">
-            {mutation.crop.replace(/_/g, " ")}
+            {item.name.replace(/_/g, " ")}
           </span>
         </div>
       ) : null}
@@ -177,25 +137,25 @@ const MutationMergedCell: React.FC<{
 
 // Component for a single crop cell with image
 const CropCell: React.FC<{
-  crop: MergedCrop;
+  item: PlacementItem;
   groundType: string;
   cellSize: number;
   gap: number;
-}> = ({ crop, groundType, cellSize, gap }) => {
+}> = ({ item, groundType, cellSize, gap }) => {
   const [cropImageError, setCropImageError] = useState(false);
   
-  const totalWidth = crop.size * cellSize + (crop.size - 1) * gap;
-  const totalHeight = crop.size * cellSize + (crop.size - 1) * gap;
+  const totalWidth = item.size * cellSize + (item.size - 1) * gap;
+  const totalHeight = item.size * cellSize + (item.size - 1) * gap;
   
   // Scale: 90% for 1x1, 75% for 2x2 and 3x3
-  const imageScale = crop.size === 1 ? 0.8 : 0.6;
+  const imageScale = item.size === 1 ? 0.8 : 0.6;
   const imageWidth = totalWidth * imageScale;
   const imageHeight = totalHeight * imageScale;
   
   const style: React.CSSProperties = {
     position: "absolute",
-    top: crop.startRow * (cellSize + gap),
-    left: crop.startCol * (cellSize + gap),
+    top: item.startRow * (cellSize + gap),
+    left: item.startCol * (cellSize + gap),
     width: totalWidth,
     height: totalHeight,
     backgroundImage: `url(${getGroundImagePath(groundType)})`,
@@ -216,13 +176,13 @@ const CropCell: React.FC<{
   return (
     <div
       style={style}
-      title={`${crop.crop} (${crop.startRow}, ${crop.startCol})${crop.size > 1 ? ` - ${crop.size}x${crop.size}` : ""}`}
+      title={`${item.name} (${item.startRow}, ${item.startCol})${item.size > 1 ? ` - ${item.size}x${item.size}` : ""}`}
       className="transition-transform hover:scale-105 hover:z-10"
     >
       {!cropImageError ? (
         <img
-          src={getCropImagePath(crop.crop)}
-          alt={crop.crop}
+          src={getCropImagePath(item.name)}
+          alt={item.name}
           style={{ width: imageWidth, height: imageHeight }}
           className="object-contain"
           onError={() => setCropImageError(true)}
@@ -232,7 +192,7 @@ const CropCell: React.FC<{
         <div className="flex flex-col items-center justify-center text-white/60">
           <ImageOff className="w-4 h-4" />
           <span className="text-[8px] mt-0.5 capitalize truncate max-w-full px-1">
-            {crop.crop.replace(/_/g, " ")}
+            {item.name.replace(/_/g, " ")}
           </span>
         </div>
       )}
@@ -248,67 +208,50 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   const { getCropDef, getMutationDef } = useGreenhouseData();
   const [showMutations, setShowMutations] = useState(true);
 
-  // Build crop size map and ground type map
+  // Build ground type map for crops
   // Check both crop definitions AND mutation definitions for ground type
-  const { cropSizes, cropGrounds } = useMemo(() => {
-    const sizes = new Map<string, number>();
+  const cropGrounds = useMemo(() => {
     const grounds = new Map<string, string>();
     if (result) {
       (result.placements || []).forEach((p) => {
         const cropDef = getCropDef(p.crop);
         const mutationDef = getMutationDef(p.crop);
         
-        // Size comes from either crop or mutation definition
-        sizes.set(p.crop, cropDef?.size || mutationDef?.size || 1);
-        
         // Ground type: prefer crop definition, fallback to mutation definition
         // This handles cases where mutations are used as requirements (e.g., magic_jellybean)
         grounds.set(p.crop, cropDef?.ground || mutationDef?.ground || "farmland");
       });
     }
-    return { cropSizes: sizes, cropGrounds: grounds };
+    return grounds;
   }, [result, getCropDef, getMutationDef]);
 
-  // Build mutation size map and ground type map
+  // Build ground type map for mutations
   // Check both mutation definitions AND crop definitions for ground type
-  const { mutationSizes, mutationGrounds } = useMemo(() => {
-    const sizes = new Map<string, number>();
+  const mutationGrounds = useMemo(() => {
     const grounds = new Map<string, string>();
     if (result) {
       (result.mutations || []).forEach((m) => {
         const mutationDef = getMutationDef(m.mutation);
         const cropDef = getCropDef(m.mutation);
         
-        // Size comes from mutation definition
-        sizes.set(m.mutation, mutationDef?.size || 1);
-        
         // Ground type: prefer crop definition (for intermediate mutations), fallback to mutation definition
         grounds.set(m.mutation, cropDef?.ground || mutationDef?.ground || "farmland");
       });
     }
-    return { mutationSizes: sizes, mutationGrounds: grounds };
+    return grounds;
   }, [result, getMutationDef, getCropDef]);
 
-  // Detect merged crops
-  const { mergedCrops, occupiedCells } = useMemo(() => {
-    if (!result) return { mergedCrops: [], occupiedCells: new Set<string>() };
-    return detectMergedCrops(result.placements, cropSizes);
-  }, [result, cropSizes]);
+  // Process placements into PlacementItems for rendering
+  const { items: cropItems, occupiedCells } = useMemo(() => {
+    if (!result) return { items: [], occupiedCells: new Set<string>() };
+    return processPlacementsToItems(result.placements || []);
+  }, [result]);
 
-  // Detect merged mutations (same logic as crops)
-  const mergedMutations = useMemo(() => {
+  // Process mutations into PlacementItems for rendering
+  const mutationItems = useMemo(() => {
     if (!result || !result.mutations) return [];
-    
-    // Convert mutations to same format as placements for merge detection
-    const mutationPlacements: CropPlacement[] = result.mutations.map(m => ({
-      crop: m.mutation,
-      cells: m.eligible_cells || [],
-      count: m.count
-    }));
-    
-    const { mergedCrops: merged } = detectMergedCrops(mutationPlacements, mutationSizes);
-    return merged;
-  }, [result, mutationSizes]);
+    return processMutationsToItems(result.mutations);
+  }, [result]);
 
   // Calculate grid dimensions
   const cellSize = 48; // Base cell size in pixels
@@ -450,22 +393,22 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
             )}
 
             {/* Merged crop cells */}
-            {mergedCrops.map((crop, index) => (
+            {cropItems.map((item, index) => (
               <CropCell
-                key={`${crop.crop}-${crop.startRow}-${crop.startCol}-${index}`}
-                crop={crop}
-                groundType={cropGrounds.get(crop.crop) || "farmland"}
+                key={`${item.name}-${item.startRow}-${item.startCol}-${index}`}
+                item={item}
+                groundType={cropGrounds.get(item.name) || "farmland"}
                 cellSize={cellSize}
                 gap={gap}
               />
             ))}
             
             {/* Merged mutation cells overlay - rendered on top of crops */}
-            {mergedMutations.map((mutation, index) => (
+            {mutationItems.map((item, index) => (
               <MutationMergedCell
-                key={`mutation-${mutation.crop}-${mutation.startRow}-${mutation.startCol}-${index}`}
-                mutation={mutation}
-                groundType={mutationGrounds.get(mutation.crop) || "farmland"}
+                key={`mutation-${item.name}-${item.startRow}-${item.startCol}-${index}`}
+                item={item}
+                groundType={mutationGrounds.get(item.name) || "farmland"}
                 cellSize={cellSize}
                 gap={gap}
                 showImage={showMutations}
@@ -491,11 +434,11 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
           Mutations
         </h4>
         <div className="space-y-2">
-          {/* Deduplicate mutations by name and sum counts */}
+          {/* Count occurrences of each mutation */}
           {(() => {
             const mutationMap = new Map<string, number>();
             (result.mutations || []).forEach((m) => {
-              mutationMap.set(m.mutation, (mutationMap.get(m.mutation) || 0) + (m.count || 0));
+              mutationMap.set(m.mutation, (mutationMap.get(m.mutation) || 0) + 1);
             });
             return Array.from(mutationMap.entries()).map(([mutationName, count]) => (
               <div
@@ -535,11 +478,11 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
           Crop Placements
         </h4>
         <div className="flex flex-wrap gap-2">
-          {/* Deduplicate placements by crop name and sum counts */}
+          {/* Count occurrences of each crop */}
           {(() => {
             const placementMap = new Map<string, number>();
             (result.placements || []).forEach((p) => {
-              placementMap.set(p.crop, (placementMap.get(p.crop) || 0) + (p.count || 0));
+              placementMap.set(p.crop, (placementMap.get(p.crop) || 0) + 1);
             });
             return Array.from(placementMap.entries()).map(([cropName, count]) => (
               <div

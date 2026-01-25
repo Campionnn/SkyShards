@@ -35,26 +35,14 @@ export interface SolveRequest {
   priorities?: Record<string, number>;
 }
 
+// Unified placement/mutation format - uses position/size
 export interface CropPlacement {
-  crop: string;
-  cells: [number, number][];
-  count: number;
-}
-
-export interface MutationResult {
-  mutation: string;
-  count: number;
-  eligible_cells: [number, number][];
-}
-
-// Preview data format from the job progress - uses position/size instead of cells
-export interface PreviewPlacement {
   crop: string;
   position: [number, number];
   size: number;
 }
 
-export interface PreviewMutation {
+export interface MutationResult {
   mutation: string;
   position: [number, number];
   size: number;
@@ -62,7 +50,7 @@ export interface PreviewMutation {
 
 export interface SolveResponse {
   status: string;
-  total_cells_used: number;
+  total_cells_used?: number;
   placements: CropPlacement[];
   mutations: MutationResult[];
   cache_hit?: string;
@@ -83,9 +71,9 @@ export interface JobProgress {
   best_bound: number | null;
   current_activity: string;
   elapsed_seconds: number;
-  // Live preview of current best solution - uses position/size format
-  preview_placements: PreviewPlacement[] | null;
-  preview_mutations: PreviewMutation[] | null;
+  // Live preview of current best solution
+  preview_placements: CropPlacement[] | null;
+  preview_mutations: MutationResult[] | null;
   preview_cells_used: number | null;
 }
 

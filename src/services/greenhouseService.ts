@@ -7,10 +7,6 @@ import type {
   JobSubmitResponse,
   JobStatusResponse,
   JobProgress,
-  PreviewPlacement,
-  PreviewMutation,
-  CropPlacement,
-  MutationResult,
 } from "../types/greenhouse";
 
 // In development, use the Vite proxy to avoid CORS issues
@@ -19,70 +15,6 @@ const API_BASE = import.meta.env.DEV ? "/api" : "https://api.skyshards.com";
 
 // Polling interval for job status checks (ms)
 const POLL_INTERVAL = 500;
-
-/**
- * Helper to get all cells occupied by a placement at a position with given size.
- * Used to transform preview data (position/size format) to cells format.
- */
-function getOccupiedCells(position: [number, number], size: number): [number, number][] {
-  const cells: [number, number][] = [];
-  for (let dr = 0; dr < size; dr++) {
-    for (let dc = 0; dc < size; dc++) {
-      cells.push([position[0] + dr, position[1] + dc]);
-    }
-  }
-  return cells;
-}
-
-/**
- * Transform preview placements (position/size format) to CropPlacement format (cells).
- */
-function transformPreviewPlacements(previews: PreviewPlacement[]): CropPlacement[] {
-  // Group by crop name and aggregate
-  const cropMap = new Map<string, { cells: [number, number][]; count: number }>();
-  
-  for (const p of previews) {
-    const cells = getOccupiedCells(p.position, p.size);
-    const existing = cropMap.get(p.crop);
-    if (existing) {
-      existing.cells.push(...cells);
-      existing.count += 1;
-    } else {
-      cropMap.set(p.crop, { cells, count: 1 });
-    }
-  }
-  
-  return Array.from(cropMap.entries()).map(([crop, data]) => ({
-    crop,
-    cells: data.cells,
-    count: data.count,
-  }));
-}
-
-/**
- * Transform preview mutations (position/size format) to MutationResult format (eligible_cells).
- */
-function transformPreviewMutations(previews: PreviewMutation[]): MutationResult[] {
-  // Group by mutation name and aggregate
-  const mutationMap = new Map<string, { cells: [number, number][]; count: number }>();
-  
-  for (const m of previews) {
-    const cells = getOccupiedCells(m.position, m.size);
-    const existing = mutationMap.get(m.mutation);
-    if (existing) {
-      existing.cells.push(...cells);
-      existing.count += 1;
-    } else {
-      mutationMap.set(m.mutation, { cells, count: 1 });
-    }
-  }
-  
-  return Array.from(mutationMap.entries()).map(([mutation, data]) => ({
-    mutation,
-    eligible_cells: data.cells,
-    count: data.count,
-  }));
-}
 
 export async function getDefaults(): Promise<DefaultsResponse> {
   const response = await fetch(`${API_BASE}/defaults`);
@@ -226,12 +158,12 @@ export async function solveGreenhouseWithJob(
                 status.progress.preview_mutations &&
                 callbacks?.onPreviewUpdate
               ) {
-                // Transform preview data from position/size format to cells format
+                // Both preview and final result now use the same position/size format
                 callbacks.onPreviewUpdate({
                   status: "SOLVING",
                   total_cells_used: status.progress.preview_cells_used || 0,
-                  placements: transformPreviewPlacements(status.progress.preview_placements),
-                  mutations: transformPreviewMutations(status.progress.preview_mutations),
+                  placements: status.progress.preview_placements,
+                  mutations: status.progress.preview_mutations,
                 });
               }
             }
