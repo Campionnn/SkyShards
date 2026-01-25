@@ -1,17 +1,15 @@
 import React from "react";
-import { Loader2, Clock, Zap, Target, TrendingUp } from "lucide-react";
+import { Loader2, Clock } from "lucide-react";
 import type { JobProgress } from "../../types/greenhouse";
 
 interface SolverProgressProps {
   progress: JobProgress | null;
   queuePosition: number | null;
-  onCancel?: () => void;
 }
 
 export const SolverProgress: React.FC<SolverProgressProps> = ({
   progress,
   queuePosition,
-  onCancel,
 }) => {
   // Queued state
   if (queuePosition !== null) {
@@ -30,14 +28,6 @@ export const SolverProgress: React.FC<SolverProgressProps> = ({
             Your job will start when previous jobs complete
           </p>
         </div>
-        {onCancel && (
-          <button
-            onClick={onCancel}
-            className="w-full mt-4 px-3 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 text-sm rounded-md transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-        )}
       </div>
     );
   }
@@ -82,62 +72,9 @@ export const SolverProgress: React.FC<SolverProgressProps> = ({
 
         {/* current activity */}
         {progress.current_activity && (
-          <p className="text-xs text-slate-400 mb-4">
+          <p className="text-xs text-slate-400">
             {progress.current_activity}
           </p>
-        )}
-
-        {/* stats grid */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="bg-slate-700/30 rounded-md p-2">
-            <div className="flex items-center gap-1.5 mb-1">
-              <Zap className="w-3 h-3 text-emerald-400" />
-              <span className="text-xs text-slate-400">Solutions</span>
-            </div>
-            <span className="text-lg font-semibold text-slate-200">
-              {progress.solutions_found}
-            </span>
-          </div>
-
-          {progress.best_objective !== null && (
-            <div className="bg-slate-700/30 rounded-md p-2">
-              <div className="flex items-center gap-1.5 mb-1">
-                <Target className="w-3 h-3 text-blue-400" />
-                <span className="text-xs text-slate-400">Best Objective</span>
-              </div>
-              <span className="text-lg font-semibold text-slate-200">
-                {progress.best_objective}
-              </span>
-            </div>
-          )}
-
-          {progress.best_bound !== null && (
-            <div className="bg-slate-700/30 rounded-md p-2">
-              <div className="flex items-center gap-1.5 mb-1">
-                <TrendingUp className="w-3 h-3 text-yellow-400" />
-                <span className="text-xs text-slate-400">Best Bound</span>
-              </div>
-              <span className="text-lg font-semibold text-slate-200">
-                {progress.best_bound.toFixed(1)}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* preview indicator */}
-        {progress.preview_placements && (
-          <div className="text-xs text-emerald-400/80 text-center mb-2">
-            Live preview available below
-          </div>
-        )}
-
-        {onCancel && (
-          <button
-            onClick={onCancel}
-            className="w-full px-3 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 text-sm rounded-md transition-colors cursor-pointer"
-          >
-            Stop & Use Current Best
-          </button>
         )}
       </div>
     );
@@ -154,14 +91,6 @@ export const SolverProgress: React.FC<SolverProgressProps> = ({
         <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-3" />
         <span className="text-sm text-slate-400">Submitting job...</span>
       </div>
-      {onCancel && (
-        <button
-          onClick={onCancel}
-          className="w-full mt-4 px-3 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 text-sm rounded-md transition-colors cursor-pointer"
-        >
-          Cancel
-        </button>
-      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
-import { GRID_SIZE, getDefaultUnlockedCells, isAdjacentToUnlocked, getExpandableCells } from "../constants";
+import { GRID_SIZE, getDefaultUnlockedCells, getExpandableCells } from "../constants";
 import type { ExpansionStep } from "../types/greenhouse";
 
 interface GridStateContextType {
@@ -51,10 +51,8 @@ export const GridStateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (next.has(key)) {
         next.delete(key);
       } else {
-        // Only allow expanding to adjacent cells
-        if (isAdjacentToUnlocked(row, col, prev) || prev.size === 0) {
-          next.add(key);
-        }
+        // Allow unlocking any cell without adjacency restriction
+        next.add(key);
       }
       return next;
     });
@@ -66,7 +64,7 @@ export const GridStateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const key = `${row},${col}`;
     setUnlockedCells(prev => {
       if (prev.has(key)) return prev;
-      if (!isAdjacentToUnlocked(row, col, prev) && prev.size > 0) return prev;
+      // Allow unlocking any cell without adjacency restriction
       const next = new Set(prev);
       next.add(key);
       return next;

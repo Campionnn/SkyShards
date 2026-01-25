@@ -5,7 +5,6 @@ import { GridStateProvider, GreenhouseDataProvider } from "./context";
 import { usePageTitle } from "./hooks";
 import { ToastProvider } from "./components";
 
-const GridPage = lazy(() => import("./pages/GridPage").then((module) => ({ default: module.GridPage })));
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
 const AboutPage = lazy(() => import("./pages/AboutPage").then((module) => ({ default: module.AboutPage })));
 const ContactPage = lazy(() => import("./pages/ContactPage").then((module) => ({ default: module.ContactPage })));
@@ -44,14 +43,6 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <GridPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "calculator",
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <CalculatorPage />

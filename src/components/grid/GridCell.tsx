@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useGridState } from "../../context";
 
 interface GridCellProps {
@@ -7,6 +7,9 @@ interface GridCellProps {
   isInteractive?: boolean;
   showCoordinates?: boolean;
   size?: "sm" | "md" | "lg";
+  isDragging?: boolean;
+  paintModeRef?: React.RefObject<'lock' | 'unlock' | null>;
+  hasDraggedRef?: React.RefObject<boolean>;
 }
 
 export const GridCell: React.FC<GridCellProps> = ({
@@ -15,20 +18,30 @@ export const GridCell: React.FC<GridCellProps> = ({
   isInteractive = true,
   showCoordinates = false,
   size = "md",
+  isDragging = false,
+  paintModeRef,
+  hasDraggedRef,
 }) => {
   const { 
     isCellUnlocked, 
     isCellExpandable, 
-    toggleCell, 
     unlockCell,
+    lockCell,
     getExpansionStep,
     expansionSteps,
   } = useGridState();
+  
+  const paintedRef = useRef(false);
   
   const isUnlocked = isCellUnlocked(row, col);
   const isExpandable = isCellExpandable(row, col);
   const expansionStep = getExpansionStep(row, col);
   const hasExpansionOverlay = expansionSteps.length > 0;
+  
+  // Reset painted flag when dragging stops
+  if (!isDragging && paintedRef.current) {
+    paintedRef.current = false;
+  }
   
   // size classes
   const sizeClasses = {
@@ -37,18 +50,52 @@ export const GridCell: React.FC<GridCellProps> = ({
     lg: "w-12 h-12 text-sm",
   };
   
-  const handleClick = () => {
-    if (!isInteractive) return;
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!isInteractive || hasExpansionOverlay) return;
     
-    if (hasExpansionOverlay && expansionStep) {
-      if (expansionStep.order === 1) {
-        unlockCell(row, col);
-      }
+    // Prevent text selection
+    e.preventDefault();
+    
+    // Handle expansion overlay clicks
+    if (expansionStep && expansionStep.order === 1) {
+      unlockCell(row, col);
       return;
     }
     
-    if (isUnlocked || isExpandable) {
-      toggleCell(row, col);
+    // Set the paint mode based on the current cell state
+    if (paintModeRef?.current === null) {
+      if (isUnlocked) {
+        paintModeRef.current = 'lock';
+        lockCell(row, col);
+      } else {
+        paintModeRef.current = 'unlock';
+        unlockCell(row, col);
+      }
+      paintedRef.current = true;
+    }
+  };
+  
+  const handleClick = (e: React.MouseEvent) => {
+    // Only handle click if we didn't drag
+    if (hasDraggedRef?.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+  
+  const handleMouseEnter = () => {
+    if (!isInteractive || !isDragging || hasExpansionOverlay || paintedRef.current) return;
+    
+    const paintMode = paintModeRef?.current;
+    if (!paintMode) return;
+    
+    // Apply the paint mode to this cell without adjacency restriction
+    if (paintMode === 'unlock' && !isUnlocked) {
+      unlockCell(row, col);
+      paintedRef.current = true;
+    } else if (paintMode === 'lock' && isUnlocked) {
+      lockCell(row, col);
+      paintedRef.current = true;
     }
   };
   
@@ -81,9 +128,10 @@ export const GridCell: React.FC<GridCellProps> = ({
       cellClasses += " hover:bg-slate-600/50 hover:border-emerald-500/50 cursor-pointer";
     }
   } else {
+    // Locked cells - now clickable
     cellClasses += " bg-slate-800/30 border-slate-700/50 text-slate-600";
     if (isInteractive) {
-      cellClasses += " cursor-not-allowed";
+      cellClasses += " hover:bg-slate-700/40 hover:border-slate-600/70 cursor-pointer";
     }
   }
   
@@ -92,6 +140,8 @@ export const GridCell: React.FC<GridCellProps> = ({
       className={cellClasses} 
       style={cellStyle}
       onClick={handleClick}
+      onMouseDown={handleMouseDown}
+      onMouseEnter={handleMouseEnter}
       title={expansionStep ? `Step ${expansionStep.order}: +${expansionStep.gloomgourd_gain} (total: ${expansionStep.gloomgourd_potential})` : undefined}
     >
       {expansionStep && hasExpansionOverlay ? (

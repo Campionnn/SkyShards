@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Grid3X3, Calculator, Menu, X, ExternalLink } from "lucide-react";
+import { Calculator, Menu, X, ExternalLink } from "lucide-react";
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { path: "/", label: "Grid", icon: Grid3X3 },
-    { path: "/calculator", label: "Calculator", icon: Calculator },
+    { path: "/", label: "Calculator", icon: Calculator },
   ];
 
   return (

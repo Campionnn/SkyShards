@@ -1,14 +1,16 @@
 import React, { useMemo, useState } from "react";
-import { CheckCircle2, AlertCircle, Grid3X3, Leaf, ImageOff, Eye, EyeOff } from "lucide-react";
+import { CheckCircle2, AlertCircle, Grid3X3, Leaf, ImageOff, Eye, EyeOff, Zap, Target, TrendingUp, Clock } from "lucide-react";
 import { GRID_SIZE } from "../../constants";
 import { useGreenhouseData } from "../../context";
-import type { SolveResponse, CropPlacement, MutationResult } from "../../types/greenhouse";
+import type { SolveResponse, CropPlacement, MutationResult, JobProgress } from "../../types/greenhouse";
 import { getCropImagePath, getGroundImagePath } from "../../types/greenhouse";
 
 interface SolverResultsProps {
   result: SolveResponse | null;
   error: string | null;
   isLoading: boolean;
+  progress?: JobProgress | null;
+  queuePosition?: number | null;
 }
 
 // Represents a crop/mutation placement on the grid
@@ -204,6 +206,8 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   result,
   error,
   isLoading,
+  progress,
+  queuePosition,
 }) => {
   const { getCropDef, getMutationDef } = useGreenhouseData();
   const [showMutations, setShowMutations] = useState(true);
@@ -295,15 +299,53 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
           <Grid3X3 className="w-4 h-4 text-slate-500" />
           <h3 className="text-sm font-medium text-slate-400">Solution</h3>
         </div>
-        <div className="text-center py-8 text-slate-500 text-sm">
-          Click "Solve" to find the optimal crop placement
+        
+        {/* Empty grid visualization */}
+        <div className="mb-4">
+          <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
+            Grid Layout
+          </h4>
+          <div className="w-full overflow-x-auto">
+            <div
+              className="relative mx-auto"
+              style={{
+                width: cellSize * GRID_SIZE + gap * (GRID_SIZE - 1),
+                height: cellSize * GRID_SIZE + gap * (GRID_SIZE - 1),
+                minWidth: cellSize * GRID_SIZE + gap * (GRID_SIZE - 1),
+              }}
+            >
+              {/* Background grid */}
+              {Array.from({ length: GRID_SIZE }).map((_, rowIndex) =>
+                Array.from({ length: GRID_SIZE }).map((_, colIndex) => {
+                  const key = `${rowIndex},${colIndex}`;
+                  return (
+                    <div
+                      key={key}
+                      style={{
+                        position: "absolute",
+                        top: rowIndex * (cellSize + gap),
+                        left: colIndex * (cellSize + gap),
+                        width: cellSize,
+                        height: cellSize,
+                      }}
+                      className="bg-slate-700/30 rounded"
+                    />
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+        
+        <div className="text-center py-4 text-slate-500 text-sm">
+          Configure your targets and click "Solve" to find the optimal crop placement
         </div>
       </div>
     );
   }
 
   const isOptimal = result.status === "OPTIMAL";
-  const isSolving = result.status === "SOLVING";
+  const isSolving = progress !== null && progress !== undefined; // Only show as solving when progress exists
 
   return (
     <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
@@ -333,6 +375,107 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
           }`}
         >
           {isOptimal ? "Optimal solution found!" : `Status: ${result.status}`}
+        </div>
+      )}
+
+      {/* Queue Position - shown when queued */}
+      {queuePosition !== null && queuePosition !== undefined && (
+        <div className="mb-4 bg-blue-500/20 border border-blue-500/30 rounded-lg p-4">
+          <div className="flex flex-col items-center justify-center">
+            <div className="text-3xl font-bold text-blue-400 mb-2">
+              #{queuePosition}
+            </div>
+            <span className="text-sm text-slate-300">Position in queue</span>
+            <p className="text-xs text-slate-500 mt-2">
+              Your job will start when previous jobs complete
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Progress Bar - shown when progress is available */}
+      {progress && (
+        <div className="mb-4">
+          {/* Phase and percentage */}
+          <div className="mb-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-slate-400">{progress.phase}</span>
+              {progress.percentage !== null && progress.percentage > 0 && (
+                <span className="text-xs text-emerald-400">
+                  {Math.round(progress.percentage)}%
+                </span>
+              )}
+            </div>
+            {progress.percentage !== null && progress.percentage > 0 && (
+              <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-300"
+                  style={{ width: `${progress.percentage}%` }}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Current activity */}
+          {progress.current_activity && (
+            <p className="text-xs text-slate-400 mb-3">
+              {progress.current_activity}
+            </p>
+          )}
+
+          {/* Stats grid - all in 1 row */}
+          <div className="grid grid-cols-4 gap-2">
+            <div className="bg-slate-700/30 rounded-md p-2">
+              <div className="flex items-center gap-1 mb-0.5">
+                <Zap className="w-3 h-3 text-emerald-400" />
+                <span className="text-xs text-slate-400">Solutions</span>
+              </div>
+              <span className="text-base font-semibold text-slate-200">
+                {progress.solutions_found}
+              </span>
+            </div>
+
+            {progress.best_objective !== null && (
+              <div className="bg-slate-700/30 rounded-md p-2">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <Target className="w-3 h-3 text-blue-400" />
+                  <span className="text-xs text-slate-400">Best Obj</span>
+                </div>
+                <span className="text-base font-semibold text-slate-200">
+                  {progress.best_objective}
+                </span>
+              </div>
+            )}
+
+            {progress.best_bound !== null && (
+              <div className="bg-slate-700/30 rounded-md p-2">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <TrendingUp className="w-3 h-3 text-yellow-400" />
+                  <span className="text-xs text-slate-400">Best Bound</span>
+                </div>
+                <span className="text-base font-semibold text-slate-200">
+                  {progress.best_bound.toFixed(1)}
+                </span>
+              </div>
+            )}
+
+            {progress.elapsed_seconds !== null && (
+              <div className="bg-slate-700/30 rounded-md p-2">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <Clock className="w-3 h-3 text-slate-400" />
+                  <span className="text-xs text-slate-400">Elapsed</span>
+                </div>
+                <span className="text-base font-semibold text-slate-200">
+                  {(() => {
+                    const elapsedTime = Math.round(progress.elapsed_seconds);
+                    const minutes = Math.floor(elapsedTime / 60);
+                    const seconds = elapsedTime % 60;
+                    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+                  })()}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -414,16 +557,6 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
                 showImage={showMutations}
               />
             ))}
-            
-            {/* Pulsing overlay when still solving */}
-            {isSolving && (
-              <div
-                className="absolute inset-0 bg-emerald-500/5 animate-pulse pointer-events-none rounded"
-                style={{
-                  animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-                }}
-              />
-            )}
           </div>
         </div>
       </div>
