@@ -4,11 +4,85 @@ import type {
   SolveResponse,
   ExpansionRequest,
   ExpansionResponse,
+  JobSubmitResponse,
+  JobStatusResponse,
+  JobProgress,
+  PreviewPlacement,
+  PreviewMutation,
+  CropPlacement,
+  MutationResult,
 } from "../types/greenhouse";
 
 // In development, use the Vite proxy to avoid CORS issues
 // In production, call the API directly
 const API_BASE = import.meta.env.DEV ? "/api" : "https://api.skyshards.com";
+
+// Polling interval for job status checks (ms)
+const POLL_INTERVAL = 500;
+
+/**
+ * Helper to get all cells occupied by a placement at a position with given size.
+ * Used to transform preview data (position/size format) to cells format.
+ */
+function getOccupiedCells(position: [number, number], size: number): [number, number][] {
+  const cells: [number, number][] = [];
+  for (let dr = 0; dr < size; dr++) {
+    for (let dc = 0; dc < size; dc++) {
+      cells.push([position[0] + dr, position[1] + dc]);
+    }
+  }
+  return cells;
+}
+
+/**
+ * Transform preview placements (position/size format) to CropPlacement format (cells).
+ */
+function transformPreviewPlacements(previews: PreviewPlacement[]): CropPlacement[] {
+  // Group by crop name and aggregate
+  const cropMap = new Map<string, { cells: [number, number][]; count: number }>();
+  
+  for (const p of previews) {
+    const cells = getOccupiedCells(p.position, p.size);
+    const existing = cropMap.get(p.crop);
+    if (existing) {
+      existing.cells.push(...cells);
+      existing.count += 1;
+    } else {
+      cropMap.set(p.crop, { cells, count: 1 });
+    }
+  }
+  
+  return Array.from(cropMap.entries()).map(([crop, data]) => ({
+    crop,
+    cells: data.cells,
+    count: data.count,
+  }));
+}
+
+/**
+ * Transform preview mutations (position/size format) to MutationResult format (eligible_cells).
+ */
+function transformPreviewMutations(previews: PreviewMutation[]): MutationResult[] {
+  // Group by mutation name and aggregate
+  const mutationMap = new Map<string, { cells: [number, number][]; count: number }>();
+  
+  for (const m of previews) {
+    const cells = getOccupiedCells(m.position, m.size);
+    const existing = mutationMap.get(m.mutation);
+    if (existing) {
+      existing.cells.push(...cells);
+      existing.count += 1;
+    } else {
+      mutationMap.set(m.mutation, { cells, count: 1 });
+    }
+  }
+  
+  return Array.from(mutationMap.entries()).map(([mutation, data]) => ({
+    mutation,
+    eligible_cells: data.cells,
+    count: data.count,
+  }));
+}
 
 export async function getDefaults(): Promise<DefaultsResponse> {
   const response = await fetch(`${API_BASE}/defaults`);
@@ -18,20 +92,197 @@ export async function getDefaults(): Promise<DefaultsResponse> {
   return response.json();
 }
 
-export async function solveGreenhouse(request: SolveRequest): Promise<SolveResponse> {
-  const response = await fetch(`${API_BASE}/greenhouse`, {
+// =============================================================================
+// Job-based Solver API
+// =============================================================================
+
+/**
+ * Submit a solve job to the queue.
+ * Returns the job ID for status polling.
+ */
+export async function submitSolveJob(request: SolveRequest): Promise<string> {
+  const response = await fetch(`${API_BASE}/jobs`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(request),
+    body: JSON.stringify({
+      type: "greenhouse",
+      params: {
+        cells: request.cells,
+        targets: request.targets,
+        priorities: request.priorities || {},
+      },
+    }),
   });
-  
+
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    throw new Error(data.detail || `Solver error: ${response.statusText}`);
+    throw new Error(data.detail || `Failed to submit job: ${response.statusText}`);
   }
+
+  const result: JobSubmitResponse = await response.json();
+  return result.job_id;
+}
+
+/**
+ * Get the status of a job.
+ */
+export async function getJobStatus(jobId: string): Promise<JobStatusResponse> {
+  const response = await fetch(`${API_BASE}/jobs/${jobId}`);
   
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error("Job not found");
+    }
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.detail || `Failed to get job status: ${response.statusText}`);
+  }
+
   return response.json();
 }
+
+/**
+ * Cancel a running or queued job.
+ */
+export async function cancelJob(jobId: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/jobs/${jobId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.detail || `Failed to cancel job: ${response.statusText}`);
+  }
+}
+
+/**
+ * Callback types for job progress tracking
+ */
+export interface SolveJobCallbacks {
+  onProgress?: (progress: JobProgress) => void;
+  onQueuePosition?: (position: number) => void;
+  onPreviewUpdate?: (result: SolveResponse) => void;
+}
+
+/**
+ * Submit a solve job and poll for results.
+ * This is the main function to use for solving - it handles the entire job lifecycle.
+ * 
+ * @param request - The solve request parameters
+ * @param callbacks - Optional callbacks for progress updates
+ * @param abortSignal - Optional AbortSignal to cancel the job
+ * @returns The final solve response
+ */
+export async function solveGreenhouseWithJob(
+  request: SolveRequest,
+  callbacks?: SolveJobCallbacks,
+  abortSignal?: AbortSignal
+): Promise<SolveResponse> {
+  // Submit the job
+  const jobId = await submitSolveJob(request);
+
+  // Poll for completion
+  return new Promise((resolve, reject) => {
+    let cancelled = false;
+
+    // Handle abort signal
+    if (abortSignal) {
+      abortSignal.addEventListener("abort", async () => {
+        cancelled = true;
+        try {
+          await cancelJob(jobId);
+        } catch {
+          // Ignore cancel errors
+        }
+      });
+    }
+
+    const poll = async () => {
+      if (cancelled) {
+        reject(new Error("Job cancelled"));
+        return;
+      }
+
+      try {
+        const status = await getJobStatus(jobId);
+
+        switch (status.status) {
+          case "queued":
+            if (status.queue_position && callbacks?.onQueuePosition) {
+              callbacks.onQueuePosition(status.queue_position);
+            }
+            setTimeout(poll, POLL_INTERVAL);
+            break;
+
+          case "running":
+            if (status.progress) {
+              // Call progress callback
+              if (callbacks?.onProgress) {
+                callbacks.onProgress(status.progress);
+              }
+              
+              // If we have a preview solution, call preview callback
+              if (
+                status.progress.preview_placements &&
+                status.progress.preview_mutations &&
+                callbacks?.onPreviewUpdate
+              ) {
+                // Transform preview data from position/size format to cells format
+                callbacks.onPreviewUpdate({
+                  status: "SOLVING",
+                  total_cells_used: status.progress.preview_cells_used || 0,
+                  placements: transformPreviewPlacements(status.progress.preview_placements),
+                  mutations: transformPreviewMutations(status.progress.preview_mutations),
+                });
+              }
+            }
+            setTimeout(poll, POLL_INTERVAL);
+            break;
+
+          case "completed":
+            if (status.result) {
+              resolve(status.result);
+            } else {
+              reject(new Error("Job completed but no result returned"));
+            }
+            break;
+
+          case "failed":
+            reject(new Error(status.error || "Job failed"));
+            break;
+
+          case "cancelled":
+            // Check if we have a partial result
+            if (status.result) {
+              resolve(status.result);
+            } else {
+              reject(new Error("Job was cancelled"));
+            }
+            break;
+
+          default:
+            setTimeout(poll, POLL_INTERVAL);
+        }
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    // Start polling
+    poll();
+  });
+}
+
+/**
+ * Legacy synchronous solve function (now uses job system internally).
+ * Kept for backwards compatibility but doesn't provide progress updates.
+ */
+export async function solveGreenhouse(request: SolveRequest): Promise<SolveResponse> {
+  return solveGreenhouseWithJob(request);
+}
+
+// =============================================================================
+// Expansion Optimizer (still synchronous - fast enough)
+// =============================================================================
 
 export async function optimizeExpansion(request: ExpansionRequest): Promise<ExpansionResponse> {
   const response = await fetch(`${API_BASE}/greenhouse/expansion`, {
@@ -39,11 +290,11 @@ export async function optimizeExpansion(request: ExpansionRequest): Promise<Expa
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(request),
   });
-  
+
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data.detail || `Expansion optimizer error: ${response.statusText}`);
   }
-  
+
   return response.json();
 }

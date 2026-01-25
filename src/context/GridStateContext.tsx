@@ -3,7 +3,7 @@ import { GRID_SIZE, getDefaultUnlockedCells, isAdjacentToUnlocked, getExpandable
 import type { ExpansionStep } from "../types/greenhouse";
 
 interface GridStateContextType {
-  // Grid state
+  // grid state
   unlockedCells: Set<string>;
   expandableCells: Set<string>;
   

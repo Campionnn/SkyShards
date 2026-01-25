@@ -2,6 +2,7 @@ import React from "react";
 import { X, Target, TrendingUp } from "lucide-react";
 import { useGreenhouseData } from "../../context";
 import { MutationAutocomplete } from "./MutationAutocomplete";
+import { getCropImagePath } from "../../types/greenhouse";
 import type { MutationDefinition } from "../../types/greenhouse";
 
 export const MutationTargets: React.FC = () => {
@@ -15,7 +16,7 @@ export const MutationTargets: React.FC = () => {
     isLoading,
   } = useGreenhouseData();
 
-  // Available mutations (not yet selected)
+  // available mutations
   const availableMutations = mutations.filter(
     (m) => !selectedMutations.some((s) => s.name === m.name)
   );
@@ -50,7 +51,7 @@ export const MutationTargets: React.FC = () => {
         a specific target.
       </p>
 
-      {/* Selected Mutations */}
+      {/* selected mutations */}
       <div className="space-y-2 mb-4">
         {selectedMutations.map((selected) => {
           const mutation = mutations.find((m) => m.name === selected.name);
@@ -60,9 +61,28 @@ export const MutationTargets: React.FC = () => {
               className="bg-slate-700/50 border border-slate-600/30 rounded-md p-3"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-200 capitalize">
-                  {selected.name.replace(/_/g, " ")}
-                </span>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
+                    <img
+                      src={getCropImagePath(selected.name)}
+                      alt={selected.name}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          const icon = document.createElement("div");
+                          icon.className = "text-emerald-400";
+                          icon.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>';
+                          parent.appendChild(icon);
+                        }
+                      }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-slate-200 capitalize">
+                    {selected.name.replace(/_/g, " ")}
+                  </span>
+                </div>
                 <button
                   onClick={() => removeMutation(selected.name)}
                   className="p-1 hover:bg-slate-600/50 rounded text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
@@ -140,7 +160,7 @@ export const MutationTargets: React.FC = () => {
         )}
       </div>
 
-      {/* Add Mutation Search */}
+      {/* mutation search */}
       {availableMutations.length > 0 && (
         <MutationAutocomplete
           mutations={mutations}

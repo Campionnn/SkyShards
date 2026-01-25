@@ -28,11 +28,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
     const viewportPadding = 8;
 
-    // Calculate position above trigger by default
     let top = triggerRect.top - tooltipRect.height - viewportPadding;
     let left = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
 
-    // Adjust if tooltip would go off screen
     if (top < viewportPadding) {
       top = triggerRect.bottom + viewportPadding;
     }

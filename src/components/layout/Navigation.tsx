@@ -15,7 +15,7 @@ export const Navigation: React.FC = () => {
     <nav className="border-b border-slate-700 bg-slate-900">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          {/* Logo */}
+          {/* logo */}
           <Link to="/" className="flex items-center group">
             <div
               className="text-2xl font-black bg-gradient-to-r from-emerald-400 via-green-400 to-teal-400 bg-clip-text text-transparent tracking-wide group-hover:from-emerald-300 group-hover:via-green-300 group-hover:to-teal-300 transition-all duration-300 drop-shadow-sm"
@@ -25,7 +25,6 @@ export const Navigation: React.FC = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-2">
             {navItems.map(({ path, label, icon: Icon }) => {
               const isActive = location.pathname === path;
@@ -45,7 +44,6 @@ export const Navigation: React.FC = () => {
               );
             })}
             
-            {/* Link to main SkyShards site */}
             <a
               href="https://skyshards.com"
               target="_blank"
@@ -57,7 +55,6 @@ export const Navigation: React.FC = () => {
             </a>
           </div>
 
-          {/* Mobile menu button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -69,7 +66,6 @@ export const Navigation: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-slate-700 pt-3 py-2">
             <div className="flex flex-col space-y-1 gap-1">

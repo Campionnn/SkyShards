@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Sparkles, RotateCcw, Loader2 } from "lucide-react";
+import { RotateCcw, Loader2 } from "lucide-react";
 import { useGridState } from "../../context";
 import { optimizeExpansion } from "../../services/greenhouseService";
 

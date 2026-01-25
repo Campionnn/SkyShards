@@ -6,6 +6,7 @@ export interface CropDefinition {
   name: string;
   size: number;
   priority: number;
+  ground?: string; // Ground type from API (farmland, sand, soul_sand, mycelium, netherrack, end_stone)
   isMutation?: boolean;
 }
 
@@ -19,6 +20,7 @@ export interface MutationDefinition {
   size: number;
   requirements: MutationRequirement[];
   requires_zero_adjacent?: boolean;
+  ground?: string; // Ground type from API
 }
 
 export interface MutationGoal {
@@ -30,6 +32,7 @@ export interface MutationGoal {
 export interface SolveRequest {
   cells: [number, number][];
   targets: MutationGoal[];
+  priorities?: Record<string, number>;
 }
 
 export interface CropPlacement {
@@ -44,13 +47,74 @@ export interface MutationResult {
   eligible_cells: [number, number][];
 }
 
+// Preview data format from the job progress - uses position/size instead of cells
+export interface PreviewPlacement {
+  crop: string;
+  position: [number, number];
+  size: number;
+}
+
+export interface PreviewMutation {
+  mutation: string;
+  position: [number, number];
+  size: number;
+}
+
 export interface SolveResponse {
   status: string;
   total_cells_used: number;
   placements: CropPlacement[];
   mutations: MutationResult[];
   cache_hit?: string;
+  solver_approach?: string;
 }
+
+// =============================================================================
+// Job System Types
+// =============================================================================
+
+export type JobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
+
+export interface JobProgress {
+  phase: string;
+  percentage: number | null;
+  solutions_found: number;
+  best_objective: number | null;
+  best_bound: number | null;
+  current_activity: string;
+  elapsed_seconds: number;
+  // Live preview of current best solution - uses position/size format
+  preview_placements: PreviewPlacement[] | null;
+  preview_mutations: PreviewMutation[] | null;
+  preview_cells_used: number | null;
+}
+
+export interface JobSubmitRequest {
+  type: "greenhouse" | "greenhouse_expansion";
+  params: Record<string, unknown>;
+}
+
+export interface JobSubmitResponse {
+  job_id: string;
+  status: string;
+  message: string;
+}
+
+export interface JobStatusResponse {
+  id: string;
+  status: JobStatus;
+  created_at: number;
+  started_at: number | null;
+  completed_at: number | null;
+  progress: JobProgress | null;
+  queue_position: number | null;
+  result: SolveResponse | null;
+  error: string | null;
+}
+
+// =============================================================================
+// Expansion Types
+// =============================================================================
 
 export interface ExpansionRequest {
   unlocked_cells: [number, number][];
@@ -111,32 +175,15 @@ export interface ExpansionState {
 }
 
 // =============================================================================
-// Color Mapping Types
+// Image Mapping Helpers
 // =============================================================================
 
-export const CROP_COLORS: Record<string, string> = {
-  pumpkin: "#ff8c00",
-  melon: "#32cd32",
-  carrot: "#ff6347",
-  wheat: "#f4a460",
-  potato: "#deb887",
-  cocoa: "#8b4513",
-  sugar_cane: "#98fb98",
-  cactus: "#228b22",
-  nether_wart: "#8b0000",
-  mushroom: "#cd853f",
-};
+// Get crop image path
+export function getCropImagePath(cropName: string): string {
+  return `/greenhouse/crops/${cropName}.png`;
+}
 
-// Generate a consistent color for unknown crops based on name
-export function getCropColor(cropName: string): string {
-  if (CROP_COLORS[cropName]) {
-    return CROP_COLORS[cropName];
-  }
-  // Generate a hue based on the crop name for consistency
-  let hash = 0;
-  for (let i = 0; i < cropName.length; i++) {
-    hash = cropName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const hue = Math.abs(hash) % 360;
-  return `hsl(${hue}, 70%, 50%)`;
+// Get ground texture image path
+export function getGroundImagePath(groundType: string): string {
+  return `/greenhouse/ground/${groundType}.png`;
 }

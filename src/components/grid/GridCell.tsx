@@ -30,7 +30,7 @@ export const GridCell: React.FC<GridCellProps> = ({
   const expansionStep = getExpansionStep(row, col);
   const hasExpansionOverlay = expansionSteps.length > 0;
   
-  // Size classes
+  // size classes
   const sizeClasses = {
     sm: "w-6 h-6 text-[8px]",
     md: "w-10 h-10 text-xs",
@@ -40,33 +40,27 @@ export const GridCell: React.FC<GridCellProps> = ({
   const handleClick = () => {
     if (!isInteractive) return;
     
-    // If expansion overlay is active and this is an expansion step
     if (hasExpansionOverlay && expansionStep) {
-      // Only allow clicking the next optimal cell (order 1)
       if (expansionStep.order === 1) {
         unlockCell(row, col);
       }
       return;
     }
     
-    // Normal toggle behavior
     if (isUnlocked || isExpandable) {
       toggleCell(row, col);
     }
   };
   
-  // Determine cell appearance
   let cellClasses = `${sizeClasses[size]} border flex items-center justify-center transition-all duration-150 relative`;
   let cellStyle: React.CSSProperties = {};
   
   if (isUnlocked) {
-    // Unlocked cell - green
     cellClasses += " bg-emerald-600 border-emerald-500 text-white";
     if (isInteractive) {
       cellClasses += " hover:bg-emerald-500 cursor-pointer";
     }
   } else if (expansionStep && hasExpansionOverlay) {
-    // Expansion overlay cell - yellow gradient based on order
     const totalSteps = expansionSteps.length;
     const minLight = 45;
     const maxLight = 75;
@@ -82,13 +76,11 @@ export const GridCell: React.FC<GridCellProps> = ({
       cellClasses += " cursor-not-allowed";
     }
   } else if (isExpandable) {
-    // Expandable cell - can be clicked to unlock
     cellClasses += " bg-slate-700/50 border-slate-600 text-slate-400";
     if (isInteractive) {
       cellClasses += " hover:bg-slate-600/50 hover:border-emerald-500/50 cursor-pointer";
     }
   } else {
-    // Locked cell - not adjacent to unlocked
     cellClasses += " bg-slate-800/30 border-slate-700/50 text-slate-600";
     if (isInteractive) {
       cellClasses += " cursor-not-allowed";

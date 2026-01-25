@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Search, X } from "lucide-react";
 import { debounce } from "../../utilities";
+import { getCropImagePath } from "../../types/greenhouse";
 import type { MutationDefinition } from "../../types/greenhouse";
 
 interface MutationAutocompleteProps {
@@ -27,7 +28,7 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
-  // Available mutations (not excluded)
+  // Available mutations
   const availableMutations = useMemo(() => {
     return mutations.filter((m) => !excludeNames.includes(m.name));
   }, [mutations, excludeNames]);
@@ -74,11 +75,10 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
 
       onSelect(mutation);
 
-      // Reset isSelecting after a short delay, but keep focus on input
-      // so user can immediately add another mutation
+      inputRef.current?.blur();
+
       setTimeout(() => {
         setIsSelecting(false);
-        // Don't blur - keep input ready for the next selection
       }, 50);
     },
     [onSelect]
@@ -128,7 +128,7 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
   const handleInputFocus = useCallback(() => {
     if (isSelecting) return;
 
-    // Show all available mutations when focused with empty query
+    // show all available mutations when empty query
     if (query.trim() === "") {
       setSuggestions(availableMutations);
       setIsOpen(availableMutations.length > 0);
@@ -137,7 +137,7 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
     }
   }, [isSelecting, query, availableMutations, debouncedSearch]);
 
-  // Click outside to close
+  // click outside to close
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -158,7 +158,7 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
     };
   }, []);
 
-  // Scroll focused item into view
+  // scroll focused item into view
   useEffect(() => {
     if (focusedIndex >= 0 && listRef.current) {
       const items = listRef.current.querySelectorAll("li");
@@ -169,7 +169,7 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
     }
   }, [focusedIndex]);
 
-  // Re-show dropdown after selection if input is still focused and there are available mutations
+  // show dropdown after selection if input is still focused and there are available mutations
   useEffect(() => {
     if (!isSelecting && availableMutations.length > 0 && document.activeElement === inputRef.current) {
       setSuggestions(availableMutations);
@@ -177,7 +177,7 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
     }
   }, [availableMutations, isSelecting]);
 
-  // Format mutation name for display
+  // format mutation name
   const formatName = (name: string) => name.replace(/_/g, " ");
 
   return (
@@ -225,19 +225,38 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
                   : "text-slate-300 hover:bg-slate-700/50"
               }`}
             >
-              <div className="flex flex-col">
-                <span className="font-medium capitalize">
-                  {formatName(mutation.name)}
-                </span>
-                <span className="text-xs text-slate-400 mt-0.5">
-                  Requires:{" "}
-                  {mutation.requirements.map((r, i) => (
-                    <span key={r.crop}>
-                      {i > 0 && ", "}
-                      {r.count}x {formatName(r.crop)}
-                    </span>
-                  ))}
-                </span>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
+                  <img
+                    src={getCropImagePath(mutation.name)}
+                    alt={mutation.name}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        const icon = document.createElement("div");
+                        icon.className = "text-emerald-400";
+                        icon.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>';
+                        parent.appendChild(icon);
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col flex-1">
+                  <span className="font-medium capitalize">
+                    {formatName(mutation.name)}
+                  </span>
+                  <span className="text-xs text-slate-400 mt-0.5">
+                    Requires:{" "}
+                    {mutation.requirements.map((r, i) => (
+                      <span key={r.crop}>
+                        {i > 0 && ", "}
+                        {r.count}x {formatName(r.crop)}
+                      </span>
+                    ))}
+                  </span>
+                </div>
               </div>
             </li>
           ))}

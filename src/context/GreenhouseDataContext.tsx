@@ -1,15 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { getDefaults } from "../services/greenhouseService";
+import { getDefaults } from "../services";
 import type { CropDefinition, MutationDefinition, SelectedMutation } from "../types/greenhouse";
 
 interface GreenhouseDataContextType {
-  // Data from API
+  // data from api
   crops: CropDefinition[];
   mutations: MutationDefinition[];
   isLoading: boolean;
   error: string | null;
   
-  // Selected mutations for solving
+  // mutations for solving
   selectedMutations: SelectedMutation[];
   addMutation: (name: string) => void;
   removeMutation: (name: string) => void;
@@ -17,11 +17,10 @@ interface GreenhouseDataContextType {
   updateMutationTargetCount: (name: string, count: number) => void;
   clearSelectedMutations: () => void;
   
-  // Get mutation definition by name
+  // mutation definition
   getMutationDef: (name: string) => MutationDefinition | undefined;
   getCropDef: (name: string) => CropDefinition | undefined;
   
-  // Refetch data
   refetchData: () => Promise<void>;
 }
 
@@ -40,10 +39,10 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
     try {
       const data = await getDefaults();
       
-      // Add base crops
+      // base crops
       const baseCrops = data.crops.map(c => ({ ...c, priority: 0 }));
-      
-      // Add mutations as placeable crops (they can be used as crop inputs for other mutations)
+
+      // base mutations
       const mutationsAsCrops = data.mutations.map(m => ({
         name: m.name,
         size: m.size,
@@ -53,31 +52,9 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
       
       setCrops([...baseCrops, ...mutationsAsCrops]);
       setMutations(data.mutations);
-      
-      // Default: select gloomgourd as maximize target if available
-      if (data.mutations.some(m => m.name === "gloomgourd") && selectedMutations.length === 0) {
-        setSelectedMutations([{ name: "gloomgourd", mode: "maximize", targetCount: 1 }]);
-      }
+
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
-      // Fallback data
-      setCrops([
-        { name: "pumpkin", size: 1, priority: 0 },
-        { name: "melon", size: 1, priority: 0 },
-      ]);
-      setMutations([
-        {
-          name: "gloomgourd",
-          size: 1,
-          requirements: [
-            { crop: "pumpkin", count: 1 },
-            { crop: "melon", count: 1 },
-          ],
-        },
-      ]);
-      if (selectedMutations.length === 0) {
-        setSelectedMutations([{ name: "gloomgourd", mode: "maximize", targetCount: 1 }]);
-      }
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +62,7 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
   
   useEffect(() => {
     fetchData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
   
   const addMutation = useCallback((name: string) => {
     setSelectedMutations(prev => {
