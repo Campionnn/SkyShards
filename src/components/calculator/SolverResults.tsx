@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from "react";
-import { CheckCircle2, AlertCircle, Grid3X3, Leaf, ImageOff, Eye, EyeOff, Zap, Target, TrendingUp, Clock } from "lucide-react";
+import React, { useMemo, useState, useRef, useCallback, useEffect } from "react";
+import { CheckCircle2, AlertCircle, Grid3X3, Leaf, ImageOff, Eye, EyeOff, Zap, Target, TrendingUp, Clock, RotateCcw } from "lucide-react";
 import { GRID_SIZE } from "../../constants";
-import { useGreenhouseData } from "../../context";
-import type { SolveResponse, CropPlacement, MutationResult, JobProgress } from "../../types/greenhouse";
+import { useGreenhouseData, useGridState, useLockedPlacements } from "../../context";
+import { useToast } from "../ui/toastContext";
+import type { SolveResponse, CropPlacement, MutationResult, JobProgress, SelectedCropForPlacement, LockedPlacement } from "../../types/greenhouse";
 import { getCropImagePath, getGroundImagePath } from "../../types/greenhouse";
 
 interface SolverResultsProps {
@@ -11,14 +12,17 @@ interface SolverResultsProps {
   isLoading: boolean;
   progress?: JobProgress | null;
   queuePosition?: number | null;
+  onClear?: () => void;
 }
 
 // Represents a crop/mutation placement on the grid
 interface PlacementItem {
-  name: string;
+  id: string; // The crop/mutation ID (key)
+  name: string; // Display name
   size: number;
   startRow: number;
   startCol: number;
+  locked?: boolean; // Whether this placement was locked by the user
 }
 
 /**
@@ -39,17 +43,25 @@ function getOccupiedCells(position: [number, number], size: number): [number, nu
  * Also builds a set of all occupied cells.
  */
 function processPlacementsToItems(
-  placements: CropPlacement[]
+  placements: CropPlacement[],
+  getCropDef: (id: string) => { name: string } | undefined,
+  getMutationDef: (id: string) => { name: string } | undefined
 ): { items: PlacementItem[]; occupiedCells: Set<string> } {
   const items: PlacementItem[] = [];
   const occupiedCells = new Set<string>();
 
   for (const p of placements) {
+    const cropDef = getCropDef(p.crop);
+    const mutationDef = getMutationDef(p.crop);
+    const displayName = cropDef?.name || mutationDef?.name || p.crop.replace(/_/g, " ");
+    
     items.push({
-      name: p.crop,
+      id: p.crop,
+      name: displayName,
       size: p.size,
       startRow: p.position[0],
       startCol: p.position[1],
+      locked: p.locked || false,
     });
     
     // Mark all cells as occupied
@@ -65,13 +77,22 @@ function processPlacementsToItems(
 /**
  * Convert mutations from API format (position/size) to PlacementItem format.
  */
-function processMutationsToItems(mutations: MutationResult[]): PlacementItem[] {
-  return mutations.map(m => ({
-    name: m.mutation,
-    size: m.size,
-    startRow: m.position[0],
-    startCol: m.position[1],
-  }));
+function processMutationsToItems(
+  mutations: MutationResult[],
+  getMutationDef: (id: string) => { name: string } | undefined
+): PlacementItem[] {
+  return mutations.map(m => {
+    const mutationDef = getMutationDef(m.mutation);
+    const displayName = mutationDef?.name || m.mutation.replace(/_/g, " ");
+    
+    return {
+      id: m.mutation,
+      name: displayName,
+      size: m.size,
+      startRow: m.position[0],
+      startCol: m.position[1],
+    };
+  });
 }
 
 // Component for merged mutation cells (handles 1x1, 2x2, 3x3)
@@ -118,7 +139,7 @@ const MutationMergedCell: React.FC<{
     >
       {showImage && !imageError ? (
         <img
-          src={getCropImagePath(item.name)}
+          src={getCropImagePath(item.id)}
           alt={item.name}
           style={{ width: imageWidth, height: imageHeight }}
           className="object-contain"
@@ -128,8 +149,8 @@ const MutationMergedCell: React.FC<{
       ) : showImage && imageError ? (
         <div className="flex flex-col items-center justify-center text-purple-300/50">
           <Leaf className="w-5 h-5" />
-          <span className="text-[7px] capitalize truncate max-w-full px-0.5">
-            {item.name.replace(/_/g, " ")}
+          <span className="text-[7px] truncate max-w-full px-0.5">
+            {item.name}
           </span>
         </div>
       ) : null}
@@ -173,17 +194,21 @@ const CropCell: React.FC<{
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
+    // Add yellow glow for locked placements
+    boxShadow: item.locked 
+      ? "0 0 8px rgba(234, 179, 8, 0.8), inset 0 0 8px rgba(234, 179, 8, 0.4)" 
+      : undefined,
   };
 
   return (
     <div
       style={style}
-      title={`${item.name} (${item.startRow}, ${item.startCol})${item.size > 1 ? ` - ${item.size}x${item.size}` : ""}`}
+      title={`${item.name} (${item.startRow}, ${item.startCol})${item.size > 1 ? ` - ${item.size}x${item.size}` : ""}${item.locked ? " (Locked)" : ""}`}
       className="transition-transform hover:scale-105 hover:z-10"
     >
       {!cropImageError ? (
         <img
-          src={getCropImagePath(item.name)}
+          src={getCropImagePath(item.id)}
           alt={item.name}
           style={{ width: imageWidth, height: imageHeight }}
           className="object-contain"
@@ -193,10 +218,136 @@ const CropCell: React.FC<{
       ) : (
         <div className="flex flex-col items-center justify-center text-white/60">
           <ImageOff className="w-4 h-4" />
-          <span className="text-[8px] mt-0.5 capitalize truncate max-w-full px-1">
-            {item.name.replace(/_/g, " ")}
+          <span className="text-[8px] mt-0.5 truncate max-w-full px-1">
+            {item.name}
           </span>
         </div>
+      )}
+    </div>
+  );
+};
+
+// Component for rendering a locked placement on the grid (for interactive placement)
+const LockedPlacementCell: React.FC<{
+  placement: LockedPlacement;
+  groundType: string;
+  cellSize: number;
+  gap: number;
+  isDragging: boolean;
+  onMouseDown: (e: React.MouseEvent) => void;
+}> = ({ placement, groundType, cellSize, gap, isDragging, onMouseDown }) => {
+  const [imageError, setImageError] = useState(false);
+  
+  const totalWidth = placement.size * cellSize + (placement.size - 1) * gap;
+  const totalHeight = placement.size * cellSize + (placement.size - 1) * gap;
+  
+  const imageScale = placement.size === 1 ? 0.8 : 0.6;
+  const imageWidth = totalWidth * imageScale;
+  const imageHeight = totalHeight * imageScale;
+  
+  const style: React.CSSProperties = {
+    position: "absolute",
+    top: placement.position[0] * (cellSize + gap),
+    left: placement.position[1] * (cellSize + gap),
+    width: totalWidth,
+    height: totalHeight,
+    backgroundImage: `url(${getGroundImagePath(groundType)})`,
+    backgroundSize: `${cellSize}px ${cellSize}px`,
+    backgroundPosition: "top left",
+    backgroundRepeat: "repeat",
+    boxShadow: "0 0 8px rgba(234, 179, 8, 0.8), inset 0 0 8px rgba(234, 179, 8, 0.4)",
+    borderRadius: 4,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    zIndex: isDragging ? 20 : 10,
+    cursor: isDragging ? "grabbing" : "grab",
+    opacity: isDragging ? 0.8 : 1,
+    transition: isDragging ? "none" : "transform 0.15s ease",
+  };
+
+  return (
+    <div
+      style={style}
+      onMouseDown={onMouseDown}
+      onContextMenu={(e) => e.preventDefault()}
+      title={`${placement.crop} - Locked (drag to move, right-click to remove)`}
+    >
+      {!imageError ? (
+        <img
+          src={getCropImagePath(placement.crop)}
+          alt={placement.crop}
+          style={{ width: imageWidth, height: imageHeight }}
+          className="object-contain pointer-events-none"
+          onError={() => setImageError(true)}
+          draggable={false}
+        />
+      ) : (
+        <span className="text-yellow-300 text-xs font-medium">
+          {placement.crop.slice(0, 4)}
+        </span>
+      )}
+    </div>
+  );
+};
+
+// Preview overlay for placing crops
+const PlacementPreview: React.FC<{
+  position: [number, number];
+  crop: SelectedCropForPlacement;
+  isValid: boolean;
+  cellSize: number;
+  gap: number;
+}> = ({ position, crop, isValid, cellSize, gap }) => {
+  const [imageError, setImageError] = useState(false);
+  
+  const totalWidth = crop.size * cellSize + (crop.size - 1) * gap;
+  const totalHeight = crop.size * cellSize + (crop.size - 1) * gap;
+  
+  const imageScale = crop.size === 1 ? 0.8 : 0.6;
+  const imageWidth = totalWidth * imageScale;
+  const imageHeight = totalHeight * imageScale;
+  
+  const style: React.CSSProperties = {
+    position: "absolute",
+    top: position[0] * (cellSize + gap),
+    left: position[1] * (cellSize + gap),
+    width: totalWidth,
+    height: totalHeight,
+    backgroundImage: `url(${getGroundImagePath(crop.ground)})`,
+    backgroundSize: `${cellSize}px ${cellSize}px`,
+    backgroundPosition: "top left",
+    backgroundRepeat: "repeat",
+    borderRadius: 4,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    zIndex: 15,
+    opacity: 0.7,
+    border: isValid ? "2px solid #22c55e" : "2px solid #ef4444",
+    boxShadow: isValid 
+      ? "0 0 12px rgba(34, 197, 94, 0.5)" 
+      : "0 0 12px rgba(239, 68, 68, 0.5)",
+    pointerEvents: "none",
+  };
+
+  return (
+    <div style={style}>
+      {!imageError ? (
+        <img
+          src={getCropImagePath(crop.id)}
+          alt={crop.name}
+          style={{ width: imageWidth, height: imageHeight }}
+          className="object-contain"
+          onError={() => setImageError(true)}
+          draggable={false}
+        />
+      ) : (
+        <span className="text-white text-xs font-medium">
+          {crop.name.slice(0, 4)}
+        </span>
       )}
     </div>
   );
@@ -208,37 +359,216 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   isLoading,
   progress,
   queuePosition,
+  onClear,
 }) => {
   const { getCropDef, getMutationDef } = useGreenhouseData();
+  const { unlockedCells } = useGridState();
+  const {
+    lockedPlacements,
+    selectedCropForPlacement,
+    addLockedPlacement,
+    removeLockedPlacement,
+    moveLockedPlacement,
+    getLockedPlacementAt,
+    isValidPlacement,
+    isPlacementMode,
+  } = useLockedPlacements();
+  const { toast } = useToast();
+  
   const [showMutations, setShowMutations] = useState(true);
+  
+  // Interactive grid state
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [hoverPosition, setHoverPosition] = useState<[number, number] | null>(null);
+  const [dragState, setDragState] = useState<{
+    placementId: string;
+    startPosition: [number, number];
+    currentPosition: [number, number];
+  } | null>(null);
 
-  // Build ground type map for crops
-  // Check both crop definitions AND mutation definitions for ground type
+  // Calculate grid dimensions
+  const cellSize = 48; // Base cell size in pixels
+  const gap = 2; // Gap between cells
+  const gridWidth = GRID_SIZE * cellSize + (GRID_SIZE - 1) * gap;
+  const gridHeight = GRID_SIZE * cellSize + (GRID_SIZE - 1) * gap;
+  
+  // Convert mouse position to grid cell
+  const getGridCell = useCallback((clientX: number, clientY: number): [number, number] | null => {
+    if (!gridRef.current) return null;
+    
+    const rect = gridRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    
+    const col = Math.floor(x / (cellSize + gap));
+    const row = Math.floor(y / (cellSize + gap));
+    
+    if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE) {
+      return null;
+    }
+    
+    return [row, col];
+  }, [cellSize, gap]);
+  
+  // Handle mouse move for preview and dragging
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const cell = getGridCell(e.clientX, e.clientY);
+    
+    if (dragState) {
+      if (cell) {
+        setDragState(prev => prev ? { ...prev, currentPosition: cell } : null);
+      }
+    } else if (isPlacementMode) {
+      setHoverPosition(cell);
+    }
+  }, [getGridCell, dragState, isPlacementMode]);
+  
+  // Handle mouse leave
+  const handleMouseLeave = useCallback(() => {
+    if (!dragState) {
+      setHoverPosition(null);
+    }
+  }, [dragState]);
+  
+  // Handle click to place crop
+  const handleGridClick = useCallback((e: React.MouseEvent) => {
+    if (dragState || !isPlacementMode || !selectedCropForPlacement) return;
+    
+    const cell = getGridCell(e.clientX, e.clientY);
+    if (!cell) return;
+    
+    const placementResult = addLockedPlacement({
+      crop: selectedCropForPlacement.id,
+      position: cell,
+      size: selectedCropForPlacement.size,
+      ground: selectedCropForPlacement.ground,
+    });
+    
+    if (!placementResult.success) {
+      toast({
+        title: "Cannot place here",
+        description: placementResult.error,
+        variant: "error",
+        duration: 2000,
+      });
+    }
+  }, [getGridCell, isPlacementMode, selectedCropForPlacement, addLockedPlacement, dragState, toast]);
+  
+  // Handle right-click to remove
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    const cell = getGridCell(e.clientX, e.clientY);
+    if (!cell) return;
+    
+    const placement = getLockedPlacementAt(cell[0], cell[1]);
+    if (placement) {
+      removeLockedPlacement(placement.id);
+    }
+  }, [getGridCell, getLockedPlacementAt, removeLockedPlacement]);
+  
+  // Handle mouse down on placement (start drag)
+  const handlePlacementMouseDown = useCallback((placementId: string, e: React.MouseEvent) => {
+    // Right-click removes
+    if (e.button === 2) {
+      e.preventDefault();
+      removeLockedPlacement(placementId);
+      return;
+    }
+    
+    // Left-click starts drag
+    if (e.button === 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const placement = lockedPlacements.find(p => p.id === placementId);
+      if (placement) {
+        setDragState({
+          placementId,
+          startPosition: placement.position,
+          currentPosition: placement.position,
+        });
+      }
+    }
+  }, [lockedPlacements, removeLockedPlacement]);
+  
+  // Handle mouse up (end drag)
+  const handleMouseUp = useCallback(() => {
+    if (dragState) {
+      const { placementId, startPosition, currentPosition } = dragState;
+      
+      // Only move if position changed
+      if (startPosition[0] !== currentPosition[0] || startPosition[1] !== currentPosition[1]) {
+        const moveResult = moveLockedPlacement(placementId, currentPosition);
+        
+        if (!moveResult.success) {
+          toast({
+            title: "Cannot move here",
+            description: moveResult.error,
+            variant: "error",
+            duration: 2000,
+          });
+        }
+      }
+      
+      setDragState(null);
+    }
+  }, [dragState, moveLockedPlacement, toast]);
+  
+  // Add document-level mouse up listener
+  useEffect(() => {
+    if (dragState) {
+      const handleDocumentMouseUp = () => handleMouseUp();
+      document.addEventListener("mouseup", handleDocumentMouseUp);
+      return () => document.removeEventListener("mouseup", handleDocumentMouseUp);
+    }
+  }, [dragState, handleMouseUp]);
+  
+  // Check if preview placement is valid
+  const previewValidation = hoverPosition && selectedCropForPlacement
+    ? isValidPlacement(hoverPosition, selectedCropForPlacement.size)
+    : null;
+  
+  // Get drag preview validation
+  const dragValidation = dragState
+    ? (() => {
+        const placement = lockedPlacements.find(p => p.id === dragState.placementId);
+        if (!placement) return null;
+        return isValidPlacement(dragState.currentPosition, placement.size, dragState.placementId);
+      })()
+    : null;
+  
+  // Build ground type map for locked placements
+  const lockedGrounds = useMemo(() => {
+    const grounds = new Map<string, string>();
+    lockedPlacements.forEach((p) => {
+      const cropDef = getCropDef(p.crop);
+      const mutationDef = getMutationDef(p.crop);
+      grounds.set(p.id, cropDef?.ground || mutationDef?.ground || p.ground || "farmland");
+    });
+    return grounds;
+  }, [lockedPlacements, getCropDef, getMutationDef]);
+
+  // Build ground type map for crops from solver result
   const cropGrounds = useMemo(() => {
     const grounds = new Map<string, string>();
     if (result) {
       (result.placements || []).forEach((p) => {
         const cropDef = getCropDef(p.crop);
         const mutationDef = getMutationDef(p.crop);
-        
-        // Ground type: prefer crop definition, fallback to mutation definition
-        // This handles cases where mutations are used as requirements (e.g., magic_jellybean)
         grounds.set(p.crop, cropDef?.ground || mutationDef?.ground || "farmland");
       });
     }
     return grounds;
   }, [result, getCropDef, getMutationDef]);
 
-  // Build ground type map for mutations
-  // Check both mutation definitions AND crop definitions for ground type
+  // Build ground type map for mutations from solver result
   const mutationGrounds = useMemo(() => {
     const grounds = new Map<string, string>();
     if (result) {
       (result.mutations || []).forEach((m) => {
         const mutationDef = getMutationDef(m.mutation);
         const cropDef = getCropDef(m.mutation);
-        
-        // Ground type: prefer crop definition (for intermediate mutations), fallback to mutation definition
         grounds.set(m.mutation, cropDef?.ground || mutationDef?.ground || "farmland");
       });
     }
@@ -248,20 +578,14 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   // Process placements into PlacementItems for rendering
   const { items: cropItems, occupiedCells } = useMemo(() => {
     if (!result) return { items: [], occupiedCells: new Set<string>() };
-    return processPlacementsToItems(result.placements || []);
-  }, [result]);
+    return processPlacementsToItems(result.placements || [], getCropDef, getMutationDef);
+  }, [result, getCropDef, getMutationDef]);
 
   // Process mutations into PlacementItems for rendering
   const mutationItems = useMemo(() => {
     if (!result || !result.mutations) return [];
-    return processMutationsToItems(result.mutations);
-  }, [result]);
-
-  // Calculate grid dimensions
-  const cellSize = 48; // Base cell size in pixels
-  const gap = 2; // Gap between cells
-  const gridWidth = GRID_SIZE * cellSize + (GRID_SIZE - 1) * gap;
-  const gridHeight = GRID_SIZE * cellSize + (GRID_SIZE - 1) * gap;
+    return processMutationsToItems(result.mutations, getMutationDef);
+  }, [result, getMutationDef]);
 
   if (isLoading) {
     return (
@@ -299,25 +623,49 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
           <Grid3X3 className="w-4 h-4 text-slate-500" />
           <h3 className="text-sm font-medium text-slate-400">Solution</h3>
         </div>
+
+        {/* Queue Position - small banner at top */}
+        {queuePosition !== null && queuePosition !== undefined && (
+          <div className="mb-4 bg-blue-500/20 border border-blue-500/30 rounded-lg px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-blue-400" />
+                <span className="text-sm text-slate-300">Position in queue:</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-blue-400">#{queuePosition}</span>
+              </div>
+            </div>
+          </div>
+        )}
         
-        {/* Empty grid visualization */}
+        {/* Empty grid visualization - Interactive for placing locked crops */}
         <div className="mb-4">
           <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">
             Grid Layout
           </h4>
           <div className="w-full overflow-x-auto">
             <div
-              className="relative mx-auto"
+              ref={gridRef}
+              className="relative mx-auto select-none"
               style={{
-                width: cellSize * GRID_SIZE + gap * (GRID_SIZE - 1),
-                height: cellSize * GRID_SIZE + gap * (GRID_SIZE - 1),
-                minWidth: cellSize * GRID_SIZE + gap * (GRID_SIZE - 1),
+                width: gridWidth,
+                height: gridHeight,
+                minWidth: gridWidth,
+                cursor: isPlacementMode ? "crosshair" : "default",
               }}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              onClick={handleGridClick}
+              onContextMenu={handleContextMenu}
+              onMouseUp={handleMouseUp}
             >
               {/* Background grid */}
               {Array.from({ length: GRID_SIZE }).map((_, rowIndex) =>
                 Array.from({ length: GRID_SIZE }).map((_, colIndex) => {
                   const key = `${rowIndex},${colIndex}`;
+                  const isUnlocked = unlockedCells.has(key);
+                  
                   return (
                     <div
                       key={key}
@@ -328,17 +676,78 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
                         width: cellSize,
                         height: cellSize,
                       }}
-                      className="bg-slate-700/30 rounded"
+                      className={`rounded ${
+                        isUnlocked
+                          ? "bg-emerald-600/40 border border-emerald-500/30"
+                          : "bg-slate-700/30 border border-slate-600/20"
+                      }`}
                     />
                   );
                 })
+              )}
+              
+              {/* Locked placements */}
+              {lockedPlacements.map((placement) => {
+                const isDragging = dragState?.placementId === placement.id;
+                const displayPlacement = isDragging
+                  ? { ...placement, position: dragState.currentPosition }
+                  : placement;
+                
+                return (
+                  <LockedPlacementCell
+                    key={placement.id}
+                    placement={displayPlacement}
+                    groundType={lockedGrounds.get(placement.id) || "farmland"}
+                    cellSize={cellSize}
+                    gap={gap}
+                    isDragging={isDragging}
+                    onMouseDown={(e) => handlePlacementMouseDown(placement.id, e)}
+                  />
+                );
+              })}
+              
+              {/* Drag preview validation overlay */}
+              {dragState && dragValidation && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: dragState.currentPosition[0] * (cellSize + gap),
+                    left: dragState.currentPosition[1] * (cellSize + gap),
+                    width: (() => {
+                      const placement = lockedPlacements.find(p => p.id === dragState.placementId);
+                      return placement ? placement.size * cellSize + (placement.size - 1) * gap : cellSize;
+                    })(),
+                    height: (() => {
+                      const placement = lockedPlacements.find(p => p.id === dragState.placementId);
+                      return placement ? placement.size * cellSize + (placement.size - 1) * gap : cellSize;
+                    })(),
+                    border: dragValidation.valid ? "2px dashed #22c55e" : "2px dashed #ef4444",
+                    borderRadius: 4,
+                    pointerEvents: "none",
+                    zIndex: 25,
+                  }}
+                />
+              )}
+              
+              {/* Placement preview */}
+              {hoverPosition && selectedCropForPlacement && !dragState && (
+                <PlacementPreview
+                  position={hoverPosition}
+                  crop={selectedCropForPlacement}
+                  isValid={previewValidation?.valid ?? false}
+                  cellSize={cellSize}
+                  gap={gap}
+                />
               )}
             </div>
           </div>
         </div>
         
         <div className="text-center py-4 text-slate-500 text-sm">
-          Configure your targets and click "Solve" to find the optimal crop placement
+          {isPlacementMode 
+            ? "Click to place crops, right-click to remove"
+            : "Configure your targets and click \"Solve\" to find the optimal crop placement"
+          }
         </div>
       </div>
     );
@@ -360,9 +769,21 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
         <h3 className="text-sm font-medium text-slate-200">
           {isSolving ? "Current Best Solution" : "Solution"}
         </h3>
-        {result.cache_hit && (
-          <span className="text-xs text-slate-500 ml-auto">cached</span>
-        )}
+        <div className="flex items-center gap-2 ml-auto">
+          {onClear && (
+              <button
+                  onClick={onClear}
+                  className="px-2 py-1 text-xs bg-slate-600/50 hover:bg-slate-600/70 rounded text-slate-300 transition-colors flex items-center gap-1"
+                  title="Clear results"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Clear
+              </button>
+          )}
+          {result.cache_hit && (
+            <span className="text-xs text-slate-500">cached</span>
+          )}
+        </div>
       </div>
 
       {/* Status */}
@@ -375,21 +796,6 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
           }`}
         >
           {isOptimal ? "Optimal solution found!" : `Status: ${result.status}`}
-        </div>
-      )}
-
-      {/* Queue Position - shown when queued */}
-      {queuePosition !== null && queuePosition !== undefined && (
-        <div className="mb-4 bg-blue-500/20 border border-blue-500/30 rounded-lg p-4">
-          <div className="flex flex-col items-center justify-center">
-            <div className="text-3xl font-bold text-blue-400 mb-2">
-              #{queuePosition}
-            </div>
-            <span className="text-sm text-slate-300">Position in queue</span>
-            <p className="text-xs text-slate-500 mt-2">
-              Your job will start when previous jobs complete
-            </p>
-          </div>
         </div>
       )}
 
@@ -505,18 +911,26 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
         </div>
         <div className="w-full overflow-x-auto">
           <div
-            className="relative mx-auto"
+            ref={gridRef}
+            className="relative mx-auto select-none"
             style={{
               width: gridWidth,
               height: gridHeight,
               minWidth: gridWidth,
+              cursor: isPlacementMode ? "crosshair" : "default",
             }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            onClick={handleGridClick}
+            onContextMenu={handleContextMenu}
+            onMouseUp={handleMouseUp}
           >
             {/* Background grid */}
             {Array.from({ length: GRID_SIZE }).map((_, rowIndex) =>
               Array.from({ length: GRID_SIZE }).map((_, colIndex) => {
                 const key = `${rowIndex},${colIndex}`;
                 const isOccupied = occupiedCells.has(key);
+                const isUnlocked = unlockedCells.has(key);
                 if (isOccupied) return null;
                 
                 return (
@@ -529,7 +943,11 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
                       width: cellSize,
                       height: cellSize,
                     }}
-                    className="bg-slate-700/30 rounded"
+                    className={`rounded ${
+                      isUnlocked
+                        ? "bg-emerald-600/40 border border-emerald-500/30"
+                        : "bg-slate-700/30 border border-slate-600/20"
+                    }`}
                   />
                 );
               })
@@ -538,9 +956,9 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
             {/* Merged crop cells */}
             {cropItems.map((item, index) => (
               <CropCell
-                key={`${item.name}-${item.startRow}-${item.startCol}-${index}`}
+                key={`${item.id}-${item.startRow}-${item.startCol}-${index}`}
                 item={item}
-                groundType={cropGrounds.get(item.name) || "farmland"}
+                groundType={cropGrounds.get(item.id) || "farmland"}
                 cellSize={cellSize}
                 gap={gap}
               />
@@ -549,14 +967,68 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
             {/* Merged mutation cells overlay - rendered on top of crops */}
             {mutationItems.map((item, index) => (
               <MutationMergedCell
-                key={`mutation-${item.name}-${item.startRow}-${item.startCol}-${index}`}
+                key={`mutation-${item.id}-${item.startRow}-${item.startCol}-${index}`}
                 item={item}
-                groundType={mutationGrounds.get(item.name) || "farmland"}
+                groundType={mutationGrounds.get(item.id) || "farmland"}
                 cellSize={cellSize}
                 gap={gap}
                 showImage={showMutations}
               />
             ))}
+            
+            {/* Locked placements (not from solver result) */}
+            {lockedPlacements.map((placement) => {
+              const isDragging = dragState?.placementId === placement.id;
+              const displayPlacement = isDragging
+                ? { ...placement, position: dragState.currentPosition }
+                : placement;
+              
+              return (
+                <LockedPlacementCell
+                  key={placement.id}
+                  placement={displayPlacement}
+                  groundType={lockedGrounds.get(placement.id) || "farmland"}
+                  cellSize={cellSize}
+                  gap={gap}
+                  isDragging={isDragging}
+                  onMouseDown={(e) => handlePlacementMouseDown(placement.id, e)}
+                />
+              );
+            })}
+            
+            {/* Drag preview validation overlay */}
+            {dragState && dragValidation && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: dragState.currentPosition[0] * (cellSize + gap),
+                  left: dragState.currentPosition[1] * (cellSize + gap),
+                  width: (() => {
+                    const placement = lockedPlacements.find(p => p.id === dragState.placementId);
+                    return placement ? placement.size * cellSize + (placement.size - 1) * gap : cellSize;
+                  })(),
+                  height: (() => {
+                    const placement = lockedPlacements.find(p => p.id === dragState.placementId);
+                    return placement ? placement.size * cellSize + (placement.size - 1) * gap : cellSize;
+                  })(),
+                  border: dragValidation.valid ? "2px dashed #22c55e" : "2px dashed #ef4444",
+                  borderRadius: 4,
+                  pointerEvents: "none",
+                  zIndex: 25,
+                }}
+              />
+            )}
+            
+            {/* Placement preview */}
+            {hoverPosition && selectedCropForPlacement && !dragState && (
+              <PlacementPreview
+                position={hoverPosition}
+                crop={selectedCropForPlacement}
+                isValid={previewValidation?.valid ?? false}
+                cellSize={cellSize}
+                gap={gap}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -573,29 +1045,34 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
             (result.mutations || []).forEach((m) => {
               mutationMap.set(m.mutation, (mutationMap.get(m.mutation) || 0) + 1);
             });
-            return Array.from(mutationMap.entries()).map(([mutationName, count]) => (
-              <div
-                key={mutationName}
-                className="flex items-center justify-between bg-slate-700/30 rounded-md px-3 py-2"
-              >
-                <div className="flex items-center gap-2">
-                  <img
-                    src={getCropImagePath(mutationName)}
-                    alt={mutationName}
-                    className="w-5 h-5 object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                  <span className="text-sm text-slate-200 capitalize">
-                    {mutationName.replace(/_/g, " ")}
+            return Array.from(mutationMap.entries()).map(([mutationId, count]) => {
+              const mutationDef = getMutationDef(mutationId);
+              const displayName = mutationDef?.name || mutationId.replace(/_/g, " ");
+              
+              return (
+                <div
+                  key={mutationId}
+                  className="flex items-center justify-between bg-slate-700/30 rounded-md px-3 py-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={getCropImagePath(mutationId)}
+                      alt={displayName}
+                      className="w-5 h-5 object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                    <span className="text-sm text-slate-200">
+                      {displayName}
+                    </span>
+                  </div>
+                  <span className="text-sm font-medium text-emerald-400">
+                    x{count}
                   </span>
                 </div>
-                <span className="text-sm font-medium text-emerald-400">
-                  x{count}
-                </span>
-              </div>
-            ));
+              );
+            });
           })()}
           {(!result.mutations || result.mutations.length === 0) && (
             <div className="text-center py-2 text-xs text-slate-500">
@@ -617,25 +1094,31 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
             (result.placements || []).forEach((p) => {
               placementMap.set(p.crop, (placementMap.get(p.crop) || 0) + 1);
             });
-            return Array.from(placementMap.entries()).map(([cropName, count]) => (
-              <div
-                key={cropName}
-                className="flex items-center gap-2 bg-slate-700/30 rounded-md px-2 py-1"
-              >
-                <img
-                  src={getCropImagePath(cropName)}
-                  alt={cropName}
-                  className="w-5 h-5 object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-                <span className="text-xs text-slate-300 capitalize">
-                  {cropName.replace(/_/g, " ")}
-                </span>
-                <span className="text-xs text-slate-500">x{count}</span>
-              </div>
-            ));
+            return Array.from(placementMap.entries()).map(([cropId, count]) => {
+              const cropDef = getCropDef(cropId);
+              const mutationDef = getMutationDef(cropId);
+              const displayName = cropDef?.name || mutationDef?.name || cropId.replace(/_/g, " ");
+              
+              return (
+                <div
+                  key={cropId}
+                  className="flex items-center gap-2 bg-slate-700/30 rounded-md px-2 py-1"
+                >
+                  <img
+                    src={getCropImagePath(cropId)}
+                    alt={displayName}
+                    className="w-5 h-5 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                  <span className="text-xs text-slate-300">
+                    {displayName}
+                  </span>
+                  <span className="text-xs text-slate-500">x{count}</span>
+                </div>
+              );
+            });
           })()}
           {(!result.placements || result.placements.length === 0) && (
             <div className="text-center py-2 text-xs text-slate-500">

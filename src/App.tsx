@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Layout } from "./components";
-import { GridStateProvider, GreenhouseDataProvider } from "./context";
+import { GridStateProvider, GreenhouseDataProvider, LockedPlacementsProvider } from "./context";
 import { usePageTitle } from "./hooks";
 import { ToastProvider } from "./components";
 
@@ -17,20 +17,17 @@ const LoadingSpinner = () => (
 );
 
 const AppWithProviders = () => {
-  return (
-    <ToastProvider>
-      <Layout />
-    </ToastProvider>
-  );
+  usePageTitle();
+  return <Layout />;
 };
 
 const ProtectedLayout = () => {
-  usePageTitle();
-
   return (
     <GreenhouseDataProvider>
       <GridStateProvider>
-        <AppWithProviders />
+        <LockedPlacementsProvider>
+          <AppWithProviders />
+        </LockedPlacementsProvider>
       </GridStateProvider>
     </GreenhouseDataProvider>
   );
@@ -82,7 +79,11 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <ToastProvider>
+      <RouterProvider router={router} />
+    </ToastProvider>
+  );
 };
 
 export default App;

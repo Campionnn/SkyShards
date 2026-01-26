@@ -1,5 +1,4 @@
 import type {
-  DefaultsResponse,
   SolveRequest,
   SolveResponse,
   ExpansionRequest,
@@ -15,14 +14,6 @@ const API_BASE = import.meta.env.DEV ? "/api" : "https://api.skyshards.com";
 
 // Polling interval for job status checks (ms)
 const POLL_INTERVAL = 500;
-
-export async function getDefaults(): Promise<DefaultsResponse> {
-  const response = await fetch(`${API_BASE}/defaults`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch defaults: ${response.statusText}`);
-  }
-  return response.json();
-}
 
 // =============================================================================
 // Job-based Solver API
@@ -42,6 +33,7 @@ export async function submitSolveJob(request: SolveRequest): Promise<string> {
         cells: request.cells,
         targets: request.targets,
         priorities: request.priorities || {},
+        locks: request.locks || [],
       },
     }),
   });

@@ -14,15 +14,17 @@ export const MutationTargets: React.FC = () => {
     updateMutationMode,
     updateMutationTargetCount,
     isLoading,
+    getCropDef,
+    getMutationDef,
   } = useGreenhouseData();
 
   // available mutations
   const availableMutations = mutations.filter(
-    (m) => !selectedMutations.some((s) => s.name === m.name)
+    (m) => !selectedMutations.some((s) => s.id === m.id)
   );
 
-  const handleAddMutation = (name: string) => {
-    addMutation(name);
+  const handleAddMutation = (id: string, name: string) => {
+    addMutation(id, name);
   };
 
   if (isLoading) {
@@ -54,17 +56,17 @@ export const MutationTargets: React.FC = () => {
       {/* selected mutations */}
       <div className="space-y-2 mb-4">
         {selectedMutations.map((selected) => {
-          const mutation = mutations.find((m) => m.name === selected.name);
+          const mutation = mutations.find((m) => m.id === selected.id);
           return (
             <div
-              key={selected.name}
+              key={selected.id}
               className="bg-slate-700/50 border border-slate-600/30 rounded-md p-3"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
                     <img
-                      src={getCropImagePath(selected.name)}
+                      src={getCropImagePath(selected.id)}
                       alt={selected.name}
                       className="w-full h-full object-contain"
                       onError={(e) => {
@@ -79,12 +81,12 @@ export const MutationTargets: React.FC = () => {
                       }}
                     />
                   </div>
-                  <span className="text-sm font-medium text-slate-200 capitalize">
-                    {selected.name.replace(/_/g, " ")}
+                  <span className="text-sm font-medium text-slate-200">
+                    {selected.name}
                   </span>
                 </div>
                 <button
-                  onClick={() => removeMutation(selected.name)}
+                  onClick={() => removeMutation(selected.id)}
                   className="p-1 hover:bg-slate-600/50 rounded text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
                   title="Remove target"
                 >
@@ -95,20 +97,26 @@ export const MutationTargets: React.FC = () => {
               {mutation && (
                 <div className="text-xs text-slate-400 mb-2">
                   Requires:{" "}
-                  {mutation.requirements.map((r, i) => (
-                    <span key={r.crop}>
-                      {i > 0 && ", "}
-                      <span className="text-slate-300 capitalize">
-                        {r.count}x {r.crop.replace(/_/g, " ")}
+                  {mutation.requirements.map((r, i) => {
+                    const reqCropDef = getCropDef(r.crop);
+                    const reqMutationDef = getMutationDef(r.crop);
+                    const displayName = reqCropDef?.name || reqMutationDef?.name || r.crop.replace(/_/g, " ");
+                    
+                    return (
+                      <span key={r.crop}>
+                        {i > 0 && ", "}
+                        <span className="text-slate-300">
+                          {r.count}x {displayName}
+                        </span>
                       </span>
-                    </span>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => updateMutationMode(selected.name, "maximize")}
+                  onClick={() => updateMutationMode(selected.id, "maximize")}
                   className={`flex-1 px-2 py-1.5 rounded text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                     selected.mode === "maximize"
                       ? "bg-emerald-500/30 text-emerald-300 border border-emerald-500/40"
@@ -119,7 +127,7 @@ export const MutationTargets: React.FC = () => {
                   <span>Maximize</span>
                 </button>
                 <button
-                  onClick={() => updateMutationMode(selected.name, "target")}
+                  onClick={() => updateMutationMode(selected.id, "target")}
                   className={`flex-1 px-2 py-1.5 rounded text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                     selected.mode === "target"
                       ? "bg-blue-500/30 text-blue-300 border border-blue-500/40"
@@ -141,7 +149,7 @@ export const MutationTargets: React.FC = () => {
                     value={selected.targetCount}
                     onChange={(e) =>
                       updateMutationTargetCount(
-                        selected.name,
+                        selected.id,
                         Math.max(1, parseInt(e.target.value) || 1)
                       )
                     }
@@ -164,8 +172,8 @@ export const MutationTargets: React.FC = () => {
       {availableMutations.length > 0 && (
         <MutationAutocomplete
           mutations={mutations}
-          excludeNames={selectedMutations.map((m) => m.name)}
-          onSelect={(mutation: MutationDefinition) => handleAddMutation(mutation.name)}
+          excludeIds={selectedMutations.map((m) => m.id)}
+          onSelect={(mutation: MutationDefinition) => handleAddMutation(mutation.id, mutation.name)}
           placeholder="+ Add mutation target..."
         />
       )}

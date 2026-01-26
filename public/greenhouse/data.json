@@ -1,0 +1,1279 @@
+{
+  "crops": {
+    "wheat": {
+      "name": "Wheat",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": 8,
+      "positive_buffs": [
+        "harvest_boost"
+      ],
+      "negative_buffs": []
+    },
+    "potato": {
+      "name": "Potato",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": 8,
+      "positive_buffs": [
+        "immunity"
+      ],
+      "negative_buffs": []
+    },
+    "carrot": {
+      "name": "Carrot",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": 8,
+      "positive_buffs": [
+        "xp_boost"
+      ],
+      "negative_buffs": []
+    },
+    "pumpkin": {
+      "name": "Pumpkin",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": 11,
+      "positive_buffs": [
+        "bonus_drops"
+      ],
+      "negative_buffs": []
+    },
+    "melon": {
+      "name": "Melon",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": 11,
+      "positive_buffs": [
+        "water_retain"
+      ],
+      "negative_buffs": []
+    },
+    "cocoa_beans": {
+      "name": "Cocoa Beans",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": 6,
+      "positive_buffs": [
+        "immunity"
+      ],
+      "negative_buffs": []
+    },
+    "sugar_cane": {
+      "name": "Sugar Cane",
+      "size": 1,
+      "ground": "sand",
+      "growth_stages": 8,
+      "positive_buffs": [
+        "improved_xp_boost"
+      ],
+      "negative_buffs": [
+        "harvest_loss"
+      ]
+    },
+    "cactus": {
+      "name": "Cactus",
+      "size": 1,
+      "ground": "sand",
+      "growth_stages": 8,
+      "positive_buffs": [
+        "improved_water_retain"
+      ],
+      "negative_buffs": [
+        "harvest_loss"
+      ]
+    },
+    "nether_wart": {
+      "name": "Nether Wart",
+      "size": 1,
+      "ground": "soul_sand",
+      "growth_stages": 8,
+      "positive_buffs": [
+        "improved_harvest_boost"
+      ],
+      "negative_buffs": [
+        "xp_loss"
+      ]
+    },
+    "red_mushroom": {
+      "name": "Red Mushroom",
+      "size": 1,
+      "ground": "mycelium",
+      "growth_stages": 6,
+      "positive_buffs": [
+        "improved_harvest_boost"
+      ],
+      "negative_buffs": [
+        "water_drain"
+      ]
+    },
+    "brown_mushroom": {
+      "name": "Brown Mushroom",
+      "size": 1,
+      "ground": "mycelium",
+      "growth_stages": 6,
+      "positive_buffs": [
+        "improved_harvest_boost"
+      ],
+      "negative_buffs": [
+        "water_drain"
+      ]
+    },
+    "moonflower": {
+      "name": "Moonflower",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": 15,
+      "positive_buffs": [
+        "bonus_drops"
+      ],
+      "negative_buffs": []
+    },
+    "sunflower": {
+      "name": "Sunflower",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": 15,
+      "positive_buffs": [
+        "bonus_drops"
+      ],
+      "negative_buffs": []
+    },
+    "wild_rose": {
+      "name": "Wild Rose",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": 15,
+      "positive_buffs": [
+        "effect_spread"
+      ],
+      "negative_buffs": []
+    },
+    "fire": {
+      "name": "Fire",
+      "size": 1,
+      "ground": "netherrack",
+      "growth_stages": null,
+      "positive_buffs": [],
+      "negative_buffs": []
+    },
+    "dead_plant": {
+      "name": "Dead Plant",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": null,
+      "positive_buffs": [],
+      "negative_buffs": []
+    },
+    "fermento": {
+      "name": "Fermento",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": null,
+      "positive_buffs": [],
+      "negative_buffs": []
+    }
+  },
+  "mutations": {
+    "ashwreath": {
+      "name": "Ashwreath",
+      "size": 1,
+      "ground": "soul_sand",
+      "requirements": [
+        {
+          "crop": "nether_wart",
+          "count": 4
+        },
+        {
+          "crop": "fire",
+          "count": 4
+        }
+      ],
+      "rarity": "common",
+      "growth_stages": 0,
+      "positive_buffs": [
+        "improved_harvest_boost"
+      ],
+      "negative_buffs": [
+        "xp_loss"
+      ],
+      "drops": {
+        "nether_wart": 720
+      }
+    },
+    "choconut": {
+      "name": "Choconut",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "cocoa_beans",
+          "count": 4
+        }
+      ],
+      "rarity": "common",
+      "growth_stages": 0,
+      "positive_buffs": [
+        "immunity"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "cocoa_beans": 400
+      }
+    },
+    "dustgrain": {
+      "name": "Dustgrain",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "wheat",
+          "count": 4
+        }
+      ],
+      "rarity": "common",
+      "growth_stages": 0,
+      "positive_buffs": [
+        "harvest_boost"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "wheat": 200
+      }
+    },
+    "gloomgourd": {
+      "name": "Gloomgourd",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "pumpkin",
+          "count": 1
+        },
+        {
+          "crop": "melon",
+          "count": 1
+        }
+      ],
+      "rarity": "common",
+      "growth_stages": 0,
+      "positive_buffs": [
+        "bonus_drops",
+        "water_retain"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "pumpkin": 60,
+        "melon": 280
+      }
+    },
+    "lonelily": {
+      "name": "Lonelily",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [],
+      "special": "requires_zero_adjacent",
+      "rarity": "common",
+      "growth_stages": 0,
+      "positive_buffs": [
+        "bonus_drops"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "potato": 600,
+        "carrot": 700,
+        "pumpkin": 340
+      }
+    },
+    "scourroot": {
+      "name": "Scourroot",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "potato",
+          "count": 2
+        },
+        {
+          "crop": "carrot",
+          "count": 2
+        }
+      ],
+      "rarity": "common",
+      "growth_stages": 0,
+      "positive_buffs": [
+        "xp_boost",
+        "immunity"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "potato": 210,
+        "carrot": 245
+      }
+    },
+    "shadevine": {
+      "name": "Shadevine",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "cactus",
+          "count": 2
+        },
+        {
+          "crop": "sugar_cane",
+          "count": 2
+        }
+      ],
+      "rarity": "common",
+      "growth_stages": 0,
+      "positive_buffs": [
+        "improved_xp_boost",
+        "improved_water_retain"
+      ],
+      "negative_buffs": [
+        "harvest_loss"
+      ],
+      "drops": {
+        "cactus": 135,
+        "sugar_cane": 180
+      }
+    },
+    "veilshroom": {
+      "name": "Veilshroom",
+      "size": 1,
+      "ground": "mycelium",
+      "requirements": [
+        {
+          "crop": "red_mushroom",
+          "count": 2
+        },
+        {
+          "crop": "brown_mushroom",
+          "count": 2
+        }
+      ],
+      "rarity": "common",
+      "growth_stages": 0,
+      "positive_buffs": [
+        "improved_harvest_boost"
+      ],
+      "negative_buffs": [
+        "water_drain"
+      ],
+      "drops": {
+        "brown_mushroom": 66,
+        "red_mushroom": 66
+      }
+    },
+    "witherbloom": {
+      "name": "Witherbloom",
+      "size": 1,
+      "ground": "soul_sand",
+      "requirements": [
+        {
+          "crop": "dead_plant",
+          "count": 8
+        }
+      ],
+      "rarity": "common",
+      "growth_stages": 0,
+      "positive_buffs": [
+        "effect_spread"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "wild_rose": 600
+      }
+    },
+    "chocoberry": {
+      "name": "Chocoberry",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "choconut",
+          "count": 6
+        },
+        {
+          "crop": "gloomgourd",
+          "count": 2
+        }
+      ],
+      "rarity": "uncommon",
+      "growth_stages": 6,
+      "positive_buffs": [
+        "water_retain"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "cocoa_beans": 400,
+        "pumpkins": 170,
+        "melon_slice": 1600
+      }
+    },
+    "cindershade": {
+      "name": "Cindershade",
+      "size": 1,
+      "ground": "soul_sand",
+      "requirements": [
+        {
+          "crop": "ashwreath",
+          "count": 4
+        },
+        {
+          "crop": "witherbloom",
+          "count": 4
+        }
+      ],
+      "rarity": "uncommon",
+      "growth_stages": 8,
+      "positive_buffs": [
+        "effect_spread",
+        "improved_harvest_boost"
+      ],
+      "negative_buffs": [
+        "xp_loss"
+      ],
+      "drops": {
+        "nether_wart": 1200,
+        "wild_rose": 800
+      }
+    },
+    "coalroot": {
+      "name": "Coalroot",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "ashwreath",
+          "count": 5
+        },
+        {
+          "crop": "scourroot",
+          "count": 3
+        }
+      ],
+      "rarity": "uncommon",
+      "growth_stages": 8,
+      "positive_buffs": [
+        "xp_boost"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "potato": 600,
+        "carrot": 1400,
+        "nether_wart": 600
+      }
+    },
+    "creambloom": {
+      "name": "Creambloom",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "choconut",
+          "count": 8
+        }
+      ],
+      "rarity": "uncommon",
+      "growth_stages": 6,
+      "positive_buffs": [
+        "immunity"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "cocoa_beans": 1600
+      }
+    },
+    "duskbloom": {
+      "name": "Duskbloom",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "moonflower",
+          "count": 2
+        },
+        {
+          "crop": "shadevine",
+          "count": 2
+        },
+        {
+          "crop": "sunflower",
+          "count": 2
+        },
+        {
+          "crop": "dustgrain",
+          "count": 2
+        }
+      ],
+      "rarity": "uncommon",
+      "growth_stages": 8,
+      "positive_buffs": [
+        "bonus_drops"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "moonflower": 533,
+        "sunflower": 533,
+        "267_wheat": 1
+      }
+    },
+    "thornshade": {
+      "name": "Thornshade",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "wild_rose",
+          "count": 4
+        },
+        {
+          "crop": "veilshroom",
+          "count": 4
+        }
+      ],
+      "rarity": "uncommon",
+      "growth_stages": 8,
+      "positive_buffs": [
+        "effect_spread"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "brown_mushroom": 190,
+        "red_mushroom": 190,
+        "wild_rose": 800
+      }
+    },
+    "blastberry": {
+      "name": "Blastberry",
+      "size": 1,
+      "ground": "sand",
+      "requirements": [
+        {
+          "crop": "chocoberry",
+          "count": 5
+        },
+        {
+          "crop": "ashwreath",
+          "count": 3
+        }
+      ],
+      "rarity": "rare",
+      "growth_stages": 6,
+      "positive_buffs": [
+        "immunity",
+        "improved_harvest_boost"
+      ],
+      "negative_buffs": [
+        "xp_loss"
+      ],
+      "drops": {
+        "cocoa_beans": 1200,
+        "nether_wart": 1800
+      }
+    },
+    "cheesebite": {
+      "name": "Cheesebite",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "creambloom",
+          "count": 4
+        },
+        {
+          "crop": "fermento",
+          "count": 4
+        }
+      ],
+      "rarity": "rare",
+      "growth_stages": 10,
+      "positive_buffs": [
+        "improved_water_retain"
+      ],
+      "negative_buffs": [
+        "harvest_loss"
+      ],
+      "drops": {
+        "brown_mushroom": 190,
+        "cactus": 600,
+        "sugar_cane": 800,
+        "red_mushroom": 190
+      }
+    },
+    "chloronite": {
+      "name": "Chloronite",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "coalroot",
+          "count": 6
+        },
+        {
+          "crop": "thornshade",
+          "count": 2
+        }
+      ],
+      "rarity": "rare",
+      "growth_stages": 10,
+      "positive_buffs": [
+        "immunity"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "brown_mushroom": 95,
+        "potato": 600,
+        "carrot": 700,
+        "red_mushroom": 95,
+        "wild_rose": 400
+      }
+    },
+    "do_not_eat_shroom": {
+      "name": "Do-not-eat-shroom",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "veilshroom",
+          "count": 4
+        },
+        {
+          "crop": "scourroot",
+          "count": 4
+        }
+      ],
+      "rarity": "rare",
+      "growth_stages": 8,
+      "positive_buffs": [
+        "improved_harvest_boost"
+      ],
+      "negative_buffs": [
+        "water_drain"
+      ],
+      "drops": {
+        "brown_mushroom": 380,
+        "potato": 1200,
+        "carrot": 1400,
+        "red_mushroom": 380
+      }
+    },
+    "fleshtrap": {
+      "name": "Fleshtrap",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "cindershade",
+          "count": 4
+        },
+        {
+          "crop": "lonelily",
+          "count": 4
+        }
+      ],
+      "rarity": "rare",
+      "growth_stages": 14,
+      "positive_buffs": [
+        "bonus_drops"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "potato": 1200,
+        "carrot": 1400,
+        "pumpkin": 680
+      }
+    },
+    "magic_jellybean": {
+      "name": "Magic Jellybean",
+      "size": 1,
+      "ground": "sand",
+      "requirements": [
+        {
+          "crop": "sugar_cane",
+          "count": 5
+        },
+        {
+          "crop": "duskbloom",
+          "count": 3
+        }
+      ],
+      "rarity": "rare",
+      "growth_stages": 120,
+      "positive_buffs": [
+        "improved_xp_boost"
+      ],
+      "negative_buffs": [
+        "harvest_loss"
+      ],
+      "drops": {
+        "moonflower": 600,
+        "sunflower": 600,
+        "cane": 1200
+      }
+    },
+    "noctilume": {
+      "name": "Noctilume",
+      "size": 2,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "duskbloom",
+          "count": 6
+        },
+        {
+          "crop": "lonelily",
+          "count": 6
+        }
+      ],
+      "rarity": "rare",
+      "growth_stages": 4,
+      "positive_buffs": [
+        "effect_spread",
+        "improved_water_retain"
+      ],
+      "negative_buffs": [
+        "harvest_loss"
+      ],
+      "drops": {
+        "cactus": 1200,
+        "wild_rose": 1600
+      }
+    },
+    "snoozling": {
+      "name": "Snoozling",
+      "size": 3,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "creambloom",
+          "count": 4
+        },
+        {
+          "crop": "dustgrain",
+          "count": 3
+        },
+        {
+          "crop": "witherbloom",
+          "count": 3
+        },
+        {
+          "crop": "duskbloom",
+          "count": 3
+        },
+        {
+          "crop": "thornshade",
+          "count": 3
+        }
+      ],
+      "rarity": "rare",
+      "growth_stages": 20,
+      "positive_buffs": [
+        "bonus_drops"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "moonflower": 800,
+        "sunflower": 800,
+        "cactus": 600,
+        "sugar_cane": 800
+      }
+    },
+    "soggybud": {
+      "name": "Soggybud",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "melon",
+          "count": 8
+        }
+      ],
+      "rarity": "rare",
+      "growth_stages": 10,
+      "positive_buffs": [
+        "water_retain"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "melon_slice": 3200
+      }
+    },
+    "chorus_fruit": {
+      "name": "Chorus Fruit",
+      "size": 1,
+      "ground": "end_stone",
+      "requirements": [
+        {
+          "crop": "chloronite",
+          "count": 5
+        },
+        {
+          "crop": "magic_jellybean",
+          "count": 3
+        }
+      ],
+      "rarity": "epic",
+      "growth_stages": 12,
+      "positive_buffs": [
+        "improved_xp_boost"
+      ],
+      "negative_buffs": [
+        "harvest_loss"
+      ],
+      "drops": {
+        "potato": 1500,
+        "carrot": 1750,
+        "sugar_cane": 2000
+      }
+    },
+    "plantboy_advance": {
+      "name": "PlantBoy Advance",
+      "size": 2,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "snoozling",
+          "count": 6
+        },
+        {
+          "crop": "thunderling",
+          "count": 6
+        }
+      ],
+      "rarity": "epic",
+      "growth_stages": 12,
+      "positive_buffs": [
+        "harvest_boost"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "moonflower": 1200,
+        "sunflower": 1200,
+        "wheat": 1200
+      }
+    },
+    "puffercloud": {
+      "name": "Puffercloud",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "snoozling",
+          "count": 2
+        },
+        {
+          "crop": "do_not_eat_shroom",
+          "count": 6
+        }
+      ],
+      "rarity": "epic",
+      "growth_stages": 14,
+      "positive_buffs": [
+        "improved_harvest_boost"
+      ],
+      "negative_buffs": [
+        "water_drain"
+      ],
+      "drops": {
+        "brown_mushroom": 665,
+        "moonflower": 1400,
+        "sunflower": 1400,
+        "red_mushroom": 665
+      }
+    },
+    "shellfruit": {
+      "name": "Shellfruit",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [],
+      "special": "explode_turtlellini_with_blastberry",
+      "rarity": "epic",
+      "growth_stages": 0,
+      "positive_buffs": [
+        "immunity",
+        "water_retain"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "cocoa_beans": 2000,
+        "melon_slice": 4000
+      }
+    },
+    "startlevine": {
+      "name": "Startlevine",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "blastberry",
+          "count": 4
+        },
+        {
+          "crop": "cheesebite",
+          "count": 4
+        }
+      ],
+      "rarity": "epic",
+      "growth_stages": 12,
+      "positive_buffs": [
+        "improved_xp_boost",
+        "improved_water_retain"
+      ],
+      "negative_buffs": [
+        "harvest_loss"
+      ],
+      "drops": {
+        "cactus": 1500,
+        "sugar_cane": 2000
+      }
+    },
+    "stoplight_petal": {
+      "name": "Stoplight Petal",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "snoozling",
+          "count": 4
+        },
+        {
+          "crop": "noctilume",
+          "count": 4
+        }
+      ],
+      "rarity": "epic",
+      "growth_stages": 12,
+      "positive_buffs": [
+        "effect_spread",
+        "improved_water_retain"
+      ],
+      "negative_buffs": [
+        "harvest_loss"
+      ],
+      "drops": {
+        "cactus": 2400,
+        "wild_rose": 3200
+      }
+    },
+    "thunderling": {
+      "name": "Thunderling",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "soggybud",
+          "count": 5
+        },
+        {
+          "crop": "noctilume",
+          "count": 3
+        }
+      ],
+      "rarity": "epic",
+      "growth_stages": 16,
+      "positive_buffs": [
+        "effect_spread"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "cactus": 900,
+        "melon_slice": 2400,
+        "wild_rose": 2400
+      }
+    },
+    "turtlellini": {
+      "name": "Turtlellini",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "soggybud",
+          "count": 4
+        },
+        {
+          "crop": "choconut",
+          "count": 4
+        }
+      ],
+      "rarity": "epic",
+      "growth_stages": 0,
+      "positive_buffs": [
+        "immunity",
+        "water_retain"
+      ],
+      "negative_buffs": [],
+      "drops": {}
+    },
+    "zombud": {
+      "name": "Zombud",
+      "size": 1,
+      "ground": "soul_sand",
+      "requirements": [
+        {
+          "crop": "dead_plant",
+          "count": 4
+        },
+        {
+          "crop": "cindershade",
+          "count": 2
+        },
+        {
+          "crop": "fleshtrap",
+          "count": 2
+        }
+      ],
+      "rarity": "epic",
+      "growth_stages": 16,
+      "positive_buffs": [
+        "effect_spread",
+        "bonus_drops"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "pumpkin": 1190,
+        "wild_rose": 2800
+      }
+    },
+    "all_in_aloe": {
+      "name": "All-in Aloe",
+      "size": 1,
+      "ground": "sand",
+      "requirements": [
+        {
+          "crop": "magic_jellybean",
+          "count": 6
+        },
+        {
+          "crop": "plantboy_advance",
+          "count": 2
+        }
+      ],
+      "rarity": "legendary",
+      "growth_stages": 27,
+      "positive_buffs": [
+        "harvest_boost"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "moonflower": 200,
+        "sunflower": 200,
+        "wheat": 200
+      }
+    },
+    "devourer": {
+      "name": "Devourer",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [
+        {
+          "crop": "puffercloud",
+          "count": 4
+        },
+        {
+          "crop": "zombud",
+          "count": 4
+        }
+      ],
+      "rarity": "legendary",
+      "growth_stages": 16,
+      "positive_buffs": [
+        "improved_harvest_boost",
+        "bonus_drops"
+      ],
+      "negative_buffs": [
+        "water_drain"
+      ],
+      "drops": {
+        "brown_mushroom": 950,
+        "pumpkin": 1700,
+        "red_mushroom": 950
+      }
+    },
+    "glasscorn": {
+      "name": "Glasscorn",
+      "size": 2,
+      "ground": "sand",
+      "requirements": [
+        {
+          "crop": "startlevine",
+          "count": 6
+        },
+        {
+          "crop": "chloronite",
+          "count": 6
+        }
+      ],
+      "rarity": "legendary",
+      "growth_stages": 9,
+      "positive_buffs": [
+        "immunity",
+        "improved_water_retain"
+      ],
+      "negative_buffs": [
+        "harvest_loss"
+      ],
+      "drops": {
+        "potato": 4800,
+        "cactus": 2400
+      }
+    },
+    "godseed": {
+      "name": "Godseed",
+      "size": 3,
+      "ground": "farmland",
+      "requirements": [],
+      "special": "all_positive_crop_effects",
+      "rarity": "legendary",
+      "growth_stages": 40,
+      "positive_buffs": [
+        "improved_harvest_boost",
+        "improved_water_retain",
+        "improved_xp_boost",
+        "immunity",
+        "bonus_drops",
+        "effect_spread"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "brown_mushroom": 117,
+        "cocoa_beans": 492,
+        "moonflower": 492,
+        "carrot": 862,
+        "sunflower": 492,
+        "cactus": 369,
+        "sugar_cane": 492,
+        "pumpkin": 209,
+        "wheat": 246,
+        "melon_slice": 985,
+        "potato": 738,
+        "nether_wart": 738,
+        "red_mushroom": 117,
+        "wild_rose": 492
+      }
+    },
+    "jerryflower": {
+      "name": "Jerryflower",
+      "size": 1,
+      "ground": "farmland",
+      "requirements": [],
+      "special": "grow_the_jerryseed",
+      "rarity": "legendary",
+      "growth_stages": 10,
+      "positive_buffs": [],
+      "negative_buffs": [],
+      "drops": {}
+    },
+    "phantomleaf": {
+      "name": "Phantomleaf",
+      "size": 1,
+      "ground": "soul_sand",
+      "requirements": [
+        {
+          "crop": "chorus_fruit",
+          "count": 4
+        },
+        {
+          "crop": "shellfruit",
+          "count": 4
+        }
+      ],
+      "rarity": "legendary",
+      "growth_stages": 15,
+      "positive_buffs": [
+        "immunity",
+        "xp_boost"
+      ],
+      "negative_buffs": [],
+      "drops": {
+        "potato": 4800,
+        "carrot": 5600
+      }
+    },
+    "timestalk": {
+      "name": "Timestalk",
+      "size": 1,
+      "ground": "soul_sand",
+      "requirements": [
+        {
+          "crop": "stoplight_petal",
+          "count": 4
+        },
+        {
+          "crop": "chorus_fruit",
+          "count": 2
+        },
+        {
+          "crop": "shellfruit",
+          "count": 2
+        }
+      ],
+      "rarity": "legendary",
+      "growth_stages": 14,
+      "positive_buffs": [
+        "improved_xp_boost",
+        "improved_water_retain"
+      ],
+      "negative_buffs": [
+        "harvest_loss"
+      ],
+      "drops": {
+        "cactus": 3000,
+        "sugar_cane": 4000
+      }
+    }
+  },
+  "effects": {
+    "xp_boost": {
+      "name": "XP Boost",
+      "description": "Increases Farming XP of adjacent crops by +20%"
+    },
+    "improved_xp_boost": {
+      "name": "Improved XP Boost",
+      "description": "Increases Farming XP of adjacent crops by +30%"
+    },
+    "harvest_boost": {
+      "name": "Harvest Boost",
+      "description": "Increases Yield by +20%"
+    },
+    "improved_harvest_boost": {
+      "name": "Improved Harvest Boost",
+      "description": "Increases Yield by +30%"
+    },
+    "water_retain": {
+      "name": "Water Retain",
+      "description": "Retains watering status of adjacent crops by +50%"
+    },
+    "improved_water_retain": {
+      "name": "Improved Water Retain",
+      "description": "Retains watering status of adjacent crops by +100%"
+    },
+    "immunity": {
+      "name": "Immunity",
+      "description": "Provides Immunity to negative effects."
+    },
+    "bonus_drops": {
+      "name": "Bonus Drops",
+      "description": "Harvest Items additionally roll from an extra loot pool."
+    },
+    "effect_spread": {
+      "name": "Effect Spread",
+      "description": "Spreads other buffs and debuffs on the current crop to adjacent crops."
+    },
+    "xp_loss": {
+      "name": "XP Loss",
+      "description": "Reduces Farming XP of adjacent crops by -20%"
+    },
+    "harvest_loss": {
+      "name": "Harvest Loss",
+      "description": "Decreases Yield by -20%"
+    },
+    "water_drain": {
+      "name": "Water Drain",
+      "description": "Reduces watering status of nearby crops by -30%"
+    }
+  }
+}

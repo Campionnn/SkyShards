@@ -3,24 +3,34 @@
 // =============================================================================
 
 export interface CropDefinition {
-  name: string;
+  id: string; // The key used in API and for images (e.g., "wheat", "potato")
+  name: string; // Display name (e.g., "Wheat", "Potato")
   size: number;
   priority: number;
-  ground?: string; // Ground type from API (farmland, sand, soul_sand, mycelium, netherrack, end_stone)
+  ground: string; // Ground type (farmland, sand, soul_sand, mycelium, netherrack, end_stone)
+  growth_stages: number | null;
+  positive_buffs: string[];
+  negative_buffs: string[];
   isMutation?: boolean;
 }
 
 export interface MutationRequirement {
-  crop: string;
+  crop: string; // This is the crop ID (key), not display name
   count: number;
 }
 
 export interface MutationDefinition {
-  name: string;
+  id: string; // The key used in API and for images (e.g., "ashwreath")
+  name: string; // Display name (e.g., "Ashwreath")
   size: number;
+  ground: string;
   requirements: MutationRequirement[];
-  requires_zero_adjacent?: boolean;
-  ground?: string; // Ground type from API
+  special?: string; // Special spawn conditions
+  rarity: string;
+  growth_stages: number;
+  positive_buffs: string[];
+  negative_buffs: string[];
+  drops: Record<string, number>;
 }
 
 export interface MutationGoal {
@@ -29,10 +39,18 @@ export interface MutationGoal {
   count: number | null;
 }
 
+// Lock object for pre-placed crops/mutations
+export interface LockDefinition {
+  name: string; // Crop/mutation ID
+  size: number;
+  position: [number, number];
+}
+
 export interface SolveRequest {
   cells: [number, number][];
   targets: MutationGoal[];
   priorities?: Record<string, number>;
+  locks?: LockDefinition[];
 }
 
 // Unified placement/mutation format - uses position/size
@@ -40,6 +58,7 @@ export interface CropPlacement {
   crop: string;
   position: [number, number];
   size: number;
+  locked?: boolean;
 }
 
 export interface MutationResult {
@@ -122,11 +141,6 @@ export interface ExpansionResponse {
   final_gloomgourd_count: number;
 }
 
-export interface DefaultsResponse {
-  crops: CropDefinition[];
-  mutations: MutationDefinition[];
-}
-
 // =============================================================================
 // Grid State Types
 // =============================================================================
@@ -144,7 +158,8 @@ export interface GridCell {
 // =============================================================================
 
 export interface SelectedMutation {
-  name: string;
+  id: string; // The mutation ID (key), used for API calls
+  name: string; // Display name for UI
   mode: "maximize" | "target";
   targetCount: number;
 }
@@ -163,12 +178,43 @@ export interface ExpansionState {
 }
 
 // =============================================================================
+// Locked Placements Types
+// =============================================================================
+
+export interface LockedPlacement {
+  id: string; // Unique ID for React keys and tracking
+  crop: string; // Crop/mutation ID (e.g., "pumpkin", "gloomgourd")
+  position: [number, number];
+  size: number;
+  ground: string; // Ground type for rendering texture
+}
+
+// Filter categories for crop/mutation list
+export type CropFilterCategory =
+  | "all"
+  | "crops"
+  | "mutations"
+  | "common"
+  | "uncommon"
+  | "rare"
+  | "epic"
+  | "legendary";
+
+// Selected crop for placement mode
+export interface SelectedCropForPlacement {
+  id: string;
+  name: string;
+  size: number;
+  ground: string;
+}
+
+// =============================================================================
 // Image Mapping Helpers
 // =============================================================================
 
-// Get crop image path
-export function getCropImagePath(cropName: string): string {
-  return `/greenhouse/crops/${cropName}.png`;
+// Get crop image path (uses crop ID, not display name)
+export function getCropImagePath(cropId: string): string {
+  return `/greenhouse/crops/${cropId}.png`;
 }
 
 // Get ground texture image path

@@ -2,11 +2,12 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from "react"
 import { Search, X } from "lucide-react";
 import { debounce } from "../../utilities";
 import { getCropImagePath } from "../../types/greenhouse";
+import { useGreenhouseData } from "../../context";
 import type { MutationDefinition } from "../../types/greenhouse";
 
 interface MutationAutocompleteProps {
   mutations: MutationDefinition[];
-  excludeNames?: string[];
+  excludeIds?: string[];
   onSelect: (mutation: MutationDefinition) => void;
   placeholder?: string;
   className?: string;
@@ -14,11 +15,12 @@ interface MutationAutocompleteProps {
 
 export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
   mutations,
-  excludeNames = [],
+  excludeIds = [],
   onSelect,
   placeholder = "Search mutations...",
   className = "",
 }) => {
+  const { getCropDef, getMutationDef } = useGreenhouseData();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<MutationDefinition[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -30,8 +32,8 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
 
   // Available mutations
   const availableMutations = useMemo(() => {
-    return mutations.filter((m) => !excludeNames.includes(m.name));
-  }, [mutations, excludeNames]);
+    return mutations.filter((m) => !excludeIds.includes(m.id));
+  }, [mutations, excludeIds]);
 
   // Debounced search function
   const debouncedSearch = useMemo(
@@ -216,7 +218,7 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
         >
           {suggestions.map((mutation, index) => (
             <li
-              key={mutation.name}
+              key={mutation.id}
               onClick={() => handleSelect(mutation)}
               onMouseEnter={() => setFocusedIndex(index)}
               className={`px-3 py-2 cursor-pointer transition-colors ${
@@ -228,7 +230,7 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
               <div className="flex items-center gap-2">
                 <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
                   <img
-                    src={getCropImagePath(mutation.name)}
+                    src={getCropImagePath(mutation.id)}
                     alt={mutation.name}
                     className="w-full h-full object-contain"
                     onError={(e) => {
@@ -244,17 +246,23 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
                   />
                 </div>
                 <div className="flex flex-col flex-1">
-                  <span className="font-medium capitalize">
-                    {formatName(mutation.name)}
+                  <span className="font-medium">
+                    {mutation.name}
                   </span>
                   <span className="text-xs text-slate-400 mt-0.5">
                     Requires:{" "}
-                    {mutation.requirements.map((r, i) => (
-                      <span key={r.crop}>
-                        {i > 0 && ", "}
-                        {r.count}x {formatName(r.crop)}
-                      </span>
-                    ))}
+                    {mutation.requirements.map((r, i) => {
+                      const reqCropDef = getCropDef(r.crop);
+                      const reqMutationDef = getMutationDef(r.crop);
+                      const displayName = reqCropDef?.name || reqMutationDef?.name || formatName(r.crop);
+                      
+                      return (
+                        <span key={r.crop}>
+                          {i > 0 && ", "}
+                          {r.count}x {displayName}
+                        </span>
+                      );
+                    })}
                   </span>
                 </div>
               </div>

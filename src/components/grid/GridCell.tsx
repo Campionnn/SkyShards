@@ -100,7 +100,7 @@ export const GridCell: React.FC<GridCellProps> = ({
   };
   
   let cellClasses = `${sizeClasses[size]} border flex items-center justify-center transition-all duration-150 relative`;
-  let cellStyle: React.CSSProperties = {};
+  const cellStyle: React.CSSProperties = {};
   
   if (isUnlocked) {
     cellClasses += " bg-emerald-600 border-emerald-500 text-white";

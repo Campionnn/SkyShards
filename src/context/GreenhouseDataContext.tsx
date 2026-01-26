@@ -1,9 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { getDefaults } from "../services";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { CropDefinition, MutationDefinition, SelectedMutation } from "../types/greenhouse";
+import greenhouseData from "../../public/greenhouse/data.json";
 
 interface GreenhouseDataContextType {
-  // data from api
   crops: CropDefinition[];
   mutations: MutationDefinition[];
   isLoading: boolean;
@@ -11,79 +10,113 @@ interface GreenhouseDataContextType {
   
   // mutations for solving
   selectedMutations: SelectedMutation[];
-  addMutation: (name: string) => void;
-  removeMutation: (name: string) => void;
-  updateMutationMode: (name: string, mode: "maximize" | "target") => void;
-  updateMutationTargetCount: (name: string, count: number) => void;
+  addMutation: (id: string, name: string) => void;
+  removeMutation: (id: string) => void;
+  updateMutationMode: (id: string, mode: "maximize" | "target") => void;
+  updateMutationTargetCount: (id: string, count: number) => void;
   clearSelectedMutations: () => void;
   
   // mutation definition
-  getMutationDef: (name: string) => MutationDefinition | undefined;
-  getCropDef: (name: string) => CropDefinition | undefined;
-  
-  refetchData: () => Promise<void>;
+  getMutationDef: (id: string) => MutationDefinition | undefined;
+  getCropDef: (id: string) => CropDefinition | undefined;
 }
 
 const GreenhouseDataContext = createContext<GreenhouseDataContextType | null>(null);
+
+// Load data from JSON
+function loadGreenhouseData() {
+  const crops: CropDefinition[] = [];
+  const mutations: MutationDefinition[] = [];
+
+  // Convert crops object to array with IDs
+  for (const [id, crop] of Object.entries(greenhouseData.crops)) {
+    crops.push({
+      id,
+      name: crop.name,
+      size: crop.size,
+      priority: 0,
+      ground: crop.ground,
+      growth_stages: crop.growth_stages,
+      positive_buffs: crop.positive_buffs,
+      negative_buffs: crop.negative_buffs,
+      isMutation: false,
+    });
+  }
+
+  // Convert mutations object to array with IDs
+  for (const [id, mutation] of Object.entries(greenhouseData.mutations)) {
+    mutations.push({
+      id,
+      name: mutation.name,
+      size: mutation.size,
+      ground: mutation.ground,
+      requirements: mutation.requirements,
+      special: (mutation as any).special,
+      rarity: mutation.rarity,
+      growth_stages: mutation.growth_stages,
+      positive_buffs: mutation.positive_buffs,
+      negative_buffs: mutation.negative_buffs,
+      drops: mutation.drops,
+    });
+
+    // Also add mutation as a crop option
+    crops.push({
+      id,
+      name: mutation.name,
+      size: mutation.size,
+      priority: 0,
+      ground: mutation.ground,
+      growth_stages: mutation.growth_stages,
+      positive_buffs: mutation.positive_buffs,
+      negative_buffs: mutation.negative_buffs,
+      isMutation: true,
+    });
+  }
+
+  return { crops, mutations };
+}
 
 export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [crops, setCrops] = useState<CropDefinition[]>([]);
   const [mutations, setMutations] = useState<MutationDefinition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedMutations, setSelectedMutations] = useState<SelectedMutation[]>([]);
   
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const [selectedMutations, setSelectedMutations] = useState<SelectedMutation[]>([]);
+
+  // Load data from JSON on mount
+  useEffect(() => {
     try {
-      const data = await getDefaults();
-      
-      // base crops
-      const baseCrops = data.crops.map(c => ({ ...c, priority: 0 }));
-
-      // base mutations
-      const mutationsAsCrops = data.mutations.map(m => ({
-        name: m.name,
-        size: m.size,
-        priority: 0,
-        isMutation: true,
-      }));
-      
-      setCrops([...baseCrops, ...mutationsAsCrops]);
-      setMutations(data.mutations);
-
+      const { crops: cropsData, mutations: mutationsData } = loadGreenhouseData();
+      setCrops(cropsData);
+      setMutations(mutationsData);
+      setIsLoading(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load data");
-    } finally {
+      setError(err instanceof Error ? err.message : "Failed to load greenhouse data");
       setIsLoading(false);
     }
-  }, [selectedMutations.length]);
-  
-  useEffect(() => {
-    fetchData();
   }, []);
   
-  const addMutation = useCallback((name: string) => {
+  const addMutation = useCallback((id: string, name: string) => {
     setSelectedMutations(prev => {
-      if (prev.some(m => m.name === name)) return prev;
-      return [...prev, { name, mode: "maximize", targetCount: 1 }];
+      if (prev.some(m => m.id === id)) return prev;
+      return [...prev, { id, name, mode: "maximize", targetCount: 1 }];
     });
   }, []);
   
-  const removeMutation = useCallback((name: string) => {
-    setSelectedMutations(prev => prev.filter(m => m.name !== name));
+  const removeMutation = useCallback((id: string) => {
+    setSelectedMutations(prev => prev.filter(m => m.id !== id));
   }, []);
   
-  const updateMutationMode = useCallback((name: string, mode: "maximize" | "target") => {
+  const updateMutationMode = useCallback((id: string, mode: "maximize" | "target") => {
     setSelectedMutations(prev =>
-      prev.map(m => (m.name === name ? { ...m, mode } : m))
+      prev.map(m => (m.id === id ? { ...m, mode } : m))
     );
   }, []);
   
-  const updateMutationTargetCount = useCallback((name: string, count: number) => {
+  const updateMutationTargetCount = useCallback((id: string, count: number) => {
     setSelectedMutations(prev =>
-      prev.map(m => (m.name === name ? { ...m, targetCount: count } : m))
+      prev.map(m => (m.id === id ? { ...m, targetCount: count } : m))
     );
   }, []);
   
@@ -91,17 +124,13 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
     setSelectedMutations([]);
   }, []);
   
-  const getMutationDef = useCallback((name: string): MutationDefinition | undefined => {
-    return mutations.find(m => m.name === name);
+  const getMutationDef = useCallback((id: string): MutationDefinition | undefined => {
+    return mutations.find(m => m.id === id);
   }, [mutations]);
   
-  const getCropDef = useCallback((name: string): CropDefinition | undefined => {
-    return crops.find(c => c.name === name);
+  const getCropDef = useCallback((id: string): CropDefinition | undefined => {
+    return crops.find(c => c.id === id);
   }, [crops]);
-  
-  const refetchData = useCallback(async () => {
-    await fetchData();
-  }, [fetchData]);
   
   const value: GreenhouseDataContextType = {
     crops,
@@ -116,7 +145,6 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
     clearSelectedMutations,
     getMutationDef,
     getCropDef,
-    refetchData,
   };
   
   return (
