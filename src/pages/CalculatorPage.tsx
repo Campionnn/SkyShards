@@ -127,9 +127,6 @@ export const CalculatorPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_420px] gap-6">
           {/* Column 1 - Configuration */}
           <div className="space-y-4">
-            {/* Mutation Targets */}
-            <MutationTargets />
-
             {/* Grid Preview - small clickable preview */}
             <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
@@ -143,6 +140,9 @@ export const CalculatorPage: React.FC = () => {
                 Click to manage unlocked cells
               </p>
             </div>
+
+            {/* Mutation Targets */}
+            <MutationTargets />
 
             {/* Solve Button */}
             <button
