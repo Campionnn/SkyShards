@@ -413,7 +413,18 @@ export const GridPainter: React.FC<GridPainterProps> = ({
     
     if (dragState) {
       if (cellInfo) {
-        setDragState(prev => prev ? { ...prev, currentPosition: cellInfo.cell } : null);
+        // Get the placement being dragged to determine its size
+        const placement = lockedPlacements.find(p => p.id === dragState.placementId);
+        if (placement) {
+          // Use the same positioning logic as placement for consistency
+          const adjustedPos = getAdjustedPosition(cellInfo.cell, cellInfo.offsetX, cellInfo.offsetY, placement.size);
+          if (adjustedPos) {
+            setDragState(prev => prev ? { ...prev, currentPosition: adjustedPos } : null);
+          }
+        } else {
+          // Fallback to cell position if placement not found
+          setDragState(prev => prev ? { ...prev, currentPosition: cellInfo.cell } : null);
+        }
       }
     } else if (paintState) {
       if (cellInfo) {
@@ -422,7 +433,7 @@ export const GridPainter: React.FC<GridPainterProps> = ({
     } else if (isPlacementMode) {
       setHoverInfo(cellInfo);
     }
-  }, [getGridCellWithOffset, dragState, paintState, isPlacementMode, handlePaintAtCell]);
+  }, [getGridCellWithOffset, dragState, paintState, isPlacementMode, handlePaintAtCell, lockedPlacements, getAdjustedPosition]);
   
   // Handle mouse leave - don't clear state, allow re-entry
   const handleMouseLeave = useCallback(() => {
@@ -552,7 +563,18 @@ export const GridPainter: React.FC<GridPainterProps> = ({
       if (!cellInfo) return;
       
       if (dragState) {
-        setDragState(prev => prev ? { ...prev, currentPosition: cellInfo.cell } : null);
+        // Get the placement being dragged to determine its size
+        const placement = lockedPlacements.find(p => p.id === dragState.placementId);
+        if (placement) {
+          // Use the same positioning logic as placement for consistency
+          const adjustedPos = getAdjustedPosition(cellInfo.cell, cellInfo.offsetX, cellInfo.offsetY, placement.size);
+          if (adjustedPos) {
+            setDragState(prev => prev ? { ...prev, currentPosition: adjustedPos } : null);
+          }
+        } else {
+          // Fallback to cell position if placement not found
+          setDragState(prev => prev ? { ...prev, currentPosition: cellInfo.cell } : null);
+        }
       } else if (paintState) {
         handlePaintAtCell(cellInfo.cell, cellInfo.offsetX, cellInfo.offsetY, paintState.mode);
       }
@@ -567,7 +589,7 @@ export const GridPainter: React.FC<GridPainterProps> = ({
       document.removeEventListener("mousemove", handleDocumentMouseMove);
       document.removeEventListener("mouseup", handleDocumentMouseUp);
     };
-  }, [paintState, dragState, getGridCellClampedWithOffset, handlePaintAtCell, handleMouseUp]);
+  }, [paintState, dragState, lockedPlacements, getGridCellClampedWithOffset, getAdjustedPosition, handlePaintAtCell, handleMouseUp]);
   
   // Calculate preview position using hoverInfo with offsets
   const previewPosition = hoverInfo && selectedCropForPlacement
