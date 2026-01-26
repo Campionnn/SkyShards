@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { Pencil, X, ChevronDown, Lock, Trash2 } from "lucide-react";
+import { Pencil, X, ChevronDown, Lock, Trash2, AlertTriangle } from "lucide-react";
 import { useGreenhouseData, useLockedPlacements } from "../../context";
 import { CropMutationInfoModal } from "./CropMutationInfoModal";
 import type { CropDefinition, MutationDefinition, CropFilterCategory, SelectedCropForPlacement } from "../../types/greenhouse";
@@ -172,6 +172,7 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
     clearLockedPlacements,
     setPriority,
     getPriority,
+    priorities,
   } = useLockedPlacements();
   
   const [filter, setFilter] = useState<CropFilterCategory>("all");
@@ -181,6 +182,12 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
     crop?: CropDefinition;
     mutation?: MutationDefinition;
   } | null>(null);
+  const [priorityWarningDismissed, setPriorityWarningDismissed] = useState(false);
+  
+  // Check if any priorities are set
+  const hasPriorities = useMemo(() => {
+    return Object.values(priorities).some((p) => p !== 0);
+  }, [priorities]);
   
   // Listen for Escape key to cancel placement mode
   useEffect(() => {
@@ -301,6 +308,23 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
             </ul>
           )}
         </div>
+        
+        {/* Priority Warning - dismissible, once per session */}
+        {hasPriorities && !priorityWarningDismissed && (
+          <div className="flex items-start gap-2 p-2 mb-3 bg-amber-500/10 border border-amber-500/30 rounded-md">
+            <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-300/90 flex-1">
+              Setting priorities reduces solver cache efficiency and may increase solve times.
+            </p>
+            <button
+              onClick={() => setPriorityWarningDismissed(true)}
+              className="p-0.5 hover:bg-amber-500/20 rounded text-amber-400/70 hover:text-amber-400 transition-colors"
+              title="Dismiss"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
         
         {/* Crops List - Constrained height */}
         <div className="overflow-y-auto space-y-2 max-h-[400px]">

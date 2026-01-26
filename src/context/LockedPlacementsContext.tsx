@@ -16,6 +16,7 @@ interface LockedPlacementsContextType {
   // Validation helpers
   isPositionOccupied: (position: [number, number], size: number, excludeId?: string) => boolean;
   isValidPlacement: (position: [number, number], size: number, excludeId?: string) => { valid: boolean; error?: string };
+  isValidPlacementPosition: (position: [number, number], size: number) => { valid: boolean; error?: string };
   getLockedPlacementAt: (row: number, col: number) => LockedPlacement | undefined;
   
   // Convert to API format
@@ -135,11 +136,10 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
     return false;
   }, [lockedPlacements]);
   
-  // Validate if a placement is valid
-  const isValidPlacement = useCallback((
+  // Validate if a placement position is valid (checks bounds and unlocked cells only)
+  const isValidPlacementPosition = useCallback((
     position: [number, number],
-    size: number,
-    excludeId?: string
+    size: number
   ): { valid: boolean; error?: string } => {
     const [row, col] = position;
     
@@ -158,19 +158,64 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
       }
     }
     
-    // Check no overlap with existing placements
+    return { valid: true };
+  }, [unlockedCells]);
+  
+  // Validate if a placement is valid (includes overlap check for moving existing placements)
+  const isValidPlacement = useCallback((
+    position: [number, number],
+    size: number,
+    excludeId?: string
+  ): { valid: boolean; error?: string } => {
+    const positionValidation = isValidPlacementPosition(position, size);
+    if (!positionValidation.valid) {
+      return positionValidation;
+    }
+    
+    // Check no overlap with existing placements (used for drag-moving)
     if (isPositionOccupied(position, size, excludeId)) {
       return { valid: false, error: "Position is occupied by another locked placement" };
     }
     
     return { valid: true };
-  }, [unlockedCells, isPositionOccupied]);
+  }, [isValidPlacementPosition, isPositionOccupied]);
   
-  // Add a new locked placement
+  // Find all placements that overlap with a given position and size
+  const getOverlappingPlacements = useCallback((
+    position: [number, number],
+    size: number,
+    excludeId?: string
+  ): LockedPlacement[] => {
+    const [row, col] = position;
+    const overlapping: LockedPlacement[] = [];
+    
+    for (const placement of lockedPlacements) {
+      if (excludeId && placement.id === excludeId) continue;
+      
+      const [pRow, pCol] = placement.position;
+      const pSize = placement.size;
+      
+      // Check for overlap between the two squares
+      const noOverlap = 
+        row + size <= pRow ||      // New placement is above
+        pRow + pSize <= row ||     // New placement is below
+        col + size <= pCol ||      // New placement is to the left
+        pCol + pSize <= col;       // New placement is to the right
+      
+      if (!noOverlap) {
+        overlapping.push(placement);
+      }
+    }
+    
+    return overlapping;
+  }, [lockedPlacements]);
+  
+  // Add a new locked placement (overrides any overlapping placements)
   const addLockedPlacement = useCallback((
     placement: Omit<LockedPlacement, "id">
   ): { success: boolean; error?: string } => {
-    const validation = isValidPlacement(placement.position, placement.size);
+    // Only validate position (bounds and unlocked cells), not overlap
+    const validation = isValidPlacementPosition(placement.position, placement.size);
     if (!validation.valid) {
       return { success: false, error: validation.error };
     }
@@ -180,9 +225,17 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
       id: generatePlacementId(),
     };
     
-    setLockedPlacements(prev => [...prev, newPlacement]);
+    // Remove any overlapping placements and add the new one
+    const overlapping = getOverlappingPlacements(placement.position, placement.size);
+    const overlappingIds = new Set(overlapping.map(p => p.id));
+    
+    setLockedPlacements(prev => [
+      ...prev.filter(p => !overlappingIds.has(p.id)),
+      newPlacement,
+    ]);
+    
     return { success: true };
-  }, [isValidPlacement]);
+  }, [isValidPlacementPosition, getOverlappingPlacements]);
   
   // Remove a locked placement by ID
   const removeLockedPlacement = useCallback((id: string) => {
@@ -270,6 +323,7 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
     clearLockedPlacements,
     isPositionOccupied,
     isValidPlacement,
+    isValidPlacementPosition,
     getLockedPlacementAt,
     getLocksForAPI,
     selectedCropForPlacement,

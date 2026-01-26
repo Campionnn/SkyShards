@@ -1,5 +1,5 @@
-import React from "react";
-import { X, Target, TrendingUp } from "lucide-react";
+import React, { useMemo } from "react";
+import { X, Target, TrendingUp, Trash2, AlertTriangle } from "lucide-react";
 import { useGreenhouseData } from "../../context";
 import { MutationAutocomplete } from "./MutationAutocomplete";
 import { getCropImagePath } from "../../types/greenhouse";
@@ -23,17 +23,33 @@ export const MutationTargets: React.FC = () => {
     (m) => !selectedMutations.some((s) => s.id === m.id)
   );
 
+  // Check for multiple maximize targets
+  const hasMultipleMaximize = useMemo(() => {
+    return selectedMutations.filter((m) => m.mode === "maximize").length > 1;
+  }, [selectedMutations]);
+
   const handleAddMutation = (id: string, name: string) => {
     addMutation(id, name);
   };
 
   if (isLoading) {
-    return (
-      <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
-        <div className="flex items-center gap-2 mb-3">
+  return (
+    <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
           <Target className="w-4 h-4 text-emerald-400" />
           <h3 className="text-sm font-medium text-slate-200">Mutation Targets</h3>
         </div>
+        {selectedMutations.length > 0 && (
+          <button
+            onClick={() => selectedMutations.forEach((m) => removeMutation(m.id))}
+            className="p-1.5 hover:bg-slate-600/50 rounded text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+            title="Clear all targets"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
         <div className="flex items-center justify-center py-4">
           <div className="w-5 h-5 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
         </div>
@@ -43,9 +59,20 @@ export const MutationTargets: React.FC = () => {
 
   return (
     <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Target className="w-4 h-4 text-emerald-400" />
-        <h3 className="text-sm font-medium text-slate-200">Mutation Targets</h3>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Target className="w-4 h-4 text-emerald-400" />
+          <h3 className="text-sm font-medium text-slate-200">Mutation Targets</h3>
+        </div>
+        {selectedMutations.length > 0 && (
+          <button
+            onClick={() => selectedMutations.forEach((m) => removeMutation(m.id))}
+            className="p-1.5 hover:bg-slate-600/50 rounded text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+            title="Clear all targets"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       <p className="text-xs text-slate-400 mb-4">
@@ -87,10 +114,10 @@ export const MutationTargets: React.FC = () => {
                 </div>
                 <button
                   onClick={() => removeMutation(selected.id)}
-                  className="p-1 hover:bg-slate-600/50 rounded text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+                  className="p-1.5 hover:bg-slate-600/50 rounded text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
                   title="Remove target"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
@@ -168,13 +195,23 @@ export const MutationTargets: React.FC = () => {
         )}
       </div>
 
+      {/* Warning for multiple maximize targets */}
+      {hasMultipleMaximize && (
+        <div className="flex items-start gap-2 p-2.5 mb-4 bg-amber-500/10 border border-amber-500/30 rounded-md">
+          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-300/90">
+            Multiple maximize targets selected. The solver will prioritize whichever mutation it can fit the most of, and will not balance between them.
+          </p>
+        </div>
+      )}
+
       {/* mutation search */}
       {availableMutations.length > 0 && (
         <MutationAutocomplete
           mutations={mutations}
           excludeIds={selectedMutations.map((m) => m.id)}
           onSelect={(mutation: MutationDefinition) => handleAddMutation(mutation.id, mutation.name)}
-          placeholder="+ Add mutation target..."
+          placeholder="Add mutation target..."
         />
       )}
     </div>

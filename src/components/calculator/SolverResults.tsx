@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useRef, useCallback, useEffect } from "react";
-import { CheckCircle2, AlertCircle, Grid3X3, Leaf, ImageOff, Eye, EyeOff, Zap, Target, TrendingUp, Clock, RotateCcw } from "lucide-react";
+import { CheckCircle2, AlertCircle, Grid3X3, Leaf, ImageOff, Eye, EyeOff, Zap, Target, TrendingUp, Clock, RotateCcw, Trash2 } from "lucide-react";
 import { GRID_SIZE } from "../../constants";
 import { useGreenhouseData, useGridState, useLockedPlacements } from "../../context";
 import { useToast } from "../ui/toastContext";
@@ -234,8 +234,11 @@ const LockedPlacementCell: React.FC<{
   cellSize: number;
   gap: number;
   isDragging: boolean;
+  isHovered: boolean;
   onMouseDown: (e: React.MouseEvent) => void;
-}> = ({ placement, groundType, cellSize, gap, isDragging, onMouseDown }) => {
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+}> = ({ placement, groundType, cellSize, gap, isDragging, isHovered, onMouseDown, onMouseEnter, onMouseLeave }) => {
   const [imageError, setImageError] = useState(false);
   
   const totalWidth = placement.size * cellSize + (placement.size - 1) * gap;
@@ -255,7 +258,9 @@ const LockedPlacementCell: React.FC<{
     backgroundSize: `${cellSize}px ${cellSize}px`,
     backgroundPosition: "top left",
     backgroundRepeat: "repeat",
-    boxShadow: "0 0 8px rgba(234, 179, 8, 0.8), inset 0 0 8px rgba(234, 179, 8, 0.4)",
+    boxShadow: isHovered 
+      ? "0 0 8px rgba(239, 68, 68, 0.8), inset 0 0 8px rgba(239, 68, 68, 0.4)"
+      : "0 0 8px rgba(234, 179, 8, 0.8), inset 0 0 8px rgba(234, 179, 8, 0.4)",
     borderRadius: 4,
     display: "flex",
     alignItems: "center",
@@ -264,15 +269,17 @@ const LockedPlacementCell: React.FC<{
     zIndex: isDragging ? 20 : 10,
     cursor: isDragging ? "grabbing" : "grab",
     opacity: isDragging ? 0.8 : 1,
-    transition: isDragging ? "none" : "transform 0.15s ease",
+    transition: isDragging ? "none" : "transform 0.15s ease, box-shadow 0.15s ease",
   };
 
   return (
     <div
       style={style}
       onMouseDown={onMouseDown}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       onContextMenu={(e) => e.preventDefault()}
-      title={`${placement.crop} - Locked (drag to move, right-click to remove)`}
+      title={`${placement.crop} - Drag to move, right-click to remove`}
     >
       {!imageError ? (
         <img
@@ -287,6 +294,13 @@ const LockedPlacementCell: React.FC<{
         <span className="text-yellow-300 text-xs font-medium">
           {placement.crop.slice(0, 4)}
         </span>
+      )}
+      
+      {/* Trash icon on hover */}
+      {isHovered && (
+        <div className="absolute top-0.5 right-0.5 bg-red-500 rounded-bl-md p-0.5">
+          <Trash2 className="w-3 h-3 text-white" />
+        </div>
       )}
     </div>
   );
@@ -371,6 +385,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
     moveLockedPlacement,
     getLockedPlacementAt,
     isValidPlacement,
+    isValidPlacementPosition,
     isPlacementMode,
   } = useLockedPlacements();
   const { toast } = useToast();
@@ -379,11 +394,29 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   
   // Interactive grid state
   const gridRef = useRef<HTMLDivElement>(null);
-  const [hoverPosition, setHoverPosition] = useState<[number, number] | null>(null);
+  const [hoveredPlacementId, setHoveredPlacementId] = useState<string | null>(null);
   const [dragState, setDragState] = useState<{
     placementId: string;
     startPosition: [number, number];
     currentPosition: [number, number];
+  } | null>(null);
+  
+  // Drag-painting state for placing/removing multiple crops
+  // Use refs for tracking to avoid stale closure issues during fast mouse movement
+  const [paintState, setPaintState] = useState<{
+    mode: "place" | "remove";
+  } | null>(null);
+  const paintDataRef = useRef<{
+    lastCell: [number, number] | null;
+    lastPlacedPosition: [number, number] | null;
+    lastPlacedSize: number;
+  }>({ lastCell: null, lastPlacedPosition: null, lastPlacedSize: 1 });
+  
+  // Track cursor position with offset for preview
+  const [hoverInfo, setHoverInfo] = useState<{
+    cell: [number, number];
+    offsetX: number;
+    offsetY: number;
   } | null>(null);
 
   // Calculate grid dimensions
@@ -392,92 +425,275 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   const gridWidth = GRID_SIZE * cellSize + (GRID_SIZE - 1) * gap;
   const gridHeight = GRID_SIZE * cellSize + (GRID_SIZE - 1) * gap;
   
-  // Convert mouse position to grid cell
-  const getGridCell = useCallback((clientX: number, clientY: number): [number, number] | null => {
+  // Convert mouse position to grid cell with sub-cell position (0-1 within cell)
+  const getGridCellWithOffset = useCallback((clientX: number, clientY: number): { cell: [number, number]; offsetX: number; offsetY: number } | null => {
     if (!gridRef.current) return null;
     
     const rect = gridRef.current.getBoundingClientRect();
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     
-    const col = Math.floor(x / (cellSize + gap));
-    const row = Math.floor(y / (cellSize + gap));
+    const cellUnit = cellSize + gap;
+    const col = Math.floor(x / cellUnit);
+    const row = Math.floor(y / cellUnit);
     
     if (row < 0 || row >= GRID_SIZE || col < 0 || col >= GRID_SIZE) {
       return null;
     }
     
-    return [row, col];
+    // Calculate offset within cell (0-1)
+    const offsetX = (x - col * cellUnit) / cellSize;
+    const offsetY = (y - row * cellUnit) / cellSize;
+    
+    return { cell: [row, col], offsetX: Math.min(1, Math.max(0, offsetX)), offsetY: Math.min(1, Math.max(0, offsetY)) };
   }, [cellSize, gap]);
   
-  // Handle mouse move for preview and dragging
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    const cell = getGridCell(e.clientX, e.clientY);
+  // Calculate placement position based on cursor position within cell
+  // For 2x2: quadrant determines which corner the current cell becomes
+  // For 3x3: center under cursor
+  // For 1x1: just the cell
+  const getPlacementPosition = useCallback((
+    cursorCell: [number, number],
+    offsetX: number,
+    offsetY: number,
+    size: number
+  ): [number, number] => {
+    if (size === 1) return cursorCell;
     
-    if (dragState) {
-      if (cell) {
-        setDragState(prev => prev ? { ...prev, currentPosition: cell } : null);
+    let row: number, col: number;
+    
+    if (size === 2) {
+      // For 2x2: quadrant-based placement
+      if (offsetY < 0.5) {
+        row = cursorCell[0] - 1;
+      } else {
+        row = cursorCell[0];
       }
-    } else if (isPlacementMode) {
-      setHoverPosition(cell);
+      
+      if (offsetX < 0.5) {
+        col = cursorCell[1] - 1;
+      } else {
+        col = cursorCell[1];
+      }
+    } else {
+      // For 3x3+: center under cursor
+      const offset = Math.floor(size / 2);
+      row = cursorCell[0] - offset;
+      col = cursorCell[1] - offset;
     }
-  }, [getGridCell, dragState, isPlacementMode]);
+    
+    // Clamp to valid grid bounds
+    row = Math.max(0, Math.min(GRID_SIZE - size, row));
+    col = Math.max(0, Math.min(GRID_SIZE - size, col));
+    
+    return [row, col];
+  }, []);
   
-  // Handle mouse leave
-  const handleMouseLeave = useCallback(() => {
-    if (!dragState) {
-      setHoverPosition(null);
+  // Find nearest valid position for a placement (snaps to unlocked cells)
+  const findNearestValidPosition = useCallback((
+    targetPos: [number, number],
+    size: number
+  ): [number, number] | null => {
+    // Check if target position is valid
+    const validation = isValidPlacementPosition(targetPos, size);
+    if (validation.valid) return targetPos;
+    
+    // Search in expanding squares for a valid position
+    for (let radius = 1; radius <= Math.max(GRID_SIZE, GRID_SIZE); radius++) {
+      for (let dr = -radius; dr <= radius; dr++) {
+        for (let dc = -radius; dc <= radius; dc++) {
+          if (Math.abs(dr) !== radius && Math.abs(dc) !== radius) continue;
+          
+          const testRow = targetPos[0] + dr;
+          const testCol = targetPos[1] + dc;
+          
+          if (testRow < 0 || testCol < 0 || testRow + size > GRID_SIZE || testCol + size > GRID_SIZE) continue;
+          
+          const testValidation = isValidPlacementPosition([testRow, testCol], size);
+          if (testValidation.valid) {
+            return [testRow, testCol];
+          }
+        }
+      }
     }
-  }, [dragState]);
+    
+    return null;
+  }, [isValidPlacementPosition]);
   
-  // Handle click to place crop
-  const handleGridClick = useCallback((e: React.MouseEvent) => {
-    if (dragState || !isPlacementMode || !selectedCropForPlacement) return;
+  // Get the adjusted position for placement (position calculation + snap to valid)
+  const getAdjustedPosition = useCallback((
+    cursorCell: [number, number],
+    offsetX: number,
+    offsetY: number,
+    size: number
+  ): [number, number] | null => {
+    const basePos = getPlacementPosition(cursorCell, offsetX, offsetY, size);
+    return findNearestValidPosition(basePos, size);
+  }, [getPlacementPosition, findNearestValidPosition]);
+  
+  // Place a crop at the given position with offset info
+  const placeCropAtPosition = useCallback((
+    cursorCell: [number, number],
+    offsetX: number,
+    offsetY: number
+  ): [number, number] | null => {
+    if (!selectedCropForPlacement) return null;
     
-    const cell = getGridCell(e.clientX, e.clientY);
-    if (!cell) return;
+    const adjustedPos = getAdjustedPosition(cursorCell, offsetX, offsetY, selectedCropForPlacement.size);
+    if (!adjustedPos) return null;
     
-    const placementResult = addLockedPlacement({
+    const result = addLockedPlacement({
       crop: selectedCropForPlacement.id,
-      position: cell,
+      position: adjustedPos,
       size: selectedCropForPlacement.size,
       ground: selectedCropForPlacement.ground,
     });
     
-    if (!placementResult.success) {
+    if (!result.success) {
       toast({
         title: "Cannot place here",
-        description: placementResult.error,
+        description: result.error,
         variant: "error",
         duration: 2000,
       });
+      return null;
     }
-  }, [getGridCell, isPlacementMode, selectedCropForPlacement, addLockedPlacement, dragState, toast]);
+    
+    return adjustedPos;
+  }, [selectedCropForPlacement, getAdjustedPosition, addLockedPlacement, toast]);
   
-  // Handle right-click to remove
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    
-    const cell = getGridCell(e.clientX, e.clientY);
-    if (!cell) return;
-    
+  // Remove any placement at the given cell
+  const removeAtCell = useCallback((cell: [number, number]) => {
     const placement = getLockedPlacementAt(cell[0], cell[1]);
     if (placement) {
       removeLockedPlacement(placement.id);
     }
-  }, [getGridCell, getLockedPlacementAt, removeLockedPlacement]);
+  }, [getLockedPlacementAt, removeLockedPlacement]);
   
-  // Handle mouse down on placement (start drag)
+  // Check if a new placement would overlap with the last placed position
+  const wouldOverlapLastPlacement = useCallback((
+    newPos: [number, number],
+    size: number,
+    lastPlaced: [number, number] | null,
+    lastSize: number
+  ): boolean => {
+    if (!lastPlaced) return false;
+    
+    const newEndRow = newPos[0] + size;
+    const newEndCol = newPos[1] + size;
+    const lastEndRow = lastPlaced[0] + lastSize;
+    const lastEndCol = lastPlaced[1] + lastSize;
+    
+    return !(newPos[0] >= lastEndRow || newEndRow <= lastPlaced[0] ||
+             newPos[1] >= lastEndCol || newEndCol <= lastPlaced[1]);
+  }, []);
+  
+  // Core painting logic - extracted to avoid duplication between React and document events
+  const handlePaintAtCell = useCallback((
+    cell: [number, number],
+    offsetX: number,
+    offsetY: number,
+    mode: "place" | "remove"
+  ) => {
+    const { lastCell, lastPlacedPosition, lastPlacedSize } = paintDataRef.current;
+    
+    // Only act if we moved to a new cell
+    if (lastCell && lastCell[0] === cell[0] && lastCell[1] === cell[1]) {
+      return;
+    }
+    
+    if (mode === "place" && selectedCropForPlacement) {
+      const adjustedPos = getAdjustedPosition(cell, offsetX, offsetY, selectedCropForPlacement.size);
+      
+      if (adjustedPos && !wouldOverlapLastPlacement(adjustedPos, selectedCropForPlacement.size, lastPlacedPosition, lastPlacedSize)) {
+        const placedPos = placeCropAtPosition(cell, offsetX, offsetY);
+        if (placedPos) {
+          paintDataRef.current = { lastCell: cell, lastPlacedPosition: placedPos, lastPlacedSize: selectedCropForPlacement.size };
+        } else {
+          paintDataRef.current = { ...paintDataRef.current, lastCell: cell };
+        }
+      } else {
+        paintDataRef.current = { ...paintDataRef.current, lastCell: cell };
+      }
+    } else if (mode === "remove") {
+      removeAtCell(cell);
+      paintDataRef.current = { ...paintDataRef.current, lastCell: cell };
+    }
+  }, [selectedCropForPlacement, getAdjustedPosition, wouldOverlapLastPlacement, placeCropAtPosition, removeAtCell]);
+  
+  // Handle mouse move for preview, dragging, and painting
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const cellInfo = getGridCellWithOffset(e.clientX, e.clientY);
+    
+    if (dragState) {
+      if (cellInfo) {
+        setDragState(prev => prev ? { ...prev, currentPosition: cellInfo.cell } : null);
+      }
+    } else if (paintState) {
+      if (cellInfo) {
+        handlePaintAtCell(cellInfo.cell, cellInfo.offsetX, cellInfo.offsetY, paintState.mode);
+      }
+    } else if (isPlacementMode) {
+      setHoverInfo(cellInfo);
+    }
+  }, [getGridCellWithOffset, dragState, paintState, isPlacementMode, handlePaintAtCell]);
+  
+  // Handle mouse leave - don't clear state during paint mode
+  const handleMouseLeave = useCallback(() => {
+    if (!dragState && !paintState) {
+      setHoverInfo(null);
+    }
+  }, [dragState, paintState]);
+  
+  // Handle mouse down to start placing or removing
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (dragState) return;
+    
+    const cellInfo = getGridCellWithOffset(e.clientX, e.clientY);
+    if (!cellInfo) return;
+    
+    const { cell, offsetX, offsetY } = cellInfo;
+    
+    // Left click in placement mode - start drag-placing
+    if (e.button === 0 && isPlacementMode && selectedCropForPlacement) {
+      e.preventDefault();
+      const placedPos = placeCropAtPosition(cell, offsetX, offsetY);
+      paintDataRef.current = { lastCell: cell, lastPlacedPosition: placedPos, lastPlacedSize: selectedCropForPlacement.size };
+      setPaintState({ mode: "place" });
+      setHoverInfo(null); // Hide preview during painting
+    }
+    // Right click - start drag-removing
+    else if (e.button === 2) {
+      e.preventDefault();
+      removeAtCell(cell);
+      setHoveredPlacementId(null); // Clear hover state when starting drag-remove
+      paintDataRef.current = { lastCell: cell, lastPlacedPosition: null, lastPlacedSize: 1 };
+      setPaintState({ mode: "remove" });
+      setHoverInfo(null); // Hide preview during painting
+    }
+  }, [getGridCellWithOffset, dragState, isPlacementMode, selectedCropForPlacement, placeCropAtPosition, removeAtCell]);
+  
+  // Handle context menu (prevent default)
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+  }, []);
+  
+  // Handle mouse down on placement (start drag move)
   const handlePlacementMouseDown = useCallback((placementId: string, e: React.MouseEvent) => {
     // Right-click removes
     if (e.button === 2) {
       e.preventDefault();
+      e.stopPropagation();
       removeLockedPlacement(placementId);
+      setHoveredPlacementId(null); // Clear hover state when removing
+      setHoverInfo(null); // Hide preview
+      paintDataRef.current = { lastCell: null, lastPlacedPosition: null, lastPlacedSize: 1 };
+      setPaintState({ mode: "remove" });
       return;
     }
     
-    // Left-click starts drag
-    if (e.button === 0) {
+    // Left-click starts drag move (only if not in placement mode)
+    if (e.button === 0 && !isPlacementMode) {
       e.preventDefault();
       e.stopPropagation();
       
@@ -490,9 +706,9 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
         });
       }
     }
-  }, [lockedPlacements, removeLockedPlacement]);
+  }, [lockedPlacements, removeLockedPlacement, isPlacementMode]);
   
-  // Handle mouse up (end drag)
+  // Handle mouse up (end drag or paint)
   const handleMouseUp = useCallback(() => {
     if (dragState) {
       const { placementId, startPosition, currentPosition } = dragState;
@@ -513,20 +729,66 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
       
       setDragState(null);
     }
-  }, [dragState, moveLockedPlacement, toast]);
-  
-  // Add document-level mouse up listener
-  useEffect(() => {
-    if (dragState) {
-      const handleDocumentMouseUp = () => handleMouseUp();
-      document.addEventListener("mouseup", handleDocumentMouseUp);
-      return () => document.removeEventListener("mouseup", handleDocumentMouseUp);
+    
+    if (paintState) {
+      setPaintState(null);
+      setHoveredPlacementId(null); // Clear hover state when ending paint
+      paintDataRef.current = { lastCell: null, lastPlacedPosition: null, lastPlacedSize: 1 };
     }
-  }, [dragState, handleMouseUp]);
+  }, [dragState, paintState, moveLockedPlacement, toast]);
+  
+  // Get clamped cell with offset for document events
+  const getGridCellClampedWithOffset = useCallback((clientX: number, clientY: number): { cell: [number, number]; offsetX: number; offsetY: number } | null => {
+    if (!gridRef.current) return null;
+    
+    const rect = gridRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    
+    const cellUnit = cellSize + gap;
+    const col = Math.max(0, Math.min(GRID_SIZE - 1, Math.floor(x / cellUnit)));
+    const row = Math.max(0, Math.min(GRID_SIZE - 1, Math.floor(y / cellUnit)));
+    
+    const offsetX = Math.min(1, Math.max(0, (x - col * cellUnit) / cellSize));
+    const offsetY = Math.min(1, Math.max(0, (y - row * cellUnit) / cellSize));
+    
+    return { cell: [row, col], offsetX, offsetY };
+  }, [cellSize, gap]);
+  
+  // Document-level event handlers for drag-painting outside grid
+  useEffect(() => {
+    if (!paintState && !dragState) return;
+    
+    const handleDocumentMouseMove = (e: MouseEvent) => {
+      const cellInfo = getGridCellClampedWithOffset(e.clientX, e.clientY);
+      if (!cellInfo) return;
+      
+      if (dragState) {
+        setDragState(prev => prev ? { ...prev, currentPosition: cellInfo.cell } : null);
+      } else if (paintState) {
+        handlePaintAtCell(cellInfo.cell, cellInfo.offsetX, cellInfo.offsetY, paintState.mode);
+      }
+    };
+    
+    const handleDocumentMouseUp = () => handleMouseUp();
+    
+    document.addEventListener("mousemove", handleDocumentMouseMove);
+    document.addEventListener("mouseup", handleDocumentMouseUp);
+    
+    return () => {
+      document.removeEventListener("mousemove", handleDocumentMouseMove);
+      document.removeEventListener("mouseup", handleDocumentMouseUp);
+    };
+  }, [paintState, dragState, getGridCellClampedWithOffset, handlePaintAtCell, handleMouseUp]);
+  
+  // Calculate preview position using hoverInfo with offsets
+  const previewPosition = hoverInfo && selectedCropForPlacement
+    ? getAdjustedPosition(hoverInfo.cell, hoverInfo.offsetX, hoverInfo.offsetY, selectedCropForPlacement.size)
+    : null;
   
   // Check if preview placement is valid
-  const previewValidation = hoverPosition && selectedCropForPlacement
-    ? isValidPlacement(hoverPosition, selectedCropForPlacement.size)
+  const previewValidation = previewPosition && selectedCropForPlacement
+    ? isValidPlacement(previewPosition, selectedCropForPlacement.size)
     : null;
   
   // Get drag preview validation
@@ -656,7 +918,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
               }}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
-              onClick={handleGridClick}
+              onMouseDown={handleMouseDown}
               onContextMenu={handleContextMenu}
               onMouseUp={handleMouseUp}
             >
@@ -689,6 +951,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
               {/* Locked placements */}
               {lockedPlacements.map((placement) => {
                 const isDragging = dragState?.placementId === placement.id;
+                const isHovered = hoveredPlacementId === placement.id && !isDragging && !isPlacementMode;
                 const displayPlacement = isDragging
                   ? { ...placement, position: dragState.currentPosition }
                   : placement;
@@ -701,7 +964,10 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
                     cellSize={cellSize}
                     gap={gap}
                     isDragging={isDragging}
+                    isHovered={isHovered}
                     onMouseDown={(e) => handlePlacementMouseDown(placement.id, e)}
+                    onMouseEnter={() => setHoveredPlacementId(placement.id)}
+                    onMouseLeave={() => setHoveredPlacementId(null)}
                   />
                 );
               })}
@@ -730,9 +996,9 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
               )}
               
               {/* Placement preview */}
-              {hoverPosition && selectedCropForPlacement && !dragState && (
+              {previewPosition && selectedCropForPlacement && !dragState && (
                 <PlacementPreview
-                  position={hoverPosition}
+                  position={previewPosition}
                   crop={selectedCropForPlacement}
                   isValid={previewValidation?.valid ?? false}
                   cellSize={cellSize}
@@ -744,10 +1010,17 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
         </div>
         
         <div className="text-center py-4 text-slate-500 text-sm">
-          {isPlacementMode 
-            ? "Click to place crops, right-click to remove"
-            : "Configure your targets and click \"Solve\" to find the optimal crop placement"
-          }
+          {hoveredPlacementId && isPlacementMode ? (
+              <span><span className="font-semibold text-emerald-400">Click to place crops</span>, <span className="font-semibold text-red-400">right-click to remove</span><br></br>press escape to stop placement</span>
+          ) : hoveredPlacementId && !isPlacementMode ? (
+            <span>Drag to move, <span className="font-semibold text-red-400">right-click to remove</span></span>
+          ) : isPlacementMode && hoverInfo ? (
+            <span><span className="font-semibold text-emerald-400">Click to place crops</span>, right-click to remove<br></br>press escape to stop placement</span>
+          ) : isPlacementMode ? (
+            "Click to place crops, right-click to remove\npress escape to stop placement"
+          ) : (
+            "Configure your targets and click \"Solve\" to find the optimal crop placement"
+          )}
         </div>
       </div>
     );
@@ -921,7 +1194,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
             }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            onClick={handleGridClick}
+            onMouseDown={handleMouseDown}
             onContextMenu={handleContextMenu}
             onMouseUp={handleMouseUp}
           >
@@ -979,6 +1252,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
             {/* Locked placements (not from solver result) */}
             {lockedPlacements.map((placement) => {
               const isDragging = dragState?.placementId === placement.id;
+              const isHovered = hoveredPlacementId === placement.id && !isDragging && !isPlacementMode;
               const displayPlacement = isDragging
                 ? { ...placement, position: dragState.currentPosition }
                 : placement;
@@ -991,7 +1265,10 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
                   cellSize={cellSize}
                   gap={gap}
                   isDragging={isDragging}
+                  isHovered={isHovered}
                   onMouseDown={(e) => handlePlacementMouseDown(placement.id, e)}
+                  onMouseEnter={() => setHoveredPlacementId(placement.id)}
+                  onMouseLeave={() => setHoveredPlacementId(null)}
                 />
               );
             })}
@@ -1020,9 +1297,9 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
             )}
             
             {/* Placement preview */}
-            {hoverPosition && selectedCropForPlacement && !dragState && (
+            {previewPosition && selectedCropForPlacement && !dragState && (
               <PlacementPreview
-                position={hoverPosition}
+                position={previewPosition}
                 crop={selectedCropForPlacement}
                 isValid={previewValidation?.valid ?? false}
                 cellSize={cellSize}
@@ -1031,6 +1308,21 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
             )}
           </div>
         </div>
+      </div>
+      
+      {/* Status message */}
+      <div className="text-center py-2 text-slate-500 text-sm">
+        {hoveredPlacementId && isPlacementMode ? (
+          <span><span className="font-semibold text-emerald-400">Click to place crops</span>, <span className="font-semibold text-red-400">right-click to remove</span></span>
+        ) : hoveredPlacementId && !isPlacementMode ? (
+          <span>Drag to move, <span className="font-semibold text-red-400">right-click to remove</span></span>
+        ) : isPlacementMode && hoverInfo ? (
+          <span><span className="font-semibold text-emerald-400">Click to place crops</span>, right-click to remove</span>
+        ) : isPlacementMode ? (
+          "Click to place crops, right-click to remove"
+        ) : (
+          "Drag locked placements to move, right-click to remove"
+        )}
       </div>
 
       {/* Mutation Summary */}
