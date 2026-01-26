@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { Info, Pencil, X, ChevronDown, Lock, Trash2 } from "lucide-react";
+import { Pencil, X, ChevronDown, Lock, Trash2 } from "lucide-react";
 import { useGreenhouseData, useLockedPlacements } from "../../context";
 import { CropMutationInfoModal } from "./CropMutationInfoModal";
 import type { CropDefinition, MutationDefinition, CropFilterCategory, SelectedCropForPlacement } from "../../types/greenhouse";
@@ -32,10 +32,10 @@ const CropItemRow: React.FC<{
   onPriorityChange: (value: number) => void;
 }> = ({
   crop,
-  mutation,
+  // mutation,
   priority,
   isPlacementActive,
-  onInfoClick,
+  // onInfoClick,
   onEditClick,
   onPriorityChange,
 }) => {
