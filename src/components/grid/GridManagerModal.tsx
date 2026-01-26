@@ -139,11 +139,11 @@ export const GridManagerModal: React.FC<GridManagerModalProps> = ({ isOpen, onCl
                     <span>Click cells to unlock or lock them, or click and drag to paint multiple cells at once</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-emerald-400">3.</span>
+                    <span className="text-emerald-400">2.</span>
                     <span>Use the Expansion Optimizer to find the best order to unlock remaining cells by maximum possible Gloomgourd spawns</span>
                   </li>
                   <li className="flex gap-2">
-                    <span className="text-emerald-400">4.</span>
+                    <span className="text-emerald-400">3.</span>
                     <span>Close this popup to return to the Calculator and solve for optimal crop placement</span>
                   </li>
                 </ul>
