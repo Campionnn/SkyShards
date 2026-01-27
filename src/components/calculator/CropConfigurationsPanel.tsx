@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect, useRef } from "react"
 import { Pencil, X, ChevronDown, Lock, Trash2, AlertTriangle } from "lucide-react";
 import { useGreenhouseData, useLockedPlacements } from "../../context";
 import { CropMutationInfoModal } from "./CropMutationInfoModal";
+import { getRarityTextColor } from "../../utilities";
 import type { CropDefinition, MutationDefinition, CropFilterCategory, SelectedCropForPlacement } from "../../types/greenhouse";
 import { getCropImagePath } from "../../types/greenhouse";
 
@@ -32,7 +33,7 @@ const CropItemRow: React.FC<{
   onPriorityChange: (value: number) => void;
 }> = ({
   crop,
-  // mutation,
+  mutation,
   priority,
   isPlacementActive,
   // onInfoClick,
@@ -40,6 +41,9 @@ const CropItemRow: React.FC<{
   onPriorityChange,
 }) => {
   const [imageError, setImageError] = useState(false);
+  
+  // Get the rarity color for the name
+  const nameColorClass = mutation ? getRarityTextColor(mutation.rarity) : "text-white";
   
   return (
     <div
@@ -66,7 +70,7 @@ const CropItemRow: React.FC<{
       
       {/* Name, Size, and Type */}
       <div className="flex-1 min-w-0 flex items-center gap-2">
-        <span className="text-sm font-medium text-slate-200 truncate">
+        <span className={`text-sm font-medium truncate ${nameColorClass}`}>
           {crop.name}
         </span>
       </div>

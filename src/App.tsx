@@ -1,11 +1,12 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Layout } from "./components";
-import { GridStateProvider, GreenhouseDataProvider, LockedPlacementsProvider } from "./context";
+import { GridStateProvider, GreenhouseDataProvider, LockedPlacementsProvider, DesignerProvider } from "./context";
 import { usePageTitle } from "./hooks";
 import { ToastProvider } from "./components";
 
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
+const DesignerPage = lazy(() => import("./pages/DesignerPage").then((module) => ({ default: module.DesignerPage })));
 const AboutPage = lazy(() => import("./pages/AboutPage").then((module) => ({ default: module.AboutPage })));
 const ContactPage = lazy(() => import("./pages/ContactPage").then((module) => ({ default: module.ContactPage })));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
@@ -43,6 +44,16 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingSpinner />}>
             <CalculatorPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "designer",
+        element: (
+          <Suspense fallback={<LoadingSpinner />}>
+            <DesignerProvider>
+              <DesignerPage />
+            </DesignerProvider>
           </Suspense>
         ),
       },

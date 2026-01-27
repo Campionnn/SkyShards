@@ -3,6 +3,7 @@ import { X, Target, TrendingUp, Trash2, AlertTriangle } from "lucide-react";
 import { useGreenhouseData } from "../../context";
 import { MutationAutocomplete } from "./MutationAutocomplete";
 import { getCropImagePath } from "../../types/greenhouse";
+import { getRarityTextColor } from "../../utilities";
 import type { MutationDefinition } from "../../types/greenhouse";
 
 export const MutationTargets: React.FC = () => {
@@ -108,7 +109,7 @@ export const MutationTargets: React.FC = () => {
                       }}
                     />
                   </div>
-                  <span className="text-sm font-medium text-slate-200">
+                  <span className={`text-sm font-medium ${mutation ? getRarityTextColor(mutation.rarity) : "text-slate-200"}`}>
                     {selected.name}
                   </span>
                 </div>
@@ -128,11 +129,12 @@ export const MutationTargets: React.FC = () => {
                     const reqCropDef = getCropDef(r.crop);
                     const reqMutationDef = getMutationDef(r.crop);
                     const displayName = reqCropDef?.name || reqMutationDef?.name || r.crop.replace(/_/g, " ");
+                    const rarityColor = reqMutationDef ? getRarityTextColor(reqMutationDef.rarity) : "text-white";
                     
                     return (
                       <span key={r.crop}>
                         {i > 0 && ", "}
-                        <span className="text-slate-300">
+                        <span className={rarityColor}>
                           {r.count}x {displayName}
                         </span>
                       </span>

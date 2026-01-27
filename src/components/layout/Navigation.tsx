@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calculator, Menu, X, ExternalLink } from "lucide-react";
+import { Calculator, Palette, Menu, X, ExternalLink } from "lucide-react";
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
@@ -8,6 +8,7 @@ export const Navigation: React.FC = () => {
 
   const navItems = [
     { path: "/", label: "Calculator", icon: Calculator },
+    { path: "/designer", label: "Designer", icon: Palette },
   ];
 
   return (

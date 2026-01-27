@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Search, X } from "lucide-react";
-import { debounce } from "../../utilities";
+import { debounce, getRarityTextColor } from "../../utilities";
 import { getCropImagePath } from "../../types/greenhouse";
 import { useGreenhouseData } from "../../context";
 import type { MutationDefinition } from "../../types/greenhouse";
@@ -246,7 +246,7 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
                   />
                 </div>
                 <div className="flex flex-col flex-1">
-                  <span className="font-medium">
+                  <span className={`font-medium ${getRarityTextColor(mutation.rarity)}`}>
                     {mutation.name}
                   </span>
                   <span className="text-xs text-slate-400 mt-0.5">
