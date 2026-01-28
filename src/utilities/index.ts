@@ -25,3 +25,6 @@ export * from "./gridCalculations";
 
 // Rarity color utilities
 export * from "./rarity";
+
+// Design encoding/decoding utilities
+export * from "./designEncoding";

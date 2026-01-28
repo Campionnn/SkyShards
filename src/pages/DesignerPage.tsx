@@ -31,11 +31,7 @@ export const DesignerPage: React.FC = () => {
               <h3 className="text-sm font-medium text-slate-200">Greenhouse Designer</h3>
               <div className="flex gap-4 text-xs text-slate-400">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded" style={{ boxShadow: "0 0 6px rgba(234, 179, 8, 0.8), inset 0 0 4px rgba(234, 179, 8, 0.4)" }} />
-                  Input
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded" style={{ boxShadow: "0 0 6px rgba(168, 85, 247, 0.8), inset 0 0 4px rgba(168, 85, 247, 0.4)" }} />
+                  <span className="w-3 h-3 rounded" style={{ boxShadow: "0 0 6px rgba(0, 200, 255, 1), inset 0 0 4px rgba(0, 200, 255, 1)" }} />
                   Target
                 </span>
               </div>

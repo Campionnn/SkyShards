@@ -77,6 +77,7 @@ interface DesignerPlacementCellProps {
   isPlacementMode: boolean;
   isInput: boolean;
   groundType: string;
+  validationInfo?: { isValid: boolean; missingRequirements: Array<{ crop: string; needed: number; have: number }> };
   onMouseDown: (e: React.MouseEvent) => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
@@ -91,6 +92,7 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
   isPlacementMode,
   isInput,
   groundType,
+  validationInfo,
   onMouseDown,
   onMouseEnter,
   onMouseLeave,
@@ -100,10 +102,15 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
   const { totalWidth, totalHeight, imageWidth, imageHeight } = calculateCropImageDimensions(placement.size, cellSize, gap);
   const { top, left } = getCellPixelPosition(placement.position[0], placement.position[1], cellSize, gap);
   
-  // Different glow colors for inputs vs targets
+  // Determine if this is an invalid target
+  const isInvalidTarget = !isInput && validationInfo && !validationInfo.isValid;
+  
+  // Glow colors: no glow for inputs, blue glow for valid targets, red border for invalid targets
   const baseGlow = isInput
-    ? "0 0 8px rgba(234, 179, 8, 0.8), inset 0 0 8px rgba(234, 179, 8, 0.4)"
-    : "0 0 8px rgba(168, 85, 247, 0.8), inset 0 0 8px rgba(168, 85, 247, 0.4)";
+    ? undefined
+    : isInvalidTarget
+      ? undefined // No glow for invalid, we use border instead
+      : "0 0 8px rgba(0, 200, 255, 1), inset 0 0 8px rgba(0, 200, 255, 1)";
   const hoverGlow = "0 0 8px rgba(239, 68, 68, 0.8), inset 0 0 8px rgba(239, 68, 68, 0.4)";
   
   const style: React.CSSProperties = {
@@ -120,9 +127,10 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    overflow: "hidden",
+    overflow: "visible", // Allow tooltip to overflow
     boxShadow: isHovered ? hoverGlow : baseGlow,
-    zIndex: isDragging ? 20 : 10,
+    border: isInvalidTarget ? "2px solid #ef4444" : undefined, // Red border for invalid
+    zIndex: isDragging ? 20 : (isHovered && isInvalidTarget ? 30 : 10), // Higher z-index when showing tooltip
     cursor: isDragging ? "grabbing" : (isPlacementMode ? "crosshair" : "grab"),
     opacity: isDragging ? 0.8 : 1,
     transition: isDragging ? "none" : "transform 0.15s ease, box-shadow 0.15s ease",
@@ -254,13 +262,15 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
   gap = 2,
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
-  const { getCropDef } = useGreenhouseData();
+  const { getCropDef, mutations } = useGreenhouseData();
   const {
     inputPlacements,
     targetPlacements,
     allPlacements,
     selectedCropForPlacement,
     isPlacementMode,
+    getTargetValidation,
+    setHoveredTargetId,
   } = useDesigner();
   
   // Designer always uses a full 10x10 grid with all cells "unlocked"
@@ -354,6 +364,9 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
           ? { ...placement, position: dragState.currentPosition }
           : placement;
         
+        // Get validation info for this target
+        const validationInfo = getTargetValidation(placement.id, mutations);
+        
         return (
           <DesignerPlacementCell
             key={placement.id}
@@ -365,9 +378,18 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
             isPlacementMode={isPlacementMode}
             isInput={false}
             groundType={getGroundType(placement.cropId)}
+            validationInfo={validationInfo}
             onMouseDown={(e) => handlePlacementMouseDown(placement.id, e)}
-            onMouseEnter={() => setHoveredPlacementId(placement.id)}
-            onMouseLeave={() => setHoveredPlacementId(null)}
+            onMouseEnter={() => {
+              setHoveredPlacementId(placement.id);
+              if (!validationInfo.isValid) {
+                setHoveredTargetId(placement.id);
+              }
+            }}
+            onMouseLeave={() => {
+              setHoveredPlacementId(null);
+              setHoveredTargetId(null);
+            }}
           />
         );
       })}

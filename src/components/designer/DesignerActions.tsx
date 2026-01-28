@@ -1,7 +1,8 @@
-import React, { useCallback, useRef } from "react";
-import { Save, FolderOpen, Download, Trash2, RotateCcw, Layers } from "lucide-react";
-import { useDesigner } from "../../context";
+import React, { useCallback, useState } from "react";
+import { Save, FolderOpen, Copy, Clipboard, Trash2, RotateCcw, Layers, X } from "lucide-react";
+import { useDesigner, useGreenhouseData } from "../../context";
 import { useToast } from "../ui/toastContext";
+import { encodeDesign, decodeDesign } from "../../utilities";
 
 interface DesignerActionsProps {
   className?: string;
@@ -38,9 +39,21 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
     clearTargetPlacements,
     clearAllPlacements,
     loadFromSolverResult,
+    selectedCropForPlacement,
+    setSelectedCropForPlacement,
   } = useDesigner();
+  const { getCropDef, getMutationDef } = useGreenhouseData();
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Handle mode change with auto-deselect
+  const handleModeChange = useCallback((newMode: "inputs" | "targets") => {
+    setMode(newMode);
+    
+    // If switching to targets and a non-mutation crop is selected, deselect it
+    if (newMode === "targets" && selectedCropForPlacement && !selectedCropForPlacement.isMutation) {
+      setSelectedCropForPlacement(null);
+    }
+  }, [setMode, selectedCropForPlacement, setSelectedCropForPlacement]);
   
   // Save current design to localStorage
   const handleSave = useCallback(() => {
@@ -149,94 +162,93 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
     });
   }, [loadFromSolverResult, toast]);
   
-  // Export design as JSON file
+  // State for import modal
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importText, setImportText] = useState("");
+  
+  // Export design as base64 gzipped string to clipboard
   const handleExport = useCallback(() => {
-    const design = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      inputPlacements: inputPlacements.map(p => ({
-        cropId: p.cropId,
-        cropName: p.cropName,
-        size: p.size,
-        position: p.position,
-        isMutation: p.isMutation,
-      })),
-      targetPlacements: targetPlacements.map(p => ({
-        cropId: p.cropId,
-        cropName: p.cropName,
-        size: p.size,
-        position: p.position,
-        isMutation: p.isMutation,
-      })),
-    };
-    
-    const blob = new Blob([JSON.stringify(design, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `greenhouse-design-${new Date().toISOString().split("T")[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Design exported",
-      description: "JSON file downloaded",
-      variant: "success",
-      duration: 3000,
-    });
+    try {
+      const encoded = encodeDesign(inputPlacements, targetPlacements);
+      navigator.clipboard.writeText(encoded);
+      
+      toast({
+        title: "Design copied to clipboard",
+        description: "Share this code with others to share your design",
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (err) {
+      toast({
+        title: "Export failed",
+        description: err instanceof Error ? err.message : "Failed to encode design",
+        variant: "error",
+        duration: 5000,
+      });
+    }
   }, [inputPlacements, targetPlacements, toast]);
   
-  // Import design from JSON file
-  const handleImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const data = JSON.parse(event.target?.result as string);
-        
-        if (!data.inputPlacements || !data.targetPlacements) {
-          throw new Error("Invalid design file format");
-        }
-        
-        const crops = data.inputPlacements.map((p: any) => ({
-          name: p.cropId,
-          position: p.position,
-          size: p.size,
-        }));
-        const mutations = data.targetPlacements.map((p: any) => ({
-          name: p.cropId,
-          position: p.position,
-          size: p.size,
-        }));
-        
-        loadFromSolverResult(crops, mutations);
-        
-        toast({
-          title: "Design imported",
-          description: "Design loaded from file",
-          variant: "success",
-          duration: 3000,
-        });
-      } catch (err) {
-        toast({
-          title: "Import failed",
-          description: err instanceof Error ? err.message : "Invalid file",
-          variant: "error",
-          duration: 5000,
-        });
-      }
-    };
-    reader.readAsText(file);
-    
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+  // Open import modal
+  const handleOpenImport = useCallback(() => {
+    setImportText("");
+    setIsImportModalOpen(true);
+  }, []);
+  
+  // Import design from base64 gzipped string
+  const handleImportFromText = useCallback(() => {
+    if (!importText.trim()) {
+      toast({
+        title: "No code provided",
+        description: "Paste a design code to import",
+        variant: "warning",
+        duration: 3000,
+      });
+      return;
     }
-  }, [loadFromSolverResult, toast]);
+    
+    try {
+      const { inputs, targets } = decodeDesign(importText.trim());
+      
+      // Get size info from crop definitions
+      const crops = inputs.map(p => {
+        const cropDef = getCropDef(p.cropId);
+        const mutationDef = getMutationDef(p.cropId);
+        return {
+          name: p.cropId,
+          position: p.position,
+          size: cropDef?.size || mutationDef?.size || 1,
+        };
+      });
+      
+      const mutations = targets.map(p => {
+        const mutationDef = getMutationDef(p.cropId);
+        const cropDef = getCropDef(p.cropId);
+        return {
+          name: p.cropId,
+          position: p.position,
+          size: mutationDef?.size || cropDef?.size || 1,
+        };
+      });
+      
+      loadFromSolverResult(crops, mutations);
+      setIsImportModalOpen(false);
+      setImportText("");
+      
+      toast({
+        title: "Design imported",
+        description: `Loaded ${inputs.length} inputs and ${targets.length} targets`,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (err) {
+      toast({
+        title: "Import failed",
+        description: err instanceof Error ? err.message : "Invalid design code",
+        variant: "error",
+        duration: 5000,
+      });
+    }
+  }, [importText, loadFromSolverResult, getCropDef, getMutationDef, toast]);
   
   // Clear current mode's placements
   const handleClearCurrent = useCallback(() => {
@@ -264,7 +276,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
       {/* Mode Toggle */}
       <div className="flex rounded-lg overflow-hidden border border-slate-600/50">
         <button
-          onClick={() => setMode("inputs")}
+          onClick={() => handleModeChange("inputs")}
           className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
             mode === "inputs"
               ? "bg-emerald-500/20 text-emerald-300 border-r border-emerald-500/30"
@@ -275,7 +287,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
           Inputs ({inputPlacements.length})
         </button>
         <button
-          onClick={() => setMode("targets")}
+          onClick={() => handleModeChange("targets")}
           className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
             mode === "targets"
               ? "bg-purple-500/20 text-purple-300"
@@ -311,22 +323,61 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
           disabled={totalPlacements === 0}
           className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-300 hover:bg-slate-700/60 hover:border-slate-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <Download className="w-4 h-4" />
-          Export
+          <Copy className="w-4 h-4" />
+          Copy Code
         </button>
         
-        <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-300 hover:bg-slate-700/60 hover:border-slate-500/50 transition-colors cursor-pointer">
-          <FolderOpen className="w-4 h-4" />
-          Import
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleImport}
-            className="hidden"
-          />
-        </label>
+        <button
+          onClick={handleOpenImport}
+          className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-300 hover:bg-slate-700/60 hover:border-slate-500/50 transition-colors"
+        >
+          <Clipboard className="w-4 h-4" />
+          Paste Code
+        </button>
       </div>
+      
+      {/* Import Modal */}
+      {isImportModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsImportModalOpen(false)}>
+          <div 
+            className="bg-slate-800 border border-slate-600 rounded-lg p-4 w-full max-w-md mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-slate-200">Import Design</h3>
+              <button
+                onClick={() => setIsImportModalOpen(false)}
+                className="text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <textarea
+              value={importText}
+              onChange={(e) => setImportText(e.target.value)}
+              placeholder="Paste design code here..."
+              className="w-full h-24 px-3 py-2 bg-slate-900/60 border border-slate-600/50 rounded-lg text-sm text-slate-200 placeholder-slate-500 resize-none focus:outline-none focus:border-slate-500"
+            />
+            
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={() => setIsImportModalOpen(false)}
+                className="flex-1 px-3 py-2 bg-slate-700/60 border border-slate-600/50 rounded-lg text-sm text-slate-300 hover:bg-slate-600/60 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleImportFromText}
+                disabled={!importText.trim()}
+                className="flex-1 px-3 py-2 bg-emerald-500/80 rounded-lg text-sm text-white hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Import
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Clear Buttons */}
       <div className="flex gap-2">

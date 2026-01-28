@@ -23,6 +23,12 @@ export interface SelectedCropForDesigner {
   isMutation: boolean;
 }
 
+// Mutation validation result
+export interface MutationValidationInfo {
+  isValid: boolean;
+  missingRequirements: Array<{ crop: string; needed: number; have: number }>;
+}
+
 interface DesignerContextType {
   // Mode
   mode: DesignerMode;
@@ -51,6 +57,10 @@ interface DesignerContextType {
   setSelectedCropForPlacement: (crop: SelectedCropForDesigner | null) => void;
   isPlacementMode: boolean;
   
+  // Hovered target for showing validation info
+  hoveredTargetId: string | null;
+  setHoveredTargetId: (id: string | null) => void;
+  
   // Load from calculator results
   loadFromSolverResult: (
     crops: Array<{ name: string; position: [number, number]; size: number }>,
@@ -64,6 +74,12 @@ interface DesignerContextType {
   getPossibleMutations: (
     mutations: MutationDefinition[]
   ) => Array<{ mutation: MutationDefinition; positions: [number, number][] }>;
+  
+  // Get validation info for a target placement (for showing missing requirements)
+  getTargetValidation: (
+    targetId: string,
+    mutations: MutationDefinition[]
+  ) => MutationValidationInfo;
 }
 
 const DesignerContext = createContext<DesignerContextType | null>(null);
@@ -86,6 +102,7 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [inputPlacements, setInputPlacements] = useState<DesignerPlacement[]>([]);
   const [targetPlacements, setTargetPlacements] = useState<DesignerPlacement[]>([]);
   const [selectedCropForPlacement, setSelectedCropForPlacement] = useState<SelectedCropForDesigner | null>(null);
+  const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
   
   // Get the current placements based on mode
   const currentPlacements = mode === "inputs" ? inputPlacements : targetPlacements;
@@ -395,6 +412,91 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return results;
   }, [inputPlacements, isValidPlacementPosition]);
   
+  // Get validation info for a target placement
+  const getTargetValidation = useCallback((
+    targetId: string,
+    mutations: MutationDefinition[]
+  ): MutationValidationInfo => {
+    const target = targetPlacements.find(t => t.id === targetId);
+    if (!target) {
+      return { isValid: false, missingRequirements: [] };
+    }
+    
+    // Find the mutation definition
+    const mutationDef = mutations.find(m => m.id === target.cropId);
+    if (!mutationDef) {
+      return { isValid: false, missingRequirements: [] };
+    }
+    
+    // Build a map of what crops are at each cell
+    const cropAtCell = new Map<string, string>();
+    for (const placement of inputPlacements) {
+      const [row, col] = placement.position;
+      for (let dr = 0; dr < placement.size; dr++) {
+        for (let dc = 0; dc < placement.size; dc++) {
+          cropAtCell.set(`${row + dr},${col + dc}`, placement.cropId);
+        }
+      }
+    }
+    
+    // Count adjacent cells by crop type for this target position
+    const [row, col] = target.position;
+    const adjacentCropCounts = new Map<string, Set<string>>();
+    
+    for (let dr = 0; dr < target.size; dr++) {
+      for (let dc = 0; dc < target.size; dc++) {
+        const cellRow = row + dr;
+        const cellCol = col + dc;
+        
+        // Check all 8 directions (including diagonals)
+        const neighbors = [
+          [cellRow - 1, cellCol],     // North
+          [cellRow + 1, cellCol],     // South
+          [cellRow, cellCol - 1],     // West
+          [cellRow, cellCol + 1],     // East
+          [cellRow - 1, cellCol - 1], // Northwest
+          [cellRow - 1, cellCol + 1], // Northeast
+          [cellRow + 1, cellCol - 1], // Southwest
+          [cellRow + 1, cellCol + 1], // Southeast
+        ];
+        
+        for (const [nr, nc] of neighbors) {
+          // Skip if inside the mutation area
+          if (nr >= row && nr < row + target.size && 
+              nc >= col && nc < col + target.size) continue;
+          
+          const crop = cropAtCell.get(`${nr},${nc}`);
+          if (crop) {
+            if (!adjacentCropCounts.has(crop)) {
+              adjacentCropCounts.set(crop, new Set());
+            }
+            adjacentCropCounts.get(crop)!.add(`${nr},${nc}`);
+          }
+        }
+      }
+    }
+    
+    // Check requirements and collect missing ones
+    const missingRequirements: Array<{ crop: string; needed: number; have: number }> = [];
+    let isValid = true;
+    
+    for (const req of mutationDef.requirements) {
+      const cellsOfThisCrop = adjacentCropCounts.get(req.crop);
+      const have = cellsOfThisCrop ? cellsOfThisCrop.size : 0;
+      
+      if (have < req.count) {
+        isValid = false;
+        missingRequirements.push({
+          crop: req.crop,
+          needed: req.count,
+          have,
+        });
+      }
+    }
+    
+    return { isValid, missingRequirements };
+  }, [inputPlacements, targetPlacements]);
+  
   const value: DesignerContextType = {
     mode,
     setMode,
@@ -413,9 +515,12 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     selectedCropForPlacement,
     setSelectedCropForPlacement,
     isPlacementMode: selectedCropForPlacement !== null,
+    hoveredTargetId,
+    setHoveredTargetId,
     loadFromSolverResult,
     allPlacements,
     getPossibleMutations,
+    getTargetValidation,
   };
   
   return (

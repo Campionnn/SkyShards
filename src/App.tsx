@@ -27,7 +27,9 @@ const ProtectedLayout = () => {
     <GreenhouseDataProvider>
       <GridStateProvider>
         <LockedPlacementsProvider>
-          <AppWithProviders />
+          <DesignerProvider>
+            <AppWithProviders />
+          </DesignerProvider>
         </LockedPlacementsProvider>
       </GridStateProvider>
     </GreenhouseDataProvider>
@@ -51,9 +53,7 @@ const router = createBrowserRouter([
         path: "designer",
         element: (
           <Suspense fallback={<LoadingSpinner />}>
-            <DesignerProvider>
-              <DesignerPage />
-            </DesignerProvider>
+            <DesignerPage />
           </Suspense>
         ),
       },

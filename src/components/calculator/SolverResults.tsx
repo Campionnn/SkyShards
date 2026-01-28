@@ -1,7 +1,8 @@
-import React, { useMemo, useState, useRef } from "react";
-import { CheckCircle2, AlertCircle, Grid3X3, Eye, EyeOff, Zap, Target, TrendingUp, Clock, RotateCcw } from "lucide-react";
+import React, { useMemo, useState, useRef, useCallback } from "react";
+import { CheckCircle2, AlertCircle, Grid3X3, Eye, EyeOff, Zap, Target, TrendingUp, Clock, RotateCcw, Paintbrush } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { GRID_SIZE } from "../../constants";
-import { useGreenhouseData, useGridState, useLockedPlacements } from "../../context";
+import { useGreenhouseData, useGridState, useLockedPlacements, useDesigner } from "../../context";
 import { useGridPlacement } from "../../hooks";
 import { getGridDimensions, getRarityTextColor } from "../../utilities";
 import {
@@ -12,6 +13,7 @@ import {
   CropCell,
   MutationCell,
 } from "../grid";
+import { useToast } from "../ui/toastContext";
 import type { SolveResponse, CropPlacement, MutationResult, JobProgress } from "../../types/greenhouse";
 import { getCropImagePath } from "../../types/greenhouse";
 
@@ -285,8 +287,82 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   const { getCropDef, getMutationDef } = useGreenhouseData();
   const { unlockedCells } = useGridState();
   const { lockedPlacements, selectedCropForPlacement, isPlacementMode } = useLockedPlacements();
+  const { loadFromSolverResult } = useDesigner();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [showMutations, setShowMutations] = useState(true);
+  
+  // Handle sending current grid content to designer
+  const handleSendToDesigner = useCallback(() => {
+    // Collect all placements to send as inputs:
+    // 1. Locked placements from the calculator
+    // 2. Solver result crops (if any)
+    const inputs: Array<{ name: string; position: [number, number]; size: number }> = [];
+    const targets: Array<{ name: string; position: [number, number]; size: number }> = [];
+    
+    // Add locked placements as inputs
+    for (const placement of lockedPlacements) {
+      inputs.push({
+        name: placement.crop,
+        position: placement.position,
+        size: placement.size,
+      });
+    }
+    
+    // Add solver result placements as inputs (if we have results)
+    if (result) {
+      for (const placement of result.placements || []) {
+        // Skip if this overlaps with a locked placement (locked placements take priority)
+        const overlapsWithLocked = lockedPlacements.some(locked => {
+          const [lr, lc] = locked.position;
+          const [pr, pc] = placement.position;
+          const noOverlap = 
+            pr + placement.size <= lr || lr + locked.size <= pr ||
+            pc + placement.size <= lc || lc + locked.size <= pc;
+          return !noOverlap;
+        });
+        
+        if (!overlapsWithLocked) {
+          inputs.push({
+            name: placement.crop,
+            position: placement.position,
+            size: placement.size,
+          });
+        }
+      }
+      
+      // Add mutations as targets
+      for (const mutation of result.mutations || []) {
+        targets.push({
+          name: mutation.mutation,
+          position: mutation.position,
+          size: mutation.size,
+        });
+      }
+    }
+    
+    if (inputs.length === 0 && targets.length === 0) {
+      toast({
+        title: "Nothing to send",
+        description: "Place some locked crops or solve first",
+        variant: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    loadFromSolverResult(inputs, targets);
+    
+    toast({
+      title: "Sent to Designer",
+      description: `Loaded ${inputs.length} inputs and ${targets.length} targets`,
+      variant: "success",
+      duration: 3000,
+    });
+    
+    navigate("/designer");
+  }, [lockedPlacements, result, loadFromSolverResult, toast, navigate]);
   
   // Grid configuration
   const gridRef = useRef<HTMLDivElement>(null);
@@ -486,6 +562,18 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
         <div className="flex items-center gap-2 mb-3">
           <Grid3X3 className="w-4 h-4 text-slate-500" />
           <h3 className="text-sm font-medium text-slate-400">Solution</h3>
+          {lockedPlacements.length > 0 && (
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                onClick={handleSendToDesigner}
+                className="px-2 py-1 text-xs bg-purple-500/50 hover:bg-purple-500/70 rounded text-slate-200 transition-colors flex items-center gap-1"
+                title="Send locked placements to Designer"
+              >
+                <Paintbrush className="w-3 h-3" />
+                Designer
+              </button>
+            </div>
+          )}
         </div>
 
         {queuePosition !== null && queuePosition !== undefined && (
@@ -528,6 +616,14 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
           {isSolving ? "Current Best Solution" : "Solution"}
         </h3>
         <div className="flex items-center gap-2 ml-auto">
+          <button
+            onClick={handleSendToDesigner}
+            className="px-2 py-1 text-xs bg-purple-500/50 hover:bg-purple-500/70 rounded text-slate-200 transition-colors flex items-center gap-1"
+            title="Send to Designer"
+          >
+            <Paintbrush className="w-3 h-3" />
+            Designer
+          </button>
           {onClear && (
             <button
               onClick={onClear}

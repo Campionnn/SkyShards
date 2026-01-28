@@ -12,7 +12,7 @@ interface CropSelectionPaletteProps {
 // Filter options for the dropdown
 const FILTER_OPTIONS: { value: CropFilterCategory; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "crops", label: "Crops" },
+  { value: "crops", label: "Crops/Miscellaneous" },
   { value: "mutations", label: "Mutations" },
   { value: "common", label: "Common" },
   { value: "uncommon", label: "Uncommon" },
@@ -20,6 +20,18 @@ const FILTER_OPTIONS: { value: CropFilterCategory; label: string }[] = [
   { value: "epic", label: "Epic" },
   { value: "legendary", label: "Legendary" },
 ];
+
+// Helper to get color for filter option
+const getFilterColor = (value: CropFilterCategory): string => {
+  switch (value) {
+    case "common": return "text-white";
+    case "uncommon": return "text-green-400";
+    case "rare": return "text-blue-400";
+    case "epic": return "text-purple-400";
+    case "legendary": return "text-yellow-400";
+    default: return "text-slate-300";
+  }
+};
 
 // Single crop/mutation tile in the palette grid
 const PaletteTile: React.FC<{
@@ -92,6 +104,11 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
   const filteredItems = useMemo(() => {
     let items = crops;
     
+    // When placing targets, only show mutations
+    if (mode === "targets") {
+      items = items.filter(c => c.isMutation);
+    }
+    
     // Apply category filter
     switch (filter) {
       case "crops":
@@ -120,7 +137,7 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
     
     // No sorting - preserve data.json order
     return items;
-  }, [crops, filter, searchTerm, getMutationDef]);
+  }, [crops, mode, filter, searchTerm, getMutationDef]);
   
   // Handle tile click
   const handleTileClick = useCallback((crop: CropDefinition) => {
@@ -198,19 +215,24 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
                 onClick={() => setIsFilterOpen(false)} 
               />
               <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-600/50 rounded-lg shadow-xl z-20 py-1 min-w-[140px]">
-                {FILTER_OPTIONS.map(option => (
-                  <button
-                    key={option.value}
-                    onClick={() => {
-                      setFilter(option.value);
-                      setIsFilterOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-1.5 text-sm hover:bg-slate-700/50 ${
-                      filter === option.value ? "text-emerald-400" : "text-slate-300"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
+                {FILTER_OPTIONS.map((option, index) => (
+                  <React.Fragment key={option.value}>
+                    {/* Separator after "Mutations" (index 2) */}
+                    {index === 3 && (
+                      <div className="border-t border-slate-600/50 my-1" />
+                    )}
+                    <button
+                      onClick={() => {
+                        setFilter(option.value);
+                        setIsFilterOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 text-sm hover:bg-slate-700/50 ${
+                        filter === option.value ? "text-emerald-400" : getFilterColor(option.value)
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  </React.Fragment>
                 ))}
               </div>
             </>
@@ -220,16 +242,28 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
       
       {/* Palette Grid */}
       <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-4 gap-1.5">
-          {filteredItems.map(crop => (
-            <PaletteTile
-              key={crop.id}
-              crop={crop}
-              mutation={getMutationDef(crop.id)}
-              isSelected={selectedCropForPlacement?.id === crop.id}
-              onClick={() => handleTileClick(crop)}
-            />
-          ))}
+        <div className="grid grid-cols-5 gap-1.5">
+          {filteredItems.map((crop, index) => {
+            // Check if we should show a rarity separator before this item
+            const prevMutation = index > 0 ? getMutationDef(filteredItems[index - 1].id) : null;
+            const currMutation = getMutationDef(crop.id);
+            const showSeparator = prevMutation && currMutation && 
+                                  prevMutation.rarity !== currMutation.rarity;
+            
+            return (
+              <React.Fragment key={crop.id}>
+                {showSeparator && (
+                  <div className="col-span-5 border-t border-slate-600/50 my-1" />
+                )}
+                <PaletteTile
+                  crop={crop}
+                  mutation={currMutation}
+                  isSelected={selectedCropForPlacement?.id === crop.id}
+                  onClick={() => handleTileClick(crop)}
+                />
+              </React.Fragment>
+            );
+          })}
         </div>
         
         {filteredItems.length === 0 && (

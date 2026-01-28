@@ -28,15 +28,20 @@ export const Navigation: React.FC = () => {
           <div className="hidden md:flex items-center space-x-2">
             {navItems.map(({ path, label, icon: Icon }) => {
               const isActive = location.pathname === path;
+              const isDesigner = path === "/designer";
+              const colorClasses = isDesigner
+                ? (isActive 
+                    ? "bg-blue-500/30 text-blue-300 border border-blue-500/40 ring-1 ring-offset-0 ring-blue-400"
+                    : "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/20 hover:border-blue-500/30")
+                : (isActive 
+                    ? "bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 ring-1 ring-offset-0 ring-emerald-400"
+                    : "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/30");
+              
               return (
                 <Link
                   key={path}
                   to={path}
-                  className={`px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer
-                    ${isActive 
-                      ? "bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 ring-1 ring-offset-0 ring-emerald-400" 
-                      : "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/30"
-                    }`}
+                  className={`px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer ${colorClasses}`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{label}</span>
@@ -71,16 +76,21 @@ export const Navigation: React.FC = () => {
             <div className="flex flex-col space-y-1 gap-1">
               {navItems.map(({ path, label, icon: Icon }) => {
                 const isActive = location.pathname === path;
+                const isDesigner = path === "/designer";
+                const colorClasses = isDesigner
+                  ? (isActive 
+                      ? "bg-blue-500/30 text-blue-300 border border-blue-500/40 ring-1 ring-offset-0 ring-blue-400"
+                      : "bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/20 hover:border-blue-500/30")
+                  : (isActive 
+                      ? "bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 ring-1 ring-offset-0 ring-emerald-400"
+                      : "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/30");
+                
                 return (
                   <Link
                     key={path}
                     to={path}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`px-3 py-2 font-medium rounded-md text-sm transition-colors duration-200 flex items-center space-x-2 cursor-pointer
-                      ${isActive 
-                        ? "bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 ring-1 ring-offset-0 ring-emerald-400" 
-                        : "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/30"
-                      }`}
+                    className={`px-3 py-2 font-medium rounded-md text-sm transition-colors duration-200 flex items-center space-x-2 cursor-pointer ${colorClasses}`}
                   >
                     <Icon className="w-4 h-4" />
                     <span>{label}</span>
