@@ -192,6 +192,7 @@
       ],
       "rarity": "common",
       "growth_stages": 0,
+      "decay": 3,
       "positive_buffs": [
         "improved_harvest_boost"
       ],
@@ -214,6 +215,7 @@
       ],
       "rarity": "common",
       "growth_stages": 0,
+      "decay": 3,
       "positive_buffs": [
         "immunity"
       ],
@@ -234,6 +236,7 @@
       ],
       "rarity": "common",
       "growth_stages": 0,
+      "decay": 3,
       "positive_buffs": [
         "harvest_boost"
       ],
@@ -258,6 +261,7 @@
       ],
       "rarity": "common",
       "growth_stages": 0,
+      "decay": 3,
       "positive_buffs": [
         "bonus_drops",
         "water_retain"
@@ -276,6 +280,7 @@
       "special": "requires_zero_adjacent",
       "rarity": "common",
       "growth_stages": 0,
+      "decay": 3,
       "positive_buffs": [
         "bonus_drops"
       ],
@@ -302,6 +307,7 @@
       ],
       "rarity": "common",
       "growth_stages": 0,
+      "decay": 3,
       "positive_buffs": [
         "xp_boost",
         "immunity"
@@ -328,6 +334,7 @@
       ],
       "rarity": "common",
       "growth_stages": 0,
+      "decay": 3,
       "positive_buffs": [
         "improved_xp_boost",
         "improved_water_retain"
@@ -356,6 +363,7 @@
       ],
       "rarity": "common",
       "growth_stages": 0,
+      "decay": 3,
       "positive_buffs": [
         "improved_harvest_boost"
       ],
@@ -379,6 +387,7 @@
       ],
       "rarity": "common",
       "growth_stages": 0,
+      "decay": 3,
       "positive_buffs": [
         "effect_spread"
       ],
@@ -403,6 +412,7 @@
       ],
       "rarity": "uncommon",
       "growth_stages": 6,
+      "decay": 3,
       "positive_buffs": [
         "water_retain"
       ],
@@ -429,6 +439,7 @@
       ],
       "rarity": "uncommon",
       "growth_stages": 8,
+      "decay": 3,
       "positive_buffs": [
         "effect_spread",
         "improved_harvest_boost"
@@ -457,6 +468,7 @@
       ],
       "rarity": "uncommon",
       "growth_stages": 8,
+      "decay": 3,
       "positive_buffs": [
         "xp_boost"
       ],
@@ -479,6 +491,7 @@
       ],
       "rarity": "uncommon",
       "growth_stages": 6,
+      "decay": 3,
       "positive_buffs": [
         "immunity"
       ],
@@ -511,6 +524,7 @@
       ],
       "rarity": "uncommon",
       "growth_stages": 8,
+      "decay": 3,
       "positive_buffs": [
         "bonus_drops"
       ],
@@ -537,6 +551,7 @@
       ],
       "rarity": "uncommon",
       "growth_stages": 8,
+      "decay": 3,
       "positive_buffs": [
         "effect_spread"
       ],
@@ -563,6 +578,7 @@
       ],
       "rarity": "rare",
       "growth_stages": 6,
+      "decay": 3,
       "positive_buffs": [
         "immunity",
         "improved_harvest_boost"
@@ -591,6 +607,7 @@
       ],
       "rarity": "rare",
       "growth_stages": 10,
+      "decay": 3,
       "positive_buffs": [
         "improved_water_retain"
       ],
@@ -620,6 +637,7 @@
       ],
       "rarity": "rare",
       "growth_stages": 10,
+      "decay": 3,
       "positive_buffs": [
         "immunity"
       ],
@@ -648,6 +666,7 @@
       ],
       "rarity": "rare",
       "growth_stages": 8,
+      "decay": 3,
       "positive_buffs": [
         "improved_harvest_boost"
       ],
@@ -677,6 +696,7 @@
       ],
       "rarity": "rare",
       "growth_stages": 14,
+      "decay": 0,
       "positive_buffs": [
         "bonus_drops"
       ],
@@ -703,6 +723,7 @@
       ],
       "rarity": "rare",
       "growth_stages": 120,
+      "decay": 0,
       "positive_buffs": [
         "improved_xp_boost"
       ],
@@ -731,6 +752,7 @@
       ],
       "rarity": "rare",
       "growth_stages": 4,
+      "decay": 5,
       "positive_buffs": [
         "effect_spread",
         "improved_water_retain"
@@ -771,6 +793,7 @@
       ],
       "rarity": "rare",
       "growth_stages": 20,
+      "decay": 6,
       "positive_buffs": [
         "bonus_drops"
       ],
@@ -794,6 +817,7 @@
       ],
       "rarity": "rare",
       "growth_stages": 10,
+      "decay": 3,
       "positive_buffs": [
         "water_retain"
       ],
@@ -818,6 +842,7 @@
       ],
       "rarity": "epic",
       "growth_stages": 12,
+      "decay": 5,
       "positive_buffs": [
         "improved_xp_boost"
       ],
@@ -846,6 +871,7 @@
       ],
       "rarity": "epic",
       "growth_stages": 12,
+      "decay": 5,
       "positive_buffs": [
         "harvest_boost"
       ],
@@ -872,6 +898,7 @@
       ],
       "rarity": "epic",
       "growth_stages": 14,
+      "decay": 5,
       "positive_buffs": [
         "improved_harvest_boost"
       ],
@@ -893,6 +920,7 @@
       "special": "explode_turtlellini_with_blastberry",
       "rarity": "epic",
       "growth_stages": 0,
+      "decay": 3,
       "positive_buffs": [
         "immunity",
         "water_retain"
@@ -919,6 +947,7 @@
       ],
       "rarity": "epic",
       "growth_stages": 12,
+      "decay": 5,
       "positive_buffs": [
         "improved_xp_boost",
         "improved_water_retain"
@@ -947,6 +976,7 @@
       ],
       "rarity": "epic",
       "growth_stages": 12,
+      "decay": 5,
       "positive_buffs": [
         "effect_spread",
         "improved_water_retain"
@@ -975,6 +1005,7 @@
       ],
       "rarity": "epic",
       "growth_stages": 16,
+      "decay": 5,
       "positive_buffs": [
         "effect_spread"
       ],
@@ -1001,6 +1032,7 @@
       ],
       "rarity": "epic",
       "growth_stages": 0,
+      "decay": 3,
       "positive_buffs": [
         "immunity",
         "water_retain"
@@ -1028,6 +1060,7 @@
       ],
       "rarity": "epic",
       "growth_stages": 16,
+      "decay": 5,
       "positive_buffs": [
         "effect_spread",
         "bonus_drops"
@@ -1054,6 +1087,7 @@
       ],
       "rarity": "legendary",
       "growth_stages": 27,
+      "decay": 0,
       "positive_buffs": [
         "harvest_boost"
       ],
@@ -1080,6 +1114,7 @@
       ],
       "rarity": "legendary",
       "growth_stages": 16,
+      "decay": 5,
       "positive_buffs": [
         "improved_harvest_boost",
         "bonus_drops"
@@ -1109,6 +1144,7 @@
       ],
       "rarity": "legendary",
       "growth_stages": 9,
+      "decay": 3,
       "positive_buffs": [
         "immunity",
         "improved_water_retain"
@@ -1129,6 +1165,7 @@
       "special": "all_positive_crop_effects",
       "rarity": "legendary",
       "growth_stages": 40,
+      "decay": 10,
       "positive_buffs": [
         "improved_harvest_boost",
         "improved_water_retain",
@@ -1163,6 +1200,7 @@
       "special": "grow_the_jerryseed",
       "rarity": "legendary",
       "growth_stages": 10,
+      "decay": 0,
       "positive_buffs": [],
       "negative_buffs": [],
       "drops": {}
@@ -1183,6 +1221,7 @@
       ],
       "rarity": "legendary",
       "growth_stages": 15,
+      "decay": 5,
       "positive_buffs": [
         "immunity",
         "xp_boost"
@@ -1213,6 +1252,7 @@
       ],
       "rarity": "legendary",
       "growth_stages": 14,
+      "decay": 5,
       "positive_buffs": [
         "improved_xp_boost",
         "improved_water_retain"
