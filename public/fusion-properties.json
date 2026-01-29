@@ -253,7 +253,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Azure",
     "id_origin": [
       "Tadgang"
     ]
@@ -291,7 +291,7 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "Azure",
+    "id_result": "Bezal",
     "id_origin": [
       "Harpy",
       "Zealot"
@@ -306,9 +306,9 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Bezal",
+    "id_result": "",
     "id_origin": [
-      "Golden Ghoul"
+      "Coralot"
     ]
   },
   "C30": {
@@ -320,7 +320,7 @@
     "input2": "",
     "id_result": "Yog",
     "id_origin": [
-      "Azure"
+      "Golden Ghoul"
     ]
   },
   "C33": {
