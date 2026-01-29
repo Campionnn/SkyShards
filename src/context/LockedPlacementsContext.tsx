@@ -31,6 +31,8 @@ interface LockedPlacementsContextType {
   priorities: Record<string, number>;
   setPriority: (cropId: string, priority: number) => void;
   getPriority: (cropId: string) => number;
+  isLoadingPriorities: boolean;
+  defaultPriorities: Record<string, number>;
 }
 
 const LockedPlacementsContext = createContext<LockedPlacementsContextType | null>(null);
@@ -47,6 +49,35 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
   const [lockedPlacements, setLockedPlacements] = useState<LockedPlacement[]>([]);
   const [selectedCropForPlacement, setSelectedCropForPlacement] = useState<SelectedCropForPlacement | null>(null);
   const [priorities, setPriorities] = useState<Record<string, number>>({});
+  const [isLoadingPriorities, setIsLoadingPriorities] = useState(true);
+  const [defaultPriorities, setDefaultPriorities] = useState<Record<string, number>>({});
+  
+  // Load default priorities on mount
+  useEffect(() => {
+    const loadDefaultPriorities = async () => {
+      try {
+        const response = await fetch("/greenhouse/default_priorities.json");
+        if (!response.ok) {
+          throw new Error(`Failed to load default priorities: ${response.statusText}`);
+        }
+        const defaultPrioritiesData = await response.json();
+        setDefaultPriorities(defaultPrioritiesData);
+        setPriorities(defaultPrioritiesData);
+      } catch (err) {
+        console.error("Error loading default priorities:", err);
+        toast({
+          title: "Warning",
+          description: "Failed to load default crop priorities. Using empty priorities.",
+          variant: "warning",
+          duration: 5000,
+        });
+      } finally {
+        setIsLoadingPriorities(false);
+      }
+    };
+    
+    loadDefaultPriorities();
+  }, [toast]);
   
   // Track previous unlockedCells to detect changes
   const prevUnlockedCellsRef = useRef<Set<string>>(unlockedCells);
@@ -301,19 +332,25 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
   // Priority management
   const setPriority = useCallback((cropId: string, priority: number) => {
     setPriorities(prev => {
-      if (priority === 0) {
-        // Remove from priorities if 0 (default)
+      const defaultValue = defaultPriorities[cropId] || 0;
+      
+      if (priority === defaultValue) {
+        // Remove from priorities if it matches the default
         const { [cropId]: _removed, ...rest } = prev;
         void _removed; // Suppress unused variable warning
         return rest;
       }
       return { ...prev, [cropId]: priority };
     });
-  }, []);
+  }, [defaultPriorities]);
   
   const getPriority = useCallback((cropId: string): number => {
-    return priorities[cropId] || 0;
-  }, [priorities]);
+    // Return custom priority if set, otherwise return default priority, otherwise 0
+    if (cropId in priorities) {
+      return priorities[cropId];
+    }
+    return defaultPriorities[cropId] || 0;
+  }, [priorities, defaultPriorities]);
   
   const value: LockedPlacementsContextType = {
     lockedPlacements,
@@ -332,6 +369,8 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
     priorities,
     setPriority,
     getPriority,
+    isLoadingPriorities,
+    defaultPriorities,
   };
   
   return (

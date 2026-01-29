@@ -177,6 +177,7 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
     setPriority,
     getPriority,
     priorities,
+    defaultPriorities,
   } = useLockedPlacements();
   
   const [filter, setFilter] = useState<CropFilterCategory>("all");
@@ -188,10 +189,14 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
   } | null>(null);
   const [priorityWarningDismissed, setPriorityWarningDismissed] = useState(false);
   
-  // Check if any priorities are set
+  // Check if any priorities differ from defaults
   const hasPriorities = useMemo(() => {
-    return Object.values(priorities).some((p) => p !== 0);
-  }, [priorities]);
+    return Object.keys(priorities).some((cropId) => {
+      const currentPriority = priorities[cropId] || 0;
+      const defaultPriority = defaultPriorities[cropId] || 0;
+      return currentPriority !== defaultPriority;
+    });
+  }, [priorities, defaultPriorities]);
   
   // Listen for Escape key to cancel placement mode
   useEffect(() => {
