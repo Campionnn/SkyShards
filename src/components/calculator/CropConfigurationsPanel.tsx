@@ -408,7 +408,7 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
             </button>
             
             {isFilterOpen && (
-              <ul className="absolute right-0 z-50 mt-1 min-w-[180px] bg-slate-800 border border-slate-600/50 rounded-md shadow-xl max-h-60 overflow-y-auto">
+              <ul className="absolute right-0 z-50 mt-1 min-w-[180px] bg-slate-800 border border-slate-600/50 rounded-md shadow-xl max-h-60 overflow-y-auto scrollbar-dark">
                 {FILTER_OPTIONS.map((option) => (
                   <li
                     key={option.value}
@@ -480,7 +480,7 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
         )}
         
         {/* Crops List - Constrained height */}
-        <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
+        <div className="flex-1 overflow-y-auto space-y-2 min-h-0 scrollbar-dark">
           {filteredCrops.length === 0 ? (
             <div className="text-center py-4 text-sm text-slate-500">
               No items match the filter
@@ -527,7 +527,7 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           </div>
-          <div className="space-y-1 max-h-32 overflow-y-auto">
+          <div className="space-y-1 max-h-32 overflow-y-auto scrollbar-dark">
             {lockedPlacements.map((placement) => (
               <LockedPlacementItem
                 key={placement.id}

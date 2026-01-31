@@ -214,7 +214,7 @@ export const MutationAutocomplete: React.FC<MutationAutocompleteProps> = ({
       {isOpen && suggestions.length > 0 && !isSelecting && (
         <ul
           ref={listRef}
-          className="absolute z-50 mt-1 w-full bg-slate-800 border border-slate-600/50 rounded-md shadow-xl max-h-60 overflow-y-auto"
+          className="absolute z-50 mt-1 w-full bg-slate-800 border border-slate-600/50 rounded-md shadow-xl max-h-60 overflow-y-auto scrollbar-dark"
         >
           {suggestions.map((mutation, index) => (
             <li
