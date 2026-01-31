@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { X, Target, TrendingUp, Trash2, AlertTriangle } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { X, Target, TrendingUp, Trash2, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
 import { useGreenhouseData } from "../../context";
 import { MutationAutocomplete } from "./MutationAutocomplete";
 import { getCropImagePath } from "../../types/greenhouse";
@@ -18,6 +18,8 @@ export const MutationTargets: React.FC = () => {
     getCropDef,
     getMutationDef,
   } = useGreenhouseData();
+  
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
 
   // available mutations
   const availableMutations = mutations.filter(
@@ -31,6 +33,36 @@ export const MutationTargets: React.FC = () => {
 
   const handleAddMutation = (id: string, name: string) => {
     addMutation(id, name);
+  };
+  
+  const handleCountChange = (id: string, value: string) => {
+    setInputValues(prev => ({ ...prev, [id]: value }));
+    if (value === "") {
+      updateMutationTargetCount(id, 1);
+      return;
+    }
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue >= 1 && numValue <= 100) {
+      updateMutationTargetCount(id, numValue);
+    }
+  };
+  
+  const handleCountBlur = (id: string) => {
+    setInputValues(prev => {
+      const newValues = { ...prev };
+      delete newValues[id];
+      return newValues;
+    });
+  };
+  
+  const incrementCount = (id: string, currentCount: number) => {
+    const newCount = Math.min(100, currentCount + 1);
+    updateMutationTargetCount(id, newCount);
+  };
+  
+  const decrementCount = (id: string, currentCount: number) => {
+    const newCount = Math.max(1, currentCount - 1);
+    updateMutationTargetCount(id, newCount);
   };
 
   if (isLoading) {
@@ -145,17 +177,6 @@ export const MutationTargets: React.FC = () => {
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => updateMutationMode(selected.id, "maximize")}
-                  className={`flex-1 px-2 py-1.5 rounded text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                    selected.mode === "maximize"
-                      ? "bg-emerald-500/30 text-emerald-300 border border-emerald-500/40"
-                      : "bg-slate-600/30 text-slate-400 border border-slate-500/30 hover:bg-slate-600/50"
-                  }`}
-                >
-                  <TrendingUp className="w-3 h-3" />
-                  <span>Maximize</span>
-                </button>
-                <button
                   onClick={() => updateMutationMode(selected.id, "target")}
                   className={`flex-1 px-2 py-1.5 rounded text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                     selected.mode === "target"
@@ -166,24 +187,50 @@ export const MutationTargets: React.FC = () => {
                   <Target className="w-3 h-3" />
                   <span>Target</span>
                 </button>
+                <button
+                  onClick={() => updateMutationMode(selected.id, "maximize")}
+                  className={`flex-1 px-2 py-1.5 rounded text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                    selected.mode === "maximize"
+                      ? "bg-emerald-500/30 text-emerald-300 border border-emerald-500/40"
+                      : "bg-slate-600/30 text-slate-400 border border-slate-500/30 hover:bg-slate-600/50"
+                  }`}
+                >
+                  <TrendingUp className="w-3 h-3" />
+                  <span>Maximize</span>
+                </button>
               </div>
 
               {selected.mode === "target" && (
                 <div className="mt-2 flex items-center gap-2">
                   <label className="text-xs text-slate-400">Count:</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={100}
-                    value={selected.targetCount}
-                    onChange={(e) =>
-                      updateMutationTargetCount(
-                        selected.id,
-                        Math.max(1, parseInt(e.target.value) || 1)
-                      )
-                    }
-                    className="w-16 px-2 py-1 bg-slate-700/50 border border-slate-600/30 rounded text-sm text-slate-200 focus:outline-none focus:border-blue-500/50"
-                  />
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={inputValues[selected.id] !== undefined ? inputValues[selected.id] : ""}
+                      placeholder={selected.targetCount.toString()}
+                      onChange={(e) => handleCountChange(selected.id, e.target.value)}
+                      onBlur={() => handleCountBlur(selected.id)}
+                      className="w-14 px-2 py-1 bg-slate-700/50 border border-slate-600/30 rounded text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 text-center"
+                    />
+                    <div className="flex flex-col">
+                      <button
+                        onClick={() => incrementCount(selected.id, selected.targetCount)}
+                        className="p-0.5 hover:bg-slate-600/50 rounded-t text-slate-400 hover:text-slate-200 transition-colors"
+                        title="Increase count"
+                      >
+                        <ChevronUp className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => decrementCount(selected.id, selected.targetCount)}
+                        className="p-0.5 hover:bg-slate-600/50 rounded-b text-slate-400 hover:text-slate-200 transition-colors"
+                        title="Decrease count"
+                      >
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { Pencil, X, ChevronDown, Lock, Trash2, AlertTriangle } from "lucide-react";
+import { Brush, X, ChevronDown, Lock, Trash2, AlertTriangle, Search, ChevronUp } from "lucide-react";
 import { useGreenhouseData, useLockedPlacements } from "../../context";
 import { CropMutationInfoModal } from "./CropMutationInfoModal";
 import { getRarityTextColor } from "../../utilities";
@@ -15,12 +15,24 @@ const FILTER_OPTIONS: { value: CropFilterCategory; label: string }[] = [
   { value: "all", label: "All" },
   { value: "crops", label: "Crops" },
   { value: "mutations", label: "Mutations" },
-  { value: "common", label: "Common Mutations" },
-  { value: "uncommon", label: "Uncommon Mutations" },
-  { value: "rare", label: "Rare Mutations" },
-  { value: "epic", label: "Epic Mutations" },
-  { value: "legendary", label: "Legendary Mutations" },
+  { value: "common", label: "Common" },
+  { value: "uncommon", label: "Uncommon" },
+  { value: "rare", label: "Rare" },
+  { value: "epic", label: "Epic" },
+  { value: "legendary", label: "Legendary" },
 ];
+
+// Helper to get color for filter option
+const getFilterColor = (value: CropFilterCategory): string => {
+  switch (value) {
+    case "common": return "text-white";
+    case "uncommon": return "text-green-400";
+    case "rare": return "text-blue-400";
+    case "epic": return "text-purple-400";
+    case "legendary": return "text-yellow-400";
+    default: return "text-slate-300";
+  }
+};
 
 // Item row for a single crop/mutation
 const CropItemRow: React.FC<{
@@ -31,6 +43,7 @@ const CropItemRow: React.FC<{
   onInfoClick: () => void;
   onEditClick: () => void;
   onPriorityChange: (value: number) => void;
+  onRowClick?: () => void;
 }> = ({
   crop,
   mutation,
@@ -39,27 +52,56 @@ const CropItemRow: React.FC<{
   // onInfoClick,
   onEditClick,
   onPriorityChange,
+  onRowClick,
 }) => {
   const [imageError, setImageError] = useState(false);
+  const [inputValue, setInputValue] = useState<string>("");
   
   // Get the rarity color for the name
   const nameColorClass = mutation ? getRarityTextColor(mutation.rarity) : "text-white";
   
+  const handlePriorityChange = (value: string) => {
+    setInputValue(value);
+    if (value === "") {
+      onPriorityChange(0);
+      return;
+    }
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
+      onPriorityChange(numValue);
+    }
+  };
+  
+  const handlePriorityBlur = () => {
+    setInputValue("");
+  };
+  
+  const incrementPriority = () => {
+    const newValue = Math.min(100, priority + 1);
+    onPriorityChange(newValue);
+  };
+  
+  const decrementPriority = () => {
+    const newValue = Math.max(0, priority - 1);
+    onPriorityChange(newValue);
+  };
+  
   return (
     <div
-      className={`bg-slate-800/40 border rounded-lg h-16 px-3 transition-colors flex items-center gap-2 ${
+      onClick={onRowClick}
+      className={`bg-slate-800/40 border rounded-lg h-14 px-3 transition-colors flex items-center gap-2 ${
         isPlacementActive
           ? "border-yellow-500/50 bg-yellow-500/10"
           : "border-slate-600/30 hover:border-slate-500/50"
-      }`}
+      } ${onRowClick && mutation ? "cursor-pointer" : ""}`}
     >
       {/* Image */}
-      <div className="w-12 h-12 flex-shrink-0 bg-slate-700/50 rounded flex items-center justify-center overflow-hidden">
+      <div className="w-10 h-10 flex-shrink-0 bg-slate-700/50 rounded flex items-center justify-center overflow-hidden">
         {!imageError ? (
           <img
             src={getCropImagePath(crop.id)}
             alt={crop.name}
-            className="w-10 h-10 object-contain"
+            className="w-8 h-8 object-contain"
             onError={() => setImageError(true)}
             draggable={false}
           />
@@ -76,7 +118,7 @@ const CropItemRow: React.FC<{
       </div>
       
       {/* Buttons with reduced spacing */}
-      <div className="flex items-center gap-1 flex-shrink-0">
+      <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
         {/* Info Button */}
         {/*<button*/}
         {/*  onClick={onInfoClick}*/}
@@ -99,26 +141,47 @@ const CropItemRow: React.FC<{
           {isPlacementActive ? (
             <X className="w-4 h-4" />
           ) : (
-            <Pencil className="w-4 h-4" />
+            <Brush className="w-4 h-4" />
           )}
         </button>
       </div>
       
-      {/* Priority Input */}
-      <div className="flex items-center gap-1.5 flex-shrink-0">
-        <span className="text-xs text-slate-500">Priority:</span>
-        <input
-          type="number"
-          min={0}
-          max={100}
-          value={priority}
-          onChange={(e) => {
-            const val = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
-            onPriorityChange(val);
-          }}
-          className="w-14 px-2 py-1 bg-slate-700/50 border border-slate-600/30 rounded text-xs text-slate-200 focus:outline-none focus:border-blue-500/50 text-center"
-          title="Higher priority = use less of this crop (0 = no preference, 100 = avoid)"
-        />
+      {/* Priority Input - Stacked */}
+      <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+        <div className="flex flex-col items-center gap-0.5">
+          <span 
+            className="text-[10px] text-slate-500 leading-none"
+            title="Higher priority = use less of this crop (0 = no preference, 100 = avoid)"
+          >
+            Priority
+          </span>
+          <input
+            type="number"
+            min={0}
+            max={100}
+            value={inputValue !== "" ? inputValue : ""}
+            placeholder={priority.toString()}
+            onChange={(e) => handlePriorityChange(e.target.value)}
+            onBlur={handlePriorityBlur}
+            className="w-12 px-1 py-0.5 bg-slate-700/50 border border-slate-600/30 rounded text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 text-center"
+          />
+        </div>
+        <div className="flex flex-col">
+          <button
+            onClick={incrementPriority}
+            className="p-0.5 hover:bg-slate-600/50 rounded-t text-slate-400 hover:text-slate-200 transition-colors"
+            title="Increase priority"
+          >
+            <ChevronUp className="w-2.5 h-2.5" />
+          </button>
+          <button
+            onClick={decrementPriority}
+            className="p-0.5 hover:bg-slate-600/50 rounded-b text-slate-400 hover:text-slate-200 transition-colors"
+            title="Decrease priority"
+          >
+            <ChevronDown className="w-2.5 h-2.5" />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -167,7 +230,7 @@ const LockedPlacementItem: React.FC<{
 export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = ({
   className = "",
 }) => {
-  const { crops, getCropDef, getMutationDef } = useGreenhouseData();
+  const { crops, getCropDef, getMutationDef, addMutation } = useGreenhouseData();
   const {
     lockedPlacements,
     selectedCropForPlacement,
@@ -180,6 +243,7 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
     defaultPriorities,
   } = useLockedPlacements();
   
+  const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<CropFilterCategory>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
@@ -222,25 +286,32 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   
-  // Filter crops based on selected category
+  // Filter crops based on selected category and search term
   const filteredCrops = useMemo(() => {
-    if (filter === "all") return crops;
+    let items = crops;
     
+    // Apply category filter
     if (filter === "crops") {
-      return crops.filter(c => !c.isMutation);
+      items = items.filter(c => !c.isMutation);
+    } else if (filter === "mutations") {
+      items = items.filter(c => c.isMutation);
+    } else if (filter !== "all") {
+      // Rarity filters - only show mutations with matching rarity
+      items = items.filter(c => {
+        if (!c.isMutation) return false;
+        const mutation = getMutationDef(c.id);
+        return mutation?.rarity.toLowerCase() === filter.toLowerCase();
+      });
     }
     
-    if (filter === "mutations") {
-      return crops.filter(c => c.isMutation);
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      items = items.filter(c => c.name.toLowerCase().includes(term));
     }
     
-    // Rarity filters - only show mutations with matching rarity
-    return crops.filter(c => {
-      if (!c.isMutation) return false;
-      const mutation = getMutationDef(c.id);
-      return mutation?.rarity.toLowerCase() === filter.toLowerCase();
-    });
-  }, [crops, filter, getMutationDef]);
+    return items;
+  }, [crops, filter, searchTerm, getMutationDef]);
   
   // Handle info button click
   const handleInfoClick = useCallback((crop: CropDefinition) => {
@@ -274,20 +345,93 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
     return cropId;
   }, [getCropDef, getMutationDef]);
   
+  // Handle clicking on a mutation row to add it to targets
+  const handleMutationRowClick = useCallback((crop: CropDefinition) => {
+    if (crop.isMutation) {
+      addMutation(crop.id, crop.name);
+    }
+  }, [addMutation]);
+  
   // Get current filter label
   const currentFilterLabel = FILTER_OPTIONS.find(opt => opt.value === filter)?.label || "All";
   
   return (
-    <div className={`flex flex-col gap-4 ${className}`}>
+    <div className={`flex flex-col h-full gap-4 ${className}`}>
       {/* Main Panel - Crop Configurations */}
-      <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4 flex flex-col">
+      <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4 flex flex-col flex-1 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-3 flex-shrink-0">
           <h3 className="text-sm font-medium text-slate-200">Crop Configurations</h3>
+          <button
+            onClick={() => {
+              Object.keys(priorities).forEach((cropId) => {
+                setPriority(cropId, defaultPriorities[cropId] || 0);
+              });
+            }}
+            className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
+            title="Reset all priorities to defaults"
+          >
+            Reset Priorities
+          </button>
+        </div>
+        
+        {/* Search and Filter Row */}
+        <div className="flex gap-2 mb-3 flex-shrink-0">
+          {/* Search Input */}
+          <div className="flex-1 relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search..."
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-700/50 border border-slate-600/30 rounded-md text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:border-emerald-500/50"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+          
+          {/* Filter Dropdown */}
+          <div className="relative" ref={filterRef}>
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/50 border border-slate-600/30 rounded-md text-sm text-slate-200 hover:bg-slate-700/70 transition-colors"
+            >
+              <span>{currentFilterLabel}</span>
+              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isFilterOpen ? "rotate-180" : ""}`} />
+            </button>
+            
+            {isFilterOpen && (
+              <ul className="absolute right-0 z-50 mt-1 min-w-[180px] bg-slate-800 border border-slate-600/50 rounded-md shadow-xl max-h-60 overflow-y-auto">
+                {FILTER_OPTIONS.map((option) => (
+                  <li
+                    key={option.value}
+                    onClick={() => {
+                      setFilter(option.value);
+                      setIsFilterOpen(false);
+                    }}
+                    className={`px-3 py-2 cursor-pointer transition-colors ${
+                      filter === option.value
+                        ? "bg-emerald-600/30 text-slate-100"
+                        : "hover:bg-slate-700/50"
+                    }`}
+                  >
+                    <span className={getFilterColor(option.value)}>{option.label}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
         
         {/* Filter Dropdown - Styled like MutationAutocomplete */}
-        <div className="relative mb-3" ref={filterRef}>
+        <div className="relative mb-3 hidden" ref={filterRef}>
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
             className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600/30 rounded-md text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 hover:bg-slate-700/70 transition-colors flex items-center justify-between"
@@ -336,7 +480,7 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
         )}
         
         {/* Crops List - Constrained height */}
-        <div className="overflow-y-auto space-y-2 max-h-[400px]">
+        <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
           {filteredCrops.length === 0 ? (
             <div className="text-center py-4 text-sm text-slate-500">
               No items match the filter
@@ -357,6 +501,7 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
                   onInfoClick={() => handleInfoClick(crop)}
                   onEditClick={() => handleEditClick(crop)}
                   onPriorityChange={(val) => setPriority(crop.id, val)}
+                  onRowClick={crop.isMutation ? () => handleMutationRowClick(crop) : undefined}
                 />
               );
             })

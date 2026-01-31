@@ -4,10 +4,6 @@ import { calculateCropImageDimensions, getCellPixelPosition } from "../../utilit
 import { getCropImagePath, getGroundImagePath } from "../../types/greenhouse";
 import type { LockedPlacement, SelectedCropForPlacement } from "../../types/greenhouse";
 
-// =============================================================================
-// Common Styles Helper
-// =============================================================================
-
 interface BaseCellStyleParams {
   position: [number, number];
   size: number;
@@ -38,10 +34,6 @@ function getBaseCellStyle(params: BaseCellStyleParams): React.CSSProperties {
     overflow: "hidden",
   };
 }
-
-// =============================================================================
-// LockedPlacementCell - Draggable locked placement on grid
-// =============================================================================
 
 export interface LockedPlacementCellProps {
   placement: LockedPlacement;
@@ -124,10 +116,6 @@ export const LockedPlacementCell: React.FC<LockedPlacementCellProps> = ({
   );
 };
 
-// =============================================================================
-// PlacementPreview - Preview overlay for placing crops
-// =============================================================================
-
 export interface PlacementPreviewProps {
   position: [number, number];
   crop: SelectedCropForPlacement;
@@ -186,10 +174,6 @@ export const PlacementPreview: React.FC<PlacementPreviewProps> = ({
   );
 };
 
-// =============================================================================
-// CropCell - Display crop placement from solver results
-// =============================================================================
-
 export interface CropCellProps {
   id: string;
   name: string;
@@ -215,6 +199,9 @@ export const CropCell: React.FC<CropCellProps> = ({
   
   const { imageWidth, imageHeight } = calculateCropImageDimensions(size, cellSize, gap);
   
+  // Check if this crop needs a white glow (dark crops on ground texture)
+  const needsGlow = (id === "choconut" || id === "chocoberry" || id === "dead_plant") && groundType !== "farmland";
+  
   const baseStyle = getBaseCellStyle({
     position,
     size,
@@ -228,17 +215,18 @@ export const CropCell: React.FC<CropCellProps> = ({
     borderWidth: 2,
     borderStyle: "solid",
     borderColor: "transparent",
-    // Add yellow glow for locked placements
-    boxShadow: isLocked 
+    boxShadow: isLocked
       ? "0 0 8px rgba(234, 179, 8, 0.8), inset 0 0 8px rgba(234, 179, 8, 0.4)" 
-      : undefined,
+      : needsGlow
+        ? "0 0 6px rgba(255, 255, 255, 0.6), inset 0 0 4px rgba(255, 255, 255, 0.3)"
+        : undefined,
   };
 
   return (
     <div
       style={style}
       title={`${name} (${position[0]}, ${position[1]})${size > 1 ? ` - ${size}x${size}` : ""}${isLocked ? " (Locked)" : ""}`}
-      className="transition-transform hover:scale-105 hover:z-10"
+      className="transition-transform hover:z-10"
     >
       {!imageError ? (
         <img
@@ -260,10 +248,6 @@ export const CropCell: React.FC<CropCellProps> = ({
     </div>
   );
 };
-
-// =============================================================================
-// MutationCell - Display mutation result from solver
-// =============================================================================
 
 export interface MutationCellProps {
   id: string;
@@ -290,6 +274,9 @@ export const MutationCell: React.FC<MutationCellProps> = ({
   
   const { imageWidth, imageHeight } = calculateCropImageDimensions(size, cellSize, gap);
   
+  // Check if this mutation needs a white glow (dark crops on ground texture)
+  const needsGlow = (id === "choconut" || id === "chocoberry" || id === "dead_plant") && groundType !== "farmland";
+  
   const baseStyle = getBaseCellStyle({
     position,
     size,
@@ -298,9 +285,13 @@ export const MutationCell: React.FC<MutationCellProps> = ({
     groundType,
   });
   
+  const glowShadow = needsGlow
+    ? "0 0 8px rgba(0, 200, 255, 1), inset 0 0 8px rgba(0, 200, 255, 1), 0 0 12px rgba(255, 255, 255, 0.5)"
+    : "0 0 8px rgba(0, 200, 255, 1), inset 0 0 8px rgba(0, 200, 255, 1)";
+  
   const style: React.CSSProperties = {
     ...baseStyle,
-    boxShadow: showImage ? "0 0 8px rgba(0, 200, 255, 1), inset 0 0 8px rgba(0, 200, 255, 1)" : "",
+    boxShadow: showImage ? glowShadow : "",
     zIndex: 5, // Above crops
   };
 
@@ -308,7 +299,7 @@ export const MutationCell: React.FC<MutationCellProps> = ({
     <div
       style={style}
       title={`${name} (${position[0]}, ${position[1]})${size > 1 ? ` - ${size}x${size}` : ""}`}
-      className="transition-transform hover:scale-105 hover:z-10"
+      className="transition-transform hover:z-10"
     >
       {showImage && !imageError ? (
         <img

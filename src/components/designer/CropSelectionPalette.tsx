@@ -12,7 +12,7 @@ interface CropSelectionPaletteProps {
 // Filter options for the dropdown
 const FILTER_OPTIONS: { value: CropFilterCategory; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "crops", label: "Crops/Miscellaneous" },
+  { value: "crops", label: "Crops" },
   { value: "mutations", label: "Mutations" },
   { value: "common", label: "Common" },
   { value: "uncommon", label: "Uncommon" },
@@ -215,12 +215,8 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
                 onClick={() => setIsFilterOpen(false)} 
               />
               <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-600/50 rounded-lg shadow-xl z-20 py-1 min-w-[140px]">
-                {FILTER_OPTIONS.map((option, index) => (
+                {FILTER_OPTIONS.map((option) => (
                   <React.Fragment key={option.value}>
-                    {/* Separator after "Mutations" (index 2) */}
-                    {index === 3 && (
-                      <div className="border-t border-slate-600/50 my-1" />
-                    )}
                     <button
                       onClick={() => {
                         setFilter(option.value);
@@ -241,18 +237,26 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
       </div>
       
       {/* Palette Grid */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-5 gap-1.5">
+      <div className="flex-1 overflow-y-auto overflow-x-visible">
+        <div className="grid grid-cols-5 gap-1.5 p-1">
           {filteredItems.map((crop, index) => {
             // Check if we should show a rarity separator before this item
             const prevMutation = index > 0 ? getMutationDef(filteredItems[index - 1].id) : null;
             const currMutation = getMutationDef(crop.id);
-            const showSeparator = prevMutation && currMutation && 
+            const showRaritySeparator = prevMutation && currMutation && 
                                   prevMutation.rarity !== currMutation.rarity;
+            
+            // Check if we should show a crop/mutation divider
+            const prevItem = index > 0 ? filteredItems[index - 1] : null;
+            const showCropMutationDivider = prevItem && !prevItem.isMutation && crop.isMutation;
             
             return (
               <React.Fragment key={crop.id}>
-                {showSeparator && (
+                {showCropMutationDivider && (
+                  <div className="col-span-5 border-t border-slate-600/50 my-2">
+                  </div>
+                )}
+                {showRaritySeparator && (
                   <div className="col-span-5 border-t border-slate-600/50 my-1" />
                 )}
                 <PaletteTile

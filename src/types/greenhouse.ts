@@ -1,10 +1,6 @@
-// =============================================================================
-// API Request/Response Types
-// =============================================================================
-
 export interface CropDefinition {
-  id: string; // The key used in API and for images (e.g., "wheat", "potato")
-  name: string; // Display name (e.g., "Wheat", "Potato")
+  id: string; // The key used in API and for images
+  name: string; // Display name
   size: number;
   priority: number;
   ground: string; // Ground type (farmland, sand, soul_sand, mycelium, netherrack, end_stone)
@@ -15,13 +11,13 @@ export interface CropDefinition {
 }
 
 export interface MutationRequirement {
-  crop: string; // This is the crop ID (key), not display name
+  crop: string; // This is the crop ID
   count: number;
 }
 
 export interface MutationDefinition {
-  id: string; // The key used in API and for images (e.g., "ashwreath")
-  name: string; // Display name (e.g., "Ashwreath")
+  id: string; // The key used in API and for images
+  name: string; // Display name
   size: number;
   ground: string;
   requirements: MutationRequirement[];
@@ -76,10 +72,6 @@ export interface SolveResponse {
   solver_approach?: string;
 }
 
-// =============================================================================
-// Job System Types
-// =============================================================================
-
 export type JobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
 
 export interface JobProgress {
@@ -119,10 +111,6 @@ export interface JobStatusResponse {
   error: string | null;
 }
 
-// =============================================================================
-// Expansion Types
-// =============================================================================
-
 export interface ExpansionRequest {
   unlocked_cells: [number, number][];
   locked_cells: [number, number][];
@@ -141,10 +129,6 @@ export interface ExpansionResponse {
   final_gloomgourd_count: number;
 }
 
-// =============================================================================
-// Grid State Types
-// =============================================================================
-
 export type CellState = "locked" | "unlocked";
 
 export interface GridCell {
@@ -152,10 +136,6 @@ export interface GridCell {
   col: number;
   state: CellState;
 }
-
-// =============================================================================
-// UI State Types
-// =============================================================================
 
 export interface SelectedMutation {
   id: string; // The mutation ID (key), used for API calls
@@ -176,10 +156,6 @@ export interface ExpansionState {
   steps: ExpansionStep[];
   showOverlay: boolean;
 }
-
-// =============================================================================
-// Locked Placements Types
-// =============================================================================
 
 export interface LockedPlacement {
   id: string; // Unique ID for React keys and tracking
@@ -207,10 +183,6 @@ export interface SelectedCropForPlacement {
   size: number;
   ground: string;
 }
-
-// =============================================================================
-// Image Mapping Helpers
-// =============================================================================
 
 // Get crop image path (uses crop ID, not display name)
 export function getCropImagePath(cropId: string): string {

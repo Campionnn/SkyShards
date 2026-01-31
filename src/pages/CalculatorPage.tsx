@@ -125,9 +125,7 @@ export const CalculatorPage: React.FC = () => {
     <>
       <div className="container mx-auto px-4 py-6 max-w-screen-2xl">
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_420px] gap-6">
-          {/* Column 1 - Configuration */}
           <div className="space-y-4">
-            {/* Grid Preview - small clickable preview */}
             <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-medium text-slate-200">Grid Configuration</h3>
@@ -167,7 +165,6 @@ export const CalculatorPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Columns 2 - Results (Interactive Grid with Locked Placements) */}
           <div>
             <SolverResults
               result={displayResult}
@@ -180,8 +177,8 @@ export const CalculatorPage: React.FC = () => {
           </div>
 
           {/* Column 3 - Crop Configurations (wider) */}
-          <div className="space-y-4">
-            <CropConfigurationsPanel />
+          <div className="flex flex-col h-[calc(100vh-8rem)]">
+            <CropConfigurationsPanel className="flex-1 overflow-hidden" />
           </div>
         </div>
       </div>

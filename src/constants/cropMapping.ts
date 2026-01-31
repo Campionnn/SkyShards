@@ -1,5 +1,4 @@
 // Predefined crop and mutation IDs for compact encoding
-// This allows encoding designs without storing crop names in the encoded string
 
 export const CROP_IDS = [
   "wheat",

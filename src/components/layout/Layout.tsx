@@ -18,8 +18,8 @@ export const Layout: React.FC = () => {
 
       <footer className="text-center py-6 text-slate-400 text-sm border-t border-slate-800/50">
         <div className="max-w-screen-xl mx-auto">
-          <p className="font-medium">Greenhouse Calculator</p>
-          <p className="mt-1 text-slate-500">A SkyShards Project</p>
+          <p className="font-medium">Made by Campion</p>
+          <p className="mt-1 text-slate-500">A SkyShards Project. Big thanks you MegaMew14 for the help!</p>
           <div className="h-px w-1/2 bg-slate-800/50 mx-auto my-3"></div>
           <div className="flex justify-center items-center space-x-4">
             <a

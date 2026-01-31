@@ -1,58 +1,25 @@
-// Design encoding/decoding utilities for sharing greenhouse designs
-// Uses grid-based encoding + deflate compression + URL-safe base64 for compact shareable strings
-//
-// Format (compact with predefined IDs):
-// - String format: "inputIndices|targetIndices|grid"
-// - Unified index encoding for both inputs and targets:
-//   - Indices 0-16 = CROP_IDS (basic crops)
-//   - Indices 17-56 = MUTATION_IDS with offset (idx - 17 = mutation index 0-39)
-//   - This allows mutations to be used as inputs for higher-tier mutations
-// - Grid: 100 or 200 chars (single/double char mode)
-// - Requires CROP_IDS and MUTATION_IDS to be defined in cropMapping.ts
-//
-// This format is highly compressible due to repeated characters in the grid.
-
 import { deflateRaw, inflateRaw } from "pako";
 import { CROP_IDS, MUTATION_IDS, CROP_TO_INDEX, MUTATION_TO_INDEX } from "../constants/cropMapping";
-
-// =============================================================================
-// Constants
-// =============================================================================
 
 const GRID_SIZE = 10;
 const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 
-// Character set for encoding (letters only - case distinguishes input vs target)
 const LETTERS = "abcdefghijklmnopqrstuvwxyz";
 const MAX_SINGLE_CROPS = 26; // a-z
 const MAX_DOUBLE_CROPS = 26 * 26; // aa-zz = 676
 
-// =============================================================================
-// Character encoding helpers
-// =============================================================================
-
-/**
- * Converts an index to a two-character code (aa, ab, ac, ... zz)
- */
 function indexToDouble(idx: number): string {
   const first = LETTERS[Math.floor(idx / LETTERS.length)];
   const second = LETTERS[idx % LETTERS.length];
   return first + second;
 }
 
-/**
- * Converts a two-character code back to an index
- */
 function doubleToIndex(chars: string): number {
   const firstIdx = LETTERS.indexOf(chars[0].toLowerCase());
   const secondIdx = LETTERS.indexOf(chars[1].toLowerCase());
   if (firstIdx === -1 || secondIdx === -1) return -1;
   return firstIdx * LETTERS.length + secondIdx;
 }
-
-// =============================================================================
-// URL-safe Base64 helpers
-// =============================================================================
 
 function toUrlSafeBase64(bytes: Uint8Array): string {
   const binary = String.fromCharCode(...bytes);
@@ -70,10 +37,6 @@ function fromUrlSafeBase64(str: string): Uint8Array {
   }
   return bytes;
 }
-
-// =============================================================================
-// Grid encoding helpers
-// =============================================================================
 
 interface GroupedPlacements {
   [cropId: string]: number[]; // positions as flat indices (row * 10 + col)
@@ -97,9 +60,6 @@ function encodeGridString(
   const inputCrops = Object.keys(inputs);
   const targetCrops = Object.keys(targets);
 
-  // Get indices of used crops/mutations from the predefined lists
-  // For inputs, check both CROP_IDS and MUTATION_IDS (mutations can be inputs for higher-tier mutations)
-  // Encode as: crop index (0-16) or (17 + mutation index) for mutations
   const inputIndices: number[] = [];
   const inputCropsList: string[] = [];
   
@@ -109,24 +69,20 @@ function encodeGridString(
       inputIndices.push(idx);
       inputCropsList.push(cropId);
     } else {
-      // Check if it's a mutation being used as an input
       idx = MUTATION_TO_INDEX[cropId];
       if (idx !== undefined) {
-        // Offset by number of crops to distinguish from regular crops
         inputIndices.push(CROP_IDS.length + idx);
         inputCropsList.push(cropId);
       }
     }
   }
 
-  // For targets, use the same unified index scheme
   const targetIndices: number[] = [];
   const targetCropsList: string[] = [];
   
   for (const mutationId of targetCrops) {
     const idx = MUTATION_TO_INDEX[mutationId];
     if (idx !== undefined) {
-      // Use offset scheme: 17 + mutation index
       targetIndices.push(CROP_IDS.length + idx);
       targetCropsList.push(mutationId);
     }
@@ -144,10 +100,10 @@ function encodeGridString(
   const useDouble = inputCropsList.length > MAX_SINGLE_CROPS || targetCropsList.length > MAX_SINGLE_CROPS;
   const emptyChar = useDouble ? ".." : ".";
 
-  // Build grid using local indices (order in the used lists)
+  // Build grid using local indices
   const grid = new Array<string>(TOTAL_CELLS).fill(emptyChar);
 
-  // Assign characters to input crops (lowercase)
+  // Assign characters to input crops
   inputCropsList.forEach((crop, localIdx) => {
     const chars = useDouble ? indexToDouble(localIdx) : LETTERS[localIdx];
     for (const pos of inputs[crop]) {
@@ -155,7 +111,7 @@ function encodeGridString(
     }
   });
 
-  // Assign characters to target crops (uppercase)
+  // Assign characters to target crops
   targetCropsList.forEach((mutation, localIdx) => {
     const chars = useDouble ? indexToDouble(localIdx).toUpperCase() : LETTERS[localIdx].toUpperCase();
     for (const pos of targets[mutation]) {
@@ -163,8 +119,6 @@ function encodeGridString(
     }
   });
 
-  // Format: inputIndices|targetIndices|grid
-  // Indices are base36-encoded (0-9a-z) separated by commas to avoid ambiguity
   const inputIdx = inputIndices.map((i) => i.toString(36)).join(",");
   const targetIdx = targetIndices.map((i) => i.toString(36)).join(",");
   return inputIdx + "|" + targetIdx + "|" + grid.join("");
@@ -181,12 +135,11 @@ function decodeGridString(str: string): {
 
   const [inputIdxStr, targetIdxStr, gridStr] = parts;
 
-  // Parse indices (base36, comma-separated)
+  // Parse indices
   const inputIndices = inputIdxStr ? inputIdxStr.split(",").map((c) => parseInt(c, 36)) : [];
   const targetIndices = targetIdxStr ? targetIdxStr.split(",").map((c) => parseInt(c, 36)) : [];
 
   // Map indices to crop/mutation IDs
-  // Indices 0-16 are crops, 17+ are mutations (offset by CROP_IDS.length)
   const inputCrops = inputIndices.map((idx) => {
     if (idx < CROP_IDS.length) {
       return CROP_IDS[idx];
@@ -196,7 +149,7 @@ function decodeGridString(str: string): {
   }).filter(Boolean);
   
   const targetCrops = targetIndices.map((idx) => {
-    // Use unified index scheme (0-16 = crops, 17+ = mutations with offset)
+    // Use unified index scheme
     if (idx < CROP_IDS.length) {
       return CROP_IDS[idx];
     } else {
@@ -204,7 +157,6 @@ function decodeGridString(str: string): {
     }
   }).filter(Boolean);
 
-  // Detect mode from grid length: 100 = single, 200 = double
   const useDouble = gridStr.length === TOTAL_CELLS * 2;
   const charWidth = useDouble ? 2 : 1;
   const expectedGridLength = TOTAL_CELLS * charWidth;
@@ -270,18 +222,6 @@ function ungroupPlacements(
   return placements;
 }
 
-// =============================================================================
-// Encoding
-// =============================================================================
-
-/**
- * Encodes a design into a compact URL-safe string for sharing.
- * Uses predefined crop/mutation indices + grid-based encoding + deflate compression + URL-safe base64.
- * Produces highly compact output (~64 chars for typical designs).
- *
- * Supports up to 676 input crops and 676 target crops.
- * Uses single-char mode (smaller) when ≤26 crops per category.
- */
 export function encodeDesign(
   inputPlacements: Array<{ cropId: string; position: [number, number] }>,
   targetPlacements: Array<{ cropId: string; position: [number, number] }>
@@ -300,15 +240,6 @@ export function encodeDesign(
   return toUrlSafeBase64(compressed);
 }
 
-// =============================================================================
-// Decoding
-// =============================================================================
-
-/**
- * Decodes a compact URL-safe string back into design data.
- * Uses predefined crop/mutation indices from cropMapping.ts.
- * Automatically detects single-char vs double-char mode from grid length.
- */
 export function decodeDesign(encoded: string): {
   inputs: Array<{ cropId: string; position: [number, number] }>;
   targets: Array<{ cropId: string; position: [number, number] }>;

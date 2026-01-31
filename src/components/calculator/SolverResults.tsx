@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useRef, useCallback } from "react";
-import { CheckCircle2, AlertCircle, Grid3X3, Eye, EyeOff, Zap, Target, TrendingUp, Clock, RotateCcw, Paintbrush } from "lucide-react";
+import { CheckCircle2, AlertCircle, Grid3X3, Eye, EyeOff, Zap, Clock, RotateCcw, Paintbrush } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GRID_SIZE } from "../../constants";
 import { useGreenhouseData, useGridState, useLockedPlacements, useDesigner } from "../../context";
@@ -35,10 +35,6 @@ interface PlacementItem {
   startCol: number;
   locked?: boolean;
 }
-
-// =============================================================================
-// Helper Functions
-// =============================================================================
 
 function getOccupiedCells(position: [number, number], size: number): [number, number][] {
   const cells: [number, number][] = [];
@@ -98,10 +94,6 @@ function processMutationsToItems(
     };
   });
 }
-
-// =============================================================================
-// Sub-Components
-// =============================================================================
 
 const LoadingState: React.FC = () => (
   <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
@@ -169,7 +161,7 @@ const ProgressBar: React.FC<{ progress: JobProgress }> = ({ progress }) => (
       </p>
     )}
 
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-2 gap-2">
       <div className="bg-slate-700/30 rounded-md p-2">
         <div className="flex items-center gap-1 mb-0.5">
           <Zap className="w-3 h-3 text-emerald-400" />
@@ -179,30 +171,6 @@ const ProgressBar: React.FC<{ progress: JobProgress }> = ({ progress }) => (
           {progress.solutions_found}
         </span>
       </div>
-
-      {progress.best_objective !== null && (
-        <div className="bg-slate-700/30 rounded-md p-2">
-          <div className="flex items-center gap-1 mb-0.5">
-            <Target className="w-3 h-3 text-blue-400" />
-            <span className="text-xs text-slate-400">Best Obj</span>
-          </div>
-          <span className="text-base font-semibold text-slate-200">
-            {progress.best_objective}
-          </span>
-        </div>
-      )}
-
-      {progress.best_bound !== null && (
-        <div className="bg-slate-700/30 rounded-md p-2">
-          <div className="flex items-center gap-1 mb-0.5">
-            <TrendingUp className="w-3 h-3 text-yellow-400" />
-            <span className="text-xs text-slate-400">Best Bound</span>
-          </div>
-          <span className="text-base font-semibold text-slate-200">
-            {progress.best_bound.toFixed(1)}
-          </span>
-        </div>
-      )}
 
       {progress.elapsed_seconds !== null && (
         <div className="bg-slate-700/30 rounded-md p-2">
@@ -229,7 +197,8 @@ const StatusMessage: React.FC<{
   isPlacementMode: boolean;
   hoverInfo: { cell: [number, number] } | null;
   hasResult: boolean;
-}> = ({ hoveredPlacementId, isPlacementMode, hoverInfo, hasResult }) => {
+  hasLockedPlacements: boolean;
+}> = ({ hoveredPlacementId, isPlacementMode, hoverInfo, hasResult, hasLockedPlacements }) => {
   const getMessage = () => {
     if (hoveredPlacementId && isPlacementMode) {
       return (
@@ -260,8 +229,11 @@ const StatusMessage: React.FC<{
         ? "Click to place crops, right-click to remove"
         : "Click to place crops, right-click to remove\npress escape to stop placement";
     }
+    if (hasLockedPlacements) {
+      return "Drag locked placements to move, right-click to remove";
+    }
     return hasResult 
-      ? "Drag locked placements to move, right-click to remove"
+      ? ""
       : "Configure your targets and click \"Solve\" to find the optimal crop placement";
   };
 
@@ -271,10 +243,6 @@ const StatusMessage: React.FC<{
     </div>
   );
 };
-
-// =============================================================================
-// Main Component
-// =============================================================================
 
 export const SolverResults: React.FC<SolverResultsProps> = ({
   result,
@@ -295,9 +263,6 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   
   // Handle sending current grid content to designer
   const handleSendToDesigner = useCallback(() => {
-    // Collect all placements to send as inputs:
-    // 1. Locked placements from the calculator
-    // 2. Solver result crops (if any)
     const inputs: Array<{ name: string; position: [number, number]; size: number }> = [];
     const targets: Array<{ name: string; position: [number, number]; size: number }> = [];
     
@@ -430,7 +395,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
 
   // Render interactive grid (shared between empty and results states)
   const renderInteractiveGrid = (showOccupied: boolean = false) => (
-    <div className="w-full overflow-x-auto">
+    <div className="w-full overflow-visible">
       <div
         ref={gridRef}
         className="relative mx-auto select-none"
@@ -592,6 +557,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
           isPlacementMode={isPlacementMode}
           hoverInfo={hoverInfo}
           hasResult={false}
+          hasLockedPlacements={lockedPlacements.length > 0}
         />
       </div>
     );
@@ -688,6 +654,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
         isPlacementMode={isPlacementMode}
         hoverInfo={hoverInfo}
         hasResult={true}
+        hasLockedPlacements={lockedPlacements.length > 0}
       />
 
       {/* Mutation Summary */}
@@ -774,6 +741,19 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
               No crops placed
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Total Cells Used */}
+      <div className="bg-slate-700/30 rounded-md px-3 py-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-slate-400">Total Cells Used:</span>
+          <span className="text-sm font-medium text-emerald-400">
+            {(() => {
+              const totalCells = (result.placements || []).reduce((sum, p) => sum + (p.size * p.size), 0);
+              return totalCells;
+            })()}
+          </span>
         </div>
       </div>
     </div>

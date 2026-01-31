@@ -1,5 +1,3 @@
-// Greenhouse constants
-
 export const GRID_SIZE = 10;
 
 export function getDefaultUnlockedCells(): Set<string> {

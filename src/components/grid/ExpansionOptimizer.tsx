@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { RotateCcw, Loader2 } from "lucide-react";
 import { useGridState } from "../../context";
-import { optimizeExpansion } from "../../services/greenhouseService";
+import { optimizeExpansion } from "../../services";
 
 export const ExpansionOptimizer: React.FC = () => {
   const { 

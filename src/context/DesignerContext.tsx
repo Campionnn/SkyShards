@@ -1,10 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
 import type { MutationDefinition } from "../types/greenhouse";
 
-// =============================================================================
-// Types
-// =============================================================================
-
 export type DesignerMode = "inputs" | "targets";
 
 export interface DesignerPlacement {
@@ -84,18 +80,10 @@ interface DesignerContextType {
 
 const DesignerContext = createContext<DesignerContextType | null>(null);
 
-// =============================================================================
-// Helpers
-// =============================================================================
-
 let placementIdCounter = 0;
 function generatePlacementId(): string {
   return `designer-${Date.now()}-${++placementIdCounter}`;
 }
-
-// =============================================================================
-// Provider
-// =============================================================================
 
 export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mode, setMode] = useState<DesignerMode>("inputs");
@@ -447,22 +435,20 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       for (let dc = 0; dc < target.size; dc++) {
         const cellRow = row + dr;
         const cellCol = col + dc;
-        
-        // Check all 8 directions (including diagonals)
+
         const neighbors = [
-          [cellRow - 1, cellCol],     // North
-          [cellRow + 1, cellCol],     // South
-          [cellRow, cellCol - 1],     // West
-          [cellRow, cellCol + 1],     // East
-          [cellRow - 1, cellCol - 1], // Northwest
-          [cellRow - 1, cellCol + 1], // Northeast
-          [cellRow + 1, cellCol - 1], // Southwest
-          [cellRow + 1, cellCol + 1], // Southeast
+          [cellRow - 1, cellCol],
+          [cellRow + 1, cellCol],
+          [cellRow, cellCol - 1],
+          [cellRow, cellCol + 1],
+          [cellRow - 1, cellCol - 1],
+          [cellRow - 1, cellCol + 1],
+          [cellRow + 1, cellCol - 1],
+          [cellRow + 1, cellCol + 1],
         ];
         
         for (const [nr, nc] of neighbors) {
-          // Skip if inside the mutation area
-          if (nr >= row && nr < row + target.size && 
+          if (nr >= row && nr < row + target.size &&
               nc >= col && nc < col + target.size) continue;
           
           const crop = cropAtCell.get(`${nr},${nc}`);
@@ -529,10 +515,6 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     </DesignerContext.Provider>
   );
 };
-
-// =============================================================================
-// Hook
-// =============================================================================
 
 export const useDesigner = (): DesignerContextType => {
   const context = useContext(DesignerContext);

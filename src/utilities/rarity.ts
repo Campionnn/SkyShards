@@ -1,12 +1,5 @@
-// Rarity color utilities for crops and mutations
-
 export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 
-/**
- * Get the Tailwind text color class for a rarity level
- * @param rarity - The rarity level
- * @returns Tailwind CSS class string
- */
 export function getRarityTextColor(rarity: string): string {
   switch (rarity.toLowerCase()) {
     case "common":
@@ -24,11 +17,6 @@ export function getRarityTextColor(rarity: string): string {
   }
 }
 
-/**
- * Get the Tailwind background + border color classes for a rarity level
- * @param rarity - The rarity level
- * @returns Tailwind CSS class string (combined bg and border)
- */
 export function getRarityBgColor(rarity: string): string {
   switch (rarity.toLowerCase()) {
     case "common":
@@ -46,11 +34,6 @@ export function getRarityBgColor(rarity: string): string {
   }
 }
 
-/**
- * Get the Tailwind border color class for a rarity level
- * @param rarity - The rarity level
- * @returns Tailwind CSS class string
- */
 export function getRarityBorderColor(rarity: string): string {
   switch (rarity.toLowerCase()) {
     case "common":
@@ -68,12 +51,6 @@ export function getRarityBorderColor(rarity: string): string {
   }
 }
 
-/**
- * Get all rarity-related classes combined (text, background, border)
- * Useful for badges or tags
- * @param rarity - The rarity level
- * @returns Object with text, bg, and border classes
- */
 export function getRarityClasses(rarity: string): {
   text: string;
   bg: string;
@@ -86,11 +63,6 @@ export function getRarityClasses(rarity: string): {
   };
 }
 
-/**
- * Format rarity name for display (capitalize first letter)
- * @param rarity - The rarity level
- * @returns Formatted string
- */
 export function formatRarity(rarity: string): string {
   return rarity.charAt(0).toUpperCase() + rarity.slice(1).toLowerCase();
 }

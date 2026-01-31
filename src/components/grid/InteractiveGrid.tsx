@@ -13,14 +13,9 @@ export interface InteractiveGridProps {
   className?: string;
   cellSize?: number;
   gap?: number;
-  /** Optional additional content to render on top of the grid */
   children?: React.ReactNode;
 }
 
-/**
- * Interactive grid for placing and managing locked crop placements.
- * Supports drag-to-place, drag-to-move, and right-click-to-remove.
- */
 export const InteractiveGrid: React.FC<InteractiveGridProps> = ({
   className = "",
   cellSize = 48,

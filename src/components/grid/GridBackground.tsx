@@ -6,20 +6,16 @@ export interface GridBackgroundProps {
   cellSize: number;
   gap: number;
   unlockedCells: Set<string>;
-  variant?: "green" | "gray"; // Color variant for the background
+  variant?: "green" | "gray";
 }
 
-/**
- * Renders the background grid cells showing locked/unlocked state
- */
 export const GridBackground: React.FC<GridBackgroundProps> = ({
   cellSize,
   gap,
   unlockedCells,
   variant = "green",
 }) => {
-  // Color schemes for different variants
-  const unlockedColor = variant === "gray" 
+  const unlockedColor = variant === "gray"
     ? "bg-slate-600/40 border border-slate-500/30"
     : "bg-emerald-600/40 border border-emerald-500/30";
   

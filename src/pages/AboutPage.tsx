@@ -28,10 +28,10 @@ export const AboutPage: React.FC = () => {
           <Info className="w-8 h-8 text-emerald-400" />
         </div>
       </div>
-      <h1 className="text-2xl font-bold mb-4 text-slate-100">About Greenhouse</h1>
+      <h1 className="text-2xl font-bold mb-4 text-slate-100">About SkyShards Greenhouse</h1>
       <p className="mb-2 text-slate-400">
-        Greenhouse is a tool designed to help you optimize crop placement and mutations in your greenhouse. 
-        This project is part of the SkyShards ecosystem and is open source.
+        SkyShards Greenhouse is a tool designed to help you optimize crop placement and mutations in your greenhouse.
+        This project is part of SkyShards and is open source.
       </p>
       <Divider />
       <div className="mb-4 flex items-center gap-2">
@@ -49,26 +49,6 @@ export const AboutPage: React.FC = () => {
           </button>
           <AnimatePresence>
             {copied["campionn"] && (
-              <motion.span
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                className="absolute left-1/2 -translate-x-1/2 top-full mt-1 text-green-500 text-xs flex items-center gap-1 pointer-events-none"
-              >
-                <Check className="w-3 h-3" /> Copied!
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </div>
-        <span className="font-semibold text-slate-300">or</span>
-        <div className="relative flex flex-col items-center min-w-[80px]">
-          <button className="font-mono cursor-pointer text-fuchsia-200 bg-slate-700 rounded-sm px-1 flex items-center gap-1 hover:bg-slate-800 transition" onClick={() => handleCopy("xkapy")}>
-            xkapy
-            <Copy className="w-4 h-4 text-white" />
-          </button>
-          <AnimatePresence>
-            {copied["xkapy"] && (
               <motion.span
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -7,10 +7,6 @@ interface GridPainterProps {
   gap?: number;
 }
 
-/**
- * Grid component for placing and managing locked crop placements.
- * This is a thin wrapper around InteractiveGrid for backwards compatibility.
- */
 export const GridPainter: React.FC<GridPainterProps> = ({
   className = "",
   cellSize = 48,

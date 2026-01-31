@@ -8,16 +8,10 @@ import type {
   JobProgress,
 } from "../types/greenhouse";
 
-// In development, use the Vite proxy to avoid CORS issues
-// In production, call the API directly
 const API_BASE = import.meta.env.DEV ? "/api" : "https://api.skyshards.com";
 
 // Polling interval for job status checks (ms)
 const POLL_INTERVAL = 500;
-
-// =============================================================================
-// Job-based Solver API
-// =============================================================================
 
 /**
  * Submit a solve job to the queue.
@@ -47,9 +41,6 @@ export async function submitSolveJob(request: SolveRequest): Promise<string> {
   return result.job_id;
 }
 
-/**
- * Get the status of a job.
- */
 export async function getJobStatus(jobId: string): Promise<JobStatusResponse> {
   const response = await fetch(`${API_BASE}/jobs/${jobId}`);
   
@@ -64,9 +55,6 @@ export async function getJobStatus(jobId: string): Promise<JobStatusResponse> {
   return response.json();
 }
 
-/**
- * Cancel a running or queued job.
- */
 export async function cancelJob(jobId: string): Promise<void> {
   const response = await fetch(`${API_BASE}/jobs/${jobId}`, {
     method: "DELETE",
@@ -78,24 +66,12 @@ export async function cancelJob(jobId: string): Promise<void> {
   }
 }
 
-/**
- * Callback types for job progress tracking
- */
 export interface SolveJobCallbacks {
   onProgress?: (progress: JobProgress) => void;
   onQueuePosition?: (position: number) => void;
   onPreviewUpdate?: (result: SolveResponse) => void;
 }
 
-/**
- * Submit a solve job and poll for results.
- * This is the main function to use for solving - it handles the entire job lifecycle.
- * 
- * @param request - The solve request parameters
- * @param callbacks - Optional callbacks for progress updates
- * @param abortSignal - Optional AbortSignal to cancel the job
- * @returns The final solve response
- */
 export async function solveGreenhouseWithJob(
   request: SolveRequest,
   callbacks?: SolveJobCallbacks,
@@ -195,18 +171,6 @@ export async function solveGreenhouseWithJob(
     poll();
   });
 }
-
-/**
- * Legacy synchronous solve function (now uses job system internally).
- * Kept for backwards compatibility but doesn't provide progress updates.
- */
-export async function solveGreenhouse(request: SolveRequest): Promise<SolveResponse> {
-  return solveGreenhouseWithJob(request);
-}
-
-// =============================================================================
-// Expansion Optimizer (still synchronous - fast enough)
-// =============================================================================
 
 export async function optimizeExpansion(request: ExpansionRequest): Promise<ExpansionResponse> {
   const response = await fetch(`${API_BASE}/greenhouse/expansion`, {

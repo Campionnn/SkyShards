@@ -100,7 +100,7 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
   const addMutation = useCallback((id: string, name: string) => {
     setSelectedMutations(prev => {
       if (prev.some(m => m.id === id)) return prev;
-      return [...prev, { id, name, mode: "maximize", targetCount: 1 }];
+      return [...prev, { id, name, mode: "target", targetCount: 1 }];
     });
   }, []);
   

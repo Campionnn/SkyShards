@@ -11,10 +11,6 @@ import { useLockedPlacements } from "../context";
 import { useToast } from "../components/ui/toastContext";
 // Types imported for documentation purposes but used via context
 
-// =============================================================================
-// Types
-// =============================================================================
-
 export interface DragState {
   placementId: string;
   startPosition: [number, number];
@@ -67,10 +63,6 @@ export interface UseGridPlacementReturn {
   ) => [number, number] | null;
 }
 
-// =============================================================================
-// Hook Implementation
-// =============================================================================
-
 export function useGridPlacement({
   cellSize,
   gap,
@@ -101,11 +93,7 @@ export function useGridPlacement({
     lastPlacedPosition: [number, number] | null;
     lastPlacedSize: number;
   }>({ lastCell: null, lastPlacedPosition: null, lastPlacedSize: 1 });
-  
-  // =============================================================================
-  // Helper Functions
-  // =============================================================================
-  
+
   const getGridCellWithOffset = useCallback((clientX: number, clientY: number): CellWithOffset | null => {
     if (!gridRef.current) return null;
     const rect = gridRef.current.getBoundingClientRect();
@@ -205,11 +193,7 @@ export function useGridPlacement({
       paintDataRef.current = { ...paintDataRef.current, lastCell: cell };
     }
   }, [selectedCropForPlacement, getAdjustedPosition, placeCropAtPosition, removeAtCell]);
-  
-  // =============================================================================
-  // Event Handlers
-  // =============================================================================
-  
+
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const cellInfo = getGridCellWithOffset(e.clientX, e.clientY);
     
@@ -326,11 +310,7 @@ export function useGridPlacement({
       paintDataRef.current = { lastCell: null, lastPlacedPosition: null, lastPlacedSize: 1 };
     }
   }, [dragState, paintState, moveLockedPlacement, toast]);
-  
-  // =============================================================================
-  // Document-level Event Handlers
-  // =============================================================================
-  
+
   useEffect(() => {
     if (!paintState && !dragState) return;
     
@@ -363,11 +343,7 @@ export function useGridPlacement({
       document.removeEventListener("mouseup", handleDocumentMouseUp);
     };
   }, [paintState, dragState, lockedPlacements, getGridCellClampedWithOffset, getAdjustedPosition, handlePaintAtCell, handleMouseUp]);
-  
-  // =============================================================================
-  // Computed Values
-  // =============================================================================
-  
+
   const previewPosition = hoverInfo && selectedCropForPlacement
     ? getAdjustedPosition(hoverInfo.cell, hoverInfo.offsetX, hoverInfo.offsetY, selectedCropForPlacement.size)
     : null;

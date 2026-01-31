@@ -9,9 +9,6 @@ export interface DragValidationOverlayProps {
   isValid: boolean;
 }
 
-/**
- * Dashed border overlay shown during drag operations to indicate valid/invalid placement
- */
 export const DragValidationOverlay: React.FC<DragValidationOverlayProps> = ({
   position,
   size,

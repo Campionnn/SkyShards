@@ -15,11 +15,8 @@ interface DesignerGridProps {
   className?: string;
   cellSize?: number;
   gap?: number;
+  showTargets?: boolean;
 }
-
-// =============================================================================
-// StatusMessage Component
-// =============================================================================
 
 const StatusMessage: React.FC<{
   hoveredPlacementId: string | null;
@@ -63,10 +60,6 @@ const StatusMessage: React.FC<{
     </div>
   );
 };
-
-// =============================================================================
-// DesignerPlacementCell - Similar to LockedPlacementCell but for designer
-// =============================================================================
 
 interface DesignerPlacementCellProps {
   placement: DesignerPlacement;
@@ -174,10 +167,6 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
   );
 };
 
-// =============================================================================
-// DesignerPlacementPreview - Preview overlay for placing crops
-// =============================================================================
-
 interface DesignerPlacementPreviewProps {
   position: [number, number];
   cropId: string;
@@ -252,14 +241,11 @@ const DesignerPlacementPreview: React.FC<DesignerPlacementPreviewProps> = ({
   );
 };
 
-// =============================================================================
-// DesignerGrid - Main component
-// =============================================================================
-
 export const DesignerGrid: React.FC<DesignerGridProps> = ({
   className = "",
   cellSize = 48,
   gap = 2,
+  showTargets = true,
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { getCropDef, mutations } = useGreenhouseData();
@@ -356,7 +342,7 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
       })}
       
       {/* Target placements */}
-      {targetPlacements.map((placement) => {
+      {showTargets && targetPlacements.map((placement) => {
         const isDragging = dragState?.placementId === placement.id;
         const isHovered = hoveredPlacementId === placement.id && !isDragging && !isPlacementMode;
         
