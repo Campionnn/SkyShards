@@ -263,13 +263,18 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   
   // Handle sending current grid content to designer
   const handleSendToDesigner = useCallback(() => {
-    const inputs: Array<{ name: string; position: [number, number]; size: number }> = [];
-    const targets: Array<{ name: string; position: [number, number]; size: number }> = [];
+    const inputs: Array<{ id: string; name: string; position: [number, number]; size: number }> = [];
+    const targets: Array<{ id: string; name: string; position: [number, number]; size: number }> = [];
     
     // Add locked placements as inputs
     for (const placement of lockedPlacements) {
+      const cropDef = getCropDef(placement.crop);
+      const mutationDef = getMutationDef(placement.crop);
+      const displayName = cropDef?.name || mutationDef?.name || placement.crop.replace(/_/g, " ");
+      
       inputs.push({
-        name: placement.crop,
+        id: placement.crop,
+        name: displayName,
         position: placement.position,
         size: placement.size,
       });
@@ -289,8 +294,13 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
         });
         
         if (!overlapsWithLocked) {
+          const cropDef = getCropDef(placement.crop);
+          const mutationDef = getMutationDef(placement.crop);
+          const displayName = cropDef?.name || mutationDef?.name || placement.crop.replace(/_/g, " ");
+          
           inputs.push({
-            name: placement.crop,
+            id: placement.crop,
+            name: displayName,
             position: placement.position,
             size: placement.size,
           });
@@ -299,8 +309,13 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
       
       // Add mutations as targets
       for (const mutation of result.mutations || []) {
+        const mutationDef = getMutationDef(mutation.mutation);
+        const cropDef = getCropDef(mutation.mutation);
+        const displayName = mutationDef?.name || cropDef?.name || mutation.mutation.replace(/_/g, " ");
+        
         targets.push({
-          name: mutation.mutation,
+          id: mutation.mutation,
+          name: displayName,
           position: mutation.position,
           size: mutation.size,
         });
@@ -327,7 +342,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
     });
     
     navigate("/designer");
-  }, [lockedPlacements, result, loadFromSolverResult, toast, navigate]);
+  }, [lockedPlacements, result, getCropDef, getMutationDef, loadFromSolverResult, toast, navigate]);
   
   // Grid configuration
   const gridRef = useRef<HTMLDivElement>(null);

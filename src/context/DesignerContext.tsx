@@ -19,10 +19,19 @@ export interface SelectedCropForDesigner {
   isMutation: boolean;
 }
 
+// Requirement info with satisfaction status
+export interface RequirementInfo {
+  crop: string;
+  needed: number;
+  have: number;
+  satisfied: boolean;
+}
+
 // Mutation validation result
 export interface MutationValidationInfo {
   isValid: boolean;
-  missingRequirements: Array<{ crop: string; needed: number; have: number }>;
+  missingRequirements: Array<RequirementInfo>;
+  satisfiedRequirements: Array<RequirementInfo>;
 }
 
 interface DesignerContextType {
@@ -59,8 +68,8 @@ interface DesignerContextType {
   
   // Load from calculator results
   loadFromSolverResult: (
-    crops: Array<{ name: string; position: [number, number]; size: number }>,
-    mutations: Array<{ name: string; position: [number, number]; size: number }>
+    crops: Array<{ id: string; name: string; position: [number, number]; size: number }>,
+    mutations: Array<{ id: string; name: string; position: [number, number]; size: number }>
   ) => void;
   
   // Get all placements for display
@@ -287,13 +296,13 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   
   // Load from solver result
   const loadFromSolverResult = useCallback((
-    crops: Array<{ name: string; position: [number, number]; size: number }>,
-    mutations: Array<{ name: string; position: [number, number]; size: number }>
+    crops: Array<{ id: string; name: string; position: [number, number]; size: number }>,
+    mutations: Array<{ id: string; name: string; position: [number, number]; size: number }>
   ) => {
     // Convert crops to input placements
     const newInputs: DesignerPlacement[] = crops.map(crop => ({
       id: generatePlacementId(),
-      cropId: crop.name,
+      cropId: crop.id,
       cropName: crop.name,
       size: crop.size,
       position: crop.position,
@@ -303,7 +312,7 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Convert mutations to target placements
     const newTargets: DesignerPlacement[] = mutations.map(mutation => ({
       id: generatePlacementId(),
-      cropId: mutation.name,
+      cropId: mutation.id,
       cropName: mutation.name,
       size: mutation.size,
       position: mutation.position,
@@ -407,13 +416,13 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   ): MutationValidationInfo => {
     const target = targetPlacements.find(t => t.id === targetId);
     if (!target) {
-      return { isValid: false, missingRequirements: [] };
+      return { isValid: false, missingRequirements: [], satisfiedRequirements: [] };
     }
     
     // Find the mutation definition
     const mutationDef = mutations.find(m => m.id === target.cropId);
     if (!mutationDef) {
-      return { isValid: false, missingRequirements: [] };
+      return { isValid: false, missingRequirements: [], satisfiedRequirements: [] };
     }
     
     // Build a map of what crops are at each cell
@@ -463,24 +472,31 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     
     // Check requirements and collect missing ones
-    const missingRequirements: Array<{ crop: string; needed: number; have: number }> = [];
+    const missingRequirements: Array<RequirementInfo> = [];
+    const satisfiedRequirements: Array<RequirementInfo> = [];
     let isValid = true;
     
     for (const req of mutationDef.requirements) {
       const cellsOfThisCrop = adjacentCropCounts.get(req.crop);
       const have = cellsOfThisCrop ? cellsOfThisCrop.size : 0;
+      const requirementInfo: RequirementInfo = {
+        crop: req.crop,
+        needed: req.count,
+        have,
+        satisfied: false,
+      };
       
       if (have < req.count) {
         isValid = false;
-        missingRequirements.push({
-          crop: req.crop,
-          needed: req.count,
-          have,
-        });
+        requirementInfo.satisfied = false;
+        missingRequirements.push(requirementInfo);
+      } else {
+        requirementInfo.satisfied = true;
+        satisfiedRequirements.push(requirementInfo);
       }
     }
     
-    return { isValid, missingRequirements };
+    return { isValid, missingRequirements, satisfiedRequirements };
   }, [inputPlacements, targetPlacements]);
   
   const value: DesignerContextType = {

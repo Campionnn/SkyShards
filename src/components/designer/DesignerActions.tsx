@@ -142,12 +142,14 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
     
     // Convert to the format expected by loadFromSolverResult
     const crops = design.inputPlacements.map(p => ({
-      name: p.cropId,
+      id: p.cropId,
+      name: p.cropName,
       position: p.position,
       size: p.size,
     }));
     const mutations = design.targetPlacements.map(p => ({
-      name: p.cropId,
+      id: p.cropId,
+      name: p.cropName,
       position: p.position,
       size: p.size,
     }));
@@ -213,8 +215,10 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
       const crops = inputs.map(p => {
         const cropDef = getCropDef(p.cropId);
         const mutationDef = getMutationDef(p.cropId);
+        const displayName = cropDef?.name || mutationDef?.name || p.cropId.replace(/_/g, " ");
         return {
-          name: p.cropId,
+          id: p.cropId,
+          name: displayName,
           position: p.position,
           size: cropDef?.size || mutationDef?.size || 1,
         };
@@ -223,8 +227,10 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
       const mutations = targets.map(p => {
         const mutationDef = getMutationDef(p.cropId);
         const cropDef = getCropDef(p.cropId);
+        const displayName = mutationDef?.name || cropDef?.name || p.cropId.replace(/_/g, " ");
         return {
-          name: p.cropId,
+          id: p.cropId,
+          name: displayName,
           position: p.position,
           size: mutationDef?.size || cropDef?.size || 1,
         };

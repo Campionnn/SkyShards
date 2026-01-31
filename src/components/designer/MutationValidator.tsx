@@ -2,6 +2,11 @@ import React, { useMemo } from "react";
 import { AlertCircle, CheckCircle } from "lucide-react";
 import { useDesigner, useGreenhouseData } from "../../context";
 import { getCropImagePath } from "../../types/greenhouse";
+import type { MutationValidationInfo, DesignerPlacement } from "../../context/DesignerContext";
+
+interface HoveredValidation extends MutationValidationInfo {
+  target: DesignerPlacement;
+}
 
 interface MutationValidatorProps {
   className?: string;
@@ -36,13 +41,12 @@ export const MutationValidator: React.FC<MutationValidatorProps> = ({ className 
   const invalidCount = targetValidation.filter(t => !t.isValid).length;
   
   // Get the hovered target's validation info
-  const hoveredValidation = useMemo(() => {
+  const hoveredValidation: HoveredValidation | null = useMemo(() => {
     if (!hoveredTargetId) return null;
     const target = targetPlacements.find(t => t.id === hoveredTargetId);
     if (!target) return null;
     
     const validation = getTargetValidation(hoveredTargetId, mutations);
-    if (validation.isValid) return null;
     
     return {
       target,
@@ -82,44 +86,84 @@ export const MutationValidator: React.FC<MutationValidatorProps> = ({ className 
         
         {invalidCount > 0 && !hoveredValidation && (
           <p className="text-xs text-red-400/80 mt-1 ml-7">
-            Hover over invalid mutations on the grid to see what's missing
+            Hover over mutations on the grid to see requirements
           </p>
         )}
       </div>
       
-      {/* Hovered invalid target's missing requirements */}
-      {hoveredValidation && hoveredValidation.missingRequirements.length > 0 && (
-        <div className="p-3 rounded-lg border bg-red-500/10 border-red-500/30">
+      {/* Hovered target's requirements */}
+      {hoveredValidation && (
+        <div className={`p-3 rounded-lg border ${
+          hoveredValidation.isValid 
+            ? "bg-green-500/10 border-green-500/30" 
+            : "bg-slate-800/50 border-slate-600/30"
+        }`}>
           <div className="flex items-center gap-2 mb-2">
             <img
               src={getCropImagePath(hoveredValidation.target.cropId)}
               alt={hoveredValidation.target.cropName}
               className="w-5 h-5 object-contain"
             />
-            <span className="text-sm font-medium text-red-300">
-              {hoveredValidation.target.cropName} - Missing Requirements
+            <span className={`text-sm font-medium ${
+              hoveredValidation.isValid ? "text-green-300" : "text-slate-200"
+            }`}>
+              {hoveredValidation.target.cropName}
             </span>
           </div>
-          <div className="space-y-1 ml-7">
-            {hoveredValidation.missingRequirements.map((req, i) => {
-              const cropDef = getCropDef(req.crop);
-              const cropName = cropDef?.name || req.crop;
-              return (
-                <div key={i} className="flex items-center gap-2 text-xs">
-                  <img
-                    src={getCropImagePath(req.crop)}
-                    alt={cropName}
-                    className="w-4 h-4 object-contain"
-                    onError={(e) => { e.currentTarget.style.display = "none"; }}
-                  />
-                  <span className="text-slate-300">{cropName}:</span>
-                  <span className="text-red-400">{req.have}</span>
-                  <span className="text-slate-500">/</span>
-                  <span className="text-slate-300">{req.needed}</span>
-                </div>
-              );
-            })}
-          </div>
+          
+          {/* Missing requirements */}
+          {hoveredValidation.missingRequirements.length > 0 && (
+            <>
+              <p className="text-xs font-medium text-red-400 ml-7 mb-1">Missing</p>
+              <div className="space-y-1 ml-7">
+                {hoveredValidation.missingRequirements.map((req, i) => {
+                  const cropDef = getCropDef(req.crop);
+                  const cropName = cropDef?.name || req.crop;
+                  return (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <img
+                        src={getCropImagePath(req.crop)}
+                        alt={cropName}
+                        className="w-4 h-4 object-contain"
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                      />
+                      <span className="text-slate-300">{cropName}:</span>
+                      <span className="text-red-400">{req.have}</span>
+                      <span className="text-slate-500">/</span>
+                      <span className="text-slate-300">{req.needed}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+          
+          {/* Satisfied requirements */}
+          {hoveredValidation.satisfiedRequirements.length > 0 && (
+            <>
+              <p className="text-xs font-medium text-green-400 ml-7 mt-2 mb-1">Satisfied</p>
+              <div className="space-y-1 ml-7">
+                {hoveredValidation.satisfiedRequirements.map((req, i) => {
+                  const cropDef = getCropDef(req.crop);
+                  const cropName = cropDef?.name || req.crop;
+                  return (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <img
+                        src={getCropImagePath(req.crop)}
+                        alt={cropName}
+                        className="w-4 h-4 object-contain"
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                      />
+                      <span className="text-slate-300">{cropName}:</span>
+                      <span className="text-green-400">{req.have}</span>
+                      <span className="text-slate-500">/</span>
+                      <span className="text-slate-300">{req.needed}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

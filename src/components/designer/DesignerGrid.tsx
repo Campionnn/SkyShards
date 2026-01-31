@@ -368,9 +368,7 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
             onMouseDown={(e) => handlePlacementMouseDown(placement.id, e)}
             onMouseEnter={() => {
               setHoveredPlacementId(placement.id);
-              if (!validationInfo.isValid) {
-                setHoveredTargetId(placement.id);
-              }
+              setHoveredTargetId(placement.id);
             }}
             onMouseLeave={() => {
               setHoveredPlacementId(null);
