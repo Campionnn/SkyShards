@@ -318,6 +318,8 @@ export const MutationRequirementGrid: React.FC<MutationRequirementGridProps> = (
                     width={imageSize}
                     height={imageSize}
                     showGround={false}
+                    groundType={groundType}
+                    hasGroundContext={true}
                     showFallback={false}
                   />
                 </div>
@@ -357,6 +359,8 @@ export const MutationRequirementGrid: React.FC<MutationRequirementGridProps> = (
                     width={imageSize}
                     height={imageSize}
                     showGround={false}
+                    groundType={groundType}
+                    hasGroundContext={true}
                     showFallback={false}
                   />
                 </div>

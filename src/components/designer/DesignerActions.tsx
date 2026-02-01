@@ -65,6 +65,9 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
   const [exportProgress, setExportProgress] = useState(0);
   const [currentExportBlob, setCurrentExportBlob] = useState<Blob | null>(null);
   
+  // Delete all confirmation state
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+  
   // Reload layouts when load modal opens
   useEffect(() => {
     if (isLoadModalOpen) {
@@ -361,11 +364,14 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
   
   // Clear all placements
   const handleClearAll = useCallback(() => {
-    if (confirm("Clear all input and target placements?")) {
-      clearAllPlacements();
-      toast({ title: "All placements cleared", variant: "success", duration: 2000 });
+    if (!showDeleteAllConfirm) {
+      setShowDeleteAllConfirm(true);
+      return;
     }
-  }, [clearAllPlacements, toast]);
+    clearAllPlacements();
+    setShowDeleteAllConfirm(false);
+    toast({ title: "All placements cleared", variant: "success", duration: 2000 });
+  }, [showDeleteAllConfirm, clearAllPlacements, toast]);
   
   // Get export options
   const getExportOptions = useCallback((): ExportOptions => {
@@ -730,8 +736,14 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
         
         <button
           onClick={handleClearAll}
+          onBlur={() => setShowDeleteAllConfirm(false)}
           disabled={totalPlacements === 0}
-          className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-300 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className={`flex items-center justify-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+            showDeleteAllConfirm
+              ? 'bg-red-500/80 text-white hover:bg-red-500 border-red-500'
+              : 'bg-slate-800/60 border-slate-600/50 text-slate-300 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-300'
+          }`}
+          title={showDeleteAllConfirm ? 'Click again to confirm' : 'Delete all placements'}
         >
           <Trash2 className="w-4 h-4" />
         </button>

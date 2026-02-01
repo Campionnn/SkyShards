@@ -144,6 +144,7 @@ export const LockedPlacementCell: React.FC<LockedPlacementCellProps> = ({
         height={imageHeight}
         showGround={false}
         groundType={placement.ground}
+        hasGroundContext={true}
         showFallback={false}
       />
       
@@ -202,6 +203,7 @@ export const PlacementPreview: React.FC<PlacementPreviewProps> = ({
         height={imageHeight}
         showGround={false}
         groundType={crop.ground}
+        hasGroundContext={true}
         showFallback={false}
       />
     </div>
@@ -273,6 +275,7 @@ export const CropCell: React.FC<CropCellProps> = ({
         height={imageHeight}
         showGround={false}
         groundType={groundType}
+        hasGroundContext={true}
         showFallback={false}
       />
     </div>
@@ -341,6 +344,7 @@ export const MutationCell: React.FC<MutationCellProps> = ({
           height={imageHeight}
           showGround={false}
           groundType={groundType}
+          hasGroundContext={true}
           showFallback={true}
           fallbackText={name}
         />

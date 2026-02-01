@@ -19,10 +19,19 @@ const GROUND_TYPES = [
  */
 export const usePreloadGroundImages = () => {
   useEffect(() => {
-    // Preload all ground images
-    GROUND_TYPES.forEach((groundType) => {
-      const img = new Image();
-      img.src = getGroundImagePath(groundType);
+    // Preload all ground images and wait for them to load
+    const imagePromises = GROUND_TYPES.map((groundType) => {
+      return new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => {
+          console.warn(`Failed to preload ground image: ${groundType}`);
+          resolve(); // Resolve anyway to not block other images
+        };
+        img.src = getGroundImagePath(groundType);
+      });
     });
+
+    Promise.all(imagePromises).then(() => {});
   }, []);
 };

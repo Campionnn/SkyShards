@@ -12,6 +12,7 @@ export interface CropImageProps {
   // Optional: Ground tile
   showGround?: boolean;
   groundType?: string;
+  hasGroundContext?: boolean; // True if ground is rendered by parent container
   
   // Optional: Sizing
   size?: CropImageSize;
@@ -82,6 +83,7 @@ export const CropImage: React.FC<CropImageProps> = ({
   cropName,
   showGround = false,
   groundType = "farmland",
+  hasGroundContext = false,
   size = "md",
   width,
   height,
@@ -124,7 +126,8 @@ export const CropImage: React.FC<CropImageProps> = ({
   }
   
   // Determine if glow is needed
-  const shouldGlow = glowOverride ?? (showGround && needsCropGlow(cropId, groundType));
+  // Only apply glow if ground is actually being shown (by us or by parent)
+  const shouldGlow = glowOverride ?? ((showGround || hasGroundContext) && needsCropGlow(cropId, groundType));
   
   // Container style (with optional ground tile)
   const containerStyle: CSSProperties = {

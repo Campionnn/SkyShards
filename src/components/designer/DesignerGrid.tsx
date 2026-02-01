@@ -173,6 +173,7 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
           height={imageHeight}
           showGround={false}
           groundType={groundType}
+          hasGroundContext={true}
           showFallback={true}
           fallbackText={placement.cropName.slice(0, 4)}
         />
@@ -245,6 +246,7 @@ const DesignerPlacementPreview: React.FC<DesignerPlacementPreviewProps> = ({
         height={imageHeight}
         showGround={false}
         groundType={groundType}
+        hasGroundContext={true}
         showFallback={true}
         fallbackText={cropName.slice(0, 4)}
       />
