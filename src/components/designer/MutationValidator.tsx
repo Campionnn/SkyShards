@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { AlertCircle, CheckCircle } from "lucide-react";
 import { useDesigner, useGreenhouseData } from "../../context";
-import { getCropImagePath } from "../../types/greenhouse";
+import { CropImage } from "../shared";
 import type { MutationValidationInfo, DesignerPlacement } from "../../context/DesignerContext";
 
 interface HoveredValidation extends MutationValidationInfo {
@@ -99,10 +99,11 @@ export const MutationValidator: React.FC<MutationValidatorProps> = ({ className 
             : "bg-slate-800/50 border-slate-600/30"
         }`}>
           <div className="flex items-center gap-2 mb-2">
-            <img
-              src={getCropImagePath(hoveredValidation.target.cropId)}
-              alt={hoveredValidation.target.cropName}
-              className="w-5 h-5 object-contain"
+            <CropImage
+              cropId={hoveredValidation.target.cropId}
+              cropName={hoveredValidation.target.cropName}
+              size="xs"
+              showFallback={false}
             />
             <span className={`text-sm font-medium ${
               hoveredValidation.isValid ? "text-green-300" : "text-slate-200"
@@ -121,11 +122,11 @@ export const MutationValidator: React.FC<MutationValidatorProps> = ({ className 
                   const cropName = cropDef?.name || req.crop;
                   return (
                     <div key={i} className="flex items-center gap-2 text-xs">
-                      <img
-                        src={getCropImagePath(req.crop)}
-                        alt={cropName}
-                        className="w-4 h-4 object-contain"
-                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                      <CropImage
+                        cropId={req.crop}
+                        cropName={cropName}
+                        size="xs"
+                        showFallback={false}
                       />
                       <span className="text-slate-300">{cropName}:</span>
                       <span className="text-red-400">{req.have}</span>
@@ -148,11 +149,11 @@ export const MutationValidator: React.FC<MutationValidatorProps> = ({ className 
                   const cropName = cropDef?.name || req.crop;
                   return (
                     <div key={i} className="flex items-center gap-2 text-xs">
-                      <img
-                        src={getCropImagePath(req.crop)}
-                        alt={cropName}
-                        className="w-4 h-4 object-contain"
-                        onError={(e) => { e.currentTarget.style.display = "none"; }}
+                      <CropImage
+                        cropId={req.crop}
+                        cropName={cropName}
+                        size="xs"
+                        showFallback={false}
                       />
                       <span className="text-slate-300">{cropName}:</span>
                       <span className="text-green-400">{req.have}</span>

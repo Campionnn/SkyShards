@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo, useCallback } from "react";
+import React, { useRef, useMemo, useCallback } from "react";
 import { Trash2 } from "lucide-react";
 import { useDesigner, useGreenhouseData, useInfoModal } from "../../context";
 import { useDesignerGridPlacement } from "../../hooks";
@@ -8,7 +8,8 @@ import {
   getCellPixelPosition,
 } from "../../utilities";
 import { GridBackground, DragValidationOverlay } from "../grid";
-import { getCropImagePath, getGroundImagePath } from "../../types/greenhouse";
+import { getGroundImagePath } from "../../types/greenhouse";
+import { CropImage } from "../shared";
 import type { DesignerPlacement } from "../../context";
 
 interface DesignerGridProps {
@@ -92,15 +93,11 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
   onMouseLeave,
   onClick,
 }) => {
-  const [imageError, setImageError] = useState(false);
   const mouseDownPos = useRef<{ x: number; y: number } | null>(null);
   const CLICK_THRESHOLD = 5; // pixels - movement less than this is considered a click
   
   const { totalWidth, totalHeight, imageWidth, imageHeight } = calculateCropImageDimensions(placement.size, cellSize, gap);
   const { top, left } = getCellPixelPosition(placement.position[0], placement.position[1], cellSize, gap);
-  
-  // Check if this crop needs a white glow (dark crops on farmland blend in)
-  const needsGlow = (placement.cropId === "choconut" || placement.cropId === "chocoberry" || placement.cropId === "dead_plant") && groundType === "farmland";
   
   // Determine if this is an invalid target
   const isInvalidTarget = !isInput && validationInfo && !validationInfo.isValid;
@@ -135,13 +132,6 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
     opacity: isDragging ? 0.8 : 1,
     transition: isDragging ? "none" : "transform 0.15s ease, box-shadow 0.15s ease",
   };
-  
-  const imageStyle: React.CSSProperties = {
-    width: imageWidth,
-    height: imageHeight,
-    imageRendering: "pixelated",
-    filter: needsGlow ? "drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))" : undefined,
-  };
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     mouseDownPos.current = { x: e.clientX, y: e.clientY };
@@ -169,20 +159,16 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
       onContextMenu={(e) => e.preventDefault()}
       title={`${placement.cropName} - Drag to move, right-click to remove`}
     >
-      {!imageError ? (
-        <img
-          src={getCropImagePath(placement.cropId)}
-          alt={placement.cropName}
-          style={imageStyle}
-          className="object-contain pointer-events-none"
-          onError={() => setImageError(true)}
-          draggable={false}
-        />
-      ) : (
-        <span className={`text-xs font-medium ${isInput ? "text-yellow-300" : "text-purple-300"}`}>
-          {placement.cropName.slice(0, 4)}
-        </span>
-      )}
+      <CropImage
+        cropId={placement.cropId}
+        cropName={placement.cropName}
+        width={imageWidth}
+        height={imageHeight}
+        showGround={false}
+        groundType={groundType}
+        showFallback={true}
+        fallbackText={placement.cropName.slice(0, 4)}
+      />
       
       {/* Trash icon on hover */}
       {isHovered && (
@@ -215,13 +201,8 @@ const DesignerPlacementPreview: React.FC<DesignerPlacementPreviewProps> = ({
   cellSize,
   gap,
 }) => {
-  const [imageError, setImageError] = useState(false);
-  
   const { totalWidth, totalHeight, imageWidth, imageHeight } = calculateCropImageDimensions(size, cellSize, gap);
   const { top, left } = getCellPixelPosition(position[0], position[1], cellSize, gap);
-  
-  // Check if this crop needs a white glow (dark crops on farmland blend in)
-  const needsGlow = (cropId === "choconut" || cropId === "chocoberry" || cropId === "dead_plant") && groundType === "farmland";
   
   const style: React.CSSProperties = {
     position: "absolute",
@@ -246,30 +227,19 @@ const DesignerPlacementPreview: React.FC<DesignerPlacementPreviewProps> = ({
       : "0 0 12px rgba(239, 68, 68, 0.5)",
     pointerEvents: "none",
   };
-  
-  const imageStyle: React.CSSProperties = {
-    width: imageWidth,
-    height: imageHeight,
-    imageRendering: "pixelated",
-    filter: needsGlow ? "drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))" : undefined,
-  };
 
   return (
     <div style={style}>
-      {!imageError ? (
-        <img
-          src={getCropImagePath(cropId)}
-          alt={cropName}
-          style={imageStyle}
-          className="object-contain"
-          onError={() => setImageError(true)}
-          draggable={false}
-        />
-      ) : (
-        <span className="text-white text-xs font-medium">
-          {cropName.slice(0, 4)}
-        </span>
-      )}
+      <CropImage
+        cropId={cropId}
+        cropName={cropName}
+        width={imageWidth}
+        height={imageHeight}
+        showGround={false}
+        groundType={groundType}
+        showFallback={true}
+        fallbackText={cropName.slice(0, 4)}
+      />
     </div>
   );
 };

@@ -1,54 +1,52 @@
 export type Rarity = "common" | "uncommon" | "rare" | "epic" | "legendary";
 
+/**
+ * Centralized rarity color mappings
+ * Single source of truth for all rarity-based styling
+ */
+export const RARITY_COLORS = {
+  common: {
+    text: "text-white",
+    bg: "bg-slate-500/20 border-slate-500/30",
+    border: "border-slate-500/50",
+  },
+  uncommon: {
+    text: "text-green-400",
+    bg: "bg-green-500/20 border-green-500/30",
+    border: "border-green-500/50",
+  },
+  rare: {
+    text: "text-blue-400",
+    bg: "bg-blue-500/20 border-blue-500/30",
+    border: "border-blue-500/50",
+  },
+  epic: {
+    text: "text-purple-400",
+    bg: "bg-purple-500/20 border-purple-500/30",
+    border: "border-purple-500/50",
+  },
+  legendary: {
+    text: "text-yellow-400",
+    bg: "bg-yellow-500/20 border-yellow-500/30",
+    border: "border-yellow-500/50",
+  },
+} as const;
+
+const DEFAULT_RARITY = "common";
+
 export function getRarityTextColor(rarity: string): string {
-  switch (rarity.toLowerCase()) {
-    case "common":
-      return "text-white";
-    case "uncommon":
-      return "text-green-400";
-    case "rare":
-      return "text-blue-400";
-    case "epic":
-      return "text-purple-400";
-    case "legendary":
-      return "text-yellow-400";
-    default:
-      return "text-white";
-  }
+  const key = rarity.toLowerCase() as Rarity;
+  return RARITY_COLORS[key]?.text ?? RARITY_COLORS[DEFAULT_RARITY].text;
 }
 
 export function getRarityBgColor(rarity: string): string {
-  switch (rarity.toLowerCase()) {
-    case "common":
-      return "bg-slate-500/20 border-slate-500/30";
-    case "uncommon":
-      return "bg-green-500/20 border-green-500/30";
-    case "rare":
-      return "bg-blue-500/20 border-blue-500/30";
-    case "epic":
-      return "bg-purple-500/20 border-purple-500/30";
-    case "legendary":
-      return "bg-yellow-500/20 border-yellow-500/30";
-    default:
-      return "bg-slate-500/20 border-slate-500/30";
-  }
+  const key = rarity.toLowerCase() as Rarity;
+  return RARITY_COLORS[key]?.bg ?? RARITY_COLORS[DEFAULT_RARITY].bg;
 }
 
 export function getRarityBorderColor(rarity: string): string {
-  switch (rarity.toLowerCase()) {
-    case "common":
-      return "border-slate-500/50";
-    case "uncommon":
-      return "border-green-500/50";
-    case "rare":
-      return "border-blue-500/50";
-    case "epic":
-      return "border-purple-500/50";
-    case "legendary":
-      return "border-yellow-500/50";
-    default:
-      return "border-slate-500/50";
-  }
+  const key = rarity.toLowerCase() as Rarity;
+  return RARITY_COLORS[key]?.border ?? RARITY_COLORS[DEFAULT_RARITY].border;
 }
 
 export function getRarityClasses(rarity: string): {

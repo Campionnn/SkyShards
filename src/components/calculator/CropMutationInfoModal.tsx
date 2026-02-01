@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useMemo } from "react";
 import { X, Droplets, Sparkles, AlertTriangle, Leaf, Package, Star, Clock, Loader2 } from "lucide-react";
-import { getCropImagePath, getGroundImagePath } from "../../types/greenhouse";
+import { getGroundImagePath } from "../../types/greenhouse";
+import { CropImage } from "../shared";
 import { useInfoModal, getEffectDescription } from "../../context";
 import { MutationRequirementGrid } from "../ui";
 import type { CropDataJSON, MutationDataJSON } from "../../services/greenhouseDataService";
@@ -210,13 +211,11 @@ export const CropMutationInfoModal: React.FC = () => {
         <div className="flex-shrink-0 bg-slate-900 border-b border-slate-700 px-6 py-4 flex items-center justify-between rounded-t-xl">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden">
-              <img
-                src={getCropImagePath(id)}
-                alt={name}
-                className="w-9 h-9 object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                }}
+              <CropImage
+                cropId={id}
+                cropName={name}
+                size="sm"
+                showFallback={false}
               />
             </div>
             <div>
@@ -380,13 +379,11 @@ export const CropMutationInfoModal: React.FC = () => {
                       
                       return (
                         <div key={index} className="flex items-center gap-2">
-                          <img
-                            src={getCropImagePath(req.crop)}
-                            alt={req.crop}
-                            className="w-5 h-5 object-contain"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                            }}
+                          <CropImage
+                            cropId={req.crop}
+                            cropName={req.crop}
+                            size="xs"
+                            showFallback={false}
                           />
                           <span className={`text-sm ${reqColor}`}>
                             {req.count}x {formatName(req.crop)}
@@ -409,13 +406,11 @@ export const CropMutationInfoModal: React.FC = () => {
                     {Object.entries(drops).map(([item, amount]) => (
                       <div key={item} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <img
-                            src={getCropImagePath(item)}
-                            alt={item}
-                            className="w-4 h-4 object-contain"
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                            }}
+                          <CropImage
+                            cropId={item}
+                            cropName={item}
+                            size="xs"
+                            showFallback={false}
                           />
                           <span className="text-sm text-slate-300">{formatName(item)}</span>
                         </div>

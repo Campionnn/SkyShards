@@ -1,5 +1,6 @@
 export { useDropdownManager } from "./useDropdownManager";
 export { usePageTitle } from "./usePageTitle";
+export { usePreloadGroundImages } from "./usePreloadGroundImages";
 export { useGridPlacement } from "./useGridPlacement";
 export type {
   DragState,

@@ -2,7 +2,7 @@ import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom"
 import { Suspense, lazy } from "react";
 import { Layout } from "./components";
 import { GridStateProvider, GreenhouseDataProvider, LockedPlacementsProvider, DesignerProvider, InfoModalProvider } from "./context";
-import { usePageTitle } from "./hooks";
+import { usePageTitle, usePreloadGroundImages } from "./hooks";
 import { ToastProvider } from "./components";
 import { CropMutationInfoModal } from "./components/calculator/CropMutationInfoModal";
 
@@ -20,6 +20,7 @@ const LoadingSpinner = () => (
 
 const AppWithProviders = () => {
   usePageTitle();
+  usePreloadGroundImages(); // Preload ground textures on mount
   return <Layout />;
 };
 

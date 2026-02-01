@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { solveGreenhouseDirect } from "../../services/greenhouseService";
-import { getCropImagePath, getGroundImagePath } from "../../types/greenhouse";
+import { getGroundImagePath } from "../../types/greenhouse";
+import { CropImage } from "../shared";
 import type { SolveResponse, CropPlacement, MutationResult } from "../../types/greenhouse";
 import type { CropDataJSON, MutationDataJSON } from "../../services/greenhouseDataService";
 
@@ -311,15 +312,13 @@ export const MutationRequirementGrid: React.FC<MutationRequirementGridProps> = (
                     zIndex: 10,
                   }}
                 >
-                  <img
-                    src={getCropImagePath(mutation.mutation)}
-                    alt={mutation.mutation}
-                    style={{ width: imageSize, height: imageSize }}
-                    className="object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                    draggable={false}
+                  <CropImage
+                    cropId={mutation.mutation}
+                    cropName={mutation.mutation}
+                    width={imageSize}
+                    height={imageSize}
+                    showGround={false}
+                    showFallback={false}
                   />
                 </div>
               );
@@ -352,15 +351,13 @@ export const MutationRequirementGrid: React.FC<MutationRequirementGridProps> = (
                     justifyContent: "center",
                   }}
                 >
-                  <img
-                    src={getCropImagePath(placement.crop)}
-                    alt={placement.crop}
-                    style={{ width: imageSize, height: imageSize }}
-                    className="object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                    draggable={false}
+                  <CropImage
+                    cropId={placement.crop}
+                    cropName={placement.crop}
+                    width={imageSize}
+                    height={imageSize}
+                    showGround={false}
+                    showFallback={false}
                   />
                 </div>
               );

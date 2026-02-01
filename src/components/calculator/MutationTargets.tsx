@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { X, Target, TrendingUp, Trash2, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
 import { useGreenhouseData } from "../../context";
 import { MutationAutocomplete } from "./MutationAutocomplete";
-import { getCropImagePath } from "../../types/greenhouse";
+import { CropImage } from "../shared";
 import { getRarityTextColor } from "../../utilities";
 import type { MutationDefinition } from "../../types/greenhouse";
 
@@ -125,20 +125,11 @@ export const MutationTargets: React.FC = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
-                    <img
-                      src={getCropImagePath(selected.id)}
-                      alt={selected.name}
-                      className="w-full h-full object-contain"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        const parent = e.currentTarget.parentElement;
-                        if (parent) {
-                          const icon = document.createElement("div");
-                          icon.className = "text-emerald-400";
-                          icon.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>';
-                          parent.appendChild(icon);
-                        }
-                      }}
+                    <CropImage
+                      cropId={selected.id}
+                      cropName={selected.name}
+                      size="xs"
+                      showFallback={false}
                     />
                   </div>
                   <span className={`text-sm font-medium ${mutation ? getRarityTextColor(mutation.rarity) : "text-slate-200"}`}>

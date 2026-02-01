@@ -13,9 +13,9 @@ import {
   CropCell,
   MutationCell,
 } from "../grid";
+import { CropImage } from "../shared";
 import { useToast } from "../ui/toastContext";
 import type { SolveResponse, CropPlacement, MutationResult, JobProgress } from "../../types/greenhouse";
-import { getCropImagePath } from "../../types/greenhouse";
 
 interface SolverResultsProps {
   result: SolveResponse | null;
@@ -699,13 +699,11 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
                   className="flex items-center justify-between bg-slate-700/30 rounded-md px-3 py-2"
                 >
                   <div className="flex items-center gap-2">
-                    <img
-                      src={getCropImagePath(mutationId)}
-                      alt={displayName}
-                      className="w-5 h-5 object-contain"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
+                    <CropImage
+                      cropId={mutationId}
+                      cropName={displayName}
+                      size="xs"
+                      showFallback={false}
                     />
                     <span className={`text-sm ${mutationDef ? getRarityTextColor(mutationDef.rarity) : "text-slate-200"}`}>{displayName}</span>
                   </div>
@@ -743,13 +741,11 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
                   key={cropId}
                   className="flex items-center gap-2 bg-slate-700/30 rounded-md px-2 py-1"
                 >
-                  <img
-                    src={getCropImagePath(cropId)}
-                    alt={displayName}
-                    className="w-5 h-5 object-contain"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
+                  <CropImage
+                    cropId={cropId}
+                    cropName={displayName}
+                    size="xs"
+                    showFallback={false}
                   />
                   <span className="text-xs text-slate-300">{displayName}</span>
                   <span className="text-xs text-slate-500">x{count}</span>

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
+import { getRarityTextColor } from "../../utilities";
 import type { CropFilterCategory } from "../../types/greenhouse";
 
 export interface FilterOption {
@@ -20,16 +21,15 @@ export interface CropFilterDropdownProps {
 
 /**
  * Default color function for filter options
+ * Uses centralized rarity color utilities
  */
 export const defaultGetFilterColor = (value: CropFilterCategory): string => {
-  switch (value) {
-    case "common": return "text-white";
-    case "uncommon": return "text-green-400";
-    case "rare": return "text-blue-400";
-    case "epic": return "text-purple-400";
-    case "legendary": return "text-yellow-400";
-    default: return "text-slate-300";
+  // Rarity-based filters use getRarityTextColor
+  if (value === "common" || value === "uncommon" || value === "rare" || value === "epic" || value === "legendary") {
+    return getRarityTextColor(value);
   }
+  // Non-rarity filters use default color
+  return "text-slate-300";
 };
 
 /**

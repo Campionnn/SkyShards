@@ -1,26 +1,14 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useCallback } from "react";
 import { X } from "lucide-react";
 import { useGreenhouseData, useDesigner } from "../../context";
 import { getRarityTextColor, getRarityBorderColor } from "../../utilities";
-import { CropSearchInput, CropFilterDropdown, type FilterOption } from "../shared";
-import type { CropDefinition, MutationDefinition, CropFilterCategory } from "../../types/greenhouse";
-import { getCropImagePath } from "../../types/greenhouse";
+import { CropImage, SearchFilterHeader } from "../shared";
+import { useCropFiltering } from "../../hooks/shared/useCropFiltering";
+import type { CropDefinition, MutationDefinition } from "../../types/greenhouse";
 
 interface CropSelectionPaletteProps {
   className?: string;
 }
-
-// Filter options for the dropdown
-const FILTER_OPTIONS: FilterOption[] = [
-  { value: "all", label: "All" },
-  { value: "crops", label: "Crops" },
-  { value: "mutations", label: "Mutations" },
-  { value: "common", label: "Common" },
-  { value: "uncommon", label: "Uncommon" },
-  { value: "rare", label: "Rare" },
-  { value: "epic", label: "Epic" },
-  { value: "legendary", label: "Legendary" },
-];
 
 // Single crop/mutation tile in the palette grid
 const PaletteTile: React.FC<{
@@ -29,8 +17,6 @@ const PaletteTile: React.FC<{
   isSelected: boolean;
   onClick: () => void;
 }> = ({ crop, mutation, isSelected, onClick }) => {
-  const [imageError, setImageError] = useState(false);
-  
   const rarityBorder = mutation ? getRarityBorderColor(mutation.rarity) : "border-slate-600/50";
   const rarityText = mutation ? getRarityTextColor(mutation.rarity) : "text-white";
   
@@ -49,19 +35,13 @@ const PaletteTile: React.FC<{
       title={`${crop.name} (${crop.size}x${crop.size})`}
     >
       {/* Crop Image */}
-      <div className="w-12 h-12 flex items-center justify-center">
-        {!imageError ? (
-          <img
-            src={getCropImagePath(crop.id)}
-            alt={crop.name}
-            className="w-full h-full object-contain"
-            onError={() => setImageError(true)}
-            draggable={false}
-          />
-        ) : (
-          <span className="text-xs text-slate-400">{crop.name.slice(0, 2)}</span>
-        )}
-      </div>
+      <CropImage
+        cropId={crop.id}
+        cropName={crop.name}
+        size="sm"
+        className="w-12 h-12"
+        fallbackClassName="text-xs text-slate-400"
+      />
       
       {/* Crop Name (truncated) */}
       <span className={`text-[10px] leading-tight truncate w-full text-center ${rarityText}`}>
@@ -80,53 +60,13 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
   const { crops, mutations } = useGreenhouseData();
   const { selectedCropForPlacement, setSelectedCropForPlacement, mode } = useDesigner();
   
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState<CropFilterCategory>("all");
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  
-  // Get mutation definition for a crop ID (if it's a mutation)
-  const getMutationDef = useCallback((cropId: string): MutationDefinition | undefined => {
-    return mutations.find(m => m.id === cropId);
-  }, [mutations]);
-  
-  // Filter and search crops
-  const filteredItems = useMemo(() => {
-    let items = crops;
-    
-    // When placing targets, only show mutations
-    if (mode === "targets") {
-      items = items.filter(c => c.isMutation);
-    }
-    
-    // Apply category filter
-    switch (filter) {
-      case "crops":
-        items = items.filter(c => !c.isMutation);
-        break;
-      case "mutations":
-        items = items.filter(c => c.isMutation);
-        break;
-      case "common":
-      case "uncommon":
-      case "rare":
-      case "epic":
-      case "legendary":
-        items = items.filter(c => {
-          const mut = getMutationDef(c.id);
-          return mut && mut.rarity === filter;
-        });
-        break;
-    }
-    
-    // Apply search filter
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      items = items.filter(c => c.name.toLowerCase().includes(term));
-    }
-    
-    // No sorting - preserve data.json order
-    return items;
-  }, [crops, mode, filter, searchTerm, getMutationDef]);
+  // Use shared filtering hook with mode-based additional filter
+  const additionalFilter = mode === "targets" ? (crop: CropDefinition) => crop.isMutation ?? false : undefined;
+  const { searchTerm, setSearchTerm, filter, setFilter, filteredCrops, getMutationDef } = useCropFiltering({
+    crops,
+    mutations,
+    additionalFilter,
+  });
   
   // Handle tile click
   const handleTileClick = useCallback((crop: CropDefinition) => {
@@ -163,37 +103,26 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
       </div>
       
       {/* Search and Filter Row */}
-      <div className="flex gap-2 mb-3">
-        {/* Search Input */}
-        <CropSearchInput
-          value={searchTerm}
-          onChange={setSearchTerm}
-          placeholder="Search..."
-        />
-        
-        {/* Filter Dropdown */}
-        <CropFilterDropdown
-          value={filter}
-          onChange={(newFilter) => setFilter(newFilter as CropFilterCategory)}
-          options={FILTER_OPTIONS}
-          isOpen={isFilterOpen}
-          onToggle={() => setIsFilterOpen(!isFilterOpen)}
-          onClose={() => setIsFilterOpen(false)}
-        />
-      </div>
+      <SearchFilterHeader
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        filter={filter}
+        onFilterChange={setFilter}
+        className="mb-3"
+      />
       
       {/* Palette Grid */}
       <div className="flex-1 overflow-y-auto overflow-x-visible">
         <div className="grid grid-cols-5 gap-1.5 p-1">
-          {filteredItems.map((crop, index) => {
+          {filteredCrops.map((crop, index) => {
             // Check if we should show a rarity separator before this item
-            const prevMutation = index > 0 ? getMutationDef(filteredItems[index - 1].id) : null;
+            const prevMutation = index > 0 ? getMutationDef(filteredCrops[index - 1].id) : null;
             const currMutation = getMutationDef(crop.id);
             const showRaritySeparator = prevMutation && currMutation && 
                                   prevMutation.rarity !== currMutation.rarity;
             
             // Check if we should show a crop/mutation divider
-            const prevItem = index > 0 ? filteredItems[index - 1] : null;
+            const prevItem = index > 0 ? filteredCrops[index - 1] : null;
             const showCropMutationDivider = prevItem && !prevItem.isMutation && crop.isMutation;
             
             return (
@@ -216,7 +145,7 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
           })}
         </div>
         
-        {filteredItems.length === 0 && (
+        {filteredCrops.length === 0 && (
           <div className="text-center text-slate-400 py-8 text-sm">
             No items found
           </div>
@@ -225,8 +154,9 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
       
       {/* Count */}
       <div className="mt-2 text-xs text-slate-500 text-center">
-        {filteredItems.length} items
+        {filteredCrops.length} items
       </div>
     </div>
   );
 };
+

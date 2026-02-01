@@ -56,3 +56,9 @@ export function getExpandableCells(unlockedCells: Set<string>): Set<string> {
   
   return expandable;
 }
+
+// Export shared constants and utilities
+export * from "./styles";
+export * from "./cropFilters";
+export * from "./cropMapping";
+

@@ -2,25 +2,13 @@ import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { Brush, X, ChevronDown, Lock, Trash2, AlertTriangle, Info, ChevronUp } from "lucide-react";
 import { useGreenhouseData, useLockedPlacements, useInfoModal } from "../../context";
 import { getRarityTextColor } from "../../utilities";
-import { CropSearchInput, CropFilterDropdown, type FilterOption } from "../shared";
-import type { CropDefinition, MutationDefinition, CropFilterCategory, SelectedCropForPlacement } from "../../types/greenhouse";
-import { getCropImagePath } from "../../types/greenhouse";
+import { CropImage, SearchFilterHeader } from "../shared";
+import { useCropFiltering } from "../../hooks/shared/useCropFiltering";
+import type { CropDefinition, MutationDefinition, SelectedCropForPlacement } from "../../types/greenhouse";
 
 interface CropConfigurationsPanelProps {
   className?: string;
 }
-
-// Filter options for the dropdown
-const FILTER_OPTIONS: FilterOption[] = [
-  { value: "all", label: "All" },
-  { value: "crops", label: "Crops" },
-  { value: "mutations", label: "Mutations" },
-  { value: "common", label: "Common" },
-  { value: "uncommon", label: "Uncommon" },
-  { value: "rare", label: "Rare" },
-  { value: "epic", label: "Epic" },
-  { value: "legendary", label: "Legendary" },
-];
 
 // Item row for a single crop/mutation
 const CropItemRow: React.FC<{
@@ -42,7 +30,6 @@ const CropItemRow: React.FC<{
   onPriorityChange,
   onRowClick,
 }) => {
-  const [imageError, setImageError] = useState(false);
   const [inputValue, setInputValue] = useState<string>("");
   
   // Get the rarity color for the name
@@ -84,19 +71,14 @@ const CropItemRow: React.FC<{
       } ${onRowClick && mutation ? "cursor-pointer" : ""}`}
     >
       {/* Image */}
-      <div className="w-10 h-10 flex-shrink-0 bg-slate-700/50 rounded flex items-center justify-center overflow-hidden">
-        {!imageError ? (
-          <img
-            src={getCropImagePath(crop.id)}
-            alt={crop.name}
-            className="w-8 h-8 object-contain"
-            onError={() => setImageError(true)}
-            draggable={false}
-          />
-        ) : (
-          <span className="text-xs text-slate-400">{crop.name.slice(0, 2)}</span>
-        )}
-      </div>
+      <CropImage
+        cropId={crop.id}
+        cropName={crop.name}
+        size="sm"
+        className="w-10 h-10 flex-shrink-0 bg-slate-700/50 rounded overflow-hidden"
+        imageClassName="w-8 h-8"
+        fallbackClassName="text-xs text-slate-400"
+      />
       
       {/* Name, Size, and Type */}
       <div className="flex-1 min-w-0 flex items-center gap-2">
@@ -181,23 +163,17 @@ const LockedPlacementItem: React.FC<{
   cropName: string;
   onRemove: () => void;
 }> = ({ placement, cropName, onRemove }) => {
-  const [imageError, setImageError] = useState(false);
-  
   return (
     <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 rounded-md px-2 py-1">
-      <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
-        {!imageError ? (
-          <img
-            src={getCropImagePath(placement.crop)}
-            alt={cropName}
-            className="w-5 h-5 object-contain"
-            onError={() => setImageError(true)}
-            draggable={false}
-          />
-        ) : (
-          <Lock className="w-4 h-4 text-yellow-400" />
-        )}
-      </div>
+      <CropImage
+        cropId={placement.crop}
+        cropName={cropName}
+        size="xs"
+        className="w-6 h-6 flex-shrink-0"
+        imageClassName="w-5 h-5"
+        fallbackText=""
+        showFallback={false}
+      />
       <div className="flex-1 min-w-0">
         <span className="text-xs text-slate-200 truncate">{cropName}</span>
         <span className="text-xs text-slate-500 ml-1">
@@ -231,11 +207,14 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
     defaultPriorities,
   } = useLockedPlacements();
   
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState<CropFilterCategory>("all");
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { openInfo } = useInfoModal();
   const [priorityWarningDismissed, setPriorityWarningDismissed] = useState(false);
+  
+  // Use shared filtering hook
+  const { searchTerm, setSearchTerm, filter, setFilter, filteredCrops } = useCropFiltering({
+    crops,
+    mutations: [], // Not needed since we use getMutationDef from context
+  });
   
   // Check if any priorities differ from defaults
   const hasPriorities = useMemo(() => {
@@ -257,33 +236,6 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [selectedCropForPlacement, setSelectedCropForPlacement]);
-  
-  // Filter crops based on selected category and search term
-  const filteredCrops = useMemo(() => {
-    let items = crops;
-    
-    // Apply category filter
-    if (filter === "crops") {
-      items = items.filter(c => !c.isMutation);
-    } else if (filter === "mutations") {
-      items = items.filter(c => c.isMutation);
-    } else if (filter !== "all") {
-      // Rarity filters - only show mutations with matching rarity
-      items = items.filter(c => {
-        if (!c.isMutation) return false;
-        const mutation = getMutationDef(c.id);
-        return mutation?.rarity.toLowerCase() === filter.toLowerCase();
-      });
-    }
-    
-    // Apply search filter
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      items = items.filter(c => c.name.toLowerCase().includes(term));
-    }
-    
-    return items;
-  }, [crops, filter, searchTerm, getMutationDef]);
   
   // Handle info button click
   const handleInfoClick = useCallback((crop: CropDefinition) => {
@@ -344,25 +296,13 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
         </div>
         
         {/* Search and Filter Row */}
-        <div className="flex gap-2 mb-3 flex-shrink-0">
-          {/* Search Input */}
-          <CropSearchInput
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Search..."
-            className="flex-1"
-          />
-          
-          {/* Filter Dropdown */}
-          <CropFilterDropdown
-            value={filter}
-            onChange={setFilter}
-            options={FILTER_OPTIONS}
-            isOpen={isFilterOpen}
-            onToggle={() => setIsFilterOpen(!isFilterOpen)}
-            onClose={() => setIsFilterOpen(false)}
-          />
-        </div>
+        <SearchFilterHeader
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          filter={filter}
+          onFilterChange={setFilter}
+          className="mb-3 flex-shrink-0"
+        />
         
         {/* Priority Warning - dismissible, once per session */}
         {hasPriorities && !priorityWarningDismissed && (
