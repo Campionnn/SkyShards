@@ -12,7 +12,7 @@ export const DesignerPage: React.FC = () => {
   
   return (
     <div className="container mx-auto px-4 py-6 max-w-screen-2xl">
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_420px] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr_420px] gap-6">
         <div className="space-y-4">
           <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
             <DesignerActions />
