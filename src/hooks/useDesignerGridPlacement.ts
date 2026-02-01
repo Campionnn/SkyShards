@@ -14,6 +14,7 @@ export interface DesignerDragState {
   placementId: string;
   startPosition: [number, number];
   currentPosition: [number, number];
+  isDragging: boolean; // True once mouse has moved enough to be considered a drag
 }
 
 export interface DesignerPaintState {
@@ -280,6 +281,7 @@ export function useDesignerGridPlacement({
           placementId,
           startPosition: placement.position,
           currentPosition: placement.position,
+          isDragging: false, // Not dragging yet, waiting for mouse movement
         });
       }
     }
@@ -287,9 +289,10 @@ export function useDesignerGridPlacement({
   
   const handleMouseUp = useCallback(() => {
     if (dragState) {
-      const { placementId, startPosition, currentPosition } = dragState;
+      const { placementId, startPosition, currentPosition, isDragging } = dragState;
       
-      if (startPosition[0] !== currentPosition[0] || startPosition[1] !== currentPosition[1]) {
+      // Only move if we actually dragged (not just clicked)
+      if (isDragging && (startPosition[0] !== currentPosition[0] || startPosition[1] !== currentPosition[1])) {
         const moveResult = movePlacement(placementId, currentPosition);
         
         if (!moveResult.success) {
@@ -324,10 +327,16 @@ export function useDesignerGridPlacement({
         if (placement) {
           const adjustedPos = getAdjustedPosition(cellInfo.cell, cellInfo.offsetX, cellInfo.offsetY, placement.size);
           if (adjustedPos) {
-            setDragState(prev => prev ? { ...prev, currentPosition: adjustedPos } : null);
+            // Mark as dragging once mouse moves to a different position
+            const hasMoved = adjustedPos[0] !== dragState.startPosition[0] || adjustedPos[1] !== dragState.startPosition[1];
+            setDragState(prev => prev ? { 
+              ...prev, 
+              currentPosition: adjustedPos,
+              isDragging: prev.isDragging || hasMoved,
+            } : null);
           }
         } else {
-          setDragState(prev => prev ? { ...prev, currentPosition: cellInfo.cell } : null);
+          setDragState(prev => prev ? { ...prev, currentPosition: cellInfo.cell, isDragging: true } : null);
         }
       } else if (paintState) {
         handlePaintAtCell(cellInfo.cell, cellInfo.offsetX, cellInfo.offsetY, paintState.mode);

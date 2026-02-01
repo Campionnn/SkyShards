@@ -26,3 +26,6 @@ export * from "./rarity";
 
 // Design encoding/decoding utilities
 export * from "./designEncoding";
+
+// Mutation layout generator
+export * from "./mutationLayoutGenerator";

@@ -2,7 +2,7 @@ import React, { useMemo, useState, useRef, useCallback } from "react";
 import { CheckCircle2, AlertCircle, Grid3X3, Eye, EyeOff, Zap, Clock, RotateCcw, Paintbrush } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GRID_SIZE } from "../../constants";
-import { useGreenhouseData, useGridState, useLockedPlacements, useDesigner } from "../../context";
+import { useGreenhouseData, useGridState, useLockedPlacements, useDesigner, useInfoModal } from "../../context";
 import { useGridPlacement } from "../../hooks";
 import { getGridDimensions, getRarityTextColor } from "../../utilities";
 import {
@@ -256,6 +256,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   const { unlockedCells } = useGridState();
   const { lockedPlacements, selectedCropForPlacement, isPlacementMode } = useLockedPlacements();
   const { loadFromSolverResult } = useDesigner();
+  const { openInfo } = useInfoModal();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -366,6 +367,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
     handleMouseUp,
     handleContextMenu,
     handlePlacementMouseDown,
+    cancelDrag,
   } = useGridPlacement({ cellSize, gap, gridRef });
   
   // Build ground type maps for solver results
@@ -468,6 +470,7 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
             cellSize={cellSize}
             gap={gap}
             isLocked={item.locked}
+            onClick={() => openInfo(item.id)}
           />
         ))}
 
@@ -483,14 +486,15 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
             cellSize={cellSize}
             gap={gap}
             showImage={showMutations}
+            onClick={() => openInfo(item.id)}
           />
         ))}
 
         {/* Locked placements */}
         {lockedPlacements.map((placement) => {
-          const isDragging = dragState?.placementId === placement.id;
-          const isHovered = hoveredPlacementId === placement.id && !isDragging && !isPlacementMode;
-          const displayPlacement = isDragging
+          const isBeingDragged = dragState?.placementId === placement.id && dragState?.isDragging;
+          const isHovered = hoveredPlacementId === placement.id && !isBeingDragged && !isPlacementMode;
+          const displayPlacement = isBeingDragged
             ? { ...placement, position: dragState.currentPosition }
             : placement;
 
@@ -500,18 +504,20 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
               placement={displayPlacement}
               cellSize={cellSize}
               gap={gap}
-              isDragging={isDragging}
+              isDragging={isBeingDragged}
               isHovered={isHovered}
               isPlacementMode={isPlacementMode}
               onMouseDown={(e) => handlePlacementMouseDown(placement.id, e)}
               onMouseEnter={() => setHoveredPlacementId(placement.id)}
               onMouseLeave={() => setHoveredPlacementId(null)}
+              onClick={() => openInfo(placement.crop)}
+              onCancelDrag={cancelDrag}
             />
           );
         })}
 
         {/* Drag validation overlay */}
-        {dragState && dragValidation && (
+        {dragState?.isDragging && dragValidation && (
           <DragValidationOverlay
             position={dragState.currentPosition}
             size={lockedPlacements.find(p => p.id === dragState.placementId)?.size ?? 1}

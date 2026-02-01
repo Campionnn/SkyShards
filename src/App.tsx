@@ -1,9 +1,10 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Layout } from "./components";
-import { GridStateProvider, GreenhouseDataProvider, LockedPlacementsProvider, DesignerProvider } from "./context";
+import { GridStateProvider, GreenhouseDataProvider, LockedPlacementsProvider, DesignerProvider, InfoModalProvider } from "./context";
 import { usePageTitle } from "./hooks";
 import { ToastProvider } from "./components";
+import { CropMutationInfoModal } from "./components/calculator/CropMutationInfoModal";
 
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
 const DesignerPage = lazy(() => import("./pages/DesignerPage").then((module) => ({ default: module.DesignerPage })));
@@ -28,7 +29,10 @@ const ProtectedLayout = () => {
       <GridStateProvider>
         <LockedPlacementsProvider>
           <DesignerProvider>
-            <AppWithProviders />
+            <InfoModalProvider>
+              <AppWithProviders />
+              <CropMutationInfoModal />
+            </InfoModalProvider>
           </DesignerProvider>
         </LockedPlacementsProvider>
       </GridStateProvider>

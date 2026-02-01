@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { useGridState, useLockedPlacements } from "../../context";
+import { useGridState, useLockedPlacements, useInfoModal } from "../../context";
 import { useGridPlacement } from "../../hooks";
 import { getGridDimensions } from "../../utilities";
 import {
@@ -25,6 +25,7 @@ export const InteractiveGrid: React.FC<InteractiveGridProps> = ({
   const gridRef = useRef<HTMLDivElement>(null);
   const { unlockedCells } = useGridState();
   const { lockedPlacements, selectedCropForPlacement, isPlacementMode } = useLockedPlacements();
+  const { openInfo } = useInfoModal();
   
   const { width: gridWidth, height: gridHeight } = getGridDimensions(cellSize, gap);
   
@@ -42,6 +43,7 @@ export const InteractiveGrid: React.FC<InteractiveGridProps> = ({
     handleMouseUp,
     handleContextMenu,
     handlePlacementMouseDown,
+    cancelDrag,
   } = useGridPlacement({ cellSize, gap, gridRef });
   
   return (
@@ -64,11 +66,11 @@ export const InteractiveGrid: React.FC<InteractiveGridProps> = ({
       
       {/* Locked placements */}
       {lockedPlacements.map((placement) => {
-        const isDragging = dragState?.placementId === placement.id;
-        const isHovered = hoveredPlacementId === placement.id && !isDragging && !isPlacementMode;
+        const isBeingDragged = dragState?.placementId === placement.id && dragState?.isDragging;
+        const isHovered = hoveredPlacementId === placement.id && !isBeingDragged && !isPlacementMode;
         
         // If dragging, show at drag position
-        const displayPlacement = isDragging
+        const displayPlacement = isBeingDragged
           ? { ...placement, position: dragState.currentPosition }
           : placement;
         
@@ -78,18 +80,20 @@ export const InteractiveGrid: React.FC<InteractiveGridProps> = ({
             placement={displayPlacement}
             cellSize={cellSize}
             gap={gap}
-            isDragging={isDragging}
+            isDragging={isBeingDragged}
             isHovered={isHovered}
             isPlacementMode={isPlacementMode}
             onMouseDown={(e) => handlePlacementMouseDown(placement.id, e)}
             onMouseEnter={() => setHoveredPlacementId(placement.id)}
             onMouseLeave={() => setHoveredPlacementId(null)}
+            onClick={() => openInfo(placement.crop)}
+            onCancelDrag={cancelDrag}
           />
         );
       })}
       
       {/* Drag preview validation overlay */}
-      {dragState && dragValidation && (
+      {dragState?.isDragging && dragValidation && (
         <DragValidationOverlay
           position={dragState.currentPosition}
           size={lockedPlacements.find(p => p.id === dragState.placementId)?.size ?? 1}
@@ -100,7 +104,7 @@ export const InteractiveGrid: React.FC<InteractiveGridProps> = ({
       )}
       
       {/* Placement preview (when not dragging) */}
-      {previewPosition && selectedCropForPlacement && !dragState && !paintState && (
+      {previewPosition && selectedCropForPlacement && !dragState?.isDragging && !paintState && (
         <PlacementPreview
           position={previewPosition}
           crop={selectedCropForPlacement}

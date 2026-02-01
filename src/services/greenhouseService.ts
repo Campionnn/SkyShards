@@ -6,6 +6,7 @@ import type {
   JobSubmitResponse,
   JobStatusResponse,
   JobProgress,
+  MutationGoal,
 } from "../types/greenhouse";
 
 const API_BASE = import.meta.env.DEV ? "/api" : "https://api.skyshards.com";
@@ -182,6 +183,36 @@ export async function optimizeExpansion(request: ExpansionRequest): Promise<Expa
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data.detail || `Expansion optimizer error: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Solve greenhouse synchronously (direct response, no job queue).
+ * Used for quick solves like mutation requirement previews.
+ */
+export async function solveGreenhouseDirect(
+  cells: [number, number][],
+  targets: MutationGoal[],
+  abortSignal?: AbortSignal
+): Promise<SolveResponse> {
+  const response = await fetch(`${API_BASE}/greenhouse`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      req: {
+        cells,
+        targets,
+        "remove_unused_crops": false
+      },
+    }),
+    signal: abortSignal,
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.detail || `Greenhouse solver error: ${response.statusText}`);
   }
 
   return response.json();

@@ -1,6 +1,6 @@
-import React, { useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo, useCallback } from "react";
 import { Trash2 } from "lucide-react";
-import { useDesigner, useGreenhouseData } from "../../context";
+import { useDesigner, useGreenhouseData, useInfoModal } from "../../context";
 import { useDesignerGridPlacement } from "../../hooks";
 import { 
   getGridDimensions, 
@@ -74,6 +74,7 @@ interface DesignerPlacementCellProps {
   onMouseDown: (e: React.MouseEvent) => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  onClick?: () => void;
 }
 
 const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
@@ -89,11 +90,17 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
   onMouseDown,
   onMouseEnter,
   onMouseLeave,
+  onClick,
 }) => {
   const [imageError, setImageError] = useState(false);
+  const mouseDownPos = useRef<{ x: number; y: number } | null>(null);
+  const CLICK_THRESHOLD = 5; // pixels - movement less than this is considered a click
   
   const { totalWidth, totalHeight, imageWidth, imageHeight } = calculateCropImageDimensions(placement.size, cellSize, gap);
   const { top, left } = getCellPixelPosition(placement.position[0], placement.position[1], cellSize, gap);
+  
+  // Check if this crop needs a white glow (dark crops on farmland blend in)
+  const needsGlow = (placement.cropId === "choconut" || placement.cropId === "chocoberry" || placement.cropId === "dead_plant") && groundType === "farmland";
   
   // Determine if this is an invalid target
   const isInvalidTarget = !isInput && validationInfo && !validationInfo.isValid;
@@ -128,11 +135,35 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
     opacity: isDragging ? 0.8 : 1,
     transition: isDragging ? "none" : "transform 0.15s ease, box-shadow 0.15s ease",
   };
+  
+  const imageStyle: React.CSSProperties = {
+    width: imageWidth,
+    height: imageHeight,
+    imageRendering: "pixelated",
+    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+  };
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    mouseDownPos.current = { x: e.clientX, y: e.clientY };
+    onMouseDown(e);
+  }, [onMouseDown]);
+  
+  const handleMouseUp = useCallback((e: React.MouseEvent) => {
+    if (mouseDownPos.current && onClick) {
+      const dx = Math.abs(e.clientX - mouseDownPos.current.x);
+      const dy = Math.abs(e.clientY - mouseDownPos.current.y);
+      if (dx < CLICK_THRESHOLD && dy < CLICK_THRESHOLD) {
+        onClick();
+      }
+    }
+    mouseDownPos.current = null;
+  }, [onClick]);
 
   return (
     <div
       style={style}
-      onMouseDown={onMouseDown}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onContextMenu={(e) => e.preventDefault()}
@@ -142,11 +173,7 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
         <img
           src={getCropImagePath(placement.cropId)}
           alt={placement.cropName}
-          style={{ 
-            width: imageWidth, 
-            height: imageHeight,
-            imageRendering: "pixelated",
-          }}
+          style={imageStyle}
           className="object-contain pointer-events-none"
           onError={() => setImageError(true)}
           draggable={false}
@@ -193,6 +220,9 @@ const DesignerPlacementPreview: React.FC<DesignerPlacementPreviewProps> = ({
   const { totalWidth, totalHeight, imageWidth, imageHeight } = calculateCropImageDimensions(size, cellSize, gap);
   const { top, left } = getCellPixelPosition(position[0], position[1], cellSize, gap);
   
+  // Check if this crop needs a white glow (dark crops on farmland blend in)
+  const needsGlow = (cropId === "choconut" || cropId === "chocoberry" || cropId === "dead_plant") && groundType === "farmland";
+  
   const style: React.CSSProperties = {
     position: "absolute",
     top,
@@ -216,6 +246,13 @@ const DesignerPlacementPreview: React.FC<DesignerPlacementPreviewProps> = ({
       : "0 0 12px rgba(239, 68, 68, 0.5)",
     pointerEvents: "none",
   };
+  
+  const imageStyle: React.CSSProperties = {
+    width: imageWidth,
+    height: imageHeight,
+    imageRendering: "pixelated",
+    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+  };
 
   return (
     <div style={style}>
@@ -223,11 +260,7 @@ const DesignerPlacementPreview: React.FC<DesignerPlacementPreviewProps> = ({
         <img
           src={getCropImagePath(cropId)}
           alt={cropName}
-          style={{ 
-            width: imageWidth, 
-            height: imageHeight,
-            imageRendering: "pixelated",
-          }}
+          style={imageStyle}
           className="object-contain"
           onError={() => setImageError(true)}
           draggable={false}
@@ -249,6 +282,7 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
 }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { getCropDef, mutations } = useGreenhouseData();
+  const { openInfo } = useInfoModal();
   const {
     inputPlacements,
     targetPlacements,
@@ -316,10 +350,10 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
       
       {/* Input placements */}
       {inputPlacements.map((placement) => {
-        const isDragging = dragState?.placementId === placement.id;
-        const isHovered = hoveredPlacementId === placement.id && !isDragging && !isPlacementMode;
+        const isBeingDragged = dragState?.placementId === placement.id && dragState?.isDragging;
+        const isHovered = hoveredPlacementId === placement.id && !isBeingDragged && !isPlacementMode;
         
-        const displayPlacement = isDragging
+        const displayPlacement = isBeingDragged
           ? { ...placement, position: dragState.currentPosition }
           : placement;
         
@@ -329,7 +363,7 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
             placement={displayPlacement}
             cellSize={cellSize}
             gap={gap}
-            isDragging={isDragging}
+            isDragging={isBeingDragged}
             isHovered={isHovered}
             isPlacementMode={isPlacementMode}
             isInput={true}
@@ -337,16 +371,17 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
             onMouseDown={(e) => handlePlacementMouseDown(placement.id, e)}
             onMouseEnter={() => setHoveredPlacementId(placement.id)}
             onMouseLeave={() => setHoveredPlacementId(null)}
+            onClick={() => openInfo(placement.cropId)}
           />
         );
       })}
       
       {/* Target placements */}
       {showTargets && targetPlacements.map((placement) => {
-        const isDragging = dragState?.placementId === placement.id;
-        const isHovered = hoveredPlacementId === placement.id && !isDragging && !isPlacementMode;
+        const isBeingDragged = dragState?.placementId === placement.id && dragState?.isDragging;
+        const isHovered = hoveredPlacementId === placement.id && !isBeingDragged && !isPlacementMode;
         
-        const displayPlacement = isDragging
+        const displayPlacement = isBeingDragged
           ? { ...placement, position: dragState.currentPosition }
           : placement;
         
@@ -359,7 +394,7 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
             placement={displayPlacement}
             cellSize={cellSize}
             gap={gap}
-            isDragging={isDragging}
+            isDragging={isBeingDragged}
             isHovered={isHovered}
             isPlacementMode={isPlacementMode}
             isInput={false}
@@ -374,12 +409,13 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
               setHoveredPlacementId(null);
               setHoveredTargetId(null);
             }}
+            onClick={() => openInfo(placement.cropId)}
           />
         );
       })}
       
       {/* Drag preview validation overlay */}
-      {dragState && dragValidation && (
+      {dragState?.isDragging && dragValidation && (
         <DragValidationOverlay
           position={dragState.currentPosition}
           size={allPlacements.find(p => p.id === dragState.placementId)?.size ?? 1}
@@ -390,7 +426,7 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
       )}
       
       {/* Placement preview (when not dragging) */}
-      {previewPosition && selectedCropForPlacement && !dragState && !paintState && (
+      {previewPosition && selectedCropForPlacement && !dragState?.isDragging && !paintState && (
         <DesignerPlacementPreview
           position={previewPosition}
           cropId={selectedCropForPlacement.id}

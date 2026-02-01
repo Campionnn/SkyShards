@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { Brush, X, ChevronDown, Lock, Trash2, AlertTriangle, Search, ChevronUp } from "lucide-react";
-import { useGreenhouseData, useLockedPlacements } from "../../context";
-import { CropMutationInfoModal } from "./CropMutationInfoModal";
+import { Brush, X, ChevronDown, Lock, Trash2, AlertTriangle, Search, ChevronUp, Info } from "lucide-react";
+import { useGreenhouseData, useLockedPlacements, useInfoModal } from "../../context";
 import { getRarityTextColor } from "../../utilities";
 import type { CropDefinition, MutationDefinition, CropFilterCategory, SelectedCropForPlacement } from "../../types/greenhouse";
 import { getCropImagePath } from "../../types/greenhouse";
@@ -49,7 +48,7 @@ const CropItemRow: React.FC<{
   mutation,
   priority,
   isPlacementActive,
-  // onInfoClick,
+  onInfoClick,
   onEditClick,
   onPriorityChange,
   onRowClick,
@@ -117,21 +116,21 @@ const CropItemRow: React.FC<{
         </span>
       </div>
       
-      {/* Buttons with reduced spacing */}
-      <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+      {/* Buttons - Larger touch targets */}
+      <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
         {/* Info Button */}
-        {/*<button*/}
-        {/*  onClick={onInfoClick}*/}
-        {/*  className="p-1.5 hover:bg-slate-700/50 rounded transition-colors text-slate-400 hover:text-blue-400"*/}
-        {/*  title="View details"*/}
-        {/*>*/}
-        {/*  <Info className="w-4 h-4" />*/}
-        {/*</button>*/}
+        <button
+          onClick={onInfoClick}
+          className="p-2.5 hover:bg-slate-700/50 rounded-lg transition-colors text-slate-400 hover:text-blue-400"
+          title="View details"
+        >
+          <Info className="w-5 h-5" />
+        </button>
         
         {/* Edit Button */}
         <button
           onClick={onEditClick}
-          className={`p-1.5 rounded transition-colors flex items-center gap-1 ${
+          className={`p-2.5 rounded-lg transition-colors flex items-center gap-1 ${
             isPlacementActive
               ? "bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30"
               : "hover:bg-slate-700/50 text-slate-400 hover:text-emerald-400"
@@ -139,9 +138,9 @@ const CropItemRow: React.FC<{
           title={isPlacementActive ? "Cancel placement" : "Place on grid"}
         >
           {isPlacementActive ? (
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           ) : (
-            <Brush className="w-4 h-4" />
+            <Brush className="w-5 h-5" />
           )}
         </button>
       </div>
@@ -247,10 +246,7 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
   const [filter, setFilter] = useState<CropFilterCategory>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
-  const [infoModal, setInfoModal] = useState<{
-    crop?: CropDefinition;
-    mutation?: MutationDefinition;
-  } | null>(null);
+  const { openInfo } = useInfoModal();
   const [priorityWarningDismissed, setPriorityWarningDismissed] = useState(false);
   
   // Check if any priorities differ from defaults
@@ -315,9 +311,8 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
   
   // Handle info button click
   const handleInfoClick = useCallback((crop: CropDefinition) => {
-    const mutation = crop.isMutation ? getMutationDef(crop.id) : undefined;
-    setInfoModal({ crop, mutation });
-  }, [getMutationDef]);
+    openInfo(crop.id);
+  }, [openInfo]);
   
   // Handle edit button click (toggle placement mode)
   const handleEditClick = useCallback((crop: CropDefinition) => {
@@ -539,14 +534,6 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
           </div>
         </div>
       )}
-      
-      {/* Info Modal */}
-      <CropMutationInfoModal
-        isOpen={!!infoModal}
-        onClose={() => setInfoModal(null)}
-        crop={infoModal?.crop}
-        mutation={infoModal?.mutation}
-      />
     </div>
   );
 };

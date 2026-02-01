@@ -420,7 +420,7 @@
       "drops": {
         "cocoa_beans": 400,
         "pumpkins": 170,
-        "melon_slice": 1600
+        "melon": 1600
       }
     },
     "cindershade": {
@@ -823,7 +823,7 @@
       ],
       "negative_buffs": [],
       "drops": {
-        "melon_slice": 3200
+        "melon": 3200
       }
     },
     "chorus_fruit": {
@@ -928,7 +928,7 @@
       "negative_buffs": [],
       "drops": {
         "cocoa_beans": 2000,
-        "melon_slice": 4000
+        "melon": 4000
       }
     },
     "startlevine": {
@@ -1012,7 +1012,7 @@
       "negative_buffs": [],
       "drops": {
         "cactus": 900,
-        "melon_slice": 2400,
+        "melon": 2400,
         "wild_rose": 2400
       }
     },
@@ -1185,7 +1185,7 @@
         "sugar_cane": 492,
         "pumpkin": 209,
         "wheat": 246,
-        "melon_slice": 985,
+        "melon": 985,
         "potato": 738,
         "nether_wart": 738,
         "red_mushroom": 117,

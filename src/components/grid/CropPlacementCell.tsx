@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { Trash2, Leaf, ImageOff } from "lucide-react";
 import { calculateCropImageDimensions, getCellPixelPosition } from "../../utilities";
 import { getCropImagePath, getGroundImagePath } from "../../types/greenhouse";
@@ -45,7 +45,12 @@ export interface LockedPlacementCellProps {
   onMouseDown: (e: React.MouseEvent) => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  onClick?: () => void;
+  onCancelDrag?: () => void;
 }
+
+// Click detection threshold in pixels
+const CLICK_THRESHOLD = 5;
 
 export const LockedPlacementCell: React.FC<LockedPlacementCellProps> = ({
   placement,
@@ -57,10 +62,17 @@ export const LockedPlacementCell: React.FC<LockedPlacementCellProps> = ({
   onMouseDown,
   onMouseEnter,
   onMouseLeave,
+  onClick,
+  onCancelDrag,
 }) => {
   const [imageError, setImageError] = useState(false);
+  const mouseDownPosRef = useRef<{ x: number; y: number } | null>(null);
+  const hasDraggedRef = useRef(false);
   
   const { imageWidth, imageHeight } = calculateCropImageDimensions(placement.size, cellSize, gap);
+  
+  // Check if this crop needs a white glow (dark crops on farmland blend in)
+  const needsGlow = (placement.crop === "choconut" || placement.crop === "chocoberry" || placement.crop === "dead_plant") && placement.ground === "farmland";
   
   const baseStyle = getBaseCellStyle({
     position: placement.position,
@@ -81,21 +93,64 @@ export const LockedPlacementCell: React.FC<LockedPlacementCellProps> = ({
     transform: isDragging ? undefined : "scale(1)",
     transition: isDragging ? "none" : "transform 0.15s ease, box-shadow 0.15s ease",
   };
+  
+  const imageStyle: React.CSSProperties = {
+    width: imageWidth,
+    height: imageHeight,
+    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+  };
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    // Store the initial position for click detection
+    mouseDownPosRef.current = { x: e.clientX, y: e.clientY };
+    hasDraggedRef.current = false;
+    
+    // Call the original mousedown handler for drag
+    onMouseDown(e);
+  }, [onMouseDown]);
+
+  const handleMouseMove = useCallback(() => {
+    // If we're tracking a potential click and mouse moved significantly, mark as dragged
+    if (mouseDownPosRef.current && !hasDraggedRef.current) {
+      hasDraggedRef.current = true;
+    }
+  }, []);
+
+  const handleMouseUp = useCallback((e: React.MouseEvent) => {
+    // Check if this was a click (not a drag)
+    if (mouseDownPosRef.current && onClick) {
+      const dx = Math.abs(e.clientX - mouseDownPosRef.current.x);
+      const dy = Math.abs(e.clientY - mouseDownPosRef.current.y);
+      
+      // If mouse moved less than threshold, treat as click
+      if (dx < CLICK_THRESHOLD && dy < CLICK_THRESHOLD) {
+        e.stopPropagation();
+        // Cancel any pending drag state before opening modal
+        onCancelDrag?.();
+        onClick();
+      }
+    }
+    
+    mouseDownPosRef.current = null;
+    hasDraggedRef.current = false;
+  }, [onClick, onCancelDrag]);
 
   return (
     <div
       style={style}
-      onMouseDown={onMouseDown}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onContextMenu={(e) => e.preventDefault()}
-      title={`${placement.crop} - Drag to move, right-click to remove`}
+      title={`${placement.crop} - Click for info, drag to move, right-click to remove`}
     >
       {!imageError ? (
         <img
           src={getCropImagePath(placement.crop)}
           alt={placement.crop}
-          style={{ width: imageWidth, height: imageHeight }}
+          style={imageStyle}
           className="object-contain pointer-events-none"
           onError={() => setImageError(true)}
           draggable={false}
@@ -135,6 +190,9 @@ export const PlacementPreview: React.FC<PlacementPreviewProps> = ({
   
   const { imageWidth, imageHeight } = calculateCropImageDimensions(crop.size, cellSize, gap);
   
+  // Check if this crop needs a white glow (dark crops on farmland blend in)
+  const needsGlow = (crop.id === "choconut" || crop.id === "chocoberry" || crop.id === "dead_plant") && crop.ground === "farmland";
+  
   const baseStyle = getBaseCellStyle({
     position,
     size: crop.size,
@@ -153,6 +211,12 @@ export const PlacementPreview: React.FC<PlacementPreviewProps> = ({
       : "0 0 12px rgba(239, 68, 68, 0.5)",
     pointerEvents: "none",
   };
+  
+  const imageStyle: React.CSSProperties = {
+    width: imageWidth,
+    height: imageHeight,
+    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+  };
 
   return (
     <div style={style}>
@@ -160,7 +224,7 @@ export const PlacementPreview: React.FC<PlacementPreviewProps> = ({
         <img
           src={getCropImagePath(crop.id)}
           alt={crop.name}
-          style={{ width: imageWidth, height: imageHeight }}
+          style={imageStyle}
           className="object-contain"
           onError={() => setImageError(true)}
           draggable={false}
@@ -183,6 +247,7 @@ export interface CropCellProps {
   cellSize: number;
   gap: number;
   isLocked?: boolean;
+  onClick?: () => void;
 }
 
 export const CropCell: React.FC<CropCellProps> = ({
@@ -194,13 +259,14 @@ export const CropCell: React.FC<CropCellProps> = ({
   cellSize,
   gap,
   isLocked = false,
+  onClick,
 }) => {
   const [imageError, setImageError] = useState(false);
   
   const { imageWidth, imageHeight } = calculateCropImageDimensions(size, cellSize, gap);
   
-  // Check if this crop needs a white glow (dark crops on ground texture)
-  const needsGlow = (id === "choconut" || id === "chocoberry" || id === "dead_plant") && groundType !== "farmland";
+  // Check if this crop needs a white glow (dark crops on farmland blend in)
+  const needsGlow = (id === "choconut" || id === "chocoberry" || id === "dead_plant") && groundType === "farmland";
   
   const baseStyle = getBaseCellStyle({
     position,
@@ -217,23 +283,36 @@ export const CropCell: React.FC<CropCellProps> = ({
     borderColor: "transparent",
     boxShadow: isLocked
       ? "0 0 8px rgba(234, 179, 8, 0.8), inset 0 0 8px rgba(234, 179, 8, 0.4)" 
-      : needsGlow
-        ? "0 0 6px rgba(255, 255, 255, 0.6), inset 0 0 4px rgba(255, 255, 255, 0.3)"
-        : undefined,
+      : undefined,
+    cursor: onClick ? "pointer" : undefined,
+  };
+  
+  const imageStyle: React.CSSProperties = {
+    width: imageWidth,
+    height: imageHeight,
+    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      e.stopPropagation();
+      onClick();
+    }
   };
 
   return (
     <div
       style={style}
-      title={`${name} (${position[0]}, ${position[1]})${size > 1 ? ` - ${size}x${size}` : ""}${isLocked ? " (Locked)" : ""}`}
-      className="transition-transform hover:z-10"
+      title={`${name} (${position[0]}, ${position[1]})${size > 1 ? ` - ${size}x${size}` : ""}${isLocked ? " (Locked)" : ""} - Click for info`}
+      className={`transition-transform hover:z-10 ${onClick ? "hover:brightness-110" : ""}`}
+      onClick={handleClick}
     >
       {!imageError ? (
         <img
           src={getCropImagePath(id)}
           alt={name}
-          style={{ width: imageWidth, height: imageHeight }}
-          className="object-contain"
+          style={imageStyle}
+          className="object-contain pointer-events-none"
           onError={() => setImageError(true)}
           draggable={false}
         />
@@ -258,6 +337,7 @@ export interface MutationCellProps {
   cellSize: number;
   gap: number;
   showImage: boolean;
+  onClick?: () => void;
 }
 
 export const MutationCell: React.FC<MutationCellProps> = ({
@@ -269,13 +349,14 @@ export const MutationCell: React.FC<MutationCellProps> = ({
   cellSize,
   gap,
   showImage,
+  onClick,
 }) => {
   const [imageError, setImageError] = useState(false);
   
   const { imageWidth, imageHeight } = calculateCropImageDimensions(size, cellSize, gap);
   
-  // Check if this mutation needs a white glow (dark crops on ground texture)
-  const needsGlow = (id === "choconut" || id === "chocoberry" || id === "dead_plant") && groundType !== "farmland";
+  // Check if this mutation needs a white glow (dark crops on farmland blend in)
+  const needsGlow = (id === "choconut" || id === "chocoberry" || id === "dead_plant") && groundType === "farmland";
   
   const baseStyle = getBaseCellStyle({
     position,
@@ -285,28 +366,39 @@ export const MutationCell: React.FC<MutationCellProps> = ({
     groundType,
   });
   
-  const glowShadow = needsGlow
-    ? "0 0 8px rgba(0, 200, 255, 1), inset 0 0 8px rgba(0, 200, 255, 1), 0 0 12px rgba(255, 255, 255, 0.5)"
-    : "0 0 8px rgba(0, 200, 255, 1), inset 0 0 8px rgba(0, 200, 255, 1)";
-  
   const style: React.CSSProperties = {
     ...baseStyle,
-    boxShadow: showImage ? glowShadow : "",
+    boxShadow: showImage ? "0 0 8px rgba(0, 200, 255, 1), inset 0 0 8px rgba(0, 200, 255, 1)" : "",
     zIndex: 5, // Above crops
+    cursor: onClick ? "pointer" : undefined,
+  };
+  
+  const imageStyle: React.CSSProperties = {
+    width: imageWidth,
+    height: imageHeight,
+    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      e.stopPropagation();
+      onClick();
+    }
   };
 
   return (
     <div
       style={style}
-      title={`${name} (${position[0]}, ${position[1]})${size > 1 ? ` - ${size}x${size}` : ""}`}
-      className="transition-transform hover:z-10"
+      title={`${name} (${position[0]}, ${position[1]})${size > 1 ? ` - ${size}x${size}` : ""} - Click for info`}
+      className={`transition-transform hover:z-10 ${onClick ? "hover:brightness-110" : ""}`}
+      onClick={handleClick}
     >
       {showImage && !imageError ? (
         <img
           src={getCropImagePath(id)}
           alt={name}
-          style={{ width: imageWidth, height: imageHeight }}
-          className="object-contain"
+          style={imageStyle}
+          className="object-contain pointer-events-none"
           onError={() => setImageError(true)}
           draggable={false}
         />

@@ -15,6 +15,7 @@ export interface DragState {
   placementId: string;
   startPosition: [number, number];
   currentPosition: [number, number];
+  isDragging: boolean; // True once mouse has moved enough to be considered a drag
 }
 
 export interface PaintState {
@@ -53,6 +54,7 @@ export interface UseGridPlacementReturn {
   handleMouseUp: () => void;
   handleContextMenu: (e: React.MouseEvent) => void;
   handlePlacementMouseDown: (placementId: string, e: React.MouseEvent) => void;
+  cancelDrag: () => void;
   
   // Utility functions
   getAdjustedPosition: (
@@ -279,6 +281,7 @@ export function useGridPlacement({
           placementId,
           startPosition: placement.position,
           currentPosition: placement.position,
+          isDragging: false, // Not dragging yet, waiting for mouse movement
         });
       }
     }
@@ -286,9 +289,10 @@ export function useGridPlacement({
   
   const handleMouseUp = useCallback(() => {
     if (dragState) {
-      const { placementId, startPosition, currentPosition } = dragState;
+      const { placementId, startPosition, currentPosition, isDragging } = dragState;
       
-      if (startPosition[0] !== currentPosition[0] || startPosition[1] !== currentPosition[1]) {
+      // Only move if we actually dragged (not just clicked)
+      if (isDragging && (startPosition[0] !== currentPosition[0] || startPosition[1] !== currentPosition[1])) {
         const moveResult = moveLockedPlacement(placementId, currentPosition);
         
         if (!moveResult.success) {
@@ -323,10 +327,16 @@ export function useGridPlacement({
         if (placement) {
           const adjustedPos = getAdjustedPosition(cellInfo.cell, cellInfo.offsetX, cellInfo.offsetY, placement.size);
           if (adjustedPos) {
-            setDragState(prev => prev ? { ...prev, currentPosition: adjustedPos } : null);
+            // Mark as dragging once mouse moves to a different position
+            const hasMoved = adjustedPos[0] !== dragState.startPosition[0] || adjustedPos[1] !== dragState.startPosition[1];
+            setDragState(prev => prev ? { 
+              ...prev, 
+              currentPosition: adjustedPos,
+              isDragging: prev.isDragging || hasMoved,
+            } : null);
           }
         } else {
-          setDragState(prev => prev ? { ...prev, currentPosition: cellInfo.cell } : null);
+          setDragState(prev => prev ? { ...prev, currentPosition: cellInfo.cell, isDragging: true } : null);
         }
       } else if (paintState) {
         handlePaintAtCell(cellInfo.cell, cellInfo.offsetX, cellInfo.offsetY, paintState.mode);
@@ -360,6 +370,11 @@ export function useGridPlacement({
       })()
     : null;
   
+  // Cancel any pending drag (used when a click is detected instead of drag)
+  const cancelDrag = useCallback(() => {
+    setDragState(null);
+  }, []);
+  
   return {
     // State
     hoveredPlacementId,
@@ -380,6 +395,7 @@ export function useGridPlacement({
     handleMouseUp,
     handleContextMenu,
     handlePlacementMouseDown,
+    cancelDrag,
     
     // Utility functions
     getAdjustedPosition,
