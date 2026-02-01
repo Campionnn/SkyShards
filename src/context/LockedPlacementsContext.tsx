@@ -73,12 +73,6 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
         }
         const defaultPrioritiesData = await response.json();
         setDefaultPriorities(defaultPrioritiesData);
-        
-        // Only set priorities if we didn't load custom ones from localStorage
-        const savedPriorities = LocalStorageManager.loadPriorities();
-        if (!savedPriorities) {
-          setPriorities(defaultPrioritiesData);
-        }
       } catch (err) {
         console.error("Error loading default priorities:", err);
         toast({
@@ -104,7 +98,12 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
   useEffect(() => {
     // Only save if we have loaded defaults (to avoid saving empty object on init)
     if (!isLoadingPriorities) {
-      LocalStorageManager.savePriorities(priorities);
+      // Only save if there are custom priorities, otherwise clear storage
+      if (Object.keys(priorities).length > 0) {
+        LocalStorageManager.savePriorities(priorities);
+      } else {
+        LocalStorageManager.clearPriorities();
+      }
     }
   }, [priorities, isLoadingPriorities]);
   

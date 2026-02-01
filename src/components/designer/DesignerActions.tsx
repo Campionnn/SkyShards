@@ -64,6 +64,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
   const [exportFormat, setExportFormat] = useState<ExportFormat | null>(null);
   const [exportProgress, setExportProgress] = useState(0);
   const [currentExportBlob, setCurrentExportBlob] = useState<Blob | null>(null);
+  const [hasExportedOnce, setHasExportedOnce] = useState(false);
   
   // Delete all confirmation state
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
@@ -415,6 +416,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
     setExportFormat(format);
     setExportStep("exporting");
     setExportProgress(0);
+    setHasExportedOnce(true);
     
     try {
       const options = getExportOptions();
@@ -583,7 +585,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
                 <motion.button
                   key="png-btn"
                   variants={buttonVariants}
-                  initial="initial"
+                  initial={hasExportedOnce ? "initial" : false}
                   animate="animate"
                   exit="exit"
                   onClick={() => handleSelectExportFormat("png")}
@@ -597,7 +599,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
                 <motion.button
                   key="gif-btn"
                   variants={buttonVariants}
-                  initial="initial"
+                  initial={hasExportedOnce ? "initial" : false}
                   animate="animate"
                   exit="exit"
                   onClick={() => handleSelectExportFormat("gif")}

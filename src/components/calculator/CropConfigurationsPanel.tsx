@@ -32,7 +32,14 @@ const CropItemRow: React.FC<{
   onPriorityChange,
   onRowClick,
 }) => {
-  const [inputValue, setInputValue] = useState<string>("");
+  // Show the input value only if it differs from default
+  const displayValue = priority !== defaultPriority ? priority.toString() : "";
+  const [inputValue, setInputValue] = useState<string>(displayValue);
+  
+  // Update inputValue when priority prop changes
+  useEffect(() => {
+    setInputValue(displayValue);
+  }, [displayValue]);
   
   // Get the rarity color for the name
   const nameColorClass = mutation ? getRarityTextColor(mutation.rarity) : "text-white";
@@ -40,6 +47,8 @@ const CropItemRow: React.FC<{
   const handlePriorityChange = (value: string) => {
     setInputValue(value);
     if (value === "") {
+      // Reset to default when cleared
+      onPriorityChange(defaultPriority);
       return;
     }
     const numValue = parseInt(value);
