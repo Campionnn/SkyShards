@@ -314,7 +314,7 @@ async function addOverlay(
   ctx.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
   
   // Draw header background with outer padding
-  ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+  ctx.fillStyle = 'rgba(15, 23, 42, 1)';
   ctx.fillRect(outerPadding, outerPadding, outputCanvas.width - (outerPadding * 2), headerHeight);
   
   // Draw header text - make "Greenhouse Designer" bigger and brighter
@@ -330,7 +330,7 @@ async function addOverlay(
   if (footerHeight > 0) {
     const footerY = outerPadding + headerHeight + canvas.height + (gridPadding * 2);
     
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+    ctx.fillStyle = 'rgba(15, 23, 42, 1)';
     ctx.fillRect(outerPadding, footerY, outputCanvas.width - (outerPadding * 2), footerHeight);
     
     const iconSize = 20 * scale;
