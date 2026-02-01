@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useMemo } from "react";
-import { X, Droplets, Sparkles, AlertTriangle, Leaf, Package, Star, Clock, Loader2 } from "lucide-react";
+import {
+  X,
+  AlertTriangle,
+  Loader2,
+  Box,
+  ClockArrowUp, Flame, Target, PackageOpen, ClockArrowDown, WandSparkles
+} from "lucide-react";
 import { getGroundImagePath } from "../../types/greenhouse";
 import { CropImage } from "../shared";
 import { useInfoModal, getEffectDescription } from "../../context";
@@ -250,7 +256,7 @@ export const CropMutationInfoModal: React.FC = () => {
             {/* Ground Type */}
             <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Leaf className="w-4 h-4 text-emerald-400" />
+                <Box className="w-4 h-4 text-emerald-400" />
                 <h3 className="text-sm font-medium text-slate-200">Ground Type</h3>
               </div>
               <div className="flex items-center gap-3">
@@ -271,7 +277,7 @@ export const CropMutationInfoModal: React.FC = () => {
                 {growthStages !== null && (
                   <div className="flex-1 bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="w-4 h-4 text-blue-400" />
+                      <ClockArrowUp className="w-4 h-4 text-blue-400" />
                       <h3 className="text-sm font-medium text-slate-200">Growth Stages</h3>
                     </div>
                     <span className="text-sm text-slate-300">{growthStages} stage{growthStages !== 1 ? "s" : ""}</span>
@@ -280,7 +286,7 @@ export const CropMutationInfoModal: React.FC = () => {
                 {decay !== null && decay > 0 && (
                   <div className="flex-1 bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Clock className="w-4 h-4 text-amber-400" />
+                      <ClockArrowDown className="w-4 h-4 text-amber-400" />
                       <h3 className="text-sm font-medium text-slate-200">Decay</h3>
                     </div>
                     <span className="text-sm text-slate-300">{decay} harvest{decay !== 1 ? "s" : ""}</span>
@@ -293,7 +299,7 @@ export const CropMutationInfoModal: React.FC = () => {
             {isMutation && special && (
               <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  <WandSparkles className="w-4 h-4 text-amber-400" />
                   <h3 className="text-sm font-medium text-amber-200">Special Condition</h3>
                 </div>
                 <p className="text-sm text-amber-300/90">{formatName(special)}</p>
@@ -304,7 +310,7 @@ export const CropMutationInfoModal: React.FC = () => {
             {positiveBuffs.length > 0 && (
               <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Droplets className="w-4 h-4 text-emerald-400" />
+                  <Flame className="w-4 h-4 text-emerald-400" />
                   <h3 className="text-sm font-medium text-emerald-200">Positive Effects</h3>
                 </div>
                 <div className="space-y-2">
@@ -358,7 +364,7 @@ export const CropMutationInfoModal: React.FC = () => {
               {requirements.length > 0 && (
                 <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <Star className="w-4 h-4 text-yellow-400" />
+                    <Target className="w-4 h-4 text-yellow-400" />
                     <h3 className="text-sm font-medium text-slate-200">Requirements</h3>
                   </div>
                   
@@ -399,7 +405,7 @@ export const CropMutationInfoModal: React.FC = () => {
               {drops && Object.keys(drops).length > 0 && (
                 <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Package className="w-4 h-4 text-blue-400" />
+                    <PackageOpen className="w-4 h-4 text-blue-400" />
                     <h3 className="text-sm font-medium text-slate-200">Drops</h3>
                   </div>
                   <div className="space-y-1">

@@ -1,32 +1,21 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { Save, FolderOpen, Copy, Clipboard, Trash2, RotateCcw, Layers, X } from "lucide-react";
 import { useDesigner, useGreenhouseData } from "../../context";
 import { useToast } from "../ui/toastContext";
 import { encodeDesign, decodeDesign } from "../../utilities";
+import { 
+  loadLayouts, 
+  saveLayouts,
+  deleteLayout,
+  layoutNameExists,
+  generateLayoutId,
+} from "../../utilities/layoutStorage";
+import type { SavedLayout } from "../../types/layout";
+import { SaveLayoutModal } from "./SaveLayoutModal";
+import { LoadLayoutModal } from "./LoadLayoutModal";
 
 interface DesignerActionsProps {
   className?: string;
-}
-
-const STORAGE_KEY = "skyshards-designer-designs";
-
-interface SavedDesign {
-  name: string;
-  savedAt: number;
-  inputPlacements: Array<{
-    cropId: string;
-    cropName: string;
-    size: number;
-    position: [number, number];
-    isMutation: boolean;
-  }>;
-  targetPlacements: Array<{
-    cropId: string;
-    cropName: string;
-    size: number;
-    position: [number, number];
-    isMutation: boolean;
-  }>;
 }
 
 export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = "" }) => {
@@ -45,6 +34,18 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
   const { getCropDef, getMutationDef } = useGreenhouseData();
   const { toast } = useToast();
   
+  // State for modals
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
+  const [savedLayouts, setSavedLayouts] = useState<SavedLayout[]>([]);
+  
+  // Reload layouts when load modal opens
+  useEffect(() => {
+    if (isLoadModalOpen) {
+      setSavedLayouts(loadLayouts());
+    }
+  }, [isLoadModalOpen]);
+  
   // Handle mode change with auto-deselect
   const handleModeChange = useCallback((newMode: "inputs" | "targets") => {
     setMode(newMode);
@@ -55,114 +56,128 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
     }
   }, [setMode, selectedCropForPlacement, setSelectedCropForPlacement]);
   
-  // Save current design to localStorage
-  const handleSave = useCallback(() => {
-    const name = prompt("Enter a name for this design:", `Design ${new Date().toLocaleDateString()}`);
-    if (!name) return;
-    
-    const design: SavedDesign = {
-      name,
-      savedAt: Date.now(),
-      inputPlacements: inputPlacements.map(p => ({
-        cropId: p.cropId,
-        cropName: p.cropName,
-        size: p.size,
-        position: p.position,
-        isMutation: p.isMutation,
-      })),
-      targetPlacements: targetPlacements.map(p => ({
-        cropId: p.cropId,
-        cropName: p.cropName,
-        size: p.size,
-        position: p.position,
-        isMutation: p.isMutation,
-      })),
-    };
-    
-    // Get existing designs
-    const existing = localStorage.getItem(STORAGE_KEY);
-    const designs: SavedDesign[] = existing ? JSON.parse(existing) : [];
-    
-    // Add new design
-    designs.push(design);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(designs));
-    
-    toast({
-      title: "Design saved",
-      description: `"${name}" has been saved`,
-      variant: "success",
-      duration: 3000,
-    });
-  }, [inputPlacements, targetPlacements, toast]);
+  // Open save modal
+  const handleOpenSave = useCallback(() => {
+    if (inputPlacements.length === 0 && targetPlacements.length === 0) {
+      return; // Button is disabled, but just in case
+    }
+    setIsSaveModalOpen(true);
+  }, [inputPlacements.length, targetPlacements.length]);
   
-  // Load design from localStorage
-  const handleLoad = useCallback(() => {
-    const existing = localStorage.getItem(STORAGE_KEY);
-    if (!existing) {
+  // Save layout
+  const handleSaveLayout = useCallback((name: string) => {
+    // Check for duplicate name
+    if (layoutNameExists(name)) {
       toast({
-        title: "No saved designs",
-        description: "Save a design first before loading",
-        variant: "warning",
-        duration: 3000,
-      });
-      return;
-    }
-    
-    const designs: SavedDesign[] = JSON.parse(existing);
-    if (designs.length === 0) {
-      toast({
-        title: "No saved designs",
-        description: "Save a design first before loading",
-        variant: "warning",
-        duration: 3000,
-      });
-      return;
-    }
-    
-    // Show simple selection (for now just use the most recent)
-    const designNames = designs.map((d, i) => `${i + 1}. ${d.name} (${new Date(d.savedAt).toLocaleDateString()})`);
-    const selection = prompt(
-      `Select a design to load:\n${designNames.join("\n")}\n\nEnter number:`,
-      "1"
-    );
-    
-    if (!selection) return;
-    
-    const index = parseInt(selection) - 1;
-    if (isNaN(index) || index < 0 || index >= designs.length) {
-      toast({
-        title: "Invalid selection",
+        title: "Name already exists",
+        description: "Please choose a different name",
         variant: "error",
         duration: 3000,
       });
       return;
     }
     
-    const design = designs[index];
+    const now = Date.now();
+    const newLayout: SavedLayout = {
+      id: generateLayoutId(),
+      name,
+      savedAt: now,
+      modifiedAt: now,
+      inputs: inputPlacements.map(p => ({
+        cropId: p.cropId,
+        position: p.position,
+      })),
+      targets: targetPlacements.map(p => ({
+        cropId: p.cropId,
+        position: p.position,
+      })),
+    };
     
-    // Convert to the format expected by loadFromSolverResult
-    const crops = design.inputPlacements.map(p => ({
-      id: p.cropId,
-      name: p.cropName,
-      position: p.position,
-      size: p.size,
-    }));
-    const mutations = design.targetPlacements.map(p => ({
-      id: p.cropId,
-      name: p.cropName,
-      position: p.position,
-      size: p.size,
-    }));
+    const layouts = loadLayouts();
+    layouts.push(newLayout);
+    saveLayouts(layouts);
     
-    loadFromSolverResult(crops, mutations);
-    
+    setIsSaveModalOpen(false);
     toast({
-      title: "Design loaded",
-      description: `"${design.name}" has been loaded`,
+      title: "Layout saved",
+      description: `"${name}" has been saved`,
       variant: "success",
       duration: 3000,
     });
-  }, [loadFromSolverResult, toast]);
+  }, [inputPlacements, targetPlacements, toast]);
+  
+  // Open load modal
+  const handleOpenLoad = useCallback(() => {
+    const layouts = loadLayouts();
+    if (layouts.length === 0) {
+      toast({
+        title: "No saved layouts",
+        description: "Save a layout first before loading",
+        variant: "warning",
+        duration: 3000,
+      });
+      return;
+    }
+    setSavedLayouts(layouts);
+    setIsLoadModalOpen(true);
+  }, [toast]);
+  
+  // Load layout
+  const handleLoadLayout = useCallback((layout: SavedLayout) => {
+    // Get size and name info from crop definitions
+    const crops = layout.inputs.map(p => {
+      const cropDef = getCropDef(p.cropId);
+      const mutationDef = getMutationDef(p.cropId);
+      const displayName = cropDef?.name || mutationDef?.name || p.cropId.replace(/_/g, " ");
+      return {
+        id: p.cropId,
+        name: displayName,
+        position: p.position,
+        size: cropDef?.size || mutationDef?.size || 1,
+      };
+    });
+    
+    const mutations = layout.targets.map(p => {
+      const mutationDef = getMutationDef(p.cropId);
+      const cropDef = getCropDef(p.cropId);
+      const displayName = mutationDef?.name || cropDef?.name || p.cropId.replace(/_/g, " ");
+      return {
+        id: p.cropId,
+        name: displayName,
+        position: p.position,
+        size: mutationDef?.size || cropDef?.size || 1,
+      };
+    });
+    
+    loadFromSolverResult(crops, mutations);
+    setIsLoadModalOpen(false);
+    
+    toast({
+      title: "Layout loaded",
+      description: `"${layout.name}" has been loaded`,
+      variant: "success",
+      duration: 3000,
+    });
+  }, [loadFromSolverResult, getCropDef, getMutationDef, toast]);
+  
+  // Delete layout
+  const handleDeleteLayout = useCallback((layoutId: string) => {
+    const success = deleteLayout(layoutId);
+    if (success) {
+      setSavedLayouts(loadLayouts());
+      toast({
+        title: "Layout deleted",
+        variant: "success",
+        duration: 2000,
+      });
+    } else {
+      toast({
+        title: "Failed to delete layout",
+        variant: "error",
+        duration: 3000,
+      });
+    }
+  }, [toast]);
   
   // State for import modal
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -308,7 +323,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
       {/* Action Buttons */}
       <div className="grid grid-cols-2 gap-2">
         <button
-          onClick={handleSave}
+          onClick={handleOpenSave}
           disabled={totalPlacements === 0}
           className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-300 hover:bg-slate-700/60 hover:border-slate-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
@@ -317,7 +332,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
         </button>
         
         <button
-          onClick={handleLoad}
+          onClick={handleOpenLoad}
           className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-300 hover:bg-slate-700/60 hover:border-slate-500/50 transition-colors"
         >
           <FolderOpen className="w-4 h-4" />
@@ -404,6 +419,22 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
+      
+      {/* Save Layout Modal */}
+      <SaveLayoutModal
+        isOpen={isSaveModalOpen}
+        onClose={() => setIsSaveModalOpen(false)}
+        onSave={handleSaveLayout}
+      />
+      
+      {/* Load Layout Modal */}
+      <LoadLayoutModal
+        isOpen={isLoadModalOpen}
+        onClose={() => setIsLoadModalOpen(false)}
+        onLoad={handleLoadLayout}
+        onDelete={handleDeleteLayout}
+        layouts={savedLayouts}
+      />
     </div>
   );
 };
