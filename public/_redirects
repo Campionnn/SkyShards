@@ -1,0 +1,3 @@
+# Cloudflare Pages SPA redirect
+# Serve index.html for all routes to enable client-side routing
+/*    /index.html   200
