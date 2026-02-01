@@ -435,6 +435,10 @@ export async function captureGridAsPng(
 ): Promise<ExportResult> {
   const { scale } = options;
   
+  // Fixed dimensions for consistent exports across devices
+  // 10x10 grid with 48px cells and 2px gap = 498px (10*48 + 9*2)
+  const FIXED_GRID_SIZE = 498;
+  
   const dataUrl = await toPng(element, {
     pixelRatio: scale,
     backgroundColor: '#1e293b',
@@ -442,6 +446,8 @@ export async function captureGridAsPng(
     skipAutoScale: true,
     includeQueryParams: true,
     skipFonts: true,
+    width: FIXED_GRID_SIZE,
+    height: FIXED_GRID_SIZE,
     filter: (node) => {
       if (node instanceof Element) {
         const tagName = node.tagName?.toLowerCase();
@@ -628,6 +634,10 @@ export async function captureGridAsGif(
     // Wait for images to update
     await new Promise(resolve => setTimeout(resolve, 50));
     
+    // Fixed dimensions for consistent exports across devices
+    // 10x10 grid with 48px cells and 2px gap = 498px (10*48 + 9*2)
+    const FIXED_GRID_SIZE = 498;
+    
     // Capture this frame
     const dataUrl = await toPng(element, {
       pixelRatio: scale,
@@ -636,6 +646,8 @@ export async function captureGridAsGif(
       skipAutoScale: true,
       includeQueryParams: true,
       skipFonts: true,
+      width: FIXED_GRID_SIZE,
+      height: FIXED_GRID_SIZE,
       filter: (node) => {
         if (node instanceof Element) {
           const tagName = node.tagName?.toLowerCase();
