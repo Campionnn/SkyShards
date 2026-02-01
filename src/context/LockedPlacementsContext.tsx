@@ -2,6 +2,14 @@ import React, { createContext, useContext, useState, useCallback, useEffect, use
 import type { LockedPlacement, SelectedCropForPlacement, LockDefinition } from "../types/greenhouse";
 import { useGridState } from "./GridStateContext";
 import { useToast } from "../components/ui/toastContext";
+import {
+  isPositionOccupiedByPlacements,
+  findOverlappingPlacements,
+  getPlacementAtCell,
+  validateGridBounds,
+  validateAllowedCells,
+  generatePlacementId,
+} from "../utilities";
 
 interface LockedPlacementsContextType {
   // Locked placements state
@@ -36,12 +44,6 @@ interface LockedPlacementsContextType {
 }
 
 const LockedPlacementsContext = createContext<LockedPlacementsContextType | null>(null);
-
-// Generate unique ID for placements
-let placementIdCounter = 0;
-function generatePlacementId(): string {
-  return `placement-${Date.now()}-${++placementIdCounter}`;
-}
 
 export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { unlockedCells } = useGridState();
@@ -146,25 +148,7 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
     size: number,
     excludeId?: string
   ): boolean => {
-    const [row, col] = position;
-    
-    for (const placement of lockedPlacements) {
-      if (excludeId && placement.id === excludeId) continue;
-      
-      const [pRow, pCol] = placement.position;
-      const pSize = placement.size;
-      
-      // Check for overlap between the two squares
-      const noOverlap = 
-        row + size <= pRow ||      // New placement is above
-        pRow + pSize <= row ||     // New placement is below
-        col + size <= pCol ||      // New placement is to the left
-        pCol + pSize <= col;       // New placement is to the right
-      
-      if (!noOverlap) return true;
-    }
-    
-    return false;
+    return isPositionOccupiedByPlacements(position, size, lockedPlacements, excludeId);
   }, [lockedPlacements]);
   
   // Validate if a placement position is valid (checks bounds and unlocked cells only)
@@ -172,24 +156,14 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
     position: [number, number],
     size: number
   ): { valid: boolean; error?: string } => {
-    const [row, col] = position;
-    
-    // Check all cells for this placement are within grid bounds
-    if (row < 0 || col < 0 || row + size > 10 || col + size > 10) {
-      return { valid: false, error: "Placement would be outside the grid" };
+    // Check bounds first
+    const boundsValidation = validateGridBounds(position, size);
+    if (!boundsValidation.valid) {
+      return boundsValidation;
     }
     
-    // Check all cells for this placement are unlocked
-    for (let dr = 0; dr < size; dr++) {
-      for (let dc = 0; dc < size; dc++) {
-        const cellKey = `${row + dr},${col + dc}`;
-        if (!unlockedCells.has(cellKey)) {
-          return { valid: false, error: "Placement requires unlocked cells" };
-        }
-      }
-    }
-    
-    return { valid: true };
+    // Check all cells are unlocked
+    return validateAllowedCells(position, size, unlockedCells);
   }, [unlockedCells]);
   
   // Validate if a placement is valid (includes overlap check for moving existing placements)
@@ -217,28 +191,7 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
     size: number,
     excludeId?: string
   ): LockedPlacement[] => {
-    const [row, col] = position;
-    const overlapping: LockedPlacement[] = [];
-    
-    for (const placement of lockedPlacements) {
-      if (excludeId && placement.id === excludeId) continue;
-      
-      const [pRow, pCol] = placement.position;
-      const pSize = placement.size;
-      
-      // Check for overlap between the two squares
-      const noOverlap = 
-        row + size <= pRow ||      // New placement is above
-        pRow + pSize <= row ||     // New placement is below
-        col + size <= pCol ||      // New placement is to the left
-        pCol + pSize <= col;       // New placement is to the right
-      
-      if (!noOverlap) {
-        overlapping.push(placement);
-      }
-    }
-    
-    return overlapping;
+    return findOverlappingPlacements(position, size, lockedPlacements, excludeId);
   }, [lockedPlacements]);
   
   // Add a new locked placement (overrides any overlapping placements)
@@ -253,7 +206,7 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
     
     const newPlacement: LockedPlacement = {
       ...placement,
-      id: generatePlacementId(),
+      id: generatePlacementId("placement"),
     };
     
     // Remove any overlapping placements and add the new one
@@ -306,18 +259,7 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
     row: number,
     col: number
   ): LockedPlacement | undefined => {
-    for (const placement of lockedPlacements) {
-      const [pRow, pCol] = placement.position;
-      const pSize = placement.size;
-      
-      if (
-        row >= pRow && row < pRow + pSize &&
-        col >= pCol && col < pCol + pSize
-      ) {
-        return placement;
-      }
-    }
-    return undefined;
+    return getPlacementAtCell(row, col, lockedPlacements);
   }, [lockedPlacements]);
   
   // Convert locked placements to API format

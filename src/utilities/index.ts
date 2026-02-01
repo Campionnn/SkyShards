@@ -21,6 +21,9 @@ export function debounce<TArgs extends unknown[], TReturn>(
 // Grid calculation utilities
 export * from "./gridCalculations";
 
+// Placement validation utilities
+export * from "./placementValidation";
+
 // Rarity color utilities
 export * from "./rarity";
 

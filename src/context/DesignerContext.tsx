@@ -1,5 +1,12 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
 import type { MutationDefinition } from "../types/greenhouse";
+import {
+  isPositionOccupiedByPlacements,
+  findOverlappingPlacements,
+  getPlacementAtCell,
+  validateGridBounds,
+  generatePlacementId,
+} from "../utilities";
 
 export type DesignerMode = "inputs" | "targets";
 
@@ -89,11 +96,6 @@ interface DesignerContextType {
 
 const DesignerContext = createContext<DesignerContextType | null>(null);
 
-let placementIdCounter = 0;
-function generatePlacementId(): string {
-  return `designer-${Date.now()}-${++placementIdCounter}`;
-}
-
 export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mode, setMode] = useState<DesignerMode>("inputs");
   const [inputPlacements, setInputPlacements] = useState<DesignerPlacement[]>([]);
@@ -116,25 +118,7 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     size: number,
     excludeId?: string
   ): boolean => {
-    const [row, col] = position;
-    
-    for (const placement of allPlacements) {
-      if (excludeId && placement.id === excludeId) continue;
-      
-      const [pRow, pCol] = placement.position;
-      const pSize = placement.size;
-      
-      // Check for overlap between the two squares
-      const noOverlap = 
-        row + size <= pRow ||      // New placement is above
-        pRow + pSize <= row ||     // New placement is below
-        col + size <= pCol ||      // New placement is to the left
-        pCol + pSize <= col;       // New placement is to the right
-      
-      if (!noOverlap) return true;
-    }
-    
-    return false;
+    return isPositionOccupiedByPlacements(position, size, allPlacements, excludeId);
   }, [allPlacements]);
   
   // Validate position (bounds only - designer treats all cells as unlocked)
@@ -142,14 +126,7 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     position: [number, number],
     size: number
   ): { valid: boolean; error?: string } => {
-    const [row, col] = position;
-    
-    // Check all cells for this placement are within grid bounds (10x10 grid)
-    if (row < 0 || col < 0 || row + size > 10 || col + size > 10) {
-      return { valid: false, error: "Placement would be outside the grid" };
-    }
-    
-    return { valid: true };
+    return validateGridBounds(position, size);
   }, []);
   
   // Validate placement (includes overlap check)
@@ -176,27 +153,7 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     size: number,
     excludeId?: string
   ): DesignerPlacement[] => {
-    const [row, col] = position;
-    const overlapping: DesignerPlacement[] = [];
-    
-    for (const placement of currentPlacements) {
-      if (excludeId && placement.id === excludeId) continue;
-      
-      const [pRow, pCol] = placement.position;
-      const pSize = placement.size;
-      
-      const noOverlap = 
-        row + size <= pRow ||
-        pRow + pSize <= row ||
-        col + size <= pCol ||
-        pCol + pSize <= col;
-      
-      if (!noOverlap) {
-        overlapping.push(placement);
-      }
-    }
-    
-    return overlapping;
+    return findOverlappingPlacements(position, size, currentPlacements, excludeId);
   }, [currentPlacements]);
   
   // Add placement to current mode's list
@@ -210,7 +167,7 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     
     const newPlacement: DesignerPlacement = {
       ...placement,
-      id: generatePlacementId(),
+      id: generatePlacementId("designer"),
     };
     
     // Remove any overlapping placements in the current mode's list
@@ -280,18 +237,7 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     row: number,
     col: number
   ): DesignerPlacement | undefined => {
-    for (const placement of allPlacements) {
-      const [pRow, pCol] = placement.position;
-      const pSize = placement.size;
-      
-      if (
-        row >= pRow && row < pRow + pSize &&
-        col >= pCol && col < pCol + pSize
-      ) {
-        return placement;
-      }
-    }
-    return undefined;
+    return getPlacementAtCell(row, col, allPlacements);
   }, [allPlacements]);
   
   // Load from solver result
@@ -301,7 +247,7 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   ) => {
     // Convert crops to input placements
     const newInputs: DesignerPlacement[] = crops.map(crop => ({
-      id: generatePlacementId(),
+      id: generatePlacementId("designer"),
       cropId: crop.id,
       cropName: crop.name,
       size: crop.size,
@@ -311,7 +257,7 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     
     // Convert mutations to target placements
     const newTargets: DesignerPlacement[] = mutations.map(mutation => ({
-      id: generatePlacementId(),
+      id: generatePlacementId("designer"),
       cropId: mutation.id,
       cropName: mutation.name,
       size: mutation.size,

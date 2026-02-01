@@ -1,7 +1,8 @@
-import React, { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import { Brush, X, ChevronDown, Lock, Trash2, AlertTriangle, Search, ChevronUp, Info } from "lucide-react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
+import { Brush, X, ChevronDown, Lock, Trash2, AlertTriangle, Info, ChevronUp } from "lucide-react";
 import { useGreenhouseData, useLockedPlacements, useInfoModal } from "../../context";
 import { getRarityTextColor } from "../../utilities";
+import { CropSearchInput, CropFilterDropdown, type FilterOption } from "../shared";
 import type { CropDefinition, MutationDefinition, CropFilterCategory, SelectedCropForPlacement } from "../../types/greenhouse";
 import { getCropImagePath } from "../../types/greenhouse";
 
@@ -10,7 +11,7 @@ interface CropConfigurationsPanelProps {
 }
 
 // Filter options for the dropdown
-const FILTER_OPTIONS: { value: CropFilterCategory; label: string }[] = [
+const FILTER_OPTIONS: FilterOption[] = [
   { value: "all", label: "All" },
   { value: "crops", label: "Crops" },
   { value: "mutations", label: "Mutations" },
@@ -20,18 +21,6 @@ const FILTER_OPTIONS: { value: CropFilterCategory; label: string }[] = [
   { value: "epic", label: "Epic" },
   { value: "legendary", label: "Legendary" },
 ];
-
-// Helper to get color for filter option
-const getFilterColor = (value: CropFilterCategory): string => {
-  switch (value) {
-    case "common": return "text-white";
-    case "uncommon": return "text-green-400";
-    case "rare": return "text-blue-400";
-    case "epic": return "text-purple-400";
-    case "legendary": return "text-yellow-400";
-    default: return "text-slate-300";
-  }
-};
 
 // Item row for a single crop/mutation
 const CropItemRow: React.FC<{
@@ -245,7 +234,6 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<CropFilterCategory>("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const filterRef = useRef<HTMLDivElement>(null);
   const { openInfo } = useInfoModal();
   const [priorityWarningDismissed, setPriorityWarningDismissed] = useState(false);
   
@@ -269,18 +257,6 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [selectedCropForPlacement, setSelectedCropForPlacement]);
-  
-  // Close filter dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-        setIsFilterOpen(false);
-      }
-    };
-    
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
   
   // Filter crops based on selected category and search term
   const filteredCrops = useMemo(() => {
@@ -347,9 +323,6 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
     }
   }, [addMutation]);
   
-  // Get current filter label
-  const currentFilterLabel = FILTER_OPTIONS.find(opt => opt.value === filter)?.label || "All";
-  
   return (
     <div className={`flex flex-col h-full gap-4 ${className}`}>
       {/* Main Panel - Crop Configurations */}
@@ -373,88 +346,22 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
         {/* Search and Filter Row */}
         <div className="flex gap-2 mb-3 flex-shrink-0">
           {/* Search Input */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search..."
-              className="w-full pl-8 pr-3 py-1.5 bg-slate-700/50 border border-slate-600/30 rounded-md text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:border-emerald-500/50"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+          <CropSearchInput
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search..."
+            className="flex-1"
+          />
           
           {/* Filter Dropdown */}
-          <div className="relative" ref={filterRef}>
-            <button
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/50 border border-slate-600/30 rounded-md text-sm text-slate-200 hover:bg-slate-700/70 transition-colors"
-            >
-              <span>{currentFilterLabel}</span>
-              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isFilterOpen ? "rotate-180" : ""}`} />
-            </button>
-            
-            {isFilterOpen && (
-              <ul className="absolute right-0 z-50 mt-1 min-w-[180px] bg-slate-800 border border-slate-600/50 rounded-md shadow-xl max-h-60 overflow-y-auto scrollbar-dark">
-                {FILTER_OPTIONS.map((option) => (
-                  <li
-                    key={option.value}
-                    onClick={() => {
-                      setFilter(option.value);
-                      setIsFilterOpen(false);
-                    }}
-                    className={`px-3 py-2 cursor-pointer transition-colors ${
-                      filter === option.value
-                        ? "bg-emerald-600/30 text-slate-100"
-                        : "hover:bg-slate-700/50"
-                    }`}
-                  >
-                    <span className={getFilterColor(option.value)}>{option.label}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-        
-        {/* Filter Dropdown - Styled like MutationAutocomplete */}
-        <div className="relative mb-3 hidden" ref={filterRef}>
-          <button
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="w-full px-3 py-2 bg-slate-700/50 border border-slate-600/30 rounded-md text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 hover:bg-slate-700/70 transition-colors flex items-center justify-between"
-          >
-            <span>{currentFilterLabel}</span>
-            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isFilterOpen ? "rotate-180" : ""}`} />
-          </button>
-          
-          {isFilterOpen && (
-            <ul className="absolute z-50 mt-1 w-full bg-slate-800 border border-slate-600/50 rounded-md shadow-xl max-h-60 overflow-y-auto">
-              {FILTER_OPTIONS.map((option) => (
-                <li
-                  key={option.value}
-                  onClick={() => {
-                    setFilter(option.value);
-                    setIsFilterOpen(false);
-                  }}
-                  className={`px-3 py-2 cursor-pointer transition-colors ${
-                    filter === option.value
-                      ? "bg-emerald-600/30 text-slate-100"
-                      : "text-slate-300 hover:bg-slate-700/50"
-                  }`}
-                >
-                  {option.label}
-                </li>
-              ))}
-            </ul>
-          )}
+          <CropFilterDropdown
+            value={filter}
+            onChange={setFilter}
+            options={FILTER_OPTIONS}
+            isOpen={isFilterOpen}
+            onToggle={() => setIsFilterOpen(!isFilterOpen)}
+            onClose={() => setIsFilterOpen(false)}
+          />
         </div>
         
         {/* Priority Warning - dismissible, once per session */}

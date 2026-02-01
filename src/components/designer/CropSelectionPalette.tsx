@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useCallback } from "react";
-import { Search, X, ChevronDown } from "lucide-react";
+import { X } from "lucide-react";
 import { useGreenhouseData, useDesigner } from "../../context";
 import { getRarityTextColor, getRarityBorderColor } from "../../utilities";
+import { CropSearchInput, CropFilterDropdown, type FilterOption } from "../shared";
 import type { CropDefinition, MutationDefinition, CropFilterCategory } from "../../types/greenhouse";
 import { getCropImagePath } from "../../types/greenhouse";
 
@@ -10,7 +11,7 @@ interface CropSelectionPaletteProps {
 }
 
 // Filter options for the dropdown
-const FILTER_OPTIONS: { value: CropFilterCategory; label: string }[] = [
+const FILTER_OPTIONS: FilterOption[] = [
   { value: "all", label: "All" },
   { value: "crops", label: "Crops" },
   { value: "mutations", label: "Mutations" },
@@ -20,18 +21,6 @@ const FILTER_OPTIONS: { value: CropFilterCategory; label: string }[] = [
   { value: "epic", label: "Epic" },
   { value: "legendary", label: "Legendary" },
 ];
-
-// Helper to get color for filter option
-const getFilterColor = (value: CropFilterCategory): string => {
-  switch (value) {
-    case "common": return "text-white";
-    case "uncommon": return "text-green-400";
-    case "rare": return "text-blue-400";
-    case "epic": return "text-purple-400";
-    case "legendary": return "text-yellow-400";
-    default: return "text-slate-300";
-  }
-};
 
 // Single crop/mutation tile in the palette grid
 const PaletteTile: React.FC<{
@@ -155,9 +144,6 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
     }
   }, [selectedCropForPlacement, setSelectedCropForPlacement]);
   
-  // Get current filter label
-  const currentFilterLabel = FILTER_OPTIONS.find(o => o.value === filter)?.label || "All";
-  
   return (
     <div className={`flex flex-col h-full ${className}`}>
       {/* Header */}
@@ -179,61 +165,21 @@ export const CropSelectionPalette: React.FC<CropSelectionPaletteProps> = ({ clas
       {/* Search and Filter Row */}
       <div className="flex gap-2 mb-3">
         {/* Search Input */}
-        <div className="flex-1 relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search..."
-            className="w-full pl-8 pr-3 py-1.5 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500/50"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+        <CropSearchInput
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Search..."
+        />
         
         {/* Filter Dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-300 hover:border-slate-500/50"
-          >
-            {currentFilterLabel}
-            <ChevronDown className={`w-4 h-4 transition-transform ${isFilterOpen ? "rotate-180" : ""}`} />
-          </button>
-          
-          {isFilterOpen && (
-            <>
-              <div 
-                className="fixed inset-0 z-10" 
-                onClick={() => setIsFilterOpen(false)} 
-              />
-              <div className="absolute right-0 top-full mt-1 bg-slate-800 border border-slate-600/50 rounded-lg shadow-xl z-20 py-1 min-w-[140px]">
-                {FILTER_OPTIONS.map((option) => (
-                  <React.Fragment key={option.value}>
-                    <button
-                      onClick={() => {
-                        setFilter(option.value);
-                        setIsFilterOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-1.5 text-sm hover:bg-slate-700/50 ${
-                        filter === option.value ? "text-emerald-400" : getFilterColor(option.value)
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  </React.Fragment>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        <CropFilterDropdown
+          value={filter}
+          onChange={(newFilter) => setFilter(newFilter as CropFilterCategory)}
+          options={FILTER_OPTIONS}
+          isOpen={isFilterOpen}
+          onToggle={() => setIsFilterOpen(!isFilterOpen)}
+          onClose={() => setIsFilterOpen(false)}
+        />
       </div>
       
       {/* Palette Grid */}
