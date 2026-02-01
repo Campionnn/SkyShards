@@ -97,7 +97,7 @@ export const LockedPlacementCell: React.FC<LockedPlacementCellProps> = ({
   const imageStyle: React.CSSProperties = {
     width: imageWidth,
     height: imageHeight,
-    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+    filter: needsGlow ? "drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))" : undefined,
   };
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -215,7 +215,7 @@ export const PlacementPreview: React.FC<PlacementPreviewProps> = ({
   const imageStyle: React.CSSProperties = {
     width: imageWidth,
     height: imageHeight,
-    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+    filter: needsGlow ? "drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))" : undefined,
   };
 
   return (
@@ -290,7 +290,7 @@ export const CropCell: React.FC<CropCellProps> = ({
   const imageStyle: React.CSSProperties = {
     width: imageWidth,
     height: imageHeight,
-    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+    filter: needsGlow ? "drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))" : undefined,
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -376,7 +376,7 @@ export const MutationCell: React.FC<MutationCellProps> = ({
   const imageStyle: React.CSSProperties = {
     width: imageWidth,
     height: imageHeight,
-    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+    filter: needsGlow ? "drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))" : undefined,
   };
 
   const handleClick = (e: React.MouseEvent) => {

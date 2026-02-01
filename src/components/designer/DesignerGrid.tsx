@@ -140,7 +140,7 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
     width: imageWidth,
     height: imageHeight,
     imageRendering: "pixelated",
-    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+    filter: needsGlow ? "drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))" : undefined,
   };
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -251,7 +251,7 @@ const DesignerPlacementPreview: React.FC<DesignerPlacementPreviewProps> = ({
     width: imageWidth,
     height: imageHeight,
     imageRendering: "pixelated",
-    filter: needsGlow ? "drop-shadow(0 0 4px rgba(255, 255, 255, 0.7))" : undefined,
+    filter: needsGlow ? "drop-shadow(0 0 5px rgba(255, 255, 255, 0.7))" : undefined,
   };
 
   return (
