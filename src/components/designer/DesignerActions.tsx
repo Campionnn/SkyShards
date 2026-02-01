@@ -7,7 +7,8 @@ import {
   loadLayouts, 
   saveLayouts,
   deleteLayout,
-  layoutNameExists,
+  renameLayout,
+  updateLayout,
   generateLayoutId,
 } from "../../utilities/layoutStorage";
 import type { SavedLayout } from "../../types/layout";
@@ -65,45 +66,68 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
   }, [inputPlacements.length, targetPlacements.length]);
   
   // Save layout
-  const handleSaveLayout = useCallback((name: string) => {
-    // Check for duplicate name
-    if (layoutNameExists(name)) {
+  const handleSaveLayout = useCallback((name: string, overwriteId?: string) => {
+    const now = Date.now();
+    
+    if (overwriteId) {
+      // Overwrite existing layout
+      const success = updateLayout(overwriteId, {
+        name,
+        modifiedAt: now,
+        inputs: inputPlacements.map(p => ({
+          cropId: p.cropId,
+          position: p.position,
+        })),
+        targets: targetPlacements.map(p => ({
+          cropId: p.cropId,
+          position: p.position,
+        })),
+      });
+      
+      if (success) {
+        setIsSaveModalOpen(false);
+        toast({
+          title: "Layout updated",
+          description: `"${name}" has been updated`,
+          variant: "success",
+          duration: 3000,
+        });
+      } else {
+        toast({
+          title: "Failed to update layout",
+          variant: "error",
+          duration: 3000,
+        });
+      }
+    } else {
+      // Create new layout
+      const newLayout: SavedLayout = {
+        id: generateLayoutId(),
+        name,
+        savedAt: now,
+        modifiedAt: now,
+        inputs: inputPlacements.map(p => ({
+          cropId: p.cropId,
+          position: p.position,
+        })),
+        targets: targetPlacements.map(p => ({
+          cropId: p.cropId,
+          position: p.position,
+        })),
+      };
+      
+      const layouts = loadLayouts();
+      layouts.push(newLayout);
+      saveLayouts(layouts);
+      
+      setIsSaveModalOpen(false);
       toast({
-        title: "Name already exists",
-        description: "Please choose a different name",
-        variant: "error",
+        title: "Layout saved",
+        description: `"${name}" has been saved`,
+        variant: "success",
         duration: 3000,
       });
-      return;
     }
-    
-    const now = Date.now();
-    const newLayout: SavedLayout = {
-      id: generateLayoutId(),
-      name,
-      savedAt: now,
-      modifiedAt: now,
-      inputs: inputPlacements.map(p => ({
-        cropId: p.cropId,
-        position: p.position,
-      })),
-      targets: targetPlacements.map(p => ({
-        cropId: p.cropId,
-        position: p.position,
-      })),
-    };
-    
-    const layouts = loadLayouts();
-    layouts.push(newLayout);
-    saveLayouts(layouts);
-    
-    setIsSaveModalOpen(false);
-    toast({
-      title: "Layout saved",
-      description: `"${name}" has been saved`,
-      variant: "success",
-      duration: 3000,
-    });
   }, [inputPlacements, targetPlacements, toast]);
   
   // Open load modal
@@ -173,6 +197,26 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
     } else {
       toast({
         title: "Failed to delete layout",
+        variant: "error",
+        duration: 3000,
+      });
+    }
+  }, [toast]);
+  
+  // Rename layout
+  const handleRenameLayout = useCallback((layoutId: string, newName: string) => {
+    const success = renameLayout(layoutId, newName);
+    if (success) {
+      setSavedLayouts(loadLayouts());
+      toast({
+        title: "Layout renamed",
+        description: `Renamed to "${newName}"`,
+        variant: "success",
+        duration: 2000,
+      });
+    } else {
+      toast({
+        title: "Failed to rename layout",
         variant: "error",
         duration: 3000,
       });
@@ -425,6 +469,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
         isOpen={isSaveModalOpen}
         onClose={() => setIsSaveModalOpen(false)}
         onSave={handleSaveLayout}
+        existingLayouts={savedLayouts.map(l => ({ id: l.id, name: l.name }))}
       />
       
       {/* Load Layout Modal */}
@@ -433,6 +478,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
         onClose={() => setIsLoadModalOpen(false)}
         onLoad={handleLoadLayout}
         onDelete={handleDeleteLayout}
+        onRename={handleRenameLayout}
         layouts={savedLayouts}
       />
     </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { X, Trash2, FolderOpen, Search } from "lucide-react";
+import { X, Trash2, FolderOpen, Search, Edit2, Check } from "lucide-react";
 import type { SavedLayout } from "../../types/layout";
 import { getCropPreviewColor } from "../../data/cropColors";
 import { useGreenhouseData } from "../../context";
@@ -9,6 +9,7 @@ interface LoadLayoutModalProps {
   onClose: () => void;
   onLoad: (layout: SavedLayout) => void;
   onDelete: (layoutId: string) => void;
+  onRename: (layoutId: string, newName: string) => void;
   layouts: SavedLayout[];
 }
 
@@ -103,9 +104,22 @@ const LayoutCard: React.FC<{
   layout: SavedLayout;
   onLoad: () => void;
   onDelete: () => void;
-}> = ({ layout, onLoad, onDelete }) => {
+  onRename: (newName: string) => void;
+}> = ({ layout, onLoad, onDelete, onRename }) => {
   const { getMutationDef } = useGreenhouseData();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(layout.name);
+  const [renameError, setRenameError] = useState("");
+  const renameInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus rename input
+  useEffect(() => {
+    if (isRenaming && renameInputRef.current) {
+      renameInputRef.current.focus();
+      renameInputRef.current.select();
+    }
+  }, [isRenaming]);
 
   // Get unique target mutations
   const targetMutations = useMemo(() => {
@@ -137,17 +151,94 @@ const LayoutCard: React.FC<{
     onDelete();
   };
 
+  const handleRenameSubmit = () => {
+    const trimmed = renameValue.trim();
+    if (!trimmed) {
+      setRenameError("Name cannot be empty");
+      return;
+    }
+    if (trimmed === layout.name) {
+      // No change, just cancel
+      setIsRenaming(false);
+      setRenameValue(layout.name);
+      setRenameError("");
+      return;
+    }
+    // Call parent rename handler - it will handle duplicate checking
+    onRename(trimmed);
+    setIsRenaming(false);
+    setRenameValue(trimmed);
+    setRenameError("");
+  };
+
+  const handleRenameCancel = () => {
+    setIsRenaming(false);
+    setRenameValue(layout.name);
+    setRenameError("");
+  };
+
+  const handleRenameKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleRenameSubmit();
+    } else if (e.key === 'Escape') {
+      handleRenameCancel();
+    }
+  };
+
   return (
     <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4 hover:border-slate-500/50 transition-colors">
       {/* Main Layout: Left side (info) and Right side (grid) */}
       <div className="flex gap-4">
         {/* Left side: Name and info */}
-        <div className="flex-1 min-w-0 flex flex-col">
+        <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="mb-2">
-            <h3 className="text-base font-medium text-slate-100 truncate">
-              {layout.name}
-            </h3>
+          <div className="mb-2 min-w-0">
+            {isRenaming ? (
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                  <input
+                    ref={renameInputRef}
+                    type="text"
+                    value={renameValue}
+                    onChange={(e) => {
+                      setRenameValue(e.target.value);
+                      setRenameError("");
+                    }}
+                    onKeyDown={handleRenameKeyDown}
+                    onBlur={handleRenameSubmit}
+                    className={`flex-1 min-w-0 px-2 py-1 bg-slate-900/60 border rounded text-sm text-slate-100 focus:outline-none ${
+                      renameError 
+                        ? 'border-red-500/50 focus:border-red-500/50' 
+                        : 'border-slate-600/50 focus:border-emerald-500/50'
+                    }`}
+                    maxLength={50}
+                  />
+                  <button
+                    onClick={handleRenameSubmit}
+                    className="p-1 text-emerald-400 hover:text-emerald-300 flex-shrink-0"
+                    title="Save"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                </div>
+                {renameError && (
+                  <p className="mt-1 text-xs text-red-400">{renameError}</p>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 group">
+                <h3 className="text-base font-medium text-slate-100 truncate flex-1">
+                  {layout.name}
+                </h3>
+                <button
+                  onClick={() => setIsRenaming(true)}
+                  className="p-1 text-slate-500 hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                  title="Rename"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
             <div className="text-xs text-slate-500 mt-0.5">
               Saved {formatDate(layout.savedAt)}
               {layout.modifiedAt !== layout.savedAt && (
@@ -225,10 +316,11 @@ export const LoadLayoutModal: React.FC<LoadLayoutModalProps> = ({
   onClose,
   onLoad,
   onDelete,
+  onRename,
   layouts,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<'modified' | 'saved' | 'name'>('modified');
+  const [sortBy, setSortBy] = useState<'saved' | 'name'>('saved');
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Reset state when modal closes
@@ -284,8 +376,6 @@ export const LoadLayoutModal: React.FC<LoadLayoutModalProps> = ({
     // Apply sorting
     const sorted = [...filtered].sort((a, b) => {
       switch (sortBy) {
-        case 'modified':
-          return b.modifiedAt - a.modifiedAt;
         case 'saved':
           return b.savedAt - a.savedAt;
         case 'name':
@@ -340,9 +430,8 @@ export const LoadLayoutModal: React.FC<LoadLayoutModalProps> = ({
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-slate-500 cursor-pointer"
+              className="px-3 py-2 bg-slate-700/50 border border-slate-600/30 rounded-md text-sm text-slate-200 hover:bg-slate-700/70 focus:outline-none focus:border-slate-500 cursor-pointer transition-colors"
             >
-              <option value="modified">Sort by Modified</option>
               <option value="saved">Sort by Saved</option>
               <option value="name">Sort by Name</option>
             </select>
@@ -365,6 +454,7 @@ export const LoadLayoutModal: React.FC<LoadLayoutModalProps> = ({
                   layout={layout}
                   onLoad={() => onLoad(layout)}
                   onDelete={() => onDelete(layout.id)}
+                  onRename={(newName) => onRename(layout.id, newName)}
                 />
               ))}
             </div>

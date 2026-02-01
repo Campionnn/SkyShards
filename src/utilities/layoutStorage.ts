@@ -93,6 +93,67 @@ export function layoutNameExists(name: string, excludeId?: string): boolean {
 }
 
 /**
+ * Rename a layout
+ */
+export function renameLayout(id: string, newName: string): boolean {
+  try {
+    const layouts = loadLayouts();
+    const layoutIndex = layouts.findIndex(l => l.id === id);
+    
+    if (layoutIndex === -1) {
+      return false; // Layout not found
+    }
+    
+    // Check if new name already exists (excluding current layout)
+    if (layoutNameExists(newName, id)) {
+      console.warn('[Layout Storage] Cannot rename: name already exists');
+      return false;
+    }
+    
+    // Update name and modifiedAt
+    layouts[layoutIndex] = {
+      ...layouts[layoutIndex],
+      name: newName,
+      modifiedAt: Date.now(),
+    };
+    
+    saveLayouts(layouts);
+    return true;
+  } catch (error) {
+    console.error('[Layout Storage] Error renaming layout:', error);
+    return false;
+  }
+}
+
+/**
+ * Update an existing layout (overwrite)
+ */
+export function updateLayout(id: string, layout: Omit<SavedLayout, 'id' | 'savedAt'>): boolean {
+  try {
+    const layouts = loadLayouts();
+    const layoutIndex = layouts.findIndex(l => l.id === id);
+    
+    if (layoutIndex === -1) {
+      return false; // Layout not found
+    }
+    
+    // Keep the original id and savedAt
+    layouts[layoutIndex] = {
+      ...layout,
+      id,
+      savedAt: layouts[layoutIndex].savedAt,
+      modifiedAt: Date.now(),
+    };
+    
+    saveLayouts(layouts);
+    return true;
+  } catch (error) {
+    console.error('[Layout Storage] Error updating layout:', error);
+    return false;
+  }
+}
+
+/**
  * Generate unique layout ID (exported for external use)
  */
 export { generateLayoutId };

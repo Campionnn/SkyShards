@@ -6,18 +6,22 @@ import type { DesignerPlacement } from "../../context/DesignerContext";
 interface SaveLayoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (name: string) => void;
+  onSave: (name: string, overwriteId?: string) => void;
+  existingLayouts: Array<{ id: string; name: string }>;
 }
 
 export const SaveLayoutModal: React.FC<SaveLayoutModalProps> = ({ 
   isOpen, 
   onClose, 
-  onSave 
+  onSave,
+  existingLayouts
 }) => {
   const { inputPlacements, targetPlacements } = useDesigner();
   const { getMutationDef } = useGreenhouseData();
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [showOverwriteWarning, setShowOverwriteWarning] = useState(false);
+  const [existingLayoutId, setExistingLayoutId] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -33,6 +37,8 @@ export const SaveLayoutModal: React.FC<SaveLayoutModalProps> = ({
     if (isOpen) {
       setName("");
       setError("");
+      setShowOverwriteWarning(false);
+      setExistingLayoutId(null);
     }
   }, [isOpen]);
 
@@ -81,7 +87,24 @@ export const SaveLayoutModal: React.FC<SaveLayoutModalProps> = ({
       return;
     }
     
-    onSave(trimmedName);
+    // Check if name exists
+    const existing = existingLayouts.find(l => l.name === trimmedName);
+    if (existing && !showOverwriteWarning) {
+      setExistingLayoutId(existing.id);
+      setShowOverwriteWarning(true);
+      setError(`A layout named "${trimmedName}" already exists. Click Save again to overwrite it.`);
+      return;
+    }
+    
+    // Save or overwrite
+    onSave(trimmedName, existingLayoutId || undefined);
+  };
+
+  const handleNameChange = (newName: string) => {
+    setName(newName);
+    setError("");
+    setShowOverwriteWarning(false);
+    setExistingLayoutId(null);
   };
 
   // Get unique target mutations for summary
@@ -134,16 +157,13 @@ export const SaveLayoutModal: React.FC<SaveLayoutModalProps> = ({
               id="layout-name"
               type="text"
               value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setError("");
-              }}
-              placeholder="Layout Name"
+              onChange={(e) => handleNameChange(e.target.value)}
+              placeholder="e.g., My Perfect Garden"
               className="w-full px-3 py-2 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
               maxLength={50}
             />
             {error && (
-              <p className="mt-1.5 text-xs text-red-400">{error}</p>
+              <p className={`mt-1.5 text-xs ${showOverwriteWarning ? 'text-yellow-400' : 'text-red-400'}`}>{error}</p>
             )}
           </div>
 
