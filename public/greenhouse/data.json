@@ -586,6 +586,8 @@
       "negative_buffs": [
         "xp_loss"
       ],
+      "harvest_info": "When using a shared setup, DO NOT harvest until all surrounding mutation spots have been filled.",
+      "growing_info": "When harvesting, it is wise to place Turtlellini in the surrounding 3x3 to save your blastberry and get your Shellfruit at the same time. When replaced, it takes 1 stage to prime for explosion. When it decays, Blastberry will explode.",
       "drops": {
         "cocoa_beans": 1200,
         "nether_wart": 1800
@@ -614,6 +616,7 @@
       "negative_buffs": [
         "harvest_loss"
       ],
+      "growing_info": "Rats will spawn at Stages 4 and 7 to try and \"eat\" the mutation, however they just pause its progress until they are killed via a Vacuum.",
       "drops": {
         "brown_mushroom": 190,
         "cactus": 600,
@@ -642,6 +645,7 @@
         "immunity"
       ],
       "negative_buffs": [],
+      "harvest_info": "At harvest, you will want to have your highest Mining Fortune setup equipped to mine the Chloronite. Currently, the amount of Chloronite dropped seems to be: (Mining Fortune - 100)/500. This is not confirmed",
       "drops": {
         "brown_mushroom": 95,
         "potato": 600,
@@ -701,6 +705,8 @@
         "bonus_drops"
       ],
       "negative_buffs": [],
+      "harvest_info": "Must harvest with full Bonus Meter",
+      "growing_info": "Feed with Enchanted Raw Meat until Fleshtrap has hit 100% Bonus, then keep it full with unenchanted Meat until it is time to harvest.",
       "drops": {
         "potato": 1200,
         "carrot": 1400,
@@ -730,6 +736,7 @@
       "negative_buffs": [
         "harvest_loss"
       ],
+      "growing_info": "Harvestable at Stage 12 and above, every 12th stage results in +1 mutation drop at base (i.e. Stage 24/36/48...).",
       "drops": {
         "moonflower": 600,
         "sunflower": 600,
@@ -760,6 +767,7 @@
       "negative_buffs": [
         "harvest_loss"
       ],
+      "growing_info": "Must change the time of day each growth stage. The plant will display what time of day it \"Craves\". ",
       "drops": {
         "cactus": 1200,
         "wild_rose": 1600
@@ -798,6 +806,7 @@
         "bonus_drops"
       ],
       "negative_buffs": [],
+      "growing_info": "Must wake it up every 5 stages (Stage 5, Stage 10, Stage 15) for it to continue growing, otherwise it will pause at one of those 3 stages.",
       "drops": {
         "moonflower": 800,
         "sunflower": 800,
@@ -822,6 +831,7 @@
         "water_retain"
       ],
       "negative_buffs": [],
+      "growing_info": "Keep waterable plants within a 3x3 to allow for Soggybud to grow.",
       "drops": {
         "melon": 3200
       }
@@ -849,6 +859,7 @@
       "negative_buffs": [
         "harvest_loss"
       ],
+      "growing_info": "When growing, the plant will teleport around the plot and override any EMPTY land it finds changing it to End Stone and also will leave the spawning location open again. When multiple Chorus Fruit teleport, it is possible for them to teleport to the same spot and delete one another with the higher growth stage plant taking priority.",
       "drops": {
         "potato": 1500,
         "carrot": 1750,
@@ -876,6 +887,7 @@
         "harvest_boost"
       ],
       "negative_buffs": [],
+      "harvest_info": "You will play a game of Snake that can be found in Abiphones and you must collect 8 Apples. If you fail, you will be set back 3 stages.",
       "drops": {
         "moonflower": 1200,
         "sunflower": 1200,
@@ -905,6 +917,7 @@
       "negative_buffs": [
         "water_drain"
       ],
+      "growing_info": "Puffercloud will do AOE damage when you are within its range when growing.",
       "drops": {
         "brown_mushroom": 665,
         "moonflower": 1400,
@@ -926,6 +939,7 @@
         "water_retain"
       ],
       "negative_buffs": [],
+      "growing_info": "Turtlellini must be exploded TWICE by Blastberry to make a Shellfruit.",
       "drops": {
         "cocoa_beans": 2000,
         "melon": 4000
@@ -955,6 +969,7 @@
       "negative_buffs": [
         "harvest_loss"
       ],
+      "harvest_info": "Wear Sorrow Armor (or have the Invisibility Effect). Careful not to detonate any of your Blastberry within the setup.",
       "drops": {
         "cactus": 1500,
         "sugar_cane": 2000
@@ -984,6 +999,7 @@
       "negative_buffs": [
         "harvest_loss"
       ],
+      "harvest_info": "Play a game of \"Red Light/Green Light\" and swing/\"break\" when you see \"Green Light\". Stop once it changes to yellow and then red. It takes upwards of 6 \"rounds\" to fully harvest the mutation",
       "drops": {
         "cactus": 2400,
         "wild_rose": 3200
@@ -1010,6 +1026,8 @@
         "effect_spread"
       ],
       "negative_buffs": [],
+      "harvest_info": "Release the Charge before harvest (Precautionary)",
+      "growing_info": "Release the Charge built up over time (will fill up your Thunder in a Bottle items) and before harvest to avoid the plant dying.",
       "drops": {
         "cactus": 900,
         "melon": 2400,
@@ -1066,6 +1084,8 @@
         "bonus_drops"
       ],
       "negative_buffs": [],
+      "harvest_info": "When harvested, all Dead Plants within the 3x3 turn into Zombud Mobs (20 HP, hit-based) and must be killed for the mutation and Bestiary credit. Useful tools for killing: Fire Freeze Staff, Gyrokinetic Wand",
+      "growing_info": "If kicked from Garden/you leave Garden before killing the Zombuds, they will despawn. In shared setups make sure you replant extra dead plants to get the max yield from each mutation. If the mutation decays, the Zombuds will spawn right as it decays if you have Dead Plants in place.",
       "drops": {
         "pumpkin": 1190,
         "wild_rose": 2800
@@ -1092,6 +1112,8 @@
         "harvest_boost"
       ],
       "negative_buffs": [],
+      "harvest_info": "Harvestable at any stage after Stage 3. To utilize Harvest Yield Buff, you must not harvest at 1x or 9x reward stages.",
+      "growing_info": "The ideal maximum stage to harvest for best yield is Stage 14 before the odds of resetting outweigh the benefits to rolling the dice.",
       "drops": {
         "moonflower": 200,
         "sunflower": 200,
@@ -1122,6 +1144,8 @@
       "negative_buffs": [
         "water_drain"
       ],
+      "harvest_info": "Don't harvest the roots (Precautionary)",
+      "growing_info": "If you remove the farmland surrounding the Devourer setup, the roots it will try to spread will not be able to make it outside of the contained area. Also it appears that keeping the Devourer well watered may reduce the amount of damage/spread it has, allowing you to possibly reuse parts of the setup on a second spawn.",
       "drops": {
         "brown_mushroom": 950,
         "pumpkin": 1700,
@@ -1152,6 +1176,7 @@
       "negative_buffs": [
         "harvest_loss"
       ],
+      "harvest_info": "Harvestable Glasscorn is not at max stage (Stage 9) but rather at Stages 7-8. If not harvested in time, it will reset.",
       "drops": {
         "potato": 4800,
         "cactus": 2400
@@ -1175,6 +1200,7 @@
         "effect_spread"
       ],
       "negative_buffs": [],
+      "growing_info": "Godseed is very much like a weed and will spread through a plot if there is an adjacent crop that is placed in a spot it could spread all of the positive effects to another open enough area.",
       "drops": {
         "brown_mushroom": 117,
         "cocoa_beans": 492,
@@ -1203,6 +1229,7 @@
       "decay": 0,
       "positive_buffs": [],
       "negative_buffs": [],
+      "growing_info": "Obtain a Unfulfilled Jerryseed from a Jerry Visitor and take it to Xalx in the Crystal Hollows with a Mysterious Crop. He will give you back an Unripe Jerryseed that you have to reforge to a Dirty Unripe Jerryseed and take to Dirt in the Dwarven Mines. Dirt will give you the Fertilized Jerryseed in return. When growing, Jerryflower will stop at Stage 5 until it is fed 10x Move Jerry.",
       "drops": {}
     },
     "phantomleaf": {
@@ -1227,6 +1254,7 @@
         "xp_boost"
       ],
       "negative_buffs": [],
+      "harvest_info": "When fully grown, break the Phantomleaf and be ready to look at ANY plant on the same plot as the Phantom leaf. When you find the fastest heartbeat, that is the one you need to break. You have 1 minute to harvest it. If you fail, you will have to grow another.",
       "drops": {
         "potato": 4800,
         "carrot": 5600
@@ -1260,6 +1288,8 @@
       "negative_buffs": [
         "harvest_loss"
       ],
+      "harvest_info": "When harvested, a clone of yourself will spawn. The clone is not too difficult to kill, but if you care to make it easier, spawn the clone without any armor on.",
+      "growing_info": "Timestalks \"grow backwards\" in the case they start as a \"fully grown plant\" and shrink over time. When ready to be harvested, it will be smaller than a player head in size.",
       "drops": {
         "cactus": 3000,
         "sugar_cane": 4000

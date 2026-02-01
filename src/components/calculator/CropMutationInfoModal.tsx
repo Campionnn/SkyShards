@@ -4,7 +4,7 @@ import {
   AlertTriangle,
   Loader2,
   Box,
-  ClockArrowUp, Flame, Target, PackageOpen, ClockArrowDown, WandSparkles
+  ClockArrowUp, Flame, Target, PackageOpen, ClockArrowDown, WandSparkles, Sprout, Scissors
 } from "lucide-react";
 import { getGroundImagePath } from "../../types/greenhouse";
 import { CropImage } from "../shared";
@@ -201,6 +201,8 @@ export const CropMutationInfoModal: React.FC = () => {
   const special = isMutation ? mutationData!.special : null;
   const decay = isMutation ? mutationData!.decay : null;
   const drops = isMutation ? mutationData!.drops : null;
+  const harvestInfo = isMutation ? mutationData!.harvest_info : null;
+  const growingInfo = isMutation ? mutationData!.growing_info : null;
 
   return (
     <div
@@ -303,6 +305,28 @@ export const CropMutationInfoModal: React.FC = () => {
                   <h3 className="text-sm font-medium text-amber-200">Special Condition</h3>
                 </div>
                 <p className="text-sm text-amber-300/90">{formatName(special)}</p>
+              </div>
+            )}
+
+            {/* Growing Info (Mutations Only) */}
+            {isMutation && growingInfo && (
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sprout className="w-4 h-4 text-blue-400" />
+                  <h3 className="text-sm font-medium text-blue-200">Growing Info</h3>
+                </div>
+                <p className="text-sm text-blue-300/90 leading-relaxed">{growingInfo}</p>
+              </div>
+            )}
+
+            {/* Harvest Info (Mutations Only) */}
+            {isMutation && harvestInfo && (
+              <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Scissors className="w-4 h-4 text-purple-400" />
+                  <h3 className="text-sm font-medium text-purple-200">Harvest Info</h3>
+                </div>
+                <p className="text-sm text-purple-300/90 leading-relaxed">{harvestInfo}</p>
               </div>
             )}
 

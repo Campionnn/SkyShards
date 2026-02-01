@@ -39,6 +39,8 @@ export interface MutationDataJSON {
   positive_buffs: string[];
   negative_buffs: string[];
   drops: Record<string, number>;
+  harvest_info?: string;
+  growing_info?: string;
 }
 
 export interface GreenhouseDataJSON {
