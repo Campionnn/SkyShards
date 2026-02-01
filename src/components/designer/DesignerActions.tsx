@@ -1,5 +1,6 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { Save, FolderOpen, Copy, Clipboard, Trash2, RotateCcw, Layers, X } from "lucide-react";
+import React, { useCallback, useState, useEffect, type RefObject } from "react";
+import { Save, FolderOpen, Copy, Clipboard, Trash2, RotateCcw, Layers, X, Image, Film, Download, ClipboardCopy, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useDesigner, useGreenhouseData } from "../../context";
 import { useToast } from "../ui/toastContext";
 import { encodeDesign, decodeDesign } from "../../utilities";
@@ -11,15 +12,33 @@ import {
   updateLayout,
   generateLayoutId,
 } from "../../utilities/layoutStorage";
+import {
+  captureGridAsPng,
+  captureGridAsGif,
+  copyBlobToClipboard,
+  downloadBlob,
+  aggregateCropInfo,
+  type ExportOptions,
+} from "../../utilities/gridExport";
 import type { SavedLayout } from "../../types/layout";
+import type { DesignerGridHandle } from "./DesignerGrid";
 import { SaveLayoutModal } from "./SaveLayoutModal";
 import { LoadLayoutModal } from "./LoadLayoutModal";
 
 interface DesignerActionsProps {
   className?: string;
+  gridRef?: RefObject<DesignerGridHandle | null>;
+  showTargets?: boolean;
 }
 
-export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = "" }) => {
+type ExportFormat = "png" | "gif";
+type ExportStep = "choose-format" | "exporting" | "choose-action";
+
+export const DesignerActions: React.FC<DesignerActionsProps> = ({ 
+  className = "",
+  gridRef,
+  showTargets = true,
+}) => {
   const { 
     mode, 
     setMode,
@@ -40,12 +59,26 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
   const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
   const [savedLayouts, setSavedLayouts] = useState<SavedLayout[]>([]);
   
+  // Export state
+  const [exportStep, setExportStep] = useState<ExportStep>("choose-format");
+  const [exportFormat, setExportFormat] = useState<ExportFormat | null>(null);
+  const [exportProgress, setExportProgress] = useState(0);
+  const [currentExportBlob, setCurrentExportBlob] = useState<Blob | null>(null);
+  
   // Reload layouts when load modal opens
   useEffect(() => {
     if (isLoadModalOpen) {
       setSavedLayouts(loadLayouts());
     }
   }, [isLoadModalOpen]);
+  
+  // Reset export state
+  const resetExportState = useCallback(() => {
+    setExportStep("choose-format");
+    setExportFormat(null);
+    setExportProgress(0);
+    setCurrentExportBlob(null);
+  }, []);
   
   // Handle mode change with auto-deselect
   const handleModeChange = useCallback((newMode: "inputs" | "targets") => {
@@ -228,7 +261,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
   const [importText, setImportText] = useState("");
   
   // Export design as base64 gzipped string to clipboard
-  const handleExport = useCallback(() => {
+  const handleExportCode = useCallback(() => {
     try {
       const encoded = encodeDesign(inputPlacements, targetPlacements);
       navigator.clipboard.writeText(encoded);
@@ -334,7 +367,140 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
     }
   }, [clearAllPlacements, toast]);
   
+  // Get export options
+  const getExportOptions = useCallback((): ExportOptions => {
+    const inputCrops = aggregateCropInfo(inputPlacements);
+    const targetCrops = showTargets ? aggregateCropInfo(targetPlacements) : [];
+    
+    return {
+      scale: 2,
+      includeWatermark: true,
+      watermarkUrl: "greenhouse.skyshards.com",
+      watermarkTitle: "Greenhouse Designer",
+      inputCrops,
+      targetCrops,
+      showTargets,
+    };
+  }, [inputPlacements, targetPlacements, showTargets]);
+  
+  // Handle export format selection
+  const handleSelectExportFormat = useCallback(async (format: ExportFormat) => {
+    if (!gridRef?.current) {
+      toast({
+        title: "Export failed",
+        description: "Grid not available for export",
+        variant: "error",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    const gridElement = gridRef.current.getGridElement();
+    if (!gridElement) {
+      toast({
+        title: "Export failed",
+        description: "Grid element not found",
+        variant: "error",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    setExportFormat(format);
+    setExportStep("exporting");
+    setExportProgress(0);
+    
+    try {
+      const options = getExportOptions();
+      let result;
+      
+      if (format === "png") {
+        result = await captureGridAsPng(gridElement, options);
+        // PNG: show copy/download options
+        setCurrentExportBlob(result.blob);
+        setExportStep("choose-action");
+      } else {
+        // GIF: auto-download (clipboard doesn't support GIF well)
+        const cropIds = [
+          ...inputPlacements.map(p => p.cropId),
+          ...(showTargets ? targetPlacements.map(p => p.cropId) : []),
+        ];
+        result = await captureGridAsGif(gridElement, options, cropIds, setExportProgress);
+        
+        // Auto-download the GIF
+        const filename = `SkyShards-designer-${Date.now()}.gif`;
+        downloadBlob(result.blob, filename);
+        
+        toast({
+          title: "GIF Downloaded!",
+          description: `Saved as ${filename}`,
+          variant: "success",
+          duration: 3000,
+        });
+        resetExportState();
+      }
+    } catch (err) {
+      console.error("Export failed:", err);
+      toast({
+        title: "Export failed",
+        description: err instanceof Error ? err.message : "Failed to capture grid",
+        variant: "error",
+        duration: 5000,
+      });
+      resetExportState();
+    }
+  }, [gridRef, getExportOptions, inputPlacements, targetPlacements, showTargets, toast, resetExportState]);
+  
+  // Handle download
+  const handleDownload = useCallback(() => {
+    if (!currentExportBlob) return;
+    
+    const filename = `SkyShards-designer-${Date.now()}.${exportFormat}`;
+    downloadBlob(currentExportBlob, filename);
+    
+    toast({
+      title: "Downloaded!",
+      description: `Saved as ${filename}`,
+      variant: "success",
+      duration: 3000,
+    });
+    resetExportState();
+  }, [currentExportBlob, exportFormat, toast, resetExportState]);
+  
+  // Handle copy to clipboard
+  const handleCopyToClipboard = useCallback(async () => {
+    if (!currentExportBlob) return;
+    
+    const success = await copyBlobToClipboard(currentExportBlob);
+    
+    if (success) {
+      toast({
+        title: "Copied to clipboard!",
+        description: "PNG image copied successfully",
+        variant: "success",
+        duration: 3000,
+      });
+      resetExportState();
+    } else {
+      // Clipboard failed, offer download instead
+      toast({
+        title: "Clipboard not supported",
+        description: "Downloading image instead...",
+        variant: "warning",
+        duration: 3000,
+      });
+      handleDownload();
+    }
+  }, [currentExportBlob, toast, resetExportState, handleDownload]);
+  
   const totalPlacements = inputPlacements.length + targetPlacements.length;
+  
+  // Animation variants for button transitions
+  const buttonVariants = {
+    initial: { opacity: 0, x: -20 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 20 },
+  };
   
   return (
     <div className={`space-y-4 ${className}`}>
@@ -384,7 +550,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
         </button>
         
         <button
-          onClick={handleExport}
+          onClick={handleExportCode}
           disabled={totalPlacements === 0}
           className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-300 hover:bg-slate-700/60 hover:border-slate-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
@@ -399,6 +565,113 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({ className = ""
           <Clipboard className="w-4 h-4" />
           Paste Code
         </button>
+      </div>
+      
+      {/* Export Image Section */}
+      <div className="space-y-2">
+        <div className="text-xs text-slate-400 uppercase tracking-wider">Export Image</div>
+        <div className="grid grid-cols-2 gap-2 relative overflow-hidden">
+          <AnimatePresence mode="wait">
+            {exportStep === "choose-format" && (
+              <>
+                <motion.button
+                  key="png-btn"
+                  variants={buttonVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  onClick={() => handleSelectExportFormat("png")}
+                  disabled={totalPlacements === 0}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-sm text-blue-300 hover:bg-blue-500/30 hover:border-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Image className="w-4 h-4" />
+                  PNG
+                </motion.button>
+                
+                <motion.button
+                  key="gif-btn"
+                  variants={buttonVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  onClick={() => handleSelectExportFormat("gif")}
+                  disabled={totalPlacements === 0}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-sm text-purple-300 hover:bg-purple-500/30 hover:border-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Film className="w-4 h-4" />
+                  GIF
+                </motion.button>
+              </>
+            )}
+            
+            {exportStep === "exporting" && (
+              <motion.div
+                key="exporting"
+                variants={buttonVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="col-span-2 flex flex-col items-center justify-center gap-2 px-3 py-3 bg-slate-800/60 border border-slate-600/50 rounded-lg"
+              >
+                <div className="flex items-center gap-2 text-sm text-slate-300">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Exporting {exportFormat?.toUpperCase()}...</span>
+                </div>
+                {exportFormat === "gif" && (
+                  <div className="w-full bg-slate-700 rounded-full h-1.5">
+                    <div 
+                      className="bg-purple-500 h-1.5 rounded-full transition-all duration-300"
+                      style={{ width: `${exportProgress}%` }}
+                    />
+                  </div>
+                )}
+              </motion.div>
+            )}
+            
+            {exportStep === "choose-action" && (
+              <>
+                <motion.button
+                  key="clipboard-btn"
+                  variants={buttonVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  onClick={handleCopyToClipboard}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-sm text-emerald-300 hover:bg-emerald-500/30 hover:border-emerald-500/50 transition-colors"
+                >
+                  <ClipboardCopy className="w-4 h-4" />
+                  Copy
+                </motion.button>
+                
+                <motion.button
+                  key="download-btn"
+                  variants={buttonVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  onClick={handleDownload}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500/20 border border-amber-500/30 rounded-lg text-sm text-amber-300 hover:bg-amber-500/30 hover:border-amber-500/50 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
+                </motion.button>
+                
+                <motion.button
+                  key="cancel-btn"
+                  variants={buttonVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  onClick={resetExportState}
+                  className="col-span-2 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-300 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                  Cancel
+                </motion.button>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
       
       {/* Import Modal */}

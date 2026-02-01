@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useCallback } from "react";
+import React, { useRef, useMemo, useCallback, forwardRef, useImperativeHandle } from "react";
 import { Trash2 } from "lucide-react";
 import { useDesigner, useGreenhouseData, useInfoModal } from "../../context";
 import { useDesignerGridPlacement } from "../../hooks";
@@ -11,6 +11,10 @@ import { GridBackground, DragValidationOverlay } from "../grid";
 import { getGroundImagePath } from "../../types/greenhouse";
 import { CropImage } from "../shared";
 import type { DesignerPlacement } from "../../context";
+
+export interface DesignerGridHandle {
+  getGridElement: () => HTMLDivElement | null;
+}
 
 interface DesignerGridProps {
   className?: string;
@@ -71,6 +75,7 @@ interface DesignerPlacementCellProps {
   isPlacementMode: boolean;
   isInput: boolean;
   groundType: string;
+  showImage?: boolean;
   validationInfo?: { isValid: boolean; missingRequirements: Array<{ crop: string; needed: number; have: number }> };
   onMouseDown: (e: React.MouseEvent) => void;
   onMouseEnter: () => void;
@@ -87,6 +92,7 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
   isPlacementMode,
   isInput,
   groundType,
+  showImage = true,
   validationInfo,
   onMouseDown,
   onMouseEnter,
@@ -102,12 +108,12 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
   // Determine if this is an invalid target
   const isInvalidTarget = !isInput && validationInfo && !validationInfo.isValid;
   
-  // Glow colors: no glow for inputs, blue glow for valid targets, red border for invalid targets
+  // Glow colors: no glow for inputs, blue glow for valid targets (only when showing image), red border for invalid targets
   const baseGlow = isInput
     ? undefined
     : isInvalidTarget
       ? undefined // No glow for invalid, we use border instead
-      : "0 0 8px rgba(0, 200, 255, 1), inset 0 0 8px rgba(0, 200, 255, 1)";
+      : showImage ? "0 0 8px rgba(0, 200, 255, 1), inset 0 0 8px rgba(0, 200, 255, 1)" : undefined;
   const hoverGlow = "0 0 8px rgba(239, 68, 68, 0.8), inset 0 0 8px rgba(239, 68, 68, 0.4)";
   
   const style: React.CSSProperties = {
@@ -159,16 +165,18 @@ const DesignerPlacementCell: React.FC<DesignerPlacementCellProps> = ({
       onContextMenu={(e) => e.preventDefault()}
       title={`${placement.cropName} - Drag to move, right-click to remove`}
     >
-      <CropImage
-        cropId={placement.cropId}
-        cropName={placement.cropName}
-        width={imageWidth}
-        height={imageHeight}
-        showGround={false}
-        groundType={groundType}
-        showFallback={true}
-        fallbackText={placement.cropName.slice(0, 4)}
-      />
+      {showImage && (
+        <CropImage
+          cropId={placement.cropId}
+          cropName={placement.cropName}
+          width={imageWidth}
+          height={imageHeight}
+          showGround={false}
+          groundType={groundType}
+          showFallback={true}
+          fallbackText={placement.cropName.slice(0, 4)}
+        />
+      )}
       
       {/* Trash icon on hover */}
       {isHovered && (
@@ -244,12 +252,12 @@ const DesignerPlacementPreview: React.FC<DesignerPlacementPreviewProps> = ({
   );
 };
 
-export const DesignerGrid: React.FC<DesignerGridProps> = ({
+export const DesignerGrid = forwardRef<DesignerGridHandle, DesignerGridProps>(({
   className = "",
   cellSize = 48,
   gap = 2,
   showTargets = true,
-}) => {
+}, ref) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { getCropDef, mutations } = useGreenhouseData();
   const { openInfo } = useInfoModal();
@@ -262,6 +270,11 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
     getTargetValidation,
     setHoveredTargetId,
   } = useDesigner();
+  
+  // Expose grid element via ref
+  useImperativeHandle(ref, () => ({
+    getGridElement: () => gridRef.current,
+  }), []);
   
   // Designer always uses a full 10x10 grid with all cells "unlocked"
   const allCellsUnlocked = useMemo(() => {
@@ -347,7 +360,7 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
       })}
       
       {/* Target placements */}
-      {showTargets && targetPlacements.map((placement) => {
+      {targetPlacements.map((placement) => {
         const isBeingDragged = dragState?.placementId === placement.id && dragState?.isDragging;
         const isHovered = hoveredPlacementId === placement.id && !isBeingDragged && !isPlacementMode;
         
@@ -369,6 +382,7 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
             isPlacementMode={isPlacementMode}
             isInput={false}
             groundType={getGroundType(placement.cropId)}
+            showImage={showTargets}
             validationInfo={validationInfo}
             onMouseDown={(e) => handlePlacementMouseDown(placement.id, e)}
             onMouseEnter={() => {
@@ -417,4 +431,6 @@ export const DesignerGrid: React.FC<DesignerGridProps> = ({
       />
     </>
   );
-};
+});
+
+DesignerGrid.displayName = "DesignerGrid";

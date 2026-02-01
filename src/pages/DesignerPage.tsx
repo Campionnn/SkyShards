@@ -1,21 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { 
   CropSelectionPalette, 
   DesignerActions, 
   DesignerGrid,
-  MutationValidator 
+  MutationValidator,
 } from "../components";
+import type { DesignerGridHandle } from "../components";
 
 export const DesignerPage: React.FC = () => {
   const [showTargets, setShowTargets] = useState(true);
+  const gridRef = useRef<DesignerGridHandle>(null);
   
   return (
     <div className="container mx-auto px-4 py-6 max-w-screen-2xl">
       <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr_420px] gap-6">
         <div className="space-y-4">
           <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
-            <DesignerActions />
+            <DesignerActions gridRef={gridRef} showTargets={showTargets} />
           </div>
           
           {/* Mutation Validator */}
@@ -55,7 +57,7 @@ export const DesignerPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <DesignerGrid showTargets={showTargets} />
+            <DesignerGrid ref={gridRef} showTargets={showTargets} />
           </div>
         </div>
         
