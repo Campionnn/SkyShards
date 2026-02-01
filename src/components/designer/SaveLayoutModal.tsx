@@ -126,16 +126,16 @@ export const SaveLayoutModal: React.FC<SaveLayoutModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm overflow-y-auto"
       onClick={handleBackdropClick}
     >
       <div
         ref={modalRef}
-        className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-md"
+        className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-md my-auto"
       >
         {/* Modal Header */}
-        <div className="bg-slate-900 border-b border-slate-700 px-6 py-4 flex items-center justify-between rounded-t-xl">
-          <h2 className="text-lg font-semibold text-slate-100">Save Layout</h2>
+        <div className="bg-slate-900 border-b border-slate-700 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl">
+          <h2 className="text-base sm:text-lg font-semibold text-slate-100">Save Layout</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-slate-200"
@@ -146,7 +146,7 @@ export const SaveLayoutModal: React.FC<SaveLayoutModalProps> = ({
         </div>
 
         {/* Modal Content */}
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="p-3 sm:p-6">
           {/* Layout Name Input */}
           <div className="mb-6">
             <label htmlFor="layout-name" className="block text-sm font-medium text-slate-300 mb-2">

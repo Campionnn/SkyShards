@@ -123,10 +123,10 @@ export const CalculatorPage: React.FC = () => {
 
   return (
     <>
-      <div className="container mx-auto px-4 py-6 max-w-screen-2xl">
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr_420px] gap-6">
-          <div className="space-y-4">
-            <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-screen-2xl">
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr_420px] gap-4 lg:gap-6">
+          <div className="space-y-4 order-2 lg:order-1">
+            <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-3 sm:p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-medium text-slate-200">Grid Configuration</h3>
                 <span className="text-xs text-slate-400">
@@ -135,7 +135,8 @@ export const CalculatorPage: React.FC = () => {
               </div>
               <GridPreview onClick={() => setIsGridModalOpen(true)} />
               <p className="text-xs text-slate-500 mt-2">
-                Click to manage unlocked cells
+                <span className="hidden sm:inline">Click to manage unlocked cells</span>
+                <span className="sm:hidden">Tap to manage unlocked cells</span>
               </p>
             </div>
 
@@ -165,7 +166,7 @@ export const CalculatorPage: React.FC = () => {
             </button>
           </div>
 
-          <div>
+          <div className="order-1 lg:order-2">
             <SolverResults
               result={displayResult}
               error={error}
@@ -177,7 +178,7 @@ export const CalculatorPage: React.FC = () => {
           </div>
 
           {/* Column 3 - Crop Configurations (wider) */}
-          <div className="flex flex-col h-[calc(100vh-8rem)]">
+          <div className="flex flex-col h-[500px] lg:h-[calc(100vh-180px)] lg:min-h-[500px] order-3">
             <CropConfigurationsPanel className="flex-1 overflow-hidden" />
           </div>
         </div>

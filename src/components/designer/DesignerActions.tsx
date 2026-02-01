@@ -682,9 +682,9 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
       
       {/* Import Modal */}
       {isImportModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setIsImportModalOpen(false)}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto" onClick={() => setIsImportModalOpen(false)}>
           <div 
-            className="bg-slate-800 border border-slate-600 rounded-lg p-4 w-full max-w-md mx-4"
+            className="bg-slate-800 border border-slate-600 rounded-lg p-4 w-full max-w-md my-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3">

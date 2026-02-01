@@ -51,16 +51,16 @@ export const GridManagerModal: React.FC<GridManagerModalProps> = ({ isOpen, onCl
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm overflow-y-auto"
       onClick={handleBackdropClick}
     >
       <div
         ref={modalRef}
-        className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto"
+        className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] my-auto overflow-y-auto"
       >
         {/* Modal Header */}
-        <div className="sticky top-0 z-10 bg-slate-900 border-b border-slate-700 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-slate-100">Grid Manager</h2>
+        <div className="sticky top-0 z-10 bg-slate-900 border-b border-slate-700 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <h2 className="text-lg sm:text-xl font-semibold text-slate-100">Grid Manager</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-slate-200"
@@ -71,8 +71,8 @@ export const GridManagerModal: React.FC<GridManagerModalProps> = ({ isOpen, onCl
         </div>
 
         {/* Modal Content */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
             {/* Grid Section */}
             <div className="lg:col-span-2">
               <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">

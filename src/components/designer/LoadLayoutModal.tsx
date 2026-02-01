@@ -392,16 +392,16 @@ export const LoadLayoutModal: React.FC<LoadLayoutModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm overflow-y-auto"
       onClick={handleBackdropClick}
     >
       <div
         ref={modalRef}
-        className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] my-auto overflow-hidden flex flex-col"
       >
         {/* Modal Header */}
-        <div className="bg-slate-900 border-b border-slate-700 px-6 py-4 flex items-center justify-between flex-shrink-0">
-          <h2 className="text-xl font-semibold text-slate-100">Load Layout</h2>
+        <div className="bg-slate-900 border-b border-slate-700 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between flex-shrink-0">
+          <h2 className="text-lg sm:text-xl font-semibold text-slate-100">Load Layout</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-slate-200"
@@ -412,7 +412,7 @@ export const LoadLayoutModal: React.FC<LoadLayoutModalProps> = ({
         </div>
 
         {/* Search and Sort Controls */}
-        <div className="px-6 py-4 border-b border-slate-700/50 flex-shrink-0">
+        <div className="px-3 sm:px-6 py-3 sm:py-4 border-b border-slate-700/50 flex-shrink-0">
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Search */}
             <div className="flex-1 relative">

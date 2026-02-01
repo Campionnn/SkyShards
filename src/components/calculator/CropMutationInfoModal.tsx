@@ -143,12 +143,12 @@ export const CropMutationInfoModal: React.FC = () => {
   if (isLoading) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm overflow-y-auto"
         onClick={handleBackdropClick}
       >
         <div
           ref={modalRef}
-          className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-lg p-8"
+          className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-lg p-8 my-auto"
         >
           <div className="flex flex-col items-center justify-center gap-3">
             <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
@@ -163,12 +163,12 @@ export const CropMutationInfoModal: React.FC = () => {
   if (error || !data) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm overflow-y-auto"
         onClick={handleBackdropClick}
       >
         <div
           ref={modalRef}
-          className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-lg p-6"
+          className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-lg p-6 my-auto"
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-slate-100">Error</h2>
@@ -204,19 +204,19 @@ export const CropMutationInfoModal: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm overflow-y-auto"
       onClick={handleBackdropClick}
     >
       <div
         ref={modalRef}
-        className={`bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-h-[85vh] overflow-hidden flex flex-col ${
+        className={`bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-h-[95vh] my-auto overflow-hidden flex flex-col ${
           isMutation && (requirements.length > 0 || (drops && Object.keys(drops).length > 0)) ? "max-w-3xl" : "max-w-lg"
         }`}
       >
         {/* Modal Header */}
-        <div className="flex-shrink-0 bg-slate-900 border-b border-slate-700 px-6 py-4 flex items-center justify-between rounded-t-xl">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden">
+        <div className="flex-shrink-0 bg-slate-900 border-b border-slate-700 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between rounded-t-xl">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
               <CropImage
                 cropId={id}
                 cropName={name}
@@ -224,8 +224,8 @@ export const CropMutationInfoModal: React.FC = () => {
                 showFallback={false}
               />
             </div>
-            <div>
-              <h2 className={`text-lg font-semibold ${rarity ? getRarityColor(rarity) : "text-slate-100"}`}>
+            <div className="min-w-0">
+              <h2 className={`text-base sm:text-lg font-semibold truncate ${rarity ? getRarityColor(rarity) : "text-slate-100"}`}>
                 {name}
               </h2>
               <div className="flex items-center gap-2">
@@ -250,7 +250,7 @@ export const CropMutationInfoModal: React.FC = () => {
         </div>
 
         {/* Modal Content */}
-        <div className={`p-6 overflow-y-auto ${isMutation && (requirements.length > 0 || (drops && Object.keys(drops).length > 0)) ? "flex gap-6" : ""}`}>
+        <div className={`p-4 sm:p-6 overflow-y-auto ${isMutation && (requirements.length > 0 || (drops && Object.keys(drops).length > 0)) ? "flex flex-col lg:flex-row gap-4 lg:gap-6" : ""}`}>
           {/* Left Column - General Info */}
           <div className={`space-y-4 ${isMutation && (requirements.length > 0 || (drops && Object.keys(drops).length > 0)) ? "flex-1 min-w-0" : ""}`}>
             {/* Ground Type */}
@@ -359,7 +359,7 @@ export const CropMutationInfoModal: React.FC = () => {
 
           {/* Right Column - Requirements & Drops (Mutations Only) */}
           {isMutation && (requirements.length > 0 || (drops && Object.keys(drops).length > 0)) && (
-            <div className="w-72 flex-shrink-0 space-y-4">
+            <div className="w-full lg:w-72 flex-shrink-0 space-y-4">
               {/* Requirements Section */}
               {requirements.length > 0 && (
                 <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">

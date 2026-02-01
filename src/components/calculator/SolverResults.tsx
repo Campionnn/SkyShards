@@ -262,6 +262,26 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   
   const [showMutations, setShowMutations] = useState(true);
   
+  // Responsive grid sizing
+  const [gridSize, setGridSize] = useState(() => {
+    const width = window.innerWidth;
+    if (width < 640) return { cellSize: 32, gap: 1 };
+    if (width < 1024) return { cellSize: 40, gap: 2 };
+    return { cellSize: 48, gap: 2 };
+  });
+  
+  React.useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 640) setGridSize({ cellSize: 32, gap: 1 });
+      else if (width < 1024) setGridSize({ cellSize: 40, gap: 2 });
+      else setGridSize({ cellSize: 48, gap: 2 });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   // Handle sending current grid content to designer
   const handleSendToDesigner = useCallback(() => {
     const inputs: Array<{ id: string; name: string; position: [number, number]; size: number }> = [];
@@ -347,8 +367,8 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
   
   // Grid configuration
   const gridRef = useRef<HTMLDivElement>(null);
-  const cellSize = 48;
-  const gap = 2;
+  const cellSize = gridSize.cellSize;
+  const gap = gridSize.gap;
   const { width: gridWidth, height: gridHeight } = getGridDimensions(cellSize, gap);
   
   // Use the shared grid placement hook
@@ -412,10 +432,10 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
 
   // Render interactive grid (shared between empty and results states)
   const renderInteractiveGrid = (showOccupied: boolean = false) => (
-    <div className="w-full overflow-visible">
+    <div className="w-full flex justify-center overflow-x-auto">
       <div
         ref={gridRef}
-        className="relative mx-auto select-none"
+        className="relative select-none"
         style={{
           width: gridWidth,
           height: gridHeight,
