@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { GRID_SIZE, getDefaultUnlockedCells, getExpandableCells } from "../constants";
 import type { ExpansionStep } from "../types/greenhouse";
 import { LocalStorageManager } from "../utilities";
@@ -41,9 +41,22 @@ export const GridStateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return getDefaultUnlockedCells();
   });
   const [expansionSteps, setExpansionStepsState] = useState<ExpansionStep[]>([]);
+  const isInitialMount = useRef(true);
   
-  // Save to localStorage whenever unlockedCells changes
+  // Save to localStorage whenever unlockedCells changes (but not on initial mount with defaults)
   useEffect(() => {
+    if (isInitialMount.current) {
+      // Check if we loaded from localStorage
+      const saved = LocalStorageManager.loadGridConfig();
+      if (saved && saved.size > 0) {
+        // We loaded from localStorage, so future changes should save
+        isInitialMount.current = false;
+      } else {
+        // We're using defaults, don't save yet
+        isInitialMount.current = false;
+        return;
+      }
+    }
     LocalStorageManager.saveGridConfig(unlockedCells);
   }, [unlockedCells]);
   

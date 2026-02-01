@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from "react";
 import type { CropDefinition, MutationDefinition, SelectedMutation } from "../types/greenhouse";
 import greenhouseData from "../../public/greenhouse/data.json";
 import { LocalStorageManager } from "../utilities";
@@ -88,6 +88,7 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
     const saved = LocalStorageManager.loadMutationTargets();
     return saved || [];
   });
+  const isInitialMutationsMount = useRef(true);
 
   // Load data from JSON on mount
   useEffect(() => {
@@ -102,8 +103,15 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
     }
   }, []);
   
-  // Save mutation targets to localStorage when they change
+  // Save mutation targets to localStorage when they change (but not empty defaults)
   useEffect(() => {
+    if (isInitialMutationsMount.current) {
+      const saved = LocalStorageManager.loadMutationTargets();
+      isInitialMutationsMount.current = false;
+      if (!saved || saved.length === 0) {
+        return; // Don't save empty array on initial mount
+      }
+    }
     LocalStorageManager.saveMutationTargets(selectedMutations);
   }, [selectedMutations]);
   

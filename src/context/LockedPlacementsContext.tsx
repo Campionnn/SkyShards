@@ -62,6 +62,7 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
   });
   const [isLoadingPriorities, setIsLoadingPriorities] = useState(true);
   const [defaultPriorities, setDefaultPriorities] = useState<Record<string, number>>({});
+  const isInitialLockedMount = useRef(true);
   
   // Load default priorities on mount
   useEffect(() => {
@@ -89,8 +90,15 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
     loadDefaultPriorities();
   }, [toast]);
   
-  // Save locked placements to localStorage when they change
+  // Save locked placements to localStorage when they change (but not empty defaults)
   useEffect(() => {
+    if (isInitialLockedMount.current) {
+      const saved = LocalStorageManager.loadLockedPlacements();
+      isInitialLockedMount.current = false;
+      if (!saved || saved.length === 0) {
+        return; // Don't save empty array on initial mount
+      }
+    }
     LocalStorageManager.saveLockedPlacements(lockedPlacements);
   }, [lockedPlacements]);
   

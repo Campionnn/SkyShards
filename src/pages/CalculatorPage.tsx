@@ -1,9 +1,10 @@
-import React, { useState, useRef, useCallback } from "react";
-import { Play } from "lucide-react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
+import { Play, Grid3x3 } from "lucide-react";
 import { useGridState, useGreenhouseData, useLockedPlacements } from "../context";
-import { GridPreview, GridManagerModal } from "../components";
+import { GridManagerModal, FirstTimeVisitorModal } from "../components";
 import { MutationTargets, SolverResults, CropConfigurationsPanel } from "../components";
 import { solveGreenhouseWithJob } from "../services";
+import { LocalStorageManager } from "../utilities";
 import type { SolveResponse, MutationGoal, JobProgress } from "../types/greenhouse";
 
 export const CalculatorPage: React.FC = () => {
@@ -13,6 +14,59 @@ export const CalculatorPage: React.FC = () => {
 
   // Modal state
   const [isGridModalOpen, setIsGridModalOpen] = useState(false);
+  const [isFirstTimeModalOpen, setIsFirstTimeModalOpen] = useState(false);
+
+  // Check if user is a first-time visitor
+  useEffect(() => {
+    // Small delay to ensure contexts have initialized
+    const timer = setTimeout(() => {
+      // Check if the user has actually customized anything
+      const gridConfig = LocalStorageManager.loadGridConfig();
+      const mutationTargets = LocalStorageManager.loadMutationTargets();
+      const designerInputs = LocalStorageManager.loadDesignerInputs();
+      const designerTargets = LocalStorageManager.loadDesignerTargets();
+      const lockedPlacements = LocalStorageManager.loadLockedPlacements();
+      const priorities = LocalStorageManager.loadPriorities();
+      const hasVisited = localStorage.getItem("skyshards-has-visited");
+      
+      // Check if grid config is the default (12 cells in a 4x4 diamond pattern)
+      const isDefaultGrid = gridConfig && gridConfig.size === 12;
+      
+      // Check if there's any actual user data (non-empty, non-default)
+      const hasUserData = 
+        (!isDefaultGrid && gridConfig && gridConfig.size > 0) || // Non-default grid
+        (mutationTargets && mutationTargets.length > 0) || // Has mutation targets
+        (designerInputs && designerInputs.length > 0) || // Has designer inputs
+        (designerTargets && designerTargets.length > 0) || // Has designer targets
+        (lockedPlacements && lockedPlacements.length > 0) || // Has locked placements
+        (priorities && Object.keys(priorities).length > 0); // Has custom priorities
+      
+      console.log("First time visitor check:", {
+        gridConfig: gridConfig,
+        isDefaultGrid,
+        mutationTargets: mutationTargets,
+        designerInputs: designerInputs,
+        designerTargets: designerTargets,
+        lockedPlacements: lockedPlacements,
+        priorities: priorities,
+        hasVisited: hasVisited,
+        hasUserData,
+      });
+      
+      // If no user data AND hasn't visited before, show the first-time modal
+      if (!hasUserData && !hasVisited) {
+        console.log("✅ First time visitor detected - showing modal");
+        setIsFirstTimeModalOpen(true);
+      } else {
+        console.log("❌ Not a first time visitor");
+      }
+      
+      // Mark as visited
+      localStorage.setItem("skyshards-has-visited", "true");
+    }, 100); // Small delay to let contexts initialize
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Solver state
   const [isLoading, setIsLoading] = useState(false);
@@ -133,8 +187,14 @@ export const CalculatorPage: React.FC = () => {
                   {unlockedCount} cells unlocked
                 </span>
               </div>
-              <GridPreview onClick={() => setIsGridModalOpen(true)} />
-              <p className="text-xs text-slate-500 mt-2">
+              <button
+                onClick={() => setIsGridModalOpen(true)}
+                className="w-full px-4 py-3 bg-slate-700/50 hover:bg-slate-700/70 border border-slate-600/50 hover:border-emerald-500/50 rounded-lg text-sm font-medium text-slate-300 hover:text-emerald-300 transition-colors duration-200 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Grid3x3 className="w-4 h-4" />
+                <span>Configure Grid</span>
+              </button>
+              <p className="text-xs text-slate-500 mt-2 text-center">
                 <span className="hidden sm:inline">Click to manage unlocked cells</span>
                 <span className="sm:hidden">Tap to manage unlocked cells</span>
               </p>
@@ -188,6 +248,13 @@ export const CalculatorPage: React.FC = () => {
       <GridManagerModal 
         isOpen={isGridModalOpen} 
         onClose={() => setIsGridModalOpen(false)} 
+      />
+
+      {/* First Time Visitor Modal */}
+      <FirstTimeVisitorModal
+        isOpen={isFirstTimeModalOpen}
+        onClose={() => setIsFirstTimeModalOpen(false)}
+        onConfigureGrid={() => setIsGridModalOpen(true)}
       />
     </>
   );

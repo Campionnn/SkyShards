@@ -56,7 +56,7 @@ export const GridManagerModal: React.FC<GridManagerModalProps> = ({ isOpen, onCl
     >
       <div
         ref={modalRef}
-        className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-6xl max-h-[95vh] my-auto overflow-y-auto"
+        className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] my-auto overflow-y-auto"
       >
         {/* Modal Header */}
         <div className="sticky top-0 z-10 bg-slate-900 border-b border-slate-700 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
@@ -72,9 +72,9 @@ export const GridManagerModal: React.FC<GridManagerModalProps> = ({ isOpen, onCl
 
         {/* Modal Content */}
         <div className="p-4 sm:p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 lg:gap-6">
             {/* Grid Section */}
-            <div className="lg:col-span-2">
+            <div>
               <div className="bg-slate-800/40 border border-slate-600/30 rounded-lg p-4">
                 {/* Grid Controls */}
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-4">

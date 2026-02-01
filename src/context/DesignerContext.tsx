@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from "react";
 import type { MutationDefinition } from "../types/greenhouse";
 import {
   isPositionOccupiedByPlacements,
@@ -111,14 +111,30 @@ export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
   const [selectedCropForPlacement, setSelectedCropForPlacement] = useState<SelectedCropForDesigner | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
+  const isInitialInputsMount = useRef(true);
+  const isInitialTargetsMount = useRef(true);
   
-  // Save input placements to localStorage when they change
+  // Save input placements to localStorage when they change (but not empty defaults)
   useEffect(() => {
+    if (isInitialInputsMount.current) {
+      const saved = LocalStorageManager.loadDesignerInputs();
+      isInitialInputsMount.current = false;
+      if (!saved || saved.length === 0) {
+        return; // Don't save empty array on initial mount
+      }
+    }
     LocalStorageManager.saveDesignerInputs(inputPlacements);
   }, [inputPlacements]);
   
-  // Save target placements to localStorage when they change
+  // Save target placements to localStorage when they change (but not empty defaults)
   useEffect(() => {
+    if (isInitialTargetsMount.current) {
+      const saved = LocalStorageManager.loadDesignerTargets();
+      isInitialTargetsMount.current = false;
+      if (!saved || saved.length === 0) {
+        return; // Don't save empty array on initial mount
+      }
+    }
     LocalStorageManager.saveDesignerTargets(targetPlacements);
   }, [targetPlacements]);
   
