@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
 import { GRID_SIZE, getDefaultUnlockedCells, getExpandableCells } from "../constants";
 import type { ExpansionStep } from "../types/greenhouse";
+import { LocalStorageManager } from "../utilities";
 
 interface GridStateContextType {
   // grid state
@@ -30,8 +31,21 @@ interface GridStateContextType {
 const GridStateContext = createContext<GridStateContextType | null>(null);
 
 export const GridStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [unlockedCells, setUnlockedCells] = useState<Set<string>>(() => getDefaultUnlockedCells());
+  const [unlockedCells, setUnlockedCells] = useState<Set<string>>(() => {
+    // Try to load from localStorage first
+    const saved = LocalStorageManager.loadGridConfig();
+    if (saved && saved.size > 0) {
+      return saved;
+    }
+    // Fall back to default
+    return getDefaultUnlockedCells();
+  });
   const [expansionSteps, setExpansionStepsState] = useState<ExpansionStep[]>([]);
+  
+  // Save to localStorage whenever unlockedCells changes
+  useEffect(() => {
+    LocalStorageManager.saveGridConfig(unlockedCells);
+  }, [unlockedCells]);
   
   // Compute expandable cells whenever unlocked cells change
   const expandableCells = useMemo(() => getExpandableCells(unlockedCells), [unlockedCells]);

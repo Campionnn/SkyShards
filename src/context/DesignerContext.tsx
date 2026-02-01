@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
 import type { MutationDefinition } from "../types/greenhouse";
 import {
   isPositionOccupiedByPlacements,
@@ -6,6 +6,7 @@ import {
   getPlacementAtCell,
   validateGridBounds,
   generatePlacementId,
+  LocalStorageManager,
 } from "../utilities";
 
 export type DesignerMode = "inputs" | "targets";
@@ -98,10 +99,28 @@ const DesignerContext = createContext<DesignerContextType | null>(null);
 
 export const DesignerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [mode, setMode] = useState<DesignerMode>("inputs");
-  const [inputPlacements, setInputPlacements] = useState<DesignerPlacement[]>([]);
-  const [targetPlacements, setTargetPlacements] = useState<DesignerPlacement[]>([]);
+  const [inputPlacements, setInputPlacements] = useState<DesignerPlacement[]>(() => {
+    // Try to load from localStorage
+    const saved = LocalStorageManager.loadDesignerInputs();
+    return saved || [];
+  });
+  const [targetPlacements, setTargetPlacements] = useState<DesignerPlacement[]>(() => {
+    // Try to load from localStorage
+    const saved = LocalStorageManager.loadDesignerTargets();
+    return saved || [];
+  });
   const [selectedCropForPlacement, setSelectedCropForPlacement] = useState<SelectedCropForDesigner | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
+  
+  // Save input placements to localStorage when they change
+  useEffect(() => {
+    LocalStorageManager.saveDesignerInputs(inputPlacements);
+  }, [inputPlacements]);
+  
+  // Save target placements to localStorage when they change
+  useEffect(() => {
+    LocalStorageManager.saveDesignerTargets(targetPlacements);
+  }, [targetPlacements]);
   
   // Get the current placements based on mode
   const currentPlacements = mode === "inputs" ? inputPlacements : targetPlacements;

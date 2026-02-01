@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { CropDefinition, MutationDefinition, SelectedMutation } from "../types/greenhouse";
 import greenhouseData from "../../public/greenhouse/data.json";
+import { LocalStorageManager } from "../utilities";
 
 interface GreenhouseDataContextType {
   crops: CropDefinition[];
@@ -82,7 +83,11 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  const [selectedMutations, setSelectedMutations] = useState<SelectedMutation[]>([]);
+  const [selectedMutations, setSelectedMutations] = useState<SelectedMutation[]>(() => {
+    // Try to load from localStorage
+    const saved = LocalStorageManager.loadMutationTargets();
+    return saved || [];
+  });
 
   // Load data from JSON on mount
   useEffect(() => {
@@ -96,6 +101,11 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
       setIsLoading(false);
     }
   }, []);
+  
+  // Save mutation targets to localStorage when they change
+  useEffect(() => {
+    LocalStorageManager.saveMutationTargets(selectedMutations);
+  }, [selectedMutations]);
   
   const addMutation = useCallback((id: string, name: string) => {
     setSelectedMutations(prev => {

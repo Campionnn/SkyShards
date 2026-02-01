@@ -31,6 +31,12 @@ export const MutationTargets: React.FC = () => {
     return selectedMutations.filter((m) => m.mode === "maximize").length > 1;
   }, [selectedMutations]);
 
+  // Check for mutations with special rules not yet implemented
+  const hasSpecialRuleMutations = useMemo(() => {
+    const specialRuleMutationIds = ["shellfruit", "godseed", "jerryseed"];
+    return selectedMutations.some((m) => specialRuleMutationIds.includes(m.id.toLowerCase()));
+  }, [selectedMutations]);
+
   const handleAddMutation = (id: string, name: string) => {
     addMutation(id, name);
   };
@@ -38,21 +44,12 @@ export const MutationTargets: React.FC = () => {
   const handleCountChange = (id: string, value: string) => {
     setInputValues(prev => ({ ...prev, [id]: value }));
     if (value === "") {
-      updateMutationTargetCount(id, 1);
       return;
     }
     const numValue = parseInt(value);
     if (!isNaN(numValue) && numValue >= 1 && numValue <= 100) {
       updateMutationTargetCount(id, numValue);
     }
-  };
-  
-  const handleCountBlur = (id: string) => {
-    setInputValues(prev => {
-      const newValues = { ...prev };
-      delete newValues[id];
-      return newValues;
-    });
   };
   
   const incrementCount = (id: string, currentCount: number) => {
@@ -199,10 +196,9 @@ export const MutationTargets: React.FC = () => {
                       type="number"
                       min={1}
                       max={100}
-                      value={inputValues[selected.id] !== undefined ? inputValues[selected.id] : ""}
-                      placeholder={selected.targetCount.toString()}
+                      value={inputValues[selected.id] ?? ""}
+                      placeholder="1"
                       onChange={(e) => handleCountChange(selected.id, e.target.value)}
-                      onBlur={() => handleCountBlur(selected.id)}
                       className="w-14 px-2 py-1 bg-slate-700/50 border border-slate-600/30 rounded text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 text-center"
                     />
                     <div className="flex flex-col">
@@ -241,6 +237,16 @@ export const MutationTargets: React.FC = () => {
           <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-amber-300/90">
             Multiple maximize targets selected. The solver will prioritize whichever mutation it can fit the most of, and will not balance between them.
+          </p>
+        </div>
+      )}
+
+      {/* Warning for special rule mutations */}
+      {hasSpecialRuleMutations && (
+        <div className="flex items-start gap-2 p-2.5 mb-4 bg-amber-500/10 border border-amber-500/30 rounded-md">
+          <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-300/90">
+            One of these mutations have special rules that have not been implemented yet. They will be added in the future.
           </p>
         </div>
       )}

@@ -15,6 +15,7 @@ const CropItemRow: React.FC<{
   crop: CropDefinition;
   mutation?: MutationDefinition;
   priority: number;
+  defaultPriority: number;
   isPlacementActive: boolean;
   onInfoClick: () => void;
   onEditClick: () => void;
@@ -24,6 +25,7 @@ const CropItemRow: React.FC<{
   crop,
   mutation,
   priority,
+  defaultPriority,
   isPlacementActive,
   onInfoClick,
   onEditClick,
@@ -38,17 +40,12 @@ const CropItemRow: React.FC<{
   const handlePriorityChange = (value: string) => {
     setInputValue(value);
     if (value === "") {
-      onPriorityChange(0);
       return;
     }
     const numValue = parseInt(value);
     if (!isNaN(numValue) && numValue >= 0 && numValue <= 100) {
       onPriorityChange(numValue);
     }
-  };
-  
-  const handlePriorityBlur = () => {
-    setInputValue("");
   };
   
   const incrementPriority = () => {
@@ -129,10 +126,9 @@ const CropItemRow: React.FC<{
             type="number"
             min={0}
             max={100}
-            value={inputValue !== "" ? inputValue : ""}
-            placeholder={priority.toString()}
+            value={inputValue}
+            placeholder={defaultPriority.toString()}
             onChange={(e) => handlePriorityChange(e.target.value)}
-            onBlur={handlePriorityBlur}
             className="w-12 px-1 py-0.5 bg-slate-700/50 border border-slate-600/30 rounded text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 text-center"
           />
         </div>
@@ -332,6 +328,7 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
               const mutation = crop.isMutation ? getMutationDef(crop.id) : undefined;
               const isActive = selectedCropForPlacement?.id === crop.id;
               const priority = getPriority(crop.id);
+              const defaultPriority = defaultPriorities[crop.id] || 0;
               
               return (
                 <CropItemRow
@@ -339,6 +336,7 @@ export const CropConfigurationsPanel: React.FC<CropConfigurationsPanelProps> = (
                   crop={crop}
                   mutation={mutation}
                   priority={priority}
+                  defaultPriority={defaultPriority}
                   isPlacementActive={isActive}
                   onInfoClick={() => handleInfoClick(crop)}
                   onEditClick={() => handleEditClick(crop)}

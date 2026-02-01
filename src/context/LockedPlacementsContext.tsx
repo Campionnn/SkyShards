@@ -9,6 +9,7 @@ import {
   validateGridBounds,
   validateAllowedCells,
   generatePlacementId,
+  LocalStorageManager,
 } from "../utilities";
 
 interface LockedPlacementsContextType {
@@ -48,9 +49,17 @@ const LockedPlacementsContext = createContext<LockedPlacementsContextType | null
 export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { unlockedCells } = useGridState();
   const { toast } = useToast();
-  const [lockedPlacements, setLockedPlacements] = useState<LockedPlacement[]>([]);
+  const [lockedPlacements, setLockedPlacements] = useState<LockedPlacement[]>(() => {
+    // Try to load from localStorage
+    const saved = LocalStorageManager.loadLockedPlacements();
+    return saved || [];
+  });
   const [selectedCropForPlacement, setSelectedCropForPlacement] = useState<SelectedCropForPlacement | null>(null);
-  const [priorities, setPriorities] = useState<Record<string, number>>({});
+  const [priorities, setPriorities] = useState<Record<string, number>>(() => {
+    // Try to load from localStorage
+    const saved = LocalStorageManager.loadPriorities();
+    return saved || {};
+  });
   const [isLoadingPriorities, setIsLoadingPriorities] = useState(true);
   const [defaultPriorities, setDefaultPriorities] = useState<Record<string, number>>({});
   
@@ -64,7 +73,12 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
         }
         const defaultPrioritiesData = await response.json();
         setDefaultPriorities(defaultPrioritiesData);
-        setPriorities(defaultPrioritiesData);
+        
+        // Only set priorities if we didn't load custom ones from localStorage
+        const savedPriorities = LocalStorageManager.loadPriorities();
+        if (!savedPriorities) {
+          setPriorities(defaultPrioritiesData);
+        }
       } catch (err) {
         console.error("Error loading default priorities:", err);
         toast({
@@ -80,6 +94,19 @@ export const LockedPlacementsProvider: React.FC<{ children: React.ReactNode }> =
     
     loadDefaultPriorities();
   }, [toast]);
+  
+  // Save locked placements to localStorage when they change
+  useEffect(() => {
+    LocalStorageManager.saveLockedPlacements(lockedPlacements);
+  }, [lockedPlacements]);
+  
+  // Save priorities to localStorage when they change
+  useEffect(() => {
+    // Only save if we have loaded defaults (to avoid saving empty object on init)
+    if (!isLoadingPriorities) {
+      LocalStorageManager.savePriorities(priorities);
+    }
+  }, [priorities, isLoadingPriorities]);
   
   // Track previous unlockedCells to detect changes
   const prevUnlockedCellsRef = useRef<Set<string>>(unlockedCells);
