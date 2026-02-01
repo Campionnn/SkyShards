@@ -1,5 +1,8 @@
 import React, { useCallback, useState, useEffect, type RefObject } from "react";
-import { Save, FolderOpen, Copy, Clipboard, Trash2, RotateCcw, Layers, X, Image, Film, Download, ClipboardCopy, Loader2 } from "lucide-react";
+import { Save, FolderOpen, Share2, Clipboard, Trash2, RotateCcw, Layers, X, Image, Film, Download, ClipboardCopy, Loader2 } from "lucide-react";
+
+// API base URL for share links
+const SHARE_BASE_URL = "https://api.skyshards.com/share";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDesigner, useGreenhouseData } from "../../context";
 import { useToast } from "../ui/toastContext";
@@ -264,18 +267,29 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importText, setImportText] = useState("");
   
-  // Export design as base64 gzipped string to clipboard
+  // Export design as shareable URL to clipboard
   const handleExportCode = useCallback(() => {
     try {
       const encoded = encodeDesign(inputPlacements, targetPlacements);
-      navigator.clipboard.writeText(encoded);
+      const shareUrl = `${SHARE_BASE_URL}/${encoded}`;
+      navigator.clipboard.writeText(shareUrl);
       
       toast({
-        title: "Design copied to clipboard",
-        description: "Share this code with others to share your design",
+        title: "Share link copied!",
+        description: "Paste this link in Discord or share with others",
         variant: "success",
         duration: 3000,
       });
+      
+      // Pre-generate the share image in the background (don't await)
+      // This ensures the image is ready when Discord crawls the link
+      fetch(`${SHARE_BASE_URL}/prepare?layout=${encoded}`, {
+        method: 'POST',
+      }).catch(err => {
+        // Silent fail - image will be generated on-demand if needed
+        console.warn('Failed to pre-generate share image:', err);
+      });
+      
     } catch (err) {
       toast({
         title: "Export failed",
@@ -292,12 +306,39 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
     setIsImportModalOpen(true);
   }, []);
   
-  // Import design from base64 gzipped string
+  // Helper to extract layout code from URL or raw code
+  const extractLayoutCode = useCallback((input: string): string => {
+    const trimmed = input.trim();
+    
+    // Check if it's a URL with ?layout= parameter (greenhouse.skyshards.com/designer?layout=ABC)
+    if (trimmed.includes("?layout=")) {
+      try {
+        const url = new URL(trimmed);
+        const layoutParam = url.searchParams.get("layout");
+        if (layoutParam) return layoutParam;
+      } catch {
+        // Not a valid URL, try regex fallback
+        const match = trimmed.match(/[?&]layout=([^&]+)/);
+        if (match) return match[1];
+      }
+    }
+    
+    // Check if it's a share URL (api.skyshards.com/share/ABC)
+    if (trimmed.includes("/share/")) {
+      const match = trimmed.match(/\/share\/([^/?#]+)/);
+      if (match) return match[1];
+    }
+    
+    // Otherwise, assume it's a raw code
+    return trimmed;
+  }, []);
+  
+  // Import design from URL or base64 gzipped string
   const handleImportFromText = useCallback(() => {
     if (!importText.trim()) {
       toast({
         title: "No code provided",
-        description: "Paste a design code to import",
+        description: "Paste a design code or share link to import",
         variant: "warning",
         duration: 3000,
       });
@@ -305,7 +346,8 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
     }
     
     try {
-      const { inputs, targets } = decodeDesign(importText.trim());
+      const layoutCode = extractLayoutCode(importText);
+      const { inputs, targets } = decodeDesign(layoutCode);
       
       // Get size info from crop definitions
       const crops = inputs.map(p => {
@@ -350,7 +392,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
         duration: 5000,
       });
     }
-  }, [importText, loadFromSolverResult, getCropDef, getMutationDef, toast]);
+  }, [importText, extractLayoutCode, loadFromSolverResult, getCropDef, getMutationDef, toast]);
   
   // Clear current mode's placements
   const handleClearCurrent = useCallback(() => {
@@ -562,8 +604,8 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
           disabled={totalPlacements === 0}
           className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-300 hover:bg-slate-700/60 hover:border-slate-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <Copy className="w-4 h-4" />
-          Copy Code
+          <Share2 className="w-4 h-4" />
+          Share Layout
         </button>
         
         <button
@@ -571,7 +613,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
           className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800/60 border border-slate-600/50 rounded-lg text-sm text-slate-300 hover:bg-slate-700/60 hover:border-slate-500/50 transition-colors"
         >
           <Clipboard className="w-4 h-4" />
-          Paste Code
+          Paste Link
         </button>
       </div>
       
@@ -702,7 +744,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
             <textarea
               value={importText}
               onChange={(e) => setImportText(e.target.value)}
-              placeholder="Paste design code here..."
+              placeholder="Paste a share link or design code here..."
               className="w-full h-24 px-3 py-2 bg-slate-900/60 border border-slate-600/50 rounded-lg text-sm text-slate-200 placeholder-slate-500 resize-none focus:outline-none focus:border-slate-500"
             />
             

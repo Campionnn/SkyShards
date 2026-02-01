@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { 
   CropSelectionPalette, 
@@ -6,11 +7,20 @@ import {
   DesignerGrid,
   MutationValidator,
 } from "../components";
+import { useToast } from "../components/ui/toastContext";
+import { useDesigner, useGreenhouseData } from "../context";
+import { decodeDesign } from "../utilities";
+import { captureGridAsPng, aggregateCropInfo } from "../utilities/gridExport";
 import type { DesignerGridHandle } from "../components";
 
 export const DesignerPage: React.FC = () => {
   const [showTargets, setShowTargets] = useState(true);
   const gridRef = useRef<DesignerGridHandle>(null);
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  const { inputPlacements, targetPlacements, loadFromSolverResult } = useDesigner();
+  const { getCropDef, getMutationDef, isLoading: isDataLoading } = useGreenhouseData();
+  const [hasLoadedFromUrl, setHasLoadedFromUrl] = useState(false);
   
   // Responsive grid sizing
   const [gridSize, setGridSize] = useState(() => {
@@ -31,6 +41,113 @@ export const DesignerPage: React.FC = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  
+  // Export grid function for Playwright-based share image generation
+  const exportGridForShare = useCallback(async (): Promise<string> => {
+    if (!gridRef.current) {
+      throw new Error('Grid not available');
+    }
+    
+    const gridElement = gridRef.current.getGridElement();
+    if (!gridElement) {
+      throw new Error('Grid element not found');
+    }
+    
+    // Build crop info for the watermark
+    const inputCrops = aggregateCropInfo(
+      inputPlacements.map(p => {
+        const def = getCropDef(p.cropId) || getMutationDef(p.cropId);
+        return { cropId: p.cropId, cropName: def?.name || p.cropId.replace(/_/g, ' ') };
+      })
+    );
+    
+    const targetCrops = showTargets ? aggregateCropInfo(
+      targetPlacements.map(p => {
+        const def = getMutationDef(p.cropId) || getCropDef(p.cropId);
+        return { cropId: p.cropId, cropName: def?.name || p.cropId.replace(/_/g, ' ') };
+      })
+    ) : [];
+    
+    const options = {
+      scale: 2,
+      includeWatermark: true,
+      watermarkUrl: "greenhouse.skyshards.com",
+      watermarkTitle: "Greenhouse Designer",
+      inputCrops,
+      targetCrops,
+      showTargets,
+    };
+    
+    const result = await captureGridAsPng(gridElement, options);
+    return result.dataUrl;
+  }, [gridRef, inputPlacements, targetPlacements, showTargets, getCropDef, getMutationDef]);
+  
+  // Expose exportGrid to window for Playwright access
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).exportGrid = exportGridForShare;
+    
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).exportGrid;
+    };
+  }, [exportGridForShare]);
+  
+  // Auto-load layout from URL parameter
+  useEffect(() => {
+    // Wait for greenhouse data to load and only run once
+    if (isDataLoading || hasLoadedFromUrl) return;
+    
+    const layoutCode = searchParams.get("layout");
+    if (!layoutCode) return;
+    
+    try {
+      const { inputs, targets } = decodeDesign(layoutCode);
+      
+      // Convert to the format expected by loadFromSolverResult
+      const crops = inputs.map(p => {
+        const cropDef = getCropDef(p.cropId);
+        const mutationDef = getMutationDef(p.cropId);
+        const displayName = cropDef?.name || mutationDef?.name || p.cropId.replace(/_/g, " ");
+        return {
+          id: p.cropId,
+          name: displayName,
+          position: p.position,
+          size: cropDef?.size || mutationDef?.size || 1,
+        };
+      });
+      
+      const mutations = targets.map(p => {
+        const mutationDef = getMutationDef(p.cropId);
+        const cropDef = getCropDef(p.cropId);
+        const displayName = mutationDef?.name || cropDef?.name || p.cropId.replace(/_/g, " ");
+        return {
+          id: p.cropId,
+          name: displayName,
+          position: p.position,
+          size: mutationDef?.size || cropDef?.size || 1,
+        };
+      });
+      
+      loadFromSolverResult(crops, mutations);
+      setHasLoadedFromUrl(true);
+      
+      toast({
+        title: "Layout loaded",
+        description: `Loaded ${inputs.length} inputs and ${targets.length} targets from shared link`,
+        variant: "success",
+        duration: 3000,
+      });
+    } catch (err) {
+      setHasLoadedFromUrl(true); // Don't retry on error
+      toast({
+        title: "Failed to load layout",
+        description: err instanceof Error ? err.message : "Invalid layout code in URL",
+        variant: "error",
+        duration: 5000,
+      });
+    }
+  }, [searchParams, isDataLoading, hasLoadedFromUrl, getCropDef, getMutationDef, loadFromSolverResult, toast]);
   
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-screen-2xl">

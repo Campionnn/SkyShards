@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate, useSearchParams } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Layout } from "./components";
 import { GridStateProvider, GreenhouseDataProvider, LockedPlacementsProvider, DesignerProvider, InfoModalProvider } from "./context";
@@ -11,6 +11,24 @@ const DesignerPage = lazy(() => import("./pages/DesignerPage").then((module) => 
 const AboutPage = lazy(() => import("./pages/AboutPage").then((module) => ({ default: module.AboutPage })));
 const ContactPage = lazy(() => import("./pages/ContactPage").then((module) => ({ default: module.ContactPage })));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+
+// Component to handle redirect from /?layout=X to /designer?layout=X
+const IndexRouteWithRedirect: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const layoutCode = searchParams.get("layout");
+  
+  // If layout param exists, redirect to designer with the same param
+  if (layoutCode) {
+    return <Navigate to={`/designer?layout=${layoutCode}`} replace />;
+  }
+  
+  // Otherwise, show the calculator page
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <CalculatorPage />
+    </Suspense>
+  );
+};
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center py-12">
@@ -48,11 +66,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <CalculatorPage />
-          </Suspense>
-        ),
+        element: <IndexRouteWithRedirect />,
       },
       {
         path: "designer",

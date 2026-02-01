@@ -314,10 +314,11 @@ export const DesignerGrid = forwardRef<DesignerGridHandle, DesignerGridProps>(({
     return cropDef?.ground || "farmland";
   };
   
-  return (
+return (
     <>
       <div
         ref={gridRef}
+        data-grid-container
         className={`relative select-none ${className}`}
         style={{
           width: gridWidth,
