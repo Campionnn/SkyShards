@@ -1,11 +1,30 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Navigation } from "./Navigation";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { PnPageAutoScale } from "../PnPageAutoScale";
+import { GreenhouseModal } from "../modals";
+
+const GREENHOUSE_MODAL_SEEN_KEY = "greenhouse_modal_seen";
 
 export const Layout: React.FC = () => {
   const location = useLocation();
+  const [showGreenhouseModal, setShowGreenhouseModal] = useState(false);
+
+  useEffect(() => {
+    // Check if user has seen the modal before
+    const hasSeenModal = localStorage.getItem(GREENHOUSE_MODAL_SEEN_KEY);
+    if (!hasSeenModal) {
+      setShowGreenhouseModal(true);
+    }
+  }, []);
+
+  const handleCloseGreenhouseModal = () => {
+    // Mark modal as seen in localStorage
+    localStorage.setItem(GREENHOUSE_MODAL_SEEN_KEY, "true");
+    setShowGreenhouseModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-950">
       <Navigation />
@@ -28,6 +47,8 @@ export const Layout: React.FC = () => {
           </div>
         </div>
       </main>
+
+      <GreenhouseModal open={showGreenhouseModal} onClose={handleCloseGreenhouseModal} />
 
       <footer className="text-center py-6 text-slate-400 text-sm border-t border-slate-800/50">
         <div className="max-w-screen-2xl mx-auto">

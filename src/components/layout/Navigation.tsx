@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calculator, Settings, Shuffle, Menu, X } from "lucide-react";
+import { Calculator, Settings, Shuffle, Menu, X, ExternalLink } from "lucide-react";
 
 const GitHubIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -118,6 +118,17 @@ export const Navigation: React.FC = () => {
                 </Link>
               );
             })}
+
+            <a
+                href="https://greenhouse.skyshards.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 hover:border-green-500/30"
+            >
+              <span>Greenhouse</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+
             <a
               href="https://github.com/Campionnn/SkyShards"
               target="_blank"
