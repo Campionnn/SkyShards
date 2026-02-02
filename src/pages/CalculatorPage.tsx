@@ -41,24 +41,9 @@ export const CalculatorPage: React.FC = () => {
         (lockedPlacements && lockedPlacements.length > 0) || // Has locked placements
         (priorities && Object.keys(priorities).length > 0); // Has custom priorities
       
-      console.log("First time visitor check:", {
-        gridConfig: gridConfig,
-        isDefaultGrid,
-        mutationTargets: mutationTargets,
-        designerInputs: designerInputs,
-        designerTargets: designerTargets,
-        lockedPlacements: lockedPlacements,
-        priorities: priorities,
-        hasVisited: hasVisited,
-        hasUserData,
-      });
-      
       // If no user data AND hasn't visited before, show the first-time modal
       if (!hasUserData && !hasVisited) {
-        console.log("✅ First time visitor detected - showing modal");
         setIsFirstTimeModalOpen(true);
-      } else {
-        console.log("❌ Not a first time visitor");
       }
       
       // Mark as visited

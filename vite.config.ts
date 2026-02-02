@@ -18,7 +18,6 @@ const copy404Plugin = () => ({
     try {
       const indexContent = readFileSync(indexPath, "utf-8");
       writeFileSync(notFoundPath, indexContent);
-      console.log("✓ Copied index.html to 404.html for SPA routing");
     } catch (err) {
       console.warn("Could not copy 404.html:", err);
     }
