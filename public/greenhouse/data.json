@@ -183,11 +183,11 @@
       "requirements": [
         {
           "crop": "nether_wart",
-          "count": 4
+          "count": 2
         },
         {
           "crop": "fire",
-          "count": 4
+          "count": 2
         }
       ],
       "rarity": "common",
@@ -210,7 +210,7 @@
       "requirements": [
         {
           "crop": "cocoa_beans",
-          "count": 4
+          "count": 2
         }
       ],
       "rarity": "common",
@@ -231,7 +231,7 @@
       "requirements": [
         {
           "crop": "wheat",
-          "count": 4
+          "count": 2
         }
       ],
       "rarity": "common",
@@ -298,11 +298,11 @@
       "requirements": [
         {
           "crop": "potato",
-          "count": 2
+          "count": 1
         },
         {
           "crop": "carrot",
-          "count": 2
+          "count": 1
         }
       ],
       "rarity": "common",
@@ -325,11 +325,11 @@
       "requirements": [
         {
           "crop": "cactus",
-          "count": 2
+          "count": 1
         },
         {
           "crop": "sugar_cane",
-          "count": 2
+          "count": 1
         }
       ],
       "rarity": "common",
@@ -354,11 +354,11 @@
       "requirements": [
         {
           "crop": "red_mushroom",
-          "count": 2
+          "count": 1
         },
         {
           "crop": "brown_mushroom",
-          "count": 2
+          "count": 1
         }
       ],
       "rarity": "common",
@@ -382,7 +382,7 @@
       "requirements": [
         {
           "crop": "dead_plant",
-          "count": 8
+          "count": 4
         }
       ],
       "rarity": "common",
@@ -821,7 +821,11 @@
       "requirements": [
         {
           "crop": "melon",
-          "count": 8
+          "count": 2
+        },
+        {
+          "crop": "gloomgourd",
+          "count": 2
         }
       ],
       "rarity": "rare",
