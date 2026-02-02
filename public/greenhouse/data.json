@@ -759,7 +759,7 @@
       ],
       "rarity": "rare",
       "growth_stages": 4,
-      "decay": 5,
+      "decay": 6,
       "positive_buffs": [
         "effect_spread",
         "improved_water_retain"

@@ -291,7 +291,7 @@ export const CropMutationInfoModal: React.FC = () => {
                       <ClockArrowDown className="w-4 h-4 text-amber-400" />
                       <h3 className="text-sm font-medium text-slate-200">Decay</h3>
                     </div>
-                    <span className="text-sm text-slate-300">{decay} harvest{decay !== 1 ? "s" : ""}</span>
+                    <span className="text-sm text-slate-300">{decay} day{decay !== 1 ? "s" : ""}</span>
                   </div>
                 )}
               </div>
