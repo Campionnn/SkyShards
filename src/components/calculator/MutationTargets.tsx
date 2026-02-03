@@ -19,7 +19,17 @@ export const MutationTargets: React.FC = () => {
     getMutationDef,
   } = useGreenhouseData();
   
-  const [inputValues, setInputValues] = useState<Record<string, string>>({});
+  // Track input values separately to handle user input
+  // Initialize from selectedMutations to handle localStorage restoration
+  const [inputValues, setInputValues] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    selectedMutations.forEach(mutation => {
+      if (mutation.mode === "target" && mutation.targetCount !== 1) {
+        initial[mutation.id] = mutation.targetCount.toString();
+      }
+    });
+    return initial;
+  });
 
   // available mutations
   const availableMutations = mutations.filter(
