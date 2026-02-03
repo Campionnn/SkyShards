@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { X, Target, TrendingUp, Trash2, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
 import { useGreenhouseData } from "../../context";
 import { MutationAutocomplete } from "./MutationAutocomplete";
@@ -19,17 +19,44 @@ export const MutationTargets: React.FC = () => {
     getMutationDef,
   } = useGreenhouseData();
   
-  // Track input values separately to handle user input
-  // Initialize from selectedMutations to handle localStorage restoration
-  const [inputValues, setInputValues] = useState<Record<string, string>>(() => {
-    const initial: Record<string, string> = {};
-    selectedMutations.forEach(mutation => {
-      if (mutation.mode === "target" && mutation.targetCount !== 1) {
-        initial[mutation.id] = mutation.targetCount.toString();
-      }
+  const [inputValues, setInputValues] = useState<Record<string, string>>({});
+  
+  // Sync inputValues with selectedMutations
+  useEffect(() => {
+    setInputValues(prev => {
+      const newInputValues = { ...prev };
+      let hasChanges = false;
+      
+      selectedMutations.forEach(mutation => {
+        if (mutation.mode === "target") {
+          const currentInputValue = prev[mutation.id];
+          const currentInputNum = currentInputValue ? parseInt(currentInputValue) : undefined;
+
+          if (currentInputValue === undefined || currentInputValue === null) {
+            if (mutation.targetCount !== 1) {
+              newInputValues[mutation.id] = mutation.targetCount.toString();
+              hasChanges = true;
+            }
+          } else if (currentInputValue === "" || currentInputValue === "0") {
+            // User cleared input or typed invalid value
+          } else if (!isNaN(currentInputNum!) && currentInputNum !== mutation.targetCount) {
+            newInputValues[mutation.id] = mutation.targetCount.toString();
+            hasChanges = true;
+          }
+        }
+      });
+      
+      Object.keys(prev).forEach(id => {
+        const mutation = selectedMutations.find(m => m.id === id);
+        if (!mutation || mutation.mode !== "target") {
+          delete newInputValues[id];
+          hasChanges = true;
+        }
+      });
+      
+      return hasChanges ? newInputValues : prev;
     });
-    return initial;
-  });
+  }, [selectedMutations]);
 
   // available mutations
   const availableMutations = mutations.filter(
