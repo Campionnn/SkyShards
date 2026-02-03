@@ -59,11 +59,13 @@ const CropItemRow: React.FC<{
   
   const incrementPriority = () => {
     const newValue = Math.min(100, priority + 1);
+    setInputValue(newValue !== defaultPriority ? newValue.toString() : "");
     onPriorityChange(newValue);
   };
   
   const decrementPriority = () => {
     const newValue = Math.max(0, priority - 1);
+    setInputValue(newValue !== defaultPriority ? newValue.toString() : "");
     onPriorityChange(newValue);
   };
   

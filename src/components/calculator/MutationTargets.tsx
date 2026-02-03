@@ -54,11 +54,13 @@ export const MutationTargets: React.FC = () => {
   
   const incrementCount = (id: string, currentCount: number) => {
     const newCount = Math.min(100, currentCount + 1);
+    setInputValues(prev => ({ ...prev, [id]: newCount.toString() }));
     updateMutationTargetCount(id, newCount);
   };
   
   const decrementCount = (id: string, currentCount: number) => {
     const newCount = Math.max(1, currentCount - 1);
+    setInputValues(prev => ({ ...prev, [id]: newCount.toString() }));
     updateMutationTargetCount(id, newCount);
   };
 
