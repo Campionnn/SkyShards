@@ -677,6 +677,7 @@
       "negative_buffs": [
         "water_drain"
       ],
+      "harvest_info": "Inflicts blindness and nausea when harvesting",
       "drops": {
         "brown_mushroom": 380,
         "potato": 1200,
@@ -1267,7 +1268,7 @@
     "timestalk": {
       "name": "Timestalk",
       "size": 1,
-      "ground": "soul_sand",
+      "ground": "end_stone",
       "requirements": [
         {
           "crop": "stoplight_petal",

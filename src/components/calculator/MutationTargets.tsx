@@ -285,7 +285,7 @@ export const MutationTargets: React.FC = () => {
         <div className="flex items-start gap-2 p-2.5 mb-4 bg-amber-500/10 border border-amber-500/30 rounded-md">
           <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-amber-300/90">
-            One of these mutations have special rules that have not been implemented yet. They will be added in the future.
+            One or more selected mutations have special rules that have not been implemented yet. They will be added in the future.
           </p>
         </div>
       )}
