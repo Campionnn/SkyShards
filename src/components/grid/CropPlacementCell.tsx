@@ -150,7 +150,7 @@ export const LockedPlacementCell: React.FC<LockedPlacementCellProps> = ({
       
       {/* Trash icon on hover */}
       {isHovered && (
-        <div className="absolute top-0.5 right-0.5 bg-red-500 rounded-bl-md p-0.5">
+        <div className="absolute top-0.5 right-0.5 bg-red-500 rounded-bl-md p-0.5" data-gif-exclude="true">
           <Trash2 className="w-3 h-3 text-white" />
         </div>
       )}

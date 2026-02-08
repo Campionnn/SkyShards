@@ -7,8 +7,8 @@ import { parseGIF, decompressFrames } from 'gifuct-js';
 export const ANIMATED_CROPS: Record<string, number> = {
   'all_in_aloe': 5,
   'fire': 5,
-  'noctilume': 5,
-  'shellfruit': 5,
+  'noctilume': 2,
+  'shellfruit': 2,
   'startlevine': 2,
 };
 
@@ -452,6 +452,10 @@ export async function captureGridAsPng(
       if (node instanceof Element) {
         const tagName = node.tagName?.toLowerCase();
         if (tagName === 'script' || tagName === 'noscript') {
+          return false;
+        }
+        // Exclude elements marked for GIF export exclusion
+        if (node.hasAttribute('data-gif-exclude')) {
           return false;
         }
       }
