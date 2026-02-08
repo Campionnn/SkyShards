@@ -1231,7 +1231,7 @@
       "special": "grow_the_jerryseed",
       "rarity": "legendary",
       "growth_stages": 10,
-      "decay": 0,
+      "decay": 10,
       "positive_buffs": [],
       "negative_buffs": [],
       "growing_info": "Obtain a Unfulfilled Jerryseed from a Jerry Visitor and take it to Xalx in the Crystal Hollows with a Mysterious Crop. He will give you back an Unripe Jerryseed that you have to reforge to a Dirty Unripe Jerryseed and take to Dirt in the Dwarven Mines. Dirt will give you the Fertilized Jerryseed in return. When growing, Jerryflower will stop at Stage 5 until it is fed 10x Move Jerry.",
