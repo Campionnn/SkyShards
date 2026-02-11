@@ -219,11 +219,11 @@ function roundRect(
 
 /**
  * Calculates the footer height based on crop content
+ * Note: targetCrops are always included in calculations and display, regardless of showTargets
  */
 function calculateFooterHeight(
   inputCrops: CropInfo[],
   targetCrops: CropInfo[],
-  showTargets: boolean,
   scale: number,
   canvasWidth: number
 ): { height: number; itemHeight: number; itemsPerRow: number; padding: number; sectionGap: number } {
@@ -237,7 +237,8 @@ function calculateFooterHeight(
   const itemsPerRow = Math.max(1, Math.floor(availableWidth / itemWidth));
   
   const inputRows = inputCrops.length > 0 ? Math.ceil(inputCrops.length / itemsPerRow) : 0;
-  const targetRows = (showTargets && targetCrops.length > 0) ? Math.ceil(targetCrops.length / itemsPerRow) : 0;
+  // Always calculate target rows for display, regardless of showTargets
+  const targetRows = targetCrops.length > 0 ? Math.ceil(targetCrops.length / itemsPerRow) : 0;
   
   let height = padding;
   
@@ -267,7 +268,7 @@ async function addOverlay(
   canvas: HTMLCanvasElement,
   options: ExportOptions
 ): Promise<HTMLCanvasElement> {
-  const { watermarkUrl, watermarkTitle, inputCrops, targetCrops, showTargets, scale, animatedFrames, frameIndex } = options;
+  const { watermarkUrl, watermarkTitle, inputCrops, targetCrops, scale, animatedFrames, frameIndex } = options;
   
   // Calculate dimensions
   const headerHeight = 38 * scale;
@@ -276,11 +277,12 @@ async function addOverlay(
   const gridPadding = 24 * scale; // Additional padding around just the grid
   const totalWidth = canvas.width + (gridPadding * 2);
   const { height: footerHeight, itemHeight, itemsPerRow, padding, sectionGap } = calculateFooterHeight(
-    inputCrops, targetCrops, showTargets, scale, totalWidth
+    inputCrops, targetCrops, scale, totalWidth
   );
   
   // Pre-load crop images
-  const allCrops = [...inputCrops, ...(showTargets ? targetCrops : [])];
+  // Always load target crop images for the footer, even if they're hidden on the grid
+  const allCrops = [...inputCrops, ...targetCrops];
   const cropImages = new Map<string, HTMLImageElement | HTMLCanvasElement>();
   
   // Load images - use animated frames if available, otherwise load static
@@ -388,7 +390,8 @@ async function addOverlay(
     };
     
     // Draw TARGETS first (reversed order)
-    if (showTargets && targetCrops.length > 0) {
+    // Always show targets in footer for counts, even if hidden on grid
+    if (targetCrops.length > 0) {
       const targetTotal = targetCrops.reduce((sum, c) => sum + c.count, 0);
       drawPixelatedText(ctx, `TARGETS (${targetTotal})`, outerPadding + padding, currentY, sectionFontSize, '#a78bfa');
       currentY += 20 * scale;
@@ -407,7 +410,7 @@ async function addOverlay(
     
     // Draw INPUTS second
     if (inputCrops.length > 0) {
-      if (showTargets && targetCrops.length > 0) currentY += sectionGap;
+      if (targetCrops.length > 0) currentY += sectionGap;
       
       const inputTotal = inputCrops.reduce((sum, c) => sum + c.count, 0);
       drawPixelatedText(ctx, `INPUTS (${inputTotal})`, outerPadding + padding, currentY, sectionFontSize, '#22c55e');
@@ -439,15 +442,22 @@ export async function captureGridAsPng(
   // 10x10 grid with 48px cells and 2px gap = 498px (10*48 + 9*2)
   const FIXED_GRID_SIZE = 498;
   
+  // Get the actual current size of the element
+  const actualWidth = element.offsetWidth;
+  const actualHeight = element.offsetHeight;
+  
+  // Calculate scale factor to normalize to fixed size
+  const scaleToFixed = FIXED_GRID_SIZE / actualWidth;
+  
   const dataUrl = await toPng(element, {
-    pixelRatio: scale,
+    pixelRatio: scale * scaleToFixed, // Combine export scale with normalization scale
     backgroundColor: '#1e293b',
     cacheBust: true,
     skipAutoScale: true,
     includeQueryParams: true,
     skipFonts: true,
-    width: FIXED_GRID_SIZE,
-    height: FIXED_GRID_SIZE,
+    width: actualWidth,
+    height: actualHeight,
     filter: (node) => {
       if (node instanceof Element) {
         const tagName = node.tagName?.toLowerCase();
@@ -470,12 +480,13 @@ export async function captureGridAsPng(
     img.src = dataUrl;
   });
   
+  // Create canvas at the fixed target size
   const canvas = document.createElement('canvas');
-  canvas.width = img.width;
-  canvas.height = img.height;
+  canvas.width = FIXED_GRID_SIZE * scale;
+  canvas.height = FIXED_GRID_SIZE * scale;
   const ctx = canvas.getContext('2d')!;
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(img, 0, 0);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   
   const outputCanvas = options.includeWatermark 
     ? await addOverlay(canvas, options)
@@ -617,6 +628,17 @@ export async function captureGridAsGif(
     originalSources.set(info.img, info.img.src);
   }
   
+  // Fixed dimensions for consistent exports across devices
+  // 10x10 grid with 48px cells and 2px gap = 498px (10*48 + 9*2)
+  const FIXED_GRID_SIZE = 498;
+  
+  // Get the actual current size of the element
+  const actualWidth = element.offsetWidth;
+  const actualHeight = element.offsetHeight;
+  
+  // Calculate scale factor to normalize to fixed size
+  const scaleToFixed = FIXED_GRID_SIZE / actualWidth;
+  
   // Capture all frames first
   const frameCanvases: HTMLCanvasElement[] = [];
   
@@ -638,20 +660,16 @@ export async function captureGridAsGif(
     // Wait for images to update
     await new Promise(resolve => setTimeout(resolve, 50));
     
-    // Fixed dimensions for consistent exports across devices
-    // 10x10 grid with 48px cells and 2px gap = 498px (10*48 + 9*2)
-    const FIXED_GRID_SIZE = 498;
-    
     // Capture this frame
     const dataUrl = await toPng(element, {
-      pixelRatio: scale,
+      pixelRatio: scale * scaleToFixed, // Combine export scale with normalization scale
       backgroundColor: '#1e293b',
       cacheBust: true,
       skipAutoScale: true,
       includeQueryParams: true,
       skipFonts: true,
-      width: FIXED_GRID_SIZE,
-      height: FIXED_GRID_SIZE,
+      width: actualWidth,
+      height: actualHeight,
       filter: (node) => {
         if (node instanceof Element) {
           const tagName = node.tagName?.toLowerCase();
@@ -670,12 +688,13 @@ export async function captureGridAsGif(
       img.src = dataUrl;
     });
     
+    // Create canvas at the fixed target size
     const canvas = document.createElement('canvas');
-    canvas.width = img.width;
-    canvas.height = img.height;
+    canvas.width = FIXED_GRID_SIZE * scale;
+    canvas.height = FIXED_GRID_SIZE * scale;
     const ctx = canvas.getContext('2d')!;
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(img, 0, 0);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     
     // Add overlay with correct frame for animated crops in footer
     const outputCanvas = options.includeWatermark

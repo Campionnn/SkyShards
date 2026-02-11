@@ -261,7 +261,7 @@ export const DesignerGrid = forwardRef<DesignerGridHandle, DesignerGridProps>(({
   showTargets = true,
 }, ref) => {
   const gridRef = useRef<HTMLDivElement>(null);
-  const { getCropDef, mutations } = useGreenhouseData();
+  const { getCropDef, getMutationDef, mutations } = useGreenhouseData();
   const { openInfo } = useInfoModal();
   const {
     inputPlacements,
@@ -311,7 +311,8 @@ export const DesignerGrid = forwardRef<DesignerGridHandle, DesignerGridProps>(({
   // Get ground type for a crop
   const getGroundType = (cropId: string): string => {
     const cropDef = getCropDef(cropId);
-    return cropDef?.ground || "farmland";
+    const mutationDef = getMutationDef(cropId);
+    return cropDef?.ground || mutationDef?.ground || "farmland";
   };
   
 return (

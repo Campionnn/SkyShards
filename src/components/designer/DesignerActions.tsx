@@ -419,7 +419,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
   // Get export options
   const getExportOptions = useCallback((): ExportOptions => {
     const inputCrops = aggregateCropInfo(inputPlacements);
-    const targetCrops = showTargets ? aggregateCropInfo(targetPlacements) : [];
+    const targetCrops = aggregateCropInfo(targetPlacements);
     
     return {
       scale: 2,

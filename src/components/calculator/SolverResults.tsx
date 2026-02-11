@@ -787,8 +787,9 @@ export const SolverResults: React.FC<SolverResultsProps> = ({
           <span className="text-xs text-slate-400">Total Cells Used:</span>
           <span className="text-sm font-medium text-emerald-400">
             {(() => {
-              const totalCells = (result.placements || []).reduce((sum, p) => sum + (p.size * p.size), 0);
-              return totalCells;
+              const cropCells = (result.placements || []).reduce((sum, p) => sum + (p.size * p.size), 0);
+              const mutationCells = (result.mutations || []).reduce((sum, m) => sum + (m.size * m.size), 0);
+              return cropCells + mutationCells;
             })()}
           </span>
         </div>
