@@ -143,17 +143,14 @@ export const DesignerPage: React.FC = () => {
   // Track layout loading state for Playwright
   const [layoutLoadState, setLayoutLoadState] = useState<'pending' | 'loaded' | 'error' | 'no-layout'>('pending');
   
-  // Auto-load layout from URL parameter
-  useEffect(() => {
-    // Wait for greenhouse data to load and only run once
-    if (isDataLoading || hasLoadedFromUrl) return;
-    
-    const layoutCode = searchParams.get("layout");
+  // Function to load a layout from an encoded string
+  const loadLayoutFromCode = useCallback(async (layoutCode: string) => {
     if (!layoutCode) {
       setLayoutLoadState('no-layout');
-      setHasLoadedFromUrl(true);
-      return;
+      throw new Error('No layout code provided');
     }
+    
+    setLayoutLoadState('pending');
     
     try {
       const { inputs, targets } = decodeDesign(layoutCode);
@@ -184,26 +181,58 @@ export const DesignerPage: React.FC = () => {
       });
       
       loadFromSolverResult(crops, mutations);
-      setHasLoadedFromUrl(true);
       setLayoutLoadState('loaded');
       
-      toast({
-        title: "Layout loaded",
-        description: `Loaded ${inputs.length} inputs and ${targets.length} targets from shared link`,
-        variant: "success",
-        duration: 3000,
-      });
+      return { inputs: crops, targets: mutations };
     } catch (err) {
-      setHasLoadedFromUrl(true); // Don't retry on error
       setLayoutLoadState('error');
-      toast({
-        title: "Failed to load layout",
-        description: err instanceof Error ? err.message : "Invalid layout code in URL",
-        variant: "error",
-        duration: 5000,
-      });
+      throw err;
     }
-  }, [searchParams, isDataLoading, hasLoadedFromUrl, getCropDef, getMutationDef, loadFromSolverResult, toast]);
+  }, [getCropDef, getMutationDef, loadFromSolverResult]);
+  
+  // Expose loadLayoutFromCode to window for Playwright access
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).loadLayoutFromCode = loadLayoutFromCode;
+    
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).loadLayoutFromCode;
+    };
+  }, [loadLayoutFromCode]);
+  
+  // Auto-load layout from URL parameter
+  useEffect(() => {
+    // Wait for greenhouse data to load and only run once
+    if (isDataLoading || hasLoadedFromUrl) return;
+    
+    const layoutCode = searchParams.get("layout");
+    if (!layoutCode) {
+      setLayoutLoadState('no-layout');
+      setHasLoadedFromUrl(true);
+      return;
+    }
+    
+    loadLayoutFromCode(layoutCode)
+      .then(({ inputs, targets }) => {
+        setHasLoadedFromUrl(true);
+        toast({
+          title: "Layout loaded",
+          description: `Loaded ${inputs.length} inputs and ${targets.length} targets from shared link`,
+          variant: "success",
+          duration: 3000,
+        });
+      })
+      .catch((err) => {
+        setHasLoadedFromUrl(true);
+        toast({
+          title: "Failed to load layout",
+          description: err instanceof Error ? err.message : "Invalid layout code in URL",
+          variant: "error",
+          duration: 5000,
+        });
+      });
+  }, [searchParams, isDataLoading, hasLoadedFromUrl, loadLayoutFromCode, toast]);
   
   // Expose layout load state to window for Playwright to check
   useEffect(() => {
