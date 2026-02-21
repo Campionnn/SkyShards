@@ -19,7 +19,7 @@ const POLL_INTERVAL = 500;
  * Returns the job ID for status polling.
  */
 export async function submitSolveJob(request: SolveRequest): Promise<string> {
-  const response = await fetch(`${API_BASE}/jobs`, {
+  const response = await fetch(`${API_BASE}/greenhouse/jobs`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -43,7 +43,7 @@ export async function submitSolveJob(request: SolveRequest): Promise<string> {
 }
 
 export async function getJobStatus(jobId: string): Promise<JobStatusResponse> {
-  const response = await fetch(`${API_BASE}/jobs/${jobId}`);
+  const response = await fetch(`${API_BASE}/greenhouse/jobs/${jobId}`);
   
   if (!response.ok) {
     if (response.status === 404) {
@@ -57,7 +57,7 @@ export async function getJobStatus(jobId: string): Promise<JobStatusResponse> {
 }
 
 export async function cancelJob(jobId: string): Promise<void> {
-  const response = await fetch(`${API_BASE}/jobs/${jobId}`, {
+  const response = await fetch(`${API_BASE}/greenhouse/jobs/${jobId}`, {
     method: "DELETE",
   });
 
@@ -197,7 +197,7 @@ export async function solveGreenhouseDirect(
   targets: MutationGoal[],
   abortSignal?: AbortSignal
 ): Promise<SolveResponse> {
-  const response = await fetch(`${API_BASE}/greenhouse`, {
+  const response = await fetch(`${API_BASE}/greenhouse/solver`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
