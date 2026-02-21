@@ -2,26 +2,32 @@
 <urlset>
   <url>
     <loc>https://skyshards.com/</loc>
-    <lastmod>2025-07-12T00:00:00+00:00</lastmod>
+    <lastmod>2026-02-19T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://skyshards.com/calculator</loc>
-    <lastmod>2025-07-12T00:00:00+00:00</lastmod>
+    <loc>https://skyshards.com/designer</loc>
+    <lastmod>2026-02-19T00:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://skyshards.com/fusion-guide</loc>
-    <lastmod>2025-07-12T00:00:00+00:00</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://skyshards.com/about</loc>
+    <lastmod>2026-02-19T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://skyshards.com/shard-prices</loc>
-    <lastmod>2025-07-12T00:00:00+00:00</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <loc>https://skyshards.com/contact</loc>
+    <lastmod>2026-02-19T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://skyshards.com/privacy-policy</loc>
+    <lastmod>2026-02-19T00:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>
