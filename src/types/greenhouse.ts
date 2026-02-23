@@ -47,6 +47,7 @@ export interface SolveRequest {
   targets: MutationGoal[];
   priorities?: Record<string, number>;
   locks?: LockDefinition[];
+  unique_crops?: number;
 }
 
 // Unified placement/mutation format - uses position/size

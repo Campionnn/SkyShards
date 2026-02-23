@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { X, Target, TrendingUp, Trash2, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
+import { X, Target, TrendingUp, Trash2, AlertTriangle, ChevronUp, ChevronDown, Sprout } from "lucide-react";
 import { useGreenhouseData } from "../../context";
 import { MutationAutocomplete } from "./MutationAutocomplete";
 import { CropImage } from "../shared";
@@ -17,6 +17,8 @@ export const MutationTargets: React.FC = () => {
     isLoading,
     getCropDef,
     getMutationDef,
+    uniqueCrops,
+    setUniqueCrops,
   } = useGreenhouseData();
   
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
@@ -299,6 +301,30 @@ export const MutationTargets: React.FC = () => {
           placeholder="Add mutation target..."
         />
       )}
+
+      {/* Unique Crops slider */}
+      <div className="mt-4 pt-4 border-t border-slate-600/30">
+        <div className="flex items-center gap-2 mb-2">
+          <Sprout className="w-4 h-4 text-emerald-400" />
+          <h3 className="text-sm font-medium text-slate-200">Unique Crops</h3>
+          <span className="ml-auto text-xs font-medium text-slate-300">
+            {uniqueCrops === 0 ? "Disabled" : uniqueCrops}
+          </span>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={12}
+          step={1}
+          value={uniqueCrops}
+          onChange={(e) => setUniqueCrops(Number(e.target.value))}
+          className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-slate-600/60 accent-emerald-500"
+        />
+        <div className="flex justify-between text-xs text-slate-500 mt-1">
+          <span>0</span>
+          <span>12</span>
+        </div>
+      </div>
     </div>
   );
 };

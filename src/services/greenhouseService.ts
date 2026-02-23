@@ -29,6 +29,9 @@ export async function submitSolveJob(request: SolveRequest): Promise<string> {
         targets: request.targets,
         priorities: request.priorities || {},
         locks: request.locks || [],
+        ...(request.unique_crops !== undefined && request.unique_crops > 0
+          ? { unique_crops: request.unique_crops }
+          : {}),
       },
     }),
   });

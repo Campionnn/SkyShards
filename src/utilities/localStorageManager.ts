@@ -7,7 +7,7 @@
 
 import type { SelectedMutation } from "../types/greenhouse";
 import type { LockedPlacement } from "../types/greenhouse";
-import type { DesignerPlacement } from "../context/DesignerContext";
+import type { DesignerPlacement } from "../context";
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -17,11 +17,10 @@ const STORAGE_KEYS = {
   DESIGNER_TARGETS: "skyshards-designer-targets",
   LOCKED_PLACEMENTS: "skyshards-locked-placements",
   MUTATION_TARGETS: "skyshards-mutation-targets",
+  UNIQUE_CROPS: "skyshards-unique-crops",
 } as const;
 
-// ============================================================================
 // Type Definitions
-// ============================================================================
 
 interface GridConfigData {
   unlockedCells: string[]; // Array of "row,col" strings
@@ -47,9 +46,7 @@ interface MutationTargetsData {
   targets: SelectedMutation[];
 }
 
-// ============================================================================
 // LocalStorageManager Class
-// ============================================================================
 
 export class LocalStorageManager {
   /**
@@ -93,9 +90,7 @@ export class LocalStorageManager {
     }
   }
 
-  // ============================================================================
   // Grid Configuration
-  // ============================================================================
 
   /**
    * Save grid configuration (unlocked cells)
@@ -124,9 +119,7 @@ export class LocalStorageManager {
     this.remove(STORAGE_KEYS.GRID_CONFIG);
   }
 
-  // ============================================================================
   // Priorities
-  // ============================================================================
 
   /**
    * Save crop priorities
@@ -155,9 +148,7 @@ export class LocalStorageManager {
     this.remove(STORAGE_KEYS.PRIORITIES);
   }
 
-  // ============================================================================
   // Designer - Input Placements
-  // ============================================================================
 
   /**
    * Save designer input placements
@@ -186,9 +177,7 @@ export class LocalStorageManager {
     this.remove(STORAGE_KEYS.DESIGNER_INPUTS);
   }
 
-  // ============================================================================
   // Designer - Target Placements
-  // ============================================================================
 
   /**
    * Save designer target placements
@@ -225,9 +214,7 @@ export class LocalStorageManager {
     this.clearDesignerTargets();
   }
 
-  // ============================================================================
   // Locked Placements (Calculator)
-  // ============================================================================
 
   /**
    * Save locked placements
@@ -256,9 +243,7 @@ export class LocalStorageManager {
     this.remove(STORAGE_KEYS.LOCKED_PLACEMENTS);
   }
 
-  // ============================================================================
   // Mutation Targets (Calculator)
-  // ============================================================================
 
   /**
    * Save mutation targets
@@ -287,9 +272,30 @@ export class LocalStorageManager {
     this.remove(STORAGE_KEYS.MUTATION_TARGETS);
   }
 
-  // ============================================================================
+  // Unique Crops (Calculator)
+
+  /**
+   * Save the unique crops slider value (0-12)
+   */
+  static saveUniqueCrops(value: number): boolean {
+    return this.save(STORAGE_KEYS.UNIQUE_CROPS, value);
+  }
+
+  /**
+   * Load the unique crops slider value
+   */
+  static loadUniqueCrops(): number | null {
+    return this.load<number>(STORAGE_KEYS.UNIQUE_CROPS);
+  }
+
+  /**
+   * Clear the unique crops value
+   */
+  static clearUniqueCrops(): void {
+    this.remove(STORAGE_KEYS.UNIQUE_CROPS);
+  }
+
   // Utility Methods
-  // ============================================================================
 
   /**
    * Clear all saved data
@@ -301,6 +307,7 @@ export class LocalStorageManager {
     this.clearDesignerTargets();
     this.clearLockedPlacements();
     this.clearMutationTargets();
+    this.clearUniqueCrops();
   }
 
   /**

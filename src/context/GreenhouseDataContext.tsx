@@ -17,6 +17,9 @@ interface GreenhouseDataContextType {
   updateMutationTargetCount: (id: string, count: number) => void;
   clearSelectedMutations: () => void;
   
+  uniqueCrops: number;
+  setUniqueCrops: (value: number) => void;
+  
   // mutation definition
   getMutationDef: (id: string) => MutationDefinition | undefined;
   getCropDef: (id: string) => CropDefinition | undefined;
@@ -89,6 +92,11 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
     return saved || [];
   });
   const isInitialMutationsMount = useRef(true);
+  
+  const [uniqueCrops, setUniqueCropsState] = useState<number>(() => {
+    const saved = LocalStorageManager.loadUniqueCrops();
+    return saved !== null ? Math.min(12, Math.max(0, saved)) : 0;
+  });
 
   // Load data from JSON on mount
   useEffect(() => {
@@ -142,6 +150,12 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
     setSelectedMutations([]);
   }, []);
   
+  const setUniqueCrops = useCallback((value: number) => {
+    const clamped = Math.min(12, Math.max(0, value));
+    setUniqueCropsState(clamped);
+    LocalStorageManager.saveUniqueCrops(clamped);
+  }, []);
+  
   const getMutationDef = useCallback((id: string): MutationDefinition | undefined => {
     return mutations.find(m => m.id === id);
   }, [mutations]);
@@ -161,6 +175,8 @@ export const GreenhouseDataProvider: React.FC<{ children: React.ReactNode }> = (
     updateMutationMode,
     updateMutationTargetCount,
     clearSelectedMutations,
+    uniqueCrops,
+    setUniqueCrops,
     getMutationDef,
     getCropDef,
   };
