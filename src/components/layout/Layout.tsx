@@ -1,20 +1,54 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Navigation } from "./Navigation";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { PnPageAutoScale } from "../PnPageAutoScale";
+import { GreenhouseModal } from "../modals";
+
+const GREENHOUSE_MODAL_SEEN_KEY = "greenhouse_modal_seen";
 
 export const Layout: React.FC = () => {
   const location = useLocation();
+  const [showGreenhouseModal, setShowGreenhouseModal] = useState(false);
+
+  useEffect(() => {
+    // Check if user has seen the modal before
+    const hasSeenModal = localStorage.getItem(GREENHOUSE_MODAL_SEEN_KEY);
+    if (!hasSeenModal) {
+      setShowGreenhouseModal(true);
+    }
+  }, []);
+
+  const handleCloseGreenhouseModal = () => {
+    // Mark modal as seen in localStorage
+    localStorage.setItem(GREENHOUSE_MODAL_SEEN_KEY, "true");
+    setShowGreenhouseModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-950">
       <Navigation />
       <main className="px-1 sm:px-2 lg:px-4 py-3">
-        <div className="max-w-screen-2xl mx-auto w-full">
-          <ErrorBoundary>
-            <Outlet key={location.pathname} />
-          </ErrorBoundary>
+        <div className="w-full">
+          <div className="pn-page">
+            <div className="pn-left" aria-hidden />
+            <div className="pn-content">
+              <PnPageAutoScale>
+                <div className="max-w-screen-2xl mx-auto w-full">
+                  <div className="pn-leaderboard" />
+
+                  <ErrorBoundary>
+                    <Outlet key={location.pathname} />
+                  </ErrorBoundary>
+                </div>
+              </PnPageAutoScale>
+            </div>
+            <aside className="pn-sidebar" aria-label="Advertisement" />
+          </div>
         </div>
       </main>
+
+      <GreenhouseModal open={showGreenhouseModal} onClose={handleCloseGreenhouseModal} />
 
       <footer className="text-center py-6 text-slate-400 text-sm border-t border-slate-800/50">
         <div className="max-w-screen-2xl mx-auto">
@@ -39,7 +73,7 @@ export const Layout: React.FC = () => {
               Contact
             </a>
             <span className="text-slate-600">•</span>
-            <a href="/privacy-policy" className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium">
+            <a href="https://skyshards.com/privacy-policy" className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium">
               Privacy Policy
             </a>
             <span className="text-slate-600">•</span>
