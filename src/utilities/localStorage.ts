@@ -123,3 +123,73 @@ export const loadKValues = (): Map<string, number> => {
   return new Map();
 };
 
+// Owned attributes storage
+const OWNED_ATTRIBUTES_STORAGE_KEY = "owned_attributes";
+
+export const saveOwnedAttributes = (attributes: Map<string, number>): void => {
+  try {
+    const obj = Object.fromEntries(attributes);
+    localStorage.setItem(OWNED_ATTRIBUTES_STORAGE_KEY, JSON.stringify(obj));
+  } catch (error) {
+    console.warn("Failed to save owned attributes to localStorage:", error);
+  }
+};
+
+export const loadOwnedAttributes = (): Map<string, number> => {
+  try {
+    const stored = localStorage.getItem(OWNED_ATTRIBUTES_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return new Map(Object.entries(parsed).map(([k, v]) => [k, Number(v)]));
+    }
+  } catch (error) {
+    console.warn("Failed to load owned attributes from localStorage:", error);
+  }
+  return new Map();
+};
+
+export const clearOwnedAttributes = (): void => {
+  try {
+    localStorage.removeItem(OWNED_ATTRIBUTES_STORAGE_KEY);
+  } catch (error) {
+    console.warn("Failed to clear owned attributes from localStorage:", error);
+  }
+};
+
+// Hypixel profile metadata
+const HYPIXEL_PROFILE_META_KEY = "hypixel_profile_meta";
+
+export interface HypixelProfileMeta {
+  username: string;
+  profileName: string;
+  lastImportTime: number;
+}
+
+export const saveHypixelProfileMeta = (meta: HypixelProfileMeta): void => {
+  try {
+    localStorage.setItem(HYPIXEL_PROFILE_META_KEY, JSON.stringify(meta));
+  } catch (error) {
+    console.warn("Failed to save Hypixel profile meta to localStorage:", error);
+  }
+};
+
+export const loadHypixelProfileMeta = (): HypixelProfileMeta | null => {
+  try {
+    const stored = localStorage.getItem(HYPIXEL_PROFILE_META_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.warn("Failed to load Hypixel profile meta from localStorage:", error);
+  }
+  return null;
+};
+
+export const clearHypixelProfileMeta = (): void => {
+  try {
+    localStorage.removeItem(HYPIXEL_PROFILE_META_KEY);
+  } catch (error) {
+    console.warn("Failed to clear Hypixel profile meta from localStorage:", error);
+  }
+};
+
