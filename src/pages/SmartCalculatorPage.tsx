@@ -345,7 +345,7 @@ const SmartCalculatorPage: React.FC = () => {
                 <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/20 rounded-md flex items-center justify-center mx-auto">
                   <Package className="w-6 h-6 text-purple-400" />
                 </div>
-                <h3 className="text-lg font-medium text-white">Smart Calculator</h3>
+                <h3 className="text-lg font-medium text-white">Smart</h3>
                 <p className="text-slate-400 text-sm mt-1">
                   Configure your inventory and settings, then select a shard to see the optimal fusion path considering your available shards.
                 </p>

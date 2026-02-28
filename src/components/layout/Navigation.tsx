@@ -48,7 +48,7 @@ export const Navigation: React.FC = () => {
 
   const navItems = [
     { path: "/", label: "Calculator", icon: Calculator, color: "purple" },
-    { path: "/smart", label: "Smart Calculator", icon: Sparkles, color: "yellow" },
+    { path: "/smart", label: "Smart", icon: Sparkles, color: "yellow" },
     { path: "/recipes", label: "Recipes", icon: Shuffle, color: "green" },
     { path: "/shards", label: "Shards", icon: Settings, color: "blue" },
   ];

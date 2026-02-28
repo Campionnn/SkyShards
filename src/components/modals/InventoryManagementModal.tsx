@@ -177,7 +177,11 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
       };
     }).sort((a, b) => {
       if (b.level !== a.level) return b.level - a.level;
-      return a.title.localeCompare(b.title);
+      const RARITY_ORDER: Record<string, number> = { C: 0, U: 1, R: 2, E: 3, L: 4 };
+      const prefixA = a.id[0], prefixB = b.id[0];
+      const orderDiff = (RARITY_ORDER[prefixA] ?? 99) - (RARITY_ORDER[prefixB] ?? 99);
+      if (orderDiff !== 0) return orderDiff;
+      return parseInt(a.id.slice(1)) - parseInt(b.id.slice(1));
     });
   }, [ownedAttributes]);
 

@@ -1,726 +1,907 @@
 {
   "C1": {
     "title": "Nature Elemental",
-    "description": "Grants +2 ❤ Health"
+    "description": "Grants +2 ❤ Health",
+    "id": "nature_elemental"
   },
   "C2": {
     "title": "Fog Elemental",
-    "description": "Grants +1 ✎ Intelligence"
+    "description": "Grants +1 ✎ Intelligence",
+    "id": "fog_elemental"
   },
   "C3": {
     "title": "Light Elemental",
-    "description": "Grants +1 ❁ Strength"
+    "description": "Grants +1 ❁ Strength",
+    "id": "light_elemental"
   },
   "C4": {
     "title": "Nocturnal Animal",
-    "description": "Grants +1 ∮ Sweep during the night"
+    "description": "Grants +1 ∮ Sweep during the night",
+    "id": "nocturnal_animal"
   },
   "C5": {
     "title": "Cheapstake",
-    "description": "Gain +1% more Coins from fishing treasures"
+    "description": "Gain +1% more Coins from fishing treasures",
+    "id": "cheapstake"
   },
   "C7": {
     "title": "Moonglade Mastery",
-    "description": "Grants +10 ☘ Fig Fortune and +10 ☘ Mangrove Fortune"
+    "description": "Grants +10 ☘ Fig Fortune and +10 ☘ Mangrove Fortune",
+    "id": "moonglade_mastery"
   },
   "C8": {
     "title": "Fisherman",
-    "description": "Has a +1% chance not to consume any bait"
+    "description": "Has a +1% chance not to consume any bait",
+    "id": "fisherman"
   },
   "C9": {
     "title": "Experience",
-    "description": "Grants +10% more experience orbs from killing mobs"
+    "description": "Grants +10% more experience orbs from killing mobs",
+    "id": "experience"
   },
   "C10": {
     "title": "Mossy Box",
-    "description": "Grants +5 ☘ Block Fortune"
+    "description": "Grants +5 ☘ Block Fortune",
+    "id": "mossy_box"
   },
   "C11": {
     "title": "Forest Fishing",
-    "description": "Grants +3 ☂ Fishing Speed while on Foraging Islands"
+    "description": "Grants +3 ☂ Fishing Speed while on Foraging Islands",
+    "id": "forest_fishing"
   },
   "C12": {
     "title": "Skeletal Ruler",
-    "description": "Increase damage to Skeletal creatures by +3%"
+    "description": "Increase damage to Skeletal creatures by +3%",
+    "id": "skeletal_ruler"
   },
   "C14": {
     "title": "Creature Fisher",
-    "description": "Grants +0.5 α Sea Creature Chance"
+    "description": "Grants +0.5 α Sea Creature Chance",
+    "id": "hunter"
   },
   "C15": {
     "title": "Arthropod Resistance",
-    "description": "Grants +4 ❈ Defense against Spiders"
+    "description": "Grants +4 ❈ Defense against Spiders",
+    "id": "arachno_resistance"
   },
   "C16": {
     "title": "Happy Box",
-    "description": "Grants a +2% chance to obtain an extra Winter Gift when finding one"
+    "description": "Grants a +2% chance to obtain an extra Winter Gift when finding one",
+    "id": "happy_box"
   },
   "C17": {
     "title": "Yummy",
-    "description": "Grants a +10% chance to drop double Berries and Sea Lumies"
+    "description": "Grants a +10% chance to drop double Berries and Sea Lumies",
+    "id": "yummy"
   },
   "C18": {
     "title": "Undead Resistance",
-    "description": "Grants +4 ❈ Defense against Undead Monsters"
+    "description": "Grants +4 ❈ Defense against Undead Monsters",
+    "id": "undead_resistance"
   },
   "C19": {
     "title": "Fig Sharpening",
-    "description": "Grants +5 ∮ Sweep towards Fig Trees"
+    "description": "Grants +5 ∮ Sweep towards Fig Trees",
+    "id": "fig_sharpening"
   },
   "C20": {
     "title": "Unity is Strength",
-    "description": "Grants +0.02 ∮ Sweep for each unique Common Attribute you own"
+    "description": "Grants +0.02 ∮ Sweep for each unique Common Attribute you own",
+    "id": "unity_is_strength"
   },
   "C21": {
     "title": "Ender Resistance",
-    "description": "Grants +4 ❈ Defense against mobs in The End"
+    "description": "Grants +4 ❈ Defense against mobs in The End",
+    "id": "ender_resistance"
   },
   "C23": {
     "title": "Bucket Lover",
-    "description": "You have a +5% chance to gain extra Chums"
+    "description": "You have a +5% chance to gain extra Chums",
+    "id": "bucket_lover"
   },
   "C24": {
     "title": "Tree Lurker",
-    "description": "Increases the odds of finding monsters from Tree Gifts by +5%"
+    "description": "Increases the odds of finding monsters from Tree Gifts by +5%",
+    "id": "tree_lurker"
   },
   "C25": {
     "title": "Visitor Bait",
-    "description": "Garden Visitors arrive +1% faster"
+    "description": "Garden Visitors arrive +1% faster",
+    "id": "visitor_bait"
   },
   "C27": {
     "title": "Midas Touch",
-    "description": "Grants +1 Coin per kill"
+    "description": "Grants +1 Coin per kill",
+    "id": "midas_touch"
   },
   "C29": {
     "title": "Forest Strength",
-    "description": "Grants +5 ❁ Strength while on Foraging Islands"
+    "description": "Grants +5 ❁ Strength while on Foraging Islands",
+    "id": "forest_strength"
   },
   "C30": {
     "title": "Blazing Resistance",
-    "description": "Grants +4 ❈ Defense against mobs while in the Crimson Isle"
+    "description": "Grants +4 ❈ Defense against mobs while in the Crimson Isle",
+    "id": "blazing_resistance"
   },
   "C33": {
     "title": "Yog Membrane",
-    "description": "Grants +1 ♨ Heat Resistance"
+    "description": "Grants +1 ♨ Heat Resistance",
+    "id": "yog_membrane"
   },
   "C34": {
     "title": "Owl Friend",
-    "description": "Your pets gain +2% more Pet EXP from Fann"
+    "description": "Your pets gain +2% more Pet EXP from Fann",
+    "id": "owl_friend"
   },
   "C35": {
     "title": "Decent Karma",
-    "description": "Grants +2 ☘ Hunter Fortune towards COMMON Attributes"
+    "description": "Grants +2 ☘ Hunter Fortune towards COMMON Attributes",
+    "id": "decent_karma"
   },
   "C36": {
     "title": "Rotten Pickaxe",
-    "description": "Grants +3 ⸕ Mining Speed"
+    "description": "Grants +3 ⸕ Mining Speed",
+    "id": "rotten_pickaxe"
   },
   "C39": {
     "title": "Mythological Resistance",
-    "description": "Grants +4 ❈ Defense against ✿ Mythological mobs"
+    "description": "Grants +4 ❈ Defense against ✿ Mythological mobs",
+    "id": "mythological_resistance"
   },
   "U1": {
     "title": "Wood Elemental",
-    "description": "Grants +2 ❤ Health"
+    "description": "Grants +2 ❤ Health",
+    "id": "wood_elemental"
   },
   "U2": {
     "title": "Water Elemental",
-    "description": "Grants +1 ✎ Intelligence"
+    "description": "Grants +1 ✎ Intelligence",
+    "id": "water_elemental"
   },
   "U3": {
     "title": "Stone Elemental",
-    "description": "Grants +1 ❁ Strength"
+    "description": "Grants +1 ❁ Strength",
+    "id": "stone_elemental"
   },
   "U4": {
     "title": "Fig Collector",
-    "description": "Grants +1 ☘ Fig Fortune for every digit in your Fig Log collection. (Max 10M collection)"
+    "description": "Grants +1 ☘ Fig Fortune for every digit in your Fig Log collection. (Max 10M collection)",
+    "id": "fig_collector"
   },
   "U5": {
     "title": "Gold Bait",
-    "description": "The cooldown of Golden Fish is reduced by +30s"
+    "description": "The cooldown of Golden Fish is reduced by +30s",
+    "id": "gold_bait"
   },
   "U6": {
     "title": "Mountain Climber",
-    "description": "Commissions grant +1% more HOTM Exp"
+    "description": "Commissions grant +1% more HOTM Exp",
+    "id": "mountain_climber"
   },
   "U7": {
     "title": "Bigger Box",
-    "description": "Grants a +5% chance to find an extra item in Treasure Chests and the Crystal Nucleus"
+    "description": "Grants a +5% chance to find an extra item in Treasure Chests and the Crystal Nucleus",
+    "id": "bigger_box"
   },
   "U8": {
     "title": "Good Karma",
-    "description": "Grants +2 ☘ Hunter Fortune towards UNCOMMON Attributes"
+    "description": "Grants +2 ☘ Hunter Fortune towards UNCOMMON Attributes",
+    "id": "good_karma"
   },
   "U9": {
     "title": "Echo of Boxes",
-    "description": "Your \"Box\" Attributes are +2% stronger"
+    "description": "Your \"Box\" Attributes are +2% stronger",
+    "id": "echo_of_boxes"
   },
   "U10": {
     "title": "Pest Luck",
-    "description": "Gain a +2% chance to obtain rare loot from Pests"
+    "description": "Gain a +2% chance to obtain rare loot from Pests",
+    "id": "pest_luck"
   },
   "U11": {
     "title": "Forest Trap",
-    "description": "Forest Shards get caught by Traps +1% faster"
+    "description": "Forest Shards get caught by Traps +1% faster",
+    "id": "forest_trap"
   },
   "U12": {
     "title": "Mana Steal",
-    "description": "Regain +0.5 of your maximum Mana every time you hit a monster"
+    "description": "Regain +0.5 of your maximum Mana every time you hit a monster",
+    "id": "mana_steal"
   },
   "U15": {
     "title": "Dragon Shortbow Improvement",
-    "description": "Your Dragon Shortbow gains +2% more ❁ Damage while in The End"
+    "description": "Your Dragon Shortbow gains +2% more ❁ Damage while in The End",
+    "id": "dragon_shortbow_improvement"
   },
   "U16": {
     "title": "Mangrove Sharpening",
-    "description": "Grants +10 ∮ Sweep towards Mangrove Trees"
+    "description": "Grants +10 ∮ Sweep towards Mangrove Trees",
+    "id": "mangrove_sharpening"
   },
   "U18": {
     "title": "Speed",
-    "description": "Grants +1 ✦ Speed"
+    "description": "Grants +1 ✦ Speed",
+    "id": "speed"
   },
   "U20": {
     "title": "Lost and Found",
-    "description": "Grants a +0.1% chance to find a Wet Book when fishing a Treasure"
+    "description": "Grants a +0.1% chance to find a Wet Book when fishing a Treasure",
+    "id": "lost_and_found"
   },
   "U21": {
     "title": "Hunter's Fang",
-    "description": "Your Hunting Axes gain +1% more stats from the weapon they hold"
+    "description": "Your Hunting Axes gain +1% more stats from the weapon they hold",
+    "id": "hunters_fangs"
   },
   "U22": {
     "title": "Insect Power",
-    "description": "Your Vacuum deals +10% extra ❁ Damage"
+    "description": "Your Vacuum deals +10% extra ❁ Damage",
+    "id": "insect_power"
   },
   "U24": {
     "title": "Undead Ruler",
-    "description": "Grants +3% more ❁ Damage against Undead Monsters"
+    "description": "Grants +3% more ❁ Damage against Undead Monsters",
+    "id": "undead"
   },
   "U25": {
     "title": "Strong Arms",
-    "description": "Your Axe gains +3 ∮ Sweep on throws"
+    "description": "Your Axe gains +3 ∮ Sweep on throws",
+    "id": "strong_arms"
   },
   "U27": {
     "title": "Life Recovery",
-    "description": "Heals for +0.1% of your max health each time you kill a mob"
+    "description": "Heals for +0.1% of your max health each time you kill a mob",
+    "id": "life_recovery"
   },
   "U28": {
     "title": "Mangrove Collector",
-    "description": "Grants +1 ☘ Mangrove Fortune for every digit in your Mangrove Log collection. (Max 10M collection)"
+    "description": "Grants +1 ☘ Mangrove Fortune for every digit in your Mangrove Log collection. (Max 10M collection)",
+    "id": "mangrove_collector"
   },
   "U29": {
     "title": "Spirit Axe",
-    "description": "Your Axes deal +2% extra ❁ Damage to creatures on Galatea"
+    "description": "Your Axes deal +2% extra ❁ Damage to creatures on Galatea",
+    "id": "spirit_axe"
   },
   "U30": {
     "title": "Combo",
-    "description": "Deal +0.1% more ❁ Damage per Grandma Wolf pet combo. (Max 50 combo)"
+    "description": "Deal +0.1% more ❁ Damage per Grandma Wolf pet combo. (Max 50 combo)",
+    "id": "combo"
   },
   "U31": {
     "title": "Strong Legs",
-    "description": "Your Axe gains +3 ∮ Sweep on melee"
+    "description": "Your Axe gains +3 ∮ Sweep on melee",
+    "id": "strong_legs"
   },
   "U32": {
     "title": "Infection",
-    "description": "Increases the chance of catching corrupted Sea Creatures by +0.2%"
+    "description": "Increases the chance of catching corrupted Sea Creatures by +0.2%",
+    "id": "infection"
   },
   "U33": {
     "title": "Arthropod Ruler",
-    "description": "Grants +3% more ❁ Damage against Spiders"
+    "description": "Grants +3% more ❁ Damage against Spiders",
+    "id": "arachno"
   },
   "U34": {
     "title": "Kat's Favorite",
-    "description": "Kat takes +1% less time to upgrade a Pet"
+    "description": "Kat takes +1% less time to upgrade a Pet",
+    "id": "kat_favorite"
   },
   "U36": {
     "title": "Ender Ruler",
-    "description": "Grants +3% more ❁ Damage against Ender Creatures"
+    "description": "Grants +3% more ❁ Damage against Ender Creatures",
+    "id": "ender"
   },
   "U38": {
     "title": "Magmatic Ruler",
-    "description": "Grants +3% more ❁ Damage against Lava Sea Creatures"
+    "description": "Grants +3% more ❁ Damage against Lava Sea Creatures",
+    "id": "magmatic_ruler"
   },
   "U39": {
     "title": "Battle Frog",
-    "description": "Your Frog Pet gains +3 ❁ Strength"
+    "description": "Your Frog Pet gains +3 ❁ Strength",
+    "id": "battle_frog"
   },
   "U40": {
     "title": "Infiltration",
-    "description": "Grants +3 ☘ Farming Fortune if your Garden Plot currently has a Pest in it"
+    "description": "Grants +3 ☘ Farming Fortune if your Garden Plot currently has a Pest in it",
+    "id": "infiltration"
   },
   "R1": {
     "title": "Forest Elemental",
-    "description": "Grants +2 ❤ Health"
+    "description": "Grants +2 ❤ Health",
+    "id": "forest_elemental"
   },
   "R2": {
     "title": "Torrent Elemental",
-    "description": "Grants +1 ✎ Intelligence"
+    "description": "Grants +1 ✎ Intelligence",
+    "id": "torrent_elemental"
   },
   "R3": {
     "title": "Lightning Elemental",
-    "description": "Grants +1 ❁ Strength"
+    "description": "Grants +1 ❁ Strength",
+    "id": "lightning_elemental"
   },
   "R4": {
     "title": "Animal Expertise",
-    "description": "Grants +10 ☘ Foraging Fortune"
+    "description": "Grants +10 ☘ Foraging Fortune",
+    "id": "animal_expertise"
   },
   "R5": {
     "title": "Frog Legs",
-    "description": "Frogs have a +10% chance to jump 1 less time"
+    "description": "Frogs have a +10% chance to jump 1 less time",
+    "id": "frog_legs"
   },
   "R6": {
     "title": "Essence of Ice",
-    "description": "Gain +1% more Ice Essence"
+    "description": "Gain +1% more Ice Essence",
+    "id": "ice_essence"
   },
   "R7": {
     "title": "Beacon Zealot",
-    "description": "The effects of beacons are 10% stronger on you. Gain a 0.1% chance to find Signal Enhancers in Tree Gifts"
+    "description": "The effects of beacons are 10% stronger on you. Gain a 0.1% chance to find Signal Enhancers in Tree Gifts",
+    "id": "beacon_zealot"
   },
   "R8": {
     "title": "Great Karma",
-    "description": "Grants +1 ☘ Hunter Fortune towards RARE Attributes"
+    "description": "Grants +1 ☘ Hunter Fortune towards RARE Attributes",
+    "id": "great_karma"
   },
   "R9": {
     "title": "Hunter's Pressure",
-    "description": "Your Black Holes capture creatures +5% faster"
+    "description": "Your Black Holes capture creatures +5% faster",
+    "id": "hunters_pressure"
   },
   "R10": {
     "title": "Fancy Visit",
-    "description": "RARE and above Garden Visitors have a +1% higher chance to arrive"
+    "description": "RARE and above Garden Visitors have a +1% higher chance to arrive",
+    "id": "fancy_visit"
   },
   "R11": {
     "title": "Moonglade Serendipity",
-    "description": "Increases the odds of finding rare items in Tree Gifts at Moonglade Marsh by +2%"
+    "description": "Increases the odds of finding rare items in Tree Gifts at Moonglade Marsh by +2%",
+    "id": "moonglade_serendipity"
   },
   "R13": {
     "title": "Catacombs Box",
-    "description": "Increases the quality of boss rewards in The Catacombs by +1"
+    "description": "Increases the quality of boss rewards in The Catacombs by +1",
+    "id": "catacomb_box"
   },
   "R15": {
     "title": "Bone Font",
-    "description": "Grants a +2% extra chance of finding Level 6+ books or higher in Superpairs"
+    "description": "Grants a +2% extra chance of finding Level 6+ books or higher in Superpairs",
+    "id": "bone_font"
   },
   "R16": {
     "title": "Crop Bug",
-    "description": "Increased the odds of finding a Cropie, Squash or Fermento by +2%"
+    "description": "Increased the odds of finding a Cropie, Squash or Fermento by +2%",
+    "id": "crop_bug"
   },
   "R18": {
     "title": "Humanoid Ruler",
-    "description": "Grants +3% more ❁ Damage against Humanoid Creatures"
+    "description": "Grants +3% more ❁ Damage against Humanoid Creatures",
+    "id": "humanoid_ruler"
   },
   "R21": {
     "title": "Atomized Mithril",
-    "description": "Gain +1% extra Mithril Powder"
+    "description": "Gain +1% extra Mithril Powder",
+    "id": "atomized_mithril"
   },
   "R22": {
     "title": "Kuudra's Box",
-    "description": "Gives +5% chance to have an extra Kuudra Teeth in the Paid Reward Chest"
+    "description": "Gives +5% chance to have an extra Kuudra Teeth in the Paid Reward Chest",
+    "id": "kuudra_box"
   },
   "R23": {
     "title": "Dwarven Serendipity",
-    "description": "Increases the chance to find Golden and Diamond Goblins by +10%"
+    "description": "Increases the chance to find Golden and Diamond Goblins by +10%",
+    "id": "dwarven_serendipity"
   },
   "R24": {
     "title": "Essence of Arthropods",
-    "description": "Gain +1% more Spider Essence"
+    "description": "Gain +1% more Spider Essence",
+    "id": "spider_essence"
   },
   "R25": {
     "title": "Cookie Eater",
-    "description": "Gain +5% of your Booster Cookie Bits up front"
+    "description": "Gain +5% of your Booster Cookie Bits up front",
+    "id": "cookie_eater"
   },
   "R27": {
     "title": "Essence of Unliving",
-    "description": "Gain +1% more Undead Essence"
+    "description": "Gain +1% more Undead Essence",
+    "id": "undead_essence"
   },
   "R29": {
     "title": "Crystal Serendipity",
-    "description": "Grants a +2% chance to double any loot from Crystal Hollows Treasure Chests"
+    "description": "Grants a +2% chance to double any loot from Crystal Hollows Treasure Chests",
+    "id": "crystal_serendipity"
   },
   "R30": {
     "title": "Deadeye",
-    "description": "Increases damage from ranged weapons by +2.5%"
+    "description": "Increases damage from ranged weapons by +2.5%",
+    "id": "deadeye"
   },
   "R31": {
     "title": "Atomized Crystals",
-    "description": "Gain +1% extra Gemstone Powder"
+    "description": "Gain +1% extra Gemstone Powder",
+    "id": "atomized_crystals"
   },
   "R33": {
     "title": "Quartz Speed",
-    "description": "⸕ Mining Speed from events is increased by +10%"
+    "description": "⸕ Mining Speed from events is increased by +10%",
+    "id": "quartz_speed"
   },
   "R34": {
     "title": "Accessory Size",
-    "description": "Grants +1 extra Accessory Bag slots"
+    "description": "Grants +1 extra Accessory Bag slots",
+    "id": "accessory_size"
   },
   "R35": {
     "title": "Winter's Serendipity",
-    "description": "Increases the odds of finding rare items in Winter Gifts by +2%"
+    "description": "Increases the odds of finding rare items in Winter Gifts by +2%",
+    "id": "winter_serendipity"
   },
   "R36": {
     "title": "Lifeline",
-    "description": "When under 20% maximum HP, your ❁ Damage and ❈ Defense increase by +2.5%"
+    "description": "When under 20% maximum HP, your ❁ Damage and ❈ Defense increase by +2.5%",
+    "id": "lifeline"
   },
   "R38": {
     "title": "Rabbit Crew",
-    "description": "Your Chocolate Factory gains +2 more Chocolate per second"
+    "description": "Your Chocolate Factory gains +2 more Chocolate per second",
+    "id": "rabbit_crew"
   },
   "R39": {
     "title": "Breeze",
-    "description": "When you haven't been damaged in the last 5s or more, your mana costs are decreased by +1%"
+    "description": "When you haven't been damaged in the last 5s or more, your mana costs are decreased by +1%",
+    "id": "breeze"
   },
   "R42": {
     "title": "Ignition",
-    "description": "Increases the duration of fire damage that you inflict on enemies by +30%"
+    "description": "Increases the duration of fire damage that you inflict on enemies by +30%",
+    "id": "ignition"
   },
   "R43": {
     "title": "Pretty Clothes",
-    "description": "Gain +1% more Copper from Garden Visitors"
+    "description": "Gain +1% more Copper from Garden Visitors",
+    "id": "pretty_clothes"
   },
   "R44": {
     "title": "Extreme Pressure",
-    "description": "Grants +5 ❍ Pressure Resistance"
+    "description": "Grants +5 ❍ Pressure Resistance",
+    "id": "extreme_pressure"
   },
   "R45": {
     "title": "Pure Reptile",
-    "description": "Grants a +2% chance to double shards from a Reptile Fusion"
+    "description": "Grants a +2% chance to double shards from a Reptile Fusion",
+    "id": "pure_reptile"
   },
   "R46": {
     "title": "Berry Enjoyer",
-    "description": "Berries have a +10% chance to grant you double points in Starlyn Contests"
+    "description": "Berries have a +10% chance to grant you double points in Starlyn Contests",
+    "id": "berry_enjoyer"
   },
   "R49": {
     "title": "Essence of the Forest",
-    "description": "Gain +1% more Forest Essence"
+    "description": "Gain +1% more Forest Essence",
+    "id": "forest_essence"
   },
   "R50": {
     "title": "Deep Diving",
-    "description": "Grants +5 ⚶ Respiration"
+    "description": "Grants +5 ⚶ Respiration",
+    "id": "deep_diving"
   },
   "R51": {
     "title": "Atomized Glacite",
-    "description": "Gain +1% extra Glacite Powder"
+    "description": "Gain +1% extra Glacite Powder",
+    "id": "atomized_glacite"
   },
   "R52": {
     "title": "Fungy Luck",
-    "description": "Gain a +10% chance to gain an additional Chisel charge upon starting the Fossil Excavator"
+    "description": "Gain a +10% chance to gain an additional Chisel charge upon starting the Fossil Excavator",
+    "id": "fungy_luck"
   },
   "R53": {
     "title": "Eelastic",
-    "description": "Increase Pull by +1 when using your Fishing Nets"
+    "description": "Increase Pull by +1 when using your Fishing Nets",
+    "id": "eelastic"
   },
   "R54": {
     "title": "Hunter's Grasp",
-    "description": "Your Black Holes gain +1% ☘ Hunter Fortune"
+    "description": "Your Black Holes gain +1% ☘ Hunter Fortune",
+    "id": "hunters_grasp"
   },
   "R56": {
     "title": "Blazing Fortune",
-    "description": "Grants +1 ✯ Magic Find on Lava Sea Creatures"
+    "description": "Grants +1 ✯ Magic Find on Lava Sea Creatures",
+    "id": "blazing_fortune"
   },
   "R57": {
     "title": "Essence of Dragons",
-    "description": "Gain +1% more Dragon Essence"
+    "description": "Gain +1% more Dragon Essence",
+    "id": "dragon_essence"
   },
   "R58": {
     "title": "Battle Experience",
-    "description": "Pets gain +1% more EXP from Combat"
+    "description": "Pets gain +1% more EXP from Combat",
+    "id": "battle_experience"
   },
   "R59": {
     "title": "Crimson Serendipity",
-    "description": "Increase the odds of finding a Vanquisher by +2%"
+    "description": "Increase the odds of finding a Vanquisher by +2%",
+    "id": "crimson_serendipity"
   },
   "R60": {
     "title": "Essence of Wither",
-    "description": "Gain +1% more Wither Essence"
+    "description": "Gain +1% more Wither Essence",
+    "id": "wither_essence"
   },
   "R61": {
     "title": "Echo of Sharpening",
-    "description": "Your Sharpening Attributes are +2% stronger"
+    "description": "Your Sharpening Attributes are +2% stronger",
+    "id": "echo_of_sharpening"
   },
   "R63": {
     "title": "Mythological Fortune",
-    "description": "Grants +0.5 ✯ Magic Find against ✿ Mythological mobs"
+    "description": "Grants +0.5 ✯ Magic Find against ✿ Mythological mobs",
+    "id": "mythological_fortune"
   },
   "R64": {
     "title": "Chop",
-    "description": "Grants a +10% chance to Chop an extra log, on top of the ones you swept"
+    "description": "Grants a +10% chance to Chop an extra log, on top of the ones you swept",
+    "id": "chop"
   },
   "E1": {
     "title": "Earth Elemental",
-    "description": "Grants +2 ❤ Health"
+    "description": "Grants +2 ❤ Health",
+    "id": "earth_elemental"
   },
   "E2": {
     "title": "Frost Elemental",
-    "description": "Grants +1 ✎ Intelligence"
+    "description": "Grants +1 ✎ Intelligence",
+    "id": "frost_elemental"
   },
   "E3": {
     "title": "Wind Elemental",
-    "description": "Grants +1 ❁ Strength"
+    "description": "Grants +1 ❁ Strength",
+    "id": "wind_elemental"
   },
   "E4": {
     "title": "Foraging Wisdom",
-    "description": "Grants +0.5 ☯ Foraging Wisdom"
+    "description": "Grants +0.5 ☯ Foraging Wisdom",
+    "id": "foraging_wisdom"
   },
   "E5": {
     "title": "Excellent Karma",
-    "description": "Grants +1 ☘ Hunter Fortune towards epic Attributes"
+    "description": "Grants +1 ☘ Hunter Fortune towards epic Attributes",
+    "id": "excellent_karma"
   },
   "E6": {
     "title": "Echo of Resistance",
-    "description": "Your Resistance Attributes are +2% stronger"
+    "description": "Your Resistance Attributes are +2% stronger",
+    "id": "echo_of_resistance"
   },
   "E7": {
     "title": "Berry Mogul",
-    "description": "Your Salts last +1% longer"
+    "description": "Your Salts last +1% longer",
+    "id": "berry_mogul"
   },
   "E9": {
     "title": "Hunter's Suppress",
-    "description": "Lassos deplete Stamina +2% faster"
+    "description": "Lassos deplete Stamina +2% faster",
+    "id": "hunters_suppress"
   },
   "E10": {
     "title": "Echo of Atomized",
-    "description": "Your Atomized Attributes are +2% stronger"
+    "description": "Your Atomized Attributes are +2% stronger",
+    "id": "echo_of_atomized"
   },
   "E11": {
     "title": "Lucky Rod",
-    "description": "Fish Treasure Shards are +1% easier to find"
+    "description": "Fish Treasure Shards are +1% easier to find",
+    "id": "lucky_rod"
   },
   "E13": {
     "title": "Lunar Power",
-    "description": "Grants +5 ☘ Farming Fortune during the Night"
+    "description": "Grants +5 ☘ Farming Fortune during the Night",
+    "id": "lunar_power"
   },
   "E14": {
     "title": "Trophy Hunter",
-    "description": "Grants +2 ♔ Trophy Fish Chance"
+    "description": "Grants +2 ♔ Trophy Fish Chance",
+    "id": "trophy_hunter"
   },
   "E15": {
     "title": "Deep Technique",
-    "description": "Each block you mine has a +1% chance to grant 1 extra ✧ Pristine for that block"
+    "description": "Each block you mine has a +1% chance to grant 1 extra ✧ Pristine for that block",
+    "id": "deep_technique"
   },
   "E16": {
     "title": "Sack Size",
-    "description": "Your sacks can hold +1% more items"
+    "description": "Your sacks can hold +1% more items",
+    "id": "sack_size"
   },
   "E17": {
     "title": "Fishing Speed",
-    "description": "Grants +3 ☂ Fishing Speed"
+    "description": "Grants +3 ☂ Fishing Speed",
+    "id": "fishing_speed"
   },
   "E18": {
     "title": "Blazing",
-    "description": "Grants +3% more ❁ Damage against mobs while in the Crimson Isle"
+    "description": "Grants +3% more ❁ Damage against mobs while in the Crimson Isle",
+    "id": "blazing"
   },
   "E20": {
     "title": "Sea Wisdom",
-    "description": "Grants +0.5 ☯ Fishing Wisdom"
+    "description": "Grants +0.5 ☯ Fishing Wisdom",
+    "id": "fishing_experience"
   },
   "E21": {
     "title": "Reborn",
-    "description": "Killing a Prince has a +10% chance to add 1 Bonus Score to your Dungeon Run"
+    "description": "Killing a Prince has a +10% chance to add 1 Bonus Score to your Dungeon Run",
+    "id": "reborn"
   },
   "E22": {
     "title": "Echo of Essence",
-    "description": "Your Essence Attributes are +2% stronger"
+    "description": "Your Essence Attributes are +2% stronger",
+    "id": "echo_of_essence"
   },
   "E24": {
     "title": "Faker",
-    "description": "Dungeon Blessings are +1% stronger on you"
+    "description": "Dungeon Blessings are +1% stronger on you",
+    "id": "faker"
   },
   "E26": {
     "title": "Shell",
-    "description": "Gain +10% Regular Knockback Resistance"
+    "description": "Gain +10% Regular Knockback Resistance",
+    "id": "shell"
   },
   "E27": {
     "title": "Warrior",
-    "description": "Increases melee damage dealt by +2.5%"
+    "description": "Increases melee damage dealt by +2.5%",
+    "id": "warrior"
   },
   "E28": {
     "title": "Why Not More",
-    "description": "Your pet's EXP Share grants +1% more EXP"
+    "description": "Your pet's EXP Share grants +1% more EXP",
+    "id": "why_not_more"
   },
   "E29": {
     "title": "Matriarch Cubs",
-    "description": "Grants a +2% chance to get a second Heavy Pearl"
+    "description": "Grants a +2% chance to get a second Heavy Pearl",
+    "id": "matriarch_cubs"
   },
   "E30": {
     "title": "Echo of Ruler",
-    "description": "Your Ruler Attributes are +2% stronger"
+    "description": "Your Ruler Attributes are +2% stronger",
+    "id": "echo_of_ruler"
   },
   "E31": {
     "title": "Solar Power",
-    "description": "Grants +5 ☘ Farming Fortune during the day"
+    "description": "Grants +5 ☘ Farming Fortune during the day",
+    "id": "solar_power"
   },
   "E32": {
     "title": "Echo of Hunter",
-    "description": "Your Hunter Attributes are +2% stronger"
+    "description": "Your Hunter Attributes are +2% stronger",
+    "id": "echo_of_hunter"
   },
   "E33": {
     "title": "Veil",
-    "description": "Grants +1 ❂ True Defense"
+    "description": "Grants +1 ❂ True Defense",
+    "id": "veil"
   },
   "E34": {
     "title": "Mana Regeneration",
-    "description": "Increases your Mana regeneration by +1%"
+    "description": "Increases your Mana regeneration by +1%",
+    "id": "mana_regeneration"
   },
   "E35": {
     "title": "Hunt Wisdom",
-    "description": "Grants +0.5 ☯ Hunting Wisdom"
+    "description": "Grants +0.5 ☯ Hunting Wisdom",
+    "id": "hunt_wisdom"
   },
   "E36": {
     "title": "Cavern Wisdom",
-    "description": "Grants +0.5 ☯ Mining Wisdom"
+    "description": "Grants +0.5 ☯ Mining Wisdom",
+    "id": "cavern_wisdom"
   },
   "E37": {
     "title": "Garden Wisdom",
-    "description": "Grants +0.5 ☯ Farming Wisdom"
+    "description": "Grants +0.5 ☯ Farming Wisdom",
+    "id": "garden_wisdom"
   },
   "E42": {
     "title": "King of Greed",
-    "description": "Increases Coin gain from Griffin Burrows by +1%"
+    "description": "Increases Coin gain from Griffin Burrows by +1%",
+    "id": "king_of_greed"
   },
   "E39": {
     "title": "Big Game Hunter",
-    "description": "Grants +0.5 ❃ Tracking on Griffin Burrows"
+    "description": "Grants +0.5 ❃ Tracking on Griffin Burrows",
+    "id": "big_game_hunter"
   },
   "L1": {
     "title": "Shadow Elemental",
-    "description": "Grants +2 ❤ Health"
+    "description": "Grants +2 ❤ Health",
+    "id": "shadow_elemental"
   },
   "L2": {
     "title": "Snow Elemental",
-    "description": "Grants +1 ✎ Intelligence"
+    "description": "Grants +1 ✎ Intelligence",
+    "id": "snow_elemental"
   },
   "L3": {
     "title": "Storm Elemental",
-    "description": "Grants +1 ❁ Strength"
+    "description": "Grants +1 ❁ Strength",
+    "id": "storm_elemental"
   },
   "L4": {
     "title": "Reptiloid",
-    "description": "Fusions with Chameleons grant the next 3 IDs as results"
+    "description": "Fusions with Chameleons grant the next 3 IDs as results",
+    "id": "reptiloid"
   },
   "L6": {
     "title": "Echo of Echoes",
-    "description": "Your Echo Attributes are +5% stronger"
+    "description": "Your Echo Attributes are +5% stronger",
+    "id": "echo_of_echoes"
   },
   "L7": {
     "title": "Echo of Wisdom",
-    "description": "Your Wisdom Attributes are +2% stronger"
+    "description": "Your Wisdom Attributes are +2% stronger",
+    "id": "echo_of_wisdom"
   },
   "L8": {
     "title": "Cloak Improvement",
-    "description": "Your David's Cloak gains +1 ❂ True Defense"
+    "description": "Your David's Cloak gains +1 ❂ True Defense",
+    "id": "cloak_improvement"
   },
   "L9": {
     "title": "Paramount Fortitude",
-    "description": "Your ❈ Defense is increased by +0.2%"
+    "description": "Your ❈ Defense is increased by +0.2%",
+    "id": "fortitude"
   },
   "L11": {
     "title": "Charmed",
-    "description": "Grants a +0.05% chance to charm the Shard of monsters you kill"
+    "description": "Grants a +0.05% chance to charm the Shard of monsters you kill",
+    "id": "charmed"
   },
   "L12": {
     "title": "Book Wisdom",
-    "description": "Grants +0.5 ☯ Enchanting Wisdom"
+    "description": "Grants +0.5 ☯ Enchanting Wisdom",
+    "id": "book_wisdom"
   },
   "L13": {
     "title": "Wart Eater",
-    "description": "Grants a +0.01% chance to obtain a Warty when breaking Nether Warts"
+    "description": "Grants a +0.01% chance to obtain a Warty when breaking Nether Warts",
+    "id": "wart_eater"
   },
   "L14": {
     "title": "Payback",
-    "description": "When hit, your next hit deals +2% damage"
+    "description": "When hit, your next hit deals +2% damage",
+    "id": "payback"
   },
   "L15": {
     "title": "Vitality",
-    "description": "Grants +2 ♨ Vitality"
+    "description": "Grants +2 ♨ Vitality",
+    "id": "mending"
   },
   "L17": {
     "title": "Maximal Torment",
-    "description": "Your ✎ Intelligence is increased by +0.1%"
+    "description": "Your ✎ Intelligence is increased by +0.1%",
+    "id": "maximal_torment"
   },
   "L18": {
     "title": "Pity",
-    "description": "Your RNG Meter fills +1% faster"
+    "description": "Your RNG Meter fills +1% faster",
+    "id": "pity"
   },
   "L20": {
     "title": "Star Bait",
-    "description": "Grants a +0.1% chance to fish a Shinyfish"
+    "description": "Grants a +0.1% chance to fish a Shinyfish",
+    "id": "star_bait"
   },
   "L23": {
     "title": "Help From Above",
-    "description": "Grants +1.25 ❣ Health Regen"
+    "description": "Grants +1.25 ❣ Health Regen",
+    "id": "life_regeneration"
   },
   "L24": {
     "title": "Wings of Destiny",
-    "description": "Increases the odds of finding Ananke Feathers by +2%"
+    "description": "Increases the odds of finding Ananke Feathers by +2%",
+    "id": "wings_of_destiny"
   },
   "L25": {
     "title": "Tuning Box",
-    "description": "Grants +1 Tuning Points"
+    "description": "Grants +1 Tuning Points",
+    "id": "tuning_box"
   },
   "L26": {
     "title": "Crimson Hook",
-    "description": "Grants +0.5 ⚓ Double Hook Chance while on the Crimson Isle"
+    "description": "Grants +0.5 ⚓ Double Hook Chance while on the Crimson Isle",
+    "id": "double_hook"
   },
   "L27": {
     "title": "Attack Speed",
-    "description": "Grants +1 ⚔ Bonus Attack Speed"
+    "description": "Grants +1 ⚔ Bonus Attack Speed",
+    "id": "attack_speed"
   },
   "L28": {
     "title": "Magic Find",
-    "description": "Grants +0.5 ✯ Magic Find"
+    "description": "Grants +0.5 ✯ Magic Find",
+    "id": "magic_find"
   },
   "L29": {
     "title": "Hunter's Karma",
-    "description": "Grants +1 ☘ Hunter Fortune"
+    "description": "Grants +1 ☘ Hunter Fortune",
+    "id": "hunter_karma"
   },
   "L30": {
     "title": "Elite",
-    "description": "Grants +3% more ❁ Damage against bosses and mini-bosses"
+    "description": "Grants +3% more ❁ Damage against bosses and mini-bosses",
+    "id": "elite"
   },
   "L31": {
     "title": "Pet Wisdom",
-    "description": "Grants +0.5 ☯ Taming Wisdom"
+    "description": "Grants +0.5 ☯ Taming Wisdom",
+    "id": "pet_wisdom"
   },
   "L32": {
     "title": "Starborn",
-    "description": "The effect of Starborn Temples is +1% stronger on you"
+    "description": "The effect of Starborn Temples is +1% stronger on you",
+    "id": "starborn"
   },
   "L33": {
     "title": "Veteran",
-    "description": "Grants +1 ☯ Combat Wisdom"
+    "description": "Grants +1 ☯ Combat Wisdom",
+    "id": "veteran"
   },
   "L34": {
     "title": "Rare Bird",
-    "description": "Grants +1 ♣ Pet Luck"
+    "description": "Grants +1 ♣ Pet Luck",
+    "id": "rare_bird"
   },
   "L36": {
     "title": "Unlimited Power",
-    "description": "Your ❁ Strength is increased by +0.1%"
+    "description": "Your ❁ Strength is increased by +0.1%",
+    "id": "unlimited_power"
   },
   "L39": {
     "title": "Unlimited Energy",
-    "description": "Your ☠ Crit Damage is increased by +0.1%"
+    "description": "Your ☠ Crit Damage is increased by +0.1%",
+    "id": "unlimited_energy"
   },
   "L41": {
     "title": "Ultimate DNA",
-    "description": "Grants +1 ☘ Mining Fortune, ☘ Farming Fortune, and ☘ Foraging Fortune"
+    "description": "Grants +1 ☘ Mining Fortune, ☘ Farming Fortune, and ☘ Foraging Fortune",
+    "id": "ultimate_dna"
   },
   "L42": {
     "title": "Almighty",
-    "description": "Your \"Unlimited\" Attributes are +5% stronger"
+    "description": "Your \"Unlimited\" Attributes are +5% stronger",
+    "id": "almighty"
   },
   "L44": {
     "title": "Echo of Elemental",
-    "description": "Buffs all other shards in the Elemental Family by +2%"
+    "description": "Buffs all other shards in the Elemental Family by +2%",
+    "id": "echo_of_elemental"
   },
   "L47": {
     "title": "Bayou Biter",
-    "description": "Grants +0.5 ⚓ Double Hook Chance while on the Backwater Bayou"
+    "description": "Grants +0.5 ⚓ Double Hook Chance while on the Backwater Bayou",
+    "id": "bayou_biter"
   },
   "L48": {
     "title": "Dominance",
-    "description": "Gain +1.5% more ❁ Damage when at full health"
+    "description": "Gain +1.5% more ❁ Damage when at full health",
+    "id": "dominance"
   },
   "L51": {
     "title": "Catacombs Graduate",
-    "description": "Gain +2% more Dungeons class experience"
+    "description": "Gain +2% more Dungeons class experience",
+    "id": "catacombs_graduate"
   }
 }
