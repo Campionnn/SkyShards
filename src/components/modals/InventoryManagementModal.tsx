@@ -12,10 +12,8 @@ interface InventoryManagementModalProps {
   open: boolean;
   onClose: () => void;
   inventory: Map<string, number>;
-  kValues: Map<string, number>;
   ownedAttributes: Map<string, number>;
   onInventoryChange: (inventory: Map<string, number>) => void;
-  onKValuesChange: (kValues: Map<string, number>) => void;
   onOwnedAttributesChange: (attributes: Map<string, number>) => void;
 }
 
@@ -34,10 +32,8 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
   open,
   onClose,
   inventory,
-  kValues,
   ownedAttributes,
   onInventoryChange,
-  onKValuesChange,
   onOwnedAttributesChange,
 }) => {
   const { shards } = useShards();
@@ -301,17 +297,6 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
     onInventoryChange(newInventory);
   };
 
-  const handleKValueChange = (shardId: string, value: string) => {
-    const k = parseFloat(value);
-    const newKValues = new Map(kValues);
-    if (isNaN(k) || value === "") {
-      newKValues.delete(shardId);
-    } else {
-      newKValues.set(shardId, k);
-    }
-    onKValuesChange(newKValues);
-  };
-
   const handleNumberInputWheel = (e: React.WheelEvent<HTMLInputElement>) => {
     e.currentTarget.blur();
   };
@@ -531,8 +516,6 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                   {filteredShards.map((shard) => {
                     const shardId = shard.key;
                     const inv = inventory.get(shardId) ?? 0;
-                    const k = kValues.has(shardId) ? kValues.get(shardId)! : 0.05;
-
                     const shardRarityBorder =
                       shard.rarity === "common"    ? "border-slate-500/50"
                       : shard.rarity === "uncommon" ? "border-green-500/50"
@@ -559,34 +542,18 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                           <span className={`text-sm font-medium flex-1 truncate ${shardRarityText}`}>{shard.name}</span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="text-xs text-slate-400 block mb-1">Qty</label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={inv === 0 ? "" : inv}
-                              onChange={(e) => handleInventoryChange(shardId, e.target.value)}
-                              onWheel={handleNumberInputWheel}
-                              onKeyDown={handleNumberInputKeyDown}
-                              placeholder="0"
-                              className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-purple-400"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs text-slate-400 block mb-1">K</label>
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={kValues.has(shardId) ? k : ""}
-                              onChange={(e) => handleKValueChange(shardId, e.target.value)}
-                              onWheel={handleNumberInputWheel}
-                              onKeyDown={handleNumberInputKeyDown}
-                              placeholder="0.05"
-                              className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-purple-400"
-                            />
-                          </div>
+                        <div>
+                          <label className="text-xs text-slate-400 block mb-1">Qty</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={inv === 0 ? "" : inv}
+                            onChange={(e) => handleInventoryChange(shardId, e.target.value)}
+                            onWheel={handleNumberInputWheel}
+                            onKeyDown={handleNumberInputKeyDown}
+                            placeholder="0"
+                            className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-purple-400"
+                          />
                         </div>
                       </div>
                     );

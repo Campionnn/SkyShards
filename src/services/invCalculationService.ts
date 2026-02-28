@@ -25,49 +25,6 @@ export class InvCalculationService {
     return InvCalculationService.instance;
   }
 
-  private getInventoryAdjustedCost(
-    shardId: string,
-    baseCost: number,
-    inventory: Map<string, number>,
-    fuseAmount: number,
-    kValues: Map<string, number>
-  ): number {
-    const inv = inventory.get(shardId) || 0;
-    if (inv >= fuseAmount) {
-      const k = kValues.has(shardId) ? kValues.get(shardId)! : 0.05;
-      return baseCost * (1 / (1 + k * inv));
-    }
-    return baseCost;
-  }
-
-  public async computeInventoryAdjustedMinCosts(
-    params: CalculationParams,
-    inventory: Map<string, number>,
-    kValues: Map<string, number> = new Map()
-  ): Promise<Map<string, number>> {
-    const parsed = await this.service.parseData(params);
-    const {minCosts} = this.service.computeMinCosts(parsed, params, []);
-
-    // Create adjusted costs map
-    const adjustedCosts = new Map<string, number>();
-
-    for (const [shardId, baseCost] of minCosts.entries()) {
-      const shard = parsed.shards[shardId];
-      if (shard) {
-        const adjustedCost = this.getInventoryAdjustedCost(
-          shardId,
-          baseCost,
-          inventory,
-          shard.fuse_amount,
-          kValues
-        );
-        adjustedCosts.set(shardId, adjustedCost);
-      }
-    }
-
-    return adjustedCosts;
-  }
-
   private recalculateTreeQuantities(
     tree: InventoryRecipeTree,
     newQuantity: number,
@@ -183,8 +140,14 @@ export class InvCalculationService {
 
   /**
    * Calculate the effective cost per output unit of a recipe, treating
-   * inventory-available inputs as free (cost = 0). Non-inventory inputs
-   * use their pre-computed optimal minCost.
+   * inventory-available inputs as discounted. When surplusDiscounts is
+   * provided, each input's discount reflects how "expendable" the surplus
+   * is: discount = surplus / (surplus + treeDemand). A tiny surplus
+   * relative to demand yields almost no discount (opportunity cost ≈ full
+   * minCost), while a large surplus with no demand yields a full discount
+   * (opportunity cost ≈ 0). Without surplusDiscounts, inventory inputs
+   * are treated as fully free (backward-compatible for current-recipe
+   * evaluation).
    */
   private calculateEffectiveCost(
     recipe: Recipe,
@@ -192,7 +155,8 @@ export class InvCalculationService {
     parsed: Data,
     minCosts: Map<string, number>,
     crocodileMultiplier: number,
-    craftPenalty: number
+    craftPenalty: number,
+    surplusDiscounts?: Map<string, number>
   ): number {
     const [input1Id, input2Id] = recipe.inputs;
     const fuse1 = parsed.shards[input1Id].fuse_amount;
@@ -201,9 +165,18 @@ export class InvCalculationService {
     const inv1 = inventory.get(input1Id) || 0;
     const inv2 = inventory.get(input2Id) || 0;
 
-    // If input is available in inventory (enough for at least one fuse), treat as free
-    const cost1 = inv1 >= fuse1 ? 0 : (minCosts.get(input1Id) || Infinity) * fuse1;
-    const cost2 = inv2 >= fuse2 ? 0 : (minCosts.get(input2Id) || Infinity) * fuse2;
+    // When inventory covers at least one fuse, apply the discount.
+    // discount=1 → fully free (default when no surplusDiscounts).
+    // discount<1 → partial opportunity cost retained.
+    const baseCost1 = (minCosts.get(input1Id) || Infinity) * fuse1;
+    const baseCost2 = (minCosts.get(input2Id) || Infinity) * fuse2;
+
+    const cost1 = inv1 >= fuse1
+      ? (1 - (surplusDiscounts?.get(input1Id) ?? 1)) * baseCost1
+      : baseCost1;
+    const cost2 = inv2 >= fuse2
+      ? (1 - (surplusDiscounts?.get(input2Id) ?? 1)) * baseCost2
+      : baseCost2;
 
     const effectiveOutput = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
     return (cost1 + cost2 + craftPenalty) / effectiveOutput;
@@ -377,14 +350,34 @@ export class InvCalculationService {
           continue;
         }
 
-        // Calculate effective cost with fair inventory
+        // Compute surplus-based discount factors for the alternative's inputs.
+        // Shared inputs get full discount (1.0) — consumed equally by either
+        // recipe, so they cancel out in the comparison.
+        // Unique inputs get a discount proportional to how much surplus exists
+        // relative to tree demand: discount = surplus / (surplus + demand).
+        // This penalises spending rare/high-demand shards on alternatives
+        // while still allowing truly excess shards to be used.
+        const surplusDiscounts = new Map<string, number>();
+        for (const inputId of recipe.inputs) {
+          if (currentInputSet.has(inputId)) {
+            surplusDiscounts.set(inputId, 1); // shared → fully free
+          } else {
+            const surplus = surplusInventory.get(inputId) || 0;
+            const demand = treeDemand.get(inputId) || 0;
+            const discount = surplus + demand > 0 ? surplus / (surplus + demand) : 0;
+            surplusDiscounts.set(inputId, discount);
+          }
+        }
+
+        // Calculate effective cost with fair inventory and surplus discounts
         const effectiveCost = this.calculateEffectiveCost(
           recipe,
           fairInventory,
           parsed,
           minCosts,
           crocodileMultiplier,
-          craftPenalty
+          craftPenalty,
+          surplusDiscounts
         );
 
         // Only consider if genuinely cheaper than the current recipe
@@ -702,8 +695,6 @@ export class InvCalculationService {
     requiredQuantity: number,
     params: CalculationParams,
     inventory: Map<string, number>,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _kValues: Map<string, number> = new Map(),
     recipeOverrides: RecipeOverride[] = []
   ): Promise<InventoryCalculationResult> {
     const parsed = await this.service.parseData(params);

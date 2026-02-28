@@ -4,7 +4,7 @@ import { CalculatorForm, InventoryCalculationResults } from "../components";
 import { InventoryManagementModal } from "../components/modals";
 import { useCustomRates, useCalculatorState } from "../hooks";
 import { DataService, InvCalculationService, CalculationService } from "../services";
-import { loadInventory, saveInventory, loadKValues, saveKValues, loadOwnedAttributes, saveOwnedAttributes } from "../utilities";
+import { loadInventory, saveInventory, loadOwnedAttributes, saveOwnedAttributes } from "../utilities";
 import type { CalculationFormData } from "../schemas";
 import type { InventoryCalculationResult, CalculationParams, Data, RecipeOverride } from "../types/types";
 
@@ -26,7 +26,6 @@ const SmartCalculatorPage: React.FC = () => {
   const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
 
   const [inventory, setInventory] = useState<Map<string, number>>(loadInventory);
-  const [kValues, setKValues] = useState<Map<string, number>>(loadKValues);
   const [ownedAttributes, setOwnedAttributes] = useState<Map<string, number>>(loadOwnedAttributes);
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -84,7 +83,6 @@ const SmartCalculatorPage: React.FC = () => {
         formData.quantity,
         params,
         new Map(inventory),
-        kValues,
         recipeOverrides
       );
 
@@ -99,7 +97,7 @@ const SmartCalculatorPage: React.FC = () => {
     } finally {
       setIsCalculating(false);
     }
-  }, [customRates, inventory, kValues, recipeOverrides]);
+  }, [customRates, inventory, recipeOverrides]);
 
   const debouncedCalculate = useCallback(
     (formData: CalculationFormData, delay = 300) => {
@@ -141,7 +139,7 @@ const SmartCalculatorPage: React.FC = () => {
     if (form && form.shard && form.shard.trim() !== "") {
       void debouncedCalculate(form, 150);
     }
-  }, [inventory, kValues, form, debouncedCalculate, recipeOverrides]);
+  }, [inventory, form, debouncedCalculate, recipeOverrides]);
 
   // Initialize params from form state so we can display costs even before a calculation
   useEffect(() => {
@@ -195,11 +193,6 @@ const SmartCalculatorPage: React.FC = () => {
   useEffect(() => {
     saveInventory(inventory);
   }, [inventory]);
-
-  // Save k values to localStorage whenever they change
-  useEffect(() => {
-    saveKValues(kValues);
-  }, [kValues]);
 
   // Save owned attributes to localStorage whenever they change
   useEffect(() => {
@@ -360,10 +353,8 @@ const SmartCalculatorPage: React.FC = () => {
         open={showInventoryModal}
         onClose={() => setShowInventoryModal(false)}
         inventory={inventory}
-        kValues={kValues}
         ownedAttributes={ownedAttributes}
         onInventoryChange={setInventory}
-        onKValuesChange={setKValues}
         onOwnedAttributesChange={setOwnedAttributes}
       />
     </div>
