@@ -25,6 +25,7 @@ export class InvCalculationService {
     return InvCalculationService.instance;
   }
 
+  // Updates quantity and derived fields for a tree node.
   private recalculateTreeQuantities(
     tree: InventoryRecipeTree,
     newQuantity: number,
@@ -103,12 +104,9 @@ export class InvCalculationService {
     return !Array.isArray(node) && node.method === "recipe";
   }
 
-  /**
-   * Walk the tree and sum up the quantity demanded per shard across all nodes.
-   * This is used to "reserve" inventory for nodes that already need it,
-   * preventing greedy alternative-recipe swaps from stealing shards that
-   * are required deeper in the tree.
-   */
+  // Sums up total quantity demanded per shard across the tree.
+  // Used to reserve inventory for nodes that need it, preventing alternatives
+  // from stealing shards required elsewhere.
   private collectTreeDemand(tree: InventoryRecipeTree): Map<string, number> {
     const demand = new Map<string, number>();
 
@@ -138,17 +136,9 @@ export class InvCalculationService {
     return demand;
   }
 
-  /**
-   * Calculate the effective cost per output unit of a recipe, treating
-   * inventory-available inputs as discounted. When surplusDiscounts is
-   * provided, each input's discount reflects how "expendable" the surplus
-   * is: discount = surplus / (surplus + treeDemand). A tiny surplus
-   * relative to demand yields almost no discount (opportunity cost ≈ full
-   * minCost), while a large surplus with no demand yields a full discount
-   * (opportunity cost ≈ 0). Without surplusDiscounts, inventory inputs
-   * are treated as fully free (backward-compatible for current-recipe
-   * evaluation).
-   */
+  // Calculates effective cost per output unit of a recipe. Applies inventory
+  // discounts based on surplus vs demand. Uses exclusivityScores to penalize
+  // consuming exclusive shards.
   private calculateEffectiveCost(
     recipe: Recipe,
     inventory: Map<string, number>,
@@ -156,7 +146,8 @@ export class InvCalculationService {
     minCosts: Map<string, number>,
     crocodileMultiplier: number,
     craftPenalty: number,
-    surplusDiscounts?: Map<string, number>
+    surplusDiscounts?: Map<string, number>,
+    exclusivityScores?: Map<string, number>
   ): number {
     const [input1Id, input2Id] = recipe.inputs;
     const fuse1 = parsed.shards[input1Id].fuse_amount;
@@ -178,8 +169,21 @@ export class InvCalculationService {
       ? (1 - (surplusDiscounts?.get(input2Id) ?? 1)) * baseCost2
       : baseCost2;
 
+    // Additive opportunity cost for exclusive shards.
+    let opportunityCost = 0;
+    if (exclusivityScores) {
+      if (inv1 >= fuse1) {
+        const excl1 = exclusivityScores.get(input1Id) || 0;
+        if (excl1 > 0) opportunityCost += baseCost1 * excl1;
+      }
+      if (inv2 >= fuse2) {
+        const excl2 = exclusivityScores.get(input2Id) || 0;
+        if (excl2 > 0) opportunityCost += baseCost2 * excl2;
+      }
+    }
+
     const effectiveOutput = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
-    return (cost1 + cost2 + craftPenalty) / effectiveOutput;
+    return (cost1 + cost2 + opportunityCost + craftPenalty) / effectiveOutput;
   }
 
   private async buildInputTree(
@@ -263,7 +267,8 @@ export class InvCalculationService {
     recipeOverrides: RecipeOverride[],
     minCosts: Map<string, number>,
     processNode: (node: InventoryRecipeTree, allowAlternatives?: boolean) => Promise<InventoryRecipeTree>,
-    treeDemand: Map<string, number>
+    treeDemand: Map<string, number>,
+    exclusivityScores: Map<string, number>
   ): Promise<InventoryRecipeTree | null> {
     if (node.method !== "recipe" || !node.recipe) {
       return null;
@@ -290,28 +295,26 @@ export class InvCalculationService {
     let remainingQuantity = node.quantity;
     const segments: InventoryRecipeTree[] = [];
 
-    // Identify inputs of the current recipe. Shared inputs (used by both
-    // current and alternative) are consumed equally either way, so they
-    // should NOT be penalized or limited for alternatives.
+    // Shared inputs are consumed equally by current and alternative recipes,
+    // so they shouldn't be penalized or limited for alternatives.
     const currentInputSet = new Set(node.recipe.inputs);
 
     while (remainingQuantity > 0) {
-      // Build a "surplus" inventory map: only inventory that exceeds the
-      // FULL tree demand is available for alternative recipe swaps.
-      // We use the full treeDemand (not subtracting this subtree's demand)
-      // because shared inputs are already handled via currentInputSet/fairInventory
-      // (they bypass surplus entirely), and for unique inputs the full demand
-      // must be reserved to prevent multiple nodes from each seeing inflated
-      // surplus and collectively over-consuming.
+      // Build surplus inventory map: only inventory exceeding total tree demand
+      // is available for alternative recipe swaps.
       const surplusInventory = new Map<string, number>();
       for (const [shardId, qty] of workingInventory) {
         const totalDemand = treeDemand.get(shardId) || 0;
-        surplusInventory.set(shardId, Math.max(0, qty - totalDemand));
+        const exclusivity = exclusivityScores.get(shardId) || 0;
+        // Exclusive shards with no tree demand can't be used by alternatives.
+        if (exclusivity > 0 && totalDemand === 0) {
+          surplusInventory.set(shardId, 0);
+        } else {
+          surplusInventory.set(shardId, Math.max(0, qty - totalDemand));
+        }
       }
 
-      // Calculate effective cost of the current recipe using raw workingInventory.
-      // The current recipe's inputs are part of the tree's demand, so they should
-      // be treated normally (they'll be consumed when processing children).
+      // Current recipe cost with full inventory discount (no exclusivity penalty).
       const currentEffectiveCost = this.calculateEffectiveCost(
         node.recipe,
         workingInventory,
@@ -355,8 +358,8 @@ export class InvCalculationService {
         // recipe, so they cancel out in the comparison.
         // Unique inputs get a discount proportional to how much surplus exists
         // relative to tree demand: discount = surplus / (surplus + demand).
-        // This penalises spending rare/high-demand shards on alternatives
-        // while still allowing truly excess shards to be used.
+        // Exclusivity is handled separately via additive opportunity cost in
+        // calculateEffectiveCost, not via multiplicative discount reduction.
         const surplusDiscounts = new Map<string, number>();
         for (const inputId of recipe.inputs) {
           if (currentInputSet.has(inputId)) {
@@ -364,12 +367,13 @@ export class InvCalculationService {
           } else {
             const surplus = surplusInventory.get(inputId) || 0;
             const demand = treeDemand.get(inputId) || 0;
-            const discount = surplus + demand > 0 ? surplus / (surplus + demand) : 0;
-            surplusDiscounts.set(inputId, discount);
+            surplusDiscounts.set(inputId, surplus + demand > 0 ? surplus / (surplus + demand) : 0);
           }
         }
 
         // Calculate effective cost with fair inventory and surplus discounts
+        // Pass exclusivityScores so additive opportunity cost penalizes
+        // consuming exclusive shards for recipes where alternatives exist
         const effectiveCost = this.calculateEffectiveCost(
           recipe,
           fairInventory,
@@ -377,7 +381,8 @@ export class InvCalculationService {
           minCosts,
           crocodileMultiplier,
           craftPenalty,
-          surplusDiscounts
+          surplusDiscounts,
+          exclusivityScores
         );
 
         // Only consider if genuinely cheaper than the current recipe
@@ -473,7 +478,8 @@ export class InvCalculationService {
     choices: Map<string, RecipeChoice>,
     cycleNodes: string[][],
     recipeOverrides: RecipeOverride[],
-    minCosts: Map<string, number>
+    minCosts: Map<string, number>,
+    exclusivityScores: Map<string, number>
   ): Promise<InventoryRecipeTree> {
     const workingInventory = new Map(inventory);
     const processedNodes = new WeakMap<object, InventoryRecipeTree>();
@@ -508,7 +514,8 @@ export class InvCalculationService {
           recipeOverrides,
           minCosts,
           processNode,
-          treeDemand
+          treeDemand,
+          exclusivityScores
         );
         if (alternative) {
           processedNodes.set(node, alternative);
@@ -554,6 +561,7 @@ export class InvCalculationService {
         processedNodes.set(node, node);
         return node;
       }
+
 
       // Check if we've already processed this exact node object
       if (processedNodes.has(node)) {
@@ -687,7 +695,119 @@ export class InvCalculationService {
       inventory.set(shard, qty);
     }
 
-    return result;
+    return this.mergeTreeSegments(result);
+  }
+
+  // Post processing pass to merge nodes
+  private mergeTreeSegments(tree: InventoryRecipeTree): InventoryRecipeTree {
+    // Recursively process children first (bottom-up)
+    if (Array.isArray(tree)) {
+      // Flatten and recursively merge each element
+      const flat: InventoryRecipeTree[] = [];
+      for (const el of tree) {
+        const merged = this.mergeTreeSegments(el);
+        // Flatten nested arrays
+        if (Array.isArray(merged)) {
+          flat.push(...merged);
+        } else {
+          flat.push(merged);
+        }
+      }
+
+      // Merge adjacent nodes with the same shard + method
+      const result: InventoryRecipeTree[] = [];
+      for (const node of flat) {
+        if (Array.isArray(node)) {
+          // Shouldn't happen after flattening, but be safe
+          result.push(node);
+          continue;
+        }
+        const prev = result.length > 0 ? result[result.length - 1] : null;
+        if (prev && !Array.isArray(prev) && this.canMergeNodes(prev, node)) {
+          result[result.length - 1] = this.mergeNodes(prev, node);
+        } else {
+          result.push(node);
+        }
+      }
+
+      return result.length === 1 ? result[0] : result;
+    }
+
+    // For non-array nodes, recurse into recipe/cycle inputs
+    if (tree.method === "recipe" && tree.inputs) {
+      return {
+        ...tree,
+        inputs: [
+          this.mergeTreeSegments(tree.inputs[0]),
+          this.mergeTreeSegments(tree.inputs[1]),
+        ],
+      };
+    }
+    if (tree.method === "cycle") {
+      return {
+        ...tree,
+        inputRecipe: this.mergeTreeSegments(tree.inputRecipe),
+        cycleInputs: tree.cycleInputs.map((ci) => this.mergeTreeSegments(ci)),
+      };
+    }
+
+    // Direct/inventory leaves
+    return tree;
+  }
+
+  // Checks if two nodes can be merged (same shard, same method, same recipe).
+  private canMergeNodes(
+    a: Exclude<InventoryRecipeTree, InventoryRecipeTree[]>,
+    b: Exclude<InventoryRecipeTree, InventoryRecipeTree[]>
+  ): boolean {
+    if (a.shard !== b.shard || a.method !== b.method) return false;
+
+    if (a.method === "direct" || a.method === "inventory") return true;
+
+    if (a.method === "recipe" && b.method === "recipe") {
+      return this.service.areRecipesEqual(a.recipe, b.recipe);
+    }
+
+    // Cycle nodes too complex
+    return false;
+  }
+
+  // Merges two compatible nodes. Precondition: canMergeNodes(a, b) === true.
+  private mergeNodes(
+    a: Exclude<InventoryRecipeTree, InventoryRecipeTree[]>,
+    b: Exclude<InventoryRecipeTree, InventoryRecipeTree[]>
+  ): Exclude<InventoryRecipeTree, InventoryRecipeTree[]> {
+    if (a.method === "direct" && b.method === "direct") {
+      return { shard: a.shard, method: "direct", quantity: a.quantity + b.quantity };
+    }
+
+    if (a.method === "inventory" && b.method === "inventory") {
+      return { shard: a.shard, method: "inventory", quantity: a.quantity + b.quantity };
+    }
+
+    if (a.method === "recipe" && b.method === "recipe") {
+      // Merge recipe nodes: combine quantities and craftsNeeded,
+      // then merge sub-trees by concatenating inputs into arrays
+      // and recursively merging them
+      const mergedInput0 = this.mergeTreeSegments(
+        [a.inputs[0], b.inputs[0]] as InventoryRecipeTree
+      );
+      const mergedInput1 = this.mergeTreeSegments(
+        [a.inputs[1], b.inputs[1]] as InventoryRecipeTree
+      );
+
+      return {
+        shard: a.shard,
+        method: "recipe",
+        quantity: a.quantity + b.quantity,
+        recipe: a.recipe,
+        inputs: [mergedInput0, mergedInput1],
+        craftsNeeded: a.craftsNeeded + b.craftsNeeded,
+      };
+    }
+
+    // Fallback (shouldn't reach here if canMergeNodes is correct)
+    return a;
   }
 
   async calculateOptimalPath(
@@ -712,6 +832,10 @@ export class InvCalculationService {
     }
 
     const {minCosts, choices} = this.service.computeMinCosts(parsed, params, recipeOverrides);
+
+    // Compute exclusivity scores: measures how irreplaceable each shard is
+    // in the recipe graph, weighted by the value of outputs it uniquely enables.
+    const exclusivityScores = this.service.computeExclusivityScores(parsed, minCosts);
 
     // Find cycle nodes to prevent infinite recursion in buildRecipeTree
     const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0
@@ -750,7 +874,8 @@ export class InvCalculationService {
       choices,
       cycleNodes,
       recipeOverrides,
-      minCosts
+      minCosts,
+      exclusivityScores
     );
 
     // Collect stats from the tree with inventory substitutions
