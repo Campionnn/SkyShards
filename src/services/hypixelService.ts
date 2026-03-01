@@ -42,7 +42,8 @@ class HypixelService {
   private baseUrl: string;
 
   private constructor() {
-    this.baseUrl = "/api";
+    const apiTarget = import.meta.env.VITE_API_TARGET || "https://api.skyshards.com";
+    this.baseUrl = import.meta.env.DEV ? "/api" : apiTarget;
   }
 
   public static getInstance(): HypixelService {
