@@ -4,7 +4,7 @@ import { CalculatorForm, InventoryCalculationResults } from "../components";
 import { InventoryManagementModal } from "../components/modals";
 import { useCustomRates, useCalculatorState } from "../hooks";
 import { DataService, InvCalculationService, CalculationService } from "../services";
-import { loadInventory, saveInventory, loadOwnedAttributes, saveOwnedAttributes } from "../utilities";
+import { loadInventory, saveInventory, loadOwnedAttributes, saveOwnedAttributes, loadDisabledShards, saveDisabledShards } from "../utilities";
 import type { CalculationFormData } from "../schemas";
 import type { InventoryCalculationResult, CalculationParams, Data, RecipeOverride } from "../types/types";
 
@@ -27,6 +27,7 @@ const SmartCalculatorPage: React.FC = () => {
 
   const [inventory, setInventory] = useState<Map<string, number>>(loadInventory);
   const [ownedAttributes, setOwnedAttributes] = useState<Map<string, number>>(loadOwnedAttributes);
+  const [disabledShards, setDisabledShards] = useState<Set<string>>(loadDisabledShards);
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [expandedStates] = useState<Map<string, boolean>>(new Map());
@@ -82,7 +83,7 @@ const SmartCalculatorPage: React.FC = () => {
         shardKey,
         formData.quantity,
         params,
-        new Map(inventory),
+        new Map([...inventory].filter(([id]) => !disabledShards.has(id))),
         recipeOverrides
       );
 
@@ -97,7 +98,7 @@ const SmartCalculatorPage: React.FC = () => {
     } finally {
       setIsCalculating(false);
     }
-  }, [customRates, inventory, recipeOverrides]);
+  }, [customRates, inventory, disabledShards, recipeOverrides]);
 
   const debouncedCalculate = useCallback(
     (formData: CalculationFormData, delay = 300) => {
@@ -198,6 +199,11 @@ const SmartCalculatorPage: React.FC = () => {
   useEffect(() => {
     saveOwnedAttributes(ownedAttributes);
   }, [ownedAttributes]);
+
+  // Save disabled shards to localStorage whenever they change
+  useEffect(() => {
+    saveDisabledShards(disabledShards);
+  }, [disabledShards]);
 
   const handleToggle = (nodeId: string) => {
     expandedStates.set(nodeId, !expandedStates.get(nodeId));
@@ -356,6 +362,8 @@ const SmartCalculatorPage: React.FC = () => {
         ownedAttributes={ownedAttributes}
         onInventoryChange={setInventory}
         onOwnedAttributesChange={setOwnedAttributes}
+        disabledShards={disabledShards}
+        onDisabledShardsChange={setDisabledShards}
       />
     </div>
   );

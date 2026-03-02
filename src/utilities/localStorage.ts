@@ -169,3 +169,26 @@ export const clearHypixelProfileMeta = (): void => {
   }
 };
 
+// Disabled shards storage
+const DISABLED_SHARDS_KEY = "inventory_disabled_shards";
+
+export const saveDisabledShards = (disabled: Set<string>): void => {
+  try {
+    localStorage.setItem(DISABLED_SHARDS_KEY, JSON.stringify([...disabled]));
+  } catch (error) {
+    console.warn("Failed to save disabled shards to localStorage:", error);
+  }
+};
+
+export const loadDisabledShards = (): Set<string> => {
+  try {
+    const stored = localStorage.getItem(DISABLED_SHARDS_KEY);
+    if (stored) {
+      return new Set(JSON.parse(stored) as string[]);
+    }
+  } catch (error) {
+    console.warn("Failed to load disabled shards from localStorage:", error);
+  }
+  return new Set();
+};
+

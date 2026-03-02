@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, Search, Package, RefreshCw, User, ChevronDown, AlertTriangle, Check, Filter, RotateCcw } from "lucide-react";
+import { X, Search, Package, RefreshCw, User, ChevronDown, AlertTriangle, Check, Filter, RotateCcw, Eye, EyeOff } from "lucide-react";
 import { hypixelService } from "../../services";
 import type { HypixelProfileResponse, ProfileData } from "../../services";
 import { useShards } from "../../hooks";
@@ -15,6 +15,8 @@ interface InventoryManagementModalProps {
   ownedAttributes: Map<string, number>;
   onInventoryChange: (inventory: Map<string, number>) => void;
   onOwnedAttributesChange: (attributes: Map<string, number>) => void;
+  disabledShards: Set<string>;
+  onDisabledShardsChange: (disabled: Set<string>) => void;
 }
 
 type TabType = "shards" | "attributes";
@@ -35,6 +37,8 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
   ownedAttributes,
   onInventoryChange,
   onOwnedAttributesChange,
+  disabledShards,
+  onDisabledShardsChange,
 }) => {
   const { shards } = useShards();
   const [activeTab, setActiveTab] = useState<TabType>("shards");
@@ -516,6 +520,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                   {filteredShards.map((shard) => {
                     const shardId = shard.key;
                     const inv = inventory.get(shardId) ?? 0;
+                    const disabled = disabledShards.has(shardId);
                     const shardRarityBorder =
                       shard.rarity === "common"    ? "border-slate-500/50"
                       : shard.rarity === "uncommon" ? "border-green-500/50"
@@ -530,8 +535,15 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                       : shard.rarity === "epic"     ? "text-purple-300"
                       :                               "text-amber-300";
 
+                    const handleToggleDisabled = () => {
+                      const next = new Set(disabledShards);
+                      if (disabled) next.delete(shardId);
+                      else next.add(shardId);
+                      onDisabledShardsChange(next);
+                    };
+
                     return (
-                      <div key={shardId} className={`bg-slate-800/50 border ${shardRarityBorder} rounded-md p-2 space-y-2`}>
+                      <div key={shardId} className={`bg-slate-800/50 border ${shardRarityBorder} rounded-md p-2 space-y-2 ${disabled ? "opacity-50" : ""}`}>
                         <div className="flex items-center gap-2">
                           <img
                             src={`${import.meta.env.BASE_URL}shardIcons/${shardId}.png`}
@@ -540,6 +552,14 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                             loading="lazy"
                           />
                           <span className={`text-sm font-medium flex-1 truncate ${shardRarityText}`}>{shard.name}</span>
+                          <button
+                            type="button"
+                            onClick={handleToggleDisabled}
+                            title={disabled ? "Enable shard" : "Disable shard"}
+                            className="flex-shrink-0 p-0.5 rounded text-slate-400 hover:text-white transition-colors cursor-pointer"
+                          >
+                            {disabled ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
                         </div>
 
                         <div>
