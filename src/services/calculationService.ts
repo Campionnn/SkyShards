@@ -413,6 +413,107 @@ export class CalculationService {
     return { minCosts, choices };
   }
 
+  // Computes exclusivity scores for each shard.
+  public computeExclusivityScores(
+    data: Data,
+    minCosts: Map<string, number>
+  ): Map<string, number> {
+    // Track max weighted exclusivity per shard (not sum)
+    const maxExclusivity = new Map<string, number>();
+    const shardIds = Object.keys(data.shards);
+
+    // Initialize all scores to 0
+    for (const shardId of shardIds) {
+      maxExclusivity.set(shardId, 0);
+    }
+
+    // Find the maximum output value for normalization
+    let maxOutputValue = 0;
+    for (const shardId of shardIds) {
+      const value = minCosts.get(shardId) || 0;
+      if (isFinite(value)) {
+        maxOutputValue = Math.max(maxOutputValue, value);
+      }
+    }
+    if (maxOutputValue === 0) maxOutputValue = 1; // Avoid division by zero
+
+    // For each output shard, analyze exclusivity of inputs
+    for (const outputShard of shardIds) {
+      const recipes = data.recipes[outputShard] || [];
+      if (recipes.length === 0) continue;
+
+      const outputValue = minCosts.get(outputShard) || 0;
+      if (outputValue <= 0 || !isFinite(outputValue)) continue;
+
+      // Normalize output value to [0, 1] range
+      const normalizedValue = outputValue / maxOutputValue;
+
+      // Group recipes by output quantity (different quantities = different "products")
+      const recipesByQuantity = new Map<number, typeof recipes>();
+      for (const recipe of recipes) {
+        const qty = recipe.outputQuantity;
+        if (!recipesByQuantity.has(qty)) {
+          recipesByQuantity.set(qty, []);
+        }
+        recipesByQuantity.get(qty)!.push(recipe);
+      }
+
+      // For each output quantity group, compute presence ratios
+      for (const [outputQty, quantityRecipes] of recipesByQuantity) {
+        const totalRecipes = quantityRecipes.length;
+        if (totalRecipes === 0) continue;
+
+        // Weight factor: higher output quantity and value = more important
+        // Use sqrt of quantity to dampen the effect (2x output isn't 2x as important)
+        const quantityFactor = Math.sqrt(outputQty);
+        const weight = normalizedValue * quantityFactor;
+
+        // Count how many recipes use each input shard (each recipe counted once per shard)
+        const inputUsageCounts = new Map<string, number>();
+        for (const recipe of quantityRecipes) {
+          // Use a Set to count each shard only once per recipe
+          const uniqueInputs = new Set(recipe.inputs);
+          for (const input of uniqueInputs) {
+            inputUsageCounts.set(input, (inputUsageCounts.get(input) || 0) + 1);
+          }
+        }
+
+        // For each input shard, compute weighted exclusivity and update max
+        for (const [inputShard, usageCount] of inputUsageCounts) {
+          // Presence ratio: 1.0 = used in all recipes (fully exclusive)
+          const presenceRatio = usageCount / totalRecipes;
+          
+          // Only consider high presence ratios as "exclusive"
+          // A shard in 50% of recipes isn't really exclusive
+          // Use a threshold: only ratios >= 0.8 count as exclusive
+          if (presenceRatio < 0.8) continue;
+          
+          // Weighted exclusivity: how valuable is this exclusive relationship?
+          // Scale presence ratio above threshold to [0, 1]
+          const exclusivityStrength = (presenceRatio - 0.8) / 0.2; // 0.8->0, 1.0->1
+          const weightedExclusivity = exclusivityStrength * weight;
+          
+          // Update max
+          const current = maxExclusivity.get(inputShard) || 0;
+          if (weightedExclusivity > current) {
+            maxExclusivity.set(inputShard, weightedExclusivity);
+          }
+        }
+      }
+    }
+
+    // Return raw weighted exclusivity scores, capped at 1.0.
+    // No global normalization — scores are used as additive opportunity cost
+    // multipliers in the inventory substitution logic, where the actual
+    // minCost of the shard provides the natural scaling.
+    const result = new Map<string, number>();
+    for (const [shardId, score] of maxExclusivity) {
+      result.set(shardId, Math.min(1, Math.max(0, score)));
+    }
+
+    return result;
+  }
+
   private getCostCalculationContext(params: CalculationParams) {
     const multipliers = this.calculateMultipliers(params);
     return {

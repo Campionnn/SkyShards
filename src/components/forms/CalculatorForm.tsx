@@ -13,6 +13,8 @@ import { DataService } from "../../services";
 
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
+  inventory?: Map<string, number>;
+  ownedAttributes?: Map<string, number>;
 }
 
 type LevelKey = keyof Pick<
@@ -20,7 +22,7 @@ type LevelKey = keyof Pick<
   "newtLevel" | "salamanderLevel" | "lizardKingLevel" | "leviathanLevel" | "pythonLevel" | "kingCobraLevel" | "seaSerpentLevel" | "tiamatLevel" | "crocodileLevel"
 >;
 
-export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
+export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedAttributes }) => {
   const { form, setForm, saveEnabled, setSaveEnabledState } = useCalculatorState();
   const { shards } = useShards();
 
@@ -368,10 +370,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                       if (normalized in MAX_QUANTITIES) rarityKey = normalized as keyof typeof MAX_QUANTITIES as string;
                     }
                     const maxQuantity: number = MAX_QUANTITIES[rarityKey as keyof typeof MAX_QUANTITIES];
-                    const updated = { ...form, shard: shard.name, quantity: maxQuantity } as CalculationFormData;
+                    const owned = ownedAttributes?.get(shard.key) ?? 0;
+                    const remaining = owned >= maxQuantity ? maxQuantity : Math.max(1, maxQuantity - owned);
+                    const updated = { ...form, shard: shard.name, quantity: remaining } as CalculationFormData;
                     setForm(updated);
                     setTimeout(() => onSubmit(updated), 0);
-                    // Removed auto-select of quantity input
                   }}
                   onFocus={handleShardInputFocus}
                   placeholder="Search for a shard..."
@@ -380,7 +383,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
               </>
             )}
           </div>
-          {!form.materialsOnly && (
+        {!form.materialsOnly && (
             <div className="flex gap-1.5">
               <div className="flex-1">
                 <label className="block text-xs font-medium text-slate-300 mb-1">Quantity</label>
@@ -400,6 +403,28 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit }) => {
                   className="w-full px-3 py-1.5 text-sm bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-colors duration-200"
                 />
               </div>
+              {(() => {
+                const selectedShard = form.shard ? shards.find((s) => s.name === form.shard) : null;
+                if (!selectedShard) return null;
+                const rarityKey = selectedShard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
+                const maxQty = MAX_QUANTITIES[rarityKey] ?? MAX_QUANTITIES.common;
+                return (
+                  <div className="flex flex-col justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = { ...form, quantity: maxQty } as CalculationFormData;
+                        setForm(updated);
+                        setTimeout(() => onSubmit(updated), 0);
+                      }}
+                      className="px-2.5 py-1.5 text-xs font-medium bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-md text-slate-300 hover:text-white transition-colors duration-200 cursor-pointer"
+                      title={`Set to max (${maxQty})`}
+                    >
+                      Max
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>

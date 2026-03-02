@@ -77,8 +77,6 @@ export const clearFormData = (): void => {
 };
 
 const INVENTORY_STORAGE_KEY = "inventory";
-const K_VALUES_STORAGE_KEY = "k_values";
-
 export const saveInventory = (inventory: Map<string, number>): void => {
   try {
     const obj = Object.fromEntries(inventory);
@@ -101,25 +99,96 @@ export const loadInventory = (): Map<string, number> => {
   return new Map();
 };
 
-export const saveKValues = (kValues: Map<string, number>): void => {
+// Owned attributes storage
+const OWNED_ATTRIBUTES_STORAGE_KEY = "owned_attributes";
+
+export const saveOwnedAttributes = (attributes: Map<string, number>): void => {
   try {
-    const obj = Object.fromEntries(kValues);
-    localStorage.setItem(K_VALUES_STORAGE_KEY, JSON.stringify(obj));
+    const obj = Object.fromEntries(attributes);
+    localStorage.setItem(OWNED_ATTRIBUTES_STORAGE_KEY, JSON.stringify(obj));
   } catch (error) {
-    console.warn("Failed to save k values to localStorage:", error);
+    console.warn("Failed to save owned attributes to localStorage:", error);
   }
 };
 
-export const loadKValues = (): Map<string, number> => {
+export const loadOwnedAttributes = (): Map<string, number> => {
   try {
-    const stored = localStorage.getItem(K_VALUES_STORAGE_KEY);
+    const stored = localStorage.getItem(OWNED_ATTRIBUTES_STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
       return new Map(Object.entries(parsed).map(([k, v]) => [k, Number(v)]));
     }
   } catch (error) {
-    console.warn("Failed to load k values from localStorage:", error);
+    console.warn("Failed to load owned attributes from localStorage:", error);
   }
   return new Map();
+};
+
+export const clearOwnedAttributes = (): void => {
+  try {
+    localStorage.removeItem(OWNED_ATTRIBUTES_STORAGE_KEY);
+  } catch (error) {
+    console.warn("Failed to clear owned attributes from localStorage:", error);
+  }
+};
+
+// Hypixel profile metadata
+const HYPIXEL_PROFILE_META_KEY = "hypixel_profile_meta";
+
+export interface HypixelProfileMeta {
+  username: string;
+  profileName: string;
+  lastImportTime: number;
+}
+
+export const saveHypixelProfileMeta = (meta: HypixelProfileMeta): void => {
+  try {
+    localStorage.setItem(HYPIXEL_PROFILE_META_KEY, JSON.stringify(meta));
+  } catch (error) {
+    console.warn("Failed to save Hypixel profile meta to localStorage:", error);
+  }
+};
+
+export const loadHypixelProfileMeta = (): HypixelProfileMeta | null => {
+  try {
+    const stored = localStorage.getItem(HYPIXEL_PROFILE_META_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.warn("Failed to load Hypixel profile meta from localStorage:", error);
+  }
+  return null;
+};
+
+export const clearHypixelProfileMeta = (): void => {
+  try {
+    localStorage.removeItem(HYPIXEL_PROFILE_META_KEY);
+  } catch (error) {
+    console.warn("Failed to clear Hypixel profile meta from localStorage:", error);
+  }
+};
+
+// Disabled shards storage
+const DISABLED_SHARDS_KEY = "inventory_disabled_shards";
+
+export const saveDisabledShards = (disabled: Set<string>): void => {
+  try {
+    localStorage.setItem(DISABLED_SHARDS_KEY, JSON.stringify([...disabled]));
+  } catch (error) {
+    console.warn("Failed to save disabled shards to localStorage:", error);
+  }
+};
+
+export const loadDisabledShards = (): Set<string> => {
+  try {
+    const stored = localStorage.getItem(DISABLED_SHARDS_KEY);
+    if (stored) {
+      return new Set(JSON.parse(stored) as string[]);
+    }
+  } catch (error) {
+    console.warn("Failed to load disabled shards from localStorage:", error);
+  }
+  return new Set();
 };
 

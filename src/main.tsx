@@ -8,7 +8,11 @@ const VALID_KEYS = [
   "calculator_data",
   "calculator_save_enabled",
   "customRates",
-  "skyshards_profile_type"
+  "skyshards_profile_type",
+  "inventory",
+  "owned_attributes",
+  "hypixel_profile_meta",
+  "greenhouse_modal_seen"
 ];
 function cleanupLocalStorage() {
   for (let i = localStorage.length - 1; i >= 0; i--) {
