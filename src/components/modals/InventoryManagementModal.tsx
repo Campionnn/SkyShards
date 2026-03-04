@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X, Search, Package, RefreshCw, User, ChevronDown, AlertTriangle, Check, Filter, RotateCcw, Eye, EyeOff } from "lucide-react";
+import { X, Search, Package, RefreshCw, User, ChevronDown, AlertTriangle, Check, Filter, RotateCcw, Eye, EyeOff, Trash2 } from "lucide-react";
 import { hypixelService } from "../../services";
 import type { HypixelProfileResponse, ProfileData } from "../../services";
 import { useShards } from "../../hooks";
-import { loadHypixelProfileMeta, saveHypixelProfileMeta, filterShards, DEFAULT_FILTER_CONFIG, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
+import { loadHypixelProfileMeta, saveHypixelProfileMeta, clearHypixelProfileMeta, clearDisabledShards, filterShards, DEFAULT_FILTER_CONFIG, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
 import type { HypixelProfileMeta } from "../../utilities";
 import { SHARD_DESCRIPTIONS, MAX_QUANTITIES } from "../../constants";
 
@@ -311,6 +311,21 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
     }
   };
 
+  const handleClearAll = () => {
+    if (confirm("Are you sure you want to clear all inventory data?")) {
+      onInventoryChange(new Map());
+      onOwnedAttributesChange(new Map());
+      onDisabledShardsChange(new Set());
+      setProfileMeta(null);
+      setUsername("");
+      setProfileData(null);
+      setSelectedProfileId(null);
+      setImportSuccess(false);
+      clearHypixelProfileMeta();
+      clearDisabledShards();
+    }
+  };
+
   if (!open) return null;
 
   const shardsCurrentRarity = RARITY_OPTIONS.find((r) => r.value === shardsRarity) ?? RARITY_OPTIONS[0];
@@ -329,9 +344,20 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
               <Package className="w-5 h-5 text-purple-400" />
               <h2 className="text-lg font-semibold text-white">Inventory</h2>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer">
-              <X className="w-5 h-5 text-slate-400" />
-            </button>
+            <div className="flex items-center gap-1">
+              {(inventory.size > 0 || ownedAttributes.size > 0) && (
+                <button
+                  onClick={handleClearAll}
+                  title="Clear all inventory"
+                  className="p-2 hover:bg-red-500/20 rounded-lg transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-5 h-5 text-red-400" />
+                </button>
+              )}
+              <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer">
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
           </div>
 
           {/* Import Section */}

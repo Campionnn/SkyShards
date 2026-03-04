@@ -269,7 +269,7 @@ const SmartCalculatorPage: React.FC = () => {
                 <div className="border-t border-purple-500/20 p-3 space-y-3">
                   {inventory.size === 0 ? (
                     <p className="text-sm text-slate-400 text-center py-2">
-                      No inventory configured. Import your shards to get started.
+                      No inventory imported.
                     </p>
                   ) : (
                     <div className="text-sm text-slate-300">

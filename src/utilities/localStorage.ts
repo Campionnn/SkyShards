@@ -192,3 +192,11 @@ export const loadDisabledShards = (): Set<string> => {
   return new Set();
 };
 
+export const clearDisabledShards = (): void => {
+  try {
+    localStorage.removeItem(DISABLED_SHARDS_KEY);
+  } catch (error) {
+    console.warn("Failed to clear disabled shards from localStorage:", error);
+  }
+};
+
