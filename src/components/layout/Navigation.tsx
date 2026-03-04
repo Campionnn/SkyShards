@@ -123,13 +123,13 @@ export const Navigation: React.FC = () => {
             })}
 
             <a
-                href="https://greenhouse.skyshards.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 hover:border-green-500/30"
+              href="https://greenhouse.skyshards.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 hover:border-green-500/30"
             >
-              <span>Greenhouse</span>
               <ExternalLink className="w-3 h-3" />
+              <span>Greenhouse</span>
             </a>
 
             <a
@@ -193,6 +193,15 @@ export const Navigation: React.FC = () => {
               })}
 
               <div className="border-t border-slate-600 pt-3 my-1 space-y-1 flex flex-col gap-1">
+                <a
+                  href="https://greenhouse.skyshards.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2 font-medium rounded-md text-sm transition-colors duration-200 flex items-center space-x-2 cursor-pointer bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 hover:border-green-500/30"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Greenhouse</span>
+                </a>
                 <a
                   href="https://github.com/Campionnn/SkyShards"
                   target="_blank"
