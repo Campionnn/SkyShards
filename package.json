@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://skyshards.com",
+  "homepage": "https://skyshardsclone.com",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -12,7 +12,7 @@
     "predeploy": "pnpm run build",
     "deploy": "gh-pages -d dist",
     "deploy:gh-pages": "cross-env GITHUB_PAGES=true pnpm run build && gh-pages -d dist",
-    "deploy:surge": "pnpm run build && surge dist --domain skyshards-fusion-calculator.surge.sh",
+    "deploy:surge": "pnpm run build && surge dist --domain skyshardsclone-fusion-calculator.surge.sh",
     "deploy:netlify": "pnpm run build && netlify deploy --prod --dir dist",
     "deploy:vercel": "pnpm run build && vercel --prod"
   },

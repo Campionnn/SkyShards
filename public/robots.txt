@@ -9,7 +9,7 @@ Allow: /screenshots/
 Allow: /shardIcons/
 
 # Sitemaps
-Sitemap: https://skyshards.com/sitemap.xml
+Sitemap: https://skyshardsclone.com/sitemap.xml
 
 # Crawl delay
 Crawl-delay: 1

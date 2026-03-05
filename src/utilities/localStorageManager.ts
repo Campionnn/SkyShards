@@ -11,13 +11,13 @@ import type { DesignerPlacement } from "../context";
 
 // Storage keys
 const STORAGE_KEYS = {
-  GRID_CONFIG: "skyshards-grid-config",
-  PRIORITIES: "skyshards-priorities",
-  DESIGNER_INPUTS: "skyshards-designer-inputs",
-  DESIGNER_TARGETS: "skyshards-designer-targets",
-  LOCKED_PLACEMENTS: "skyshards-locked-placements",
-  MUTATION_TARGETS: "skyshards-mutation-targets",
-  UNIQUE_CROPS: "skyshards-unique-crops",
+  GRID_CONFIG: "skyshardsclone-grid-config",
+  PRIORITIES: "skyshardsclone-priorities",
+  DESIGNER_INPUTS: "skyshardsclone-designer-inputs",
+  DESIGNER_TARGETS: "skyshardsclone-designer-targets",
+  LOCKED_PLACEMENTS: "skyshardsclone-locked-placements",
+  MUTATION_TARGETS: "skyshardsclone-mutation-targets",
+  UNIQUE_CROPS: "skyshardsclone-unique-crops",
 } as const;
 
 // Type Definitions

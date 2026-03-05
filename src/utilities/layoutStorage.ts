@@ -1,6 +1,6 @@
 import type { SavedLayout } from "../types/layout";
 
-const STORAGE_KEY = "skyshards-designer-designs";
+const STORAGE_KEY = "skyshardsclone-designer-designs";
 
 /**
  * Generate a unique ID for a layout

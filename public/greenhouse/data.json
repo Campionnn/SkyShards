@@ -10,6 +10,14 @@
       ],
       "negative_buffs": []
     },
+    "empty": {
+      "name": "Empty",
+      "size": 1,
+      "ground": "farmland",
+      "growth_stages": 0,
+      "positive_buffs": [],
+      "negative_buffs": []
+    },
     "potato": {
       "name": "Potato",
       "size": 1,
@@ -276,8 +284,12 @@
       "name": "Lonelily",
       "size": 1,
       "ground": "farmland",
-      "requirements": [],
-      "special": "requires_zero_adjacent",
+      "requirements": [
+        {
+          "crop": "empty",
+          "count": 8
+        }
+      ],
       "rarity": "common",
       "growth_stages": 0,
       "decay": 3,

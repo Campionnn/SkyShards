@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect, type RefObject } from "react";
 import { Save, FolderOpen, Share2, Clipboard, Trash2, RotateCcw, Layers, X, Image, Film, Download, ClipboardCopy, Loader2 } from "lucide-react";
 
 // API base URL for share links
-const SHARE_BASE_URL = "https://api.skyshards.com/share";
+const SHARE_BASE_URL = "https://api.skyshardsclone.com/share";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDesigner, useGreenhouseData } from "../../context";
 import { useToast } from "../ui/toastContext";
@@ -310,7 +310,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
   const extractLayoutCode = useCallback((input: string): string => {
     const trimmed = input.trim();
     
-    // Check if it's a URL with ?layout= parameter (greenhouse.skyshards.com/designer?layout=ABC)
+    // Check if it's a URL with ?layout= parameter (greenhouse.skyshardsclone.com/designer?layout=ABC)
     if (trimmed.includes("?layout=")) {
       try {
         const url = new URL(trimmed);
@@ -323,7 +323,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
       }
     }
     
-    // Check if it's a share URL (api.skyshards.com/share/ABC)
+    // Check if it's a share URL (api.skyshardsclone.com/share/ABC)
     if (trimmed.includes("/share/")) {
       const match = trimmed.match(/\/share\/([^/?#]+)/);
       if (match) return match[1];
@@ -424,7 +424,7 @@ export const DesignerActions: React.FC<DesignerActionsProps> = ({
     return {
       scale: 2,
       includeWatermark: true,
-      watermarkUrl: "greenhouse.skyshards.com",
+      watermarkUrl: "greenhouse.skyshardsclone.com",
       watermarkTitle: "Greenhouse Designer",
       inputCrops,
       targetCrops,

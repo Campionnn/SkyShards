@@ -23,7 +23,7 @@ export const Layout: React.FC = () => {
           <div className="h-px w-1/2 bg-slate-800/50 mx-auto my-3"></div>
           <div className="flex justify-center items-center space-x-4">
             <a
-              href="https://skyshards.com"
+              href="https://skyshardsclone.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-slate-500 hover:text-emerald-400 transition-colors duration-200 text-xs font-medium"

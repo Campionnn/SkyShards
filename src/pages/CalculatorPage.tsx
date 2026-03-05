@@ -27,7 +27,7 @@ export const CalculatorPage: React.FC = () => {
       const designerTargets = LocalStorageManager.loadDesignerTargets();
       const lockedPlacements = LocalStorageManager.loadLockedPlacements();
       const priorities = LocalStorageManager.loadPriorities();
-      const hasVisited = localStorage.getItem("skyshards-has-visited");
+      const hasVisited = localStorage.getItem("skyshardsclone-has-visited");
       
       // Check if grid config is the default (12 cells in a 4x4 diamond pattern)
       const isDefaultGrid = gridConfig && gridConfig.size === 12;
@@ -47,7 +47,7 @@ export const CalculatorPage: React.FC = () => {
       }
       
       // Mark as visited
-      localStorage.setItem("skyshards-has-visited", "true");
+      localStorage.setItem("skyshardsclone-has-visited", "true");
     }, 100); // Small delay to let contexts initialize
     
     return () => clearTimeout(timer);

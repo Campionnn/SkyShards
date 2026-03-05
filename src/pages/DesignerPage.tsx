@@ -118,7 +118,7 @@ export const DesignerPage: React.FC = () => {
     const options = {
       scale: 2,  // 2x scale - Discord targets ~800px, too large causes aggressive compression
       includeWatermark: true,
-      watermarkUrl: "greenhouse.skyshards.com",
+      watermarkUrl: "greenhouse.skyshardsclone.com",
       watermarkTitle: "Greenhouse Designer",
       inputCrops,
       targetCrops,

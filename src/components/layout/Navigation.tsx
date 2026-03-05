@@ -50,7 +50,7 @@ export const Navigation: React.FC = () => {
             })}
             
             <a
-              href="https://skyshards.com"
+              href="https://skyshardsclone.com"
               target="_blank"
               rel="noopener noreferrer"
               className="px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1.5 cursor-pointer bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/20 hover:border-purple-500/30"
@@ -100,7 +100,7 @@ export const Navigation: React.FC = () => {
 
               <div className="border-t border-slate-600 pt-3 my-1">
                 <a
-                  href="https://skyshards.com"
+                  href="https://skyshardsclone.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-2 font-medium rounded-md text-sm transition-colors duration-200 flex items-center space-x-2 cursor-pointer bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/20 hover:border-purple-500/30"

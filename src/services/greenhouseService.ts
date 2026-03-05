@@ -9,7 +9,7 @@ import type {
   MutationGoal,
 } from "../types/greenhouse";
 
-const API_BASE = import.meta.env.DEV ? "/api" : "https://api.skyshards.com";
+const API_BASE = import.meta.env.DEV ? "/api" : "https://api.skyshardsclone.com";
 
 // Polling interval for job status checks (ms)
 const POLL_INTERVAL = 500;

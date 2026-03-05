@@ -27,7 +27,7 @@ const copy404Plugin = () => ({
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const apiTarget = env.VITE_API_TARGET || "https://api.skyshards.com";
+  const apiTarget = env.VITE_API_TARGET || "https://api.skyshardsclone.com";
 
   return {
     plugins: [react(), tailwindcss(), copy404Plugin()],
