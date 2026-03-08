@@ -47,13 +47,28 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
 
   const shard = data.shards[tree.shard];
 
-  // Helper function to get expansion state and ensure it's initialized
+  // Helper function to get expansion state
+  const pendingDefaults = React.useRef<Map<string, boolean>>(new Map());
   const getExpansionState = (id: string, defaultState: boolean = true) => {
-    if (!expandedStates.has(id)) {
-      expandedStates.set(id, defaultState);
+    if (expandedStates.has(id)) {
+      return expandedStates.get(id)!;
     }
-    return expandedStates.get(id)!;
+    // Track that this id needs to be initialized
+    pendingDefaults.current.set(id, defaultState);
+    return defaultState;
   };
+
+  // Flush any pending default entries into the Map after render
+  React.useEffect(() => {
+    if (pendingDefaults.current.size > 0) {
+      for (const [id, val] of pendingDefaults.current) {
+        if (!expandedStates.has(id)) {
+          expandedStates.set(id, val);
+        }
+      }
+      pendingDefaults.current.clear();
+    }
+  });
 
   const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard | undefined, input2Shard: Shard | undefined): boolean => {
     return (recipe?.isReptile || input1Shard?.family?.toLowerCase().includes("reptile") || input2Shard?.family?.toLowerCase().includes("reptile")) as boolean;

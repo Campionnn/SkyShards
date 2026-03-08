@@ -6,7 +6,6 @@ import { usePageTitle } from "./hooks";
 import { ToastProvider } from "./components";
 
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
-const SmartCalculatorPage = lazy(() => import("./pages/SmartCalculatorPage").then((module) => ({ default: module.SmartCalculatorPage })));
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));
 const RecipePage = lazy(() => import("./pages/RecipePage"));
 const GuidePage = lazy(() => import("./pages/GuidePage").then((module) => ({ default: module.GuidePage })));
@@ -58,14 +57,6 @@ const router = createBrowserRouter(
           element: (
             <Suspense fallback={<LoadingSpinner />}>
               <CalculatorPage />
-            </Suspense>
-          ),
-        },
-        {
-          path: "smart",
-          element: (
-            <Suspense fallback={<LoadingSpinner />}>
-              <SmartCalculatorPage />
             </Suspense>
           ),
         },

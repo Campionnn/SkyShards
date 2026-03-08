@@ -15,6 +15,8 @@ interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
   inventory?: Map<string, number>;
   ownedAttributes?: Map<string, number>;
+  useInventory?: boolean;
+  onUseInventoryChange?: (enabled: boolean) => void;
 }
 
 type LevelKey = keyof Pick<
@@ -22,15 +24,21 @@ type LevelKey = keyof Pick<
   "newtLevel" | "salamanderLevel" | "lizardKingLevel" | "leviathanLevel" | "pythonLevel" | "kingCobraLevel" | "seaSerpentLevel" | "tiamatLevel" | "crocodileLevel"
 >;
 
-export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedAttributes }) => {
+export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedAttributes, useInventory, onUseInventoryChange }) => {
   const { form, setForm, saveEnabled, setSaveEnabledState } = useCalculatorState();
   const { shards } = useShards();
 
-  // Keep a ref of the latest form to use inside effects without depending on the whole object
+  // Keep refs of the latest form and onSubmit to use inside effects
+  // without depending on the whole object/callback identity
   const latestFormRef = React.useRef<CalculationFormData>(form);
   React.useEffect(() => {
     latestFormRef.current = form;
   }, [form]);
+
+  const onSubmitRef = React.useRef(onSubmit);
+  React.useEffect(() => {
+    onSubmitRef.current = onSubmit;
+  }, [onSubmit]);
 
   React.useEffect(() => {
     const checkAndSubmit = async () => {
@@ -38,12 +46,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
       if (current.shard && current.shard.trim() !== "") {
         const isValid = await isValidShardName(current.shard);
         if (isValid) {
-          onSubmit({ ...current, frogBonus: false });
+          onSubmitRef.current({ ...current, frogBonus: false });
         }
       }
     };
     checkAndSubmit().catch(console.error);
-  }, [form.shard, form.quantity, onSubmit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.shard, form.quantity]);
 
   // Only call onSubmit immediately for non-shard/quantity fields
   const handleInputChange = <K extends keyof CalculationFormData>(field: K, value: CalculationFormData[K]) => {
@@ -151,9 +160,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
     if (moneyNullishOrZero && moneyInput === "") {
       const updated = { ...latestFormRef.current, moneyPerHour: Infinity } as CalculationFormData;
       setForm(updated);
-      onSubmit(updated);
+      onSubmitRef.current(updated);
     }
-  }, [form.moneyPerHour, moneyInput, onSubmit, setForm]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.moneyPerHour, moneyInput, setForm]);
 
   React.useEffect(() => {
     setMoneyToInfinity();
@@ -179,19 +189,20 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
     const isNullish = form.craftPenalty === undefined || form.craftPenalty === null;
 
     if (isNullish) {
-      const updated = { ...form, craftPenalty: desiredDefault } as CalculationFormData;
+      const updated = { ...latestFormRef.current, craftPenalty: desiredDefault } as CalculationFormData;
       setForm(updated);
-      onSubmit(updated);
+      onSubmitRef.current(updated);
     } else if (form.ironManView && form.craftPenalty === 1000) {
-      const updated = { ...form, craftPenalty: 0.8 } as CalculationFormData;
+      const updated = { ...latestFormRef.current, craftPenalty: 0.8 } as CalculationFormData;
       setForm(updated);
-      onSubmit(updated);
+      onSubmitRef.current(updated);
     } else if (!form.ironManView && form.craftPenalty === 0.8) {
-      const updated = { ...form, craftPenalty: 1000 } as CalculationFormData;
+      const updated = { ...latestFormRef.current, craftPenalty: 1000 } as CalculationFormData;
       setForm(updated);
-      onSubmit(updated);
+      onSubmitRef.current(updated);
     }
-  }, [form.ironManView, form.craftPenalty, form, onSubmit, setForm]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.ironManView, form.craftPenalty, setForm]);
 
   // For craftPenalty, keep a local string state for user input
   const [craftPenaltyInput, setCraftPenaltyInput] = React.useState<string>("");
@@ -236,12 +247,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
   const handleMultiSelectDone = React.useCallback(
     (selectedData: Array<{ shard: ShardWithKey; quantity: number }>) => {
       const selectedKeys = selectedData.map((item) => item.shard.key);
-      const updated = { ...form, selectedShardKeys: selectedKeys, shardQuantities: selectedData } as CalculationFormData;
+      const updated = { ...latestFormRef.current, selectedShardKeys: selectedKeys, shardQuantities: selectedData } as CalculationFormData;
       setForm(updated);
       setIsMultiSelectModalOpen(false);
-      setTimeout(() => onSubmit(updated), 0);
+      setTimeout(() => onSubmitRef.current(updated), 0);
     },
-    [form, setForm, onSubmit]
+    [setForm]
   );
 
   return (
@@ -269,8 +280,31 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
           </button>
         </div>
 
-        {/* Auto Save toggle */}
-        <div className="flex justify-end gap-6 mb-3">
+        {/* Use Inventory + Auto Save toggles */}
+        <div className="flex justify-between gap-6 mb-3">
+          {onUseInventoryChange && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-slate-200">Use Inventory</span>
+              <Tooltip content="Enable inventory-aware calculations. When enabled, your imported inventory shards will be factored into the optimal fusion path."></Tooltip>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={useInventory ?? false}
+                onClick={() => onUseInventoryChange(!useInventory)}
+                className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
+                  ${useInventory ? "bg-purple-600" : "bg-white/5"}
+                  hover:border-purple-400`}
+                style={{ boxShadow: "none" }}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform duration-200 border border-white/10
+                  ${useInventory ? "bg-purple-400" : "bg-slate-300/70"}
+                  ${useInventory ? "translate-x-4" : "translate-x-0.5"}`}
+                  style={{ paddingLeft: "1px" }}
+                />
+              </button>
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-slate-200">Auto Save</span>
             <Tooltip content="Automatically saves all your settings (fortune, shard levels, etc.) in your browser. Data is restored when the page reloads."></Tooltip>

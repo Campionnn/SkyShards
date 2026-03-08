@@ -1,20 +1,37 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Menu, X } from "lucide-react";
-import { CalculatorForm, CalculationResults } from "../components";
-import { WelcomeProfileModal } from "../components";
+import { Menu, X, ChevronDown, ChevronRight, Package } from "lucide-react";
+import { CalculatorForm, CalculationResults, InventoryCalculationResults } from "../components";
+import { WelcomeProfileModal, InventoryManagementModal } from "../components";
 import { useCustomRates, useCalculatorState } from "../hooks";
-import { DataService } from "../services";
+import { DataService, InvCalculationService, CalculationService } from "../services";
 import type { CalculationFormData } from "../schemas";
-import type { CalculationResult, CalculationParams, RecipeOverride, Data } from "../types/types";
-import { isFirstVisit, setSaveEnabled } from "../utilities";
+import type { CalculationResult, CalculationParams, RecipeOverride, Data, InventoryCalculationResult } from "../types/types";
+import { isFirstVisit, setSaveEnabled, loadInventory, saveInventory, loadOwnedAttributes, saveOwnedAttributes, loadDisabledShards, saveDisabledShards } from "../utilities";
 import { calculateOptimalPathWithWorker, calculateMultipleShardsParallel, type WorkerProgress } from "../services/workerCalculationService";
 
-const CalculatorFormWithContext: React.FC<{ onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void }> = ({ onSubmit }) => {
+const INVENTORY_ENABLED_KEY = "skyshards_use_inventory";
+
+const CalculatorFormWithContext: React.FC<{
+  onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void;
+  inventory?: Map<string, number>;
+  ownedAttributes?: Map<string, number>;
+  useInventory: boolean;
+  onUseInventoryChange: (enabled: boolean) => void;
+}> = ({ onSubmit, inventory, ownedAttributes, useInventory, onUseInventoryChange }) => {
   const { setForm } = useCalculatorState();
-  return <CalculatorForm onSubmit={(data) => onSubmit(data, setForm)} />;
+  const stableOnSubmit = useCallback((data: CalculationFormData) => onSubmit(data, setForm), [onSubmit, setForm]);
+  return (
+    <CalculatorForm
+      onSubmit={stableOnSubmit}
+      inventory={inventory}
+      ownedAttributes={ownedAttributes}
+      useInventory={useInventory}
+      onUseInventoryChange={onUseInventoryChange}
+    />
+  );
 };
 
-// Shared calculation logic
+// Shared calculation logic (non-inventory mode)
 const performCalculation = async (
   formData: CalculationFormData,
   customRates: { [shardId: string]: number | undefined },
@@ -268,6 +285,67 @@ const CalculatorPageContent: React.FC = () => {
     }
   }, []);
 
+  // ─── Inventory state ───
+  const [useInventory, setUseInventory] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(INVENTORY_ENABLED_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+  const [inventory, setInventory] = useState<Map<string, number>>(loadInventory);
+  const [ownedAttributes, setOwnedAttributes] = useState<Map<string, number>>(loadOwnedAttributes);
+  const [disabledShards, setDisabledShards] = useState<Set<string>>(loadDisabledShards);
+  const [inventoryExpanded, setInventoryExpanded] = useState(true);
+  const [showInventoryModal, setShowInventoryModal] = useState(false);
+  const [inventoryResult, setInventoryResult] = useState<InventoryCalculationResult | null>(null);
+  const [invCalculationData, setInvCalculationData] = useState<Data | null>(null);
+  const [invCurrentParams, setInvCurrentParams] = useState<CalculationParams | null>(null);
+  const [expandedStates] = useState<Map<string, boolean>>(new Map());
+  const [, setRenderTick] = useState(0);
+
+  // Persist inventory toggle
+  useEffect(() => {
+    try {
+      localStorage.setItem(INVENTORY_ENABLED_KEY, useInventory ? "true" : "false");
+    } catch { /* ignore */ }
+  }, [useInventory]);
+
+  // Save inventory data to localStorage
+  useEffect(() => { saveInventory(inventory); }, [inventory]);
+  useEffect(() => { saveOwnedAttributes(ownedAttributes); }, [ownedAttributes]);
+  useEffect(() => { saveDisabledShards(disabledShards); }, [disabledShards]);
+
+  // Inventory tree expand/collapse handlers
+  const handleToggle = useCallback((nodeId: string) => {
+    expandedStates.set(nodeId, !expandedStates.get(nodeId));
+    setRenderTick((t) => t + 1);
+  }, [expandedStates]);
+
+  const handleExpandAll = useCallback(() => {
+    expandedStates.forEach((_, key) => {
+      expandedStates.set(key, true);
+    });
+    setRenderTick((t) => t + 1);
+  }, [expandedStates]);
+
+  const handleCollapseAll = useCallback(() => {
+    expandedStates.forEach((_, key) => {
+      expandedStates.set(key, false);
+    });
+    setRenderTick((t) => t + 1);
+  }, [expandedStates]);
+
+  const handleUseInventoryChange = useCallback((enabled: boolean) => {
+    setUseInventory(enabled);
+    // Clear results when toggling so user gets fresh calculation
+    setResult(null);
+    setCalculationData(null);
+    setInventoryResult(null);
+    setInvCalculationData(null);
+  }, [setResult, setCalculationData]);
+
+  // ─── Profile select ───
   const handleSelectProfile = (profile: "ironman" | "normal") => {
     localStorage.setItem("skyshards_profile_type", profile);
     setSaveEnabled(true);
@@ -280,13 +358,81 @@ const CalculatorPageContent: React.FC = () => {
     setForm(newForm);
     setResult(null);
     setCalculationData(null);
+    setInventoryResult(null);
+    setInvCalculationData(null);
 
     debouncedCalculate(newForm, 100).catch(console.error);
 
     setShowWelcome(false);
   };
 
-  // Debounced calculation
+  // ─── Inventory calculation ───
+  const performInventoryCalculation = useCallback(async (formData: CalculationFormData) => {
+    if (!formData.shard || formData.shard.trim() === "") {
+      return;
+    }
+
+    const dataService = DataService.getInstance();
+    const nameToKeyMap = await dataService.getShardNameToKeyMap();
+    const shardKey = nameToKeyMap[formData.shard.toLowerCase()];
+
+    if (!shardKey) {
+      return;
+    }
+
+    const filteredCustomRates = Object.fromEntries(
+      Object.entries(customRates).filter(([, v]) => v !== undefined)
+    ) as { [shardId: string]: number };
+
+    const params: CalculationParams = {
+      customRates: formData.ironManView ? filteredCustomRates : await dataService.loadShardCosts(formData.instantBuyPrices),
+      hunterFortune: formData.hunterFortune,
+      excludeChameleon: formData.excludeChameleon,
+      frogBonus: formData.frogBonus,
+      newtLevel: formData.newtLevel,
+      salamanderLevel: formData.salamanderLevel,
+      lizardKingLevel: formData.lizardKingLevel,
+      leviathanLevel: formData.leviathanLevel,
+      pythonLevel: formData.pythonLevel,
+      kingCobraLevel: formData.kingCobraLevel,
+      seaSerpentLevel: formData.seaSerpentLevel,
+      tiamatLevel: formData.tiamatLevel,
+      crocodileLevel: formData.crocodileLevel,
+      kuudraTier: formData.kuudraTier,
+      moneyPerHour: formData.moneyPerHour,
+      customKuudraTime: formData.customKuudraTime,
+      kuudraTimeSeconds: formData.kuudraTimeSeconds,
+      noWoodenBait: formData.noWoodenBait,
+      rateAsCoinValue: !formData.ironManView,
+      craftPenalty: formData.craftPenalty,
+    };
+
+    setInvCurrentParams(params);
+    setIsCalculating(true);
+
+    try {
+      const invService = InvCalculationService.getInstance();
+      const calculationResult = await invService.calculateOptimalPath(
+        shardKey,
+        formData.quantity,
+        params,
+        new Map([...inventory].filter(([id]) => !disabledShards.has(id))),
+        recipeOverrides
+      );
+
+      setInventoryResult(calculationResult);
+
+      const calculationService = CalculationService.getInstance();
+      const data = await calculationService.parseData(params);
+      setInvCalculationData(data);
+    } catch (err) {
+      console.error("Inventory calculation failed:", err);
+    } finally {
+      setIsCalculating(false);
+    }
+  }, [customRates, inventory, disabledShards, recipeOverrides]);
+
+  // ─── Standard debounced calculation ───
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const cancelRef = useRef<(() => void) | null>(null);
 
@@ -297,7 +443,7 @@ const CalculatorPageContent: React.FC = () => {
         clearTimeout(debounceTimeoutRef.current);
       }
 
-      // Cancel any ongoing calculation
+      // Cancel any ongoing worker calculation
       if (cancelRef?.current) {
         cancelRef.current();
         cancelRef.current = null;
@@ -305,45 +451,56 @@ const CalculatorPageContent: React.FC = () => {
 
       setResult(null);
       setCalculationData(null);
+      setInventoryResult(null);
+      setInvCalculationData(null);
       setProgress(null);
 
       debounceTimeoutRef.current = setTimeout(async () => {
-        const callbacks = {
-          setTargetShardName,
-          setCurrentShardKey,
-          setCurrentQuantity,
-          setCurrentParams,
-          setResult,
-          setCalculationData,
-          setCalculating: setIsCalculating,
-          setProgress,
-        };
+        if (useInventory && !formData.materialsOnly) {
+          // Inventory mode — use InvCalculationService
+          performInventoryCalculation(formData).catch(console.error);
+        } else {
+          // Standard mode — use worker-based calculation
+          const callbacks = {
+            setTargetShardName,
+            setCurrentShardKey,
+            setCurrentQuantity,
+            setCurrentParams,
+            setResult,
+            setCalculationData,
+            setCalculating: setIsCalculating,
+            setProgress,
+          };
 
-        try {
-          // Store the cancel function so it can be called if parameters change
-          cancelRef.current = await performCalculation(formData, customRates, recipeOverrides, callbacks);
-        } catch (err) {
-          if (err instanceof Error && !err.message.includes("not found")) {
-            console.error("Calculation failed:", err);
+          try {
+            cancelRef.current = await performCalculation(formData, customRates, recipeOverrides, callbacks);
+          } catch (err) {
+            if (err instanceof Error && !err.message.includes("not found")) {
+              console.error("Calculation failed:", err);
+            }
           }
         }
       }, delay);
     },
-    [customRates, recipeOverrides, setTargetShardName, setCurrentShardKey, setCurrentQuantity, setCurrentParams, setResult, setCalculationData]
+    [customRates, recipeOverrides, useInventory, performInventoryCalculation, setTargetShardName, setCurrentShardKey, setCurrentQuantity, setCurrentParams, setResult, setCalculationData]
   );
 
-  const handleCalculate = async (formData: CalculationFormData, setForm: (data: CalculationFormData) => void) => {
-    setForm(formData);
+  const formRef = useRef(form);
+  formRef.current = form;
+
+  const handleCalculate = useCallback(async (formData: CalculationFormData, setFormFn: (data: CalculationFormData) => void) => {
+    setFormFn(formData);
     // For immediate fields like shard selection, calculate immediately
-    const materialsOnlyChanged = formData.materialsOnly !== form?.materialsOnly;
-    const selectedShardsChanged = JSON.stringify(formData.selectedShardKeys) !== JSON.stringify(form?.selectedShardKeys);
-    
-    if (formData.shard !== form?.shard || formData.quantity !== form?.quantity || materialsOnlyChanged || selectedShardsChanged) {
+    const currentForm = formRef.current;
+    const materialsOnlyChanged = formData.materialsOnly !== currentForm?.materialsOnly;
+    const selectedShardsChanged = JSON.stringify(formData.selectedShardKeys) !== JSON.stringify(currentForm?.selectedShardKeys);
+
+    if (formData.shard !== currentForm?.shard || formData.quantity !== currentForm?.quantity || materialsOnlyChanged || selectedShardsChanged) {
       await debouncedCalculate(formData, 100);
     } else {
       await debouncedCalculate(formData, 300);
     }
-  };
+  }, [debouncedCalculate]);
 
   const handleResultUpdate = (newResult: CalculationResult) => {
     setResult(newResult);
@@ -357,17 +514,58 @@ const CalculatorPageContent: React.FC = () => {
     setRecipeOverrides([]);
   };
 
-  // Re-calculate when customRates, recipeOverrides change and form is valid
+  // Re-calculate when customRates, recipeOverrides, inventory, or useInventory change and form is valid
   useEffect(() => {
-    const isValidForm = form && (
-      (form.shard && form.shard.trim() !== "") || 
-      (form.materialsOnly && form.selectedShardKeys && form.selectedShardKeys.length > 0)
+    const currentForm = formRef.current;
+    const isValidForm = currentForm && (
+      (currentForm.shard && currentForm.shard.trim() !== "") ||
+      (currentForm.materialsOnly && currentForm.selectedShardKeys && currentForm.selectedShardKeys.length > 0)
     );
-    
+
     if (isValidForm) {
-      debouncedCalculate(form, 150).catch(console.error);
+      debouncedCalculate(currentForm, 150).catch(console.error);
     }
-  }, [customRates, recipeOverrides, form, debouncedCalculate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customRates, recipeOverrides, inventory, useInventory, debouncedCalculate]);
+
+  // Initialize params from form for inventory mode display
+  useEffect(() => {
+    if (!useInventory || !form) return;
+
+    const initializeParams = async () => {
+      const dataService = DataService.getInstance();
+      const filteredCustomRates = Object.fromEntries(
+        Object.entries(customRates).filter(([, v]) => v !== undefined)
+      ) as { [shardId: string]: number };
+
+      const params: CalculationParams = {
+        customRates: form.ironManView ? filteredCustomRates : await dataService.loadShardCosts(form.instantBuyPrices),
+        hunterFortune: form.hunterFortune,
+        excludeChameleon: form.excludeChameleon,
+        frogBonus: form.frogBonus,
+        newtLevel: form.newtLevel,
+        salamanderLevel: form.salamanderLevel,
+        lizardKingLevel: form.lizardKingLevel,
+        leviathanLevel: form.leviathanLevel,
+        pythonLevel: form.pythonLevel,
+        kingCobraLevel: form.kingCobraLevel,
+        seaSerpentLevel: form.seaSerpentLevel,
+        tiamatLevel: form.tiamatLevel,
+        crocodileLevel: form.crocodileLevel,
+        kuudraTier: form.kuudraTier,
+        moneyPerHour: form.moneyPerHour,
+        customKuudraTime: form.customKuudraTime,
+        kuudraTimeSeconds: form.kuudraTimeSeconds,
+        noWoodenBait: form.noWoodenBait,
+        rateAsCoinValue: !form.ironManView,
+        craftPenalty: form.craftPenalty,
+      };
+
+      setInvCurrentParams(params);
+    };
+
+    void initializeParams();
+  }, [form, customRates, useInventory]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -377,6 +575,10 @@ const CalculatorPageContent: React.FC = () => {
       }
     };
   }, []);
+
+  // Determine which results to show
+  const showInventoryResults = useInventory && !form.materialsOnly && inventoryResult && invCalculationData && invCurrentParams;
+  const showStandardResults = !useInventory || form.materialsOnly ? (result && calculationData && currentParams) : false;
 
   return (
     <>
@@ -392,8 +594,8 @@ const CalculatorPageContent: React.FC = () => {
                 className="
                 w-full px-3 py-2.5
                 bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30
-                rounded-md text-white hover:bg-purple-500/20 
-                flex items-center justify-center space-x-2 
+                rounded-md text-white hover:bg-purple-500/20
+                flex items-center justify-center space-x-2
                 transition-colors duration-200 font-medium text-sm cursor-pointer
               "
               >
@@ -402,8 +604,60 @@ const CalculatorPageContent: React.FC = () => {
               </button>
             </div>
 
-            <div className={`${sidebarOpen ? "block" : "hidden xl:block"}`}>
-              <CalculatorFormWithContext onSubmit={handleCalculate} />
+            <div className={`${sidebarOpen ? "block" : "hidden xl:block"} space-y-3`}>
+              {/* Inventory Section */}
+              <div className="bg-purple-500/10 border border-purple-500/20 rounded-md overflow-hidden">
+                  <button
+                    onClick={() => setInventoryExpanded(!inventoryExpanded)}
+                    className="w-full px-3 py-2.5 flex items-center justify-between text-white hover:bg-purple-500/20 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Package className="w-4 h-4 text-purple-400" />
+                      <span className="font-medium">Inventory</span>
+                      {inventory.size > 0 && (
+                        <span className="text-xs text-purple-300 bg-purple-500/20 px-1.5 py-0.5 rounded">
+                          {inventory.size} shard{inventory.size !== 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
+                    {inventoryExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                  </button>
+
+                  {inventoryExpanded && (
+                    <div className="border-t border-purple-500/20 p-3 space-y-3">
+                      {inventory.size === 0 ? (
+                        <p className="text-sm text-slate-400 text-center py-2">
+                          No inventory imported.
+                        </p>
+                      ) : (
+                        <div className="text-sm text-slate-300">
+                          <span className="text-white font-medium">{inventory.size}</span> shard type{inventory.size !== 1 ? "s" : ""} in inventory
+                          {ownedAttributes.size > 0 && (
+                            <span className="ml-2">
+                              • <span className="text-white font-medium">{ownedAttributes.size}</span> attribute{ownedAttributes.size !== 1 ? "s" : ""}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <button
+                        onClick={() => setShowInventoryModal(true)}
+                        className="w-full px-3 py-2 bg-purple-500/20 border border-purple-500/30 hover:border-purple-400/40 rounded-md text-purple-300 hover:bg-purple-500/30 flex items-center justify-center gap-2 transition-colors duration-200 text-sm font-medium cursor-pointer"
+                      >
+                        <Package className="w-4 h-4" />
+                        <span>Manage Inventory</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+              {/* Calculator Settings Form */}
+              <CalculatorFormWithContext
+                onSubmit={handleCalculate}
+                inventory={useInventory ? inventory : undefined}
+                ownedAttributes={useInventory ? ownedAttributes : undefined}
+                useInventory={useInventory}
+                onUseInventoryChange={handleUseInventoryChange}
+              />
             </div>
           </div>
           {/* Results Panel */}
@@ -421,15 +675,34 @@ const CalculatorPageContent: React.FC = () => {
               </div>
             )}
 
-            {/* Results */}
-            {result && calculationData && currentParams && (
+            {/* Inventory Results */}
+            {showInventoryResults && (
+              <InventoryCalculationResults
+                result={inventoryResult}
+                data={invCalculationData}
+                targetShardName={form.shard || "Unknown Shard"}
+                targetShard={form.shard || ""}
+                ironManView={form.ironManView}
+                expandedStates={expandedStates}
+                onToggle={handleToggle}
+                onExpandAll={handleExpandAll}
+                onCollapseAll={handleCollapseAll}
+                params={invCurrentParams}
+                recipeOverrides={recipeOverrides}
+                onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
+                onResetRecipeOverrides={resetRecipeOverrides}
+              />
+            )}
+
+            {/* Standard Results */}
+            {showStandardResults && (
               <CalculationResults
-                result={result}
-                data={calculationData}
+                result={result!}
+                data={calculationData!}
                 targetShardName={targetShardName}
                 targetShard={currentShardKey}
                 requiredQuantity={currentQuantity}
-                params={currentParams}
+                params={currentParams!}
                 onResultUpdate={handleResultUpdate}
                 recipeOverrides={recipeOverrides}
                 onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
@@ -440,7 +713,7 @@ const CalculatorPageContent: React.FC = () => {
             )}
 
             {/* Empty State */}
-            {!result && !isCalculating && (
+            {!result && !inventoryResult && !isCalculating && (
               <div className="text-center py-10 bg-white/5 border border-white/10 rounded-md">
                 <div className="max-w-md mx-auto space-y-3">
                   <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/20 rounded-md flex items-center justify-center mx-auto">
@@ -460,6 +733,18 @@ const CalculatorPageContent: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Inventory Management Modal */}
+      <InventoryManagementModal
+        open={showInventoryModal}
+        onClose={() => setShowInventoryModal(false)}
+        inventory={inventory}
+        ownedAttributes={ownedAttributes}
+        onInventoryChange={setInventory}
+        onOwnedAttributesChange={setOwnedAttributes}
+        disabledShards={disabledShards}
+        onDisabledShardsChange={setDisabledShards}
+      />
     </>
   );
 };
