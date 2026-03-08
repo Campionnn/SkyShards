@@ -330,6 +330,22 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
     }
   };
 
+  const handleSelectAllShards = () => {
+    const newDisabled = new Set(disabledShards);
+    filteredShards.forEach((shard) => {
+      newDisabled.delete(shard.key);
+    });
+    onDisabledShardsChange(newDisabled);
+  };
+
+  const handleClearAllShards = () => {
+    const newDisabled = new Set(disabledShards);
+    filteredShards.forEach((shard) => {
+      newDisabled.add(shard.key);
+    });
+    onDisabledShardsChange(newDisabled);
+  };
+
   const handleClearAll = () => {
     if (confirm("Are you sure you want to clear all inventory data?")) {
       onInventoryChange(new Map());
@@ -824,20 +840,49 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
         {/* Footer */}
         <div className="p-3 border-t border-slate-700 bg-slate-800/50 flex-shrink-0">
           <div className="flex items-center justify-between">
-            <div className="text-xs text-slate-400">
-              {profileMeta && (
-                <span>
-                  Last imported: {profileMeta.username} ({profileMeta.profileName}) -{" "}
-                  {new Date(profileMeta.lastImportTime).toLocaleDateString()}
-                </span>
-              )}
-            </div>
-            <button
-              onClick={onClose}
-              className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-md text-white text-sm transition-colors cursor-pointer"
-            >
-              Close
-            </button>
+            {activeTab === "shards" ? (
+              <>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSelectAllShards}
+                    className="px-4 py-2 text-sm bg-green-500/20 hover:bg-green-500/30 border border-green-500/20 hover:border-green-500/30 rounded-md text-green-400 font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={filteredShards.length === 0}
+                  >
+                    Select All
+                  </button>
+                  <button
+                    onClick={handleClearAllShards}
+                    className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={filteredShards.length === 0}
+                  >
+                    Clear All
+                  </button>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-md text-white text-sm transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="text-xs text-slate-400">
+                  {profileMeta && (
+                    <span>
+                      Last imported: {profileMeta.username} ({profileMeta.profileName}) -{" "}
+                      {new Date(profileMeta.lastImportTime).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={onClose}
+                  className="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-md text-white text-sm transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
