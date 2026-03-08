@@ -12,9 +12,10 @@ interface MultiSelectShardModalProps {
   shards: ShardWithKey[];
   onDone: (selectedShards: Array<{ shard: ShardWithKey; quantity: number }>) => void;
   initialSelections?: Map<string, number>; // Map of shard key to quantity
+  ownedAttributes?: Map<string, number>; // Map of shard key to attribute level (fused count)
 }
 
-export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ isOpen, onClose, shards, onDone, initialSelections = new Map() }) => {
+export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ isOpen, onClose, shards, onDone, initialSelections = new Map(), ownedAttributes = new Map() }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [rarityFilter, setRarityFilter] = useState("all");
   const [isRarityDropdownOpen, setIsRarityDropdownOpen] = useState(false);
@@ -180,6 +181,24 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
     setSelections(allSelections);
   };
 
+  const handleSelectMissing = () => {
+    setSelections((prev) => {
+      const newMap = new Map(prev);
+      shards.forEach((shard) => {
+        const rarity = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
+        const maxQty = MAX_QUANTITIES[rarity] || 1;
+        const owned = ownedAttributes.get(shard.key) ?? 0;
+        const needed = maxQty - owned;
+        if (needed > 0) {
+          newMap.set(shard.key, needed);
+        } else {
+          newMap.delete(shard.key);
+        }
+      });
+      return newMap;
+    });
+  };
+
   const handleDone = () => {
     const selectedData = Array.from(selections.entries())
       .map(([key, quantity]) => {
@@ -342,6 +361,13 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
               className="px-4 py-2 text-sm bg-green-500/20 hover:bg-green-500/30 border border-green-500/20 hover:border-green-500/30 rounded-md text-green-400 font-medium transition-colors cursor-pointer"
             >
               Select All
+            </button>
+            <button
+              onClick={handleSelectMissing}
+              className="px-4 py-2 text-sm bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/20 hover:border-purple-500/30 rounded-md text-purple-400 font-medium transition-colors cursor-pointer"
+              title="Select all shards not yet maxed, with the quantity still needed to reach max"
+            >
+              Select Missing
             </button>
             <button onClick={() => setSelections(new Map())} className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors cursor-pointer" disabled={selections.size === 0}>
               Clear All

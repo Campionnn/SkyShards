@@ -654,7 +654,7 @@ const CalculatorPageContent: React.FC = () => {
               <CalculatorFormWithContext
                 onSubmit={handleCalculate}
                 inventory={useInventory ? inventory : undefined}
-                ownedAttributes={useInventory ? ownedAttributes : undefined}
+                ownedAttributes={ownedAttributes}
                 useInventory={useInventory}
                 onUseInventoryChange={handleUseInventoryChange}
               />

@@ -466,6 +466,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
               (form.shardQuantities || []).map((item) => [item.shard.key, item.quantity])
             )
           }
+          ownedAttributes={ownedAttributes}
         />
 
         {/* Settings */}
