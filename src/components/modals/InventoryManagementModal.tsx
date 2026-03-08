@@ -160,6 +160,15 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
     });
   }, [shards, shardsQuery, shardsRarity, inventory]);
 
+  // Build a map from shard key (e.g. "L51") to shard name (e.g. "Scarf") for attribute search
+  const shardKeyToName = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const s of shardsArray) {
+      map[s.key] = s.name;
+    }
+    return map;
+  }, [shardsArray]);
+
   const attributesList = useMemo(() => {
     return Object.entries(SHARD_DESCRIPTIONS).map(([id, desc]) => {
       const prefix = id[0].toUpperCase();
@@ -173,6 +182,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
         id,
         rarity,
         title: (desc as { title: string }).title,
+        shardName: shardKeyToName[id] ?? "",
         level: ownedAttributes.get(id) ?? 0,
       };
     }).sort((a, b) => {
@@ -183,9 +193,9 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
       if (orderDiff !== 0) return orderDiff;
       return parseInt(a.id.slice(1)) - parseInt(b.id.slice(1));
     });
-  }, [ownedAttributes]);
+  }, [ownedAttributes, shardKeyToName]);
 
-  // Filtered attributes
+  // Filtered attributes — search across shard name, attribute title, id, family, type, description
   const filteredAttributes = useMemo(() => {
     return attributesList.filter((attr) => {
       const maxForRarity =
@@ -203,10 +213,19 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
         || (attrsLockFilter === "unlocked" && !capped);
       if (!attrsQuery.trim()) return matchesRarity && matchesLock;
       const q = attrsQuery.toLowerCase();
-      const matchesSearch = attr.title.toLowerCase().includes(q) || attr.id.toLowerCase().includes(q);
+      // Match against attribute title, shard key, shard name, and description fields
+      const shardDesc = SHARD_DESCRIPTIONS[attr.id as keyof typeof SHARD_DESCRIPTIONS] as { title: string; description?: string } | undefined;
+      const matchingShardDef = shardsArray.find((s) => s.key === attr.id);
+      const matchesSearch =
+        attr.title.toLowerCase().includes(q)
+        || attr.id.toLowerCase().includes(q)
+        || attr.shardName.toLowerCase().includes(q)
+        || (matchingShardDef?.family?.toLowerCase().includes(q) ?? false)
+        || (matchingShardDef?.type?.toLowerCase().includes(q) ?? false)
+        || (shardDesc?.description?.toLowerCase().includes(q) ?? false);
       return matchesRarity && matchesLock && matchesSearch;
     });
-  }, [attributesList, attrsQuery, attrsRarity, attrsLockFilter]);
+  }, [attributesList, attrsQuery, attrsRarity, attrsLockFilter, shardsArray]);
 
   // Sort profiles by last_save (most recent first)
   const sortedProfiles = useMemo(() => {
@@ -766,9 +785,16 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                               </span>
                             )}
                           </div>
-                          <span className={`text-xs font-medium leading-tight ${rarityText} truncate`}>
-                            {attr.title}
-                          </span>
+                          <div className="min-w-0">
+                            <span className={`text-xs font-medium leading-tight ${rarityText} truncate block`}>
+                              {attr.title}
+                            </span>
+                            {attr.shardName && (
+                              <span className="text-[10px] text-slate-500 truncate block">
+                                {attr.shardName}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {/* Level + progress bar */}

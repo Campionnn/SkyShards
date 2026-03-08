@@ -691,6 +691,9 @@ const CalculatorPageContent: React.FC = () => {
                 recipeOverrides={recipeOverrides}
                 onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
                 onResetRecipeOverrides={resetRecipeOverrides}
+                inventory={inventory}
+                disabledShards={disabledShards}
+                onDisabledShardsChange={setDisabledShards}
               />
             )}
 

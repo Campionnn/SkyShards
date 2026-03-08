@@ -5,6 +5,7 @@ import type { InventoryCalculationResult, Data, CalculationParams, RecipeOverrid
 import { InventoryRecipeTreeNode } from "../tree";
 import { SummaryCard, MaterialItem } from "../ui";
 import { RecipeOverrideManager } from "../forms";
+import { ShardsUsed } from "./ShardsUsed";
 
 interface InventoryCalculationResultsProps {
   result: InventoryCalculationResult;
@@ -20,6 +21,9 @@ interface InventoryCalculationResultsProps {
   recipeOverrides: RecipeOverride[];
   onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
   onResetRecipeOverrides: () => void;
+  inventory: Map<string, number>;
+  disabledShards: Set<string>;
+  onDisabledShardsChange: (disabled: Set<string>) => void;
 }
 
 export const InventoryCalculationResults: React.FC<InventoryCalculationResultsProps> = ({
@@ -36,6 +40,9 @@ export const InventoryCalculationResults: React.FC<InventoryCalculationResultsPr
   recipeOverrides,
   onRecipeOverridesUpdate,
   onResetRecipeOverrides,
+  inventory,
+  disabledShards,
+  onDisabledShardsChange,
 }) => {
   const targetShardData = data.shards[targetShard];
   const targetShardRate = targetShardData?.rate ?? 0;
@@ -83,14 +90,49 @@ export const InventoryCalculationResults: React.FC<InventoryCalculationResultsPr
               </div>
               Materials Needed
             </h3>
-            <div className="px-3 py-1.5 flex gap-1 bg-sky-500/20 border border-sky-500/30 text-sky-400 text-sm font-medium rounded-md min-w-0">
-              <span className="text-slate-300">{Math.floor(result.totalShardsProduced)}x</span>
-              <span className="truncate">{targetShardName}</span>
-              {result.craftsNeeded > 0 && (
-                <span className="text-slate-400 whitespace-nowrap">
-                  {Math.floor(result.craftsNeeded)} craft{Math.floor(result.craftsNeeded) > 1 ? "s" : ""}
-                </span>
-              )}
+            <div className="flex gap-2 flex-wrap">
+              {(() => {
+                // Don't show Forest Essence if wooden bait is excluded
+                if (params.noWoodenBait) return null;
+
+                const forestEssenceShards = Array.from(result.totalQuantities).filter(([shardId]) =>
+                  ["shinyfish", "inferno koi", "abyssal lanternfish", "silentdepth"].includes(data.shards[shardId]?.name?.toLowerCase())
+                );
+
+                if (forestEssenceShards.length === 0) return null;
+
+                const rarityBonuses = {
+                  common: 2 * params.newtLevel,
+                  uncommon: 2 * params.salamanderLevel,
+                  rare: params.lizardKingLevel,
+                  epic: params.leviathanLevel,
+                  legendary: 0,
+                };
+
+                const totalForestEssence = forestEssenceShards.reduce((total, [shardId, quantity]) => {
+                  const shardName = data.shards[shardId]?.name?.toLowerCase();
+                  const effectiveFortune = 1 + (params.hunterFortune + rarityBonuses[data.shards[shardId]?.rarity]) / 100;
+                  const essenceNeeded = (quantity * (shardName === "shinyfish" ? 350 : 1024)) / effectiveFortune;
+                  return total + essenceNeeded;
+                }, 0);
+
+                return (
+                  <div className="flex gap-1 items-center px-3 py-1.5 bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-400 text-sm font-medium rounded-md min-w-0">
+                    <span className="truncate">About</span>
+                    <span className="text-slate-300">{formatLargeNumber(totalForestEssence)}</span>
+                    <span className="truncate">Forest Essence</span>
+                  </div>
+                );
+              })()}
+              <div className="px-3 py-1.5 flex gap-1 bg-sky-500/20 border border-sky-500/30 text-sky-400 text-sm font-medium rounded-md min-w-0">
+                <span className="text-slate-300">{Math.floor(result.totalShardsProduced)}x</span>
+                <span className="truncate">{targetShardName}</span>
+                {result.craftsNeeded > 0 && (
+                  <span className="text-slate-400 whitespace-nowrap">
+                    {Math.floor(result.craftsNeeded)} craft{Math.floor(result.craftsNeeded) > 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -105,6 +147,17 @@ export const InventoryCalculationResults: React.FC<InventoryCalculationResultsPr
               })}
           </div>
         </div>
+      )}
+
+      {/* Inventory Shards Used */}
+      {result.remainingInventory && (
+        <ShardsUsed
+          inventory={inventory}
+          remainingInventory={result.remainingInventory}
+          data={data}
+          disabledShards={disabledShards}
+          onDisabledShardsChange={onDisabledShardsChange}
+        />
       )}
 
       {/* Fusion Tree */}
