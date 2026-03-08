@@ -285,7 +285,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
           {onUseInventoryChange && (
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-slate-200">Use Inventory</span>
-              <Tooltip content="Enable inventory-aware calculations. When enabled, your imported inventory shards will be factored into the optimal fusion path."></Tooltip>
+              <Tooltip content="Enable inventory-aware calculations. When enabled, your imported inventory shards will be factored into the optimal fusion path. This is very experimental, so let me know on Discord or GitHub if it isn't working properly"></Tooltip>
               <button
                 type="button"
                 role="switch"
