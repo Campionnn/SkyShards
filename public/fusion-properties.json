@@ -1874,9 +1874,23 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Littlefoot",
     "id_origin": [
       "Sphinx"
+    ]
+  },
+  "E45": {
+    "name": "Littlefoot",
+    "rarity": "Epic",
+    "category": "Combat",
+    "family": [
+      "Arctic"
+    ],
+    "input1": "",
+    "input2": "",
+    "id_result": "",
+    "id_origin": [
+      "King Minos"
     ]
   },
   "L1": {
@@ -1900,7 +1914,7 @@
     ],
     "input1": "Water&Legendary",
     "input2": "Epic+&Elemental",
-    "id_result": "Spike",
+    "id_result": "Nessie",
     "id_origin": []
   },
   "L3": {
@@ -1926,6 +1940,20 @@
     "input2": "",
     "id_result": "Cinderbat",
     "id_origin": []
+  },
+  "L5": {
+    "name": "Nessie",
+    "rarity": "Legendary",
+    "category": "Water",
+    "family": [
+      "Reptile"
+    ],
+    "input1": "",
+    "input2": "",
+    "id_result": "Spike",
+    "id_origin": [
+      "Blizzard"
+    ]
   },
   "L6": {
     "name": "Tiamat",
@@ -2025,7 +2053,7 @@
     "id_origin": [
       "Tortoise",
       "Naga",
-      "Blizzard"
+      "Nessie"
     ]
   },
   "L15": {
