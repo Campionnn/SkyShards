@@ -285,7 +285,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
           {onUseInventoryChange && (
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-slate-200">Use Inventory</span>
-              <Tooltip content="Enable inventory-aware calculations. When enabled, your imported inventory shards will be factored into the optimal fusion path. This is very experimental, so let me know on Discord or GitHub if it isn't working properly"></Tooltip>
+              <Tooltip content="Enable inventory-aware calculations. When enabled, your imported inventory shards will be factored into the optimal fusion path. Does not work with material only mode yet. This is very experimental, so let me know on Discord or GitHub if it isn't working properly"></Tooltip>
               <button
                 type="button"
                 role="switch"
@@ -338,7 +338,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-white">Materials Only</span>
-                <Tooltip content="Calculate combined materials for multiple shards without showing the fusion tree."></Tooltip>
+                <Tooltip content="Calculate combined materials for multiple shards without showing the fusion tree. Does not work with use inventory"></Tooltip>
                 <button
                   type="button"
                   role="switch"
