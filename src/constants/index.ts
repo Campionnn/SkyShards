@@ -67,3 +67,85 @@ export const KUUDRA_TIERS = [
 ] as const;
 
 export const SHARD_LEVELS = Array.from({ length: 11 }, (_, i) => i).reverse();
+
+// Mapping of attribute level to required shard count by rarity
+export const ATTRIBUTE_TIER_TO_SHARD_COUNT: Record<string, Record<number, number>> = {
+  common: {
+    1: 1,
+    2: 3,
+    3: 5,
+    4: 6,
+    5: 7,
+    6: 8,
+    7: 10,
+    8: 14,
+    9: 18,
+    10: 24,
+  },
+  uncommon: {
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 12,
+    10: 16,
+  },
+  rare: {
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 3,
+    5: 4,
+    6: 4,
+    7: 5,
+    8: 6,
+    9: 8,
+    10: 12,
+  },
+  epic: {
+    1: 1,
+    2: 1,
+    3: 2,
+    4: 2,
+    5: 3,
+    6: 3,
+    7: 4,
+    8: 4,
+    9: 5,
+    10: 7,
+  },
+  legendary: {
+    1: 1,
+    2: 1,
+    3: 1,
+    4: 2,
+    5: 2,
+    6: 2,
+    7: 3,
+    8: 3,
+    9: 4,
+    10: 5,
+  },
+};
+
+export function fusedCountToTierLevel(fusedCount: number, rarity: string): number {
+  const tierMap = ATTRIBUTE_TIER_TO_SHARD_COUNT[rarity.toLowerCase()];
+  if (!tierMap) return 0;
+  
+  // Calculate cumulative counts for each tier
+  let cumulative = 0;
+  for (let tier = 1; tier <= 10; tier++) {
+    cumulative += tierMap[tier] ?? 0;
+    if (fusedCount < cumulative) {
+      return tier - 1;
+    } else if (fusedCount === cumulative) {
+      return tier;
+    }
+  }
+
+  return 10;
+}

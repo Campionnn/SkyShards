@@ -6,7 +6,7 @@ import type { HypixelProfileResponse, ProfileData } from "../../services";
 import { useShards } from "../../hooks";
 import { loadHypixelProfileMeta, saveHypixelProfileMeta, clearHypixelProfileMeta, clearDisabledShards, filterShards, DEFAULT_FILTER_CONFIG, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
 import type { HypixelProfileMeta } from "../../utilities";
-import { SHARD_DESCRIPTIONS, MAX_QUANTITIES } from "../../constants";
+import { SHARD_DESCRIPTIONS, MAX_QUANTITIES, ATTRIBUTE_TIER_TO_SHARD_COUNT, fusedCountToTierLevel } from "../../constants";
 
 interface InventoryManagementModalProps {
   open: boolean;
@@ -17,6 +17,18 @@ interface InventoryManagementModalProps {
   onOwnedAttributesChange: (attributes: Map<string, number>) => void;
   disabledShards: Set<string>;
   onDisabledShardsChange: (disabled: Set<string>) => void;
+  onShardClick?: (shardKey: string) => void;
+  onShardLevelsImport?: (levels: {
+    newtLevel?: number;
+    salamanderLevel?: number;
+    lizardKingLevel?: number;
+    leviathanLevel?: number;
+    pythonLevel?: number;
+    kingCobraLevel?: number;
+    seaSerpentLevel?: number;
+    tiamatLevel?: number;
+    crocodileLevel?: number;
+  }) => void;
 }
 
 type TabType = "shards" | "attributes";
@@ -39,6 +51,8 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
   onOwnedAttributesChange,
   disabledShards,
   onDisabledShardsChange,
+  onShardClick,
+  onShardLevelsImport,
 }) => {
   const { shards } = useShards();
   const [activeTab, setActiveTab] = useState<TabType>("shards");
@@ -249,6 +263,49 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
         newInventory.set(shard.id, shard.amount);
       }
     }
+    
+    // Auto-fill the 9 shard level shards based on attribute levels
+    const shardLevelMapping = [
+      { shardId: "C35", rarity: "common", formKey: "newtLevel" },
+      { shardId: "U8", rarity: "uncommon", formKey: "salamanderLevel" },
+      { shardId: "R8", rarity: "rare", formKey: "lizardKingLevel" },
+      { shardId: "E5", rarity: "epic", formKey: "leviathanLevel" },
+      { shardId: "R9", rarity: "rare", formKey: "pythonLevel" },
+      { shardId: "R54", rarity: "rare", formKey: "kingCobraLevel" },
+      { shardId: "E32", rarity: "epic", formKey: "seaSerpentLevel" },
+      { shardId: "L6", rarity: "legendary", formKey: "tiamatLevel" },
+      { shardId: "R45", rarity: "rare", formKey: "crocodileLevel" },
+    ];
+
+    console.log("Profile attributes:", profileData.attributes);
+    
+    const shardLevels: Record<string, number> = {};
+    
+    for (const { shardId, rarity, formKey } of shardLevelMapping) {
+      const fusedCount = profileData.attributes.find(attr => attr.id.toUpperCase() === shardId.toUpperCase())?.level ?? 0;
+      const tierLevel = fusedCountToTierLevel(fusedCount, rarity);
+      console.log(`Shard ${shardId} (${rarity}): fused count = ${fusedCount}, tier level = ${tierLevel}`);
+      
+      // Store the tier level for the form
+      shardLevels[formKey] = tierLevel;
+      
+      // Also set inventory quantity based on tier level
+      if (tierLevel > 0 && tierLevel <= 10) {
+        const requiredCount = ATTRIBUTE_TIER_TO_SHARD_COUNT[rarity]?.[tierLevel] ?? 0;
+        console.log(`  -> Setting form level to ${tierLevel}, inventory to ${requiredCount}`);
+        if (requiredCount > 0) {
+          newInventory.set(shardId, requiredCount);
+        }
+      }
+    }
+
+    // Update shard levels in the form
+    if (onShardLevelsImport) {
+      console.log("Updating shard levels:", shardLevels);
+      onShardLevelsImport(shardLevels);
+    }
+
+    console.log("Final inventory map:", newInventory);
     onInventoryChange(newInventory);
 
     const newAttributes = new Map<string, number>();
@@ -782,9 +839,15 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                     return (
                       <div
                         key={attr.id}
+                        onClick={() => {
+                          if (onShardClick) {
+                            onShardClick(attr.id);
+                            onClose();
+                          }
+                        }}
                         className={`bg-slate-800/50 border ${rarityBorder} rounded-md p-2 space-y-1.5 ${
                           !owned ? "opacity-40" : ""
-                        }`}
+                        } ${onShardClick ? "cursor-pointer hover:bg-slate-700/50 transition-colors" : ""}`}
                       >
                         {/* Icon + title row */}
                         <div className="flex items-center gap-1.5">

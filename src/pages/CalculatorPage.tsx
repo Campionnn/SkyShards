@@ -8,6 +8,7 @@ import type { CalculationFormData } from "../schemas";
 import type { CalculationResult, CalculationParams, RecipeOverride, Data, InventoryCalculationResult } from "../types/types";
 import { isFirstVisit, setSaveEnabled, loadInventory, saveInventory, loadOwnedAttributes, saveOwnedAttributes, loadDisabledShards, saveDisabledShards } from "../utilities";
 import { calculateOptimalPathWithWorker, calculateMultipleShardsParallel, type WorkerProgress } from "../services/workerCalculationService";
+import { MAX_QUANTITIES } from "../constants";
 
 const INVENTORY_ENABLED_KEY = "skyshards_use_inventory";
 
@@ -285,14 +286,12 @@ const CalculatorPageContent: React.FC = () => {
     }
   }, []);
 
-  // ─── Inventory state ───
+  // Inventory state
   const [useInventory, setUseInventory] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem(INVENTORY_ENABLED_KEY) === "true";
-    } catch {
-      return false;
-    }
+    const stored = localStorage.getItem(INVENTORY_ENABLED_KEY);
+    return stored === "true";
   });
+
   const [inventory, setInventory] = useState<Map<string, number>>(loadInventory);
   const [ownedAttributes, setOwnedAttributes] = useState<Map<string, number>>(loadOwnedAttributes);
   const [disabledShards, setDisabledShards] = useState<Set<string>>(loadDisabledShards);
@@ -303,6 +302,68 @@ const CalculatorPageContent: React.FC = () => {
   const [invCurrentParams, setInvCurrentParams] = useState<CalculationParams | null>(null);
   const [expandedStates] = useState<Map<string, boolean>>(new Map());
   const [, setRenderTick] = useState(0);
+
+  // Handler for clicking a shard in the attributes tab
+  const handleShardClickFromInventory = useCallback(async (shardKey: string) => {
+    try {
+      const dataService = DataService.getInstance();
+      const shards = await dataService.loadShards();
+      const shard = shards.find(s => s.key === shardKey);
+      
+      if (shard) {
+        // Calculate remaining quantity based on owned attributes
+        const rarityKey = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
+        const maxQuantity = MAX_QUANTITIES[rarityKey] ?? MAX_QUANTITIES.common;
+        const owned = ownedAttributes.get(shardKey) ?? 0;
+        const remaining = owned >= maxQuantity ? maxQuantity : Math.max(1, maxQuantity - owned);
+        
+        const updatedForm = { ...form, shard: shard.name, quantity: remaining };
+        setForm(updatedForm);
+        setTargetShardName(shard.name);
+        setCurrentShardKey(shardKey);
+        setCurrentQuantity(remaining);
+        // Trigger calculation after a brief delay to ensure form is updated
+        setTimeout(() => {
+          const submit = async (formData: CalculationFormData) => {
+            await performCalculation(
+              formData,
+              customRates,
+              recipeOverrides,
+              {
+                setTargetShardName,
+                setCurrentShardKey,
+                setCurrentQuantity,
+                setCurrentParams,
+                setResult,
+                setCalculationData,
+                setCalculating: setIsCalculating,
+                setProgress,
+              }
+            );
+          };
+          submit(updatedForm).catch(console.error);
+        }, 0);
+      }
+    } catch (error) {
+      console.error("Failed to load shard from key:", error);
+    }
+  }, [form, setForm, setTargetShardName, customRates, recipeOverrides, ownedAttributes]);
+
+  // Handler for importing shard levels from profile
+  const handleShardLevelsImport = useCallback((levels: {
+    newtLevel?: number;
+    salamanderLevel?: number;
+    lizardKingLevel?: number;
+    leviathanLevel?: number;
+    pythonLevel?: number;
+    kingCobraLevel?: number;
+    seaSerpentLevel?: number;
+    tiamatLevel?: number;
+    crocodileLevel?: number;
+  }) => {
+    const updatedForm = { ...form, ...levels };
+    setForm(updatedForm);
+  }, [form, setForm]);
 
   // Persist inventory toggle
   useEffect(() => {
@@ -747,6 +808,8 @@ const CalculatorPageContent: React.FC = () => {
         onOwnedAttributesChange={setOwnedAttributes}
         disabledShards={disabledShards}
         onDisabledShardsChange={setDisabledShards}
+        onShardClick={handleShardClickFromInventory}
+        onShardLevelsImport={handleShardLevelsImport}
       />
     </>
   );
