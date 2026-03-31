@@ -714,15 +714,20 @@
     "description": "Grants +0.5 ☯ Farming Wisdom",
     "id": "garden_wisdom"
   },
+  "E39": {
+    "title": "Big Game Hunter",
+    "description": "Grants +0.5 ❃ Tracking on Griffin Burrows",
+    "id": "big_game_hunter"
+  },
   "E42": {
     "title": "King of Greed",
     "description": "Increases Coin gain from Griffin Burrows by +1%",
     "id": "king_of_greed"
   },
-  "E39": {
-    "title": "Big Game Hunter",
-    "description": "Grants +0.5 ❃ Tracking on Griffin Burrows",
-    "id": "big_game_hunter"
+  "E45": {
+    "title": "Freezing Spread",
+    "description": "Grants +0.5 Gemstone Spread for every 20 Cold Resistance you have while in the Glacite Mineshafts",
+    "id": "freezing_spread"
   },
   "L1": {
     "title": "Shadow Elemental",
@@ -743,6 +748,11 @@
     "title": "Reptiloid",
     "description": "Fusions with Chameleons grant the next 3 IDs as results",
     "id": "reptiloid"
+  },
+  "L5": {
+    "title": "Loch Hook",
+    "description": "Grants +0.5 ⚓ Double Hook Chance while on Foraging Islands",
+    "id": "loch_hook"
   },
   "L6": {
     "title": "Echo of Echoes",
@@ -821,7 +831,7 @@
   },
   "L26": {
     "title": "Crimson Hook",
-    "description": "Grants +0.5 ⚓ Double Hook Chance while on the Crimson Isle",
+    "description": "Grants +0.5 ⚓ Double Hook Chance while on Combat Islands",
     "id": "double_hook"
   },
   "L27": {
@@ -891,7 +901,7 @@
   },
   "L47": {
     "title": "Bayou Biter",
-    "description": "Grants +0.5 ⚓ Double Hook Chance while on the Backwater Bayou",
+    "description": "Grants +0.5 ⚓ Double Hook Chance while on Fishing Islands",
     "id": "bayou_biter"
   },
   "L48": {
