@@ -899,6 +899,11 @@
     "description": "Buffs all other shards in the Elemental Family by +2%",
     "id": "echo_of_elemental"
   },
+  "L46": {
+    "title": "Groovy Radar",
+    "description": "Pests have a +2.5% chance to drop a second Vinyl",
+    "id": "groovy_radar"
+  },
   "L47": {
     "title": "Bayou Biter",
     "description": "Grants +0.5 ⚓ Double Hook Chance while on Fishing Islands",
