@@ -2180,7 +2180,7 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Cocoaleech",
     "id_origin": [
       "Chameleon",
       "Wyvern",
@@ -2225,7 +2225,7 @@
     ],
     "input1": "Bird",
     "input2": "Legendary+",
-    "id_result": "",
+    "id_result": "Cocoaleech",
     "id_origin": []
   },
   "L32": {
@@ -2259,7 +2259,7 @@
     ],
     "input1": "Condor Shard",
     "input2": "Legendary+",
-    "id_result": "",
+    "id_result": "Cocoaleech",
     "id_origin": []
   },
   "L36": {
@@ -2322,6 +2322,22 @@
     "input2": "Galaxy Fish Shard",
     "id_result": "Titanoboa",
     "id_origin": []
+  },
+  "L46": {
+    "name": "Cocoaleech",
+    "rarity": "Legendary",
+    "category": "Forest",
+    "family": [
+      "Bug"
+    ],
+    "input1": "",
+    "input2": "",
+    "id_result": "",
+    "id_origin": [
+      "Cinderbat",
+      "Condor",
+      "Dodo"
+    ]
   },
   "L47": {
     "name": "Titanoboa",
