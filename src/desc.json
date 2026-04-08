@@ -376,7 +376,7 @@
   },
   "R16": {
     "title": "Crop Bug",
-    "description": "Increased the odds of finding a Cropie, Squash or Fermento by +2%",
+    "description": "Increased the odds of finding a Cropie, Squash, Fermento, or Helianthus by +2%",
     "id": "crop_bug"
   },
   "R18": {
