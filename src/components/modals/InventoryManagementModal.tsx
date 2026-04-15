@@ -287,16 +287,8 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
       console.log(`Shard ${shardId} (${rarity}): fused count = ${fusedCount}, tier level = ${tierLevel}`);
       
       // Store the tier level for the form
+      console.log(`  -> Setting form level to ${tierLevel}`);
       shardLevels[formKey] = tierLevel;
-      
-      // Also set inventory quantity based on tier level
-      if (tierLevel > 0 && tierLevel <= 10) {
-        const requiredCount = ATTRIBUTE_TIER_TO_SHARD_COUNT[rarity]?.[tierLevel] ?? 0;
-        console.log(`  -> Setting form level to ${tierLevel}, inventory to ${requiredCount}`);
-        if (requiredCount > 0) {
-          newInventory.set(shardId, requiredCount);
-        }
-      }
     }
 
     // Update shard levels in the form
