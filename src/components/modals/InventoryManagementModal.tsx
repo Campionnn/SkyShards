@@ -6,7 +6,7 @@ import type { HypixelProfileResponse, ProfileData } from "../../services";
 import { useShards } from "../../hooks";
 import { loadHypixelProfileMeta, saveHypixelProfileMeta, clearHypixelProfileMeta, clearDisabledShards, filterShards, DEFAULT_FILTER_CONFIG, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
 import type { HypixelProfileMeta } from "../../utilities";
-import { SHARD_DESCRIPTIONS, MAX_QUANTITIES, ATTRIBUTE_TIER_TO_SHARD_COUNT, fusedCountToTierLevel } from "../../constants";
+import { SHARD_DESCRIPTIONS, MAX_QUANTITIES, fusedCountToTierLevel } from "../../constants";
 
 interface InventoryManagementModalProps {
   open: boolean;
