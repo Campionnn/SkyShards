@@ -670,9 +670,9 @@
     "id": "why_not_more"
   },
   "E29": {
-    "title": "Matriarch Cubs",
-    "description": "Grants a +2% chance to get a second Heavy Pearl",
-    "id": "matriarch_cubs"
+    "title": "Attack Speed",
+    "description": "Grants +1 ⚔ Bonus Attack Speed",
+    "id": "attack_speed"
   },
   "E30": {
     "title": "Echo of Ruler",
@@ -835,9 +835,9 @@
     "id": "double_hook"
   },
   "L27": {
-    "title": "Attack Speed",
-    "description": "Grants +1 ⚔ Bonus Attack Speed",
-    "id": "attack_speed"
+    "title": "Matriarch Cubs",
+    "description": "Grants a +2% chance to get a second Heavy Pearl",
+    "id": "matriarch_cubs"
   },
   "L28": {
     "title": "Magic Find",
