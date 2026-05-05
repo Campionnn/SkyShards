@@ -279,9 +279,9 @@
     "input2": "",
     "id_result": "",
     "id_origin": [
-      "Crow",
       "Hideonleaf",
-      "Hideongift"
+      "Hideongift",
+      "Crow"
     ]
   },
   "C27": {
@@ -293,8 +293,8 @@
     "input2": "",
     "id_result": "Bezal",
     "id_origin": [
-      "Harpy",
-      "Zealot"
+      "Zealot",
+      "Harpy"
     ]
   },
   "C29": {
@@ -505,9 +505,9 @@
     "input2": "",
     "id_result": "Bambuleaf",
     "id_origin": [
+      "Bramble",
       "Sparrow",
-      "Hideoncave",
-      "Bramble"
+      "Hideoncave"
     ]
   },
   "U11": {
@@ -522,9 +522,9 @@
     "input2": "Forest",
     "id_result": "Salmon",
     "id_origin": [
-      "Salamander",
+      "Tide",
       "Goldfin",
-      "Tide"
+      "Salamander"
     ]
   },
   "U12": {
@@ -536,9 +536,9 @@
     "input2": "",
     "id_result": "Seer",
     "id_origin": [
-      "Cuboa",
+      "Quake",
       "Troglobyte",
-      "Quake"
+      "Cuboa"
     ]
   },
   "U15": {
@@ -623,8 +623,8 @@
     "input2": "",
     "id_result": "Sycophant",
     "id_origin": [
-      "Viper",
-      "Obsidian Defender"
+      "Obsidian Defender",
+      "Viper"
     ]
   },
   "U25": {
@@ -638,9 +638,9 @@
     "input2": "",
     "id_result": "Mochibear",
     "id_origin": [
+      "Pest",
       "Heron",
-      "Praying Mantis",
-      "Pest"
+      "Praying Mantis"
     ]
   },
   "U27": {
@@ -702,8 +702,8 @@
     "input2": "",
     "id_result": "",
     "id_origin": [
-      "Seagull",
-      "Bambuleaf"
+      "Bambuleaf",
+      "Seagull"
     ]
   },
   "U32": {
@@ -932,9 +932,9 @@
     "input2": "",
     "id_result": "Abyssal Lanternfish",
     "id_origin": [
-      "Lizard King",
+      "Cascade",
       "Toad",
-      "Cascade"
+      "Lizard King"
     ]
   },
   "R13": {
@@ -982,9 +982,9 @@
     "input2": "",
     "id_result": "Star Sentry",
     "id_origin": [
+      "Glacite Walker",
       "Python",
-      "Lapis Skeleton",
-      "Glacite Walker"
+      "Lapis Skeleton"
     ]
   },
   "R21": {
@@ -1254,13 +1254,13 @@
     "input2": "Rare+",
     "id_result": "Fungloom",
     "id_origin": [
-      "Ladybug",
-      "Cropeetle",
       "Invisibug",
-      "Hideonring",
       "Hideongeon",
+      "Cropeetle",
       "Hideondra",
-      "Bitbug"
+      "Bitbug",
+      "Hideonring",
+      "Ladybug"
     ]
   },
   "R50": {
@@ -1354,8 +1354,8 @@
     "id_result": "Wither",
     "id_origin": [
       "Crocodile",
-      "King Cobra",
-      "Stalagmight"
+      "Stalagmight",
+      "King Cobra"
     ]
   },
   "R58": {
@@ -1582,11 +1582,7 @@
     "input1": "Moray Eel Shard",
     "input2": "Firefly|Eel Shard",
     "id_result": "Water Hydra",
-    "id_origin": [
-      "Leviathan",
-      "Moray Eel",
-      "Cryo"
-    ]
+    "id_origin": []
   },
   "E15": {
     "name": "Bal",
@@ -1715,7 +1711,7 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "Hellwisp",
+    "id_result": "Inferno Demonlord",
     "id_origin": [
       "Mimic"
     ]
@@ -1733,10 +1729,12 @@
     "id_origin": []
   },
   "E29": {
-    "name": "Hellwisp",
+    "name": "Inferno Demonlord",
     "rarity": "Epic",
     "category": "Combat",
-    "family": [],
+    "family": [
+      "Demon"
+    ],
     "input1": "",
     "input2": "",
     "id_result": "Ghost",
@@ -1794,7 +1792,7 @@
     "input2": "",
     "id_result": "Sphinx",
     "id_origin": [
-      "Hellwisp",
+      "Inferno Demonlord",
       "Caiman"
     ]
   },
@@ -1807,14 +1805,14 @@
     "input2": "",
     "id_result": "",
     "id_origin": [
-      "Toucan",
-      "Komodo Dragon",
-      "Iguana",
-      "Firefly",
       "Terra",
       "Pandarai",
+      "Iguana",
       "Lunar Moth",
-      "Hideonsack"
+      "Hideonsack",
+      "Komodo Dragon",
+      "Toucan",
+      "Firefly"
     ]
   },
   "E35": {
@@ -2003,8 +2001,8 @@
     "input2": "",
     "id_result": "Kraken",
     "id_origin": [
-      "Tiamat",
-      "Tempest"
+      "Tempest",
+      "Tiamat"
     ]
   },
   "L11": {
@@ -2051,9 +2049,9 @@
     "input2": "",
     "id_result": "Taurus",
     "id_origin": [
+      "Nessie",
       "Tortoise",
-      "Naga",
-      "Nessie"
+      "Naga"
     ]
   },
   "L15": {
@@ -2065,10 +2063,10 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Burningsoul",
+    "id_result": "Hellwisp",
     "id_origin": [
-      "Lapis Creeper",
-      "Endstone Protector"
+      "Endstone Protector",
+      "Lapis Creeper"
     ]
   },
   "L17": {
@@ -2092,7 +2090,7 @@
     ],
     "input1": "Kraken Shard",
     "input2": "Kraken Shard",
-    "id_result": "Burningsoul",
+    "id_result": "Hellwisp",
     "id_origin": []
   },
   "L20": {
@@ -2116,8 +2114,8 @@
     "input2": "",
     "id_result": "Lord Jawbus",
     "id_origin": [
-      "Moltenfish",
-      "Taurus"
+      "Taurus",
+      "Moltenfish"
     ]
   },
   "L24": {
@@ -2130,7 +2128,7 @@
     ],
     "input1": "Kraken Shard",
     "input2": "Bird",
-    "id_result": "Burningsoul",
+    "id_result": "Hellwisp",
     "id_origin": []
   },
   "L25": {
@@ -2158,7 +2156,7 @@
     ]
   },
   "L27": {
-    "name": "Burningsoul",
+    "name": "Hellwisp",
     "rarity": "Legendary",
     "category": "Combat",
     "family": [
@@ -2168,9 +2166,9 @@
     "input2": "",
     "id_result": "Power Dragon",
     "id_origin": [
-      "Ananke",
+      "Kraken",
       "Daemon",
-      "Kraken"
+      "Ananke"
     ]
   },
   "L28": {
@@ -2182,10 +2180,10 @@
     "input2": "",
     "id_result": "Cocoaleech",
     "id_origin": [
+      "Tenebris",
       "Chameleon",
       "Wyvern",
       "Wartybug",
-      "Tenebris",
       "Hideonbox"
     ]
   },
@@ -2213,7 +2211,7 @@
     "input2": "",
     "id_result": "Thorn",
     "id_origin": [
-      "Burningsoul"
+      "Hellwisp"
     ]
   },
   "L31": {
