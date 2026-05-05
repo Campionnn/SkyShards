@@ -1711,7 +1711,7 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "Hellwisp",
+    "id_result": "Inferno Demonlord",
     "id_origin": [
       "Mimic"
     ]
@@ -1729,10 +1729,12 @@
     "id_origin": []
   },
   "E29": {
-    "name": "Hellwisp",
+    "name": "Inferno Demonlord",
     "rarity": "Epic",
     "category": "Combat",
-    "family": [],
+    "family": [
+      "Demon"
+    ],
     "input1": "",
     "input2": "",
     "id_result": "Ghost",
@@ -1790,7 +1792,7 @@
     "input2": "",
     "id_result": "Sphinx",
     "id_origin": [
-      "Hellwisp",
+      "Inferno Demonlord",
       "Caiman"
     ]
   },
@@ -2061,7 +2063,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Burningsoul",
+    "id_result": "Hellwisp",
     "id_origin": [
       "Endstone Protector",
       "Lapis Creeper"
@@ -2088,7 +2090,7 @@
     ],
     "input1": "Kraken Shard",
     "input2": "Kraken Shard",
-    "id_result": "Burningsoul",
+    "id_result": "Hellwisp",
     "id_origin": []
   },
   "L20": {
@@ -2126,7 +2128,7 @@
     ],
     "input1": "Kraken Shard",
     "input2": "Bird",
-    "id_result": "Burningsoul",
+    "id_result": "Hellwisp",
     "id_origin": []
   },
   "L25": {
@@ -2154,7 +2156,7 @@
     ]
   },
   "L27": {
-    "name": "Burningsoul",
+    "name": "Hellwisp",
     "rarity": "Legendary",
     "category": "Combat",
     "family": [
@@ -2209,7 +2211,7 @@
     "input2": "",
     "id_result": "Thorn",
     "id_origin": [
-      "Burningsoul"
+      "Hellwisp"
     ]
   },
   "L31": {
