@@ -175,7 +175,7 @@ export class CalculationService {
   public calculateMultipliers(params: CalculationParams) {
     const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
     const seaSerpentMultiplier = 1 + ((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier;
-    const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100) * seaSerpentMultiplier;
+    const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100);
     const pythonMultiplier = ((5 * params.pythonLevel) / 100) * seaSerpentMultiplier;
     const kingCobraMultiplier = (params.kingCobraLevel / 100) * seaSerpentMultiplier;
     let craftPenalty: number;
