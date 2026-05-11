@@ -109,6 +109,11 @@
     "description": "Garden Visitors arrive +1% faster",
     "id": "visitor_bait"
   },
+  "C26": {
+    "title": "Lotus Trophy",
+    "description": "Grants +0.5 Trophy Fish Chance while in the Lotus Atoll",
+    "id": "lotus_trophy"
+  },
   "C27": {
     "title": "Midas Touch",
     "description": "Grants +1 Coin per kill",
@@ -238,6 +243,11 @@
     "title": "Insect Power",
     "description": "Your Vacuum deals +10% extra ❁ Damage",
     "id": "insect_power"
+  },
+  "U23": {
+    "title": "Golden Frog",
+    "description": "Trophy Frogs are +0.5% more likely to be GOLD",
+    "id": "golden_frog"
   },
   "U24": {
     "title": "Undead Ruler",
@@ -376,7 +386,7 @@
   },
   "R16": {
     "title": "Crop Bug",
-    "description": "Increased the odds of finding a Cropie, Squash or Fermento by +2%",
+    "description": "Grants +2% Overbloom towards Cropie, Squash, Fermento, and Helianthus",
     "id": "crop_bug"
   },
   "R18": {
@@ -428,6 +438,11 @@
     "title": "Atomized Crystals",
     "description": "Gain +1% extra Gemstone Powder",
     "id": "atomized_crystals"
+  },
+  "R32": {
+    "title": "Diamond Frog",
+    "description": "Trophy Frogs are +0.5% more likely to be DIAMOND",
+    "id": "diamond_frog"
   },
   "R33": {
     "title": "Quartz Speed",
