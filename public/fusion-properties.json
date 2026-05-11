@@ -253,7 +253,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Azure",
+    "id_result": "Lotusfish",
     "id_origin": [
       "Tadgang"
     ]
@@ -284,6 +284,20 @@
       "Crow"
     ]
   },
+  "C26": {
+    "name": "Lotusfish",
+    "rarity": "Common",
+    "category": "Water",
+    "family": [
+      "Tropical Fish"
+    ],
+    "input1": "",
+    "input2": "",
+    "id_result": "Azure",
+    "id_origin": [
+      "Coralot"
+    ]
+  },
   "C27": {
     "name": "Golden Ghoul",
     "rarity": "Common",
@@ -308,7 +322,7 @@
     "input2": "",
     "id_result": "",
     "id_origin": [
-      "Coralot"
+      "Lotusfish"
     ]
   },
   "C30": {
@@ -584,7 +598,7 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "Ent",
+    "id_result": "Lotum",
     "id_origin": [
       "Mossybit"
     ]
@@ -613,6 +627,21 @@
     "input2": "Combat",
     "id_result": "Bambuleaf",
     "id_origin": []
+  },
+  "U23": {
+    "name": "Lotum",
+    "rarity": "Uncommon",
+    "category": "Water",
+    "family": [
+      "Amphibian",
+      "Frog"
+    ],
+    "input1": "",
+    "input2": "",
+    "id_result": "Ent",
+    "id_origin": [
+      "Salmon"
+    ]
   },
   "U24": {
     "name": "Zombie Soldier",
@@ -676,7 +705,7 @@
     "input2": "",
     "id_result": "Magma Slug",
     "id_origin": [
-      "Salmon"
+      "Lotum"
     ]
   },
   "U30": {
@@ -1072,7 +1101,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Snowfin",
+    "id_result": "Tewtil",
     "id_origin": [
       "Abyssal Lanternfish"
     ]
@@ -1100,6 +1129,21 @@
     "input2": "",
     "id_result": "Kada Knight",
     "id_origin": []
+  },
+  "R32": {
+    "name": "Tewtil",
+    "rarity": "Rare",
+    "category": "Water",
+    "family": [
+      "Reptile",
+      "Turtle"
+    ],
+    "input1": "",
+    "input2": "",
+    "id_result": "Snowfin",
+    "id_origin": [
+      "Silentdepth"
+    ]
   },
   "R33": {
     "name": "Quartzfang",
@@ -1136,7 +1180,7 @@
     "input2": "",
     "id_result": "Carrot King",
     "id_origin": [
-      "Silentdepth"
+      "Tewtil"
     ]
   },
   "R36": {
