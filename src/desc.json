@@ -376,7 +376,7 @@
   },
   "R16": {
     "title": "Crop Bug",
-    "description": "Increased the odds of finding a Cropie, Squash, Fermento, or Helianthus by +2%",
+    "description": "Grants +10 ☀ Overbloom which increases your chances of dropping RARE CROPS.",
     "id": "crop_bug"
   },
   "R18": {
