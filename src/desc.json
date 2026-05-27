@@ -324,6 +324,11 @@
     "description": "Trophy Frogs are +0.5% more likely to be GOLD",
     "id": "golden_frog"
   },
+  "U59": {
+    "title": "Lily Puncher",
+    "description": "Punching Exploding Lily Pads applies +5% more force",
+    "id": "lily_puncher"
+  },
   "R1": {
     "title": "Forest Elemental",
     "description": "Grants +2 ❤ Health",
