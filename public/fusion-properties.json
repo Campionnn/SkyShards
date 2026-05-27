@@ -58,7 +58,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Night Squid",
+    "id_result": "Verdant",
     "id_origin": [
       "Mist"
     ]
@@ -75,20 +75,6 @@
     "id_result": "Hideonleaf",
     "id_origin": [
       "Phanpyre"
-    ]
-  },
-  "C8": {
-    "name": "Night Squid",
-    "rarity": "Common",
-    "category": "Water",
-    "family": [
-      "Squid"
-    ],
-    "input1": "",
-    "input2": "",
-    "id_result": "Verdant",
-    "id_origin": [
-      "Cod"
     ]
   },
   "C9": {
@@ -130,7 +116,7 @@
     "input2": "",
     "id_result": "Bogged",
     "id_origin": [
-      "Night Squid"
+      "Cod"
     ]
   },
   "C12": {
@@ -320,7 +306,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Inkling",
     "id_origin": [
       "Lotusfish"
     ]
@@ -335,6 +321,20 @@
     "id_result": "Yog",
     "id_origin": [
       "Golden Ghoul"
+    ]
+  },
+  "C32": {
+    "name": "Inkling",
+    "rarity": "Common",
+    "category": "Water",
+    "family": [
+      "Squid"
+    ],
+    "input1": "",
+    "input2": "",
+    "id_result": "",
+    "id_origin": [
+      "Azure"
     ]
   },
   "C33": {
@@ -792,7 +792,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Flipflopper",
     "id_origin": [
       "Magma Slug"
     ]
@@ -821,6 +821,33 @@
     "input2": "Mining Shards",
     "id_result": "",
     "id_origin": []
+  },
+  "U41": {
+    "name": "Flipflopper",
+    "rarity": "Uncommon",
+    "category": "Water",
+    "family": [],
+    "input1": "",
+    "input2": "",
+    "id_result": "Tewtil",
+    "id_origin": [
+      "Stridersurfer"
+    ]
+  },
+  "U59": {
+    "name": "Tewtil",
+    "rarity": "Uncommon",
+    "category": "Water",
+    "family": [
+      "Reptile",
+      "Turtle"
+    ],
+    "input1": "",
+    "input2": "",
+    "id_result": "",
+    "id_origin": [
+      "Flipflopper"
+    ]
   },
   "R1": {
     "name": "Sylvan",
@@ -1101,7 +1128,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Tewtil",
+    "id_result": "Seashine",
     "id_origin": [
       "Abyssal Lanternfish"
     ]
@@ -1131,13 +1158,10 @@
     "id_origin": []
   },
   "R32": {
-    "name": "Tewtil",
+    "name": "Seashine",
     "rarity": "Rare",
     "category": "Water",
-    "family": [
-      "Reptile",
-      "Turtle"
-    ],
+    "family": [],
     "input1": "",
     "input2": "",
     "id_result": "Snowfin",
@@ -1180,7 +1204,7 @@
     "input2": "",
     "id_result": "Carrot King",
     "id_origin": [
-      "Tewtil"
+      "Seashine"
     ]
   },
   "R36": {

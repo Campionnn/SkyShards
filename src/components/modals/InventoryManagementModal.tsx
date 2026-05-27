@@ -6,7 +6,7 @@ import type { HypixelProfileResponse, ProfileData } from "../../services";
 import { useShards } from "../../hooks";
 import { loadHypixelProfileMeta, saveHypixelProfileMeta, clearHypixelProfileMeta, clearDisabledShards, filterShards, DEFAULT_FILTER_CONFIG, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
 import type { HypixelProfileMeta } from "../../utilities";
-import { SHARD_DESCRIPTIONS, MAX_QUANTITIES, ATTRIBUTE_TIER_TO_SHARD_COUNT, fusedCountToTierLevel } from "../../constants";
+import { SHARD_DESCRIPTIONS, MAX_QUANTITIES, fusedCountToTierLevel } from "../../constants";
 
 interface InventoryManagementModalProps {
   open: boolean;
@@ -287,16 +287,8 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
       console.log(`Shard ${shardId} (${rarity}): fused count = ${fusedCount}, tier level = ${tierLevel}`);
       
       // Store the tier level for the form
+      console.log(`  -> Setting form level to ${tierLevel}`);
       shardLevels[formKey] = tierLevel;
-      
-      // Also set inventory quantity based on tier level
-      if (tierLevel > 0 && tierLevel <= 10) {
-        const requiredCount = ATTRIBUTE_TIER_TO_SHARD_COUNT[rarity]?.[tierLevel] ?? 0;
-        console.log(`  -> Setting form level to ${tierLevel}, inventory to ${requiredCount}`);
-        if (requiredCount > 0) {
-          newInventory.set(shardId, requiredCount);
-        }
-      }
     }
 
     // Update shard levels in the form

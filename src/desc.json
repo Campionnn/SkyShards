@@ -386,7 +386,7 @@
   },
   "R16": {
     "title": "Crop Bug",
-    "description": "Grants +2% Overbloom towards Cropie, Squash, Fermento, and Helianthus",
+    "description": "Grants +10 ☀ Overbloom which increases your chances of dropping RARE CROPS.",
     "id": "crop_bug"
   },
   "R18": {
