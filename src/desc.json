@@ -29,11 +29,6 @@
     "description": "Grants +10 ☘ Fig Fortune and +10 ☘ Mangrove Fortune",
     "id": "moonglade_mastery"
   },
-  "C8": {
-    "title": "Fisherman",
-    "description": "Has a +1% chance not to consume any bait",
-    "id": "fisherman"
-  },
   "C9": {
     "title": "Experience",
     "description": "Grants +10% more experience orbs from killing mobs",
@@ -51,7 +46,7 @@
   },
   "C12": {
     "title": "Skeletal Ruler",
-    "description": "Increase damage to Skeletal creatures by +3%",
+    "description": "Increase damage to Skeletal mobs by +3%",
     "id": "skeletal_ruler"
   },
   "C14": {
@@ -61,7 +56,7 @@
   },
   "C15": {
     "title": "Arthropod Resistance",
-    "description": "Grants +4 ❈ Defense against Spiders",
+    "description": "Grants +4 ❈ Defense against Arthropod mobs",
     "id": "arachno_resistance"
   },
   "C16": {
@@ -76,7 +71,7 @@
   },
   "C18": {
     "title": "Undead Resistance",
-    "description": "Grants +4 ❈ Defense against Undead Monsters",
+    "description": "Grants +4 ❈ Defense against Undead mobs",
     "id": "undead_resistance"
   },
   "C19": {
@@ -91,7 +86,7 @@
   },
   "C21": {
     "title": "Ender Resistance",
-    "description": "Grants +4 ❈ Defense against mobs in The End",
+    "description": "Grants +4 ❈ Defense against Ender mobs",
     "id": "ender_resistance"
   },
   "C23": {
@@ -109,6 +104,11 @@
     "description": "Garden Visitors arrive +1% faster",
     "id": "visitor_bait"
   },
+  "C26": {
+    "title": "Lotus Trophy",
+    "description": "Grants +1 Trophy Chance",
+    "id": "lotus_trophy"
+  },
   "C27": {
     "title": "Midas Touch",
     "description": "Grants +1 Coin per kill",
@@ -121,8 +121,13 @@
   },
   "C30": {
     "title": "Blazing Resistance",
-    "description": "Grants +4 ❈ Defense against mobs while in the Crimson Isle",
+    "description": "Grants +4 ❈ Defense against Infernal mobs",
     "id": "blazing_resistance"
+  },
+  "C32": {
+    "title": "Fisherman",
+    "description": "Has a +1% chance not to consume any bait",
+    "id": "fisherman"
   },
   "C33": {
     "title": "Yog Membrane",
@@ -196,7 +201,7 @@
   },
   "U10": {
     "title": "Pest Luck",
-    "description": "Gain a +2% chance to obtain rare loot from Pests",
+    "description": "Grants +2 ☀ Overbloom towards Pests",
     "id": "pest_luck"
   },
   "U11": {
@@ -239,9 +244,14 @@
     "description": "Your Vacuum deals +10% extra ❁ Damage",
     "id": "insect_power"
   },
+  "U23": {
+    "title": "Lily Tracker",
+    "description": "Grants +1 Tracking on Exploding Lily Pads",
+    "id": "lily_tracker"
+  },
   "U24": {
     "title": "Undead Ruler",
-    "description": "Grants +3% more ❁ Damage against Undead Monsters",
+    "description": "Grants +3% more ❁ Damage against Undead mobs",
     "id": "undead"
   },
   "U25": {
@@ -281,7 +291,7 @@
   },
   "U33": {
     "title": "Arthropod Ruler",
-    "description": "Grants +3% more ❁ Damage against Spiders",
+    "description": "Grants +3% more ❁ Damage against Arthropod mobs",
     "id": "arachno"
   },
   "U34": {
@@ -308,6 +318,11 @@
     "title": "Infiltration",
     "description": "Grants +3 ☘ Farming Fortune if your Garden Plot currently has a Pest in it",
     "id": "infiltration"
+  },
+  "U41": {
+    "title": "Golden Frog",
+    "description": "Trophy Frogs are +0.5% more likely to be GOLD",
+    "id": "golden_frog"
   },
   "R1": {
     "title": "Forest Elemental",
@@ -341,7 +356,7 @@
   },
   "R7": {
     "title": "Beacon Zealot",
-    "description": "The effects of beacons are 10% stronger on you. Gain a 0.1% chance to find Signal Enhancers in Tree Gifts",
+    "description": "Galatea's beacons are 10% stronger on you. Gain a 0.1% chance to find Signal Enhancers in Tree Gifts",
     "id": "beacon_zealot"
   },
   "R8": {
@@ -376,7 +391,7 @@
   },
   "R16": {
     "title": "Crop Bug",
-    "description": "Grants +10 ☀ Overbloom which increases your chances of dropping RARE CROPS.",
+    "description": "Grants +1 ☀ Overbloom which increases your chances of dropping RARE CROPS.",
     "id": "crop_bug"
   },
   "R18": {
@@ -416,7 +431,7 @@
   },
   "R29": {
     "title": "Crystal Serendipity",
-    "description": "Grants a +2% chance to double any loot from Crystal Hollows Treasure Chests",
+    "description": "Grants a +1% chance to double any loot from Crystal Hollows Treasure Chests",
     "id": "crystal_serendipity"
   },
   "R30": {
@@ -428,6 +443,11 @@
     "title": "Atomized Crystals",
     "description": "Gain +1% extra Gemstone Powder",
     "id": "atomized_crystals"
+  },
+  "R32": {
+    "title": "Diamond Frog",
+    "description": "Trophy Frogs are +0.5% more likely to be DIAMOND",
+    "id": "diamond_frog"
   },
   "R33": {
     "title": "Quartz Speed",
@@ -630,8 +650,8 @@
     "id": "fishing_speed"
   },
   "E18": {
-    "title": "Blazing",
-    "description": "Grants +3% more ❁ Damage against mobs while in the Crimson Isle",
+    "title": "Infernal Ruler",
+    "description": "Grants +3% more ❁ Damage against Infernal mobs",
     "id": "blazing"
   },
   "E20": {
@@ -656,7 +676,7 @@
   },
   "E26": {
     "title": "Shell",
-    "description": "Gain +10% Regular Knockback Resistance",
+    "description": "Gain +10% chance negate knockback",
     "id": "shell"
   },
   "E27": {
@@ -715,7 +735,7 @@
     "id": "garden_wisdom"
   },
   "E39": {
-    "title": "Big Game Hunter",
+    "title": "Mythological Tracker",
     "description": "Grants +0.5 ❃ Tracking on Griffin Burrows",
     "id": "big_game_hunter"
   },
@@ -770,7 +790,7 @@
     "id": "cloak_improvement"
   },
   "L9": {
-    "title": "Paramount Fortitude",
+    "title": "Unlimited Fortitude",
     "description": "Your ❈ Defense is increased by +0.2%",
     "id": "fortitude"
   },
@@ -800,7 +820,7 @@
     "id": "mending"
   },
   "L17": {
-    "title": "Maximal Torment",
+    "title": "Unlimited Torment",
     "description": "Your ✎ Intelligence is increased by +0.1%",
     "id": "maximal_torment"
   },
