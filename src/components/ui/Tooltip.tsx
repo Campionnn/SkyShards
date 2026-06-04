@@ -49,7 +49,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
     const viewportPadding = 8;
 
     // Calculate position above trigger by default
-    let top = triggerRect.top - tooltipRect.height - viewportPadding;
+    const scroll = document.scrollingElement?.getBoundingClientRect().top ?? 0;
+    let top = triggerRect.top - scroll - tooltipRect.height - viewportPadding;
     let left = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
 
     // Adjust if tooltip would go off screen
@@ -120,7 +121,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
       <div
         ref={tooltipRef}
-        className={`fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 transition-opacity duration-200 ${
+        className={`fixed z-[9999] max-w-xs min-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 transition-opacity duration-200 ${
           isVisible ? "opacity-100" : "opacity-0 pointer-events-none select-none"
         }`}
         style={{
