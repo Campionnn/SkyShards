@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, Search, Package, RefreshCw, User, ChevronDown, AlertTriangle, Check, Filter, RotateCcw, Eye, EyeOff, Trash2 } from "lucide-react";
-import { hypixelService } from "../../services";
+import { hypixelService, DataService } from "../../services";
 import type { HypixelProfileResponse, ProfileData } from "../../services";
 import { useShards } from "../../hooks";
 import { loadHypixelProfileMeta, saveHypixelProfileMeta, clearHypixelProfileMeta, clearDisabledShards, filterShards, DEFAULT_FILTER_CONFIG, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
@@ -31,7 +31,16 @@ interface InventoryManagementModalProps {
   }) => void;
 }
 
-type TabType = "shards" | "attributes";
+type TabType = "shards" | "attributes" | "missing";
+
+type ShardSortMode =
+  | "id-asc"
+  | "id-desc"
+  | "name-asc"
+  | "name-desc"
+  | "rarity"
+  | "price-asc"
+  | "price-desc";
 
 const RARITY_OPTIONS = [
   { value: "all",       label: "All Rarities", color: "text-violet-400" },
@@ -82,6 +91,10 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
 
   // Profile metadata
   const [profileMeta, setProfileMeta] = useState<HypixelProfileMeta | null>(null);
+
+  const [shardSortMode, setShardSortMode] = useState<ShardSortMode>("id-asc");
+  const [priceMap, setPriceMap] = useState<Record<string, number> | null>(null);
+  const [priceError, setPriceError] = useState<string | null>(null);
 
   useEffect(() => {
     const meta = loadHypixelProfileMeta();
@@ -160,19 +173,142 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
           searchConfig: DEFAULT_FILTER_CONFIG,
         });
 
-    if (!shardsQuery.trim()) {
-      return baseFilter.sort(sortByShardKey);
+    const sortByPrice = (a: { key: string }, b: { key: string }, dir: 1 | -1) => {
+      const aPrice = priceMap?.[a.key];
+      const bPrice = priceMap?.[b.key];
+      if (aPrice == null && bPrice == null) return 0;
+      if (aPrice == null) return 1;
+      if (bPrice == null) return -1;
+      return (aPrice - bPrice) * dir;
+    };
+
+    const sortByRarity = (a: { rarity: string; key: string }, b: { rarity: string; key: string }) => {
+      const rarityOrder: Record<string, number> = {
+        common: 1,
+        uncommon: 2,
+        rare: 3,
+        epic: 4,
+        legendary: 5,
+      };
+      const aR = rarityOrder[a.rarity.toLowerCase()] ?? 99;
+      const bR = rarityOrder[b.rarity.toLowerCase()] ?? 99;
+      if (aR !== bR) return aR - bR;
+      return sortByShardKey(a, b);
+    };
+
+    const sorted = [...baseFilter];
+
+    switch (shardSortMode) {
+      case "id-asc":
+        sorted.sort(sortByShardKey);
+        break;
+      case "id-desc":
+        sorted.sort((a, b) => sortByShardKey(b, a));
+        break;
+      case "name-asc":
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "name-desc":
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case "rarity":
+        sorted.sort(sortByRarity);
+        break;
+      case "price-asc":
+        sorted.sort((a, b) => sortByPrice(a, b, 1));
+        break;
+      case "price-desc":
+        sorted.sort((a, b) => sortByPrice(a, b, -1));
+        break;
+      default:
+        sorted.sort(sortByShardKey);
+        break;
     }
 
-    const lowerQuery = shardsQuery.toLowerCase();
-    return baseFilter.sort((a, b) => {
-      const aStarts = a.name.toLowerCase().startsWith(lowerQuery);
-      const bStarts = b.name.toLowerCase().startsWith(lowerQuery);
-      if (aStarts && !bStarts) return -1;
-      if (!aStarts && bStarts) return 1;
-      return sortShardsByNameWithPrefixAwareness(a, b);
+    return sorted;
+  }, [shards, shardsQuery, shardsRarity, inventory, shardSortMode, priceMap]);
+
+  const missingShards = useMemo(() => {
+    const base = shardsArray.filter((shard) => {
+      const invQty = inventory.get(shard.key) ?? 0;
+      const hasAttribute = ownedAttributes.get(shard.key) ? (ownedAttributes.get(shard.key) ?? 0) > 0 : false;
+      return invQty <= 0 && !hasAttribute;
     });
-  }, [shards, shardsQuery, shardsRarity, inventory]);
+    const sorted = [...base];
+
+    const sortByPrice = (a: { key: string }, b: { key: string }, dir: 1 | -1) => {
+      const aPrice = priceMap?.[a.key];
+      const bPrice = priceMap?.[b.key];
+      if (aPrice == null && bPrice == null) return 0;
+      if (aPrice == null) return 1;
+      if (bPrice == null) return -1;
+      return (aPrice - bPrice) * dir;
+    };
+
+    const sortByRarity = (a: { rarity: string; key: string }, b: { rarity: string; key: string }) => {
+      const rarityOrder: Record<string, number> = {
+        common: 1,
+        uncommon: 2,
+        rare: 3,
+        epic: 4,
+        legendary: 5,
+      };
+      const aR = rarityOrder[a.rarity.toLowerCase()] ?? 99;
+      const bR = rarityOrder[b.rarity.toLowerCase()] ?? 99;
+      if (aR !== bR) return aR - bR;
+      return sortByShardKey(a, b);
+    };
+
+    switch (shardSortMode) {
+      case "id-asc":
+        sorted.sort(sortByShardKey);
+        break;
+      case "id-desc":
+        sorted.sort((a, b) => sortByShardKey(b, a));
+        break;
+      case "name-asc":
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "name-desc":
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case "rarity":
+        sorted.sort(sortByRarity);
+        break;
+      case "price-asc":
+        sorted.sort((a, b) => sortByPrice(a, b, 1));
+        break;
+      case "price-desc":
+        sorted.sort((a, b) => sortByPrice(a, b, -1));
+        break;
+      default:
+        sorted.sort(sortByShardKey);
+        break;
+    }
+
+    return sorted;
+  }, [shardsArray, inventory, ownedAttributes, shardSortMode, priceMap]);
+
+  const shardSortLabel = useMemo(() => {
+    switch (shardSortMode) {
+      case "id-asc":
+        return "ID low to high";
+      case "id-desc":
+        return "ID high to low";
+      case "name-asc":
+        return "alphabetical A-Z";
+      case "name-desc":
+        return "alphabetical Z-A";
+      case "rarity":
+        return "rarity";
+      case "price-asc":
+        return "price low to high";
+      case "price-desc":
+        return "price high to low";
+      default:
+        return "ID low to high";
+    }
+  }, [shardSortMode]);
 
   // Build a map from shard key (e.g. "L51") to shard name (e.g. "Scarf") for attribute search
   const shardKeyToName = useMemo(() => {
@@ -256,12 +392,34 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
   };
 
   // Import data from a profile
-  const importProfileData = (profileData: ProfileData, username: string) => {
+  const importProfileData = useCallback(async (profileData: ProfileData, username: string) => {
+    const dataService = DataService.getInstance();
+    const nameToKeyMap = await dataService.getShardNameToKeyMap();
+    const validKeys = new Set(shardsArray.map((shard) => shard.key));
+
     const newInventory = new Map<string, number>();
+    let unmappedCount = 0;
+
     for (const shard of profileData.shards) {
-      if (shard.amount > 0) {
-        newInventory.set(shard.id, shard.amount);
+      if (shard.amount <= 0) continue;
+
+      let key = shard.id;
+      if (!validKeys.has(key)) {
+        const upper = shard.id.toUpperCase();
+        if (validKeys.has(upper)) {
+          key = upper;
+        } else {
+          const nameKey = nameToKeyMap[shard.name?.toLowerCase?.() ?? ""];
+          if (nameKey && validKeys.has(nameKey)) {
+            key = nameKey;
+          } else {
+            unmappedCount += 1;
+            continue;
+          }
+        }
       }
+
+      newInventory.set(key, shard.amount);
     }
     
     // Auto-fill the 9 shard level shards based on attribute levels
@@ -316,10 +474,14 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
     saveHypixelProfileMeta(meta);
     setProfileMeta(meta);
     setImportSuccess(true);
-  };
+
+    if (unmappedCount > 0) {
+      console.warn(`Skipped ${unmappedCount} shards that did not match known keys.`);
+    }
+  }, [onInventoryChange, onOwnedAttributesChange, onShardLevelsImport, shardsArray]);
 
   // Handle import button click
-  const handleImport = async () => {
+  const handleImport = useCallback(async () => {
     if (!username.trim()) return;
 
     setIsLoading(true);
@@ -339,21 +501,32 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
         curr.profile.last_save > prev.profile.last_save ? curr : prev
       );
       setSelectedProfileId(mostRecent.profile.profile_id);
-      importProfileData(mostRecent, data.username);
+      await importProfileData(mostRecent, data.username);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch profile");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [username, importProfileData]);
+
+  useEffect(() => {
+    if (!open) return;
+    setPriceError(null);
+    DataService.getInstance()
+      .loadShardCosts(true)
+      .then((prices) => setPriceMap(prices))
+      .catch((err: unknown) => {
+        setPriceError(err instanceof Error ? err.message : "Failed to load prices");
+      });
+  }, [open]);
 
   // Handle profile change from dropdown
-  const handleProfileChange = (profileId: string) => {
+  const handleProfileChange = async (profileId: string) => {
     setSelectedProfileId(profileId);
     if (profileData) {
       const profile = profileData.profiles.find((p) => p.profile.profile_id === profileId);
       if (profile) {
-        importProfileData(profile, profileData.username);
+        await importProfileData(profile, profileData.username);
       }
     }
   };
@@ -532,6 +705,17 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
               )}
             </button>
             <button
+              onClick={() => setActiveTab("missing")}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer flex items-center gap-2 ${
+                activeTab === "missing"
+                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                  : "bg-slate-800 text-slate-400 border border-slate-600 hover:bg-slate-700"
+              }`}
+            >
+              Missing
+              <span className="text-xs bg-purple-500/30 px-1.5 py-0.5 rounded">{missingShards.length}</span>
+            </button>
+            <button
               onClick={() => setActiveTab("attributes")}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer flex items-center gap-2 ${
                 activeTab === "attributes"
@@ -596,6 +780,24 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                   )}
                 </div>
 
+                {/* Sort dropdown */}
+                <div className="relative">
+                  <select
+                    value={shardSortMode}
+                    onChange={(e) => setShardSortMode(e.target.value as ShardSortMode)}
+                    className="px-3 py-2 h-[38px] bg-slate-800 border border-slate-600 rounded-md text-white text-sm focus:outline-none focus:border-purple-400 appearance-none cursor-pointer"
+                    title="Sort shards"
+                  >
+                    <option value="id-asc">ID (low to high)</option>
+                    <option value="id-desc">ID (high to low)</option>
+                    <option value="name-asc">Alphabetical (A-Z)</option>
+                    <option value="name-desc">Alphabetical (Z-A)</option>
+                    <option value="rarity">Rarity</option>
+                    <option value="price-asc">Price (low to high)</option>
+                    <option value="price-desc">Price (high to low)</option>
+                  </select>
+                </div>
+
                 {/* Reset */}
                 <button
                   onClick={() => { setShardsQuery(""); setShardsRarity("all"); }}
@@ -605,6 +807,12 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                   <RotateCcw className="w-4 h-4" />
                 </button>
               </div>
+
+              {priceError && (shardSortMode === "price-asc" || shardSortMode === "price-desc") && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-md p-2 text-xs text-red-300">
+                  {priceError}
+                </div>
+              )}
 
               {/* Count */}
               <div className="text-xs text-slate-400">
@@ -684,6 +892,84 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                             placeholder="0"
                             className="w-full px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm focus:outline-none focus:border-purple-400"
                           />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Missing Shards Tab */}
+          {activeTab === "missing" && (
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <div className="relative">
+                  <select
+                    value={shardSortMode}
+                    onChange={(e) => setShardSortMode(e.target.value as ShardSortMode)}
+                    className="px-3 py-2 h-[38px] bg-slate-800 border border-slate-600 rounded-md text-white text-sm focus:outline-none focus:border-purple-400 appearance-none cursor-pointer"
+                    title="Sort shards"
+                  >
+                    <option value="id-asc">ID (low to high)</option>
+                    <option value="id-desc">ID (high to low)</option>
+                    <option value="name-asc">Alphabetical (A-Z)</option>
+                    <option value="name-desc">Alphabetical (Z-A)</option>
+                    <option value="rarity">Rarity</option>
+                    <option value="price-asc">Price (low to high)</option>
+                    <option value="price-desc">Price (high to low)</option>
+                  </select>
+                </div>
+              </div>
+
+              {priceError && (shardSortMode === "price-asc" || shardSortMode === "price-desc") && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-md p-2 text-xs text-red-300">
+                  {priceError}
+                </div>
+              )}
+
+              <div className="text-xs text-slate-400">
+                {missingShards.length} of {shardsArray.length} shards missing (sorted by {shardSortLabel})
+              </div>
+
+              {missingShards.length === 0 ? (
+                <div className="text-center py-8 text-slate-400">
+                  <Check className="w-8 h-8 mx-auto mb-2 text-green-400" />
+                  <p>All shards are present in inventory</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {missingShards.map((shard) => {
+                    const shardRarityBorder =
+                      shard.rarity === "common"    ? "border-slate-500/50"
+                      : shard.rarity === "uncommon" ? "border-green-500/50"
+                      : shard.rarity === "rare"     ? "border-blue-500/50"
+                      : shard.rarity === "epic"     ? "border-purple-500/50"
+                      :                               "border-amber-500/50";
+
+                    const shardRarityText =
+                      shard.rarity === "common"    ? "text-slate-300"
+                      : shard.rarity === "uncommon" ? "text-green-300"
+                      : shard.rarity === "rare"     ? "text-blue-300"
+                      : shard.rarity === "epic"     ? "text-purple-300"
+                      :                               "text-amber-300";
+
+                    const price = priceMap?.[shard.key];
+                    return (
+                      <div key={shard.key} className={`bg-slate-800/50 border ${shardRarityBorder} rounded-md p-2 space-y-1`}>
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={`${import.meta.env.BASE_URL}shardIcons/${shard.key}.png`}
+                            alt={shard.name}
+                            className="w-5 h-5 object-contain flex-shrink-0"
+                            loading="lazy"
+                          />
+                          <span className={`text-sm font-medium flex-1 truncate ${shardRarityText}`}>{shard.name}</span>
+                          <span className="text-xs text-slate-400">{shard.key}</span>
+                        </div>
+                        <div className="text-xs text-slate-400">
+                          Price: {price == null ? "N/A" : price.toLocaleString()}
                         </div>
                       </div>
                     );

@@ -1,2 +1,8 @@
 onlyBuiltDependencies:
   - esbuild
+  - '@tailwindcss/oxide'
+
+overrides:
+  flatted: ^3.4.2
+  picomatch: ^4.0.4
+  mdast-util-to-hast: ^13.2.1
