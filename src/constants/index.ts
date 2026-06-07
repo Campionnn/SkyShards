@@ -132,6 +132,18 @@ export const ATTRIBUTE_TIER_TO_SHARD_COUNT: Record<string, Record<number, number
   },
 };
 
+export const tierLabel = (tier: number): string => (tier === 10 ? "Tier 10 (Max)" : `Tier ${tier}`);
+
+// Cumulative number of shards required to reach a given tier (1-10) for a rarity.
+// Tier 10 equals MAX_QUANTITIES[rarity].
+export function cumulativeShardsForTier(rarity: string, tier: number): number {
+  const tierMap = ATTRIBUTE_TIER_TO_SHARD_COUNT[rarity.toLowerCase()];
+  if (!tierMap) return 0;
+  let cumulative = 0;
+  for (let t = 1; t <= tier; t++) cumulative += tierMap[t] ?? 0;
+  return cumulative;
+}
+
 export function fusedCountToTierLevel(fusedCount: number, rarity: string): number {
   const tierMap = ATTRIBUTE_TIER_TO_SHARD_COUNT[rarity.toLowerCase()];
   if (!tierMap) return 0;

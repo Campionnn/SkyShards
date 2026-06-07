@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(cd \"C:\\\\Users\\\\Aarav\\\\OneDrive\\\\Desktop\\\\vibecoding\\\\Shards\"; \\(Get-Command pnpm -ErrorAction SilentlyContinue\\).Source; \\(Get-Command npm -ErrorAction SilentlyContinue\\).Source; \\(Get-Command npx -ErrorAction SilentlyContinue\\).Source; node -v)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node -e \"const d=require\\('./public/fusion-data.json'\\); const t=new Set\\(\\),f=new Set\\(\\); for\\(const k in d.shards\\){t.add\\(d.shards[k].type\\);f.add\\(d.shards[k].family\\);} console.log\\('TYPES:',JSON.stringify\\([...t]\\)\\); console.log\\('FAMILIES count:',f.size\\);\")"
+    ]
+  }
+}

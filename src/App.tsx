@@ -8,6 +8,7 @@ import { ToastProvider } from "./components";
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));
 const RecipePage = lazy(() => import("./pages/RecipePage"));
+const MissingShardsPage = lazy(() => import("./pages/MissingShardsPage"));
 const GuidePage = lazy(() => import("./pages/GuidePage").then((module) => ({ default: module.GuidePage })));
 const AboutPage = lazy(() => import("./pages/AboutPage").then((module) => ({ default: module.AboutPage })));
 
@@ -73,6 +74,14 @@ const router = createBrowserRouter(
           element: (
             <Suspense fallback={<LoadingSpinner />}>
               <RecipePage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "missing",
+          element: (
+            <Suspense fallback={<LoadingSpinner />}>
+              <MissingShardsPage />
             </Suspense>
           ),
         },

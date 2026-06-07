@@ -15,6 +15,8 @@ export const usePageTitle = () => {
           return "SkyShards · Recipes";
         case "/shards":
           return "SkyShards · Shards";
+        case "/missing":
+          return "SkyShards · Missing Shards";
         default:
           return "SkyShards · Calculator";
       }

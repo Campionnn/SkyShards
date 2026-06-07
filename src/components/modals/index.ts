@@ -6,3 +6,4 @@ export { MultiSelectShardModal } from "./MultiSelectShardModal";
 export { MaterialBreakdownModal } from "./MaterialBreakdownModal";
 export { InventoryManagementModal } from "./InventoryManagementModal";
 export { GreenhouseModal } from "./GreenhouseModal";
+export { ShardDetailModal } from "./ShardDetailModal";

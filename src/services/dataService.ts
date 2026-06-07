@@ -100,8 +100,15 @@ export class DataService {
     this.bazaarPriceCache[cacheKey] = {};
 
     for (const shard of shards) {
-      const price = bazaarData.products[`${shard.internal_id}`]?.quick_status;
-      this.bazaarPriceCache[cacheKey][shard.id] = useInstantBuyPrices ? price?.buyPrice : price?.sellPrice;
+      const product = bazaarData.products[`${shard.internal_id}`];
+      const quick = product?.quick_status;
+      // Prefer the live top-of-book (matches the in-game prices exactly); fall back to quick_status.
+      // Instabuy  = lowest sell offer  = buy_summary[0]  (in-game "Buy price")
+      // Buy Order = highest buy order  = sell_summary[0] (in-game "Sell price")
+      const price = useInstantBuyPrices
+        ? product?.buy_summary?.[0]?.pricePerUnit ?? quick?.buyPrice
+        : product?.sell_summary?.[0]?.pricePerUnit ?? quick?.sellPrice;
+      this.bazaarPriceCache[cacheKey][shard.id] = price;
     }
   
     return this.bazaarPriceCache[cacheKey];
