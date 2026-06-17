@@ -1,67 +1,13 @@
-import React, { useState } from "react";
-import { Clock, Coins, Hammer, Target, BarChart3, TicketPercent } from "lucide-react";
-import { formatLargeNumber, formatNumber, formatTime } from "../../utilities";
-import type { RecipeTree, CalculationResultsProps } from "../../types/types";
-import { RecipeTreeNode } from "../tree";
-import { RecipeOverrideManager } from "../forms";
-import { SummaryCard, MaterialItem, useToast } from "../ui";
+import React, { useMemo, useState } from "react";
+import { BarChart3, Hammer } from "lucide-react";
+import { formatLargeNumber } from "../../utilities";
+import type { CalculationResultsProps, ShardWithKey } from "../../types/types";
+import { MaterialItem, useToast } from "../ui";
 import pako from "pako";
 import { CopyTreeModal } from "../modals";
-
-// Utility function to manage expanded states
-const useTreeExpansion = (tree: RecipeTree | null) => {
-  const [expandedStates, setExpandedStates] = useState<Map<string, boolean>>(new Map());
-  const [lastTreeHash, setLastTreeHash] = useState<string>("");
-
-  const initializeExpandedStates = (tree: RecipeTree, nodeId: string = "root"): Map<string, boolean> => {
-    const states = new Map<string, boolean>();
-    const traverse = (node: RecipeTree, id: string) => {
-      if (node.method === "recipe" && node.inputs) {
-        states.set(id, true);
-        node.inputs.forEach((input, index) => {
-          traverse(input, `${id}-${index}`);
-        });
-      }
-    };
-    traverse(tree, nodeId);
-    return states;
-  };
-
-  React.useEffect(() => {
-    if (tree) {
-      const treeHash = JSON.stringify(tree);
-      if (treeHash !== lastTreeHash) {
-        const initialStates = initializeExpandedStates(tree);
-        setExpandedStates(initialStates);
-        setLastTreeHash(treeHash);
-      }
-    }
-  }, [tree, lastTreeHash]);
-
-  const handleExpandAll = () => {
-    const newStates = new Map(expandedStates);
-    for (const key of newStates.keys()) {
-      newStates.set(key, true);
-    }
-    setExpandedStates(newStates);
-  };
-
-  const handleCollapseAll = () => {
-    const newStates = new Map(expandedStates);
-    for (const key of newStates.keys()) {
-      newStates.set(key, false);
-    }
-    setExpandedStates(newStates);
-  };
-
-  const handleNodeToggle = (nodeId: string) => {
-    const newStates = new Map(expandedStates);
-    newStates.set(nodeId, !newStates.get(nodeId));
-    setExpandedStates(newStates);
-  };
-
-  return { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle };
-};
+import { ResultSummaryCards } from "./ResultSummaryCards";
+import { FusionTreeView } from "./FusionTreeView";
+import { MaterialTreeSelector } from "./MaterialTreeSelector";
 
 export const CalculationResults: React.FC<CalculationResultsProps> = ({
   result,
@@ -74,8 +20,10 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   onResetRecipeOverrides,
   ironManView,
   materialsOnly = false,
+  materialShardResults,
+  materialTreeShardKey = "",
+  onMaterialTreeShardChange,
 }) => {
-  const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
   const [copyModalOpen, setCopyModalOpen] = useState(false);
   const { toast } = useToast();
 
@@ -85,275 +33,48 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     return btoa(binary);
   };
 
-  type SkyOceanDirect = { shard: string; method: "direct"; quantity: number };
-  type SkyOceanCycleStep = { shard: string; inputs: [string, string] };
-  type SkyOceanCycle = {
-    shard: string;
-    method: "cycle";
-    quantity: number;
-    craftsExpected: number;
-    outputQuantity: number;
-    pureReptile: number;
-    steps: SkyOceanCycleStep[];
-    inputRecipe?: SkyOceanTree;
-    cycleInputs: SkyOceanTree[];
-  };
-  type SkyOceanRecipe = {
-    shard: string;
-    method: "recipe";
-    quantity: number;
-    craftsExpected: number;
-    outputQuantity: number;
-    pureReptile: number;
-    inputs: SkyOceanTree[];
-  };
-  type SkyOceanTree = SkyOceanDirect | SkyOceanCycle | SkyOceanRecipe;
-
-  const convertTreeToSkyOcean = (tree: RecipeTree): SkyOceanTree => {
-    if (tree.method === "direct") {
-      return {
-        shard: tree.shard,
-        method: "direct",
-        quantity: tree.quantity,
-      };
-    }
-
-    if (tree.method === "cycle") {
-      const pureReptile = tree.quantity / tree.steps[0].recipe.outputQuantity;
-
-      return {
-        shard: tree.shard,
-        method: "cycle",
-        quantity: tree.quantity,
-        craftsExpected: tree.craftsNeeded,
-        outputQuantity: tree.steps[0].recipe.outputQuantity,
-        pureReptile: pureReptile,
-        steps: tree.steps.map((step) => ({
-          shard: step.outputShard,
-          inputs: step.recipe.inputs,
-        })),
-        inputRecipe: tree.inputRecipe ? convertTreeToSkyOcean(tree.inputRecipe) : undefined,
-        cycleInputs: tree.cycleInputs ? tree.cycleInputs.map((input) => convertTreeToSkyOcean(input)) : [],
-      };
-    }
-
-    // recipe
-    const pureReptile = (tree.quantity - tree.craftsNeeded * tree.recipe.outputQuantity) / tree.recipe.outputQuantity;
-
-    return {
-      shard: tree.shard,
-      method: "recipe",
-      quantity: tree.quantity,
-      craftsExpected: tree.craftsNeeded,
-      outputQuantity: tree.recipe.outputQuantity,
-      pureReptile: pureReptile,
-      inputs: tree.inputs ? tree.inputs.map((input) => convertTreeToSkyOcean(input)) : [],
-    };
-  };
-
-  type NoFrillsItem = { name: string; needed: number; source: "Direct" | "Fuse" | "Cycle" };
-
-  const convertTreeToNoFrills = (tree: RecipeTree): NoFrillsItem[] => {
-    const shardQuantities: Map<string, number> = new Map();
-    const traverse = (node: RecipeTree | undefined) => {
-      if (!node) return;
-      if (node.method === "direct") {
-        const key = `${node.shard}|Direct`;
-        const currentQuantity = shardQuantities.get(key) || 0;
-        shardQuantities.set(key, currentQuantity + node.quantity);
-      } else if (node.method === "recipe") {
-        const key = `${node.shard}|Fuse`;
-        const currentQuantity = shardQuantities.get(key) || 0;
-        shardQuantities.set(key, currentQuantity + node.quantity);
-        if (node.inputs) {
-          node.inputs.forEach((input) => traverse(input));
-        }
-      } else if (node.method === "cycle") {
-        const key = `${node.shard}|Cycle`;
-        shardQuantities.set(key, (shardQuantities.get(key) || 0) + node.quantity);
-        if (node.inputRecipe) traverse(node.inputRecipe);
-        node.cycleInputs.forEach((cycleInput) => traverse(cycleInput));
-      }
-    };
-    traverse(tree);
-
-    const list: NoFrillsItem[] = [];
-    shardQuantities.forEach((quantity, key) => {
-      const [shardId, method] = key.split("|");
-      list.push({
-        name: data.shards[shardId].name,
-        needed: quantity,
-        source: method as NoFrillsItem["source"],
-      });
-    });
-    return list;
-  };
-
-  type SkyHanniItem = { name: string; needed: number };
-
-  const convertTreeToSkyHanni = (tree: RecipeTree): SkyHanniItem[] => {
-    const shardQuantities: Map<string, number> = new Map();
-    const traverse = (node: RecipeTree | undefined) => {
-      if (!node) return;
-      if (node.method === "direct") {
-        const key = node.shard;
-        const currentQuantity = shardQuantities.get(key) || 0;
-        shardQuantities.set(key, currentQuantity + node.quantity);
-      } else if (node.method === "recipe") {
-        if (node.inputs) {
-          node.inputs.forEach((input) => traverse(input));
-        }
-      } else if (node.method === "cycle") {
-        if (node.inputRecipe) traverse(node.inputRecipe);
-        node.cycleInputs.forEach((cycleInput) => traverse(cycleInput));
-      }
-    };
-    traverse(tree);
-
-    const list: SkyHanniItem[] = [];
-    shardQuantities.forEach((quantity, shardId) => {
-      list.push({
-        name: data.shards[shardId].name,
-        needed: quantity,
-      });
-    });
-    return list;
-  };
-
-  const buildSkyOceanString = () => {
-    if (!result.tree) return "";
-    const convertedTree = convertTreeToSkyOcean(result.tree);
-    const treeString = JSON.stringify(convertedTree);
-    const base64Tree = gzipBase64(treeString);
-    return "<SkyOceanRecipe>(V2):" + base64Tree;
-  };
-
+  // Materials-only copy (no tree): flatten the combined totals
   const buildNoFrillsString = () => {
-    let list: NoFrillsItem[];
-
-    if (result.tree) {
-      list = convertTreeToNoFrills(result.tree);
-    } else {
-      list = [];
-      result.totalQuantities.forEach((quantity, shardId) => {
-        list.push({
-          name: data.shards[shardId].name,
-          needed: quantity,
-          source: "Direct",
-        });
-      });
-    }
-
-    const listString = JSON.stringify(list);
-    const base64List = gzipBase64(listString);
-    return "<NoFrillsRecipe>(V1):" + base64List;
+    const list = Array.from(result.totalQuantities).map(([shardId, quantity]) => ({
+      name: data.shards[shardId].name,
+      needed: quantity,
+      source: "Direct" as const,
+    }));
+    return "<NoFrillsRecipe>(V1):" + gzipBase64(JSON.stringify(list));
   };
 
   const buildSkyHanniString = () => {
-    let list: SkyHanniItem[];
+    const list = Array.from(result.totalQuantities).map(([shardId, quantity]) => ({
+      name: data.shards[shardId].name,
+      needed: quantity,
+    }));
+    return "<SkyHanniRecipe>(V1):" + gzipBase64(JSON.stringify(list));
+  };
 
-    if (result.tree) {
-      list = convertTreeToSkyHanni(result.tree);
-    } else {
-      list = [];
-      result.totalQuantities.forEach((quantity, shardId) => {
-        list.push({
-          name: data.shards[shardId].name,
-          needed: quantity,
-        });
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => toast({ title: "Copied", description: `${label} list copied to clipboard.`, variant: "success" }))
+      .catch((err) => {
+        console.error(`Failed to copy ${label} list:`, err);
+        toast({ title: "Copy failed", description: "Failed to copy to clipboard.", variant: "error" });
       });
-    }
-
-    const listString = JSON.stringify(list);
-    const base64List = gzipBase64(listString);
-    return "<SkyHanniRecipe>(V1):" + base64List;
   };
 
-  const handleCopySkyOcean = () => {
-    try {
-      const text = buildSkyOceanString();
-      navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          toast({ title: "Copied", description: "SkyOcean recipe copied to clipboard.", variant: "success" });
-        })
-        .catch((err) => {
-          console.error("Failed to copy SkyOcean string:", err);
-          toast({ title: "Copy failed", description: "Failed to copy to clipboard.", variant: "error" });
-        });
-    } catch (err) {
-      console.error("Failed to build SkyOcean string:", err);
-      toast({ title: "Build failed", description: "Failed to build SkyOcean string.", variant: "error" });
-    }
-  };
+  // Shards available to view individually (the selected target shards)
+  const selectableShards = useMemo<ShardWithKey[]>(() => {
+    if (!materialShardResults) return [];
+    return Array.from(materialShardResults.keys())
+      .filter((key) => data.shards[key])
+      .map((key) => ({ ...data.shards[key], key }));
+  }, [materialShardResults, data]);
 
-  const handleCopyNoFrills = () => {
-    try {
-      const text = buildNoFrillsString();
-      navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          toast({ title: "Copied", description: "NoFrills recipe copied to clipboard.", variant: "success" });
-        })
-        .catch((err) => {
-          console.error("Failed to copy NoFrills list:", err);
-          toast({ title: "Copy failed", description: "Failed to copy to clipboard.", variant: "error" });
-        });
-    } catch (err) {
-      console.error("Failed to build NoFrills list:", err);
-      toast({ title: "Build failed", description: "Failed to build NoFrills list.", variant: "error" });
-    }
-  };
-
-  const handleCopySkyHanni = () => {
-    try {
-      const text = buildSkyHanniString();
-      navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          toast({ title: "Copied", description: "SkyHanni recipe copied to clipboard.", variant: "success" });
-        })
-        .catch((err) => {
-          console.error("Failed to copy SkyHanni list:", err);
-          toast({ title: "Copy failed", description: "Failed to copy to clipboard.", variant: "error" });
-        });
-    } catch (err) {
-      console.error("Failed to build SkyHanni list:", err);
-      toast({ title: "Build failed", description: "Failed to build SkyHanni list.", variant: "error" });
-    }
-  };
+  const selectedTreeResult = materialTreeShardKey ? materialShardResults?.get(materialTreeShardKey) : undefined;
 
   return (
     <div className="space-y-3">
       {/* Summary Cards */}
-      <div className={`grid grid-cols-2 ${materialsOnly ? "lg:grid-cols-3" : ironManView ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-3`}>
-        {ironManView && (
-          <>
-            {!materialsOnly && <SummaryCard icon={Clock} iconColor="text-purple-400" label="Time per Shard" value={formatTime(result.timePerShard)} />}
-            <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Time" value={formatTime(result.totalTime)} />
-          </>
-        )}
-        {!ironManView && (
-          <>
-            {!materialsOnly && <SummaryCard icon={Coins} iconColor="text-yellow-400" label="Cost per Shard" value={formatLargeNumber(result.timePerShard)} />}
-            <SummaryCard icon={Target} iconColor="text-blue-400" label="Total Cost" value={formatLargeNumber(result.totalTime)} />
-            <SummaryCard
-              icon={TicketPercent}
-              iconColor="text-purple-400"
-              label="Total Coins Saved"
-              value={formatLargeNumber(result.totalShardsProduced * data.shards[targetShard].rate - result.totalTime)}
-            />
-          </>
-        )}
-        <SummaryCard icon={BarChart3} iconColor="text-green-400" label="Shards Produced" value={formatNumber(result.totalShardsProduced).toString()} />
-        <SummaryCard
-          icon={Hammer}
-          iconColor="text-orange-400"
-          label="Total Fusions"
-          value={`${result.craftsNeeded}x`}
-          additionalValue={ironManView ? formatTime(result.craftTime) : formatLargeNumber(result.craftTime)}
-        />
-      </div>
+      <ResultSummaryCards result={result} data={data} targetShard={targetShard} ironManView={ironManView} materialsOnly={materialsOnly} />
       {/* Materials Needed */}
       <div className="bg-slate-800 border border-slate-600 rounded-md p-3">
         <div className="flex flex-col sm:flex-row gap-2.5 flex-wrap items-start sm:items-center sm:justify-between mb-3">
@@ -440,82 +161,53 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
               return <MaterialItem key={shardId} shard={shard} quantity={quantity} ironManView={ironManView} />;
             })}
         </div>
-      </div>{" "}
-      {/* Fusion Tree */}
-      {!materialsOnly && result.tree && (
-      <div className="bg-slate-800 border border-slate-600 rounded-md p-3">
-        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
-          <div className="min-w-[810px]">
-            <RecipeOverrideManager
-              params={params}
-              recipeOverrides={recipeOverrides}
-              onRecipeOverridesUpdate={onRecipeOverridesUpdate}
-              onResetRecipeOverrides={onResetRecipeOverrides}
-            >
-              {({ showAlternatives, resetAlternatives }) => (
-                <>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
-                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                      <div className="p-1 bg-slate-700 rounded-md">
-                        <BarChart3 className="w-5 h-5 text-purple-400" />
-                      </div>
-                      Fusion Tree
-                    </h3>
-                    <div className="flex gap-2 flex-wrap">
-                      <button
-                        onClick={() => setCopyModalOpen(true)}
-                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/20 hover:border-blue-500/30 order-4 sm:order-1"
-                      >
-                        <span>Copy Tree</span>
-                      </button>
-                      <button
-                        onClick={resetAlternatives}
-                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 hover:border-red-500/30 order-3 sm:order-2"
-                      >
-                        <span>Reset Alternatives</span>
-                      </button>
-                      <button
-                        onClick={handleExpandAll}
-                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 hover:border-green-500/30 order-2 sm:order-3"
-                      >
-                        <span>Expand All</span>
-                      </button>
-                      <button
-                        onClick={handleCollapseAll}
-                        className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/20 hover:border-orange-500/30 order-1 sm:order-4"
-                      >
-                        <span>Collapse All</span>
-                      </button>
-                    </div>
-                  </div>
-                  {result.tree && (
-                    <RecipeTreeNode
-                      tree={result.tree}
-                      data={data}
-                    isTopLevel={true}
-                    totalShardsProduced={result.totalShardsProduced}
-                    nodeId="root"
-                    expandedStates={expandedStates}
-                    onToggle={handleNodeToggle}
-                    onShowAlternatives={showAlternatives}
-                    noWoodenBait={params.noWoodenBait}
-                    ironManView={ironManView}
-                  />
-                  )}
-                </>
-              )}
-            </RecipeOverrideManager>
-          </div>
-        </div>
       </div>
+      {/* Per-shard fusion tree (materials-only mode) */}
+      {materialsOnly && selectableShards.length > 0 && (
+        <div className="bg-slate-800 border border-slate-600 rounded-md p-3 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="p-1 bg-slate-700 rounded-md">
+              <BarChart3 className="w-5 h-5 text-purple-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">View Fusion Tree</h3>
+          </div>
+          <p className="text-sm text-slate-400">Select one of your shards to view its full fusion tree. Alternatives you set here apply to every shard.</p>
+          <MaterialTreeSelector shards={selectableShards} value={materialTreeShardKey} onChange={(key) => onMaterialTreeShardChange?.(key)} />
+        </div>
+      )}
+      {materialsOnly && selectedTreeResult && data.shards[materialTreeShardKey] && (
+        <>
+          <ResultSummaryCards result={selectedTreeResult} data={data} targetShard={materialTreeShardKey} ironManView={ironManView} />
+          <FusionTreeView
+            result={selectedTreeResult}
+            data={data}
+            params={params}
+            recipeOverrides={recipeOverrides}
+            onRecipeOverridesUpdate={onRecipeOverridesUpdate}
+            onResetRecipeOverrides={onResetRecipeOverrides}
+            ironManView={ironManView}
+          />
+        </>
+      )}
+      {/* Fusion Tree (single-shard mode) */}
+      {!materialsOnly && result.tree && (
+        <FusionTreeView
+          result={result}
+          data={data}
+          params={params}
+          recipeOverrides={recipeOverrides}
+          onRecipeOverridesUpdate={onRecipeOverridesUpdate}
+          onResetRecipeOverrides={onResetRecipeOverrides}
+          ironManView={ironManView}
+        />
       )}
       <CopyTreeModal
         open={copyModalOpen}
         onClose={() => setCopyModalOpen(false)}
-        onCopySkyOcean={handleCopySkyOcean}
-        onCopyNoFrills={handleCopyNoFrills}
-        onCopySkyHanni={handleCopySkyHanni}
-        materialsOnly={materialsOnly}
+        onCopySkyOcean={() => copyToClipboard("", "SkyOcean")}
+        onCopyNoFrills={() => copyToClipboard(buildNoFrillsString(), "NoFrills")}
+        onCopySkyHanni={() => copyToClipboard(buildSkyHanniString(), "SkyHanni")}
+        materialsOnly={true}
       />
     </div>
   );

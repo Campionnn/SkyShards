@@ -4,11 +4,9 @@ import type { Data, Recipes } from "../types/types";
 import type { FusionData } from "./recipeUtils";
 import { buildFusionGraph, type FusionEdgeType, type FusionGraph } from "./fusionLines";
 
-/**
- * React Flow / dagre layout for the fusion-lines graph. Pure (no React, no I/O):
- * it turns the dominance-pruned graph from `fusionLines.ts` into positioned nodes
- * and typed edges for the interactive graph page.
- */
+// React Flow / dagre layout for the fusion-lines graph: turns the dominance-pruned
+// graph from fusionLines.ts into positioned nodes and typed edges for the
+// interactive graph page.
 
 export const NODE_WIDTH = 180;
 export const NODE_HEIGHT = 52;
@@ -23,7 +21,7 @@ export interface ShardNodeData extends Record<string, unknown> {
   shardId: string;
   name: string;
   rarity: string;
-  /** Has more than one dominant parent (special or id) — `*(shared)` in FUSION_LINES.md. */
+  /** Has more than one dominant parent (special or id). */
   shared: boolean;
   /** Participates in at least one special / id edge (used by the edge-type filter). */
   inSpecial: boolean;
@@ -42,11 +40,9 @@ export type EdgeFilter = "both" | "special" | "id";
 export type ShardNode = Node<ShardNodeData, "shard">;
 export type FusionEdge = Edge<FusionEdgeData>;
 
-/**
- * Convert the raw fusion-data.json shape (recipes nested by output quantity) into
- * the `Data` type consumed by `buildFusionGraph`. Mirrors
- * `CalculationService.buildData`, minus the rate/fortune work the graph never uses.
- */
+/** Convert the raw fusion-data.json shape (recipes nested by output quantity) into
+ * the `Data` type consumed by `buildFusionGraph`. Mirrors `CalculationService.buildData`,
+ * minus the rate/fortune work the graph never uses. */
 export function fusionDataToData(fusionJson: FusionData, rates?: Record<string, number>): Data {
   const recipes: Recipes = {};
   for (const output in fusionJson.recipes) {
@@ -65,13 +61,11 @@ export function fusionDataToData(fusionJson: FusionData, rates?: Record<string, 
   return { recipes, shards };
 }
 
-/**
- * The shard's fusion line: its strict ANCESTORS (walking edges upward) plus strict
- * DESCENDANTS (walking edges downward) plus itself. Unlike a weakly-connected
- * component this does NOT zig-zag through siblings, so it stays a readable lineage
- * even though id-fusions link much of the graph together. `filter` limits which
- * edge kinds are followed so the highlight matches what's on screen. Cycle-safe.
- */
+/** The shard's fusion line: its strict ancestors plus strict descendants plus
+ * itself. Unlike a weakly-connected component this doesn't zig-zag through
+ * siblings, so it stays a readable lineage even though id-fusions link much of
+ * the graph together. `filter` limits which edge kinds are followed so the
+ * highlight matches what's on screen. Cycle-safe. */
 export function getConnectedLine(shardId: string, graph: FusionGraph, filter: EdgeFilter = "both"): Set<string> {
   const fwd: Map<string, Set<string>>[] = [];
   const rev: Map<string, Set<string>>[] = [];
@@ -104,11 +98,9 @@ export function getConnectedLine(shardId: string, graph: FusionGraph, filter: Ed
   return result;
 }
 
-/**
- * Build positioned nodes + typed edges from the fusion graph. Layout runs once via
+/** Build positioned nodes + typed edges from the fusion graph. Layout runs once via
  * dagre (left-to-right). Returned nodes carry static data only — the page applies
- * `dimmed` per interaction.
- */
+ * `dimmed` per interaction. */
 export function buildGraphElements(data: Data, graph: FusionGraph): { nodes: ShardNode[]; edges: FusionEdge[] } {
   // Collect every node id that takes part in a kept edge.
   const ids = new Set<string>();
@@ -127,9 +119,8 @@ export function buildGraphElements(data: Data, graph: FusionGraph): { nodes: Sha
   for (const id of ids) g.setNode(id, { width: NODE_WIDTH, height: NODE_HEIGHT });
 
   const edges: FusionEdge[] = [];
-  // Special (family-backbone) edges get a much higher weight so dagre keeps family
-  // chains tight & vertical; id edges (cross-family) are low weight so they bend out
-  // of the way instead of dragging family members across the graph.
+  // Special edges get a much higher weight so dagre keeps family chains tight; id
+  // edges stay low weight so they bend out of the way instead of dragging members across.
   const addEdges = (m: Map<string, Set<string>>, edgeType: FusionEdgeType) => {
     const weight = edgeType === "special" ? 12 : 1;
     for (const [from, tos] of m) {
@@ -160,14 +151,8 @@ export function buildGraphElements(data: Data, graph: FusionGraph): { nodes: Sha
       id,
       type: "shard",
       position: { x: (pos?.x ?? 0) - NODE_WIDTH / 2, y: (pos?.y ?? 0) - NODE_HEIGHT / 2 },
-      // Authoritative node box (not just style) so React Flow knows the exact size from
-      // the first frame. `measured` is essential: React Flow's adoptUserNodes wipes a
-      // node's measured handle bounds back to `undefined` on every re-adopt UNLESS the
-      // user node carries `measured` (see parseHandles). Because we pass explicit
-      // dimensions, React Flow never writes `measured` back itself, so without this the
-      // handle bounds reset on every render and edges fall back to the node's top-left
-      // origin (arrows float up-and-left of the dots; a manual resize "fixes" it only
-      // until the next render). Supplying `measured` lets the real bounds persist.
+      // `measured` must be set explicitly, or React Flow resets handle bounds on every
+      // re-adopt and edge arrows float up-and-left of the node.
       width: NODE_WIDTH,
       height: NODE_HEIGHT,
       measured: { width: NODE_WIDTH, height: NODE_HEIGHT },

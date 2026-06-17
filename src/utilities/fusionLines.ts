@@ -1,40 +1,26 @@
 import type { Data } from "../types/types";
 import { MAX_QUANTITIES } from "../constants";
 
-/**
- * Fusion-graph analysis.
- *
- * Recipes come in three kinds (same classification as recipeUtils.classifyFusion
- * and the SkyShards-Parser script):
- *   - chameleon: an input is "L4" (Chameleon). Ignored entirely.
- *   - special:   outputQuantity === 2. Curated upgrades, mostly same-family.
- *   - id:        everything else. A shard id-fuses into a fixed result with *any*
- *                second shard acting as a throwaway catalyst.
- *
- * Within a family the raw recipe graph is near-complete and bidirectional
- * (Ghost + almost anything -> Sphinx; Sphinx + almost anything -> King Minos),
- * so "X is an input to Y" is meaningless. The signal is DOMINANCE: a meaningful
- * parent appears in a large fraction of an output's recipes (Hellwisp in 364/369
- * of Power Dragon), while catalysts appear ~0.6%. We keep only dominant edges,
- * tagged special vs id. This collapses ~tens-of-thousands of garbage paths to a
- * clean ~222-edge graph that reproduces the canonical lines:
- *   special: Gecko -> Iguana -> Komodo Dragon -> Wyvern
- *   id:      Ghost -> Sphinx -> King Minos,  Hellwisp -> Power Dragon -> Apex Dragon
- *
- * This module is pure (no React / no I/O) so it can be shared by the calculator,
- * the standalone debug script, and a future UI graph view.
- */
+// Recipes split into three kinds (matches recipeUtils.classifyFusion): chameleon
+// (an input is L4, ignored entirely), special (outputQuantity === 2, curated
+// same-family upgrades), and id (everything else, fuse-with-any-catalyst). Within
+// a family the raw recipe graph is near-complete and bidirectional, so "X is an
+// input to Y" alone is meaningless — the signal is DOMINANCE: a real parent shows
+// up in most of an output's recipes while catalysts are noise. Keeping only
+// dominant edges collapses the graph to the canonical lines, e.g.
+// Gecko -> Iguana -> Komodo Dragon -> Wyvern (special) and
+// Ghost -> Sphinx -> King Minos (id).
 
 export type FusionEdgeType = "special" | "id";
 
 export interface FusionGraph {
-  /** special: from -> set of outputs reachable via a dominant special (qty=2) edge. */
+  /** special: from -> outputs reachable via a dominant special (qty=2) edge. */
   special: Map<string, Set<string>>;
-  /** id: from -> set of outputs reachable via a dominant id edge. */
+  /** id: from -> outputs reachable via a dominant id edge. */
   id: Map<string, Set<string>>;
-  /** reverse special: output -> set of dominant special parents. */
+  /** reverse special: output -> dominant special parents. */
   specialRev: Map<string, Set<string>>;
-  /** reverse id: output -> set of dominant id parents. */
+  /** reverse id: output -> dominant id parents. */
   idRev: Map<string, Set<string>>;
 }
 
@@ -43,23 +29,12 @@ export interface BuildFusionGraphOptions {
   dominanceThreshold?: number;
   /** Minimum raw recipe count an input must appear in (kills tiny-block noise). */
   minCount?: number;
-  /**
-   * Structural "can this shard ever be obtained directly?" predicate, sourced from
-   * the base `rates.json` (rate > 0) — NOT the param-modified per-run rate. When
-   * provided, the graph is post-pruned so no remaining root (a node with no incoming
-   * edge of *either* type) is directly-unobtainable: a fusion line that starts from a
-   * shard you can never acquire is meaningless, so its outgoing edges are dropped.
-   * Omit it to skip pruning entirely (backward compatible).
-   */
+  /** Structural obtainability predicate (base rates.json, rate > 0). When provided,
+   * roots that are never directly obtainable are pruned out as noise. */
   isDirectlyObtainable?: (id: string) => boolean;
-  /**
-   * Minimum cost to obtain each shard (from `CalculationService.computeMinCosts`).
-   * When provided, an edge `from -> to` is dropped if `minCost(from) > minCost(to)`:
-   * a higher-cost shard is never used to make a strictly cheaper one (e.g. Starborn
-   * for Blizzard, Inferno Demonlord for Ghost). Such an edge can never lie on an
-   * optimal path — the input alone already costs more than the whole output's
-   * minimum — so removing it is loss-free. Omit to skip cost pruning.
-   */
+  /** Min cost to obtain each shard (CalculationService.computeMinCosts). When
+   * provided, drops edges from a pricier shard into a cheaper one — such an edge
+   * can never lie on an optimal path. */
   minCost?: (id: string) => number;
 }
 
@@ -82,12 +57,12 @@ const addEdge = (fwd: Map<string, Set<string>>, rev: Map<string, Set<string>>, f
   r.add(from);
 };
 
-/**
- * Build the dominance-pruned, type-tagged fusion graph. Chameleon recipes are
- * excluded. An edge X -> Y (special|id) is added when X appears in at least
- * `dominanceThreshold` of Y's recipes (for that output quantity) and at least
- * `minCount` of them.
- */
+// Local alias so we don't depend on the exact import name elsewhere.
+type Recipe = Data["recipes"][string][number];
+
+/** Build the dominance-pruned, type-tagged fusion graph. Chameleon recipes are
+ * excluded. An edge X -> Y is added when X appears in at least `dominanceThreshold`
+ * of Y's recipes (for that output quantity) and at least `minCount` of them. */
 export function buildFusionGraph(data: Data, opts: BuildFusionGraphOptions = {}): FusionGraph {
   const threshold = opts.dominanceThreshold ?? DEFAULT_DOMINANCE_THRESHOLD;
   const minCount = opts.minCount ?? DEFAULT_MIN_COUNT;
@@ -109,7 +84,6 @@ export function buildFusionGraph(data: Data, opts: BuildFusionGraphOptions = {})
     }
 
     for (const [quantity, recipes] of byQuantity) {
-      // Exclude chameleon recipes.
       const usable = recipes.filter((r) => r.inputs[0] !== CHAMELEON_ID && r.inputs[1] !== CHAMELEON_ID);
       if (usable.length === 0) continue;
 
@@ -183,22 +157,11 @@ const pruneBackwardEdges = (
   for (const [from, to] of doomed) removeEdge(fwd, rev, from, to);
 };
 
-/**
- * Drop edges `from -> to` where the source is strictly more costly than the target —
- * you would never spend a pricier shard to fuse a cheaper one (e.g. Inferno
- * Demonlord for Ghost, Starborn for Blizzard). Such an edge can never be on an
- * optimal path (the input alone exceeds the output's minimum cost), so removal is
- * loss-free.
- *
- * The two edge kinds need different handling:
- *   - id (cross-family) edges: remove every backward one outright.
- *   - special (family backbone) edges: only remove a backward edge when the target
- *     can reach the source via other special edges (i.e., the edge is part of a
- *     cycle). This catches indirect cycles like Hideonring → Hideongift where
- *     Hideongift → Hideondra → Hideonring creates the loop. One-directional
- *     backbone edges are preserved even when the base shard is expensive to acquire
- *     (e.g. Gecko → Iguana — Iguana has no path back to Gecko, so it is kept).
- */
+/** Drop edges `from -> to` where the source costs more than the target — you'd
+ * never spend a pricier shard to fuse a cheaper one. For id edges this removes
+ * every backward edge; for special (family backbone) edges it only removes one
+ * that's part of a cycle, so one-directional chains like Gecko -> Iguana survive
+ * even when Gecko is itself expensive. */
 function pruneHigherCostEdges(graph: FusionGraph, minCost: (id: string) => number): void {
   pruneBackwardEdges(graph.id, graph.idRev, minCost, () => true);
   pruneBackwardEdges(graph.special, graph.specialRev, minCost, (from, to) => canReach(graph.special, to, from));
@@ -217,15 +180,10 @@ const removeFrom = (fwd: Map<string, Set<string>>, rev: Map<string, Set<string>>
   fwd.delete(from);
 };
 
-/**
- * Iteratively strip edges that originate from a "dead" root: a node with outgoing
- * edges, no incoming edge of *either* type (so it anchors a line), and that is not
- * directly obtainable. Such a line begins at a shard you can never acquire, so it is
- * pure noise. Removing its edges can orphan its former children into new dead roots,
- * so we repeat until the graph stabilises. The combined-type incoming check keeps
- * nodes that are reachable via the other edge kind (e.g. Power Dragon, a special root
- * but reachable via its id parent Hellwisp).
- */
+/** Iteratively strip edges from roots (no incoming edge of either type) that
+ * aren't directly obtainable — a line that starts at a shard you can never
+ * acquire is noise. Removing a root's edges can orphan its children into new
+ * dead roots, so this repeats until the graph stabilizes. */
 function pruneUnobtainableRoots(graph: FusionGraph, isDirectlyObtainable: (id: string) => boolean): void {
   for (;;) {
     const dead: string[] = [];
@@ -243,15 +201,9 @@ function pruneUnobtainableRoots(graph: FusionGraph, isDirectlyObtainable: (id: s
   }
 }
 
-// Local alias so we don't depend on the exact import name elsewhere.
-type Recipe = Data["recipes"][string][number];
-
-/**
- * Shards reachable downstream from `shardId` over SPECIAL edges only, INCLUDING
- * the shard itself. This is the shard's "fusion line" for completion purposes —
- * the family backbone it upgrades along, excluding id-fusion jumps into unrelated
- * targets (e.g. Cavernshade -> Sphinx -> King Minos). Cycle-safe.
- */
+/** Shards reachable downstream from `shardId` over special edges only, including
+ * the shard itself — its family-backbone fusion line, excluding id-fusion jumps
+ * into unrelated targets. Cycle-safe. */
 export function getSpecialDownstreamClosure(
   shardId: string,
   graph: FusionGraph,
@@ -274,16 +226,11 @@ export function getSpecialDownstreamClosure(
   return closure;
 }
 
-/**
- * Set of shards that are "freely usable" from inventory: a shard qualifies when
- * itself and everything it upgrades into along its special-fusion line (its
- * special-only downstream closure) are all maxed in the player's attributes. For
- * such shards there is no remaining progression to hoard for, so the inventory
- * layer drops the exclusivity ("scarcity") penalty that would otherwise refuse to
- * consume them.
- *
- * Empty `ownedAttributes` => empty set => behavior identical to before.
- */
+/** Shards that are "freely usable" from inventory: a shard qualifies when it and
+ * everything it upgrades into along its special-fusion line are all maxed in the
+ * player's attributes, so there's no progression left to hoard for and the
+ * inventory layer can drop the scarcity penalty. Empty `ownedAttributes` returns
+ * an empty set. */
 export function computeFreelyUsableShards(
   data: Data,
   ownedAttributes: Map<string, number>,
@@ -298,9 +245,7 @@ export function computeFreelyUsableShards(
   const isMaxed = (id: string): boolean => {
     const shard = data.shards[id];
     if (!shard) return false;
-    const cap =
-      MAX_QUANTITIES[shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES] ??
-      MAX_QUANTITIES.common;
+    const cap = MAX_QUANTITIES[shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES] ?? MAX_QUANTITIES.common;
     return (ownedAttributes.get(id) ?? 0) >= cap;
   };
 
@@ -320,7 +265,7 @@ export function computeFreelyUsableShards(
   return result;
 }
 
-// ── Display structures ────────────────────────────────────────────────────────
+// ── Display structures ──────────────────────────────────────────────────────
 
 export interface FusionTreeNode {
   id: string;
@@ -330,7 +275,7 @@ export interface FusionTreeNode {
   edgeType?: FusionEdgeType;
   /** True if this node has more than one dominant parent of this edge type. */
   sharedParents?: boolean;
-  /** True if this node's subtree was already expanded under another root (children omitted here). */
+  /** True if this node's subtree was already expanded under another root. */
   ref?: boolean;
   children: FusionTreeNode[];
 }
@@ -358,16 +303,10 @@ const makeNode = (
   children: [],
 });
 
-/**
- * Build rooted display trees for one edge type. Roots are nodes that have
- * outgoing edges of this type but no incoming edge of this type. Each node's
- * subtree is expanded exactly once (globally) — when a node is reached again via
- * a different converging parent it is emitted as a leaf `ref` (its full subtree
- * lives under the first root). This keeps the output bounded (the id graph is a
- * convergent forest where many parents feed shared sinks like XYZ). Nodes flagged
- * `sharedParents` have more than one dominant parent (e.g. Sphinx <- Ghost &
- * Cavernshade). Cycle-safe.
- */
+/** Build rooted display trees for one edge type. Roots have outgoing edges of
+ * this type but no incoming edge of this type. Each node's subtree is expanded
+ * once globally — a node reached again via a converging parent is emitted as a
+ * leaf `ref` instead of repeating its subtree. Cycle-safe. */
 function buildTrees(
   data: Data,
   fwd: Map<string, Set<string>>,
@@ -392,11 +331,8 @@ function buildTrees(
   return roots.map((root) => expand(root, undefined));
 }
 
-/**
- * Produce serializable display data: the special-fusion family trees and the
- * id-fusion ladders, kept separate so the picture stays legible. Suitable for a
- * UI graph view or a text dump.
- */
+/** Serializable display data: the special-fusion family trees and the id-fusion
+ * ladders, kept separate so the picture stays legible. */
 export function computeFusionLines(data: Data, opts?: BuildFusionGraphOptions): FusionLines {
   const graph = buildFusionGraph(data, opts);
   return {
