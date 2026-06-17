@@ -122,7 +122,7 @@ export function buildGraphElements(data: Data, graph: FusionGraph): { nodes: Sha
   collect(graph.id);
 
   const g = new dagre.graphlib.Graph();
-  g.setGraph({ rankdir: "LR", nodesep: 16, ranksep: 100, marginx: 24, marginy: 24 });
+  g.setGraph({ rankdir: "LR", nodesep: 30, ranksep: 100, marginx: 24, marginy: 24, ranker: "longest-path" });
   g.setDefaultEdgeLabel(() => ({}));
   for (const id of ids) g.setNode(id, { width: NODE_WIDTH, height: NODE_HEIGHT });
 
