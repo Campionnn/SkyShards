@@ -478,7 +478,8 @@ const CalculatorPageContent: React.FC = () => {
         formData.quantity,
         params,
         new Map([...inventory].filter(([id]) => !disabledShards.has(id))),
-        recipeOverrides
+        recipeOverrides,
+        ownedAttributes
       );
 
       setInventoryResult(calculationResult);
@@ -491,7 +492,7 @@ const CalculatorPageContent: React.FC = () => {
     } finally {
       setIsCalculating(false);
     }
-  }, [customRates, inventory, disabledShards, recipeOverrides]);
+  }, [customRates, inventory, disabledShards, recipeOverrides, ownedAttributes]);
 
   // ─── Standard debounced calculation ───
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);

@@ -11,6 +11,13 @@ export const Layout: React.FC = () => {
   const location = useLocation();
   const [showGreenhouseModal, setShowGreenhouseModal] = useState(false);
 
+  const cleanPath = location.pathname.replace(/\/+$/, "");
+  // The fusion graph hosts a React Flow canvas, which breaks under an ancestor CSS
+  // scale — render it without PnPageAutoScale's transform.
+  const disablePageScale = cleanPath.endsWith("/fusion-lines");
+  // Pages that need full-width layout should opt out of the reserved ad columns.
+  const disableAds = cleanPath.endsWith("/fusion-lines");
+
   useEffect(() => {
     // Check if user has seen the modal before
     const hasSeenModal = localStorage.getItem(GREENHOUSE_MODAL_SEEN_KEY);
@@ -30,12 +37,12 @@ export const Layout: React.FC = () => {
       <Navigation />
       <main className="px-1 sm:px-2 lg:px-4 py-3">
         <div className="w-full">
-          <div className="pn-page">
-            <div className="pn-left" aria-hidden />
-            <div className="pn-content">
-              <PnPageAutoScale>
+          <div className={disableAds ? undefined : "pn-page"}>
+            {!disableAds && <div className="pn-left" aria-hidden />}
+            <div className={disableAds ? undefined : "pn-content"}>
+              <PnPageAutoScale disabled={disablePageScale}>
                 <div className="max-w-screen-2xl mx-auto w-full">
-                  <div className="pn-leaderboard" />
+                  {!disableAds && <div className="pn-leaderboard" />}
 
                   <ErrorBoundary>
                     <Outlet key={location.pathname} />
@@ -43,7 +50,7 @@ export const Layout: React.FC = () => {
                 </div>
               </PnPageAutoScale>
             </div>
-            <aside className="pn-sidebar" aria-label="Advertisement" />
+            {!disableAds && <aside className="pn-sidebar" aria-label="Advertisement" />}
           </div>
         </div>
       </main>
