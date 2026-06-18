@@ -288,12 +288,18 @@ export class InvCalculationService {
     cycleNodes: string[][],
     recipeOverrides: RecipeOverride[],
     minCosts: Map<string, number>,
-    processNode: (node: InventoryRecipeTree, allowAlternatives?: boolean) => Promise<InventoryRecipeTree>,
+    processNode: (node: InventoryRecipeTree, allowAlternatives?: boolean, path?: Set<string>) => Promise<InventoryRecipeTree>,
     treeDemand: Map<string, number>,
     exclusivityScores: Map<string, number>,
-    freelyUsableShards: Set<string>
+    freelyUsableShards: Set<string>,
+    path: Set<string>
   ): Promise<InventoryRecipeTree | null> {
     if (node.method !== "recipe" || !node.recipe) {
+      return null;
+    }
+
+    // Don't re-apply alternatives for a shard already being expanded further up this path.
+    if (path.has(node.shard)) {
       return null;
     }
 
@@ -317,6 +323,9 @@ export class InvCalculationService {
     const {crocodileMultiplier, craftPenalty} = this.service.calculateMultipliers(params);
     let remainingQuantity = node.quantity;
     const segments: InventoryRecipeTree[] = [];
+
+    // Carries this shard down so its descendants can't expand it again.
+    const childPath = new Set(path).add(node.shard);
 
     // Shared inputs are consumed equally by current and alternative recipes,
     // so they shouldn't be penalized or limited for alternatives.
@@ -485,8 +494,8 @@ export class InvCalculationService {
       ) as InventoryRecipeNode;
       // Don't re-alt the just-chosen node, but DO let its children swap their own
       // inputs (e.g. a nested catalyst) — process children with alternatives enabled.
-      customNode.inputs[0] = await processNode(customNode.inputs[0], true);
-      customNode.inputs[1] = await processNode(customNode.inputs[1], true);
+      customNode.inputs[0] = await processNode(customNode.inputs[0], true, childPath);
+      customNode.inputs[1] = await processNode(customNode.inputs[1], true, childPath);
       segments.push(customNode);
       remainingQuantity -= quantityProduced;
     }
@@ -497,8 +506,8 @@ export class InvCalculationService {
 
     if (remainingQuantity > 0) {
       this.recalculateTreeQuantities(node, remainingQuantity, parsed, params);
-      node.inputs[0] = await processNode(node.inputs[0], true);
-      node.inputs[1] = await processNode(node.inputs[1], true);
+      node.inputs[0] = await processNode(node.inputs[0], true, childPath);
+      node.inputs[1] = await processNode(node.inputs[1], true, childPath);
       segments.push(node);
     }
 
@@ -527,13 +536,14 @@ export class InvCalculationService {
 
     const processNode = async (
       node: InventoryRecipeTree,
-      allowAlternatives = true
+      allowAlternatives = true,
+      path: Set<string> = new Set()
     ): Promise<InventoryRecipeTree> => {
       // Handle array nodes by processing each element
       if (Array.isArray(node)) {
         const processedArray: InventoryRecipeTree[] = [];
         for (const element of node) {
-          processedArray.push(await processNode(element, allowAlternatives));
+          processedArray.push(await processNode(element, allowAlternatives, path));
         }
         return processedArray as InventoryRecipeTree;
       }
@@ -552,7 +562,8 @@ export class InvCalculationService {
           processNode,
           treeDemand,
           exclusivityScores,
-          freelyUsableShards
+          freelyUsableShards,
+          path
         );
         if (alternative) {
           processedNodes.set(node, alternative);
@@ -647,8 +658,8 @@ export class InvCalculationService {
           this.recalculateTreeQuantities(craftedPortion.inputs[0], newCraftsNeeded * fuse1, parsed, params);
           this.recalculateTreeQuantities(craftedPortion.inputs[1], newCraftsNeeded * fuse2, parsed, params);
 
-          craftedPortion.inputs[0] = await processNode(craftedPortion.inputs[0], allowAlternatives);
-          craftedPortion.inputs[1] = await processNode(craftedPortion.inputs[1], allowAlternatives);
+          craftedPortion.inputs[0] = await processNode(craftedPortion.inputs[0], allowAlternatives, path);
+          craftedPortion.inputs[1] = await processNode(craftedPortion.inputs[1], allowAlternatives, path);
         } else if (craftedPortion.method === "cycle") {
           const outputStep = craftedPortion.steps.find((step: {
             outputShard: string
@@ -698,9 +709,9 @@ export class InvCalculationService {
               }
             });
 
-            craftedPortion.inputRecipe = await processNode(craftedPortion.inputRecipe, allowAlternatives);
+            craftedPortion.inputRecipe = await processNode(craftedPortion.inputRecipe, allowAlternatives, path);
             for (let i = 0; i < craftedPortion.cycleInputs.length; i++) {
-              craftedPortion.cycleInputs[i] = await processNode(craftedPortion.cycleInputs[i], allowAlternatives);
+              craftedPortion.cycleInputs[i] = await processNode(craftedPortion.cycleInputs[i], allowAlternatives, path);
             }
           }
         }
@@ -712,12 +723,12 @@ export class InvCalculationService {
 
       // No inventory - process children normally
       if (node.method === "recipe") {
-        node.inputs[0] = await processNode(node.inputs[0], allowAlternatives);
-        node.inputs[1] = await processNode(node.inputs[1], allowAlternatives);
+        node.inputs[0] = await processNode(node.inputs[0], allowAlternatives, path);
+        node.inputs[1] = await processNode(node.inputs[1], allowAlternatives, path);
       } else if (node.method === "cycle") {
-        node.inputRecipe = await processNode(node.inputRecipe, allowAlternatives);
+        node.inputRecipe = await processNode(node.inputRecipe, allowAlternatives, path);
         for (let i = 0; i < node.cycleInputs.length; i++) {
-          node.cycleInputs[i] = await processNode(node.cycleInputs[i], allowAlternatives);
+          node.cycleInputs[i] = await processNode(node.cycleInputs[i], allowAlternatives, path);
         }
       }
 

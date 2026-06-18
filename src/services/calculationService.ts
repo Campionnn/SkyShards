@@ -17,6 +17,13 @@ import { BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS } from "../cons
 export class CalculationService {
   private static instance: CalculationService;
   private dataCache: Map<string, Data> = new Map();
+  /** Caches the min-cost graph buildRecipeTree solves when called without a cache,
+   * so inventory substitution doesn't re-solve the whole graph for every node it
+   * builds. */
+  private buildTreeMinCostCache = new WeakMap<
+    Data,
+    { key: string; minCosts: Map<string, number>; choices: Map<string, RecipeChoice> }
+  >();
   /** Base (rates.json) acquisition rates, captured by buildData. Used for the
    * structural "is this shard directly obtainable" check, independent of params. */
   private defaultRates: Record<string, number> = {};
@@ -803,14 +810,25 @@ export class CalculationService {
     minCostsCache?: { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> }
   ): RecipeTree {
     if (!minCostsCache) {
-      const dummyParams: CalculationParams = {
-        ...params,
-        seaSerpentLevel: 0,
-        tiamatLevel: 0,
-        crocodileLevel: 0,
-      };
-      const result = this.computeMinCosts(data, dummyParams);
-      minCostsCache = { minCosts: result.minCosts, choices: result.choices };
+      const memoKey = `${params.craftPenalty}|${params.rateAsCoinValue}`;
+      const memo = this.buildTreeMinCostCache.get(data);
+      if (memo && memo.key === memoKey) {
+        minCostsCache = { minCosts: memo.minCosts, choices: memo.choices };
+      } else {
+        const dummyParams: CalculationParams = {
+          ...params,
+          seaSerpentLevel: 0,
+          tiamatLevel: 0,
+          crocodileLevel: 0,
+        };
+        const result = this.computeMinCosts(data, dummyParams);
+        minCostsCache = { minCosts: result.minCosts, choices: result.choices };
+        this.buildTreeMinCostCache.set(data, {
+          key: memoKey,
+          minCosts: result.minCosts,
+          choices: result.choices,
+        });
+      }
     }
 
     if (cycleNodes.flat().includes(shard)) {
