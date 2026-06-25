@@ -367,6 +367,17 @@ export class InvCalculationService {
         | null = null;
 
       for (const recipe of alternatives) {
+        // Reject alternatives that consume the shard we're currently producing, or
+        // any ancestor shard still being built further up this path. Feeding a shard
+        // into its own production is a net-negative inventory loop: e.g. picking
+        // Titanoboa = Tortoise + Megalith, where Megalith = Tortoise + Titanoboa,
+        // burns more Titanoboa from inventory than the one Titanoboa it makes. The
+        // inventory credit makes each step look locally cheap, but globally it's
+        // nonsense — the surplus should just satisfy the demand directly instead.
+        if (recipe.inputs.some((inputId) => inputId === node.shard || path.has(inputId))) {
+          continue;
+        }
+
         // Build a "fair inventory" for this alternative:
         // - Shared inputs (also in current recipe): use workingInventory,
         //   since they'd be consumed equally by either recipe choice
@@ -578,7 +589,10 @@ export class InvCalculationService {
 
       // Handle direct nodes - try to substitute with inventory
       if (node.method === "direct") {
-        const invQty = workingInventory.get(node.shard) || 0;
+        // Don't satisfy a shard from inventory inside its own build subtree —
+        // it's an ancestor we're producing, so consuming it here is a net-negative
+        // loop. Craft it instead (see the ancestor guard in tryApplyInventoryAlternatives).
+        const invQty = path.has(node.shard) ? 0 : (workingInventory.get(node.shard) || 0);
 
         if (invQty >= node.quantity) {
           workingInventory.set(node.shard, invQty - node.quantity);
@@ -616,7 +630,9 @@ export class InvCalculationService {
         return processedNodes.get(node)!;
       }
 
-      const invQty = workingInventory.get(node.shard) || 0;
+      // Same ancestor guard for recipe/cycle output shards: never pull the shard
+      // we're in the middle of producing from inventory inside its own subtree.
+      const invQty = path.has(node.shard) ? 0 : (workingInventory.get(node.shard) || 0);
 
       // Full replacement with inventory
       if (invQty >= node.quantity) {
