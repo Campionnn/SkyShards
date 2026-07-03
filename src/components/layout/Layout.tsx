@@ -11,19 +11,35 @@ const useAdBlockDetected = (): boolean => {
   const [detected, setDetected] = useState(false);
 
   useEffect(() => {
+    let active = true;
+    const markDetected = () => { if (active) setDetected(true); };
+
+    const rampTimer = setTimeout(() => {
+      if (typeof (window as any).ramp === "undefined") {
+        markDetected();
+      }
+    }, 1500);
+
+    fetch("https://scripts.pubnation.com/ads.js", {
+      method: "HEAD",
+      mode: "no-cors",
+      cache: "no-store",
+    }).catch(markDetected);
+
     const el = document.createElement("div");
     el.className = "adsbox";
     el.style.cssText = "height:1px;width:1px;position:absolute;top:-9999px;left:-9999px;";
     document.body.appendChild(el);
 
-    const timer = setTimeout(() => {
-      const blocked = !document.body.contains(el) || el.offsetHeight === 0;
-      setDetected(blocked);
+    const baitTimer = setTimeout(() => {
+      if (!document.body.contains(el) || el.offsetHeight === 0) markDetected();
       el.parentNode?.removeChild(el);
-    }, 100);
+    }, 200);
 
     return () => {
-      clearTimeout(timer);
+      active = false;
+      clearTimeout(rampTimer);
+      clearTimeout(baitTimer);
       el.parentNode?.removeChild(el);
     };
   }, []);
