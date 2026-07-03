@@ -535,7 +535,8 @@ export class InvCalculationService {
     recipeOverrides: RecipeOverride[],
     minCosts: Map<string, number>,
     exclusivityScores: Map<string, number>,
-    freelyUsableShards: Set<string>
+    freelyUsableShards: Set<string>,
+    allowAlternatives = true
   ): Promise<InventoryRecipeTree> {
     const workingInventory = new Map(inventory);
     const processedNodes = new WeakMap<object, InventoryRecipeTree>();
@@ -557,29 +558,6 @@ export class InvCalculationService {
           processedArray.push(await processNode(element, allowAlternatives, path));
         }
         return processedArray as InventoryRecipeTree;
-      }
-
-      // Attempt to split recipe nodes into inventory-aware segments before deeper processing
-      if (allowAlternatives && this.isRecipeTreeNode(node)) {
-        const alternative = await this.tryApplyInventoryAlternatives(
-          node,
-          workingInventory,
-          params,
-          parsed,
-          choices,
-          cycleNodes,
-          recipeOverrides,
-          minCosts,
-          processNode,
-          treeDemand,
-          exclusivityScores,
-          freelyUsableShards,
-          path
-        );
-        if (alternative) {
-          processedNodes.set(node, alternative);
-          return alternative;
-        }
       }
 
       // Skip inventory nodes
@@ -630,8 +608,13 @@ export class InvCalculationService {
         return processedNodes.get(node)!;
       }
 
-      // Same ancestor guard for recipe/cycle output shards: never pull the shard
-      // we're in the middle of producing from inventory inside its own subtree.
+      // Inventory substitution runs BEFORE recipe alternatives: owning a shard is
+      // strictly cheaper than any recipe for it. When alternatives fired first they
+      // would restructure — and craft from scratch — nodes that could have been
+      // satisfied straight from inventory (e.g. crafting 16 Tewtil through a huge
+      // farming cascade while 120 sat in inventory).
+      // Ancestor guard: never pull the shard we're in the middle of producing from
+      // inventory inside its own subtree.
       const invQty = path.has(node.shard) ? 0 : (workingInventory.get(node.shard) || 0);
 
       // Full replacement with inventory
@@ -673,9 +656,6 @@ export class InvCalculationService {
 
           this.recalculateTreeQuantities(craftedPortion.inputs[0], newCraftsNeeded * fuse1, parsed, params);
           this.recalculateTreeQuantities(craftedPortion.inputs[1], newCraftsNeeded * fuse2, parsed, params);
-
-          craftedPortion.inputs[0] = await processNode(craftedPortion.inputs[0], allowAlternatives, path);
-          craftedPortion.inputs[1] = await processNode(craftedPortion.inputs[1], allowAlternatives, path);
         } else if (craftedPortion.method === "cycle") {
           const outputStep = craftedPortion.steps.find((step: {
             outputShard: string
@@ -724,20 +704,42 @@ export class InvCalculationService {
                 this.recalculateTreeQuantities(cycleInput, totalInputQuantity, parsed, params);
               }
             });
-
-            craftedPortion.inputRecipe = await processNode(craftedPortion.inputRecipe, allowAlternatives, path);
-            for (let i = 0; i < craftedPortion.cycleInputs.length; i++) {
-              craftedPortion.cycleInputs[i] = await processNode(craftedPortion.cycleInputs[i], allowAlternatives, path);
-            }
           }
         }
 
-        const result = [inventoryPart, craftedPortion] as InventoryRecipeTree;
+        // Re-process the crafted remainder as a whole node so it can still pick
+        // up recipe alternatives (its shard's inventory is 0 now, so no re-entry).
+        const processedRemainder = await processNode(craftedPortion, allowAlternatives, path);
+        const result = [inventoryPart, processedRemainder] as InventoryRecipeTree;
         processedNodes.set(node, result);
         return result;
       }
 
-      // No inventory - process children normally
+      // No inventory of this shard — try splitting recipe nodes into
+      // inventory-aware alternative segments before deeper processing.
+      if (allowAlternatives && this.isRecipeTreeNode(node)) {
+        const alternative = await this.tryApplyInventoryAlternatives(
+          node,
+          workingInventory,
+          params,
+          parsed,
+          choices,
+          cycleNodes,
+          recipeOverrides,
+          minCosts,
+          processNode,
+          treeDemand,
+          exclusivityScores,
+          freelyUsableShards,
+          path
+        );
+        if (alternative) {
+          processedNodes.set(node, alternative);
+          return alternative;
+        }
+      }
+
+      // Process children normally
       if (node.method === "recipe") {
         node.inputs[0] = await processNode(node.inputs[0], allowAlternatives, path);
         node.inputs[1] = await processNode(node.inputs[1], allowAlternatives, path);
@@ -752,7 +754,7 @@ export class InvCalculationService {
       return node;
     };
 
-    const result = await processNode(tree);
+    const result = await processNode(tree, allowAlternatives);
 
     // Update the original inventory map to reflect what was used
     for (const [shard, qty] of workingInventory.entries()) {
@@ -917,66 +919,78 @@ export class InvCalculationService {
       ? this.service.findCycleNodes(choices)
       : [];
 
-    const recipeTree = this.service.buildRecipeTree(
-      parsed,
-      targetShard,
-      choices,
-      cycleNodes,
-      params,
-      recipeOverrides
-    );
-    const craftCounter = {total: 0};
     const {crocodileMultiplier} = this.service.calculateMultipliers(params);
-    this.service.assignQuantities(
-      recipeTree,
-      requiredQuantity,
-      parsed,
-      craftCounter,
-      choices,
-      crocodileMultiplier,
-      params,
-      recipeOverrides
-    );
 
-    let inventoryTree: InventoryRecipeTree = recipeTree;
-    const workingInventory = new Map(inventory);
+    const buildTree = (): InventoryRecipeTree => {
+      const recipeTree = this.service.buildRecipeTree(
+        parsed,
+        targetShard,
+        choices,
+        cycleNodes,
+        params,
+        recipeOverrides
+      );
+      const craftCounter = {total: 0};
+      this.service.assignQuantities(
+        recipeTree,
+        requiredQuantity,
+        parsed,
+        craftCounter,
+        choices,
+        crocodileMultiplier,
+        params,
+        recipeOverrides
+      );
+      return recipeTree;
+    };
 
-    inventoryTree = await this.substituteInventoryBFS(
-      inventoryTree,
-      workingInventory,
-      params,
-      parsed,
-      choices,
-      cycleNodes,
-      recipeOverrides,
-      minCosts,
-      exclusivityScores,
-      freelyUsableShards
-    );
+    const evaluate = async (allowAlternatives: boolean) => {
+      const workingInventory = new Map(inventory);
+      const tree = await this.substituteInventoryBFS(
+        buildTree(),
+        workingInventory,
+        params,
+        parsed,
+        choices,
+        cycleNodes,
+        recipeOverrides,
+        minCosts,
+        exclusivityScores,
+        freelyUsableShards,
+        allowAlternatives
+      );
+      const {craftsNeeded, craftTime, totalQuantities} = this.service.collectTreeStats(tree, params);
+      const totalTime = this.service.calculateTotalTimeFromQuantities(
+        totalQuantities,
+        craftTime,
+        parsed,
+        params
+      );
+      return {tree, workingInventory, craftsNeeded, craftTime, totalQuantities, totalTime};
+    };
 
-    // Collect stats from the tree with inventory substitutions
-    const {craftsNeeded, craftTime, totalQuantities} = this.service.collectTreeStats(
-      inventoryTree,
-      params
-    );
+    // The alternative-recipe machinery is heuristic and can occasionally pick a
+    // globally worse restructuring. Plain substitution (no alternatives) only ever
+    // replaces farm/craft work with free inventory, so it can never be worse than
+    // ignoring the inventory — comparing the two guarantees "Use Inventory" never
+    // increases the total time.
+    const withAlternatives = await evaluate(true);
+    const substitutionOnly = await evaluate(false);
+    const best = withAlternatives.totalTime <= substitutionOnly.totalTime
+      ? withAlternatives
+      : substitutionOnly;
 
-    const totalTime = this.service.calculateTotalTimeFromQuantities(
-      totalQuantities,
-      craftTime,
-      parsed,
-      params
-    );
-    const timePerShard = requiredQuantity > 0 ? totalTime / requiredQuantity : 0;
+    const timePerShard = requiredQuantity > 0 ? best.totalTime / requiredQuantity : 0;
 
     return {
       timePerShard,
-      totalTime,
+      totalTime: best.totalTime,
       totalShardsProduced: requiredQuantity,
-      craftsNeeded,
-      totalQuantities,
-      craftTime,
-      tree: inventoryTree,
-      remainingInventory: workingInventory,
+      craftsNeeded: best.craftsNeeded,
+      totalQuantities: best.totalQuantities,
+      craftTime: best.craftTime,
+      tree: best.tree,
+      remainingInventory: best.workingInventory,
     };
   }
 }
