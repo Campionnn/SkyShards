@@ -7,16 +7,42 @@ import { GreenhouseModal } from "../modals";
 
 const GREENHOUSE_MODAL_SEEN_KEY = "greenhouse_modal_seen";
 
+const useAdBlockDetected = (): boolean => {
+  const [detected, setDetected] = useState(false);
+
+  useEffect(() => {
+    const el = document.createElement("div");
+    el.className = "adsbox";
+    el.style.cssText = "height:1px;width:1px;position:absolute;top:-9999px;left:-9999px;";
+    document.body.appendChild(el);
+
+    const timer = setTimeout(() => {
+      const blocked = !document.body.contains(el) || el.offsetHeight === 0;
+      setDetected(blocked);
+      el.parentNode?.removeChild(el);
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      el.parentNode?.removeChild(el);
+    };
+  }, []);
+
+  return detected;
+};
+
 export const Layout: React.FC = () => {
   const location = useLocation();
   const [showGreenhouseModal, setShowGreenhouseModal] = useState(false);
+  const adBlockDetected = useAdBlockDetected();
 
   const cleanPath = location.pathname.replace(/\/+$/, "");
   // The fusion graph hosts a React Flow canvas, which breaks under an ancestor CSS
   // scale — render it without PnPageAutoScale's transform.
   const disablePageScale = cleanPath.endsWith("/fusion-lines");
   // Pages that need full-width layout should opt out of the reserved ad columns.
-  const disableAds = cleanPath.endsWith("/fusion-lines");
+  // Also disable ad spaces when an ad blocker is detected to prevent layout gaps.
+  const disableAds = cleanPath.endsWith("/fusion-lines") || adBlockDetected;
 
   useEffect(() => {
     // Check if user has seen the modal before
