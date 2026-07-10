@@ -138,6 +138,9 @@ export interface CalculationResultsProps {
   onResetRecipeOverrides: () => void;
   ironManView: boolean;
   materialsOnly?: boolean;
+  materialShardResults?: Map<string, CalculationResult>;
+  materialTreeShardKey?: string;
+  onMaterialTreeShardChange?: (key: string) => void;
 }
 
 // fusion tree

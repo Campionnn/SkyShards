@@ -46,6 +46,7 @@ const performCalculation = async (
     setCalculationData: (data: Data | null) => void;
     setCalculating: (v: boolean) => void;
     setProgress: (p: WorkerProgress | null) => void;
+    setMaterialShardResults: (results: Map<string, CalculationResult>) => void;
   }
 ): Promise<(() => void) | null> => {
   let isCancelled = false;
@@ -133,7 +134,11 @@ const performCalculation = async (
         let totalCraftTime = 0;
         let totalCraftsNeeded = 0;
 
-        results.forEach((result) => {
+        // Retain each shard's full result (incl. its fusion tree) so individual
+        // trees can be viewed without recalculating. Order matches `targets`.
+        const perShardResults = new Map<string, CalculationResult>();
+
+        results.forEach((result, index) => {
           if (result.totalQuantities) {
             result.totalQuantities.forEach((quantity, matKey) => {
               combinedMaterials[matKey] = (combinedMaterials[matKey] || 0) + quantity;
@@ -143,7 +148,14 @@ const performCalculation = async (
           totalTime += result.totalTime || 0;
           totalCraftTime += result.craftTime || 0;
           totalCraftsNeeded += result.craftsNeeded || 0;
+
+          const shardKey = targets[index]?.shard;
+          if (shardKey) {
+            perShardResults.set(shardKey, result);
+          }
         });
+
+        callbacks.setMaterialShardResults(perShardResults);
 
         const materialQuantities = new Map<string, number>(Object.entries(combinedMaterials));
         const selectedShardKeys = formData.selectedShardKeys || [];
@@ -233,6 +245,7 @@ const performCalculation = async (
   callbacks.setCurrentParams(params);
   callbacks.setResult(null);
   callbacks.setCalculationData(null);
+  callbacks.setMaterialShardResults(new Map());
   callbacks.setCalculating(true);
   callbacks.setProgress({ phase: "parsing", progress: 0, message: "Starting..." });
 
@@ -277,6 +290,10 @@ const CalculatorPageContent: React.FC = () => {
   const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
   const [progress, setProgress] = useState<WorkerProgress | null>(null);
+
+  // Materials-only mode: per-shard results (incl. trees) and the shard whose tree is being viewed
+  const [materialShardResults, setMaterialShardResults] = useState<Map<string, CalculationResult>>(new Map());
+  const [materialTreeShardKey, setMaterialTreeShardKey] = useState<string>("");
 
   // Welcome modal state (first visit only)
   const [showWelcome, setShowWelcome] = useState(false);
@@ -338,6 +355,7 @@ const CalculatorPageContent: React.FC = () => {
                 setCalculationData,
                 setCalculating: setIsCalculating,
                 setProgress,
+                setMaterialShardResults,
               }
             );
           };
@@ -478,7 +496,8 @@ const CalculatorPageContent: React.FC = () => {
         formData.quantity,
         params,
         new Map([...inventory].filter(([id]) => !disabledShards.has(id))),
-        recipeOverrides
+        recipeOverrides,
+        ownedAttributes
       );
 
       setInventoryResult(calculationResult);
@@ -491,7 +510,7 @@ const CalculatorPageContent: React.FC = () => {
     } finally {
       setIsCalculating(false);
     }
-  }, [customRates, inventory, disabledShards, recipeOverrides]);
+  }, [customRates, inventory, disabledShards, recipeOverrides, ownedAttributes]);
 
   // ─── Standard debounced calculation ───
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -514,6 +533,7 @@ const CalculatorPageContent: React.FC = () => {
       setCalculationData(null);
       setInventoryResult(null);
       setInvCalculationData(null);
+      setMaterialShardResults(new Map());
       setProgress(null);
 
       debounceTimeoutRef.current = setTimeout(async () => {
@@ -531,6 +551,7 @@ const CalculatorPageContent: React.FC = () => {
             setCalculationData,
             setCalculating: setIsCalculating,
             setProgress,
+            setMaterialShardResults,
           };
 
           try {
@@ -773,6 +794,9 @@ const CalculatorPageContent: React.FC = () => {
                 onResetRecipeOverrides={resetRecipeOverrides}
                 ironManView={form.ironManView}
                 materialsOnly={form.materialsOnly}
+                materialShardResults={materialShardResults}
+                materialTreeShardKey={materialTreeShardKey}
+                onMaterialTreeShardChange={setMaterialTreeShardKey}
               />
             )}
 

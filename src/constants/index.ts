@@ -1,4 +1,35 @@
+import type { CalculationParams } from "../types/types";
+
 export const NO_FORTUNE_SHARDS = ["C19", "U4", "U16", "U28", "R24", "R25", "R27", "R60", "R64", "L4", "L15", "L30", "L33", "L48", "L51"];
+
+/**
+ * Neutral calculation params: no fortune/pet bonuses, in-game rate (time) cost, no
+ * Kuudra. Used where a structural, player-independent cost ordering is needed — e.g.
+ * the fusion-graph view's cost-based edge pruning (`rateAsCoinValue: false` so cost =
+ * 1 / acquisition rate, i.e. acquisition difficulty).
+ */
+export const DEFAULT_CALCULATION_PARAMS: CalculationParams = {
+  customRates: {},
+  hunterFortune: 0,
+  excludeChameleon: false,
+  frogBonus: false,
+  newtLevel: 0,
+  salamanderLevel: 0,
+  lizardKingLevel: 0,
+  leviathanLevel: 0,
+  pythonLevel: 0,
+  kingCobraLevel: 0,
+  seaSerpentLevel: 0,
+  tiamatLevel: 0,
+  crocodileLevel: 0,
+  kuudraTier: "none",
+  moneyPerHour: null,
+  customKuudraTime: false,
+  kuudraTimeSeconds: null,
+  noWoodenBait: false,
+  rateAsCoinValue: false,
+  craftPenalty: 0,
+};
 
 import SHARD_DESCRIPTIONS from "../desc.json";
 export { SHARD_DESCRIPTIONS };

@@ -4,17 +4,26 @@ interface PnPageAutoScaleProps {
   children: React.ReactNode;
   minWidth?: number;
   mobileBreakpoint?: number;
+  /**
+   * When true, render children without the `transform: scale()` wrapper. Required for
+   * pages that host their own coordinate-sensitive canvas (e.g. the React Flow fusion
+   * graph): React Flow measures handle/pointer positions via getBoundingClientRect and
+   * can't account for an ancestor CSS scale, so a scaled wrapper offsets every edge.
+   */
+  disabled?: boolean;
 }
 
 export const PnPageAutoScale: React.FC<PnPageAutoScaleProps> = ({
   children,
   minWidth = 1920,
   mobileBreakpoint = 1280,
+  disabled = false,
 }) => {
   const [scale, setScale] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (disabled) return;
     const updateScale = () => {
       const viewportWidth = window.innerWidth;
 
@@ -31,7 +40,11 @@ export const PnPageAutoScale: React.FC<PnPageAutoScaleProps> = ({
     window.addEventListener("resize", updateScale);
 
     return () => window.removeEventListener("resize", updateScale);
-  }, [minWidth, mobileBreakpoint]);
+  }, [minWidth, mobileBreakpoint, disabled]);
+
+  if (disabled) {
+    return <>{children}</>;
+  }
 
   return (
     <div

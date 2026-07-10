@@ -7,9 +7,58 @@ import { GreenhouseModal } from "../modals";
 
 const GREENHOUSE_MODAL_SEEN_KEY = "greenhouse_modal_seen";
 
+const useAdBlockDetected = (): boolean => {
+  const [detected, setDetected] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const markDetected = () => { if (active) setDetected(true); };
+
+    const rampTimer = setTimeout(() => {
+      if (typeof (window as any).ramp === "undefined") {
+        markDetected();
+      }
+    }, 1500);
+
+    fetch("https://scripts.pubnation.com/ads.js", {
+      method: "HEAD",
+      mode: "no-cors",
+      cache: "no-store",
+    }).catch(markDetected);
+
+    const el = document.createElement("div");
+    el.className = "adsbox";
+    el.style.cssText = "height:1px;width:1px;position:absolute;top:-9999px;left:-9999px;";
+    document.body.appendChild(el);
+
+    const baitTimer = setTimeout(() => {
+      if (!document.body.contains(el) || el.offsetHeight === 0) markDetected();
+      el.parentNode?.removeChild(el);
+    }, 200);
+
+    return () => {
+      active = false;
+      clearTimeout(rampTimer);
+      clearTimeout(baitTimer);
+      el.parentNode?.removeChild(el);
+    };
+  }, []);
+
+  return detected;
+};
+
 export const Layout: React.FC = () => {
   const location = useLocation();
   const [showGreenhouseModal, setShowGreenhouseModal] = useState(false);
+  const adBlockDetected = useAdBlockDetected();
+
+  const cleanPath = location.pathname.replace(/\/+$/, "");
+  // The fusion graph hosts a React Flow canvas, which breaks under an ancestor CSS
+  // scale — render it without PnPageAutoScale's transform.
+  const disablePageScale = cleanPath.endsWith("/fusion-lines");
+  // Pages that need full-width layout should opt out of the reserved ad columns.
+  // Also disable ad spaces when an ad blocker is detected to prevent layout gaps.
+  const disableAds = cleanPath.endsWith("/fusion-lines") || adBlockDetected;
 
   useEffect(() => {
     // Check if user has seen the modal before
@@ -30,12 +79,12 @@ export const Layout: React.FC = () => {
       <Navigation />
       <main className="px-1 sm:px-2 lg:px-4 py-3">
         <div className="w-full">
-          <div className="pn-page">
-            <div className="pn-left" aria-hidden />
-            <div className="pn-content">
-              <PnPageAutoScale>
+          <div className={disableAds ? undefined : "pn-page"}>
+            {!disableAds && <div className="pn-left" aria-hidden />}
+            <div className={disableAds ? undefined : "pn-content"}>
+              <PnPageAutoScale disabled={disablePageScale}>
                 <div className="max-w-screen-2xl mx-auto w-full">
-                  <div className="pn-leaderboard" />
+                  {!disableAds && <div className="pn-leaderboard" />}
 
                   <ErrorBoundary>
                     <Outlet key={location.pathname} />
@@ -43,7 +92,7 @@ export const Layout: React.FC = () => {
                 </div>
               </PnPageAutoScale>
             </div>
-            <aside className="pn-sidebar" aria-label="Advertisement" />
+            {!disableAds && <aside className="pn-sidebar" aria-label="Advertisement" />}
           </div>
         </div>
       </main>

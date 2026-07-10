@@ -1,4 +1,5 @@
-import { CalculationService } from "../services";
+import { CalculationService } from "./calculationService";
+import { computeFreelyUsableShards } from "../utilities/fusionLines";
 import type {
   CalculationParams,
   Data,
@@ -13,6 +14,12 @@ type InventoryRecipeNode = Extract<
   InventoryRecipeTree,
   { method: "recipe" }
 >;
+
+// Tiny residual opportunity-cost factor applied to "freely usable" inventory
+// shards (whose special-fusion line is fully maxed). Far smaller than the farm
+// cost it avoids, so inventory still wins over direct farming, but it scales with
+// the shard's real minCost so cheaper freely-usable shards are consumed first.
+const FREELY_USABLE_RESIDUAL = 0.02;
 
 export class InvCalculationService {
   private static instance: InvCalculationService;
@@ -147,7 +154,9 @@ export class InvCalculationService {
     crocodileMultiplier: number,
     craftPenalty: number,
     surplusDiscounts?: Map<string, number>,
-    exclusivityScores?: Map<string, number>
+    exclusivityScores?: Map<string, number>,
+    freelyUsableShards?: Set<string>,
+    sharedInputs?: Set<string>
   ): number {
     const [input1Id, input2Id] = recipe.inputs;
     const fuse1 = parsed.shards[input1Id].fuse_amount;
@@ -169,16 +178,29 @@ export class InvCalculationService {
       ? (1 - (surplusDiscounts?.get(input2Id) ?? 1)) * baseCost2
       : baseCost2;
 
-    // Additive opportunity cost for exclusive shards.
+    // Additive opportunity cost for exclusive shards. Only inputs UNIQUE to this
+    // recipe are penalized — inputs shared with the recipe being compared against
+    // are consumed identically either way, so penalizing them would unfairly bias
+    // against the alternative. Freely-usable shards (whose special-fusion line is
+    // fully maxed) drop the exclusivity penalty and instead carry a tiny
+    // cost-proportional residual so cheaper ones are consumed first.
     let opportunityCost = 0;
     if (exclusivityScores) {
-      if (inv1 >= fuse1) {
-        const excl1 = exclusivityScores.get(input1Id) || 0;
-        if (excl1 > 0) opportunityCost += baseCost1 * excl1;
+      if (inv1 >= fuse1 && !sharedInputs?.has(input1Id)) {
+        if (freelyUsableShards?.has(input1Id)) {
+          opportunityCost += baseCost1 * FREELY_USABLE_RESIDUAL;
+        } else {
+          const excl1 = exclusivityScores.get(input1Id) || 0;
+          if (excl1 > 0) opportunityCost += baseCost1 * excl1;
+        }
       }
-      if (inv2 >= fuse2) {
-        const excl2 = exclusivityScores.get(input2Id) || 0;
-        if (excl2 > 0) opportunityCost += baseCost2 * excl2;
+      if (inv2 >= fuse2 && !sharedInputs?.has(input2Id)) {
+        if (freelyUsableShards?.has(input2Id)) {
+          opportunityCost += baseCost2 * FREELY_USABLE_RESIDUAL;
+        } else {
+          const excl2 = exclusivityScores.get(input2Id) || 0;
+          if (excl2 > 0) opportunityCost += baseCost2 * excl2;
+        }
       }
     }
 
@@ -266,11 +288,18 @@ export class InvCalculationService {
     cycleNodes: string[][],
     recipeOverrides: RecipeOverride[],
     minCosts: Map<string, number>,
-    processNode: (node: InventoryRecipeTree, allowAlternatives?: boolean) => Promise<InventoryRecipeTree>,
+    processNode: (node: InventoryRecipeTree, allowAlternatives?: boolean, path?: Set<string>) => Promise<InventoryRecipeTree>,
     treeDemand: Map<string, number>,
-    exclusivityScores: Map<string, number>
+    exclusivityScores: Map<string, number>,
+    freelyUsableShards: Set<string>,
+    path: Set<string>
   ): Promise<InventoryRecipeTree | null> {
     if (node.method !== "recipe" || !node.recipe) {
+      return null;
+    }
+
+    // Don't re-apply alternatives for a shard already being expanded further up this path.
+    if (path.has(node.shard)) {
       return null;
     }
 
@@ -295,6 +324,9 @@ export class InvCalculationService {
     let remainingQuantity = node.quantity;
     const segments: InventoryRecipeTree[] = [];
 
+    // Carries this shard down so its descendants can't expand it again.
+    const childPath = new Set(path).add(node.shard);
+
     // Shared inputs are consumed equally by current and alternative recipes,
     // so they shouldn't be penalized or limited for alternatives.
     const currentInputSet = new Set(node.recipe.inputs);
@@ -306,10 +338,16 @@ export class InvCalculationService {
       for (const [shardId, qty] of workingInventory) {
         const totalDemand = treeDemand.get(shardId) || 0;
         const exclusivity = exclusivityScores.get(shardId) || 0;
-        // Exclusive shards with no tree demand can't be used by alternatives.
-        if (exclusivity > 0 && totalDemand === 0) {
+        if (!freelyUsableShards.has(shardId) && exclusivity > 0 && totalDemand === 0) {
+          // Exclusive shards with no tree demand can't be used by alternatives.
           surplusInventory.set(shardId, 0);
         } else {
+          // Only inventory beyond what the rest of the tree already needs is free to
+          // divert into an alternative recipe's catalyst slot. This holds even for
+          // freely-usable shards (maxed line): dropping the *future-progression*
+          // hoarding penalty doesn't make a shard that's scarce for THIS build free —
+          // diverting an over-demanded freely-usable shard (e.g. Ghost, also Sphinx's
+          // core input) into a catalyst slot just forces farming it elsewhere.
           surplusInventory.set(shardId, Math.max(0, qty - totalDemand));
         }
       }
@@ -329,6 +367,17 @@ export class InvCalculationService {
         | null = null;
 
       for (const recipe of alternatives) {
+        // Reject alternatives that consume the shard we're currently producing, or
+        // any ancestor shard still being built further up this path. Feeding a shard
+        // into its own production is a net-negative inventory loop: e.g. picking
+        // Titanoboa = Tortoise + Megalith, where Megalith = Tortoise + Titanoboa,
+        // burns more Titanoboa from inventory than the one Titanoboa it makes. The
+        // inventory credit makes each step look locally cheap, but globally it's
+        // nonsense — the surplus should just satisfy the demand directly instead.
+        if (recipe.inputs.some((inputId) => inputId === node.shard || path.has(inputId))) {
+          continue;
+        }
+
         // Build a "fair inventory" for this alternative:
         // - Shared inputs (also in current recipe): use workingInventory,
         //   since they'd be consumed equally by either recipe choice
@@ -362,8 +411,9 @@ export class InvCalculationService {
         // calculateEffectiveCost, not via multiplicative discount reduction.
         const surplusDiscounts = new Map<string, number>();
         for (const inputId of recipe.inputs) {
-          if (currentInputSet.has(inputId)) {
-            surplusDiscounts.set(inputId, 1); // shared → fully free
+          if (currentInputSet.has(inputId) || freelyUsableShards.has(inputId)) {
+            // Shared inputs cancel out; freely-usable inputs have no hoarding cost.
+            surplusDiscounts.set(inputId, 1);
           } else {
             const surplus = surplusInventory.get(inputId) || 0;
             const demand = treeDemand.get(inputId) || 0;
@@ -382,7 +432,9 @@ export class InvCalculationService {
           crocodileMultiplier,
           craftPenalty,
           surplusDiscounts,
-          exclusivityScores
+          exclusivityScores,
+          freelyUsableShards,
+          currentInputSet
         );
 
         // Only consider if genuinely cheaper than the current recipe
@@ -450,10 +502,12 @@ export class InvCalculationService {
         choices,
         cycleNodes,
         recipeOverrides
-      );
-      // processNode recurses into sub-trees, consuming inventory naturally
-      const processedSegment = await processNode(customNode, false);
-      segments.push(processedSegment);
+      ) as InventoryRecipeNode;
+      // Don't re-alt the just-chosen node, but DO let its children swap their own
+      // inputs (e.g. a nested catalyst) — process children with alternatives enabled.
+      customNode.inputs[0] = await processNode(customNode.inputs[0], true, childPath);
+      customNode.inputs[1] = await processNode(customNode.inputs[1], true, childPath);
+      segments.push(customNode);
       remainingQuantity -= quantityProduced;
     }
 
@@ -463,8 +517,9 @@ export class InvCalculationService {
 
     if (remainingQuantity > 0) {
       this.recalculateTreeQuantities(node, remainingQuantity, parsed, params);
-      const leftover = await processNode(node, false);
-      segments.push(leftover);
+      node.inputs[0] = await processNode(node.inputs[0], true, childPath);
+      node.inputs[1] = await processNode(node.inputs[1], true, childPath);
+      segments.push(node);
     }
 
     return segments.length === 1 ? segments[0] : (segments as InventoryRecipeTree);
@@ -479,7 +534,9 @@ export class InvCalculationService {
     cycleNodes: string[][],
     recipeOverrides: RecipeOverride[],
     minCosts: Map<string, number>,
-    exclusivityScores: Map<string, number>
+    exclusivityScores: Map<string, number>,
+    freelyUsableShards: Set<string>,
+    allowAlternatives = true
   ): Promise<InventoryRecipeTree> {
     const workingInventory = new Map(inventory);
     const processedNodes = new WeakMap<object, InventoryRecipeTree>();
@@ -491,36 +548,16 @@ export class InvCalculationService {
 
     const processNode = async (
       node: InventoryRecipeTree,
-      allowAlternatives = true
+      allowAlternatives = true,
+      path: Set<string> = new Set()
     ): Promise<InventoryRecipeTree> => {
       // Handle array nodes by processing each element
       if (Array.isArray(node)) {
         const processedArray: InventoryRecipeTree[] = [];
         for (const element of node) {
-          processedArray.push(await processNode(element, allowAlternatives));
+          processedArray.push(await processNode(element, allowAlternatives, path));
         }
         return processedArray as InventoryRecipeTree;
-      }
-
-      // Attempt to split recipe nodes into inventory-aware segments before deeper processing
-      if (allowAlternatives && this.isRecipeTreeNode(node)) {
-        const alternative = await this.tryApplyInventoryAlternatives(
-          node,
-          workingInventory,
-          params,
-          parsed,
-          choices,
-          cycleNodes,
-          recipeOverrides,
-          minCosts,
-          processNode,
-          treeDemand,
-          exclusivityScores
-        );
-        if (alternative) {
-          processedNodes.set(node, alternative);
-          return alternative;
-        }
       }
 
       // Skip inventory nodes
@@ -530,7 +567,10 @@ export class InvCalculationService {
 
       // Handle direct nodes - try to substitute with inventory
       if (node.method === "direct") {
-        const invQty = workingInventory.get(node.shard) || 0;
+        // Don't satisfy a shard from inventory inside its own build subtree —
+        // it's an ancestor we're producing, so consuming it here is a net-negative
+        // loop. Craft it instead (see the ancestor guard in tryApplyInventoryAlternatives).
+        const invQty = path.has(node.shard) ? 0 : (workingInventory.get(node.shard) || 0);
 
         if (invQty >= node.quantity) {
           workingInventory.set(node.shard, invQty - node.quantity);
@@ -568,7 +608,14 @@ export class InvCalculationService {
         return processedNodes.get(node)!;
       }
 
-      const invQty = workingInventory.get(node.shard) || 0;
+      // Inventory substitution runs BEFORE recipe alternatives: owning a shard is
+      // strictly cheaper than any recipe for it. When alternatives fired first they
+      // would restructure — and craft from scratch — nodes that could have been
+      // satisfied straight from inventory (e.g. crafting 16 Tewtil through a huge
+      // farming cascade while 120 sat in inventory).
+      // Ancestor guard: never pull the shard we're in the middle of producing from
+      // inventory inside its own subtree.
+      const invQty = path.has(node.shard) ? 0 : (workingInventory.get(node.shard) || 0);
 
       // Full replacement with inventory
       if (invQty >= node.quantity) {
@@ -609,9 +656,6 @@ export class InvCalculationService {
 
           this.recalculateTreeQuantities(craftedPortion.inputs[0], newCraftsNeeded * fuse1, parsed, params);
           this.recalculateTreeQuantities(craftedPortion.inputs[1], newCraftsNeeded * fuse2, parsed, params);
-
-          craftedPortion.inputs[0] = await processNode(craftedPortion.inputs[0], allowAlternatives);
-          craftedPortion.inputs[1] = await processNode(craftedPortion.inputs[1], allowAlternatives);
         } else if (craftedPortion.method === "cycle") {
           const outputStep = craftedPortion.steps.find((step: {
             outputShard: string
@@ -660,27 +704,49 @@ export class InvCalculationService {
                 this.recalculateTreeQuantities(cycleInput, totalInputQuantity, parsed, params);
               }
             });
-
-            craftedPortion.inputRecipe = await processNode(craftedPortion.inputRecipe, allowAlternatives);
-            for (let i = 0; i < craftedPortion.cycleInputs.length; i++) {
-              craftedPortion.cycleInputs[i] = await processNode(craftedPortion.cycleInputs[i], allowAlternatives);
-            }
           }
         }
 
-        const result = [inventoryPart, craftedPortion] as InventoryRecipeTree;
+        // Re-process the crafted remainder as a whole node so it can still pick
+        // up recipe alternatives (its shard's inventory is 0 now, so no re-entry).
+        const processedRemainder = await processNode(craftedPortion, allowAlternatives, path);
+        const result = [inventoryPart, processedRemainder] as InventoryRecipeTree;
         processedNodes.set(node, result);
         return result;
       }
 
-      // No inventory - process children normally
+      // No inventory of this shard — try splitting recipe nodes into
+      // inventory-aware alternative segments before deeper processing.
+      if (allowAlternatives && this.isRecipeTreeNode(node)) {
+        const alternative = await this.tryApplyInventoryAlternatives(
+          node,
+          workingInventory,
+          params,
+          parsed,
+          choices,
+          cycleNodes,
+          recipeOverrides,
+          minCosts,
+          processNode,
+          treeDemand,
+          exclusivityScores,
+          freelyUsableShards,
+          path
+        );
+        if (alternative) {
+          processedNodes.set(node, alternative);
+          return alternative;
+        }
+      }
+
+      // Process children normally
       if (node.method === "recipe") {
-        node.inputs[0] = await processNode(node.inputs[0], allowAlternatives);
-        node.inputs[1] = await processNode(node.inputs[1], allowAlternatives);
+        node.inputs[0] = await processNode(node.inputs[0], allowAlternatives, path);
+        node.inputs[1] = await processNode(node.inputs[1], allowAlternatives, path);
       } else if (node.method === "cycle") {
-        node.inputRecipe = await processNode(node.inputRecipe, allowAlternatives);
+        node.inputRecipe = await processNode(node.inputRecipe, allowAlternatives, path);
         for (let i = 0; i < node.cycleInputs.length; i++) {
-          node.cycleInputs[i] = await processNode(node.cycleInputs[i], allowAlternatives);
+          node.cycleInputs[i] = await processNode(node.cycleInputs[i], allowAlternatives, path);
         }
       }
 
@@ -688,7 +754,7 @@ export class InvCalculationService {
       return node;
     };
 
-    const result = await processNode(tree);
+    const result = await processNode(tree, allowAlternatives);
 
     // Update the original inventory map to reflect what was used
     for (const [shard, qty] of workingInventory.entries()) {
@@ -815,7 +881,8 @@ export class InvCalculationService {
     requiredQuantity: number,
     params: CalculationParams,
     inventory: Map<string, number>,
-    recipeOverrides: RecipeOverride[] = []
+    recipeOverrides: RecipeOverride[] = [],
+    ownedAttributes: Map<string, number> = new Map()
   ): Promise<InventoryCalculationResult> {
     const parsed = await this.service.parseData(params);
 
@@ -837,70 +904,93 @@ export class InvCalculationService {
     // in the recipe graph, weighted by the value of outputs it uniquely enables.
     const exclusivityScores = this.service.computeExclusivityScores(parsed, minCosts);
 
+    // Shards whose entire special-fusion line is maxed in the player's attributes:
+    // their hoarding (exclusivity) penalty is dropped so inventory gets used freely.
+    const defaultRates = this.service.getDefaultRates();
+    const freelyUsableShards = computeFreelyUsableShards(
+      parsed,
+      ownedAttributes,
+      (id) => (defaultRates[id] ?? 0) > 0,
+      (id) => minCosts.get(id) ?? Infinity
+    );
+
     // Find cycle nodes to prevent infinite recursion in buildRecipeTree
     const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0
       ? this.service.findCycleNodes(choices)
       : [];
 
-    const recipeTree = this.service.buildRecipeTree(
-      parsed,
-      targetShard,
-      choices,
-      cycleNodes,
-      params,
-      recipeOverrides
-    );
-    const craftCounter = {total: 0};
     const {crocodileMultiplier} = this.service.calculateMultipliers(params);
-    this.service.assignQuantities(
-      recipeTree,
-      requiredQuantity,
-      parsed,
-      craftCounter,
-      choices,
-      crocodileMultiplier,
-      params,
-      recipeOverrides
-    );
 
-    let inventoryTree: InventoryRecipeTree = recipeTree;
-    const workingInventory = new Map(inventory);
+    const buildTree = (): InventoryRecipeTree => {
+      const recipeTree = this.service.buildRecipeTree(
+        parsed,
+        targetShard,
+        choices,
+        cycleNodes,
+        params,
+        recipeOverrides
+      );
+      const craftCounter = {total: 0};
+      this.service.assignQuantities(
+        recipeTree,
+        requiredQuantity,
+        parsed,
+        craftCounter,
+        choices,
+        crocodileMultiplier,
+        params,
+        recipeOverrides
+      );
+      return recipeTree;
+    };
 
-    inventoryTree = await this.substituteInventoryBFS(
-      inventoryTree,
-      workingInventory,
-      params,
-      parsed,
-      choices,
-      cycleNodes,
-      recipeOverrides,
-      minCosts,
-      exclusivityScores
-    );
+    const evaluate = async (allowAlternatives: boolean) => {
+      const workingInventory = new Map(inventory);
+      const tree = await this.substituteInventoryBFS(
+        buildTree(),
+        workingInventory,
+        params,
+        parsed,
+        choices,
+        cycleNodes,
+        recipeOverrides,
+        minCosts,
+        exclusivityScores,
+        freelyUsableShards,
+        allowAlternatives
+      );
+      const {craftsNeeded, craftTime, totalQuantities} = this.service.collectTreeStats(tree, params);
+      const totalTime = this.service.calculateTotalTimeFromQuantities(
+        totalQuantities,
+        craftTime,
+        parsed,
+        params
+      );
+      return {tree, workingInventory, craftsNeeded, craftTime, totalQuantities, totalTime};
+    };
 
-    // Collect stats from the tree with inventory substitutions
-    const {craftsNeeded, craftTime, totalQuantities} = this.service.collectTreeStats(
-      inventoryTree,
-      params
-    );
+    // The alternative-recipe machinery is heuristic and can occasionally pick a
+    // globally worse restructuring. Plain substitution (no alternatives) only ever
+    // replaces farm/craft work with free inventory, so it can never be worse than
+    // ignoring the inventory — comparing the two guarantees "Use Inventory" never
+    // increases the total time.
+    const withAlternatives = await evaluate(true);
+    const substitutionOnly = await evaluate(false);
+    const best = withAlternatives.totalTime <= substitutionOnly.totalTime
+      ? withAlternatives
+      : substitutionOnly;
 
-    const totalTime = this.service.calculateTotalTimeFromQuantities(
-      totalQuantities,
-      craftTime,
-      parsed,
-      params
-    );
-    const timePerShard = requiredQuantity > 0 ? totalTime / requiredQuantity : 0;
+    const timePerShard = requiredQuantity > 0 ? best.totalTime / requiredQuantity : 0;
 
     return {
       timePerShard,
-      totalTime,
+      totalTime: best.totalTime,
       totalShardsProduced: requiredQuantity,
-      craftsNeeded,
-      totalQuantities,
-      craftTime,
-      tree: inventoryTree,
-      remainingInventory: workingInventory,
+      craftsNeeded: best.craftsNeeded,
+      totalQuantities: best.totalQuantities,
+      craftTime: best.craftTime,
+      tree: best.tree,
+      remainingInventory: best.workingInventory,
     };
   }
 }

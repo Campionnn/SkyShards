@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import ReactDOM from "react-dom";
 import { getRarityColor } from "../../utilities";
 import { MoveRight } from "lucide-react";
 
@@ -49,8 +50,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
     const viewportPadding = 8;
 
     // Calculate position above trigger by default
-    const scroll = document.scrollingElement?.getBoundingClientRect().top ?? 0;
-    let top = triggerRect.top - scroll - tooltipRect.height - viewportPadding;
+    let top = triggerRect.top - tooltipRect.height - viewportPadding;
     let left = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
 
     // Adjust if tooltip would go off screen
@@ -85,25 +85,73 @@ export const Tooltip: React.FC<TooltipProps> = ({
       }
     };
 
-    const handlePositionUpdate = () => {
+    const handleResize = () => {
       requestAnimationFrame(() => {
         updatePosition();
       });
     };
 
+    const handleScrollClose = () => {
+      setInternalVisible(false);
+    };
+
     document.addEventListener("mousedown", handleOutsideClick);
-    window.addEventListener("resize", handlePositionUpdate);
-    window.addEventListener("scroll", handlePositionUpdate);
+    window.addEventListener("resize", handleResize);
+    // Close on any scroll (capture phase catches inner containers too) to avoid lag
+    document.addEventListener("scroll", handleScrollClose, { capture: true });
 
     return () => {
       cancelAnimationFrame(raf);
       document.removeEventListener("mousedown", handleOutsideClick);
-      window.removeEventListener("resize", handlePositionUpdate);
-      window.removeEventListener("scroll", handlePositionUpdate);
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("scroll", handleScrollClose, { capture: true });
     };
   }, [isVisible]);
 
   const metaInfo = [shardId, family, type].filter(Boolean).join(" • ");
+
+  const tooltipEl = (
+    <div
+      ref={tooltipRef}
+      className={`fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 transition-opacity duration-200 ${
+        isVisible ? "opacity-100" : "opacity-0 pointer-events-none select-none"
+      }`}
+      style={{
+        top: position.top,
+        left: position.left,
+        userSelect: isVisible ? "text" : "none",
+        WebkitUserSelect: isVisible ? "text" : "none",
+        MozUserSelect: isVisible ? "text" : "none",
+        msUserSelect: isVisible ? "text" : "none",
+      }}
+    >
+      {(title || shardName) && (
+        <div className="flex items-center gap-2 mb-2 text-left">
+          {shardIcon && (
+            <img src={`${import.meta.env.BASE_URL}shardIcons/${shardIcon}.png`} alt={title || shardName} className={`${iconSize || "w-8 h-8"} object-contain flex-shrink-0`} loading="lazy" />
+          )}
+          <div className="flex flex-col">
+            {shardName && <div className={`font-medium text-sm ${rarity ? getRarityColor(rarity) : "text-white"}`}>{shardName}</div>}
+            {title && (
+              <div className="text-yellow-500 text-xs flex gap-1 items-center">
+                <div dangerouslySetInnerHTML={{ __html: title }} />
+                {showRomanNumerals && (
+                  <span className="flex items-center">
+                    I<MoveRight className="w-3" />X
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      <div className="text-slate-300 text-xs flex flex-col gap-1 text-left">
+        {metaInfo && <div className="text-slate-400 text-xs">{metaInfo}</div>}
+        <div dangerouslySetInnerHTML={{ __html: content }} />
+        {warning && <div className="text-red-400">{warning}</div>}
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -119,46 +167,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         )}
       </div>
 
-      <div
-        ref={tooltipRef}
-        className={`fixed z-[9999] max-w-xs min-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 transition-opacity duration-200 ${
-          isVisible ? "opacity-100" : "opacity-0 pointer-events-none select-none"
-        }`}
-        style={{
-          top: position.top,
-          left: position.left,
-          userSelect: isVisible ? "text" : "none",
-          WebkitUserSelect: isVisible ? "text" : "none",
-          MozUserSelect: isVisible ? "text" : "none",
-          msUserSelect: isVisible ? "text" : "none",
-        }}
-      >
-        {(title || shardName) && (
-          <div className="flex items-center gap-2 mb-2 text-left">
-            {shardIcon && (
-              <img src={`${import.meta.env.BASE_URL}shardIcons/${shardIcon}.png`} alt={title || shardName} className={`${iconSize || "w-8 h-8"} object-contain flex-shrink-0`} loading="lazy" />
-            )}
-            <div className="flex flex-col">
-              {shardName && <div className={`font-medium text-sm ${rarity ? getRarityColor(rarity) : "text-white"}`}>{shardName}</div>}
-              {title && (
-                <div className="text-yellow-500 text-xs flex gap-1 items-center">
-                  <div dangerouslySetInnerHTML={{ __html: title }} />
-                  {showRomanNumerals && (
-                    <span className="flex items-center">
-                      I<MoveRight className="w-3" />X
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        <div className="text-slate-300 text-xs flex flex-col gap-1 text-left">
-          {metaInfo && <div className="text-slate-400 text-xs">{metaInfo}</div>}
-          <div dangerouslySetInnerHTML={{ __html: content }} />
-          {warning && <div className="text-red-400">{warning}</div>}
-        </div>
-      </div>
+      {ReactDOM.createPortal(tooltipEl, document.body)}
     </>
   );
 };

@@ -17,6 +17,22 @@ import { BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS } from "../cons
 export class CalculationService {
   private static instance: CalculationService;
   private dataCache: Map<string, Data> = new Map();
+  /** Caches the min-cost graph buildRecipeTree solves when called without a cache,
+   * so inventory substitution doesn't re-solve the whole graph for every node it
+   * builds. */
+  private buildTreeMinCostCache = new WeakMap<
+    Data,
+    { key: string; minCosts: Map<string, number>; choices: Map<string, RecipeChoice> }
+  >();
+  /** Base (rates.json) acquisition rates, captured by buildData. Used for the
+   * structural "is this shard directly obtainable" check, independent of params. */
+  private defaultRates: Record<string, number> = {};
+
+  /** Base rates.json values (rate > 0 ⇒ directly obtainable). Available after the
+   * first parseData/buildData call; empty before that. */
+  public getDefaultRates(): Record<string, number> {
+    return this.defaultRates;
+  }
 
   public static getInstance(): CalculationService {
     if (!CalculationService.instance) {
@@ -62,69 +78,7 @@ export class CalculationService {
       const fusionJson = await fusionResponse.json();
       const defaultRates = await ratesResponse.json();
 
-      const recipes: Recipes = {};
-      for (const outputShard in fusionJson.recipes) {
-        recipes[outputShard] = [];
-        for (const qtyStr in fusionJson.recipes[outputShard]) {
-          const qty = parseInt(qtyStr);
-          const recipeList = fusionJson.recipes[outputShard][qtyStr];
-          recipeList.forEach((inputs: [string, string]) => {
-            const isReptile = inputs.some((input) => fusionJson.shards[input].family.includes("Reptile"));
-            recipes[outputShard].push({ inputs, outputQuantity: qty, isReptile: isReptile });
-          });
-        }
-      }
-
-      const shards: Shards = {};
-      for (const shardId in fusionJson.shards) {
-        let rate = params.rateAsCoinValue ? (params.customRates[shardId] ?? Infinity) : (params.customRates[shardId] ?? defaultRates[shardId] ?? 0);
-
-        // skip rate modification if rate is a coin value
-        if (params.rateAsCoinValue) {
-          shards[shardId] = {
-            ...fusionJson.shards[shardId],
-            id: shardId,
-            rate,
-          };
-          continue;
-        }
-
-        // Handle Kuudra rates for L15
-        if (shardId === "L15" && rate === 0) {
-          // If moneyPerHour is null, treat as Infinity (ignore key cost)
-          const moneyPerHour = params.moneyPerHour == null ? Infinity : params.moneyPerHour;
-          rate = this.calculateKuudraRate(params.kuudraTier, moneyPerHour, params.customKuudraTime ? params.kuudraTimeSeconds : null);
-        }
-
-        if (rate > 0) {
-          // Apply wooden bait modifier - different rates for shiny fish vs other wooden bait
-          if (params.noWoodenBait && WOODEN_BAIT_SHARDS.includes(shardId)) {
-            if (shardId === "L23") {
-              rate *= 0.1; // Reduce rate to 10% for shiny fish when wooden bait is excluded
-            } else {
-              rate *= 0.05; // Reduce rate to 5% for other wooden bait shards
-            }
-          }
-
-          // Apply fortune calculations
-          if (!NO_FORTUNE_SHARDS.includes(shardId)) {
-            rate = this.applyFortuneModifiers(rate, shardId, fusionJson.shards[shardId], params);
-          }
-        }
-
-        // Exclude chameleon
-        if (params.excludeChameleon && shardId === "L4") {
-          rate = 0;
-        }
-
-        shards[shardId] = {
-          ...fusionJson.shards[shardId],
-          id: shardId,
-          rate,
-        };
-      }
-
-      const result = { recipes, shards };
+      const result = this.buildData(fusionJson, defaultRates, params);
 
       // Cache the result (limit cache size to prevent memory issues)
       if (this.dataCache.size > 50) {
@@ -139,6 +93,77 @@ export class CalculationService {
     } catch (error) {
       throw new Error(`Failed to parse data: ${error}`);
     }
+  }
+
+  buildData(
+    fusionJson: { recipes: Record<string, Record<string, [string, string][]>>; shards: Record<string, Shard> },
+    defaultRates: Record<string, number>,
+    params: CalculationParams
+  ): Data {
+    this.defaultRates = defaultRates;
+    const recipes: Recipes = {};
+    for (const outputShard in fusionJson.recipes) {
+      recipes[outputShard] = [];
+      for (const qtyStr in fusionJson.recipes[outputShard]) {
+        const qty = parseInt(qtyStr);
+        const recipeList = fusionJson.recipes[outputShard][qtyStr];
+        recipeList.forEach((inputs: [string, string]) => {
+          const isReptile = inputs.some((input) => fusionJson.shards[input].family.includes("Reptile"));
+          recipes[outputShard].push({ inputs, outputQuantity: qty, isReptile: isReptile });
+        });
+      }
+    }
+
+    const shards: Shards = {};
+    for (const shardId in fusionJson.shards) {
+      let rate = params.rateAsCoinValue ? (params.customRates[shardId] ?? Infinity) : (params.customRates[shardId] ?? defaultRates[shardId] ?? 0);
+
+      // skip rate modification if rate is a coin value
+      if (params.rateAsCoinValue) {
+        shards[shardId] = {
+          ...fusionJson.shards[shardId],
+          id: shardId,
+          rate,
+        };
+        continue;
+      }
+
+      // Handle Kuudra rates for L15
+      if (shardId === "L15" && rate === 0) {
+        // If moneyPerHour is null, treat as Infinity (ignore key cost)
+        const moneyPerHour = params.moneyPerHour == null ? Infinity : params.moneyPerHour;
+        rate = this.calculateKuudraRate(params.kuudraTier, moneyPerHour, params.customKuudraTime ? params.kuudraTimeSeconds : null);
+      }
+
+      if (rate > 0) {
+        // Apply wooden bait modifier - different rates for shiny fish vs other wooden bait
+        if (params.noWoodenBait && WOODEN_BAIT_SHARDS.includes(shardId)) {
+          if (shardId === "L23") {
+            rate *= 0.1; // Reduce rate to 10% for shiny fish when wooden bait is excluded
+          } else {
+            rate *= 0.05; // Reduce rate to 5% for other wooden bait shards
+          }
+        }
+
+        // Apply fortune calculations
+        if (!NO_FORTUNE_SHARDS.includes(shardId)) {
+          rate = this.applyFortuneModifiers(rate, shardId, fusionJson.shards[shardId], params);
+        }
+      }
+
+      // Exclude chameleon
+      if (params.excludeChameleon && shardId === "L4") {
+        rate = 0;
+      }
+
+      shards[shardId] = {
+        ...fusionJson.shards[shardId],
+        id: shardId,
+        rate,
+      };
+    }
+
+    return { recipes, shards };
   }
 
   private calculateKuudraRate(kuudraTier: string, moneyPerHour: number, customTimeSeconds: number | null = null): number {
@@ -785,14 +810,25 @@ export class CalculationService {
     minCostsCache?: { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> }
   ): RecipeTree {
     if (!minCostsCache) {
-      const dummyParams: CalculationParams = {
-        ...params,
-        seaSerpentLevel: 0,
-        tiamatLevel: 0,
-        crocodileLevel: 0,
-      };
-      const result = this.computeMinCosts(data, dummyParams);
-      minCostsCache = { minCosts: result.minCosts, choices: result.choices };
+      const memoKey = `${params.craftPenalty}|${params.rateAsCoinValue}`;
+      const memo = this.buildTreeMinCostCache.get(data);
+      if (memo && memo.key === memoKey) {
+        minCostsCache = { minCosts: memo.minCosts, choices: memo.choices };
+      } else {
+        const dummyParams: CalculationParams = {
+          ...params,
+          seaSerpentLevel: 0,
+          tiamatLevel: 0,
+          crocodileLevel: 0,
+        };
+        const result = this.computeMinCosts(data, dummyParams);
+        minCostsCache = { minCosts: result.minCosts, choices: result.choices };
+        this.buildTreeMinCostCache.set(data, {
+          key: memoKey,
+          minCosts: result.minCosts,
+          choices: result.choices,
+        });
+      }
     }
 
     if (cycleNodes.flat().includes(shard)) {
