@@ -12,19 +12,24 @@ const useAdBlockDetected = (): boolean => {
 
   useEffect(() => {
     let active = true;
-    const markDetected = () => { if (active) setDetected(true); };
+    let score = 0;
+    const signal = () => {
+      if (!active) return;
+      score += 1;
+      if (score >= 2) setDetected(true);
+    };
 
     const rampTimer = setTimeout(() => {
       if (typeof (window as any).ramp === "undefined") {
-        markDetected();
+        signal();
       }
-    }, 1500);
+    }, 4000);
 
     fetch("https://scripts.pubnation.com/ads.js", {
       method: "HEAD",
       mode: "no-cors",
       cache: "no-store",
-    }).catch(markDetected);
+    }).catch(signal);
 
     const el = document.createElement("div");
     el.className = "adsbox";
@@ -32,7 +37,7 @@ const useAdBlockDetected = (): boolean => {
     document.body.appendChild(el);
 
     const baitTimer = setTimeout(() => {
-      if (!document.body.contains(el) || el.offsetHeight === 0) markDetected();
+      if (!document.body.contains(el) || el.offsetHeight === 0) signal();
       el.parentNode?.removeChild(el);
     }, 200);
 
