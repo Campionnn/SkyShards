@@ -72,7 +72,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
   const handleMaxStats = () => {
     const updatedForm = {
       ...form,
-      hunterFortune: 121,
+      hunterFortune: 122,
       newtLevel: 10,
       salamanderLevel: 10,
       lizardKingLevel: 10,
