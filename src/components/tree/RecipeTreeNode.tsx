@@ -296,7 +296,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
             </div>
             {crocProcs !== null && (
               <Tooltip
-                content={`Crocodile has a chance to double the output of reptile recipes. You need <span class="text-green-400">${crocProcs} Pure Reptile </span> triggers to have enough shards for the craft. This is based on average luck`}
+                content={<>Crocodile has a chance to double the output of reptile recipes. You need <span className="text-green-400">{crocProcs} Pure Reptile </span> triggers to have enough shards for the craft. This is based on average luck</>}
                 title={`Pure Reptile`}
                 shardName="Crocodile"
                 shardIcon="R45"
@@ -600,7 +600,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
           </div>
           {crocProcs !== null && (
             <Tooltip
-              content={`Crocodile has a chance to double the output of reptile recipes. You need <span class="text-green-400">${crocProcs} Pure Reptile </span> triggers to have enough shards for the craft. This is based on average luck`}
+              content={<>Crocodile has a chance to double the output of reptile recipes. You need <span className="text-green-400">{crocProcs} Pure Reptile </span> triggers to have enough shards for the craft. This is based on average luck</>}
               title={`Pure Reptile`}
               shardName="Crocodile"
               shardIcon="R45"

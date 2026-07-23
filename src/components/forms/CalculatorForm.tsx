@@ -521,39 +521,40 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                     rarity="legendary"
                     title=""
                     showRomanNumerals={false}
-                    content={`
-                      <div class="space-y-2">
-                        <div class="text-slate-200 font-semibold">Sources</div>
-                        <ul class="space-y-0.5">
-                          <li><span class="font-semibold">+50</span> <span class="text-slate-300">— HotF 6 perk</span></li>
-                          <li><span class="font-semibold">+30</span> <span class="text-slate-300">— David's Cloak (Attribute Stacks 30)</span></li>
-                          <li><span class="font-semibold">+25</span> <span class="text-slate-300">— Hunting level 25</span></li>
-                          <li><span class="font-semibold">+13</span> <span class="text-slate-300">— Megalith (Sea Serpent + Tiamat max)</span></li>
-                          <li><span class="font-semibold">+3</span> <span class="text-slate-300">— Infernal Kuudra Core</span></li>
+                    content={
+                      <div className="space-y-2">
+                        <div className="text-slate-200 font-semibold">Sources</div>
+                        <ul className="space-y-0.5">
+                          <li><span className="font-semibold">+50</span> <span className="text-slate-300">HotF 6 perk</span></li>
+                          <li><span className="font-semibold">+30</span> <span className="text-slate-300">David's Cloak (Attribute Stacks 30)</span></li>
+                          <li><span className="font-semibold">+25</span> <span className="text-slate-300">Hunting level 25</span></li>
+                          <li><span className="font-semibold">+13</span> <span className="text-slate-300">Megalith (Sea Serpent + Tiamat max)</span></li>
+                          <li><span className="font-semibold">+3</span> <span className="text-slate-300">Infernal Kuudra Core</span></li>
+                          <li><span className="font-semibold">+1</span> <span className="text-slate-300">Starborn Century Cake </span></li>
                         </ul>
-                        <div class="h-px bg-white/10"></div>
-                        <div class="text-slate-300">Universal fortune total: <span class="text-amber-300 font-semibold">121</span></div>
+                        <div className="h-px bg-white/10"></div>
+                        <div className="text-slate-300">Universal fortune total: <span className="text-amber-300 font-semibold">122</span></div>
 
-                        <div class="text-slate-200 font-semibold pt-1">Rarity bonuses</div>
-                        <ul class="pl-0 space-y-0.5 text-xs">
-                          <li class="flex items-center justify-between"><span><span class="font-semibold text-white">+26</span> <span class="text-white">Common</span></span><span class="text-slate-400">Newt</span></li>
-                          <li class="flex items-center justify-between"><span><span class="font-semibold text-green-400">+26</span> <span class="text-green-400">Uncommon</span></span><span class="text-slate-400">Salamander</span></li>
-                          <li class="flex items-center justify-between"><span><span class="font-semibold text-blue-400">+13</span> <span class="text-blue-400">Rare</span></span><span class="text-slate-400">Lizard King</span></li>
-                          <li class="flex items-center justify-between"><span><span class="font-semibold text-purple-400">+13</span> <span class="text-purple-400">Epic</span></span><span class="text-slate-400">Leviathan</span></li>
-                          <li class="flex items-center justify-between"><span><span class="font-semibold text-yellow-400">+0</span> <span class="text-yellow-400">Legendary</span></span><span class="text-slate-500">—</span></li>
+                        <div className="text-slate-200 font-semibold pt-1">Rarity bonuses</div>
+                        <ul className="pl-0 space-y-0.5 text-xs">
+                          <li className="flex items-center justify-between"><span><span className="font-semibold text-white">+26</span> <span className="text-white">Common</span></span><span className="text-slate-400">Newt</span></li>
+                          <li className="flex items-center justify-between"><span><span className="font-semibold text-green-400">+26</span> <span className="text-green-400">Uncommon</span></span><span className="text-slate-400">Salamander</span></li>
+                          <li className="flex items-center justify-between"><span><span className="font-semibold text-blue-400">+13</span> <span className="text-blue-400">Rare</span></span><span className="text-slate-400">Lizard King</span></li>
+                          <li className="flex items-center justify-between"><span><span className="font-semibold text-purple-400">+13</span> <span className="text-purple-400">Epic</span></span><span className="text-slate-400">Leviathan</span></li>
+                          <li className="flex items-center justify-between"><span><span className="font-semibold text-yellow-400">+0</span> <span className="text-yellow-400">Legendary</span></span><span className="text-slate-500"></span></li>
                         </ul>
 
-                        <div class="text-slate-200 font-semibold pt-1">Totals</div>
-                        <ul class="pl-0 space-y-0.5 text-xs">
-                          <li class="flex items-center justify-between"><span class="text-white">Common</span><span class="text-white font-semibold">147</span></li>
-                          <li class="flex items-center justify-between"><span class="text-green-400">Uncommon</span><span class="text-green-400 font-semibold">147</span></li>
-                          <li class="flex items-center justify-between"><span class="text-blue-400">Rare</span><span class="text-blue-400 font-semibold">134</span></li>
-                          <li class="flex items-center justify-between"><span class="text-purple-400">Epic</span><span class="text-purple-400 font-semibold">134</span></li>
-                          <li class="flex items-center justify-between"><span class="text-yellow-400">Legendary</span><span class="text-yellow-400 font-semibold">121</span></li>
+                        <div className="text-slate-200 font-semibold pt-1">Totals</div>
+                        <ul className="pl-0 space-y-0.5 text-xs">
+                          <li className="flex items-center justify-between"><span className="text-white">Common</span><span className="text-white font-semibold">148</span></li>
+                          <li className="flex items-center justify-between"><span className="text-green-400">Uncommon</span><span className="text-green-400 font-semibold">148</span></li>
+                          <li className="flex items-center justify-between"><span className="text-blue-400">Rare</span><span className="text-blue-400 font-semibold">135</span></li>
+                          <li className="flex items-center justify-between"><span className="text-purple-400">Epic</span><span className="text-purple-400 font-semibold">135</span></li>
+                          <li className="flex items-center justify-between"><span className="text-yellow-400">Legendary</span><span className="text-yellow-400 font-semibold">122</span></li>
                         </ul>
 
                       </div>
-                    `}
+                    }
                   />
                   </div>
                 </div>
