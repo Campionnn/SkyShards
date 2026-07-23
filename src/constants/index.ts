@@ -31,8 +31,9 @@ export const DEFAULT_CALCULATION_PARAMS: CalculationParams = {
   craftPenalty: 0,
 };
 
-import SHARD_DESCRIPTIONS from "../desc.json";
-export { SHARD_DESCRIPTIONS };
+import type { ShardDescriptions } from "../types/shardDescription";
+import DESC_JSON from "../desc.json";
+export const SHARD_DESCRIPTIONS = DESC_JSON as unknown as ShardDescriptions;
 
 export const WOODEN_BAIT_SHARDS = ["R29", "L23", "R59", "R23", "R49"];
 

@@ -4,7 +4,7 @@ import { X, Search, Package, RefreshCw, User, ChevronDown, AlertTriangle, Check,
 import { hypixelService } from "../../services";
 import type { HypixelProfileResponse, ProfileData } from "../../services";
 import { useShards } from "../../hooks";
-import { loadHypixelProfileMeta, saveHypixelProfileMeta, clearHypixelProfileMeta, clearDisabledShards, filterShards, DEFAULT_FILTER_CONFIG, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
+import { loadHypixelProfileMeta, saveHypixelProfileMeta, clearHypixelProfileMeta, clearDisabledShards, filterShards, DEFAULT_FILTER_CONFIG, sortByShardKey, compareShardKeys, sortShardsByNameWithPrefixAwareness, getShardSearchText } from "../../utilities";
 import type { HypixelProfileMeta } from "../../utilities";
 import { SHARD_DESCRIPTIONS, MAX_QUANTITIES, fusedCountToTierLevel } from "../../constants";
 
@@ -195,17 +195,15 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
       return {
         id,
         rarity,
-        title: (desc as { title: string }).title,
+        title: desc.title,
         shardName: shardKeyToName[id] ?? "",
         level: ownedAttributes.get(id) ?? 0,
       };
     }).sort((a, b) => {
       if (b.level !== a.level) return b.level - a.level;
-      const RARITY_ORDER: Record<string, number> = { C: 0, U: 1, R: 2, E: 3, L: 4 };
-      const prefixA = a.id[0], prefixB = b.id[0];
-      const orderDiff = (RARITY_ORDER[prefixA] ?? 99) - (RARITY_ORDER[prefixB] ?? 99);
-      if (orderDiff !== 0) return orderDiff;
-      return parseInt(a.id.slice(1)) - parseInt(b.id.slice(1));
+      // compareShardKeys orders by (rarity, base number, "-N" suffix), so a
+      // duplicate-placeholder id like "U17-1" sorts right after its base "U17".
+      return compareShardKeys(a.id, b.id);
     });
   }, [ownedAttributes, shardKeyToName]);
 
@@ -228,7 +226,6 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
       if (!attrsQuery.trim()) return matchesRarity && matchesLock;
       const q = attrsQuery.toLowerCase();
       // Match against attribute title, shard key, shard name, and description fields
-      const shardDesc = SHARD_DESCRIPTIONS[attr.id as keyof typeof SHARD_DESCRIPTIONS] as { title: string; description?: string } | undefined;
       const matchingShardDef = shardsArray.find((s) => s.key === attr.id);
       const matchesSearch =
         attr.title.toLowerCase().includes(q)
@@ -236,7 +233,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
         || attr.shardName.toLowerCase().includes(q)
         || (matchingShardDef?.family?.toLowerCase().includes(q) ?? false)
         || (matchingShardDef?.type?.toLowerCase().includes(q) ?? false)
-        || (shardDesc?.description?.toLowerCase().includes(q) ?? false);
+        || getShardSearchText(attr.id).includes(q);
       return matchesRarity && matchesLock && matchesSearch;
     });
   }, [attributesList, attrsQuery, attrsRarity, attrsLockFilter, shardsArray]);

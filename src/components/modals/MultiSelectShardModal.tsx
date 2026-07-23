@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Search, Check, RotateCcw, Filter, ChevronDown } from "lucide-react";
-import { getRarityColor, sortShardsByNameWithPrefixAwareness, filterShards, DEFAULT_FILTER_CONFIG } from "../../utilities";
+import { getRarityColor, sortShardsByNameWithPrefixAwareness, sortByShardKey, filterShards, DEFAULT_FILTER_CONFIG } from "../../utilities";
 import type { ShardWithKey } from "../../types/types";
 import { MAX_QUANTITIES } from "../../constants";
 import { ToggleSwitch } from "../ui";
@@ -35,25 +35,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
 
   const currentRarity = rarityOptions.find((r) => r.value === rarityFilter) || rarityOptions[0];
 
-  const sortByShardId = (a: ShardWithKey, b: ShardWithKey) => {
-    const aMatch = a.key.match(/^([CUREL])(\d+)$/);
-    const bMatch = b.key.match(/^([CUREL])(\d+)$/);
-
-    if (!aMatch || !bMatch) {
-      return a.key.localeCompare(b.key);
-    }
-
-    const [, aRarity, aNum] = aMatch;
-    const [, bRarity, bNum] = bMatch;
-
-    const rarityOrder: Record<string, number> = { C: 1, U: 2, R: 3, E: 4, L: 5 };
-
-    if (rarityOrder[aRarity] !== rarityOrder[bRarity]) {
-      return rarityOrder[aRarity] - rarityOrder[bRarity];
-    }
-
-    return parseInt(aNum) - parseInt(bNum);
-  };
+  const sortByShardId = (a: ShardWithKey, b: ShardWithKey) => sortByShardKey(a, b);
 
   // Disable body scroll when modal is open
   useEffect(() => {

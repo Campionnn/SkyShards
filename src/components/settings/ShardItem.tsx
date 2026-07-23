@@ -6,7 +6,7 @@ import { MoveRight, RotateCcw } from "lucide-react";
 interface ShardItemProps {
   shard: ShardWithDirectInfo;
   title: string;
-  description: string;
+  description: React.ReactNode;
   detailed: boolean;
   rate: number;
   defaultRate: number;
@@ -76,7 +76,7 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, title, d
                   I<MoveRight className="w-4" />X
                 </span>
               </div>
-              <p className="text-slate-300 break-words" dangerouslySetInnerHTML={{ __html: description }}></p>
+              <div className="text-slate-300 break-words">{description}</div>
             </div>
           )}
         </div>

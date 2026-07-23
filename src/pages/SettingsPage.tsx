@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Search, RotateCcw, Save, AlignLeft } from "lucide-react";
 import { useShardsWithRecipes, useCustomRates } from "../hooks";
-import { debounce, formatShardDescription, filterShards, DEFAULT_FILTER_CONFIG } from "../utilities";
+import { debounce, filterShards, DEFAULT_FILTER_CONFIG } from "../utilities";
+import { ShardDescription } from "../components/ui/ShardDescription";
 import { RarityDropdown, TypeDropdown, ShardItem } from "../components";
 import { SHARD_DESCRIPTIONS } from "../constants";
 import type { ShardWithDirectInfo } from "../types/types";
@@ -239,7 +240,7 @@ export const SettingsPage: React.FC = () => {
                   key={shard.key}
                   shard={shard}
                   title={desc?.title || shard.name}
-                  description={formatShardDescription(desc?.description || "No description.")}
+                  description={<ShardDescription record={desc} fallback="No description." />}
                   detailed={detailedShard}
                   rate={customRates[shard.key] !== undefined ? customRates[shard.key]! : defaultRates[shard.key]}
                   defaultRate={defaultRates[shard.key]}

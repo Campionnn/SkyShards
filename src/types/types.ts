@@ -115,7 +115,7 @@ export interface LevelDropdownProps {
   onChange: (value: number) => void;
   label: string;
   tooltipTitle?: string;
-  tooltipContent?: string;
+  tooltipContent?: React.ReactNode;
   tooltipShardName?: string;
   tooltipShardIcon?: string;
   tooltipRarity?: string;

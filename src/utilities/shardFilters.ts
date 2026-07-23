@@ -1,5 +1,6 @@
 import type { ShardWithKey } from "../types/types";
 import { SHARD_DESCRIPTIONS } from "../constants";
+import { getShardSearchText } from "./segments";
 
 export interface ShardFilterConfig {
   /** Search in shard.name */
@@ -80,7 +81,7 @@ export function matchesSearchQuery(
       return true;
     }
 
-    if (config.description && shardDesc?.description?.toLowerCase().includes(search)) {
+    if (config.description && getShardSearchText(shard.key).includes(search)) {
       return true;
     }
   }

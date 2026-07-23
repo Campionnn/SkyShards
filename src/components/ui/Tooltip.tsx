@@ -4,7 +4,7 @@ import { getRarityColor } from "../../utilities";
 import { MoveRight } from "lucide-react";
 
 interface TooltipProps {
-  content: string;
+  content: React.ReactNode;
   title?: string;
   shardName?: string;
   className?: string;
@@ -134,7 +134,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
             {shardName && <div className={`font-medium text-sm ${rarity ? getRarityColor(rarity) : "text-white"}`}>{shardName}</div>}
             {title && (
               <div className="text-yellow-500 text-xs flex gap-1 items-center">
-                <div dangerouslySetInnerHTML={{ __html: title }} />
+                <div>{title}</div>
                 {showRomanNumerals && (
                   <span className="flex items-center">
                     I<MoveRight className="w-3" />X
@@ -147,7 +147,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       )}
       <div className="text-slate-300 text-xs flex flex-col gap-1 text-left">
         {metaInfo && <div className="text-slate-400 text-xs">{metaInfo}</div>}
-        <div dangerouslySetInnerHTML={{ __html: content }} />
+        <div>{content}</div>
         {warning && <div className="text-red-400">{warning}</div>}
       </div>
     </div>

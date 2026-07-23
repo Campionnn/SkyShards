@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Info } from "lucide-react";
-import { formatNumber, getRarityColor, formatShardDescription, formatTime, formatLargeNumber } from "../../utilities";
+import { formatNumber, getRarityColor, formatTime, formatLargeNumber } from "../../utilities";
 import { Tooltip } from "./Tooltip";
+import { ShardDescription } from "./ShardDescription";
 import { MaterialBreakdownModal } from "../modals";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 import type { Shard } from "../../types/types";
@@ -26,7 +27,7 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
         <div className="flex flex-col items-start min-w-0 justify-center h-full">
           <span className="text-slate-300 font-medium text-base flex-shrink-0">{quantity}x</span>
           <Tooltip
-            content={formatShardDescription(shardDesc?.description || "No description available.")}
+            content={<ShardDescription record={shardDesc} />}
             title={shardDesc?.title}
             shardName={shard.name}
             shardIcon={shard.id}

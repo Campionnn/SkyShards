@@ -5,7 +5,8 @@ import { ShardAutocomplete, MoneyInput } from "./inputs";
 import { useCalculatorState, useShards } from "../../hooks";
 import { LevelDropdown, KuudraDropdown } from "../calculator";
 import {MAX_QUANTITIES, SHARD_DESCRIPTIONS} from "../../constants";
-import { isValidShardName, formatShardDescription } from "../../utilities";
+import { isValidShardName } from "../../utilities";
+import { ShardDescription } from "../ui/ShardDescription";
 import { Tooltip, ToggleSwitch } from "../ui";
 import type { ShardWithKey } from "../../types/types";
 import { MultiSelectShardModal } from "../modals";
@@ -609,7 +610,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   onChange={handleLevelChange(key)}
                   label={label}
                   tooltipTitle={shardDesc?.title}
-                  tooltipContent={formatShardDescription(shardDesc?.description || "No description available.")}
+                  tooltipContent={<ShardDescription record={shardDesc} />}
                   tooltipShardName={label}
                   tooltipShardIcon={shardId}
                   tooltipRarity={shard?.rarity}

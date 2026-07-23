@@ -1,5 +1,6 @@
 import React from "react";
-import { getRarityColor, formatShardDescription, formatLargeNumber } from "../../utilities";
+import { getRarityColor, formatLargeNumber } from "../../utilities";
+import { ShardDescription } from "../ui/ShardDescription";
 import { GiGecko } from "react-icons/gi";
 import { ChevronDown, ChevronRight, MoveRight, Settings } from "lucide-react";
 import { formatNumber } from "../../utilities";
@@ -72,7 +73,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
       <>
         <span className="text-white">{quantity}x</span>
         <Tooltip
-          content={formatShardDescription(shardDesc?.description || "No description available.")}
+          content={<ShardDescription record={shardDesc} />}
           title={shardDesc?.title}
           shardName={shard.name}
           shardIcon={shard.id}
@@ -127,7 +128,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
         <span className="text-white">{outputQuantity}x</span>
         <Tooltip
-          content={formatShardDescription(outputShardDesc?.description || "No description available.")}
+          content={<ShardDescription record={outputShardDesc} />}
           title={outputShardDesc?.title}
           shardName={outputShard.name}
           shardIcon={outputShard.id}
@@ -147,7 +148,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
         <span className="text-slate-400">{input1Quantity}x</span>
         <Tooltip
-          content={formatShardDescription(input1ShardDesc?.description || "No description available.")}
+          content={<ShardDescription record={input1ShardDesc} />}
           title={input1ShardDesc?.title}
           shardName={input1Shard.name}
           shardIcon={input1Shard.id}
@@ -167,7 +168,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
 
         <span className="text-slate-400">{input2Quantity}x</span>
         <Tooltip
-          content={formatShardDescription(input2ShardDesc?.description || "No description available.")}
+          content={<ShardDescription record={input2ShardDesc} />}
           title={input2ShardDesc?.title || input2Shard.name}
           shardName={input2Shard.name}
           shardIcon={input2Shard.id}
@@ -514,7 +515,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
               <span className="font-medium text-sm">{Math.floor(displayQuantity)}x</span>
 
               <Tooltip
-                content={formatShardDescription(shardDesc?.description || "No description available.")}
+                content={<ShardDescription record={shardDesc} />}
                 title={shardDesc?.title}
                 shardName={shard.name}
                 shardIcon={shard.id}
@@ -537,7 +538,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 <span>{Math.floor(input1.quantity)}x</span>
 
                 <Tooltip
-                  content={formatShardDescription(input1ShardDesc?.description || "No description available.")}
+                  content={<ShardDescription record={input1ShardDesc} />}
                   title={input1ShardDesc?.title}
                   shardName={input1Shard.name}
                   shardIcon={input1Shard.id}
@@ -564,7 +565,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
                 <span>{Math.floor(input2.quantity)}x</span>
 
                 <Tooltip
-                  content={formatShardDescription(input2ShardDesc?.description || "No description available.")}
+                  content={<ShardDescription record={input2ShardDesc} />}
                   title={input2ShardDesc?.title}
                   shardName={input2Shard.name}
                   shardIcon={input2Shard.id}
