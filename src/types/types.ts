@@ -136,6 +136,7 @@ export interface CalculationResultsProps {
   recipeOverrides: RecipeOverride[];
   onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
   onResetRecipeOverrides: () => void;
+  onShowActiveAlternatives: () => void;
   ironManView: boolean;
   materialsOnly?: boolean;
   materialShardResults?: Map<string, CalculationResult>;

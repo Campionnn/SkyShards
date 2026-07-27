@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Menu, X, ChevronDown, ChevronRight, Package } from "lucide-react";
 import { CalculatorForm, CalculationResults, InventoryCalculationResults } from "../components";
-import { WelcomeProfileModal, InventoryManagementModal } from "../components";
+import { WelcomeProfileModal, InventoryManagementModal, ActiveAlternativesModal } from "../components";
 import { useCustomRates, useCalculatorState } from "../hooks";
 import { DataService, InvCalculationService, CalculationService } from "../services";
 import type { CalculationFormData } from "../schemas";
@@ -288,6 +288,7 @@ const CalculatorPageContent: React.FC = () => {
   const [currentShardKey, setCurrentShardKey] = useState<string>("");
   const [currentQuantity, setCurrentQuantity] = useState<number>(1);
   const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
+  const [activeAlternativesOpen, setActiveAlternativesOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [progress, setProgress] = useState<WorkerProgress | null>(null);
 
@@ -596,6 +597,10 @@ const CalculatorPageContent: React.FC = () => {
     setRecipeOverrides([]);
   };
 
+  const removeRecipeOverride = (shardId: string) => {
+    setRecipeOverrides((overrides) => overrides.filter((override) => override.shardId !== shardId));
+  };
+
   // Re-calculate when customRates, recipeOverrides, inventory, or useInventory change and form is valid
   useEffect(() => {
     const currentForm = formRef.current;
@@ -773,6 +778,7 @@ const CalculatorPageContent: React.FC = () => {
                 recipeOverrides={recipeOverrides}
                 onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
                 onResetRecipeOverrides={resetRecipeOverrides}
+                onShowActiveAlternatives={() => setActiveAlternativesOpen(true)}
                 inventory={inventory}
                 disabledShards={disabledShards}
                 onDisabledShardsChange={setDisabledShards}
@@ -792,6 +798,7 @@ const CalculatorPageContent: React.FC = () => {
                 recipeOverrides={recipeOverrides}
                 onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
                 onResetRecipeOverrides={resetRecipeOverrides}
+                onShowActiveAlternatives={() => setActiveAlternativesOpen(true)}
                 ironManView={form.ironManView}
                 materialsOnly={form.materialsOnly}
                 materialShardResults={materialShardResults}
@@ -834,6 +841,16 @@ const CalculatorPageContent: React.FC = () => {
         onDisabledShardsChange={setDisabledShards}
         onShardClick={handleShardClickFromInventory}
         onShardLevelsImport={handleShardLevelsImport}
+      />
+
+      {/* Alternatives currently applied to the fusion tree. Lives here so it stays open while the tree recalculates. */}
+      <ActiveAlternativesModal
+        open={activeAlternativesOpen}
+        onClose={() => setActiveAlternativesOpen(false)}
+        recipeOverrides={recipeOverrides}
+        rateAsCoinValue={!form.ironManView}
+        onRemove={removeRecipeOverride}
+        onRemoveAll={resetRecipeOverrides}
       />
     </>
   );

@@ -18,6 +18,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   recipeOverrides,
   onRecipeOverridesUpdate,
   onResetRecipeOverrides,
+  onShowActiveAlternatives,
   ironManView,
   materialsOnly = false,
   materialShardResults,
@@ -185,6 +186,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
             recipeOverrides={recipeOverrides}
             onRecipeOverridesUpdate={onRecipeOverridesUpdate}
             onResetRecipeOverrides={onResetRecipeOverrides}
+            onShowActiveAlternatives={onShowActiveAlternatives}
             ironManView={ironManView}
           />
         </>
@@ -198,6 +200,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           recipeOverrides={recipeOverrides}
           onRecipeOverridesUpdate={onRecipeOverridesUpdate}
           onResetRecipeOverrides={onResetRecipeOverrides}
+          onShowActiveAlternatives={onShowActiveAlternatives}
           ironManView={ironManView}
         />
       )}
