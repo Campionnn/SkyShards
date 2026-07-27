@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { KUUDRA_TIERS } from "../../constants";
 
-export interface KuudraDropdownProps {
+interface KuudraDropdownProps {
   value: string;
   onChange: (value: string) => void;
   label: string;

@@ -17,7 +17,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
   expandedStates,
   onToggle,
   onShowAlternatives,
-  noWoodenBait = false,
   ironManView,
   isInCycle = false,
   remainingInventory,
@@ -36,7 +35,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
             expandedStates={expandedStates}
             onToggle={onToggle}
             onShowAlternatives={onShowAlternatives}
-            noWoodenBait={noWoodenBait}
             ironManView={ironManView}
             isInCycle={isInCycle}
             remainingInventory={remainingInventory}
@@ -290,7 +288,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
               expandedStates={expandedStates}
               onToggle={onToggle}
               onShowAlternatives={onShowAlternatives}
-              noWoodenBait={noWoodenBait}
               ironManView={ironManView}
               isInCycle={inCycle}
               remainingInventory={remainingInventory}
@@ -302,7 +299,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
               expandedStates={expandedStates}
               onToggle={onToggle}
               onShowAlternatives={onShowAlternatives}
-              noWoodenBait={noWoodenBait}
               ironManView={ironManView}
               isInCycle={inCycle}
               remainingInventory={remainingInventory}
@@ -597,7 +593,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
               expandedStates={expandedStates}
               onToggle={onToggle}
               onShowAlternatives={onShowAlternatives}
-              noWoodenBait={noWoodenBait}
               ironManView={ironManView}
               isInCycle={isInCycle}
               remainingInventory={remainingInventory}
@@ -609,7 +604,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
               expandedStates={expandedStates}
               onToggle={onToggle}
               onShowAlternatives={onShowAlternatives}
-              noWoodenBait={noWoodenBait}
               ironManView={ironManView}
               isInCycle={isInCycle}
               remainingInventory={remainingInventory}

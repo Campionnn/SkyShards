@@ -14,7 +14,6 @@ import { DataService } from "../../services";
 
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
-  inventory?: Map<string, number>;
   ownedAttributes?: Map<string, number>;
   useInventory?: boolean;
   onUseInventoryChange?: (enabled: boolean) => void;

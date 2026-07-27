@@ -4,7 +4,7 @@ const shardIconModules = import.meta.glob('/shardIcons/*.png', {
   import: 'default'
 });
 
-export function getShardIconIds(): string[] {
+function getShardIconIds(): string[] {
   return Object.keys(shardIconModules)
     .map(path => {
       // Extract filename without extension

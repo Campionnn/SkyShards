@@ -1098,7 +1098,3 @@ export class CalculationService {
     return updatedOverrides;
   }
 }
-
-// Create and export a default instance
-const calculationService = new CalculationService();
-export default calculationService;

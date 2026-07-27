@@ -124,14 +124,6 @@ export const loadOwnedAttributes = (): Map<string, number> => {
   return new Map();
 };
 
-export const clearOwnedAttributes = (): void => {
-  try {
-    localStorage.removeItem(OWNED_ATTRIBUTES_STORAGE_KEY);
-  } catch (error) {
-    console.warn("Failed to clear owned attributes from localStorage:", error);
-  }
-};
-
 // Hypixel profile metadata
 const HYPIXEL_PROFILE_META_KEY = "hypixel_profile_meta";
 

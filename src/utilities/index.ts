@@ -7,5 +7,5 @@ export * from "./fusionLines";
 export * from "./segments";
 export * from "./minecraftColors";
 export { isFocusRestoredByWindow, isBlurCausedByWindow } from "./windowFocus";
-export { imagePreloader, ImagePreloader } from "./imagePreloader";
-export { getShardIconIds, SHARD_ICON_IDS } from "./getShardIconIds";
+export { imagePreloader } from "./imagePreloader";
+export { SHARD_ICON_IDS } from "./getShardIconIds";

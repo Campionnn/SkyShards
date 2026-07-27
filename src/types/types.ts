@@ -150,7 +150,6 @@ export interface RecipeTreeNodeProps {
   expandedStates: Map<string, boolean>;
   onToggle: (nodeId: string) => void;
   onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
-  noWoodenBait?: boolean;
   ironManView: boolean;
 }
 
@@ -163,7 +162,6 @@ export interface InventoryRecipeTreeNodeProps {
   expandedStates: Map<string, boolean>;
   onToggle: (nodeId: string) => void;
   onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
-  noWoodenBait?: boolean;
   ironManView: boolean;
   isInCycle?: boolean;
   remainingInventory?: Map<string, number>;

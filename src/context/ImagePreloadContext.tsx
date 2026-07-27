@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import { imagePreloader, SHARD_ICON_IDS } from "../utilities";
 
 interface ImagePreloadContextValue {
@@ -8,9 +8,6 @@ interface ImagePreloadContextValue {
 const ImagePreloadContext = createContext<ImagePreloadContextValue>({
   isReady: false,
 });
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useImagePreload = () => useContext(ImagePreloadContext);
 
 interface ImagePreloadProviderProps {
   children: React.ReactNode;

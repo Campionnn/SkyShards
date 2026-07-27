@@ -17,7 +17,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   expandedStates,
   onToggle,
   onShowAlternatives,
-  noWoodenBait = false,
   ironManView,
 }) => {
   const shard = data.shards[tree.shard];
@@ -640,7 +639,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
             expandedStates={expandedStates}
             onToggle={onToggle}
             onShowAlternatives={onShowAlternatives}
-            noWoodenBait={noWoodenBait}
             ironManView={ironManView}
           />
           <RecipeTreeNode
@@ -650,7 +648,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
             expandedStates={expandedStates}
             onToggle={onToggle}
             onShowAlternatives={onShowAlternatives}
-            noWoodenBait={noWoodenBait}
             ironManView={ironManView}
           />
         </div>

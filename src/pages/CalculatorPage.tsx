@@ -14,17 +14,15 @@ const INVENTORY_ENABLED_KEY = "skyshards_use_inventory";
 
 const CalculatorFormWithContext: React.FC<{
   onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void;
-  inventory?: Map<string, number>;
   ownedAttributes?: Map<string, number>;
   useInventory: boolean;
   onUseInventoryChange: (enabled: boolean) => void;
-}> = ({ onSubmit, inventory, ownedAttributes, useInventory, onUseInventoryChange }) => {
+}> = ({ onSubmit, ownedAttributes, useInventory, onUseInventoryChange }) => {
   const { setForm } = useCalculatorState();
   const stableOnSubmit = useCallback((data: CalculationFormData) => onSubmit(data, setForm), [onSubmit, setForm]);
   return (
     <CalculatorForm
       onSubmit={stableOnSubmit}
-      inventory={inventory}
       ownedAttributes={ownedAttributes}
       useInventory={useInventory}
       onUseInventoryChange={onUseInventoryChange}
@@ -740,7 +738,6 @@ const CalculatorPageContent: React.FC = () => {
               {/* Calculator Settings Form */}
               <CalculatorFormWithContext
                 onSubmit={handleCalculate}
-                inventory={useInventory ? inventory : undefined}
                 ownedAttributes={ownedAttributes}
                 useInventory={useInventory}
                 onUseInventoryChange={handleUseInventoryChange}

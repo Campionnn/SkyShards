@@ -325,7 +325,6 @@ export const FusionTreeView: React.FC<FusionTreeViewProps> = ({
                   expandedStates={expandedStates}
                   onToggle={handleNodeToggle}
                   onShowAlternatives={showAlternatives}
-                  noWoodenBait={params.noWoodenBait}
                   ironManView={ironManView}
                 />
               </>
