@@ -20,7 +20,7 @@ export const ActiveAlternativesModal: React.FC<ActiveAlternativesModalProps> = (
   const shardsById = useMemo(() => {
     const map: Record<string, Shard> = {};
     for (const shard of shards) {
-      map[shard.key] = shard;
+      map[shard.id] = shard;
     }
     return map;
   }, [shards]);

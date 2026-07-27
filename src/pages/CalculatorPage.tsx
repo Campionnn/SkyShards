@@ -106,9 +106,9 @@ const performCalculation = async (
 
     const shardQuantitiesMap = new Map<string, number>();
     if (formData.shardQuantities) {
-      formData.shardQuantities.forEach((item: { shard?: { key: string }; quantity?: number }) => {
+      formData.shardQuantities.forEach((item: { shard?: { id: string }; quantity?: number }) => {
         if (item.shard && item.quantity) {
-          shardQuantitiesMap.set(item.shard.key, item.quantity);
+          shardQuantitiesMap.set(item.shard.id, item.quantity);
         }
       });
     }
@@ -326,7 +326,7 @@ const CalculatorPageContent: React.FC = () => {
     try {
       const dataService = DataService.getInstance();
       const shards = await dataService.loadShards();
-      const shard = shards.find(s => s.key === shardKey);
+      const shard = shards.find(s => s.id === shardKey);
       
       if (shard) {
         // Calculate remaining quantity based on owned attributes

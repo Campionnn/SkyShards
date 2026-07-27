@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { BarChart3, Hammer } from "lucide-react";
 import { formatLargeNumber } from "../../utilities";
-import type { CalculationResultsProps, ShardWithKey } from "../../types/types";
+import type { CalculationResultsProps, Shard } from "../../types/types";
 import { MaterialItem, useToast } from "../ui";
 import pako from "pako";
 import { CopyTreeModal } from "../modals";
@@ -63,7 +63,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   };
 
   // Shards available to view individually (the selected target shards)
-  const selectableShards = useMemo<ShardWithKey[]>(() => {
+  const selectableShards = useMemo<Shard[]>(() => {
     if (!materialShardResults) return [];
     return Array.from(materialShardResults.keys())
       .filter((key) => data.shards[key])

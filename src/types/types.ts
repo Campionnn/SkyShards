@@ -102,11 +102,7 @@ export interface CalculationResult {
   materialBreakdown?: Map<string, Map<string, number>>;
 }
 
-export interface ShardWithKey extends Shard {
-  key: string;
-}
-
-export interface ShardWithDirectInfo extends ShardWithKey {
+export interface ShardWithDirectInfo extends Shard {
   isDirect: boolean;
 }
 
@@ -177,7 +173,7 @@ export interface InventoryRecipeTreeNodeProps {
 export interface ShardAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
-  onSelect: (shard: ShardWithKey) => void;
+  onSelect: (shard: Shard) => void;
   onFocus?: () => void;
   placeholder?: string;
   className?: string;
@@ -185,10 +181,10 @@ export interface ShardAutocompleteProps {
 }
 
 export interface SuggestionItemProps {
-  shard: ShardWithKey;
+  shard: Shard;
   index: number;
   focusedIndex: number;
-  onSelect: (shard: ShardWithKey) => void;
+  onSelect: (shard: Shard) => void;
   isSelecting: boolean;
   setFocusedIndex: (index: number) => void;
 }

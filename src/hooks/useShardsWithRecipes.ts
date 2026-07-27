@@ -16,8 +16,8 @@ export const useShardsWithRecipes = (): { shards: ShardWithDirectInfo[]; loading
 
         const shardsWithDirectInfo = shardsData.map((shard) => ({
           ...shard,
-          rate: defaultRates[shard.key] || 0,
-          isDirect: (defaultRates[shard.key] || 0) > 0,
+          rate: defaultRates[shard.id] || 0,
+          isDirect: (defaultRates[shard.id] || 0) > 0,
         }));
 
         setShards(shardsWithDirectInfo);

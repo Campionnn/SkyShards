@@ -241,16 +241,16 @@ export const SettingsPage: React.FC = () => {
         <div className="h-full overflow-y-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-3 items-start">
             {filteredShards.map((shard) => {
-              const desc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
+              const desc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
               return (
                 <ShardItem
-                  key={shard.key}
+                  key={shard.id}
                   shard={shard}
                   title={desc?.title || shard.name}
                   description={<ShardDescription record={desc} fallback="No description." collapsibleHowToHunt />}
                   detailed={detailedShard}
-                  rate={customRates[shard.key] !== undefined ? customRates[shard.key]! : defaultRates[shard.key]}
-                  defaultRate={defaultRates[shard.key]}
+                  rate={customRates[shard.id] !== undefined ? customRates[shard.id]! : defaultRates[shard.id]}
+                  defaultRate={defaultRates[shard.id]}
                   onRateChange={handleRateChange}
                 />
               );

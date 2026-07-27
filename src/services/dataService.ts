@@ -1,5 +1,5 @@
 import type { BazaarData } from "../types/hypixelApiTypes.ts";
-import type { ShardWithKey, Shard } from "../types/types";
+import type { Shard } from "../types/types";
 import { sortShardsByNameWithPrefixAwareness, filterShards, BASIC_FILTER_CONFIG, NAME_ONLY_FILTER_CONFIG } from "../utilities";
 
 interface FusionData {
@@ -9,7 +9,7 @@ interface FusionData {
 
 export class DataService {
   private static instance: DataService;
-  private shardsCache: ShardWithKey[] | null = null;
+  private shardsCache: Shard[] | null = null;
   private shardNameToKeyCache: Record<string, string> | null = null;
   private defaultRatesCache: Record<string, number> | null = null;
   private bazaarPriceCache: Record<string, Record<string, number>> | null = null;
@@ -47,18 +47,17 @@ export class DataService {
     }
   }
 
-  async loadShards(): Promise<ShardWithKey[]> {
+  async loadShards(): Promise<Shard[]> {
     if (this.shardsCache) {
       return this.shardsCache;
     }
 
     const [fusionData, defaultRates] = await Promise.all([this.fetchJson<FusionData>("fusion-data.json"), this.loadDefaultRates()]);
 
-    this.shardsCache = Object.entries(fusionData.shards).map(([key, shard]: [string, Shard]) => ({
-        key,
+    this.shardsCache = Object.entries(fusionData.shards).map(([id, shard]: [string, Shard]) => ({
         ...shard,
-        id: key,
-        rate: defaultRates[key] || 0,
+        id,
+        rate: defaultRates[id] || 0,
     }));
 
     return this.shardsCache;
@@ -71,7 +70,7 @@ export class DataService {
 
     const shards = await this.loadShards();
     this.shardNameToKeyCache = shards.reduce((acc, shard) => {
-      acc[shard.name.toLowerCase()] = shard.key;
+      acc[shard.name.toLowerCase()] = shard.id;
       return acc;
     }, {} as Record<string, string>);
 
@@ -107,13 +106,13 @@ export class DataService {
     return this.bazaarPriceCache[cacheKey];
   }
 
-  private sortShardsByQuery(shards: ShardWithKey[], query: string): ShardWithKey[] {
+  private sortShardsByQuery(shards: Shard[], query: string): Shard[] {
     const lowerQuery = query.toLowerCase();
     return shards.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
-      const aKey = a.key.toLowerCase();
-      const bKey = b.key.toLowerCase();
+      const aKey = a.id.toLowerCase();
+      const bKey = b.id.toLowerCase();
       const aStarts = aName.startsWith(lowerQuery) || aKey.startsWith(lowerQuery);
       const bStarts = bName.startsWith(lowerQuery) || bKey.startsWith(lowerQuery);
       
@@ -123,7 +122,7 @@ export class DataService {
     });
   }
 
-  async searchShards(query: string): Promise<ShardWithKey[]> {
+  async searchShards(query: string): Promise<Shard[]> {
     const shards = await this.loadShards();
     const filtered = filterShards(shards, {
       query,
@@ -133,7 +132,7 @@ export class DataService {
     return this.sortShardsByQuery(filtered, query);
   }
 
-  async searchShardsByNameOnly(query: string): Promise<ShardWithKey[]> {
+  async searchShardsByNameOnly(query: string): Promise<Shard[]> {
     const shards = await this.loadShards();
     const filtered = filterShards(shards, {
       query,
@@ -144,7 +143,7 @@ export class DataService {
     if (filtered.length === 0) {
       const fallbackConfig = {
         name: false,
-        key: false,
+        id: false,
         family: false,
         type: false,
         title: true,

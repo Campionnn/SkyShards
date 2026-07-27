@@ -1,4 +1,4 @@
-import type { ShardWithKey } from "../types/types";
+import type { Shard } from "../types/types";
 
 export interface FusionData {
   recipes: Record<string, Record<string, string[][]>>;
@@ -56,10 +56,10 @@ const iterateRecipes = (fusionData: FusionData, callback: (outputId: string, rec
   });
 };
 
-export const processOutputRecipes = (selectedShard: ShardWithKey, fusionData: FusionData): Recipe[] => {
+export const processOutputRecipes = (selectedShard: Shard, fusionData: FusionData): Recipe[] => {
   const recipes: Recipe[] = [];
   iterateRecipes(fusionData, (outputShardId, recipe, outputQuantity) => {
-    if (outputShardId === selectedShard.key) {
+    if (outputShardId === selectedShard.id) {
       const [input1, input2] = recipe;
       recipes.push({ input1, input2, quantity: outputQuantity, output: outputShardId });
     }

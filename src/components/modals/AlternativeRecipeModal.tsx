@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Star, Search, Plus, ChevronDown } from "lucide-react";
-import { getRarityColor, formatTime, formatLargeNumber } from "../../utilities";
+import { getRarityColor, formatTime, formatLargeNumber, matchesSearchQuery, NAME_AND_FAMILY_FILTER_CONFIG } from "../../utilities";
 import type { AlternativeRecipeModalProps, Recipe, AlternativeRecipeOption } from "../../types/types";
 import { CalculationService } from "../../services";
 
@@ -134,7 +134,7 @@ export const AlternativeRecipeModal: React.FC<
           if (!option.recipe) return false;
           return option.recipe.inputs.some((inputId) => {
             const inputShard = data.shards[inputId];
-            return inputShard?.name.toLowerCase().includes(query);
+            return !!inputShard && matchesSearchQuery(inputShard, query, NAME_AND_FAMILY_FILTER_CONFIG);
           });
         });
         if (filteredGroup.length > 0) filteredGrouped[firstShard] = filteredGroup;
@@ -318,7 +318,7 @@ export const AlternativeRecipeModal: React.FC<
             if (!option.recipe) return false;
             const partnerShard = getPartner(option.recipe.inputs);
             const partner = data?.shards?.[partnerShard];
-            return partner?.name.toLowerCase().includes(dropdownSearchQuery.toLowerCase());
+            return !!partner && matchesSearchQuery(partner, dropdownSearchQuery, NAME_AND_FAMILY_FILTER_CONFIG);
           })
         : group;
 
@@ -544,7 +544,7 @@ export const AlternativeRecipeModal: React.FC<
                       <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-slate-400" />
                       <input
                         type="text"
-                        placeholder="Search shard..."
+                        placeholder="Search name or family..."
                         value={dropdownSearchQuery}
                         onChange={(e) =>
                           setDropdownSearchQueries((prev) => ({
@@ -637,7 +637,7 @@ export const AlternativeRecipeModal: React.FC<
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by input shard name..."
+              placeholder="Search by input shard name or family..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"

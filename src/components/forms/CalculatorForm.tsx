@@ -8,7 +8,7 @@ import {MAX_QUANTITIES, SHARD_DESCRIPTIONS} from "../../constants";
 import { isValidShardName } from "../../utilities";
 import { ShardDescription } from "../ui/ShardDescription";
 import { Tooltip, ToggleSwitch } from "../ui";
-import type { ShardWithKey } from "../../types/types";
+import type { Shard } from "../../types/types";
 import { MultiSelectShardModal } from "../modals";
 import { DataService } from "../../services";
 
@@ -232,22 +232,22 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
 
   // Materials Only mode state
   const [isMultiSelectModalOpen, setIsMultiSelectModalOpen] = React.useState(false);
-  const [allShards, setAllShards] = React.useState<ShardWithKey[]>([]);
+  const [allShards, setAllShards] = React.useState<Shard[]>([]);
 
   const handleOpenMultiSelect = React.useCallback(async () => {
     if (allShards.length === 0) {
       const dataService = DataService.getInstance();
       const shards = await dataService.loadShards();
       // Filter out Chameleon shard (L4) as it's only used for fusions
-      const filteredShards = shards.filter(shard => shard.key !== 'L4');
+      const filteredShards = shards.filter(shard => shard.id !== 'L4');
       setAllShards(filteredShards);
     }
     setIsMultiSelectModalOpen(true);
   }, [allShards]);
 
   const handleMultiSelectDone = React.useCallback(
-    (selectedData: Array<{ shard: ShardWithKey; quantity: number }>) => {
-      const selectedKeys = selectedData.map((item) => item.shard.key);
+    (selectedData: Array<{ shard: Shard; quantity: number }>) => {
+      const selectedKeys = selectedData.map((item) => item.shard.id);
       const updated = { ...latestFormRef.current, selectedShardKeys: selectedKeys, shardQuantities: selectedData } as CalculationFormData;
       setForm(updated);
       setIsMultiSelectModalOpen(false);
@@ -389,7 +389,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                 <ShardAutocomplete
                   value={form.shard}
                   onChange={(value: string) => handleInputChange("shard", value)}
-                  onSelect={(shard: ShardWithKey) => {
+                  onSelect={(shard: Shard) => {
                     // Use the rarity directly from the selected shard (provided by autocomplete)
                     let rarityKey = "common";
                     if (shard) {
@@ -397,7 +397,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                       if (normalized in MAX_QUANTITIES) rarityKey = normalized as keyof typeof MAX_QUANTITIES as string;
                     }
                     const maxQuantity: number = MAX_QUANTITIES[rarityKey as keyof typeof MAX_QUANTITIES];
-                    const owned = ownedAttributes?.get(shard.key) ?? 0;
+                    const owned = ownedAttributes?.get(shard.id) ?? 0;
                     const remaining = owned >= maxQuantity ? maxQuantity : Math.max(1, maxQuantity - owned);
                     const updated = { ...form, shard: shard.name, quantity: remaining } as CalculationFormData;
                     setForm(updated);
@@ -464,7 +464,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
           onDone={handleMultiSelectDone}
           initialSelections={
             new Map(
-              (form.shardQuantities || []).map((item) => [item.shard.key, item.quantity])
+              (form.shardQuantities || []).map((item) => [item.shard.id, item.quantity])
             )
           }
           ownedAttributes={ownedAttributes}

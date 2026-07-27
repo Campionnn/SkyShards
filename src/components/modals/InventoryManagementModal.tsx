@@ -146,14 +146,14 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
     }
   }, [attrsLockOpen]);
 
-  // shards from useShards() is already ShardWithKey[]
+  // shards from useShards() is already Shard[]
   const shardsArray = shards ?? [];
 
   // Filtered + sorted shards (same logic as BrowseAllShardsModal)
   const filteredShards = useMemo(() => {
     // When no query and no rarity filter, only show inventory items
     const baseFilter = !shardsQuery.trim() && shardsRarity === "all"
-      ? shardsArray.filter((s) => inventory.has(s.key))
+      ? shardsArray.filter((s) => inventory.has(s.id))
       : filterShards(shardsArray, {
           query: shardsQuery,
           rarity: shardsRarity,
@@ -178,7 +178,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
   const shardKeyToName = useMemo(() => {
     const map: Record<string, string> = {};
     for (const s of shardsArray) {
-      map[s.key] = s.name;
+      map[s.id] = s.name;
     }
     return map;
   }, [shardsArray]);
@@ -226,7 +226,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
       if (!attrsQuery.trim()) return matchesRarity && matchesLock;
       const q = attrsQuery.toLowerCase();
       // Match against attribute title, shard key, shard name, and description fields
-      const matchingShardDef = shardsArray.find((s) => s.key === attr.id);
+      const matchingShardDef = shardsArray.find((s) => s.id === attr.id);
       const matchesSearch =
         attr.title.toLowerCase().includes(q)
         || attr.id.toLowerCase().includes(q)
@@ -379,7 +379,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
   const handleSelectAllShards = () => {
     const newDisabled = new Set(disabledShards);
     filteredShards.forEach((shard) => {
-      newDisabled.delete(shard.key);
+      newDisabled.delete(shard.id);
     });
     onDisabledShardsChange(newDisabled);
   };
@@ -387,7 +387,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
   const handleClearAllShards = () => {
     const newDisabled = new Set(disabledShards);
     filteredShards.forEach((shard) => {
-      newDisabled.add(shard.key);
+      newDisabled.add(shard.id);
     });
     onDisabledShardsChange(newDisabled);
   };
@@ -625,7 +625,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {filteredShards.map((shard) => {
-                    const shardId = shard.key;
+                    const shardId = shard.id;
                     const inv = inventory.get(shardId) ?? 0;
                     const disabled = disabledShards.has(shardId);
                     const shardRarityBorder =

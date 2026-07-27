@@ -113,11 +113,11 @@ export const compareShardKeys = (aKey: string, bKey: string): number => {
 };
 
 // Helper function to sort by shard ID (rarity letter + number [+ suffix])
-export const sortByShardKey = (a: { key: string }, b: { key: string }): number =>
-  compareShardKeys(a.key, b.key);
+export const sortByShardKey = (a: { id: string }, b: { id: string }): number =>
+  compareShardKeys(a.id, b.id);
 
 // Sorting function that sorts by ID when names share a common prefix, otherwise alphabetically
-export const sortShardsByNameWithPrefixAwareness = (a: { name: string; key: string }, b: { name: string; key: string }): number => {
+export const sortShardsByNameWithPrefixAwareness = (a: { name: string; id: string }, b: { name: string; id: string }): number => {
   const aName = a.name.toLowerCase();
   const bName = b.name.toLowerCase();
   

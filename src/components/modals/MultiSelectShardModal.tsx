@@ -2,15 +2,15 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Search, Check, RotateCcw, Filter, ChevronDown } from "lucide-react";
 import { getRarityColor, sortShardsByNameWithPrefixAwareness, sortByShardKey, filterShards, DEFAULT_FILTER_CONFIG } from "../../utilities";
-import type { ShardWithKey } from "../../types/types";
+import type { Shard } from "../../types/types";
 import { MAX_QUANTITIES } from "../../constants";
 import { ToggleSwitch } from "../ui";
 
 interface MultiSelectShardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  shards: ShardWithKey[];
-  onDone: (selectedShards: Array<{ shard: ShardWithKey; quantity: number }>) => void;
+  shards: Shard[];
+  onDone: (selectedShards: Array<{ shard: Shard; quantity: number }>) => void;
   initialSelections?: Map<string, number>; // Map of shard key to quantity
   ownedAttributes?: Map<string, number>; // Map of shard key to attribute level (fused count)
 }
@@ -35,7 +35,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
 
   const currentRarity = rarityOptions.find((r) => r.value === rarityFilter) || rarityOptions[0];
 
-  const sortByShardId = (a: ShardWithKey, b: ShardWithKey) => sortByShardKey(a, b);
+  const sortByShardId = (a: Shard, b: Shard) => sortByShardKey(a, b);
 
   // Disable body scroll when modal is open
   useEffect(() => {
@@ -84,7 +84,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
     });
 
     // Sort results
-    let sorted: ShardWithKey[];
+    let sorted: Shard[];
     if (!searchQuery.trim()) {
       sorted = filtered.sort(sortByShardId);
     } else {
@@ -103,8 +103,8 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
 
     // If showSelectedFirst is enabled, separate selected and unselected shards
     if (showSelectedFirst) {
-      const selected = sorted.filter((shard) => selections.has(shard.key));
-      const unselected = sorted.filter((shard) => !selections.has(shard.key));
+      const selected = sorted.filter((shard) => selections.has(shard.id));
+      const unselected = sorted.filter((shard) => !selections.has(shard.id));
       return [...selected, ...unselected];
     }
 
@@ -121,7 +121,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
         newMap.delete(shardKey);
       } else {
         // Find the shard and set to max quantity based on rarity
-        const shard = shards.find((s) => s.key === shardKey);
+        const shard = shards.find((s) => s.id === shardKey);
         if (shard) {
           const rarity = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
           const maxQty = MAX_QUANTITIES[rarity] || 1;
@@ -158,7 +158,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
     shards.forEach((shard) => {
       const rarity = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
       const maxQty = MAX_QUANTITIES[rarity] || 1;
-      allSelections.set(shard.key, maxQty);
+      allSelections.set(shard.id, maxQty);
     });
     setSelections(allSelections);
   };
@@ -169,12 +169,12 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
       shards.forEach((shard) => {
         const rarity = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
         const maxQty = MAX_QUANTITIES[rarity] || 1;
-        const owned = ownedAttributes.get(shard.key) ?? 0;
+        const owned = ownedAttributes.get(shard.id) ?? 0;
         const needed = maxQty - owned;
         if (needed > 0) {
-          newMap.set(shard.key, needed);
+          newMap.set(shard.id, needed);
         } else {
-          newMap.delete(shard.key);
+          newMap.delete(shard.id);
         }
       });
       return newMap;
@@ -184,7 +184,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
   const handleDone = () => {
     const selectedData = Array.from(selections.entries())
       .map(([key, quantity]) => {
-        const shard = shards.find((s) => s.key === key);
+        const shard = shards.find((s) => s.id === key);
         return { shard: shard!, quantity };
       })
       .filter((item) => item.shard);
@@ -285,19 +285,19 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
         <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
             {filteredShards.map((shard) => {
-              const isSelected = selections.has(shard.key);
-              const quantity = selections.get(shard.key) || 1;
+              const isSelected = selections.has(shard.id);
+              const quantity = selections.get(shard.id) || 1;
               return (
                 <div
-                  key={shard.key}
-                  onClick={() => toggleShard(shard.key)}
+                  key={shard.id}
+                  onClick={() => toggleShard(shard.id)}
                   className={`flex items-center gap-2 p-2.5 rounded-lg transition-all duration-300 border cursor-pointer ${
                     isSelected ? "bg-blue-500/20 border-blue-500/50 hover:border-blue-500/70" : "bg-slate-700/30 hover:bg-slate-700/60 border border-slate-600/50 hover:border-slate-500"
                   }`}
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0 group">
                     <div className="relative flex-shrink-0">
-                      <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.key}.png`} alt={shard.name} className="w-7 h-7 object-contain" loading="lazy" />
+                      <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-7 h-7 object-contain" loading="lazy" />
                       {isSelected && (
                         <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center border border-slate-800">
                           <Check className="w-3 h-3 text-white" />
@@ -316,7 +316,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
                       type="number"
                       min="1"
                       value={quantity}
-                      onChange={(e) => updateQuantity(shard.key, parseInt(e.target.value) || 1)}
+                      onChange={(e) => updateQuantity(shard.id, parseInt(e.target.value) || 1)}
                       onClick={(e) => e.stopPropagation()}
                       onFocus={(e) => e.target.select()}
                       className="w-14 px-2 py-1 text-sm bg-slate-700 border border-slate-600 rounded text-white text-center focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 flex-shrink-0"

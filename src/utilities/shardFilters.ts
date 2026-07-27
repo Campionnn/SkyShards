@@ -1,12 +1,12 @@
-import type { ShardWithKey } from "../types/types";
+import type { Shard } from "../types/types";
 import { SHARD_DESCRIPTIONS } from "../constants";
 import { getShardSearchText } from "./segments";
 
 export interface ShardFilterConfig {
   /** Search in shard.name */
   name?: boolean;
-  /** Search in shard.key (ID) */
-  key?: boolean;
+  /** Search in shard.id */
+  id?: boolean;
   /** Search in shard.family */
   family?: boolean;
   /** Search in shard.type */
@@ -19,7 +19,7 @@ export interface ShardFilterConfig {
 
 export const DEFAULT_FILTER_CONFIG: ShardFilterConfig = {
   name: true,
-  key: true,
+  id: true,
   family: true,
   type: true,
   title: true,
@@ -28,8 +28,17 @@ export const DEFAULT_FILTER_CONFIG: ShardFilterConfig = {
 
 export const NAME_ONLY_FILTER_CONFIG: ShardFilterConfig = {
   name: true,
-  key: false,
+  id: false,
   family: false,
+  type: false,
+  title: false,
+  description: false,
+};
+
+export const NAME_AND_FAMILY_FILTER_CONFIG: ShardFilterConfig = {
+  name: true,
+  id: false,
+  family: true,
   type: false,
   title: false,
   description: false,
@@ -37,7 +46,7 @@ export const NAME_ONLY_FILTER_CONFIG: ShardFilterConfig = {
 
 export const BASIC_FILTER_CONFIG: ShardFilterConfig = {
   name: true,
-  key: true,
+  id: true,
   family: true,
   type: true,
   title: false,
@@ -45,7 +54,7 @@ export const BASIC_FILTER_CONFIG: ShardFilterConfig = {
 };
 
 export function matchesSearchQuery(
-  shard: ShardWithKey,
+  shard: Shard,
   query: string,
   config: ShardFilterConfig = DEFAULT_FILTER_CONFIG
 ): boolean {
@@ -58,8 +67,8 @@ export function matchesSearchQuery(
     return true;
   }
 
-  // Check key (ID)
-  if (config.key && shard.key.toLowerCase().includes(search)) {
+  // Check id
+  if (config.id && shard.id.toLowerCase().includes(search)) {
     return true;
   }
 
@@ -75,13 +84,13 @@ export function matchesSearchQuery(
 
   // Check descriptions
   if (config.title || config.description) {
-    const shardDesc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
+    const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
 
     if (config.title && shardDesc?.title?.toLowerCase().includes(search)) {
       return true;
     }
 
-    if (config.description && getShardSearchText(shard.key).includes(search)) {
+    if (config.description && getShardSearchText(shard.id).includes(search)) {
       return true;
     }
   }
@@ -96,7 +105,7 @@ export interface ShardFilterOptions {
   searchConfig?: ShardFilterConfig;
 }
 
-export function filterShards<T extends ShardWithKey>(
+export function filterShards<T extends Shard>(
   shards: T[],
   options: ShardFilterOptions = {}
 ): T[] {

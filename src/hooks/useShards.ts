@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { DataService } from "../services";
-import type { ShardWithKey } from "../types/types";
+import type { Shard } from "../types/types";
 
 export const useShards = () => {
-  const [shards, setShards] = useState<ShardWithKey[]>([]);
+  const [shards, setShards] = useState<Shard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
