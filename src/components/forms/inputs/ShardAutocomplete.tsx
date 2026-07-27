@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Search, X, LayoutGrid } from "lucide-react";
 import { DataService } from "../../../services";
-import { debounce } from "../../../utilities";
+import { debounce, isFocusRestoredByWindow } from "../../../utilities";
 import type { ShardWithKey, ShardAutocompleteProps } from "../../../types/types";
 import { SuggestionItem } from "../search";
 import { BrowseAllShardsModal } from "../../modals";
@@ -197,8 +197,11 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => {
-            if (onFocus) onFocus();
+          onFocus={(e) => {
+            // Consumers use onFocus to clear the box for a fresh search, so only tell them
+            // about focus the user asked for - not focus handed back after an alt-tab.
+            const restored = isFocusRestoredByWindow(e.target);
+            if (onFocus && !restored) onFocus();
             handleInputFocus();
           }}
           placeholder={placeholder}

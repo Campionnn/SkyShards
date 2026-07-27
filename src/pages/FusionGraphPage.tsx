@@ -18,6 +18,7 @@ import { useFusionData } from "../hooks";
 import { CalculationService } from "../services/calculationService";
 import { DEFAULT_CALCULATION_PARAMS } from "../constants";
 import { ShardGraphNode } from "../components/graph";
+import { isBlurCausedByWindow } from "../utilities";
 import {
   EDGE_COLORS,
   NODE_HEIGHT,
@@ -207,6 +208,8 @@ const FusionGraphInner: React.FC = () => {
               }}
               onFocus={() => setShowResults(true)}
               onBlur={() => {
+                // Alt-tabbing away shouldn't collapse the results the user was reading.
+                if (isBlurCausedByWindow()) return;
                 blurTimer.current = setTimeout(() => setShowResults(false), 150);
               }}
               placeholder="Search shards…"

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Search, RotateCcw, Save, AlignLeft } from "lucide-react";
 import { useShardsWithRecipes, useCustomRates } from "../hooks";
-import { debounce, filterShards, DEFAULT_FILTER_CONFIG } from "../utilities";
+import { debounce, filterShards, DEFAULT_FILTER_CONFIG, isFocusRestoredByWindow } from "../utilities";
 import { ShardDescription } from "../components/ui/ShardDescription";
 import { RarityDropdown, TypeDropdown, ShardItem } from "../components";
 import { SHARD_DESCRIPTIONS } from "../constants";
@@ -67,6 +67,13 @@ export const SettingsPage: React.FC = () => {
     setFilter(e.target.value);
   }, []);
 
+  // Focusing the box starts a new search, so it clears the old one - unless the browser is
+  // just handing focus back after the user alt-tabbed away mid-search.
+  const handleFilterFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    if (isFocusRestoredByWindow(e.target)) return;
+    setFilter("");
+  }, []);
+
   if (shardsLoading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -95,7 +102,7 @@ export const SettingsPage: React.FC = () => {
               type="text"
               value={filter}
               onChange={handleFilterChange}
-              onFocus={() => setFilter("")}
+              onFocus={handleFilterFocus}
               placeholder="Search by name, perk, or description..."
               className="
                 w-full pl-10 pr-4 py-2.5 
@@ -163,7 +170,7 @@ export const SettingsPage: React.FC = () => {
               type="text"
               value={filter}
               onChange={handleFilterChange}
-              onFocus={() => setFilter("")}
+              onFocus={handleFilterFocus}
               placeholder="Search by name, perk, or description..."
               className="
                 w-full pl-10 pr-4 py-2.5 

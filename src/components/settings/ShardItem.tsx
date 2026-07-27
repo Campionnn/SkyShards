@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import type { ShardWithDirectInfo } from "../../types/types";
-import { getRarityColor } from "../../utilities";
+import { getRarityColor, isBlurCausedByWindow } from "../../utilities";
 import { MoveRight, RotateCcw } from "lucide-react";
 
 interface ShardItemProps {
@@ -31,11 +31,17 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, title, d
   );
 
   const handleFocus = () => {
+    // Alt-tabbing back refocuses the input; don't restart the edit and overwrite what is
+    // already typed there.
+    if (isEditing) return;
     setIsEditing(true);
     setInputValue(rate.toString());
   };
 
   const handleBlur = () => {
+    // Switching windows isn't finishing the edit, so leave the half-typed value alone.
+    if (isBlurCausedByWindow()) return;
+
     setIsEditing(false);
     if (inputValue === "") {
       onRateChange(shard.key, defaultRate);

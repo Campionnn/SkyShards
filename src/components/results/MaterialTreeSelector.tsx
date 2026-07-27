@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Search, X, ChevronDown } from "lucide-react";
 import type { ShardWithKey } from "../../types/types";
-import { getRarityColor } from "../../utilities";
+import { getRarityColor, isFocusRestoredByWindow } from "../../utilities";
 import { SuggestionItem } from "../forms/search";
 
 interface MaterialTreeSelectorProps {
@@ -108,8 +108,10 @@ export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shar
             setFocusedIndex(-1);
           }}
           onKeyDown={handleKeyDown}
-          onFocus={() => {
-            setQuery("");
+          onFocus={(e) => {
+            // Keep the in-progress query when the browser hands focus back after an alt-tab;
+            // only a deliberate focus starts a fresh search.
+            if (!isFocusRestoredByWindow(e.target)) setQuery("");
             setIsOpen(true);
           }}
           placeholder="Select a shard to view its fusion tree..."
