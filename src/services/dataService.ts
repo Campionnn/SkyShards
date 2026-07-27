@@ -100,8 +100,10 @@ export class DataService {
     this.bazaarPriceCache[cacheKey] = {};
 
     for (const shard of shards) {
-      const price = bazaarData.products[`${shard.internal_id}`]?.quick_status;
-      this.bazaarPriceCache[cacheKey][shard.id] = useInstantBuyPrices ? price?.buyPrice : price?.sellPrice;
+      const buyPrice = bazaarData.products[`${shard.internal_id}`]?.buy_summary[0]?.pricePerUnit;
+      const sellPrice = bazaarData.products[`${shard.internal_id}`]?.sell_summary[0]?.pricePerUnit;
+
+      this.bazaarPriceCache[cacheKey][shard.id] = useInstantBuyPrices ? buyPrice : sellPrice;
     }
   
     return this.bazaarPriceCache[cacheKey];
