@@ -3,10 +3,20 @@ export interface BazaarData {
   products: {
     [key: string]: {
       productId: string;
-      quick_status: {
-        buyPrice: number;
-        sellPrice: number;
-      };
+      sell_summary: {
+        [key: number]: {
+          amount: number,
+          pricePerUnit: number,
+          orders: number,
+        }
+      },
+      buy_summary: {
+        [key: number]: {
+          amount: number,
+          pricePerUnit: number,
+          orders: number,
+        }
+      },
     };
   };
 }
