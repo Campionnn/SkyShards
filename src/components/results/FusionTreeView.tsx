@@ -4,7 +4,7 @@ import type { CalculationResult, CalculationParams, Data, RecipeTree, RecipeOver
 import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";
 import { useToast } from "../ui";
-import pako from "pako";
+import { gzipBase64 } from "../../utilities";
 import { CopyTreeModal } from "../modals";
 
 // Manage expanded/collapsed state for a recipe tree
@@ -87,11 +87,6 @@ export const FusionTreeView: React.FC<FusionTreeViewProps> = ({
   const [copyModalOpen, setCopyModalOpen] = useState(false);
   const { toast } = useToast();
 
-  const gzipBase64 = (text: string) => {
-    const gzipped = pako.gzip(text);
-    const binary = String.fromCharCode(...gzipped);
-    return btoa(binary);
-  };
 
   type SkyOceanDirect = { shard: string; method: "direct"; quantity: number };
   type SkyOceanCycleStep = { shard: string; inputs: [string, string] };

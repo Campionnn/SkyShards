@@ -146,8 +146,9 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
     }
   }, [attrsLockOpen]);
 
-  // shards from useShards() is already Shard[]
-  const shardsArray = shards ?? [];
+  // shards from useShards() is already Shard[]; memoized so the fallback [] keeps
+  // a stable identity and the memos below don't recompute on every render.
+  const shardsArray = useMemo(() => shards ?? [], [shards]);
 
   // Filtered + sorted shards (same logic as BrowseAllShardsModal)
   const filteredShards = useMemo(() => {
@@ -172,7 +173,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
       if (!aStarts && bStarts) return 1;
       return sortShardsByNameWithPrefixAwareness(a, b);
     });
-  }, [shards, shardsQuery, shardsRarity, inventory]);
+  }, [shardsArray, shardsQuery, shardsRarity, inventory]);
 
   // Build a map from shard key (e.g. "L51") to shard name (e.g. "Scarf") for attribute search
   const shardKeyToName = useMemo(() => {
@@ -274,27 +275,19 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
       { shardId: "R45", rarity: "rare", formKey: "crocodileLevel" },
     ];
 
-    console.log("Profile attributes:", profileData.attributes);
-    
     const shardLevels: Record<string, number> = {};
-    
+
     for (const { shardId, rarity, formKey } of shardLevelMapping) {
       const fusedCount = profileData.attributes.find(attr => attr.id.toUpperCase() === shardId.toUpperCase())?.level ?? 0;
-      const tierLevel = fusedCountToTierLevel(fusedCount, rarity);
-      console.log(`Shard ${shardId} (${rarity}): fused count = ${fusedCount}, tier level = ${tierLevel}`);
-      
       // Store the tier level for the form
-      console.log(`  -> Setting form level to ${tierLevel}`);
-      shardLevels[formKey] = tierLevel;
+      shardLevels[formKey] = fusedCountToTierLevel(fusedCount, rarity);
     }
 
     // Update shard levels in the form
     if (onShardLevelsImport) {
-      console.log("Updating shard levels:", shardLevels);
       onShardLevelsImport(shardLevels);
     }
 
-    console.log("Final inventory map:", newInventory);
     onInventoryChange(newInventory);
 
     const newAttributes = new Map<string, number>();

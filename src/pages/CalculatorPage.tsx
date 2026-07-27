@@ -364,7 +364,7 @@ const CalculatorPageContent: React.FC = () => {
     } catch (error) {
       console.error("Failed to load shard from key:", error);
     }
-  }, [form, setForm, setTargetShardName, customRates, recipeOverrides, ownedAttributes]);
+  }, [form, setForm, setTargetShardName, setResult, setCalculationData, customRates, recipeOverrides, ownedAttributes]);
 
   // Handler for importing shard levels from profile
   const handleShardLevelsImport = useCallback((levels: {
@@ -610,7 +610,6 @@ const CalculatorPageContent: React.FC = () => {
     if (isValidForm) {
       debouncedCalculate(currentForm, 150).catch(console.error);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customRates, recipeOverrides, inventory, useInventory, debouncedCalculate]);
 
   // Initialize params from form for inventory mode display

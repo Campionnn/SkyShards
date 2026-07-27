@@ -20,7 +20,8 @@ const useAdBlockDetected = (): boolean => {
     };
 
     const rampTimer = setTimeout(() => {
-      if (typeof (window as any).ramp === "undefined") {
+      // `ramp` is injected by the PubNation ad script; we only presence-check it.
+      if (typeof (window as { ramp?: unknown }).ramp === "undefined") {
         signal();
       }
     }, 4000);

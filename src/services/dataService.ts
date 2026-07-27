@@ -99,8 +99,15 @@ export class DataService {
     this.bazaarPriceCache[cacheKey] = {};
 
     for (const shard of shards) {
-      const price = bazaarData.products[`${shard.internal_id}`]?.quick_status;
-      this.bazaarPriceCache[cacheKey][shard.id] = useInstantBuyPrices ? price?.buyPrice : price?.sellPrice;
+      // Annotated as optional because the index signature on `products` lies:
+      // shards absent from the Bazaar response resolve to `undefined` at runtime.
+      const price: { buyPrice: number; sellPrice: number } | undefined = bazaarData.products[shard.internal_id]?.quick_status;
+      const cost = useInstantBuyPrices ? price?.buyPrice : price?.sellPrice;
+      // Leave the key unset rather than storing `undefined` in a Record<string, number>,
+      // so consumers' `?? fallback` fires as intended.
+      if (cost !== undefined) {
+        this.bazaarPriceCache[cacheKey][shard.id] = cost;
+      }
     }
   
     return this.bazaarPriceCache[cacheKey];

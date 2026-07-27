@@ -51,7 +51,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
       }
     };
     checkAndSubmit().catch(console.error);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.shard, form.quantity]);
 
   // Only call onSubmit immediately for non-shard/quantity fields
@@ -162,7 +161,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
       setForm(updated);
       onSubmitRef.current(updated);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.moneyPerHour, moneyInput, setForm]);
 
   React.useEffect(() => {
@@ -201,7 +199,6 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
       setForm(updated);
       onSubmitRef.current(updated);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.ironManView, form.craftPenalty, setForm]);
 
   // For craftPenalty, keep a local string state for user input

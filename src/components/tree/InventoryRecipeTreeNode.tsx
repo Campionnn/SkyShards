@@ -21,6 +21,23 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
   isInCycle = false,
   remainingInventory,
 }) => {
+  // Hooks must run before any early return so their order is stable across
+  // renders — `tree` flips between array and single node as the inventory
+  // substitution changes.
+  const pendingDefaults = React.useRef<Map<string, boolean>>(new Map());
+
+  // Flush any pending default entries into the Map after render
+  React.useEffect(() => {
+    if (pendingDefaults.current.size > 0) {
+      for (const [id, val] of pendingDefaults.current) {
+        if (!expandedStates.has(id)) {
+          expandedStates.set(id, val);
+        }
+      }
+      pendingDefaults.current.clear();
+    }
+  });
+
   // Handle array of trees
   if (Array.isArray(tree)) {
     return (
@@ -47,7 +64,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
   const shard = data.shards[tree.shard];
 
   // Helper function to get expansion state
-  const pendingDefaults = React.useRef<Map<string, boolean>>(new Map());
   const getExpansionState = (id: string, defaultState: boolean = true) => {
     if (expandedStates.has(id)) {
       return expandedStates.get(id)!;
@@ -56,18 +72,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
     pendingDefaults.current.set(id, defaultState);
     return defaultState;
   };
-
-  // Flush any pending default entries into the Map after render
-  React.useEffect(() => {
-    if (pendingDefaults.current.size > 0) {
-      for (const [id, val] of pendingDefaults.current) {
-        if (!expandedStates.has(id)) {
-          expandedStates.set(id, val);
-        }
-      }
-      pendingDefaults.current.clear();
-    }
-  });
 
   const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard | undefined, input2Shard: Shard | undefined): boolean => {
     return (recipe?.isReptile || input1Shard?.family?.toLowerCase().includes("reptile") || input2Shard?.family?.toLowerCase().includes("reptile")) as boolean;

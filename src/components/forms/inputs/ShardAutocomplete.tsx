@@ -178,6 +178,10 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      // The pending timeout is set by the input/select handlers, not by this effect,
+      // so it has to be read at cleanup time. Copying it into the effect body (what
+      // the rule suggests) would capture null at mount and clear nothing.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       const searchTimeout = searchTimeoutRef.current;
       if (searchTimeout) {
         clearTimeout(searchTimeout);

@@ -1,9 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { BarChart3, Hammer } from "lucide-react";
-import { formatLargeNumber } from "../../utilities";
+import { formatLargeNumber, gzipBase64 } from "../../utilities";
 import type { CalculationResultsProps, Shard } from "../../types/types";
 import { MaterialItem, useToast } from "../ui";
-import pako from "pako";
 import { CopyTreeModal } from "../modals";
 import { ResultSummaryCards } from "./ResultSummaryCards";
 import { FusionTreeView } from "./FusionTreeView";
@@ -27,12 +26,6 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
 }) => {
   const [copyModalOpen, setCopyModalOpen] = useState(false);
   const { toast } = useToast();
-
-  const gzipBase64 = (text: string) => {
-    const gzipped = pako.gzip(text);
-    const binary = String.fromCharCode(...gzipped);
-    return btoa(binary);
-  };
 
   // Materials-only copy (no tree): flatten the combined totals
   const buildNoFrillsString = () => {
