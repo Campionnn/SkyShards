@@ -1,4 +1,4 @@
-# PubNation Ads.txt v20260707
+# PubNation Ads.txt v20260716
 managerdomain=pubnation.com
 contact=sales@pubnation.com
 ownerdomain=skyshards.com
@@ -53,7 +53,7 @@ video.unrulymedia.com, 799061815, RESELLER
 smilewanted.com, 5672, DIRECT
 pubmatic.com, 158810, RESELLER, 5d62403b186f2ace
 rubiconproject.com, 19814, RESELLER, 0bfd66d529a55807
-emxdgt.com, 46, DIRECT, 1e1d41537f7cad7f 
+emxdgt.com, 46, DIRECT, 1e1d41537f7cad7f
 ssp.cadent.com, 46, DIRECT, 1e1d41537f7cad7f
 The-ozone-project.com, OZONEPBN0001, DIRECT
 appnexus.com, 9979, RESELLER
@@ -63,9 +63,9 @@ pubmatic.com, 160557, RESELLER, 5d62403b186f2ace
 smartadserver.com, 5034, DIRECT, 060d053dcf45cbf3
 e-planning.net,011a0cd116da3304,DIRECT,c1ba615865ed87b2
 connatix.com, 2124253207421523, DIRECT, 2af98acdee0e81ed
-connatix.com, 2123337082124529, RESELLER, 2af98acdee0e81ed 
-video.unrulymedia.com, 687806135, RESELLER 
-pubmatic.com, 156592, RESELLER, 5d62403b186f2ace 
+connatix.com, 2123337082124529, RESELLER, 2af98acdee0e81ed
+video.unrulymedia.com, 687806135, RESELLER
+pubmatic.com, 156592, RESELLER, 5d62403b186f2ace
 rubiconproject.com, 19564, RESELLER, 0bfd66d529a55807
 trustedstack.com, TSUKNZU26, DIRECT
 insticator.com, 9be2403e-f58b-4c92-8499-2aaa9cfa1c7d, DIRECT, b3511ffcafb23a32
@@ -83,3 +83,6 @@ minutemedia.com, 01garg96c88b, DIRECT
 blis.com, 1268, DIRECT, 61453ae19a4b73f4
 rubiconproject.com, 16928, RESELLER, 0bfd66d529a55807
 themediagrid.com, 29IN8P, RESELLER, 9fac4a4a87c2a44f
+
+
+
