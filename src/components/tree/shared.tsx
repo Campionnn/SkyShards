@@ -9,10 +9,9 @@ import { renderChevron } from "./treeHelpers";
 import type { Shard } from "../../types/types";
 
 /**
- * Presentation shared by RecipeTreeNode and InventoryRecipeTreeNode. Both files grew
- * by cloning the other, so everything here existed twice; the props that look
- * redundant (`ironManView`, `emphasis`) are the points where the two had genuinely
- * drifted and are kept so this stays a pure extraction.
+ * Presentation shared by RecipeTreeNode and InventoryRecipeTreeNode. `ironManView`
+ * and `emphasis` are the two axes where the renderers differ, so they are props
+ * rather than fixed styling.
  */
 
 interface ShardInfoProps {

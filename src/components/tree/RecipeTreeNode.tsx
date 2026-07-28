@@ -1,8 +1,20 @@
 import React from "react";
 import { formatLargeNumber, formatNumber } from "../../utilities";
-import type { RecipeTreeNodeProps, Shard, RecipeTree } from "../../types/types";
+import type { AlternativeSelectionContext, Data, RecipeTree, Shard } from "../../types/types";
 import { ShardInfo, RecipeDisplay, RecipeSummary, CrocodileProcsBadge, AlternativesButton, CycleHeader } from "./shared";
-import { getCrocodileProcs, renderChevron } from "./treeHelpers";
+import { getCrocodileProcs, renderChevron, useExpansionState } from "./treeHelpers";
+
+interface RecipeTreeNodeProps {
+  tree: RecipeTree;
+  data: Data;
+  isTopLevel?: boolean;
+  totalShardsProduced?: number;
+  nodeId: string;
+  expandedStates: Map<string, boolean>;
+  onToggle: (nodeId: string) => void;
+  onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
+  ironManView: boolean;
+}
 
 export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   tree,
@@ -15,15 +27,9 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   onShowAlternatives,
   ironManView,
 }) => {
-  const shard = data.shards[tree.shard];
+  const getExpansionState = useExpansionState(expandedStates);
 
-  // Helper function to get expansion state and ensure it's initialized
-  const getExpansionState = (id: string, defaultState: boolean = true) => {
-    if (!expandedStates.has(id)) {
-      expandedStates.set(id, defaultState);
-    }
-    return expandedStates.get(id)!;
-  };
+  const shard = data.shards[tree.shard];
 
   const renderDirectShard = (quantity: number, shard: Shard) => (
     <div className="rounded border border-slate-400/50 flex items-center justify-between px-3 py-1.5 text-sm font-medium gap-2">
@@ -130,7 +136,6 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
           <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-0.5">
             <div className="">
               {[...tree.steps]
-                .slice()
                 .reverse()
                 .map((step, stepIndex) => {
                   const recipe = step.recipe;

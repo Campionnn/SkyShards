@@ -607,6 +607,8 @@ export class InvCalculationService {
           quantity: invQty,
         };
 
+        // recalculateTreeQuantities rewrites quantities in place, so the crafted
+        // half works on a clone and the caller's node survives intact.
         const craftedPortion = JSON.parse(JSON.stringify(node));
         const remainingQuantity = node.quantity - invQty;
         craftedPortion.quantity = remainingQuantity;

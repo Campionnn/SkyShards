@@ -3,12 +3,9 @@ import { DataService } from "../services";
 import { preloadShardIcons } from "../utilities";
 
 /**
- * Kicks off shard-icon cache warming once per session.
- *
- * The ids come from the shard data the app already loads (and caches), rather than
- * from a build-time glob — the previous `import.meta.glob('/shardIcons/*.png')`
- * resolved against the project root instead of `public/`, so it always matched
- * nothing and the preloader silently did nothing.
+ * Kicks off shard-icon cache warming once per session. Ids come from the shard data
+ * the app already loads and caches, so the icon list cannot drift from the shards
+ * that actually exist.
  */
 export const useShardIconPreload = () => {
   useEffect(() => {

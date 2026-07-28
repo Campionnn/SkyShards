@@ -431,8 +431,8 @@ export const CalculatorPage: React.FC = () => {
   const cancelRef = useRef<(() => void) | null>(null);
 
   // Not async: the work happens inside the setTimeout below, so a returned promise
-  // would resolve before the calculation even starts. Failures are handled at the two
-  // call sites inside that callback, which is the only place they can be observed.
+  // would resolve before the calculation starts. Failures are handled inside that
+  // callback, the only place they can be observed.
   const debouncedCalculate = useCallback(
     (formData: CalculationFormData, delay = 300) => {
       // Clear existing timeout
@@ -488,11 +488,8 @@ export const CalculatorPage: React.FC = () => {
   formRef.current = form;
 
   const handleCalculate = useCallback((formData: CalculationFormData, setFormFn: (data: CalculationFormData) => void) => {
-    // formRef still holds the previous form here: setFormFn has only scheduled the
-    // update, and this runs before React re-renders. That is what makes the
-    // comparison below meaningful — callers used to defer this through a
-    // setTimeout(…, 0), by which point the ref had already been overwritten with the
-    // new form and every comparison came out false.
+    // Read formRef before setFormFn: the update is only scheduled, so this still
+    // holds the previous form, which is what the comparison below needs.
     const currentForm = formRef.current;
     setFormFn(formData);
 

@@ -5,8 +5,7 @@ import type { CalculationParams, Data, Recipe, RecipeOverride, RecipeTree } from
 
 /**
  * Golden-output tests for the three functions that *are* the product:
- * `computeMinCosts`, `buildRecipeTree` and `assignQuantities`. They had no coverage,
- * and the P1 cleanup refactors their shared internals.
+ * `computeMinCosts`, `buildRecipeTree` and `assignQuantities`.
  *
  * Two kinds of assertion live here, deliberately:
  *  - snapshots, which pin today's exact numbers so any behaviour change surfaces; and

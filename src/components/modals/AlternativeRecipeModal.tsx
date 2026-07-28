@@ -1,9 +1,22 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Modal } from "../ui";
 import { X, Star, Search, Plus, ChevronDown } from "lucide-react";
-import { getRarityColor, formatTime, formatLargeNumber, matchesSearchQuery, NAME_AND_FAMILY_FILTER_CONFIG } from "../../utilities";
-import type { AlternativeRecipeModalProps, Recipe, AlternativeRecipeOption } from "../../types/types";
+import { NAME_AND_FAMILY_FILTER_CONFIG, formatLargeNumber, formatTime, getRarityColor, matchesSearchQuery, shardIconUrl } from "../../utilities";
+import type { AlternativeRecipeOption, CalculationParams, Data, Recipe } from "../../types/types";
 import { CalculationService } from "../../services";
+
+interface AlternativeRecipeModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  /** The direct-acquisition option, plus fusion alternatives grouped by shared input. */
+  alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
+  onSelect: (recipe: Recipe | null) => void;
+  shardName: string;
+  data: Data;
+  loading: boolean;
+  requiredQuantity?: number;
+  params: CalculationParams;
+}
 
 export const AlternativeRecipeModal: React.FC<
   AlternativeRecipeModalProps & {
@@ -208,19 +221,19 @@ export const AlternativeRecipeModal: React.FC<
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5 mb-1 ml-5">
                   <span className="text-slate-300 text-xs">{firstInputShard.fuse_amount}x</span>
-                  <img src={`${import.meta.env.BASE_URL}shardIcons/${firstInput}.png`} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
+                  <img src={shardIconUrl(firstInput)} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
                   <span className={getRarityColor(firstInputShard.rarity) + " text-sm"}>{firstInputShard.name}</span>
                 </div>
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="text-slate-400 mr-1">+</span>
                   <span className="text-slate-300 text-xs">{partnerShard.fuse_amount}x</span>
-                  <img src={`${import.meta.env.BASE_URL}shardIcons/${partner}.png`} alt={partnerShard.name} className="w-4 h-4 object-contain" loading="lazy" />
+                  <img src={shardIconUrl(partner)} alt={partnerShard.name} className="w-4 h-4 object-contain" loading="lazy" />
                   <span className={getRarityColor(partnerShard.rarity) + " text-sm"}>{partnerShard.name}</span>
                 </div>
                 <div className="border-t border-slate-500 my-1"></div>
                 <div className="flex items-center gap-1.5 ml-5">
                   <span className="text-slate-300 text-xs">{option.recipe.outputQuantity}x</span>
-                  {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
+                  {outputShard && <img src={shardIconUrl(outputShard.id)} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
                   <span className={outputShard ? getRarityColor(outputShard.rarity) + " text-sm" : "text-slate-300 text-sm"}>{shardName}</span>
                 </div>
               </div>
@@ -228,19 +241,19 @@ export const AlternativeRecipeModal: React.FC<
             <div className="hidden sm:flex flex-col sm:flex-row gap-1.5 text-sm">
               <div className="flex items-center gap-1.5">
                 <span className="text-slate-300 text-xs">{firstInputShard.fuse_amount}x</span>
-                <img src={`${import.meta.env.BASE_URL}shardIcons/${firstInput}.png`} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
+                <img src={shardIconUrl(firstInput)} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
                 <span className={getRarityColor(firstInputShard.rarity)}>{firstInputShard.name}</span>
               </div>
               <p className="hidden sm:block text-slate-400 mb-0.5 mx-0.5">+</p>
               <div className="flex items-center gap-1.5">
                 <span className="text-slate-300 text-xs">{partnerShard.fuse_amount}x</span>
-                <img src={`${import.meta.env.BASE_URL}shardIcons/${partner}.png`} alt={partnerShard.name} className="w-4 h-4 object-contain" loading="lazy" />
+                <img src={shardIconUrl(partner)} alt={partnerShard.name} className="w-4 h-4 object-contain" loading="lazy" />
                 <span className={getRarityColor(partnerShard.rarity)}>{partnerShard.name}</span>
               </div>
               <p className="hidden sm:block text-slate-400 mb-0.5 mx-0.5">=</p>
               <div className="flex items-center gap-1.5">
                 <span className="text-slate-300 text-xs">{option.recipe.outputQuantity}x</span>
-                {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
+                {outputShard && <img src={shardIconUrl(outputShard.id)} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
                 <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300"}>{shardName}</span>
               </div>
             </div>
@@ -470,7 +483,7 @@ export const AlternativeRecipeModal: React.FC<
           <div className="flex items-center gap-2 mb-3">
             {firstShardObj && (
               <>
-                <img src={`${import.meta.env.BASE_URL}shardIcons/${groupShard}.png`} alt={firstShardObj.name} className="w-5 h-5 object-contain" loading="lazy" />
+                <img src={shardIconUrl(groupShard)} alt={firstShardObj.name} className="w-5 h-5 object-contain" loading="lazy" />
                 <span className={getRarityColor(firstShardObj.rarity) + " font-semibold text-base"}>{firstShardObj.name}</span>
                 <span className="text-xs text-slate-400">
                   ({group.length} recipe{group.length !== 1 ? "s" : ""})
@@ -501,7 +514,7 @@ export const AlternativeRecipeModal: React.FC<
                           <>
                             <Plus className="w-4 h-4 text-fuchsia-400" />
                             <span className="text-slate-400 text-xs">{partner?.fuse_amount || 2}x</span>
-                            <img src={`${import.meta.env.BASE_URL}shardIcons/${partnerShard}.png`} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
+                            <img src={shardIconUrl(partnerShard)} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
                             <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>{partner?.name || partnerShard}</span>
                             {partner?.family?.includes("Reptile") && (
                               <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">Reptile</span>
@@ -573,7 +586,7 @@ export const AlternativeRecipeModal: React.FC<
                               <div className="flex items-center gap-2">
                                 <Plus className="w-4 h-4 text-fuchsia-400" />
                                 <span className="text-slate-400 text-xs">{partner?.fuse_amount || 2}x</span>
-                                <img src={`${import.meta.env.BASE_URL}shardIcons/${partnerShard}.png`} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
+                                <img src={shardIconUrl(partnerShard)} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
                                 <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>{partner?.name || partnerShard}</span>
                                 {partner?.family?.includes("Reptile") && (
                                   <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">Reptile</span>
@@ -612,7 +625,7 @@ export const AlternativeRecipeModal: React.FC<
             {/* Shard icon next to the shard name */}
             <span className="flex items-center gap-1 text-slate-400 text-sm">
               <span>for</span>
-              {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-5 h-5 object-contain" loading="lazy" />}
+              {outputShard && <img src={shardIconUrl(outputShard.id)} alt={outputShard.name} className="w-5 h-5 object-contain" loading="lazy" />}
               <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-400"}>{shardName}</span>
             </span>
           </div>

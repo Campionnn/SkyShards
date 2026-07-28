@@ -6,9 +6,7 @@ import type { CalculationParams, RecipeOverride } from "../types/types";
 
 /**
  * Golden-output tests for `calculateOptimalPath` — the inventory-aware entry point.
- * It re-implements the cycle-quantity math twice more (in `recalculateTreeQuantities`
- * and inline in `processNode`), which the P1 cleanup consolidates, so both paths are
- * pinned here.
+ * Both the plain and cycle quantity paths are pinned here.
  *
  * These go through `parseData`, i.e. the real fetch/build path; see src/test/setup.ts.
  */

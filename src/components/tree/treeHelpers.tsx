@@ -1,10 +1,10 @@
+import React from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type { Data, InventoryRecipeTree, Recipe, Shard } from "../../types/types";
 
 /**
- * Non-component helpers shared byte-for-byte by RecipeTreeNode and
- * InventoryRecipeTreeNode. Kept out of shared.tsx so that file exports only
- * components (react-refresh/only-export-components).
+ * Non-component helpers used by both tree renderers. Kept out of shared.tsx so that
+ * file exports only components (react-refresh/only-export-components).
  */
 
 export const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard | undefined, input2Shard: Shard | undefined): boolean => {
@@ -12,6 +12,40 @@ export const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard |
 };
 
 export const renderChevron = (isExpanded: boolean) => (isExpanded ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-amber-400" />);
+
+/**
+ * Read a node's expand/collapse state, seeding a default the first time an id is seen.
+ *
+ * `expandedStates` is a plain Map owned by the page, held outside React state so
+ * toggling one node doesn't rebuild the whole tree. Seeding a default is a write, and
+ * writing during render is impure, so defaults are buffered in a ref and flushed in an
+ * effect after commit.
+ *
+ * The Map must end up populated: the page's toggle handler computes the next value as
+ * `!expandedStates.get(id)`, which would read `undefined` for an unseeded node and
+ * flip a defaulted-open node straight back to open.
+ */
+export const useExpansionState = (expandedStates: Map<string, boolean>) => {
+  const pendingDefaults = React.useRef<Map<string, boolean>>(new Map());
+
+  React.useEffect(() => {
+    if (pendingDefaults.current.size === 0) return;
+    for (const [id, value] of pendingDefaults.current) {
+      if (!expandedStates.has(id)) {
+        expandedStates.set(id, value);
+      }
+    }
+    pendingDefaults.current.clear();
+  });
+
+  return (id: string, defaultState: boolean = true): boolean => {
+    if (expandedStates.has(id)) {
+      return expandedStates.get(id)!;
+    }
+    pendingDefaults.current.set(id, defaultState);
+    return defaultState;
+  };
+};
 
 /**
  * How many Pure Reptile procs the player needs for this node, or null when

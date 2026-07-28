@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Modal } from "../ui";
 import { X, Search, Filter, ChevronDown, RotateCcw } from "lucide-react";
-import { getRarityColor, sortShardsByNameWithPrefixAwareness, sortByShardKey, filterShards, DEFAULT_FILTER_CONFIG } from "../../utilities";
+import { DEFAULT_FILTER_CONFIG, filterShards, getRarityColor, shardIconUrl, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
 import type { Shard } from "../../types/types";
 
 interface BrowseAllShardsModalProps {
@@ -168,7 +168,7 @@ export const BrowseAllShardsModal: React.FC<BrowseAllShardsModalProps> = ({ isOp
               onClick={() => handleSelectShard(shard)}
               className="flex items-center gap-2 p-2.5 bg-slate-700/30 hover:bg-slate-700/60 border border-slate-600/50 hover:border-slate-500 rounded-lg transition-all duration-300 text-left group cursor-pointer"
             >
-              <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-7 h-7 object-contain flex-shrink-0" loading="lazy" />
+              <img src={shardIconUrl(shard.id)} alt={shard.name} className="w-7 h-7 object-contain flex-shrink-0" loading="lazy" />
               <div className="min-w-0 flex-1">
                 <div className={`font-medium text-sm truncate ${getRarityColor(shard.rarity)}`}>{shard.name}</div>
                 <div className="text-xs text-slate-400 truncate">

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Info } from "lucide-react";
-import { formatNumber, getRarityColor, formatTime, formatLargeNumber } from "../../utilities";
+import { formatLargeNumber, formatNumber, formatTime, getRarityColor, shardIconUrl } from "../../utilities";
 import { Tooltip } from "./Tooltip";
 import { ShardDescription } from "./ShardDescription";
 import { MaterialBreakdownModal } from "../modals";
@@ -38,7 +38,7 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
             className="cursor-pointer"
           >
             <span className={`mt-0 font-medium text-sm ${getRarityColor(shard.rarity)} flex items-center min-w-0`}>
-              <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-2" loading="lazy" />
+              <img src={shardIconUrl(shard.id)} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-2" loading="lazy" />
               <span className="truncate">{shard.name}</span>
             </span>
           </Tooltip>

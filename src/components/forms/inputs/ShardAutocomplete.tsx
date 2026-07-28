@@ -2,9 +2,19 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from "react"
 import { Search, X, LayoutGrid } from "lucide-react";
 import { DataService } from "../../../services";
 import { debounce, isFocusRestoredByWindow } from "../../../utilities";
-import type { Shard, ShardAutocompleteProps } from "../../../types/types";
+import type { Shard } from "../../../types/types";
 import { SuggestionItem } from "../search";
 import { BrowseAllShardsModal } from "../../modals";
+
+interface ShardAutocompleteProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSelect: (shard: Shard) => void;
+  onFocus?: () => void;
+  placeholder?: string;
+  className?: string;
+  searchMode?: "enhanced" | "name-only";
+}
 
 export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onChange, onSelect, onFocus, placeholder = "Search for a shard...", className = "", searchMode = "enhanced" }) => {
   const [suggestions, setSuggestions] = useState<Shard[]>([]);
@@ -17,7 +27,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
   const [allShards, setAllShards] = useState<Shard[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Memoized debounced search function
   const debouncedSearch = useMemo(

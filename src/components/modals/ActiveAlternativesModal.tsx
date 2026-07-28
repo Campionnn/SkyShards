@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Modal } from "../ui";
 import { X, Star, Trash2 } from "lucide-react";
-import { getRarityColor } from "../../utilities";
+import { getRarityColor, shardIconUrl } from "../../utilities";
 import { useShards } from "../../hooks";
 import type { RecipeOverride, Shard } from "../../types/types";
 
@@ -37,7 +37,7 @@ export const ActiveAlternativesModal: React.FC<ActiveAlternativesModalProps> = (
     return (
       <span className="flex items-center gap-1.5">
         <span className="text-slate-300 text-xs">{quantity}x</span>
-        <img src={`${import.meta.env.BASE_URL}shardIcons/${shardId}.png`} alt={shard?.name || shardId} className="w-4 h-4 object-contain" loading="lazy" />
+        <img src={shardIconUrl(shardId)} alt={shard?.name || shardId} className="w-4 h-4 object-contain" loading="lazy" />
         <span className={shard ? getRarityColor(shard.rarity) : "text-slate-300"}>{shard?.name || shardId}</span>
       </span>
     );
@@ -52,7 +52,7 @@ export const ActiveAlternativesModal: React.FC<ActiveAlternativesModalProps> = (
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <img
-                src={`${import.meta.env.BASE_URL}shardIcons/${override.shardId}.png`}
+                src={shardIconUrl(override.shardId)}
                 alt={outputShard?.name || override.shardId}
                 className="w-5 h-5 object-contain"
                 loading="lazy"

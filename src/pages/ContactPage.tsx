@@ -8,7 +8,7 @@ const Divider = () => <hr className="my-6 border-slate-700" />;
 
 export const ContactPage: React.FC = () => {
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
-  const timeouts = useRef<{ [key: string]: NodeJS.Timeout }>({});
+  const timeouts = useRef<{ [key: string]: ReturnType<typeof setTimeout> }>({});
 
   const handleCopy = (tag: string) => {
     void copyText(tag).catch((err) => console.error("Failed to copy:", err));

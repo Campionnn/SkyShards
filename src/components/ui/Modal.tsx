@@ -5,16 +5,14 @@ import { createPortal } from "react-dom";
  * Shared shell for everything in components/modals: portal, backdrop, body scroll
  * lock, Escape-to-close and focus handling.
  *
- * All nine modals hand-rolled this. They had already drifted — two backdrop tints and
- * two padding scales — so `backdropClassName` and `panelClassName` exist to let each
- * call site keep exactly the appearance it had rather than silently restyling it.
+ * `backdropClassName` and `panelClassName` are props because call sites use different
+ * backdrop tints and padding scales.
  */
 
 /**
- * Modals stack: Alternatives opens over the calculator, Active Alternatives over that.
- * Each one writing `document.body.style.overflow` directly meant the inner one's
- * cleanup unlocked scrolling while the outer was still open, so reference-count the
- * lock and only release it when the last modal closes.
+ * Modals stack — Alternatives opens over the calculator, Active Alternatives over
+ * that. The scroll lock is reference-counted so closing an inner modal does not unlock
+ * the page while an outer one is still open.
  */
 let openModals = 0;
 let overflowBeforeLock = "";

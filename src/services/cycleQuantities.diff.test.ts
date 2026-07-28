@@ -3,26 +3,24 @@ import { CalculationService } from "./calculationService";
 import type { Data, Recipe, Shard } from "../types/types";
 
 /**
- * Differential test for the `computeCycleQuantities` extraction.
+ * Differential test for `computeCycleQuantities` against an independent reference
+ * implementation of the same math.
  *
- * The goldens pin the two cycle shapes reachable from the shipped data via recipe
- * overrides. That is not enough to claim the extraction is behaviour-preserving: a
- * cycle can in principle arise from any set of chosen recipes, and the shipped data
- * can change. So this compares the extracted function against a verbatim copy of the
- * code it replaced, over a wide space of synthetic cycles — including shapes the
- * current data cannot produce.
+ * The goldens only pin the two cycle shapes the shipped data can reach via recipe
+ * overrides. A cycle can in principle arise from any set of chosen recipes, and the
+ * data changes with every sync, so this exercises a wide space of synthetic cycles —
+ * including shapes the current data cannot produce.
  *
- * `originalCycleMath` below is a literal transcription of the pre-refactor block from
- * `assignQuantities`, kept unformatted on purpose. Do not tidy it; its value is being
- * an unmodified reference.
+ * `referenceCycleMath` is the independent implementation. Do not refactor it to share
+ * code with the function under test; its value is being written separately.
  */
 
 const svc = CalculationService.getInstance();
 
 type Step = { outputShard: string; recipe: Recipe };
 
-/** Verbatim pre-refactor math. Returns what the three copies each computed. */
-const originalCycleMath = (
+/** Independent implementation of the cycle quantity math, for comparison. */
+const referenceCycleMath = (
   treeShard: string,
   steps: Step[],
   requiredQuantity: number,
@@ -131,7 +129,7 @@ describe("computeCycleQuantities matches the code it replaced", () => {
       const crocodileMultiplier = 1 + (2 * Math.floor(next() * 11)) / 100;
       const requiredQuantity = [0, 1, 3, 17, 100, 1001, 999999][Math.floor(next() * 7)];
 
-      const expected = originalCycleMath(target, steps, requiredQuantity, data, crocodileMultiplier);
+      const expected = referenceCycleMath(target, steps, requiredQuantity, data, crocodileMultiplier);
       const actual = svc.computeCycleQuantities(target, steps, requiredQuantity, data, crocodileMultiplier);
 
       if (expected === null || actual === null) {
@@ -193,7 +191,7 @@ describe("computeCycleQuantities matches the code it replaced", () => {
     ];
 
     for (const { name, target, steps, quantity, croc } of cases) {
-      const expected = originalCycleMath(target, steps, quantity, data, croc);
+      const expected = referenceCycleMath(target, steps, quantity, data, croc);
       const actual = svc.computeCycleQuantities(target, steps, quantity, data, croc);
 
       if (expected === null) {

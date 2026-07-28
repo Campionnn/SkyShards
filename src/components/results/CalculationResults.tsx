@@ -1,13 +1,32 @@
 import React, { useMemo, useState } from "react";
 import { BarChart3, Hammer } from "lucide-react";
 import { formatLargeNumber, gzipBase64 } from "../../utilities";
-import type { CalculationResultsProps, Shard } from "../../types/types";
+import type { CalculationParams, CalculationResult, Data, RecipeOverride, Shard } from "../../types/types";
 import { MaterialItem } from "../ui";
 import { useCopyToClipboard } from "../../hooks";
 import { CopyTreeModal } from "../modals";
 import { ResultSummaryCards } from "./ResultSummaryCards";
 import { FusionTreeView } from "./FusionTreeView";
 import { MaterialTreeSelector } from "./MaterialTreeSelector";
+
+interface CalculationResultsProps {
+  result: CalculationResult;
+  data: Data;
+  targetShardName: string;
+  targetShard: string;
+  requiredQuantity: number;
+  params: CalculationParams;
+  onResultUpdate: (result: CalculationResult) => void;
+  recipeOverrides: RecipeOverride[];
+  onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
+  onResetRecipeOverrides: () => void;
+  onShowActiveAlternatives: () => void;
+  ironManView: boolean;
+  materialsOnly?: boolean;
+  materialShardResults?: Map<string, CalculationResult>;
+  materialTreeShardKey?: string;
+  onMaterialTreeShardChange?: (key: string) => void;
+}
 
 export const CalculationResults: React.FC<CalculationResultsProps> = ({
   result,

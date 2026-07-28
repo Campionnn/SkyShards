@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import type { ShardWithDirectInfo } from "../../types/types";
-import { getRarityColor, isBlurCausedByWindow } from "../../utilities";
+import { getRarityColor, isBlurCausedByWindow, shardIconUrl } from "../../utilities";
 import { MoveRight, RotateCcw } from "lucide-react";
 
 interface ShardItemProps {
@@ -62,7 +62,7 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, title, d
       <div className="flex items-start justify-between gap-2 w-full">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1 mb-1">
-            <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
+            <img src={shardIconUrl(shard.id)} alt={shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
             <div className={`font-medium text-sm ${getRarityColor(shard.rarity)} truncate`}>{shard.name}</div>
             {shard.isDirect ? (
               <span className="px-1.5 py-0.5 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>

@@ -4,7 +4,7 @@ import { X, Search, Package, RefreshCw, User, ChevronDown, AlertTriangle, Check,
 import { hypixelService } from "../../services";
 import type { HypixelProfileResponse, ProfileData } from "../../services";
 import { useShards } from "../../hooks";
-import { loadHypixelProfileMeta, saveHypixelProfileMeta, clearHypixelProfileMeta, clearDisabledShards, filterShards, DEFAULT_FILTER_CONFIG, sortByShardKey, compareShardKeys, sortShardsByNameWithPrefixAwareness, getShardSearchText } from "../../utilities";
+import { DEFAULT_FILTER_CONFIG, clearDisabledShards, clearHypixelProfileMeta, compareShardKeys, filterShards, getShardSearchText, loadHypixelProfileMeta, saveHypixelProfileMeta, shardIconUrl, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
 import type { HypixelProfileMeta } from "../../utilities";
 import { SHARD_DESCRIPTIONS, MAX_QUANTITIES, LEVELED_SHARDS, fusedCountToTierLevel } from "../../constants";
 
@@ -91,8 +91,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
     }
   }, []);
 
-  // Reset state when modal opens/closes. The body scroll lock that used to live here
-  // is now Modal's job, so it can be released once rather than per-modal.
+  // Reset transient state when the modal opens or closes.
   useEffect(() => {
     if (open) {
       setError(null);
@@ -626,7 +625,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                     <div key={shardId} className={`bg-slate-800/50 border ${shardRarityBorder} rounded-md p-2 space-y-2 ${disabled ? "opacity-50" : ""}`}>
                       <div className="flex items-center gap-2">
                         <img
-                          src={`${import.meta.env.BASE_URL}shardIcons/${shardId}.png`}
+                          src={shardIconUrl(shardId)}
                           alt={shard.name}
                           className="w-5 h-5 object-contain flex-shrink-0"
                           loading="lazy"
@@ -815,7 +814,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                       <div className="flex items-center gap-1.5">
                         <div className="relative flex-shrink-0">
                           <img
-                            src={`${import.meta.env.BASE_URL}shardIcons/${attr.id}.png`}
+                            src={shardIconUrl(attr.id)}
                             alt={attr.title}
                             className="w-8 h-8 object-contain"
                             loading="lazy"

@@ -2,9 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { KUUDRA_TIERS } from "../../constants";
 
+/** The only values this dropdown can emit — KUUDRA_TIERS is `as const`. */
+type KuudraTier = (typeof KUUDRA_TIERS)[number]["value"];
+
 interface KuudraDropdownProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: KuudraTier;
+  onChange: (value: KuudraTier) => void;
   label: string;
 }
 
@@ -22,7 +25,7 @@ export const KuudraDropdown: React.FC<KuudraDropdownProps> = React.memo(({ value
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (tierValue: string) => {
+  const handleSelect = (tierValue: KuudraTier) => {
     onChange(tierValue);
     setIsOpen(false);
   };

@@ -9,9 +9,8 @@ import { Tooltip } from "./Tooltip";
  * - `sm` — inline among other controls in a header row. The label is static text
  *   with a tooltip between it and the switch, and does not toggle on click.
  *
- * The accent colours are per-switch on purpose (purple = inventory, emerald = save,
- * blue = materials); they were the only thing keeping three copies of this markup
- * inline in CalculatorForm.
+ * Accent colours are per-switch on purpose: purple = inventory, emerald = save,
+ * blue = materials.
  */
 type ToggleSize = "sm" | "md";
 type ToggleAccent = "fuchsia" | "purple" | "emerald" | "blue";

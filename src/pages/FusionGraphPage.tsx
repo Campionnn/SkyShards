@@ -18,7 +18,7 @@ import { useFusionData } from "../hooks";
 import { CalculationService } from "../services";
 import { DEFAULT_CALCULATION_PARAMS } from "../constants";
 import { ShardGraphNode } from "../components/graph";
-import { isBlurCausedByWindow } from "../utilities";
+import { isBlurCausedByWindow, shardIconUrl } from "../utilities";
 import {
   EDGE_COLORS,
   NODE_HEIGHT,
@@ -233,7 +233,7 @@ const FusionGraphInner: React.FC = () => {
                   className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-purple-500/20"
                 >
                   <img
-                    src={`${import.meta.env.BASE_URL}shardIcons/${node.id}.png`}
+                    src={shardIconUrl(node.id)}
                     alt=""
                     className="h-5 w-5 object-contain"
                   />

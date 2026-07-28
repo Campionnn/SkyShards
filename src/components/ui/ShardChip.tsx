@@ -7,11 +7,7 @@ import type { Shard } from "../../types/types";
 
 interface ShardChipProps {
   shard: Shard;
-  /**
-   * Fall back to the shard's name as the tooltip title when it has no description
-   * entry. Only the second recipe input does this today — preserved as an option so
-   * this extraction changes no rendering.
-   */
+  /** Fall back to the shard's name as the tooltip title when it has no description entry. */
   fallbackTitleToName?: boolean;
 }
 

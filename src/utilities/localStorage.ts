@@ -112,9 +112,8 @@ const filterFormDataForSave = (data: CalculationFormData): Partial<CalculationFo
  * dropped field simply falls back to its default. That makes per-field validation the
  * natural fit: one corrupted entry costs you one setting, not every setting.
  *
- * Note this deliberately does NOT use `calculationSchema.parse` directly —
- * `filterFormDataForSave` strips `shard` and `quantity`, both of which the schema
- * requires, so a whole-object parse would reject every saved form.
+ * A whole-object `calculationSchema.parse` will not work here: `filterFormDataForSave`
+ * strips `shard` and `quantity`, both of which the schema requires.
  */
 const formFields = calculationSchema.shape;
 

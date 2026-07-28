@@ -92,10 +92,8 @@ export class DataService {
   }
 
   /**
-   * Same promise-caching as `loadFusionJson`, and for the same reason: caching the
-   * awaited *result* left a window where two concurrent callers both saw an empty
-   * cache and both fetched. That was observable — a cold page load requested
-   * rates.json twice.
+   * Promise-cached like `loadFusionJson`: caching the awaited result instead leaves a
+   * window where two concurrent callers both see an empty cache and both fetch.
    */
   async loadDefaultRates(): Promise<Record<string, number>> {
     if (!this.defaultRatesCache) {

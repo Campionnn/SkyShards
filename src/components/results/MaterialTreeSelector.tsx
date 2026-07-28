@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Search, X, ChevronDown } from "lucide-react";
 import type { Shard } from "../../types/types";
-import { getRarityColor, isFocusRestoredByWindow } from "../../utilities";
+import { getRarityColor, isFocusRestoredByWindow, shardIconUrl } from "../../utilities";
 import { SuggestionItem } from "../forms/search";
 
 interface MaterialTreeSelectorProps {
@@ -93,7 +93,7 @@ export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shar
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           {selectedShard && !isOpen ? (
-            <img src={`${import.meta.env.BASE_URL}shardIcons/${selectedShard.id}.png`} alt={selectedShard.name} className="w-4 h-4 object-contain" loading="lazy" />
+            <img src={shardIconUrl(selectedShard.id)} alt={selectedShard.name} className="w-4 h-4 object-contain" loading="lazy" />
           ) : (
             <Search className="h-4 w-4 text-slate-400" />
           )}

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { X, Search, Check, RotateCcw, Filter, ChevronDown } from "lucide-react";
-import { getRarityColor, sortShardsByNameWithPrefixAwareness, sortByShardKey, filterShards, DEFAULT_FILTER_CONFIG } from "../../utilities";
+import { DEFAULT_FILTER_CONFIG, filterShards, getRarityColor, shardIconUrl, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
 import type { Shard } from "../../types/types";
 import { MAX_QUANTITIES } from "../../constants";
 import { Modal, ToggleSwitch } from "../ui";
@@ -285,7 +285,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0 group">
                   <div className="relative flex-shrink-0">
-                    <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-7 h-7 object-contain" loading="lazy" />
+                    <img src={shardIconUrl(shard.id)} alt={shard.name} className="w-7 h-7 object-contain" loading="lazy" />
                     {isSelected && (
                       <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center border border-slate-800">
                         <Check className="w-3 h-3 text-white" />

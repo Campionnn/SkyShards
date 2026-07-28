@@ -4,11 +4,10 @@ import type { CalculationParams } from "../types/types";
 export const NO_FORTUNE_SHARDS = ["C19", "U4", "U16", "U28", "R24", "R25", "R27", "R60", "R64", "L4", "L15", "L30", "L33", "L48", "L51"];
 
 /**
- * The nine shards whose attribute level the player sets by hand. Single source for
- * both the form's level dropdowns and the Hypixel profile import, which previously
- * kept two separate nine-row tables — one with labels, one with rarities.
+ * The nine shards whose attribute level the player sets by hand. Drives both the
+ * form's level dropdowns and the Hypixel profile import.
  *
- * `rarity` drives `fusedCountToTierLevel` on import; `ironmanOnly` marks the six
+ * `rarity` feeds `fusedCountToTierLevel` on import; `ironmanOnly` marks the six
  * reptile lines that only exist on an ironman profile. Order is the display order of
  * the dropdown grid.
  */

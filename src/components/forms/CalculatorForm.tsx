@@ -52,7 +52,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
 
   // Only call onSubmit immediately for non-shard/quantity fields
   const handleInputChange = <K extends keyof CalculationFormData>(field: K, value: CalculationFormData[K]) => {
-    const updatedForm = { ...form, [field]: value } as CalculationFormData;
+    const updatedForm = { ...form, [field]: value };
     setForm(updatedForm);
     if (field !== "shard" && field !== "quantity" && field !== "customKuudraTime") {
       onSubmit(updatedForm);
@@ -62,11 +62,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
   const handleLevelChange =
     <K extends LevelKey>(key: K) =>
     (value: number) => {
-      handleInputChange(key, value as CalculationFormData[K]);
+      handleInputChange(key, value);
     };
 
   const handleMaxStats = () => {
-    const updatedForm = {
+    const updatedForm: CalculationFormData = {
       ...form,
       hunterFortune: 122,
       newtLevel: 10,
@@ -78,8 +78,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
       seaSerpentLevel: 10,
       tiamatLevel: 10,
       crocodileLevel: 10,
-      kuudraTier: "t5" as CalculationFormData["kuudraTier"], // Set Kuudra to t5 on max stats, type-safe
-    } as CalculationFormData;
+      kuudraTier: "t5", // Set Kuudra to t5 on max stats
+    };
     setForm(updatedForm);
     onSubmit(updatedForm);
   };
@@ -150,7 +150,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
   const setMoneyToInfinity = React.useCallback(() => {
     const moneyNullishOrZero = form.moneyPerHour === undefined || form.moneyPerHour === null || form.moneyPerHour === 0;
     if (moneyNullishOrZero && moneyInput === "") {
-      const updated = { ...latestFormRef.current, moneyPerHour: Infinity } as CalculationFormData;
+      const updated = { ...latestFormRef.current, moneyPerHour: Infinity };
       setForm(updated);
       onSubmitRef.current(updated);
     }
@@ -170,7 +170,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
   // Clear shard input on focus if a shard is already selected
   const handleShardInputFocus = () => {
     if (form.shard) {
-      handleInputChange("shard", "" as CalculationFormData["shard"]);
+      handleInputChange("shard", "");
     }
   };
 
@@ -180,15 +180,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
     const isNullish = form.craftPenalty === undefined || form.craftPenalty === null;
 
     if (isNullish) {
-      const updated = { ...latestFormRef.current, craftPenalty: desiredDefault } as CalculationFormData;
+      const updated = { ...latestFormRef.current, craftPenalty: desiredDefault };
       setForm(updated);
       onSubmitRef.current(updated);
     } else if (form.ironManView && form.craftPenalty === 1000) {
-      const updated = { ...latestFormRef.current, craftPenalty: 0.8 } as CalculationFormData;
+      const updated = { ...latestFormRef.current, craftPenalty: 0.8 };
       setForm(updated);
       onSubmitRef.current(updated);
     } else if (!form.ironManView && form.craftPenalty === 0.8) {
-      const updated = { ...latestFormRef.current, craftPenalty: 1000 } as CalculationFormData;
+      const updated = { ...latestFormRef.current, craftPenalty: 1000 };
       setForm(updated);
       onSubmitRef.current(updated);
     }
@@ -223,7 +223,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
   const handleMultiSelectDone = React.useCallback(
     (selectedData: Array<{ shard: Shard; quantity: number }>) => {
       const selectedKeys = selectedData.map((item) => item.shard.id);
-      const updated = { ...latestFormRef.current, selectedShardKeys: selectedKeys, shardQuantities: selectedData } as CalculationFormData;
+      const updated = { ...latestFormRef.current, selectedShardKeys: selectedKeys, shardQuantities: selectedData };
       setForm(updated);
       setIsMultiSelectModalOpen(false);
       onSubmitRef.current(updated);
@@ -310,7 +310,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   <button
                     type="button"
                     onClick={() => {
-                      const updated = { ...form, selectedShardKeys: [], shardQuantities: [] } as CalculationFormData;
+                      const updated = { ...form, selectedShardKeys: [], shardQuantities: [] };
                       setForm(updated);
                       onSubmit(updated);
                     }}
@@ -336,7 +336,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                     const maxQuantity: number = MAX_QUANTITIES[rarityKey as keyof typeof MAX_QUANTITIES];
                     const owned = ownedAttributes?.get(shard.id) ?? 0;
                     const remaining = owned >= maxQuantity ? maxQuantity : Math.max(1, maxQuantity - owned);
-                    const updated = { ...form, shard: shard.name, quantity: remaining } as CalculationFormData;
+                    const updated = { ...form, shard: shard.name, quantity: remaining };
                     setForm(updated);
                     onSubmit(updated);
                   }}
@@ -356,7 +356,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   min="1"
                   value={form.quantity === 0 ? "" : form.quantity}
                   placeholder="1"
-                  onChange={(e) => handleInputChange("quantity", Number(e.target.value) as CalculationFormData["quantity"])}
+                  onChange={(e) => handleInputChange("quantity", Number(e.target.value))}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -377,7 +377,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                     <button
                       type="button"
                       onClick={() => {
-                        const updated = { ...form, quantity: maxQty } as CalculationFormData;
+                        const updated = { ...form, quantity: maxQty };
                         setForm(updated);
                         onSubmit(updated);
                       }}
@@ -500,7 +500,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   min="0"
                   value={form.hunterFortune === 0 ? "" : form.hunterFortune}
                   placeholder="0"
-                  onChange={(e) => handleInputChange("hunterFortune", Number(e.target.value) as CalculationFormData["hunterFortune"])}
+                  onChange={(e) => handleInputChange("hunterFortune", Number(e.target.value))}
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   className="
                   w-full px-3 py-2 text-sm
@@ -584,11 +584,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                 setCraftPenaltyInput(value);
                 // If empty, use default for calculation
                 if (value.trim() === "") {
-                  handleInputChange("craftPenalty", (form.ironManView ? 0.8 : 1000) as CalculationFormData["craftPenalty"]);
+                  handleInputChange("craftPenalty", (form.ironManView ? 0.8 : 1000));
                 } else {
                   const num = Number(value);
                   if (!isNaN(num) && num >= 0) {
-                    handleInputChange("craftPenalty", num as CalculationFormData["craftPenalty"]);
+                    handleInputChange("craftPenalty", num);
                   }
                 }
               }}
@@ -608,8 +608,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
             </h3>
             <div className="space-y-2">
               <KuudraDropdown
-                value={(form.kuudraTier ?? "none") as CalculationFormData["kuudraTier"]}
-                onChange={(value: string) => handleInputChange("kuudraTier", value as CalculationFormData["kuudraTier"])}
+                value={(form.kuudraTier ?? "none")}
+                onChange={(value) => handleInputChange("kuudraTier", value)}
                 label="Kuudra Tier"
               />
               <MoneyInput
@@ -617,11 +617,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                 onChange={(value: string) => {
                   setMoneyInput(value);
                   if (value.trim() === "") {
-                    handleInputChange("moneyPerHour", Infinity as CalculationFormData["moneyPerHour"]); // Infinity means ignore key cost
+                    handleInputChange("moneyPerHour", Infinity); // Infinity means ignore key cost
                     onSubmit({ ...form, moneyPerHour: Infinity }); // force update tree
                   } else {
                     const parsed = parseShorthandNumber(value);
-                    handleInputChange("moneyPerHour", parsed as CalculationFormData["moneyPerHour"]);
+                    handleInputChange("moneyPerHour", parsed);
                   }
                 }}
                 placeholder="200k, 2.5m, 2b..."
@@ -632,14 +632,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   label="Custom Kuudra Completion Time"
                   checked={form.customKuudraTime || false}
                   onChange={(checked) => {
-                    handleInputChange("customKuudraTime", checked as CalculationFormData["customKuudraTime"]);
+                    handleInputChange("customKuudraTime", checked);
                     if (!checked) {
                       // Reset time input when disabling custom time
-                      handleInputChange("kuudraTimeSeconds", null as CalculationFormData["kuudraTimeSeconds"]);
+                      handleInputChange("kuudraTimeSeconds", null);
                       setKuudraTimeInput("");
                     }
                     // handleInputChange does not submit for customKuudraTime, so do it here.
-                    const updatedForm = { ...form, customKuudraTime: checked } as CalculationFormData;
+                    const updatedForm = { ...form, customKuudraTime: checked };
                     if (!checked) {
                       updatedForm.kuudraTimeSeconds = null;
                     }
@@ -660,11 +660,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                           const value = e.target.value;
                           setKuudraTimeInput(value);
                           if (value.trim() === "") {
-                            handleInputChange("kuudraTimeSeconds", null as CalculationFormData["kuudraTimeSeconds"]);
+                            handleInputChange("kuudraTimeSeconds", null);
                           } else {
                             const parsed = parseInt(value);
                             if (!isNaN(parsed) && parsed > 0) {
-                              handleInputChange("kuudraTimeSeconds", parsed as CalculationFormData["kuudraTimeSeconds"]);
+                              handleInputChange("kuudraTimeSeconds", parsed);
                             }
                           }
                         }}

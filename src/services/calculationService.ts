@@ -65,8 +65,8 @@ export class CalculationService {
       noWoodenBait: params.noWoodenBait,
       // buildData branches on this to decide whether a shard's rate is a coin price
       // or an hourly rate, so two calls differing only here must not share an entry.
-      // craftPenalty is deliberately absent: it only affects computeMinCosts, never
-      // the Data this key guards.
+      // craftPenalty is absent on purpose: it only affects computeMinCosts, never the
+      // Data this key guards.
       rateAsCoinValue: params.rateAsCoinValue,
     });
   }
@@ -410,11 +410,8 @@ export class CalculationService {
       const { recipes, effectiveOutputQty, fuseAmounts } = precomputed[outputShard];
       let bestCost = currentCost;
       let bestRecipe: Recipe | null = currentChoice.recipe;
-      // recipes was being mutated in the loop somewhere, so make a copy. idk why
-      const arr = recipes.slice()
-
-      for (let i = 0; i < arr.length; i++) {
-        const recipe = arr[i];
+      for (let i = 0; i < recipes.length; i++) {
+        const recipe = recipes[i];
         const [fuse1, fuse2] = fuseAmounts[i];
         const [input1, input2] = recipe.inputs;
         const costInput1 = minCosts.get(input1)! * fuse1;
@@ -897,14 +894,12 @@ export class CalculationService {
    * Quantity math for a cycle node: how many crafts the loop needs to run to yield
    * `requiredQuantity` of `shard`, and how much of each external input that costs.
    *
-   * `assignQuantities` and both of InvCalculationService's tree walks each carried a
-   * copy of this. Returns null when `steps` holds no recipe producing `shard`; every
-   * caller treats that as "leave the node alone".
+   * Returns null when `steps` holds no recipe producing `shard`; every caller treats
+   * that as "leave the node alone".
    *
-   * Reproduced verbatim from those copies. `netOutputPerCycle` is the sensitive part:
-   * it is a float subtraction feeding a `Math.ceil`, so e.g. `2 * 1.2 - 2` lands on
-   * 0.3999999999999999 and rounds a 250-craft loop up to 252. That is existing
-   * behaviour, pinned deliberately rather than corrected here.
+   * `netOutputPerCycle` is the sensitive part: a float subtraction feeding a
+   * `Math.ceil`, so e.g. `2 * 1.2 - 2` lands on 0.3999999999999999 and rounds a
+   * 250-craft loop up to 252. Pinned by tests rather than corrected.
    */
   public computeCycleQuantities(
     shard: string,

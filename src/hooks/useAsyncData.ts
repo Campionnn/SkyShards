@@ -7,8 +7,7 @@ export interface AsyncData<T> {
 }
 
 /**
- * Load something once on mount. Replaces the `{data, loading, error}` +
- * `useEffect` + `try/catch/finally` block that was copied into every data hook.
+ * Load something once on mount, exposing `{data, loading, error}`.
  *
  * `fetcher` is deliberately not in the dependency array — these hooks are all called
  * with an inline arrow, so depending on its identity would refetch on every render.

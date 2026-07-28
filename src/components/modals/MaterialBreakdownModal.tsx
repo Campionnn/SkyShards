@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal } from "../ui";
 import { X, Package } from "lucide-react";
-import { formatNumber, getRarityColor } from "../../utilities";
+import { formatNumber, getRarityColor, shardIconUrl } from "../../utilities";
 import type { Shard } from "../../types/types";
 
 interface MaterialBreakdownModalProps {
@@ -28,7 +28,7 @@ export const MaterialBreakdownModal: React.FC<MaterialBreakdownModalProps> = ({ 
             <h2 id="material-breakdown-title" className="text-lg font-semibold text-white">Material Usage Breakdown</h2>
             <span className="flex items-center gap-1 text-slate-400 text-sm">
               <span>for</span>
-              <img src={`${import.meta.env.BASE_URL}shardIcons/${materialShard.id}.png`} alt={materialShard.name} className="w-5 h-5 object-contain" loading="lazy" />
+              <img src={shardIconUrl(materialShard.id)} alt={materialShard.name} className="w-5 h-5 object-contain" loading="lazy" />
               <span className={getRarityColor(materialShard.rarity)}>{materialShard.name}</span>
             </span>
           </div>
@@ -65,7 +65,7 @@ export const MaterialBreakdownModal: React.FC<MaterialBreakdownModalProps> = ({ 
                 <div key={targetShardId} className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-3 hover:bg-slate-700/50 hover:border-slate-500 transition-all duration-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <img src={`${import.meta.env.BASE_URL}shardIcons/${targetShard.id}.png`} alt={targetShard.name} className="w-8 h-8 object-contain flex-shrink-0" loading="lazy" />
+                      <img src={shardIconUrl(targetShard.id)} alt={targetShard.name} className="w-8 h-8 object-contain flex-shrink-0" loading="lazy" />
                       <div className="flex-1 min-w-0">
                         <div className={`font-medium truncate ${getRarityColor(targetShard.rarity)}`}>{targetShard.name}</div>
                         <div className="text-xs text-slate-400 mt-0.5">{percentage}% of total usage</div>

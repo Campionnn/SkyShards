@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ShardAutocomplete, RecipeCountBadge, SearchFilterInput, ShardDisplay, DropdownButton } from "../components";
-import { getRarityColor } from "../utilities";
+import { getRarityColor, shardIconUrl } from "../utilities";
 import { useFusionData, useDropdownManager, useRecipeState } from "../hooks";
 import { processOutputRecipes, categorizeAndGroupRecipes, filterCategorizedRecipes, type PairRecipe, type CategorizedRecipes, type GroupedRecipe } from "../utilities";
 import type { FusionJson, Shard } from "../types/types";
@@ -400,7 +400,7 @@ export const RecipePage = () => {
               <div className="flex items-center justify-center gap-2 lg:gap-3">
                 <div className="flex items-center gap-1 text-sm">
                   <span className="text-slate-300">What can you make with</span>
-                  <img src={`${import.meta.env.BASE_URL}shardIcons/${selectedShard.id}.png`} alt={selectedShard.name} className="w-5 h-5 object-contain" loading="lazy" />
+                  <img src={shardIconUrl(selectedShard.id)} alt={selectedShard.name} className="w-5 h-5 object-contain" loading="lazy" />
                   <span className={`font-semibold ${getRarityColor(selectedShard.rarity)}`}>{selectedShard.name}</span>
                   <span className="text-slate-400">?</span>
                 </div>
@@ -435,7 +435,7 @@ export const RecipePage = () => {
               <div className="flex items-center justify-center gap-2 lg:gap-3">
                 <div className="flex items-center gap-1 text-sm">
                   <span className="text-slate-300">How to make</span>
-                  <img src={`${import.meta.env.BASE_URL}shardIcons/${selectedOutputShard.id}.png`} alt={selectedOutputShard.name} className="w-5 h-5 object-contain" loading="lazy" />
+                  <img src={shardIconUrl(selectedOutputShard.id)} alt={selectedOutputShard.name} className="w-5 h-5 object-contain" loading="lazy" />
                   <span className={`font-semibold ${getRarityColor(selectedOutputShard.rarity)}`}>{selectedOutputShard.name}</span>
                   <span className="text-slate-400">?</span>
                 </div>

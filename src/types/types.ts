@@ -1,5 +1,3 @@
-import React from "react";
-
 export interface Shard {
   id: string;
   name: string;
@@ -40,11 +38,10 @@ export interface Data {
  * quantity -> input pairs, and shards keyed by id.
  *
  * `Data` is what the app runs on; this is what gets parsed off the wire and fed to
- * `CalculationService.buildData` / `fusionDataToData`. Note that `id` and `rate` are
- * not actually present in the file — they are filled in by whoever builds the `Shard`
- * objects (`DataService.loadShards`, `buildData`). Typing them in anyway is the
- * convention the codebase already settled on, and every reader of this type only
- * touches `name` / `family` / `rarity` / `fuse_amount` / `internal_id`.
+ * `CalculationService.buildData` / `fusionDataToData`. `id` and `rate` are not present
+ * in the file itself — they are filled in by whoever builds the `Shard` objects
+ * (`DataService.loadShards`, `buildData`) — but readers of this type only touch
+ * `name` / `family` / `rarity` / `fuse_amount` / `internal_id`.
  */
 export type FusionJson = {
   recipes: Record<string, Record<string, [string, string][]>>;
@@ -122,87 +119,6 @@ export interface ShardWithDirectInfo extends Shard {
   isDirect: boolean;
 }
 
-export interface LevelDropdownProps {
-  value: number;
-  onChange: (value: number) => void;
-  label: string;
-  tooltipTitle?: string;
-  tooltipContent?: React.ReactNode;
-  tooltipShardName?: string;
-  tooltipShardIcon?: string;
-  tooltipRarity?: string;
-  tooltipWarning?: string;
-  tooltipFamily?: string;
-  tooltipType?: string;
-}
-
-// calculation results
-export interface CalculationResultsProps {
-  result: CalculationResult;
-  data: Data;
-  targetShardName: string;
-  targetShard: string;
-  requiredQuantity: number;
-  params: CalculationParams;
-  onResultUpdate: (result: CalculationResult) => void;
-  recipeOverrides: RecipeOverride[];
-  onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
-  onResetRecipeOverrides: () => void;
-  onShowActiveAlternatives: () => void;
-  ironManView: boolean;
-  materialsOnly?: boolean;
-  materialShardResults?: Map<string, CalculationResult>;
-  materialTreeShardKey?: string;
-  onMaterialTreeShardChange?: (key: string) => void;
-}
-
-// fusion tree
-export interface RecipeTreeNodeProps {
-  tree: RecipeTree;
-  data: Data;
-  isTopLevel?: boolean;
-  totalShardsProduced?: number;
-  nodeId: string;
-  expandedStates: Map<string, boolean>;
-  onToggle: (nodeId: string) => void;
-  onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
-  ironManView: boolean;
-}
-
-export interface InventoryRecipeTreeNodeProps {
-  tree: InventoryRecipeTree;
-  data: Data;
-  isTopLevel?: boolean;
-  totalShardsProduced?: number;
-  nodeId: string;
-  expandedStates: Map<string, boolean>;
-  onToggle: (nodeId: string) => void;
-  onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
-  ironManView: boolean;
-  isInCycle?: boolean;
-  remainingInventory?: Map<string, number>;
-}
-
-// searchbar
-export interface ShardAutocompleteProps {
-  value: string;
-  onChange: (value: string) => void;
-  onSelect: (shard: Shard) => void;
-  onFocus?: () => void;
-  placeholder?: string;
-  className?: string;
-  searchMode?: "enhanced" | "name-only";
-}
-
-export interface SuggestionItemProps {
-  shard: Shard;
-  index: number;
-  focusedIndex: number;
-  onSelect: (shard: Shard) => void;
-  isSelecting: boolean;
-  setFocusedIndex: (index: number) => void;
-}
-
 // Alternative recipe types
 export interface AlternativeRecipeOption {
   recipe: Recipe | null;
@@ -218,28 +134,6 @@ export interface AlternativeSelectionContext {
   outputShard?: string;
   currentRecipe?: Recipe | null;
   requiredQuantity?: number;
-}
-
-// Component props interfaces
-export interface AlternativeRecipeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  // Changed: alternatives is now grouped
-  alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
-  onSelect: (recipe: Recipe | null) => void;
-  shardName: string;
-  data: Data;
-  loading: boolean;
-  requiredQuantity?: number;
-  params: CalculationParams;
-}
-
-export interface RecipeOverrideManagerProps {
-  params: CalculationParams;
-  recipeOverrides: RecipeOverride[];
-  onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
-  onResetRecipeOverrides: () => void;
-  children: (props: { showAlternatives: (shardId: string, context: AlternativeSelectionContext) => void; recipeOverrides: RecipeOverride[]; resetAlternatives: () => void }) => React.ReactNode;
 }
 
 export interface InventoryCalculationResult {

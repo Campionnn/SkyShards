@@ -1,9 +1,23 @@
 import React from "react";
 import { formatLargeNumber, formatNumber } from "../../utilities";
 import { Package } from "lucide-react";
-import type { InventoryRecipeTreeNodeProps, Shard, InventoryRecipeTree } from "../../types/types";
+import type { AlternativeSelectionContext, Data, InventoryRecipeTree, Shard } from "../../types/types";
 import { ShardInfo, RecipeDisplay, RecipeSummary, CrocodileProcsBadge, AlternativesButton, CycleHeader } from "./shared";
-import { getCrocodileProcs, renderChevron } from "./treeHelpers";
+import { getCrocodileProcs, renderChevron, useExpansionState } from "./treeHelpers";
+
+interface InventoryRecipeTreeNodeProps {
+  tree: InventoryRecipeTree;
+  data: Data;
+  isTopLevel?: boolean;
+  totalShardsProduced?: number;
+  nodeId: string;
+  expandedStates: Map<string, boolean>;
+  onToggle: (nodeId: string) => void;
+  onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
+  ironManView: boolean;
+  isInCycle?: boolean;
+  remainingInventory?: Map<string, number>;
+}
 
 export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = ({
   tree,
@@ -18,22 +32,9 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
   isInCycle = false,
   remainingInventory,
 }) => {
-  // Hooks must run before any early return so their order is stable across
-  // renders — `tree` flips between array and single node as the inventory
-  // substitution changes.
-  const pendingDefaults = React.useRef<Map<string, boolean>>(new Map());
-
-  // Flush any pending default entries into the Map after render
-  React.useEffect(() => {
-    if (pendingDefaults.current.size > 0) {
-      for (const [id, val] of pendingDefaults.current) {
-        if (!expandedStates.has(id)) {
-          expandedStates.set(id, val);
-        }
-      }
-      pendingDefaults.current.clear();
-    }
-  });
+  // Must run before any early return so hook order is stable across renders —
+  // `tree` flips between array and single node as the inventory substitution changes.
+  const getExpansionState = useExpansionState(expandedStates);
 
   // Handle array of trees
   if (Array.isArray(tree)) {
@@ -59,16 +60,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
   }
 
   const shard = data.shards[tree.shard];
-
-  // Helper function to get expansion state
-  const getExpansionState = (id: string, defaultState: boolean = true) => {
-    if (expandedStates.has(id)) {
-      return expandedStates.get(id)!;
-    }
-    // Track that this id needs to be initialized
-    pendingDefaults.current.set(id, defaultState);
-    return defaultState;
-  };
 
   const renderInventoryShard = (quantity: number, inventoryShard: Shard, inCycle: boolean) => {
     const remaining = remainingInventory?.get(inventoryShard.id) ?? 0;
@@ -376,7 +367,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
           <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-0.5">
             <div className="">
               {[...tree.steps]
-                .slice()
                 .reverse()
                 .map((step, stepIndex) => {
                   const recipe = step.recipe;
