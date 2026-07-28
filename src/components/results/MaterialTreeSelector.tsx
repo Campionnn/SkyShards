@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from "react"
 import { Search, X, ChevronDown } from "lucide-react";
 import type { Shard } from "../../types/types";
 import { getRarityColor, isFocusRestoredByWindow, shardIconUrl } from "../../utilities";
-import { SuggestionItem } from "../forms/search";
+import { SuggestionItem } from "../forms";
 
 interface MaterialTreeSelectorProps {
   shards: Shard[];
