@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo } from "react";
-import { createPortal } from "react-dom";
+import React, { useMemo } from "react";
+import { Modal } from "../ui";
 import { X, Star, Trash2 } from "lucide-react";
 import { getRarityColor } from "../../utilities";
 import { useShards } from "../../hooks";
@@ -24,16 +24,6 @@ export const ActiveAlternativesModal: React.FC<ActiveAlternativesModalProps> = (
     }
     return map;
   }, [shards]);
-
-  // Disable body scroll when modal is open
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "unset";
-      };
-    }
-  }, [open]);
 
   if (!open) return null;
 
@@ -103,57 +93,54 @@ export const ActiveAlternativesModal: React.FC<ActiveAlternativesModalProps> = (
     );
   };
 
-  return createPortal(
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-purple-400" />
-              <h2 className="text-lg font-semibold text-white">Active Alternatives</h2>
-            </div>
-            <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer" aria-label="Close">
-              <X className="w-5 h-5 text-slate-400" />
+  return (
+    <Modal open={open} onClose={onClose} labelledBy="active-alternatives-title" panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex-shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Star className="w-5 h-5 text-purple-400" />
+            <h2 id="active-alternatives-title" className="text-lg font-semibold text-white">Active Alternatives</h2>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer" aria-label="Close">
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-4 overflow-y-auto flex-1 min-h-0">
+        {recipeOverrides.length === 0 ? (
+          <div className="text-center py-12 text-slate-400">
+            <div>No alternatives set.</div>
+            <div className="text-sm mt-1">Click a shard in the fusion tree to pick a different recipe for it.</div>
+          </div>
+        ) : (
+          <div className="space-y-3">{recipeOverrides.map(renderOverride)}</div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-slate-700 bg-slate-800/50 flex-shrink-0">
+        <div className="flex items-center justify-between gap-3 text-sm text-slate-400">
+          <span>
+            {recipeOverrides.length} alternative{recipeOverrides.length !== 1 ? "s" : ""} set
+          </span>
+          <div className="flex items-center gap-3">
+            {recipeOverrides.length > 0 && (
+              <button
+                onClick={handleRemoveAll}
+                className="px-3 py-2 font-medium rounded-md transition-colors duration-200 cursor-pointer bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 hover:border-red-500/30"
+              >
+                Remove All
+              </button>
+            )}
+            <button onClick={onClose} className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-md cursor-pointer">
+              Close
             </button>
           </div>
         </div>
-
-        {/* Content */}
-        <div className="p-4 overflow-y-auto flex-1 min-h-0">
-          {recipeOverrides.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
-              <div>No alternatives set.</div>
-              <div className="text-sm mt-1">Click a shard in the fusion tree to pick a different recipe for it.</div>
-            </div>
-          ) : (
-            <div className="space-y-3">{recipeOverrides.map(renderOverride)}</div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-slate-700 bg-slate-800/50 flex-shrink-0">
-          <div className="flex items-center justify-between gap-3 text-sm text-slate-400">
-            <span>
-              {recipeOverrides.length} alternative{recipeOverrides.length !== 1 ? "s" : ""} set
-            </span>
-            <div className="flex items-center gap-3">
-              {recipeOverrides.length > 0 && (
-                <button
-                  onClick={handleRemoveAll}
-                  className="px-3 py-2 font-medium rounded-md transition-colors duration-200 cursor-pointer bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 hover:border-red-500/30"
-                >
-                  Remove All
-                </button>
-              )}
-              <button onClick={onClose} className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-md cursor-pointer">
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
-    </div>,
-    document.body
+    </Modal>
   );
 };

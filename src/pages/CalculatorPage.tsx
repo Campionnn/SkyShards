@@ -3,7 +3,7 @@ import { Menu, X, ChevronDown, ChevronRight, Package } from "lucide-react";
 import { CalculatorForm, CalculationResults, InventoryCalculationResults } from "../components";
 import { WelcomeProfileModal, InventoryManagementModal, ActiveAlternativesModal } from "../components";
 import { useCustomRates, useCalculatorState } from "../hooks";
-import { DataService, InvCalculationService, CalculationService } from "../services";
+import { DataService, InvCalculationService, CalculationService, buildCalculationParams } from "../services";
 import type { CalculationFormData } from "../schemas";
 import type { CalculationResult, CalculationParams, RecipeOverride, Data, InventoryCalculationResult } from "../types/types";
 import { isFirstVisit, setSaveEnabled, loadInventory, saveInventory, loadOwnedAttributes, saveOwnedAttributes, loadDisabledShards, saveDisabledShards } from "../utilities";
@@ -70,33 +70,7 @@ const performCalculation = async (
       return null;
     }
 
-    const dataService = DataService.getInstance();
-    const filteredCustomRates = Object.fromEntries(
-      Object.entries(customRates).filter(([, v]) => v !== undefined)
-    ) as { [shardId: string]: number };
-
-    const params = {
-      customRates: formData.ironManView ? filteredCustomRates : await dataService.loadShardCosts(formData.instantBuyPrices),
-      hunterFortune: formData.hunterFortune,
-      excludeChameleon: formData.excludeChameleon,
-      frogBonus: formData.frogBonus,
-      newtLevel: formData.newtLevel,
-      salamanderLevel: formData.salamanderLevel,
-      lizardKingLevel: formData.lizardKingLevel,
-      leviathanLevel: formData.leviathanLevel,
-      pythonLevel: formData.pythonLevel,
-      kingCobraLevel: formData.kingCobraLevel,
-      seaSerpentLevel: formData.seaSerpentLevel,
-      tiamatLevel: formData.tiamatLevel,
-      crocodileLevel: formData.crocodileLevel,
-      kuudraTier: formData.kuudraTier,
-      moneyPerHour: formData.moneyPerHour,
-      customKuudraTime: formData.customKuudraTime,
-      kuudraTimeSeconds: formData.kuudraTimeSeconds,
-      noWoodenBait: formData.noWoodenBait,
-      rateAsCoinValue: !formData.ironManView,
-      craftPenalty: formData.craftPenalty,
-    };
+    const params = await buildCalculationParams(formData, customRates);
 
     callbacks.setCurrentParams(params);
     callbacks.setCalculating(true);
@@ -213,32 +187,7 @@ const performCalculation = async (
   callbacks.setCurrentShardKey(shardKey);
   callbacks.setCurrentQuantity(formData.quantity);
 
-  const filteredCustomRates = Object.fromEntries(
-    Object.entries(customRates).filter(([, v]) => v !== undefined)
-  ) as { [shardId: string]: number };
-
-  const params = {
-    customRates: formData.ironManView ? filteredCustomRates : await dataService.loadShardCosts(formData.instantBuyPrices),
-    hunterFortune: formData.hunterFortune,
-    excludeChameleon: formData.excludeChameleon,
-    frogBonus: formData.frogBonus,
-    newtLevel: formData.newtLevel,
-    salamanderLevel: formData.salamanderLevel,
-    lizardKingLevel: formData.lizardKingLevel,
-    leviathanLevel: formData.leviathanLevel,
-    pythonLevel: formData.pythonLevel,
-    kingCobraLevel: formData.kingCobraLevel,
-    seaSerpentLevel: formData.seaSerpentLevel,
-    tiamatLevel: formData.tiamatLevel,
-    crocodileLevel: formData.crocodileLevel,
-    kuudraTier: formData.kuudraTier,
-    moneyPerHour: formData.moneyPerHour,
-    customKuudraTime: formData.customKuudraTime,
-    kuudraTimeSeconds: formData.kuudraTimeSeconds,
-    noWoodenBait: formData.noWoodenBait,
-    rateAsCoinValue: !formData.ironManView,
-    craftPenalty: formData.craftPenalty,
-  };
+  const params = await buildCalculationParams(formData, customRates);
 
   callbacks.setCurrentParams(params);
   callbacks.setResult(null);
@@ -458,32 +407,7 @@ const CalculatorPageContent: React.FC = () => {
       return;
     }
 
-    const filteredCustomRates = Object.fromEntries(
-      Object.entries(customRates).filter(([, v]) => v !== undefined)
-    ) as { [shardId: string]: number };
-
-    const params: CalculationParams = {
-      customRates: formData.ironManView ? filteredCustomRates : await dataService.loadShardCosts(formData.instantBuyPrices),
-      hunterFortune: formData.hunterFortune,
-      excludeChameleon: formData.excludeChameleon,
-      frogBonus: formData.frogBonus,
-      newtLevel: formData.newtLevel,
-      salamanderLevel: formData.salamanderLevel,
-      lizardKingLevel: formData.lizardKingLevel,
-      leviathanLevel: formData.leviathanLevel,
-      pythonLevel: formData.pythonLevel,
-      kingCobraLevel: formData.kingCobraLevel,
-      seaSerpentLevel: formData.seaSerpentLevel,
-      tiamatLevel: formData.tiamatLevel,
-      crocodileLevel: formData.crocodileLevel,
-      kuudraTier: formData.kuudraTier,
-      moneyPerHour: formData.moneyPerHour,
-      customKuudraTime: formData.customKuudraTime,
-      kuudraTimeSeconds: formData.kuudraTimeSeconds,
-      noWoodenBait: formData.noWoodenBait,
-      rateAsCoinValue: !formData.ironManView,
-      craftPenalty: formData.craftPenalty,
-    };
+    const params = await buildCalculationParams(formData, customRates);
 
     setInvCurrentParams(params);
     setIsCalculating(true);
@@ -617,33 +541,7 @@ const CalculatorPageContent: React.FC = () => {
     if (!useInventory || !form) return;
 
     const initializeParams = async () => {
-      const dataService = DataService.getInstance();
-      const filteredCustomRates = Object.fromEntries(
-        Object.entries(customRates).filter(([, v]) => v !== undefined)
-      ) as { [shardId: string]: number };
-
-      const params: CalculationParams = {
-        customRates: form.ironManView ? filteredCustomRates : await dataService.loadShardCosts(form.instantBuyPrices),
-        hunterFortune: form.hunterFortune,
-        excludeChameleon: form.excludeChameleon,
-        frogBonus: form.frogBonus,
-        newtLevel: form.newtLevel,
-        salamanderLevel: form.salamanderLevel,
-        lizardKingLevel: form.lizardKingLevel,
-        leviathanLevel: form.leviathanLevel,
-        pythonLevel: form.pythonLevel,
-        kingCobraLevel: form.kingCobraLevel,
-        seaSerpentLevel: form.seaSerpentLevel,
-        tiamatLevel: form.tiamatLevel,
-        crocodileLevel: form.crocodileLevel,
-        kuudraTier: form.kuudraTier,
-        moneyPerHour: form.moneyPerHour,
-        customKuudraTime: form.customKuudraTime,
-        kuudraTimeSeconds: form.kuudraTimeSeconds,
-        noWoodenBait: form.noWoodenBait,
-        rateAsCoinValue: !form.ironManView,
-        craftPenalty: form.craftPenalty,
-      };
+      const params = await buildCalculationParams(form, customRates);
 
       setInvCurrentParams(params);
     };

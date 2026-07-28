@@ -76,7 +76,7 @@ const FusionGraphInner: React.FC = () => {
     const hasRates = Object.keys(rates).length > 0;
     // Structural min cost (neutral params) so we can drop backwards "expensive ->
     // cheap" edges; a pricier shard is never used to fuse a cheaper one.
-    const { minCosts } = new CalculationService().computeMinCosts(data, DEFAULT_CALCULATION_PARAMS);
+    const { minCosts } = CalculationService.getInstance().computeMinCosts(data, DEFAULT_CALCULATION_PARAMS);
     const g = buildFusionGraph(
       data,
       hasRates

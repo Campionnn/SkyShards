@@ -61,6 +61,11 @@ export class CalculationService {
       customKuudraTime: params.customKuudraTime,
       kuudraTimeSeconds: params.kuudraTimeSeconds,
       noWoodenBait: params.noWoodenBait,
+      // buildData branches on this to decide whether a shard's rate is a coin price
+      // or an hourly rate, so two calls differing only here must not share an entry.
+      // craftPenalty is deliberately absent: it only affects computeMinCosts, never
+      // the Data this key guards.
+      rateAsCoinValue: params.rateAsCoinValue,
     });
   }
 
@@ -888,6 +893,74 @@ export class CalculationService {
     }
   }
 
+  /**
+   * Quantity math for a cycle node: how many crafts the loop needs to run to yield
+   * `requiredQuantity` of `shard`, and how much of each external input that costs.
+   *
+   * `assignQuantities` and both of InvCalculationService's tree walks each carried a
+   * copy of this. Returns null when `steps` holds no recipe producing `shard`; every
+   * caller treats that as "leave the node alone".
+   *
+   * Reproduced verbatim from those copies. `netOutputPerCycle` is the sensitive part:
+   * it is a float subtraction feeding a `Math.ceil`, so e.g. `2 * 1.2 - 2` lands on
+   * 0.3999999999999999 and rounds a 250-craft loop up to 252. That is existing
+   * behaviour, pinned deliberately rather than corrected here.
+   */
+  public computeCycleQuantities(
+    shard: string,
+    steps: { outputShard: string; recipe: Recipe }[],
+    requiredQuantity: number,
+    data: Data,
+    crocodileMultiplier: number
+  ): { roundedCrafts: number; stepCount: number; quantityForInput: (inputShard: string) => number } | null {
+    const outputStep = steps.find((step) => step.outputShard === shard);
+    if (!outputStep) return null;
+
+    const recipe = outputStep.recipe;
+    const baseOutput = recipe.outputQuantity;
+    const expectedOutput = recipe.isReptile ? baseOutput * crocodileMultiplier : baseOutput;
+
+    // How much of the target the loop eats on its way round, so a cycle that consumes
+    // more than it makes still terminates (via the expectedOutput fallback below).
+    let totalInputsConsumed = 0;
+    steps.forEach((step) => {
+      step.recipe.inputs.forEach((inputId) => {
+        if (inputId === shard) {
+          const inputShard = data.shards[inputId];
+          totalInputsConsumed += inputShard.fuse_amount;
+        }
+      });
+    });
+
+    const netOutputPerCycle = expectedOutput - totalInputsConsumed;
+    const expectedCrafts = netOutputPerCycle > 0 ? Math.ceil(requiredQuantity / netOutputPerCycle) : Math.ceil(requiredQuantity / expectedOutput);
+    const stepCount = steps.length;
+    // Every step of the loop runs the same number of times, so round up to a whole
+    // number of laps.
+    const roundedCrafts = Math.ceil(expectedCrafts / stepCount) * stepCount;
+
+    // Inputs produced inside the loop are already accounted for by the loop itself;
+    // only the ones that have to come from outside get a quantity.
+    const inputQuantities = new Map<string, number>();
+    const outputShards = new Set(steps.map((step) => step.outputShard));
+
+    steps.forEach((step) => {
+      step.recipe.inputs.forEach((inputId) => {
+        if (!outputShards.has(inputId)) {
+          const inputShard = data.shards[inputId];
+          const currentQuantity = inputQuantities.get(inputId) || 0;
+          inputQuantities.set(inputId, currentQuantity + inputShard.fuse_amount);
+        }
+      });
+    });
+
+    return {
+      roundedCrafts,
+      stepCount,
+      quantityForInput: (inputShard) => (inputQuantities.get(inputShard) || 0) * (roundedCrafts / stepCount),
+    };
+  }
+
   assignQuantities(
     tree: RecipeTree,
     requiredQuantity: number,
@@ -919,53 +992,19 @@ export class CalculationService {
         break;
       }
 
-      case "cycle":
-        { const outputStep = tree.steps.find((step) => step.outputShard === tree.shard);
-        if (!outputStep) break;
-
-        const recipe = outputStep.recipe;
-        const baseOutput = recipe.outputQuantity;
-        const expectedOutput = recipe.isReptile ? baseOutput * crocodileMultiplier : baseOutput;
-
-        // Calculate net output per cycle
-        let totalInputsConsumed = 0;
-        tree.steps.forEach((step) => {
-          step.recipe.inputs.forEach((inputId) => {
-            if (inputId === tree.shard) {
-              const inputShard = data.shards[inputId];
-              totalInputsConsumed += inputShard.fuse_amount;
-            }
-          });
-        });
-
-        const netOutputPerCycle = expectedOutput - totalInputsConsumed;
-        const expectedCrafts = netOutputPerCycle > 0 ? Math.ceil(requiredQuantity / netOutputPerCycle) : Math.ceil(requiredQuantity / expectedOutput);
-        const stepCount = tree.steps.length;
-        const roundedCrafts = Math.ceil(expectedCrafts / stepCount) * stepCount;
+      case "cycle": {
+        const cycle = this.computeCycleQuantities(tree.shard, tree.steps, requiredQuantity, data, crocodileMultiplier);
+        if (!cycle) break;
 
         tree.multiplier = crocodileMultiplier;
-        craftCounter.total += roundedCrafts;
-        tree.craftsNeeded = roundedCrafts;
-
-        const inputQuantities = new Map<string, number>();
-        const outputShards = new Set(tree.steps.map((step) => step.outputShard));
-
-        tree.steps.forEach((step) => {
-          step.recipe.inputs.forEach((inputId) => {
-            if (!outputShards.has(inputId)) {
-              const inputShard = data.shards[inputId];
-              const currentQuantity = inputQuantities.get(inputId) || 0;
-              inputQuantities.set(inputId, currentQuantity + inputShard.fuse_amount);
-            }
-          });
-        });
+        craftCounter.total += cycle.roundedCrafts;
+        tree.craftsNeeded = cycle.roundedCrafts;
 
         tree.cycleInputs.forEach((cycleInput) => {
-          const inputQuantity = inputQuantities.get(cycleInput.shard) || 0;
-          const totalInputQuantity = inputQuantity * (roundedCrafts / stepCount);
-          this.assignQuantities(cycleInput, totalInputQuantity, data, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
+          this.assignQuantities(cycleInput, cycle.quantityForInput(cycleInput.shard), data, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
         });
-        break; }
+        break;
+      }
     }
   }
 

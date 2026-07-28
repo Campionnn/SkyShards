@@ -2,7 +2,8 @@ import React, { useMemo, useState } from "react";
 import { BarChart3, Hammer } from "lucide-react";
 import { formatLargeNumber, gzipBase64 } from "../../utilities";
 import type { CalculationResultsProps, Shard } from "../../types/types";
-import { MaterialItem, useToast } from "../ui";
+import { MaterialItem } from "../ui";
+import { useCopyToClipboard } from "../../hooks";
 import { CopyTreeModal } from "../modals";
 import { ResultSummaryCards } from "./ResultSummaryCards";
 import { FusionTreeView } from "./FusionTreeView";
@@ -25,7 +26,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   onMaterialTreeShardChange,
 }) => {
   const [copyModalOpen, setCopyModalOpen] = useState(false);
-  const { toast } = useToast();
+  const copyToClipboard = useCopyToClipboard();
 
   // Materials-only copy (no tree): flatten the combined totals
   const buildNoFrillsString = () => {
@@ -45,15 +46,6 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     return "<SkyHanniRecipe>(V1):" + gzipBase64(JSON.stringify(list));
   };
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => toast({ title: "Copied", description: `${label} list copied to clipboard.`, variant: "success" }))
-      .catch((err) => {
-        console.error(`Failed to copy ${label} list:`, err);
-        toast({ title: "Copy failed", description: "Failed to copy to clipboard.", variant: "error" });
-      });
-  };
 
   // Shards available to view individually (the selected target shards)
   const selectableShards = useMemo<Shard[]>(() => {
@@ -200,9 +192,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
       <CopyTreeModal
         open={copyModalOpen}
         onClose={() => setCopyModalOpen(false)}
-        onCopySkyOcean={() => copyToClipboard("", "SkyOcean")}
-        onCopyNoFrills={() => copyToClipboard(buildNoFrillsString(), "NoFrills")}
-        onCopySkyHanni={() => copyToClipboard(buildSkyHanniString(), "SkyHanni")}
+        onCopySkyOcean={() => void copyToClipboard("", "SkyOcean", "list")}
+        onCopyNoFrills={() => void copyToClipboard(buildNoFrillsString(), "NoFrills", "list")}
+        onCopySkyHanni={() => void copyToClipboard(buildSkyHanniString(), "SkyHanni", "list")}
         materialsOnly={true}
       />
     </div>

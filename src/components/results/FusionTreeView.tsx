@@ -3,8 +3,8 @@ import { BarChart3 } from "lucide-react";
 import type { CalculationResult, CalculationParams, Data, RecipeTree, RecipeOverride } from "../../types/types";
 import { RecipeTreeNode } from "../tree";
 import { RecipeOverrideManager } from "../forms";
-import { useToast } from "../ui";
 import { gzipBase64 } from "../../utilities";
+import { useCopyToClipboard } from "../../hooks";
 import { CopyTreeModal } from "../modals";
 
 // Manage expanded/collapsed state for a recipe tree
@@ -85,7 +85,7 @@ export const FusionTreeView: React.FC<FusionTreeViewProps> = ({
 }) => {
   const { expandedStates, handleExpandAll, handleCollapseAll, handleNodeToggle } = useTreeExpansion(result.tree);
   const [copyModalOpen, setCopyModalOpen] = useState(false);
-  const { toast } = useToast();
+  const copyToClipboard = useCopyToClipboard();
 
 
   type SkyOceanDirect = { shard: string; method: "direct"; quantity: number };
@@ -247,21 +247,9 @@ export const FusionTreeView: React.FC<FusionTreeViewProps> = ({
     return "<SkyHanniRecipe>(V1):" + base64List;
   };
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        toast({ title: "Copied", description: `${label} recipe copied to clipboard.`, variant: "success" });
-      })
-      .catch((err) => {
-        console.error(`Failed to copy ${label} string:`, err);
-        toast({ title: "Copy failed", description: "Failed to copy to clipboard.", variant: "error" });
-      });
-  };
-
-  const handleCopySkyOcean = () => copyToClipboard(buildSkyOceanString(), "SkyOcean");
-  const handleCopyNoFrills = () => copyToClipboard(buildNoFrillsString(), "NoFrills");
-  const handleCopySkyHanni = () => copyToClipboard(buildSkyHanniString(), "SkyHanni");
+  const handleCopySkyOcean = () => void copyToClipboard(buildSkyOceanString(), "SkyOcean");
+  const handleCopyNoFrills = () => void copyToClipboard(buildNoFrillsString(), "NoFrills");
+  const handleCopySkyHanni = () => void copyToClipboard(buildSkyHanniString(), "SkyHanni");
 
   if (!result.tree) return null;
 

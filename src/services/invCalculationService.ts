@@ -23,7 +23,9 @@ const FREELY_USABLE_RESIDUAL = 0.02;
 
 export class InvCalculationService {
   private static instance: InvCalculationService;
-  private service = new CalculationService();
+  // Share the singleton: a private instance would keep its own dataCache and
+  // re-fetch/rebuild fusion-data.json separately from the rest of the app.
+  private service = CalculationService.getInstance();
 
   public static getInstance(): InvCalculationService {
     if (!InvCalculationService.instance) {
@@ -60,48 +62,16 @@ export class InvCalculationService {
       this.recalculateTreeQuantities(tree.inputs[0], craftsNeeded * fuse1, parsed, params);
       this.recalculateTreeQuantities(tree.inputs[1], craftsNeeded * fuse2, parsed, params);
     } else if (tree.method === "cycle") {
-      const outputStep = tree.steps.find((step) => step.outputShard === tree.shard);
-      if (!outputStep) return;
-
       const {crocodileMultiplier} = this.service.calculateMultipliers(params);
-      const recipe = outputStep.recipe;
-      const baseOutput = recipe.outputQuantity;
-      const expectedOutput = recipe.isReptile ? baseOutput * crocodileMultiplier : baseOutput;
+      const cycle = this.service.computeCycleQuantities(tree.shard, tree.steps, newQuantity, parsed, crocodileMultiplier);
+      if (!cycle) return;
 
-      let totalInputsConsumed = 0;
-      tree.steps.forEach((step) => {
-        step.recipe.inputs.forEach((inputId) => {
-          if (inputId === tree.shard) {
-            const inputShard = parsed.shards[inputId];
-            totalInputsConsumed += inputShard.fuse_amount;
-          }
-        });
-      });
-
-      const netOutputPerCycle = expectedOutput - totalInputsConsumed;
-      const expectedCrafts = netOutputPerCycle > 0 ? Math.ceil(newQuantity / netOutputPerCycle) : Math.ceil(newQuantity / expectedOutput);
-      const stepCount = tree.steps.length;
-      const roundedCrafts = Math.ceil(expectedCrafts / stepCount) * stepCount;
-      tree.craftsNeeded = roundedCrafts;
-
-      const inputQuantities = new Map<string, number>();
-      const outputShards = new Set(tree.steps.map((step) => step.outputShard));
-
-      tree.steps.forEach((step) => {
-        step.recipe.inputs.forEach((inputId) => {
-          if (!outputShards.has(inputId)) {
-            const inputShard = parsed.shards[inputId];
-            const currentQuantity = inputQuantities.get(inputId) || 0;
-            inputQuantities.set(inputId, currentQuantity + inputShard.fuse_amount);
-          }
-        });
-      });
+      tree.craftsNeeded = cycle.roundedCrafts;
 
       tree.cycleInputs.forEach((cycleInput) => {
+        // Inventory leaves and split nodes carry no quantity of their own to update.
         if (!Array.isArray(cycleInput) && cycleInput.method !== "inventory") {
-          const inputQuantity = inputQuantities.get(cycleInput.shard) || 0;
-          const totalInputQuantity = inputQuantity * (roundedCrafts / stepCount);
-          this.recalculateTreeQuantities(cycleInput, totalInputQuantity, parsed, params);
+          this.recalculateTreeQuantities(cycleInput, cycle.quantityForInput(cycleInput.shard), parsed, params);
         }
       });
     }
@@ -657,51 +627,14 @@ export class InvCalculationService {
           this.recalculateTreeQuantities(craftedPortion.inputs[0], newCraftsNeeded * fuse1, parsed, params);
           this.recalculateTreeQuantities(craftedPortion.inputs[1], newCraftsNeeded * fuse2, parsed, params);
         } else if (craftedPortion.method === "cycle") {
-          const outputStep = craftedPortion.steps.find((step: {
-            outputShard: string
-          }) => step.outputShard === craftedPortion.shard);
-          if (outputStep) {
-            const {crocodileMultiplier} = this.service.calculateMultipliers(params);
-            const recipe = outputStep.recipe;
-            const baseOutput = recipe.outputQuantity;
-            const expectedOutput = recipe.isReptile ? baseOutput * crocodileMultiplier : baseOutput;
-
-            let totalInputsConsumed = 0;
-            craftedPortion.steps.forEach((step: { recipe: Recipe }) => {
-              step.recipe.inputs.forEach((inputId: string) => {
-                if (inputId === craftedPortion.shard) {
-                  const inputShard = parsed.shards[inputId];
-                  totalInputsConsumed += inputShard.fuse_amount;
-                }
-              });
-            });
-
-            const netOutputPerCycle = expectedOutput - totalInputsConsumed;
-            const expectedCrafts = netOutputPerCycle > 0
-              ? Math.ceil(remainingQuantity / netOutputPerCycle)
-              : Math.ceil(remainingQuantity / expectedOutput);
-            const stepCount = craftedPortion.steps.length;
-            const roundedCrafts = Math.ceil(expectedCrafts / stepCount) * stepCount;
-            craftedPortion.craftsNeeded = roundedCrafts;
-
-            const inputQuantities = new Map<string, number>();
-            const outputShards = new Set(craftedPortion.steps.map((step: { outputShard: string }) => step.outputShard));
-
-            craftedPortion.steps.forEach((step: { recipe: Recipe }) => {
-              step.recipe.inputs.forEach((inputId: string) => {
-                if (!outputShards.has(inputId)) {
-                  const inputShard = parsed.shards[inputId];
-                  const currentQuantity = inputQuantities.get(inputId) || 0;
-                  inputQuantities.set(inputId, currentQuantity + inputShard.fuse_amount);
-                }
-              });
-            });
+          const {crocodileMultiplier} = this.service.calculateMultipliers(params);
+          const cycle = this.service.computeCycleQuantities(craftedPortion.shard, craftedPortion.steps, remainingQuantity, parsed, crocodileMultiplier);
+          if (cycle) {
+            craftedPortion.craftsNeeded = cycle.roundedCrafts;
 
             craftedPortion.cycleInputs.forEach((cycleInput: InventoryRecipeTree) => {
               if (!Array.isArray(cycleInput) && cycleInput.method !== "inventory") {
-                const inputQuantity = inputQuantities.get(cycleInput.shard) || 0;
-                const totalInputQuantity = inputQuantity * (roundedCrafts / stepCount);
-                this.recalculateTreeQuantities(cycleInput, totalInputQuantity, parsed, params);
+                this.recalculateTreeQuantities(cycleInput, cycle.quantityForInput(cycleInput.shard), parsed, params);
               }
             });
           }

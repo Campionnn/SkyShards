@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { createPortal } from "react-dom";
+import { Modal } from "../ui";
 import { X, Star, Search, Plus, ChevronDown } from "lucide-react";
 import { getRarityColor, formatTime, formatLargeNumber, matchesSearchQuery, NAME_AND_FAMILY_FILTER_CONFIG } from "../../utilities";
 import type { AlternativeRecipeModalProps, Recipe, AlternativeRecipeOption } from "../../types/types";
@@ -57,16 +57,6 @@ export const AlternativeRecipeModal: React.FC<
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [isOpen]);
-
-  // Disable body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = "unset";
-      };
     }
   }, [isOpen]);
 
@@ -611,73 +601,70 @@ export const AlternativeRecipeModal: React.FC<
     });
   };
 
-  return createPortal(
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex-shrink-0">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-purple-400" />
-              <h2 className="text-lg font-semibold text-white">Alternative Recipes</h2>
-              {/* Shard icon next to the shard name */}
-              <span className="flex items-center gap-1 text-slate-400 text-sm">
-                <span>for</span>
-                {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-5 h-5 object-contain" loading="lazy" />}
-                <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-400"}>{shardName}</span>
-              </span>
-            </div>
-            <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer">
-              <X className="w-5 h-5 text-slate-400" />
-            </button>
-          </div>
-
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search by input shard name or family..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-4 overflow-y-auto flex-1 min-h-0">
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="w-8 h-8 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
-            </div>
-          ) : processedAlternatives.direct === null && Object.keys(processedAlternatives.grouped).length === 0 ? (
-            <div className="text-center py-12 text-slate-400">{searchQuery ? `No alternatives found matching "${searchQuery}"` : "No alternatives found"}</div>
-          ) : (
-            <div className="space-y-4">
-              {/* Direct collection option */}
-              {processedAlternatives.direct && renderDirectOption(processedAlternatives.direct)}
-
-              {/* Grouped fusion recipes as dropdowns */}
-              {renderGroupedFusionOptions(processedAlternatives.grouped)}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-4 border-t border-slate-700 bg-slate-800/50 flex-shrink-0">
-          <div className="flex items-center justify-between text-sm text-slate-400">
-            <span>Recipes grouped by most common input • Best options shown first</span>
-            <span>
-              {processedAlternatives.direct && processedAlternatives.direct.timePerShard !== Infinity ? "1 direct + " : ""}
-              {Object.values(processedAlternatives.grouped).reduce((sum, group) => sum + group.length, 0)} fusion recipe
-              {Object.values(processedAlternatives.grouped).reduce((sum, group) => sum + group.length, 0) !== 1 ? "s" : ""}
-              {searchQuery && ` (filtered)`}
+  return (
+    <Modal open={isOpen} onClose={onClose} labelledBy="alternative-recipe-title" panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex-shrink-0">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Star className="w-5 h-5 text-purple-400" />
+            <h2 id="alternative-recipe-title" className="text-lg font-semibold text-white">Alternative Recipes</h2>
+            {/* Shard icon next to the shard name */}
+            <span className="flex items-center gap-1 text-slate-400 text-sm">
+              <span>for</span>
+              {outputShard && <img src={`${import.meta.env.BASE_URL}shardIcons/${outputShard.id}.png`} alt={outputShard.name} className="w-5 h-5 object-contain" loading="lazy" />}
+              <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-400"}>{shardName}</span>
             </span>
           </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer">
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search by input shard name or family..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          />
         </div>
       </div>
-    </div>,
-    document.body
+
+      {/* Content */}
+      <div className="p-4 overflow-y-auto flex-1 min-h-0">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="w-8 h-8 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
+          </div>
+        ) : processedAlternatives.direct === null && Object.keys(processedAlternatives.grouped).length === 0 ? (
+          <div className="text-center py-12 text-slate-400">{searchQuery ? `No alternatives found matching "${searchQuery}"` : "No alternatives found"}</div>
+        ) : (
+          <div className="space-y-4">
+            {/* Direct collection option */}
+            {processedAlternatives.direct && renderDirectOption(processedAlternatives.direct)}
+
+            {/* Grouped fusion recipes as dropdowns */}
+            {renderGroupedFusionOptions(processedAlternatives.grouped)}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="p-4 border-t border-slate-700 bg-slate-800/50 flex-shrink-0">
+        <div className="flex items-center justify-between text-sm text-slate-400">
+          <span>Recipes grouped by most common input • Best options shown first</span>
+          <span>
+            {processedAlternatives.direct && processedAlternatives.direct.timePerShard !== Infinity ? "1 direct + " : ""}
+            {Object.values(processedAlternatives.grouped).reduce((sum, group) => sum + group.length, 0)} fusion recipe
+            {Object.values(processedAlternatives.grouped).reduce((sum, group) => sum + group.length, 0) !== 1 ? "s" : ""}
+            {searchQuery && ` (filtered)`}
+          </span>
+        </div>
+      </div>
+    </Modal>
   );
 };

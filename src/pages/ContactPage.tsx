@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Copy, Check } from "lucide-react";
 import { DiscordIcon } from "../components/ui/DiscordIcon";
+import { copyText } from "../utilities";
 
 const Divider = () => <hr className="my-6 border-slate-700" />;
 
@@ -10,7 +11,7 @@ export const ContactPage: React.FC = () => {
   const timeouts = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   const handleCopy = (tag: string) => {
-    navigator.clipboard.writeText(tag);
+    void copyText(tag).catch((err) => console.error("Failed to copy:", err));
     setCopied((prev) => ({ ...prev, [tag]: true }));
     if (timeouts.current[tag]) {
       clearTimeout(timeouts.current[tag]);
