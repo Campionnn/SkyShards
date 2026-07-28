@@ -15,7 +15,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { Search, X } from "lucide-react";
 import { useFusionData } from "../hooks";
-import { CalculationService } from "../services/calculationService";
+import { CalculationService } from "../services";
 import { DEFAULT_CALCULATION_PARAMS } from "../constants";
 import { ShardGraphNode } from "../components/graph";
 import { isBlurCausedByWindow } from "../utilities";

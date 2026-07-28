@@ -35,6 +35,22 @@ export interface Data {
   shards: Shards;
 }
 
+/**
+ * The raw on-disk shape of `public/fusion-data.json`: recipes nested output -> output
+ * quantity -> input pairs, and shards keyed by id.
+ *
+ * `Data` is what the app runs on; this is what gets parsed off the wire and fed to
+ * `CalculationService.buildData` / `fusionDataToData`. Note that `id` and `rate` are
+ * not actually present in the file — they are filled in by whoever builds the `Shard`
+ * objects (`DataService.loadShards`, `buildData`). Typing them in anyway is the
+ * convention the codebase already settled on, and every reader of this type only
+ * touches `name` / `family` / `rarity` / `fuse_amount` / `internal_id`.
+ */
+export type FusionJson = {
+  recipes: Record<string, Record<string, [string, string][]>>;
+  shards: Record<string, Shard>;
+};
+
 export interface RecipeChoice {
   recipe: Recipe | null;
 }

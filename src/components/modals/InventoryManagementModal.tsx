@@ -6,7 +6,7 @@ import type { HypixelProfileResponse, ProfileData } from "../../services";
 import { useShards } from "../../hooks";
 import { loadHypixelProfileMeta, saveHypixelProfileMeta, clearHypixelProfileMeta, clearDisabledShards, filterShards, DEFAULT_FILTER_CONFIG, sortByShardKey, compareShardKeys, sortShardsByNameWithPrefixAwareness, getShardSearchText } from "../../utilities";
 import type { HypixelProfileMeta } from "../../utilities";
-import { SHARD_DESCRIPTIONS, MAX_QUANTITIES, fusedCountToTierLevel } from "../../constants";
+import { SHARD_DESCRIPTIONS, MAX_QUANTITIES, LEVELED_SHARDS, fusedCountToTierLevel } from "../../constants";
 
 interface InventoryManagementModalProps {
   open: boolean;
@@ -259,21 +259,9 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
     }
     
     // Auto-fill the 9 shard level shards based on attribute levels
-    const shardLevelMapping = [
-      { shardId: "C35", rarity: "common", formKey: "newtLevel" },
-      { shardId: "U8", rarity: "uncommon", formKey: "salamanderLevel" },
-      { shardId: "R8", rarity: "rare", formKey: "lizardKingLevel" },
-      { shardId: "E5", rarity: "epic", formKey: "leviathanLevel" },
-      { shardId: "R9", rarity: "rare", formKey: "pythonLevel" },
-      { shardId: "R54", rarity: "rare", formKey: "kingCobraLevel" },
-      { shardId: "E32", rarity: "epic", formKey: "seaSerpentLevel" },
-      { shardId: "L6", rarity: "legendary", formKey: "tiamatLevel" },
-      { shardId: "R45", rarity: "rare", formKey: "crocodileLevel" },
-    ];
-
     const shardLevels: Record<string, number> = {};
 
-    for (const { shardId, rarity, formKey } of shardLevelMapping) {
+    for (const { shardId, rarity, key: formKey } of LEVELED_SHARDS) {
       const fusedCount = profileData.attributes.find(attr => attr.id.toUpperCase() === shardId.toUpperCase())?.level ?? 0;
       // Store the tier level for the form
       shardLevels[formKey] = fusedCountToTierLevel(fusedCount, rarity);

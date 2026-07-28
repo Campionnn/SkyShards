@@ -1,17 +1,13 @@
 import type { BazaarData } from "../types/hypixelApiTypes.ts";
-import type { Shard } from "../types/types";
+import type { FusionJson, Shard } from "../types/types";
 import { sortShardsByNameWithPrefixAwareness, filterShards, BASIC_FILTER_CONFIG, NAME_ONLY_FILTER_CONFIG } from "../utilities";
-
-interface FusionData {
-  shards: Record<string, Shard>;
-  recipes: Record<string, unknown>;
-}
 
 export class DataService {
   private static instance: DataService;
   private shardsCache: Shard[] | null = null;
   private shardNameToKeyCache: Record<string, string> | null = null;
-  private defaultRatesCache: Record<string, number> | null = null;
+  private fusionJsonCache: Promise<FusionJson> | null = null;
+  private defaultRatesCache: Promise<Record<string, number>> | null = null;
   private bazaarPriceCache: Record<string, Record<string, number>> | null = null;
 
   public static getInstance(): DataService {
@@ -52,7 +48,7 @@ export class DataService {
       return this.shardsCache;
     }
 
-    const [fusionData, defaultRates] = await Promise.all([this.fetchJson<FusionData>("fusion-data.json"), this.loadDefaultRates()]);
+    const [fusionData, defaultRates] = await Promise.all([this.loadFusionJson(), this.loadDefaultRates()]);
 
     this.shardsCache = Object.entries(fusionData.shards).map(([id, shard]: [string, Shard]) => ({
         ...shard,
@@ -77,12 +73,37 @@ export class DataService {
     return this.shardNameToKeyCache;
   }
 
-  async loadDefaultRates(): Promise<Record<string, number>> {
-    if (this.defaultRatesCache) {
-      return this.defaultRatesCache;
+  /**
+   * The raw `fusion-data.json`, memoised. The file is ~6.5 MB, so this caches the
+   * in-flight promise rather than the result: concurrent callers on a cold cache share
+   * one request and one parse instead of racing to do both twice.
+   *
+   * A failed load clears the cache so the next caller retries rather than being handed
+   * a permanently rejected promise.
+   */
+  async loadFusionJson(): Promise<FusionJson> {
+    if (!this.fusionJsonCache) {
+      this.fusionJsonCache = this.fetchJson<FusionJson>("fusion-data.json").catch((error) => {
+        this.fusionJsonCache = null;
+        throw error;
+      });
     }
+    return this.fusionJsonCache;
+  }
 
-    this.defaultRatesCache = await this.fetchJson<Record<string, number>>("rates.json");
+  /**
+   * Same promise-caching as `loadFusionJson`, and for the same reason: caching the
+   * awaited *result* left a window where two concurrent callers both saw an empty
+   * cache and both fetched. That was observable — a cold page load requested
+   * rates.json twice.
+   */
+  async loadDefaultRates(): Promise<Record<string, number>> {
+    if (!this.defaultRatesCache) {
+      this.defaultRatesCache = this.fetchJson<Record<string, number>>("rates.json").catch((error) => {
+        this.defaultRatesCache = null;
+        throw error;
+      });
+    }
     return this.defaultRatesCache;
   }
 

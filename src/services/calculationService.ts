@@ -3,6 +3,7 @@ import type {
   AlternativeSelectionContext,
   CalculationParams,
   Data,
+  FusionJson,
   InventoryRecipeTree,
   Recipe,
   RecipeChoice,
@@ -13,6 +14,7 @@ import type {
   Shards,
 } from "../types/types";
 import { BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS } from "../constants";
+import { DataService } from "./dataService";
 
 export class CalculationService {
   private static instance: CalculationService;
@@ -78,10 +80,12 @@ export class CalculationService {
     }
 
     try {
-      const [fusionResponse, ratesResponse] = await Promise.all([fetch(`${import.meta.env.BASE_URL}fusion-data.json`), fetch(`${import.meta.env.BASE_URL}rates.json`)]);
-
-      const fusionJson = await fusionResponse.json();
-      const defaultRates = await ratesResponse.json();
+      // Both files go through DataService so the ~6.5 MB fusion-data.json is fetched
+      // and parsed once per realm, rather than once here and again for every other
+      // consumer. The params-keyed dataCache above is a separate layer: it memoises
+      // the *built* Data, which differs per fortune/level/rate settings.
+      const dataService = DataService.getInstance();
+      const [fusionJson, defaultRates] = await Promise.all([dataService.loadFusionJson(), dataService.loadDefaultRates()]);
 
       const result = this.buildData(fusionJson, defaultRates, params);
 
@@ -100,11 +104,7 @@ export class CalculationService {
     }
   }
 
-  buildData(
-    fusionJson: { recipes: Record<string, Record<string, [string, string][]>>; shards: Record<string, Shard> },
-    defaultRates: Record<string, number>,
-    params: CalculationParams
-  ): Data {
+  buildData(fusionJson: FusionJson, defaultRates: Record<string, number>, params: CalculationParams): Data {
     this.defaultRates = defaultRates;
     const recipes: Recipes = {};
     for (const outputShard in fusionJson.recipes) {

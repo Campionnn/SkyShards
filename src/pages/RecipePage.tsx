@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { ShardAutocomplete, RecipeCountBadge, SearchFilterInput, ShardDisplay, DropdownButton } from "../components";
 import { getRarityColor } from "../utilities";
 import { useFusionData, useDropdownManager, useRecipeState } from "../hooks";
-import { processOutputRecipes, categorizeAndGroupRecipes, filterCategorizedRecipes, type Recipe, type CategorizedRecipes, type GroupedRecipe, type FusionData } from "../utilities";
-import type { Shard } from "../types/types";
+import { processOutputRecipes, categorizeAndGroupRecipes, filterCategorizedRecipes, type PairRecipe, type CategorizedRecipes, type GroupedRecipe } from "../utilities";
+import type { FusionJson, Shard } from "../types/types";
 
 type RecipeMode = "input" | "output" | null;
 
@@ -15,7 +15,7 @@ export const RecipePage = () => {
   const [outputSearchValue, setOutputSearchValue] = useState("");
   const [filterValue, setFilterValue] = useState("");
 
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [recipes, setRecipes] = useState<PairRecipe[]>([]);
   const [categorizedRecipes, setCategorizedRecipes] = useState<CategorizedRecipes>({
     special: [],
     id: [],
@@ -27,8 +27,8 @@ export const RecipePage = () => {
   const [dropdownSearch, setDropdownSearch] = useState<{ [dropdownId: string]: string }>({});
   const groupDropdowns = useDropdownManager();
 
-  const getInputRecipes = (shard: Shard, fusionData: FusionData): Recipe[] => {
-    const recipes: Recipe[] = [];
+  const getInputRecipes = (shard: Shard, fusionData: FusionJson): PairRecipe[] => {
+    const recipes: PairRecipe[] = [];
     Object.entries(fusionData.recipes).forEach(([outputShardId, recipeData]) => {
       Object.entries(recipeData).forEach(([quantityStr, recipeList]) => {
         const outputQuantity = parseInt(quantityStr, 10);
@@ -53,7 +53,7 @@ export const RecipePage = () => {
       return;
     }
 
-    let newRecipes: Recipe[] = [];
+    let newRecipes: PairRecipe[] = [];
     let newMode: RecipeMode = null;
 
     if (selectedShard && !selectedOutputShard) {

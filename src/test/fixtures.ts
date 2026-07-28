@@ -1,16 +1,11 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { DEFAULT_CALCULATION_PARAMS } from "../constants";
-import type { CalculationParams, Data, InventoryRecipeTree, Recipe, RecipeTree, Shard } from "../types/types";
+import type { CalculationParams, Data, FusionJson, InventoryRecipeTree, Recipe, RecipeTree } from "../types/types";
 
 export const PUBLIC_DIR = fileURLToPath(new URL("../../public/", import.meta.url));
 
 const readJson = <T>(name: string): T => JSON.parse(readFileSync(PUBLIC_DIR + name, "utf8")) as T;
-
-export type FusionJson = {
-  recipes: Record<string, Record<string, [string, string][]>>;
-  shards: Record<string, Shard>;
-};
 
 /**
  * The real shipped data, not a fixture copy. Goldens are only meaningful if they

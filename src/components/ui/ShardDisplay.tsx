@@ -2,12 +2,12 @@ import { getRarityColor } from "../../utilities";
 import { Tooltip } from "./Tooltip";
 import { ShardDescription } from "./ShardDescription";
 import { SHARD_DESCRIPTIONS } from "../../constants";
-import type { FusionData } from "../../utilities";
+import type { FusionJson } from "../../types/types";
 
 interface ShardDisplayProps {
   shardId: string;
   quantity?: number;
-  fusionData: FusionData;
+  fusionData: FusionJson;
   size?: "sm" | "md";
   tooltipVisible?: boolean;
 }

@@ -1,4 +1,4 @@
-import type { Data } from "../types/types";
+import type { Data, Recipe } from "../types/types";
 import { MAX_QUANTITIES } from "../constants";
 
 // Recipes split into three kinds (matches recipeUtils.classifyFusion): chameleon
@@ -57,8 +57,6 @@ const addEdge = (fwd: Map<string, Set<string>>, rev: Map<string, Set<string>>, f
   r.add(from);
 };
 
-// Local alias so we don't depend on the exact import name elsewhere.
-type Recipe = Data["recipes"][string][number];
 
 /** Build the dominance-pruned, type-tagged fusion graph. Chameleon recipes are
  * excluded. An edge X -> Y is added when X appears in at least `dominanceThreshold`

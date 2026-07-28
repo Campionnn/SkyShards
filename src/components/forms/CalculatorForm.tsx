@@ -4,7 +4,7 @@ import { type CalculationFormData } from "../../schemas";
 import { ShardAutocomplete, MoneyInput } from "./inputs";
 import { useCalculatorState, useShards } from "../../hooks";
 import { LevelDropdown, KuudraDropdown } from "../calculator";
-import {MAX_QUANTITIES, SHARD_DESCRIPTIONS} from "../../constants";
+import {LEVELED_SHARDS, MAX_QUANTITIES, SHARD_DESCRIPTIONS, type ShardLevelKey} from "../../constants";
 import { isValidShardName } from "../../utilities";
 import { ShardDescription } from "../ui/ShardDescription";
 import { Tooltip, ToggleSwitch } from "../ui";
@@ -19,10 +19,7 @@ interface CalculatorFormProps {
   onUseInventoryChange?: (enabled: boolean) => void;
 }
 
-type LevelKey = keyof Pick<
-  CalculationFormData,
-  "newtLevel" | "salamanderLevel" | "lizardKingLevel" | "leviathanLevel" | "pythonLevel" | "kingCobraLevel" | "seaSerpentLevel" | "tiamatLevel" | "crocodileLevel"
->;
+type LevelKey = ShardLevelKey;
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedAttributes, useInventory, onUseInventoryChange }) => {
   const { form, setForm, saveEnabled, setSaveEnabledState } = useCalculatorState();
@@ -84,9 +81,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
       kuudraTier: "t5" as CalculationFormData["kuudraTier"], // Set Kuudra to t5 on max stats, type-safe
     } as CalculationFormData;
     setForm(updatedForm);
-    setTimeout(() => {
-      onSubmit(updatedForm);
-    }, 0);
+    onSubmit(updatedForm);
   };
 
   const handleReset = () => {
@@ -128,9 +123,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
     setForm(resetFormData);
     setMoneyInput(""); // Clear the input field
     setKuudraTimeInput(""); // Clear the kuudra time input field
-    setTimeout(() => {
-      onSubmit(resetFormData);
-    }, 0);
+    onSubmit(resetFormData);
   };
 
   // Utility to parse shorthand like 10k, 53m, 2.5b
@@ -209,22 +202,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
     setCraftPenaltyInput("");
   }, [form.ironManView]);
 
-  // Build level items with strict typing for keys
-  const levelItems: Array<{ key: LevelKey; label: string; shardId: string }> = [
-    ...(form.ironManView
-      ? ([
-          { key: "newtLevel", label: "Newt", shardId: "C35" },
-          { key: "salamanderLevel", label: "Salamander", shardId: "U8" },
-          { key: "lizardKingLevel", label: "Lizard King", shardId: "R8" },
-          { key: "leviathanLevel", label: "Leviathan", shardId: "E5" },
-          { key: "pythonLevel", label: "Python", shardId: "R9" },
-          { key: "kingCobraLevel", label: "King Cobra", shardId: "R54" },
-        ] as Array<{ key: LevelKey; label: string; shardId: string }>)
-      : []),
-    { key: "seaSerpentLevel", label: "Sea Serpent", shardId: "E32" },
-    { key: "tiamatLevel", label: "Tiamat", shardId: "L6" },
-    { key: "crocodileLevel", label: "Crocodile", shardId: "R45" },
-  ];
+  // The six reptile lines only exist on an ironman profile.
+  const levelItems = LEVELED_SHARDS.filter((item) => form.ironManView || !item.ironmanOnly);
 
   // Materials Only mode state
   const [isMultiSelectModalOpen, setIsMultiSelectModalOpen] = React.useState(false);
@@ -247,7 +226,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
       const updated = { ...latestFormRef.current, selectedShardKeys: selectedKeys, shardQuantities: selectedData } as CalculationFormData;
       setForm(updated);
       setIsMultiSelectModalOpen(false);
-      setTimeout(() => onSubmitRef.current(updated), 0);
+      onSubmitRef.current(updated);
     },
     [setForm]
   );
@@ -280,49 +259,23 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
         {/* Use Inventory + Auto Save toggles */}
         <div className="flex justify-between gap-6 mb-3">
           {onUseInventoryChange && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-slate-200">Use Inventory</span>
-              <Tooltip content="Enable inventory-aware calculations. When enabled, your imported inventory shards will be factored into the optimal fusion path. Does not work with material only mode yet. This is very experimental, so let me know on Discord or GitHub if it isn't working properly"></Tooltip>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={useInventory ?? false}
-                onClick={() => onUseInventoryChange(!useInventory)}
-                className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
-                  ${useInventory ? "bg-purple-600" : "bg-white/5"}
-                  hover:border-purple-400`}
-                style={{ boxShadow: "none" }}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform duration-200 border border-white/10
-                  ${useInventory ? "bg-purple-400" : "bg-slate-300/70"}
-                  ${useInventory ? "translate-x-4" : "translate-x-0.5"}`}
-                  style={{ paddingLeft: "1px" }}
-                />
-              </button>
-            </div>
+            <ToggleSwitch
+              size="sm"
+              accent="purple"
+              label="Use Inventory"
+              tooltip="Enable inventory-aware calculations. When enabled, your imported inventory shards will be factored into the optimal fusion path. Does not work with material only mode yet. This is very experimental, so let me know on Discord or GitHub if it isn't working properly"
+              checked={useInventory ?? false}
+              onChange={onUseInventoryChange}
+            />
           )}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-slate-200">Auto Save</span>
-            <Tooltip content="Automatically saves all your settings (fortune, shard levels, etc.) in your browser. Data is restored when the page reloads."></Tooltip>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={saveEnabled}
-              onClick={() => setSaveEnabledState(!saveEnabled)}
-              className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
-                ${saveEnabled ? "bg-emerald-600" : "bg-white/5"}
-                hover:border-emerald-400`}
-              style={{ boxShadow: "none" }}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform duration-200 border border-white/10
-                ${saveEnabled ? "bg-emerald-400" : "bg-slate-300/70"}
-                ${saveEnabled ? "translate-x-4" : "translate-x-0.5"}`}
-                style={{ paddingLeft: "1px" }}
-              />
-            </button>
-          </div>
+          <ToggleSwitch
+            size="sm"
+            accent="emerald"
+            label="Auto Save"
+            tooltip="Automatically saves all your settings (fortune, shard levels, etc.) in your browser. Data is restored when the page reloads."
+            checked={saveEnabled}
+            onChange={setSaveEnabledState}
+          />
         </div>
 
         {/* Target Shard or Select Shards */}
@@ -333,27 +286,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                 <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                 {form.materialsOnly ? "Select Shards" : "Target Shard"}
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-white">Materials Only</span>
-                <Tooltip content="Calculate combined materials for multiple shards without showing the fusion tree. Does not work with use inventory"></Tooltip>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={form.materialsOnly}
-                  onClick={() => handleInputChange("materialsOnly", !form.materialsOnly)}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
-                    ${form.materialsOnly ? "bg-blue-600" : "bg-white/5"}
-                    hover:border-blue-400`}
-                  style={{ boxShadow: "none" }}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform duration-200 border border-white/10
-                    ${form.materialsOnly ? "bg-blue-400" : "bg-slate-300/70"}
-                    ${form.materialsOnly ? "translate-x-4" : "translate-x-0.5"}`}
-                    style={{ paddingLeft: "1px" }}
-                  />
-                </button>
-              </div>
+              <ToggleSwitch
+                size="sm"
+                accent="blue"
+                label="Materials Only"
+                labelClassName="text-white"
+                tooltip="Calculate combined materials for multiple shards without showing the fusion tree. Does not work with use inventory"
+                checked={form.materialsOnly}
+                onChange={(checked) => handleInputChange("materialsOnly", checked)}
+              />
             </div>
             {form.materialsOnly && form.ironManView ? (
               <div className="flex gap-2">
@@ -371,7 +312,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                     onClick={() => {
                       const updated = { ...form, selectedShardKeys: [], shardQuantities: [] } as CalculationFormData;
                       setForm(updated);
-                      setTimeout(() => onSubmit(updated), 0);
+                      onSubmit(updated);
                     }}
                     className="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/20 hover:border-red-500/30 rounded-md text-red-400 font-medium transition-colors flex items-center justify-center cursor-pointer text-sm"
                     title="Clear selection"
@@ -397,7 +338,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                     const remaining = owned >= maxQuantity ? maxQuantity : Math.max(1, maxQuantity - owned);
                     const updated = { ...form, shard: shard.name, quantity: remaining } as CalculationFormData;
                     setForm(updated);
-                    setTimeout(() => onSubmit(updated), 0);
+                    onSubmit(updated);
                   }}
                   onFocus={handleShardInputFocus}
                   placeholder="Search for a shard..."
@@ -438,7 +379,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                       onClick={() => {
                         const updated = { ...form, quantity: maxQty } as CalculationFormData;
                         setForm(updated);
-                        setTimeout(() => onSubmit(updated), 0);
+                        onSubmit(updated);
                       }}
                       className="px-2.5 py-1.5 text-xs font-medium bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-md text-slate-300 hover:text-white transition-colors duration-200 cursor-pointer"
                       title={`Set to max (${maxQty})`}
@@ -697,14 +638,12 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                       handleInputChange("kuudraTimeSeconds", null as CalculationFormData["kuudraTimeSeconds"]);
                       setKuudraTimeInput("");
                     }
-                    // Manually trigger calculation after state update
-                    setTimeout(() => {
-                      const updatedForm = { ...form, customKuudraTime: checked } as CalculationFormData;
-                      if (!checked) {
-                        updatedForm.kuudraTimeSeconds = null;
-                      }
-                      onSubmit(updatedForm);
-                    }, 0);
+                    // handleInputChange does not submit for customKuudraTime, so do it here.
+                    const updatedForm = { ...form, customKuudraTime: checked } as CalculationFormData;
+                    if (!checked) {
+                      updatedForm.kuudraTimeSeconds = null;
+                    }
+                    onSubmit(updatedForm);
                   }}
                 />
                 {form.customKuudraTime && (

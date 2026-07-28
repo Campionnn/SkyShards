@@ -1,6 +1,40 @@
+import type { CalculationFormData } from "../schemas";
 import type { CalculationParams } from "../types/types";
 
 export const NO_FORTUNE_SHARDS = ["C19", "U4", "U16", "U28", "R24", "R25", "R27", "R60", "R64", "L4", "L15", "L30", "L33", "L48", "L51"];
+
+/**
+ * The nine shards whose attribute level the player sets by hand. Single source for
+ * both the form's level dropdowns and the Hypixel profile import, which previously
+ * kept two separate nine-row tables — one with labels, one with rarities.
+ *
+ * `rarity` drives `fusedCountToTierLevel` on import; `ironmanOnly` marks the six
+ * reptile lines that only exist on an ironman profile. Order is the display order of
+ * the dropdown grid.
+ */
+export const LEVELED_SHARDS = [
+  { key: "newtLevel", label: "Newt", shardId: "C35", rarity: "common", ironmanOnly: true },
+  { key: "salamanderLevel", label: "Salamander", shardId: "U8", rarity: "uncommon", ironmanOnly: true },
+  { key: "lizardKingLevel", label: "Lizard King", shardId: "R8", rarity: "rare", ironmanOnly: true },
+  { key: "leviathanLevel", label: "Leviathan", shardId: "E5", rarity: "epic", ironmanOnly: true },
+  { key: "pythonLevel", label: "Python", shardId: "R9", rarity: "rare", ironmanOnly: true },
+  { key: "kingCobraLevel", label: "King Cobra", shardId: "R54", rarity: "rare", ironmanOnly: true },
+  { key: "seaSerpentLevel", label: "Sea Serpent", shardId: "E32", rarity: "epic", ironmanOnly: false },
+  { key: "tiamatLevel", label: "Tiamat", shardId: "L6", rarity: "legendary", ironmanOnly: false },
+  { key: "crocodileLevel", label: "Crocodile", shardId: "R45", rarity: "rare", ironmanOnly: false },
+] as const satisfies ReadonlyArray<{
+  // `keyof CalculationFormData` is the load-bearing part: a typo in a key, or a field
+  // renamed in the schema, fails the build here instead of silently writing a level
+  // nobody reads.
+  key: keyof CalculationFormData;
+  label: string;
+  shardId: string;
+  rarity: string;
+  ironmanOnly: boolean;
+}>;
+
+/** The nine form fields `LEVELED_SHARDS` writes to. */
+export type ShardLevelKey = (typeof LEVELED_SHARDS)[number]["key"];
 
 /**
  * Neutral calculation params: no fortune/pet bonuses, in-game rate (time) cost, no

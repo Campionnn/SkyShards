@@ -227,7 +227,7 @@ const performCalculation = async (
   };
 };
 
-const CalculatorPageContent: React.FC = () => {
+export const CalculatorPage: React.FC = () => {
   const { result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName, form, setForm } = useCalculatorState();
   const { customRates } = useCustomRates();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -287,28 +287,19 @@ const CalculatorPageContent: React.FC = () => {
         setTargetShardName(shard.name);
         setCurrentShardKey(shardKey);
         setCurrentQuantity(remaining);
-        // Trigger calculation after a brief delay to ensure form is updated
-        setTimeout(() => {
-          const submit = async (formData: CalculationFormData) => {
-            await performCalculation(
-              formData,
-              customRates,
-              recipeOverrides,
-              {
-                setTargetShardName,
-                setCurrentShardKey,
-                setCurrentQuantity,
-                setCurrentParams,
-                setResult,
-                setCalculationData,
-                setCalculating: setIsCalculating,
-                setProgress,
-                setMaterialShardResults,
-              }
-            );
-          };
-          submit(updatedForm).catch(console.error);
-        }, 0);
+        // performCalculation is handed the new form explicitly, so it does not need to
+        // wait for the setForm above to commit.
+        performCalculation(updatedForm, customRates, recipeOverrides, {
+          setTargetShardName,
+          setCurrentShardKey,
+          setCurrentQuantity,
+          setCurrentParams,
+          setResult,
+          setCalculationData,
+          setCalculating: setIsCalculating,
+          setProgress,
+          setMaterialShardResults,
+        }).catch(console.error);
       }
     } catch (error) {
       console.error("Failed to load shard from key:", error);
@@ -388,7 +379,7 @@ const CalculatorPageContent: React.FC = () => {
     setInventoryResult(null);
     setInvCalculationData(null);
 
-    debouncedCalculate(newForm, 100).catch(console.error);
+    debouncedCalculate(newForm, 100);
 
     setShowWelcome(false);
   };
@@ -436,11 +427,14 @@ const CalculatorPageContent: React.FC = () => {
   }, [customRates, inventory, disabledShards, recipeOverrides, ownedAttributes]);
 
   // ─── Standard debounced calculation ───
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cancelRef = useRef<(() => void) | null>(null);
 
+  // Not async: the work happens inside the setTimeout below, so a returned promise
+  // would resolve before the calculation even starts. Failures are handled at the two
+  // call sites inside that callback, which is the only place they can be observed.
   const debouncedCalculate = useCallback(
-    async (formData: CalculationFormData, delay = 300) => {
+    (formData: CalculationFormData, delay = 300) => {
       // Clear existing timeout
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
@@ -493,17 +487,24 @@ const CalculatorPageContent: React.FC = () => {
   const formRef = useRef(form);
   formRef.current = form;
 
-  const handleCalculate = useCallback(async (formData: CalculationFormData, setFormFn: (data: CalculationFormData) => void) => {
-    setFormFn(formData);
-    // For immediate fields like shard selection, calculate immediately
+  const handleCalculate = useCallback((formData: CalculationFormData, setFormFn: (data: CalculationFormData) => void) => {
+    // formRef still holds the previous form here: setFormFn has only scheduled the
+    // update, and this runs before React re-renders. That is what makes the
+    // comparison below meaningful — callers used to defer this through a
+    // setTimeout(…, 0), by which point the ref had already been overwritten with the
+    // new form and every comparison came out false.
     const currentForm = formRef.current;
+    setFormFn(formData);
+
+    // Picking a shard or changing what is being made should feel immediate; tweaking
+    // a setting can wait for the user to stop fiddling.
     const materialsOnlyChanged = formData.materialsOnly !== currentForm?.materialsOnly;
     const selectedShardsChanged = JSON.stringify(formData.selectedShardKeys) !== JSON.stringify(currentForm?.selectedShardKeys);
 
     if (formData.shard !== currentForm?.shard || formData.quantity !== currentForm?.quantity || materialsOnlyChanged || selectedShardsChanged) {
-      await debouncedCalculate(formData, 100);
+      debouncedCalculate(formData, 100);
     } else {
-      await debouncedCalculate(formData, 300);
+      debouncedCalculate(formData, 300);
     }
   }, [debouncedCalculate]);
 
@@ -532,7 +533,7 @@ const CalculatorPageContent: React.FC = () => {
     );
 
     if (isValidForm) {
-      debouncedCalculate(currentForm, 150).catch(console.error);
+      debouncedCalculate(currentForm, 150);
     }
   }, [customRates, recipeOverrides, inventory, useInventory, debouncedCalculate]);
 
@@ -750,4 +751,3 @@ const CalculatorPageContent: React.FC = () => {
   );
 };
 
-export const CalculatorPage: React.FC = () => <CalculatorPageContent />;
