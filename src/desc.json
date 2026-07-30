@@ -25,6 +25,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -111,6 +129,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -197,6 +233,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -574,18 +628,14 @@
         "c": "green"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "Animal ",
+        "t": " Animal ",
         "c": "green"
       },
       {
@@ -595,6 +645,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -815,18 +883,14 @@
         "c": "green"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "blue"
       },
       {
         "t": " "
       },
       {
-        "t": "Aquatic ",
+        "t": " Aquatic ",
         "c": "blue"
       },
       {
@@ -836,6 +900,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -1539,18 +1621,14 @@
         "c": "green"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "dark_red"
       },
       {
         "t": " "
       },
       {
-        "t": "Arthropod ",
+        "t": " Arthropod ",
         "c": "dark_red"
       },
       {
@@ -1560,6 +1638,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -1636,15 +1732,19 @@
         "t": " "
       },
       {
-        "t": "chance to obtain an extra ",
+        "t": "chance to obtain",
         "c": "gray"
       },
       {
-        "t": "Winter Gift",
-        "c": "white"
+        "t": " "
       },
       {
-        "t": " "
+        "t": "an extra ",
+        "c": "gray"
+      },
+      {
+        "t": "Winter Gift ",
+        "c": "white"
       },
       {
         "t": "when finding one.",
@@ -1854,6 +1954,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -1931,14 +2049,21 @@
         "c": "dark_green"
       },
       {
-        "t": " Sweep",
+        "t": " "
+      },
+      {
+        "t": " Sweep ",
         "c": "dark_green"
+      },
+      {
+        "t": "towards Fig",
+        "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "towards Fig Trees.",
+        "t": "Trees.",
         "c": "gray"
       },
       {
@@ -2194,18 +2319,14 @@
         "c": "green"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "dark_purple"
       },
       {
         "t": " "
       },
       {
-        "t": "Ender ",
+        "t": " Ender ",
         "c": "dark_purple"
       },
       {
@@ -2215,6 +2336,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -2349,14 +2488,14 @@
         "t": " "
       },
       {
-        "t": "chance to gain",
+        "t": "chance to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "extra Chums.",
+        "t": "gain extra Chums.",
         "c": "gray"
       }
     ],
@@ -2472,11 +2611,8 @@
         "c": "dark_green"
       },
       {
-        "t": "by",
+        "t": "by ",
         "c": "gray"
-      },
-      {
-        "t": " "
       },
       {
         "range": [
@@ -2640,6 +2776,9 @@
         ],
         "unit": "%",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": " "
@@ -2937,14 +3076,18 @@
         "c": "dark_green"
       },
       {
-        "t": " while in",
+        "t": " while in ",
         "c": "gray"
+      },
+      {
+        "t": "The",
+        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "The Garden",
+        "t": "Garden",
         "c": "green"
       },
       {
@@ -3181,18 +3324,14 @@
         "c": "green"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "dark_red"
       },
       {
         "t": " "
       },
       {
-        "t": "Infernal ",
+        "t": " Infernal ",
         "c": "dark_red"
       },
       {
@@ -3202,6 +3341,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -3301,18 +3458,14 @@
         "c": "green"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "dark_green"
       },
       {
         "t": " "
       },
       {
-        "t": "Woodland ",
+        "t": " Woodland ",
         "c": "dark_green"
       },
       {
@@ -3322,6 +3475,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -3557,14 +3728,14 @@
         "c": "green"
       },
       {
-        "t": " more Pet",
+        "t": " more Pet EXP",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "EXP from Fann",
+        "t": "from Fann",
         "c": "gray"
       },
       {
@@ -3823,76 +3994,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Flitter ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -3931,7 +4032,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -3965,7 +4066,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -3999,15 +4100,11 @@
         "c": "aqua"
       },
       {
-        "t": " while",
+        "t": " while on",
         "c": "gray"
       },
       {
         "t": " "
-      },
-      {
-        "t": "on ",
-        "c": "gray"
       },
       {
         "t": "Fishing Islands",
@@ -4019,54 +4116,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Tepid ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -4115,7 +4164,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -4162,6 +4211,24 @@
       {
         "t": "mobs.",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -4390,15 +4457,11 @@
         "c": "aqua"
       },
       {
-        "t": " while",
+        "t": " while on",
         "c": "gray"
       },
       {
         "t": " "
-      },
-      {
-        "t": "on ",
-        "c": "gray"
       },
       {
         "t": "Mining Islands",
@@ -4410,54 +4473,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Cavernfish ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -4506,7 +4521,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -4540,18 +4555,14 @@
         "c": "green"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "white"
       },
       {
         "t": " "
       },
       {
-        "t": "Frozen ",
+        "t": " Frozen ",
         "c": "white"
       },
       {
@@ -4561,57 +4572,27 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Strongarm ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -4660,7 +4641,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -4694,7 +4675,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -4719,6 +4700,9 @@
         ],
         "unit": "",
         "c": "gold"
+      },
+      {
+        "t": " "
       },
       {
         "t": " Ore Fortune",
@@ -4778,18 +4762,14 @@
         "c": "green"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "white"
       },
       {
         "t": " "
       },
       {
-        "t": "Skeletal ",
+        "t": " Skeletal ",
         "c": "white"
       },
       {
@@ -4799,6 +4779,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -4970,18 +4968,14 @@
         "c": "green"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "gold"
       },
       {
         "t": " "
       },
       {
-        "t": "Subterranean ",
+        "t": " Subterranean ",
         "c": "gold"
       },
       {
@@ -4991,79 +4985,27 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Shyworm ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -5112,7 +5054,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -5146,7 +5088,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -5180,18 +5122,14 @@
         "c": "green"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "dark_purple"
       },
       {
         "t": " "
       },
       {
-        "t": "Arcane ",
+        "t": " Arcane ",
         "c": "dark_purple"
       },
       {
@@ -5201,6 +5139,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -5304,76 +5260,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Foxtrot ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -5412,7 +5298,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -5446,7 +5332,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -5555,14 +5441,7 @@
         "c": "dark_green"
       },
       {
-        "t": " during the",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "day.",
+        "t": " during the day.",
         "c": "gray"
       }
     ],
@@ -5633,18 +5512,14 @@
         "t": " "
       },
       {
-        "t": " Pressure",
+        "t": " Pressure Resistance",
         "c": "blue"
       },
       {
         "t": " "
       },
       {
-        "t": "Resistance",
-        "c": "blue"
-      },
-      {
-        "t": " while on ",
+        "t": "while on ",
         "c": "gray"
       },
       {
@@ -5747,18 +5622,14 @@
         "c": "green"
       },
       {
-        "t": "against ",
-        "c": "gray"
-      },
-      {
-        "t": "",
+        "t": "against",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "Airborne ",
+        "t": " Airborne ",
         "c": "gray"
       },
       {
@@ -5768,6 +5639,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Resistance",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -5918,14 +5807,14 @@
         "t": " "
       },
       {
-        "t": "chance",
+        "t": "chance to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "to contain double the ",
+        "t": "contain double the ",
         "c": "gray"
       },
       {
@@ -6023,14 +5912,14 @@
         "t": " "
       },
       {
-        "t": "chance to attract a",
+        "t": "chance to attract a second",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "second mob.",
+        "t": "mob.",
         "c": "gray"
       }
     ],
@@ -6115,6 +6004,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -6197,6 +6104,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -6279,6 +6204,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -6359,21 +6302,25 @@
         "c": "gold"
       },
       {
-        "t": " for",
+        "t": " for every",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "every digit in your Fig Log collection.",
+        "t": "digit in your Fig Log collection. ",
         "c": "gray"
+      },
+      {
+        "t": "(Max",
+        "c": "dark_gray"
       },
       {
         "t": " "
       },
       {
-        "t": "(Max 10M collection)",
+        "t": "10M collection)",
         "c": "dark_gray"
       }
     ],
@@ -6494,14 +6441,18 @@
         "t": " "
       },
       {
-        "t": "more",
+        "t": "more ",
         "c": "gray"
+      },
+      {
+        "t": "HOTM",
+        "c": "dark_purple"
       },
       {
         "t": " "
       },
       {
-        "t": "HOTM Exp",
+        "t": "Exp",
         "c": "dark_purple"
       },
       {
@@ -6570,21 +6521,24 @@
         "c": "green"
       },
       {
-        "t": " chance",
+        "t": " "
+      },
+      {
+        "t": " chance to find",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "to find an extra item in Treasure",
+        "t": "an extra item in Treasure Chests",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "Chests and the Crystal Nucleus.",
+        "t": "and the Crystal Nucleus.",
         "c": "gray"
       }
     ],
@@ -7226,14 +7180,21 @@
         "c": "dark_green"
       },
       {
-        "t": " Sweep",
+        "t": " "
+      },
+      {
+        "t": " Sweep ",
         "c": "dark_green"
+      },
+      {
+        "t": "towards",
+        "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "towards Mangrove Trees.",
+        "t": "Mangrove Trees.",
         "c": "gray"
       },
       {
@@ -7297,19 +7258,18 @@
         "c": "green"
       },
       {
+        "t": " "
+      },
+      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": "",
+        "t": " Damage",
         "c": "red"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Damage ",
-        "c": "red"
       },
       {
         "t": "against ",
@@ -7651,14 +7611,18 @@
         "c": "gold"
       },
       {
-        "t": "on",
+        "t": "on ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "dark_green"
       },
       {
         "t": " "
       },
       {
-        "t": " Pests",
+        "t": "Pests",
         "c": "dark_green"
       },
       {
@@ -7907,31 +7871,23 @@
           10
         ],
         "unit": "%",
-        "c": "dark_gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "range": [
-          1.3,
-          13
-        ],
-        "unit": "%",
         "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "more stats from the",
+        "t": " "
+      },
+      {
+        "t": "more stats from the weapon they",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "weapon they hold.",
+        "t": "hold.",
         "c": "gray"
       }
     ],
@@ -8567,14 +8523,14 @@
         "t": " "
       },
       {
-        "t": "of your max",
+        "t": "of your max health",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "health each time you kill a mob.",
+        "t": "each time you kill a mob.",
         "c": "gray"
       },
       {
@@ -8671,17 +8627,21 @@
         "c": "gold"
       },
       {
-        "t": " "
-      },
-      {
-        "t": "for every digit in your Mangrove",
+        "t": " for",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "Log collection. ",
+        "t": "every digit in your Mangrove Log",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "collection. ",
         "c": "gray"
       },
       {
@@ -8738,19 +8698,19 @@
         "c": "gray"
       },
       {
-        "t": " Damage ",
+        "t": " Damage",
         "c": "red"
+      },
+      {
+        "t": " "
       },
       {
         "t": "against ",
         "c": "gray"
       },
       {
-        "t": " Woodland",
+        "t": " Woodland ",
         "c": "dark_green"
-      },
-      {
-        "t": " "
       },
       {
         "t": "mobs",
@@ -9415,14 +9375,14 @@
         "c": "green"
       },
       {
-        "t": " less time to",
+        "t": " less time to upgrade",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "upgrade a Pet.",
+        "t": "a Pet.",
         "c": "gray"
       }
     ],
@@ -9727,14 +9687,7 @@
         "t": " "
       },
       {
-        "t": "",
-        "c": "red"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Strength",
+        "t": " Strength",
         "c": "red"
       },
       {
@@ -9974,14 +9927,14 @@
         "t": " "
       },
       {
-        "t": "more",
+        "t": "more likely to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "likely to be ",
+        "t": "be ",
         "c": "gray"
       },
       {
@@ -10036,19 +9989,18 @@
         "c": "green"
       },
       {
+        "t": " "
+      },
+      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": "",
+        "t": " Damage",
         "c": "red"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Damage ",
-        "c": "red"
       },
       {
         "t": "against ",
@@ -10068,54 +10020,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Polaris ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -10164,7 +10068,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -10198,7 +10102,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -10228,14 +10132,14 @@
         "t": " "
       },
       {
-        "t": "",
+        "t": " Foraging",
         "c": "gold"
       },
       {
         "t": " "
       },
       {
-        "t": "Foraging Fortune",
+        "t": "Fortune",
         "c": "gold"
       },
       {
@@ -10244,76 +10148,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Treefrog ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -10362,7 +10196,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -10396,7 +10230,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -10558,54 +10392,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Areita ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -10644,7 +10430,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -10671,19 +10457,18 @@
         "c": "green"
       },
       {
+        "t": " "
+      },
+      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": "",
+        "t": " Damage",
         "c": "red"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Damage ",
-        "c": "red"
       },
       {
         "t": "against ",
@@ -10703,76 +10488,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Bluebird ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -10821,7 +10536,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -10862,14 +10577,18 @@
         "t": " "
       },
       {
-        "t": "while in the",
+        "t": "while in the ",
         "c": "gray"
+      },
+      {
+        "t": "Tomb",
+        "c": "red"
       },
       {
         "t": " "
       },
       {
-        "t": "Tomb Floodway",
+        "t": "Floodway",
         "c": "red"
       },
       {
@@ -10892,7 +10611,7 @@
           "c": "gray"
         },
         {
-          "t": "Sanger’s Shop",
+          "t": "Sanger's Shop",
           "c": "dark_green"
         },
         {
@@ -10919,19 +10638,18 @@
         "c": "green"
       },
       {
+        "t": " "
+      },
+      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": "",
+        "t": " Damage",
         "c": "red"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Damage ",
-        "c": "red"
       },
       {
         "t": "against ",
@@ -10951,54 +10669,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Duplico ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -11047,7 +10717,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -11078,14 +10748,14 @@
         "c": "green"
       },
       {
-        "t": " more likely",
+        "t": " more likely to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "to be ",
+        "t": "be ",
         "c": "gray"
       },
       {
@@ -11099,76 +10769,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Litterbug ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -11217,7 +10817,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -11251,7 +10851,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -11426,6 +11026,9 @@
         "c": "light_purple"
       },
       {
+        "t": " "
+      },
+      {
         "t": " ",
         "c": "gray"
       },
@@ -11450,54 +11053,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Gazer ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -11546,7 +11101,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -11580,6 +11135,9 @@
         "t": " "
       },
       {
+        "t": " "
+      },
+      {
         "t": "chance to bring ",
         "c": "gray"
       },
@@ -11593,76 +11151,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Honeybug ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -11711,7 +11199,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -11745,7 +11233,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -11756,127 +11244,6 @@
     ]
   },
   "U53": {
-    "title": "Animal Ruler",
-    "id": "animal_ruler",
-    "description": [
-      {
-        "t": "Grants ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          3,
-          30
-        ],
-        "unit": "%",
-        "c": "green"
-      },
-      {
-        "t": "more ",
-        "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "red"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Damage ",
-        "c": "red"
-      },
-      {
-        "t": "against ",
-        "c": "gray"
-      },
-      {
-        "t": " Animal ",
-        "c": "green"
-      },
-      {
-        "t": "mobs",
-        "c": "gray"
-      },
-      {
-        "t": ".",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Sprawl ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with a ",
-          "c": "gray"
-        },
-        {
-          "t": "Fishing Net",
-          "c": "aqua"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
-  "U54": {
     "title": "Yeti Tracker",
     "id": "yeti_tracker",
     "description": [
@@ -11926,54 +11293,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Shuddersquid ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -12012,7 +11331,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -12061,76 +11380,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Solsnatcher ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -12169,7 +11418,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -12203,7 +11452,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -12228,6 +11477,9 @@
         ],
         "unit": "%",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": " extra",
@@ -12480,26 +11732,22 @@
         "t": " "
       },
       {
-        "t": "chance to",
+        "t": "chance to instantly",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "instantly attract a mob when",
+        "t": "attract a mob when lathering a ",
         "c": "gray"
       },
       {
-        "t": " "
-      },
-      {
-        "t": "lathering a ",
-        "c": "gray"
-      },
-      {
-        "t": "Tree ",
+        "t": "Tree",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": "with ",
@@ -12556,19 +11804,18 @@
         "c": "green"
       },
       {
+        "t": " "
+      },
+      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": "",
+        "t": " Damage",
         "c": "red"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Damage ",
-        "c": "red"
       },
       {
         "t": "against ",
@@ -12614,7 +11861,7 @@
           "c": "gray"
         },
         {
-          "t": "Evasive",
+          "t": "Elusive",
           "c": "green"
         },
         {
@@ -12679,186 +11926,6 @@
         {
           "t": "Ant's Cave",
           "c": "gold"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
-  "U58-1": {
-    "title": "Subterranean Ruler",
-    "id": "subterranean_ruler",
-    "description": [
-      {
-        "t": "Grants ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          3,
-          30
-        ],
-        "unit": "%",
-        "c": "green"
-      },
-      {
-        "t": "more ",
-        "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "red"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Damage ",
-        "c": "red"
-      },
-      {
-        "t": "against ",
-        "c": "gray"
-      },
-      {
-        "t": " Subterranean",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "mobs",
-        "c": "gray"
-      },
-      {
-        "t": ".",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Driftling ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch a ",
-          "c": "gray"
-        },
-        {
-          "t": "Driftling",
-          "c": "green"
-        },
-        {
-          "t": " with a ",
-          "c": "gray"
-        },
-        {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
-        },
-        {
-          "t": "Cavern Biome",
-          "c": "gold"
-        },
-        {
-          "t": " of the",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Safari Zone",
-          "c": "dark_green"
         },
         {
           "t": ".",
@@ -13028,19 +12095,18 @@
         "c": "green"
       },
       {
+        "t": " "
+      },
+      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": "",
+        "t": " Damage",
         "c": "red"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Damage ",
-        "c": "red"
       },
       {
         "t": "against ",
@@ -13288,76 +12354,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Woodchucker ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -13392,7 +12388,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -13527,6 +12523,9 @@
         ],
         "unit": "%",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": " "
@@ -13668,76 +12667,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Bloodbat ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -13776,7 +12705,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -13805,6 +12734,9 @@
         ],
         "unit": "%",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": " "
@@ -14089,75 +13021,6 @@
       ]
     ]
   },
-  "U66": {
-    "title": "Legendary Rabbit Luck",
-    "id": "legendary_rabbit_luck",
-    "description": [
-      {
-        "t": "Increases your chance of finding",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "LEGENDARY ",
-        "c": "gold",
-        "bold": true
-      },
-      {
-        "t": "Rabbits during",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Hoppity's Hunt ",
-        "c": "light_purple"
-      },
-      {
-        "t": "by ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          1,
-          10
-        ],
-        "unit": "%",
-        "c": "green"
-      },
-      {
-        "t": ".",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Purchased in ",
-          "c": "gray"
-        },
-        {
-          "t": "Chocolate Shop",
-          "c": "gold"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
   "U67": {
     "title": "Visitor Cheese",
     "id": "visitor_cheese",
@@ -14177,6 +13040,9 @@
         ],
         "unit": "%",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": " "
@@ -14273,14 +13139,14 @@
         "c": "gray"
       },
       {
-        "t": "Heart of the",
+        "t": "Heart of the Forest",
         "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "Forest Exp",
+        "t": "Exp",
         "c": "green"
       },
       {
@@ -14421,10 +13287,14 @@
         "c": "gold"
       },
       {
+        "t": " while",
+        "c": "gray"
+      },
+      {
         "t": " "
       },
       {
-        "t": "while in the ",
+        "t": "in the ",
         "c": "gray"
       },
       {
@@ -14485,6 +13355,9 @@
         "t": " "
       },
       {
+        "t": " "
+      },
+      {
         "t": "chance to bring ",
         "c": "gray"
       },
@@ -14512,7 +13385,127 @@
           "c": "gray"
         },
         {
-          "t": "Sanger’s Shop",
+          "t": "Sanger's Shop",
+          "c": "dark_green"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "U71": {
+    "title": "Animal Ruler",
+    "id": "animal_ruler",
+    "description": [
+      {
+        "t": "Grants ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          3,
+          30
+        ],
+        "unit": "%",
+        "c": "green"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "more ",
+        "c": "gray"
+      },
+      {
+        "t": " Damage",
+        "c": "red"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "against ",
+        "c": "gray"
+      },
+      {
+        "t": " Animal ",
+        "c": "green"
+      },
+      {
+        "t": "mobs",
+        "c": "gray"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Kill Sprawl ",
+          "c": "gray"
+        },
+        {
+          "t": "while using ",
+          "c": "gray"
+        },
+        {
+          "t": "Salts",
+          "c": "light_purple"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Catch with a ",
+          "c": "gray"
+        },
+        {
+          "t": "Fishing Net",
+          "c": "aqua"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Catch with ",
+          "c": "gray"
+        },
+        {
+          "t": "Lasso",
           "c": "dark_green"
         },
         {
@@ -14603,19 +13596,18 @@
         "c": "green"
       },
       {
+        "t": " "
+      },
+      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": "",
+        "t": " Damage",
         "c": "red"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Damage ",
-        "c": "red"
       },
       {
         "t": "against ",
@@ -14679,14 +13671,14 @@
         "t": " "
       },
       {
-        "t": "chance to fell an",
+        "t": "chance to fell an entire",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "entire tree!",
+        "t": "tree!",
         "c": "gray"
       }
     ],
@@ -14735,14 +13727,14 @@
         "t": " "
       },
       {
-        "t": "chance to spawn",
+        "t": "chance to spawn an",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "an additional ",
+        "t": "additional ",
         "c": "gray"
       },
       {
@@ -14750,15 +13742,11 @@
         "c": "light_purple"
       },
       {
-        "t": "when",
+        "t": "when mining",
         "c": "gray"
       },
       {
         "t": " "
-      },
-      {
-        "t": "mining ",
-        "c": "gray"
       },
       {
         "t": "Ender Nodes",
@@ -14842,6 +13830,154 @@
         {
           "t": "Fig Trees",
           "c": "green"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "U79": {
+    "title": "Elusive Ruler",
+    "id": "elusive_ruler",
+    "description": [
+      {
+        "t": "Grants ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          3,
+          30
+        ],
+        "unit": "%",
+        "c": "green"
+      },
+      {
+        "t": "more ",
+        "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "red"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Damage ",
+        "c": "red"
+      },
+      {
+        "t": "against ",
+        "c": "gray"
+      },
+      {
+        "t": " Elusive ",
+        "c": "light_purple"
+      },
+      {
+        "t": "mobs",
+        "c": "gray"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Fusing ",
+          "c": "gray"
+        },
+        {
+          "t": "Ant ",
+          "c": "white"
+        },
+        {
+          "t": "Shard ",
+          "c": "gray"
+        },
+        {
+          "t": "with ",
+          "c": "gray"
+        },
+        {
+          "t": "Elusive",
+          "c": "green"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Family",
+          "c": "gray"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Kill Queen Ant ",
+          "c": "gray"
+        },
+        {
+          "t": "while using ",
+          "c": "gray"
+        },
+        {
+          "t": "Salts",
+          "c": "light_purple"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Place ",
+          "c": "gray"
+        },
+        {
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Ant's Cave",
+          "c": "gold"
         },
         {
           "t": ".",
@@ -14953,15 +14089,11 @@
         "c": "gray"
       },
       {
-        "t": "",
+        "t": " Pests",
         "c": "dark_green"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Pests ",
-        "c": "dark_green"
       },
       {
         "t": "to drop an extra ",
@@ -15201,6 +14333,17 @@
     "id": "pest_cooldown",
     "description": [
       {
+        "t": "Pest Cooldown ",
+        "c": "gold"
+      },
+      {
+        "t": "(Farming)",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
         "t": "Reduces the spawn cooldown of ",
         "c": "gray"
       },
@@ -15303,15 +14446,11 @@
         "t": " "
       },
       {
-        "t": "chance to find",
+        "t": "chance to find an",
         "c": "gray"
       },
       {
         "t": " "
-      },
-      {
-        "t": "an ",
-        "c": "gray"
       },
       {
         "t": "Enchanted Crop ",
@@ -15381,6 +14520,75 @@
       ]
     ]
   },
+  "U106": {
+    "title": "Legendary Rabbit Luck",
+    "id": "legendary_rabbit_luck",
+    "description": [
+      {
+        "t": "Increases your chance of finding",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "LEGENDARY ",
+        "c": "gold",
+        "bold": true
+      },
+      {
+        "t": "Rabbits during",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Hoppity's Hunt ",
+        "c": "light_purple"
+      },
+      {
+        "t": "by ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          1,
+          10
+        ],
+        "unit": "%",
+        "c": "green"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Purchased in ",
+          "c": "gray"
+        },
+        {
+          "t": "Chocolate Shop",
+          "c": "gold"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
   "R1": {
     "title": "Forest Elemental",
     "id": "forest_elemental",
@@ -15407,6 +14615,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -15489,6 +14715,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -15571,6 +14815,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -15720,14 +14982,14 @@
         "t": " "
       },
       {
-        "t": "chance to",
+        "t": "chance to jump",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "jump 1 less time.",
+        "t": "1 less time.",
         "c": "gray"
       }
     ],
@@ -15906,15 +15168,11 @@
         "t": " "
       },
       {
-        "t": "stronger on you.",
+        "t": "stronger on you. Gain a",
         "c": "gray"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Gain a ",
-        "c": "gray"
       },
       {
         "range": [
@@ -15928,15 +15186,15 @@
         "t": " "
       },
       {
-        "t": "chance to find",
+        "t": "chance to find ",
         "c": "gray"
       },
       {
-        "t": " "
+        "t": "Signal Enhancers",
+        "c": "gold"
       },
       {
-        "t": "Signal Enhancers ",
-        "c": "gold"
+        "t": " "
       },
       {
         "t": "in ",
@@ -16874,14 +16132,21 @@
         "c": "dark_green"
       },
       {
-        "t": " Sweep",
+        "t": " "
+      },
+      {
+        "t": " Sweep ",
         "c": "dark_green"
+      },
+      {
+        "t": "towards",
+        "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "towards Helix Trees.",
+        "t": "Helix Trees.",
         "c": "gray"
       },
       {
@@ -17032,14 +16297,17 @@
         "c": "green"
       },
       {
-        "t": " chance to",
+        "t": " "
+      },
+      {
+        "t": " chance to have an",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "have an extra ",
+        "t": "extra ",
         "c": "gray"
       },
       {
@@ -17047,14 +16315,14 @@
         "c": "dark_purple"
       },
       {
-        "t": "in the",
+        "t": "in the Paid",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "Paid Reward Chest.",
+        "t": "Reward Chest.",
         "c": "gray"
       }
     ],
@@ -17285,6 +16553,17 @@
     "id": "cookie_eater",
     "description": [
       {
+        "t": "Cookie Eater ",
+        "c": "gold"
+      },
+      {
+        "t": "(Global)",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
         "range": [
           5,
           50
@@ -17357,7 +16636,14 @@
         "c": "gray"
       },
       {
-        "t": "Crimson Essence",
+        "t": "Crimson",
+        "c": "red"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Essence",
         "c": "red"
       },
       {
@@ -17684,7 +16970,14 @@
         "c": "gray"
       },
       {
-        "t": "Gemstone Powder",
+        "t": "Gemstone",
+        "c": "light_purple"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Powder",
         "c": "light_purple"
       },
       {
@@ -17707,8 +17000,8 @@
           "c": "gray"
         },
         {
-          "t": "Pocket Black Hole",
-          "c": "red"
+          "t": "Lasso",
+          "c": "dark_green"
         },
         {
           "t": ".",
@@ -17797,14 +17090,14 @@
         "t": " "
       },
       {
-        "t": "more",
+        "t": "more likely to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "likely to be ",
+        "t": "be ",
         "c": "gray"
       },
       {
@@ -18262,14 +17555,18 @@
         "t": " "
       },
       {
-        "t": "chance to Chop",
+        "t": "chance to Chop ",
         "c": "gray"
+      },
+      {
+        "t": "an",
+        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "an extra log",
+        "t": "extra log",
         "c": "green"
       },
       {
@@ -18573,7 +17870,7 @@
           "c": "gray"
         },
         {
-          "t": "Sanger’s Shop",
+          "t": "Sanger's Shop",
           "c": "dark_green"
         },
         {
@@ -18704,6 +18001,9 @@
         "c": "green"
       },
       {
+        "t": " "
+      },
+      {
         "t": " more ",
         "c": "gray"
       },
@@ -18712,18 +18012,14 @@
         "c": "red"
       },
       {
-        "t": "from ",
+        "t": "from",
         "c": "gray"
-      },
-      {
-        "t": "Garden",
-        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "Visitors",
+        "t": "Garden Visitors",
         "c": "green"
       },
       {
@@ -18742,16 +18038,23 @@
           "c": "gray"
         },
         {
-          "t": "Fusing  ",
+          "t": "Fusing ",
           "c": "gray"
+        },
+        {
+          "t": "Earthworm ",
+          "c": "green"
         },
         {
           "t": "Shard ",
           "c": "gray"
         },
         {
-          "t": "with ",
+          "t": "with",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Invisibug ",
@@ -18920,6 +18223,93 @@
     ]
   },
   "R46": {
+    "title": "Animal Fortune",
+    "id": "animal_fortune",
+    "description": [
+      {
+        "t": "Grants ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          0.5,
+          5
+        ],
+        "unit": "",
+        "c": "aqua"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": " Magic Find ",
+        "c": "aqua"
+      },
+      {
+        "t": "against ",
+        "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "green"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Animal ",
+        "c": "green"
+      },
+      {
+        "t": "mobs.",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Fusing ",
+          "c": "gray"
+        },
+        {
+          "t": "Groundhog ",
+          "c": "white"
+        },
+        {
+          "t": "Shard ",
+          "c": "gray"
+        },
+        {
+          "t": "with",
+          "c": "gray"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Honeyhog ",
+          "c": "white"
+        },
+        {
+          "t": "Shard",
+          "c": "gray"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "R47": {
     "title": "Berry Enjoyer",
     "id": "berry_enjoyer",
     "description": [
@@ -19010,89 +18400,6 @@
         },
         {
           "t": "or higher",
-          "c": "gray"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
-  "R48": {
-    "title": "Animal Fortune",
-    "id": "animal_fortune",
-    "description": [
-      {
-        "t": "Grants ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          0.5,
-          5
-        ],
-        "unit": "",
-        "c": "aqua"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": " Magic Find ",
-        "c": "aqua"
-      },
-      {
-        "t": "against",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": " Animal ",
-        "c": "green"
-      },
-      {
-        "t": "mobs.",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Fusing ",
-          "c": "gray"
-        },
-        {
-          "t": "Groundhog ",
-          "c": "white"
-        },
-        {
-          "t": "Shard ",
-          "c": "gray"
-        },
-        {
-          "t": "with",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Honeyhog ",
-          "c": "white"
-        },
-        {
-          "t": "Shard",
           "c": "gray"
         },
         {
@@ -19530,14 +18837,14 @@
         "t": " "
       },
       {
-        "t": "chance to gain an",
+        "t": "chance to gain",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "additional Chisel ",
+        "t": "an additional Chisel ",
         "c": "gray"
       },
       {
@@ -19815,14 +19122,18 @@
         "c": "aqua"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": " Critter ",
+        "t": "Critter ",
         "c": "green"
       },
       {
@@ -20117,14 +19428,7 @@
         "c": "green"
       },
       {
-        "t": " more EXP from",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Combat.",
+        "t": " more EXP from Combat.",
         "c": "gray"
       }
     ],
@@ -20432,14 +19736,18 @@
         "c": "aqua"
       },
       {
-        "t": "against",
+        "t": "against ",
+        "c": "gray"
+      },
+      {
+        "t": "",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": " Construct ",
+        "t": "Construct ",
         "c": "gray"
       },
       {
@@ -20577,14 +19885,18 @@
         "c": "aqua"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "dark_green"
       },
       {
         "t": " "
       },
       {
-        "t": " Mythological ",
+        "t": "Mythological ",
         "c": "dark_green"
       },
       {
@@ -20701,14 +20013,18 @@
         "c": "aqua"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": " Cubic ",
+        "t": "Cubic ",
         "c": "green"
       },
       {
@@ -20792,14 +20108,14 @@
         "c": "green"
       },
       {
-        "t": " more likely",
+        "t": " more likely to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "to be ",
+        "t": "be ",
         "c": "gray"
       },
       {
@@ -20908,54 +20224,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Snoozle ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -20994,7 +20262,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -21058,76 +20326,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Parakeet ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -21166,7 +20364,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -21306,54 +20504,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Rockmite ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -21392,7 +20542,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -21422,14 +20572,14 @@
         "t": " "
       },
       {
-        "t": "chance to gain",
+        "t": "chance to gain double",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "double loot from ",
+        "t": "loot from ",
         "c": "gray"
       },
       {
@@ -21481,156 +20631,6 @@
         {
           "t": "Shard",
           "c": "gray"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
-  "R71": {
-    "title": "Frozen Fortune",
-    "id": "frozen_fortune",
-    "description": [
-      {
-        "t": "Grants ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          0.5,
-          5
-        ],
-        "unit": "",
-        "c": "aqua"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": " Magic Find ",
-        "c": "aqua"
-      },
-      {
-        "t": "on ",
-        "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "white"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Frozen ",
-        "c": "white"
-      },
-      {
-        "t": "mobs.",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Billygoat ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch a ",
-          "c": "gray"
-        },
-        {
-          "t": "Billygoat",
-          "c": "blue"
-        },
-        {
-          "t": " with a ",
-          "c": "gray"
-        },
-        {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
-        },
-        {
-          "t": "Icy Biome",
-          "c": "blue"
-        },
-        {
-          "t": " of the",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Safari Zone",
-          "c": "dark_green"
         },
         {
           "t": ".",
@@ -21693,54 +20693,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Scrappy ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -21779,7 +20731,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -21817,15 +20769,11 @@
         "c": "gray"
       },
       {
-        "t": "",
+        "t": " Elusive",
         "c": "light_purple"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Elusive ",
-        "c": "light_purple"
       },
       {
         "t": "mobs.",
@@ -21833,76 +20781,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Hideyho ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -21936,7 +20814,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -21998,54 +20876,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Mantis Shrimp ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -22084,7 +20914,7 @@
           "c": "gray"
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -22148,54 +20978,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Chuckwalla ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -22234,7 +21016,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -22298,76 +21080,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Hideonfloor ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -22406,7 +21118,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -22462,54 +21174,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Gimmiegold ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -22548,7 +21212,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -22559,8 +21223,8 @@
     ]
   },
   "R78": {
-    "title": "Arthropod Fortune",
-    "id": "arthropod_fortune",
+    "title": "Frozen Fortune",
+    "id": "frozen_fortune",
     "description": [
       {
         "t": "Grants ",
@@ -22582,15 +21246,15 @@
         "c": "aqua"
       },
       {
-        "t": "against",
+        "t": "on ",
         "c": "gray"
       },
       {
-        "t": " "
+        "t": " Frozen",
+        "c": "white"
       },
       {
-        "t": " Arthropod ",
-        "c": "dark_red"
+        "t": " "
       },
       {
         "t": "mobs.",
@@ -22608,11 +21272,45 @@
           "c": "gray"
         },
         {
-          "t": "Purchased in ",
+          "t": "Catch a ",
           "c": "gray"
         },
         {
-          "t": "Sanger’s Shop",
+          "t": "Billygoat",
+          "c": "blue"
+        },
+        {
+          "t": " with a ",
+          "c": "gray"
+        },
+        {
+          "t": "Critter",
+          "c": "red"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Capsule",
+          "c": "red"
+        },
+        {
+          "t": " in the ",
+          "c": "gray"
+        },
+        {
+          "t": "Icy Biome",
+          "c": "blue"
+        },
+        {
+          "t": " of the",
+          "c": "gray"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -22650,15 +21348,11 @@
         "c": "gray"
       },
       {
-        "t": "",
+        "t": " Arcane",
         "c": "dark_purple"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Arcane ",
-        "c": "dark_purple"
       },
       {
         "t": "mobs.",
@@ -22666,76 +21360,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Hideonwall ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -22784,7 +21408,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -22844,54 +21468,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Nozzlenose ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -22930,7 +21506,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -23066,76 +21642,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Fluffling ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -23174,7 +21680,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -23364,14 +21870,14 @@
         "t": " "
       },
       {
-        "t": "chance",
+        "t": "chance to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "to instantly re-mutate at their first",
+        "t": "instantly re-mutate at their first",
         "c": "gray"
       },
       {
@@ -23457,15 +21963,11 @@
         "c": "gray"
       },
       {
-        "t": "Tree",
+        "t": "Tree Gifts",
         "c": "dark_green"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Gifts ",
-        "c": "dark_green"
       },
       {
         "t": "to contain double loot.",
@@ -23524,11 +22026,8 @@
     "id": "echo_of_buckets",
     "description": [
       {
-        "t": "Your \"Bucket\" Attributes are",
+        "t": "Your \"Bucket\" Attributes are ",
         "c": "gray"
-      },
-      {
-        "t": " "
       },
       {
         "range": [
@@ -23536,7 +22035,21 @@
           10
         ],
         "unit": "%",
+        "c": "dark_gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "range": [
+          1.3,
+          13
+        ],
+        "unit": "%",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": "stronger.",
@@ -23759,54 +22272,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Troodon ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -23845,7 +22310,75 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
+          "c": "dark_green"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "R87": {
+    "title": "Arthropod Fortune",
+    "id": "arthropod_fortune",
+    "description": [
+      {
+        "t": "Grants ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          0.5,
+          5
+        ],
+        "unit": "",
+        "c": "aqua"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": " Magic Find ",
+        "c": "aqua"
+      },
+      {
+        "t": "against ",
+        "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "dark_red"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Arthropod ",
+        "c": "dark_red"
+      },
+      {
+        "t": "mobs.",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Purchased in ",
+          "c": "gray"
+        },
+        {
+          "t": "Sanger's Shop",
           "c": "dark_green"
         },
         {
@@ -23936,14 +22469,18 @@
         "c": "aqua"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "blue"
       },
       {
         "t": " "
       },
       {
-        "t": " Aquatic ",
+        "t": "Aquatic ",
         "c": "blue"
       },
       {
@@ -24038,21 +22575,21 @@
         "t": " "
       },
       {
-        "t": "chance",
+        "t": "chance to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "to add 1 Bonus Score to your",
+        "t": "add 1 Bonus Score to your Dungeon",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "Dungeon Run.",
+        "t": "Run.",
         "c": "gray"
       },
       {
@@ -24416,6 +22953,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -24498,6 +23053,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -24580,6 +23153,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -24815,11 +23406,8 @@
     "id": "echo_of_resistance",
     "description": [
       {
-        "t": "Your Resistance Attributes are",
+        "t": "Your Resistance Attributes are ",
         "c": "gray"
-      },
-      {
-        "t": " "
       },
       {
         "range": [
@@ -24827,7 +23415,21 @@
           20
         ],
         "unit": "%",
+        "c": "dark_gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "range": [
+          3,
+          30
+        ],
+        "unit": "%",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": "stronger.",
@@ -25204,11 +23806,8 @@
     "id": "echo_of_atomized",
     "description": [
       {
-        "t": "Your Atomized Attributes are",
+        "t": "Your Atomized Attributes are ",
         "c": "gray"
-      },
-      {
-        "t": " "
       },
       {
         "range": [
@@ -25216,7 +23815,21 @@
           20
         ],
         "unit": "%",
+        "c": "dark_gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "range": [
+          3,
+          30
+        ],
+        "unit": "%",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": "stronger.",
@@ -25370,11 +23983,8 @@
         "c": "dark_purple"
       },
       {
-        "t": "you drop have a",
+        "t": "you drop have a ",
         "c": "gray"
-      },
-      {
-        "t": " "
       },
       {
         "range": [
@@ -25388,14 +23998,7 @@
         "t": " "
       },
       {
-        "t": "chance to be",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "recombobulated.",
+        "t": "chance to be recombobulated.",
         "c": "gray"
       },
       {
@@ -25462,7 +24065,7 @@
           "c": "gray"
         },
         {
-          "t": "Evasive ",
+          "t": "Elusive ",
           "c": "green"
         },
         {
@@ -25710,6 +24313,47 @@
           "c": "gray"
         },
         {
+          "t": "Eel ",
+          "c": "blue"
+        },
+        {
+          "t": "Shard ",
+          "c": "gray"
+        },
+        {
+          "t": "with ",
+          "c": "gray"
+        },
+        {
+          "t": "Moray Eel",
+          "c": "dark_purple"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Shard",
+          "c": "gray"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Fusing ",
+          "c": "gray"
+        },
+        {
           "t": "Moray Eel ",
           "c": "dark_purple"
         },
@@ -25738,47 +24382,6 @@
         },
         {
           "t": "Shards",
-          "c": "gray"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Fusing ",
-          "c": "gray"
-        },
-        {
-          "t": "Eel ",
-          "c": "blue"
-        },
-        {
-          "t": "Shard ",
-          "c": "gray"
-        },
-        {
-          "t": "with ",
-          "c": "gray"
-        },
-        {
-          "t": "Moray Eel",
-          "c": "dark_purple"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Shard",
           "c": "gray"
         },
         {
@@ -25947,14 +24550,7 @@
         "t": " "
       },
       {
-        "t": "more",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "items.",
+        "t": "more items.",
         "c": "gray"
       }
     ],
@@ -26505,11 +25101,8 @@
     "id": "echo_of_essence",
     "description": [
       {
-        "t": "Your Essence Attributes are",
+        "t": "Your Essence Attributes are ",
         "c": "gray"
-      },
-      {
-        "t": " "
       },
       {
         "range": [
@@ -26517,7 +25110,21 @@
           20
         ],
         "unit": "%",
+        "c": "dark_gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "range": [
+          3,
+          30
+        ],
+        "unit": "%",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": "stronger.",
@@ -26791,7 +25398,7 @@
           "c": "gray"
         },
         {
-          "t": "Sanger’s Shop",
+          "t": "Sanger's Shop",
           "c": "dark_green"
         },
         {
@@ -27013,11 +25620,8 @@
     "id": "why_not_more",
     "description": [
       {
-        "t": "Your pet's EXP Share grants",
+        "t": "Your pet's EXP Share grants ",
         "c": "gray"
-      },
-      {
-        "t": " "
       },
       {
         "range": [
@@ -27028,7 +25632,10 @@
         "c": "green"
       },
       {
-        "t": " more EXP.",
+        "t": " "
+      },
+      {
+        "t": "more EXP.",
         "c": "gray"
       }
     ],
@@ -27081,51 +25688,6 @@
       ]
     ]
   },
-  "E29": {
-    "title": "Attack Speed",
-    "id": "attack_speed",
-    "description": [
-      {
-        "t": "Grants ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          1,
-          10
-        ],
-        "unit": "",
-        "c": "yellow"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": " Attack Speed",
-        "c": "yellow"
-      },
-      {
-        "t": ".",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Obtained from the Inferno Demonlord III and IV.",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
   "E30": {
     "title": "Echo of Ruler",
     "id": "echo_of_ruler",
@@ -27140,18 +25702,10 @@
           20
         ],
         "unit": "%",
-        "c": "dark_gray"
+        "c": "green"
       },
       {
         "t": " "
-      },
-      {
-        "range": [
-          3,
-          30
-        ],
-        "unit": "%",
-        "c": "green"
       },
       {
         "t": " "
@@ -28138,70 +26692,6 @@
       ]
     ]
   },
-  "E40": {
-    "title": "Dominance",
-    "id": "dominance",
-    "description": [
-      {
-        "t": "Gain ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          1.5,
-          15
-        ],
-        "unit": "%",
-        "c": "green"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "more ",
-        "c": "gray"
-      },
-      {
-        "t": " Damage ",
-        "c": "red"
-      },
-      {
-        "t": "when",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "at full health.",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Obtained from ",
-          "c": "gray"
-        },
-        {
-          "t": "Master Catacombs Floor IV",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
   "E42": {
     "title": "King of Greed",
     "id": "king_of_greed",
@@ -28698,54 +27188,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Gemzie ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -28784,81 +27226,8 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
-  "E46": {
-    "title": "Divine Rabbit Luck",
-    "id": "divine_rabbit_luck",
-    "description": [
-      {
-        "t": "Increases your chance of finding",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "DIVINE ",
-        "c": "aqua",
-        "bold": true
-      },
-      {
-        "t": "Rabbits during ",
-        "c": "gray"
-      },
-      {
-        "t": "Hoppity's",
-        "c": "light_purple"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Hunt ",
-        "c": "light_purple"
-      },
-      {
-        "t": "by ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          1,
-          10
-        ],
-        "unit": "%",
-        "c": "green"
-      },
-      {
-        "t": ".",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Purchased in ",
-          "c": "gray"
-        },
-        {
-          "t": "Chocolate Shop",
-          "c": "gold"
         },
         {
           "t": ".",
@@ -28935,6 +27304,51 @@
       ]
     ]
   },
+  "E48": {
+    "title": "Attack Speed",
+    "id": "attack_speed",
+    "description": [
+      {
+        "t": "Grants ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          1,
+          10
+        ],
+        "unit": "",
+        "c": "yellow"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": " Attack Speed",
+        "c": "yellow"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Obtained from the Inferno Demonlord III and IV.",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
   "E49": {
     "title": "Honey Refill",
     "id": "honey_refill",
@@ -28959,14 +27373,14 @@
         "t": " "
       },
       {
-        "t": "chance",
+        "t": "chance to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "to refill instantly.",
+        "t": "refill instantly.",
         "c": "gray"
       }
     ],
@@ -29284,6 +27698,70 @@
       ]
     ]
   },
+  "E57": {
+    "title": "Dominance",
+    "id": "dominance",
+    "description": [
+      {
+        "t": "Gain ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          1.5,
+          15
+        ],
+        "unit": "%",
+        "c": "green"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "more ",
+        "c": "gray"
+      },
+      {
+        "t": " Damage ",
+        "c": "red"
+      },
+      {
+        "t": "when at",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "full health.",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Obtained from ",
+          "c": "gray"
+        },
+        {
+          "t": "Master Catacombs Floor IV",
+          "c": "red"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
   "E58": {
     "title": "Social Wisdom",
     "id": "social_wisdom",
@@ -29463,11 +27941,8 @@
         "c": "gold"
       },
       {
-        "t": "and",
+        "t": "and ",
         "c": "gray"
-      },
-      {
-        "t": " "
       },
       {
         "range": [
@@ -29485,14 +27960,18 @@
         "c": "gold"
       },
       {
-        "t": " while in the",
+        "t": " while in the ",
         "c": "gray"
+      },
+      {
+        "t": "Mines of",
+        "c": "dark_green"
       },
       {
         "t": " "
       },
       {
-        "t": "Mines of Divan",
+        "t": "Divan",
         "c": "dark_green"
       },
       {
@@ -29571,6 +28050,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -29668,6 +28165,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -29765,6 +28280,24 @@
       {
         "t": ".",
         "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Elemental",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -29855,7 +28388,7 @@
         "t": " "
       },
       {
-        "t": "Shard’s ID line as a result.",
+        "t": "Shard's ID line as a result.",
         "c": "gray"
       }
     ],
@@ -29904,15 +28437,11 @@
         "t": " "
       },
       {
-        "t": " Double Hook",
+        "t": " Double Hook Chance",
         "c": "blue"
       },
       {
         "t": " "
-      },
-      {
-        "t": "Chance ",
-        "c": "blue"
       },
       {
         "t": "while on ",
@@ -30157,14 +28686,14 @@
         "t": " "
       },
       {
-        "t": "",
+        "t": " True",
         "c": "white"
       },
       {
         "t": " "
       },
       {
-        "t": "True Defense",
+        "t": "Defense",
         "c": "white"
       },
       {
@@ -30242,16 +28771,24 @@
         "c": "green"
       },
       {
-        "t": "is increased by",
+        "t": "is increased by ",
         "c": "gray"
+      },
+      {
+        "range": [
+          0.2,
+          2
+        ],
+        "unit": "%",
+        "c": "dark_gray"
       },
       {
         "t": " "
       },
       {
         "range": [
-          0.2,
-          2
+          0.35,
+          3.5
         ],
         "unit": "%",
         "c": "green"
@@ -30290,6 +28827,17 @@
     "title": "Egg Finder",
     "id": "egg_finder",
     "description": [
+      {
+        "t": "Egg Finder ",
+        "c": "gold"
+      },
+      {
+        "t": "(Global)",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
       {
         "t": "Finds a ",
         "c": "gray"
@@ -30340,38 +28888,31 @@
           "c": "gray"
         },
         {
-          "t": "Fusing ",
+          "t": "Fusing  ",
           "c": "gray"
         },
         {
-          "t": "Rabbit Godmother ",
-          "c": "dark_purple"
-        },
-        {
-          "t": "Shard",
+          "t": "Shard ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "with ",
           "c": "gray"
         },
         {
-          "t": "Combat ",
+          "t": "Combat",
           "c": "red"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Category",
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Legendary ",
@@ -30586,29 +29127,18 @@
         "t": " "
       },
       {
-        "t": "chance to",
+        "t": "chance to obtain a",
         "c": "gray"
       },
       {
         "t": " "
-      },
-      {
-        "t": "obtain a ",
-        "c": "gray"
       },
       {
         "t": "Warty ",
         "c": "dark_purple"
       },
       {
-        "t": "when breaking Nether",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Warts.",
+        "t": "when breaking Nether Warts.",
         "c": "gray"
       }
     ],
@@ -30874,6 +29404,9 @@
         ],
         "unit": "%",
         "c": "aqua"
+      },
+      {
+        "t": " "
       },
       {
         "t": ".",
@@ -31153,16 +29686,24 @@
     "id": "echo_of_tracking",
     "description": [
       {
-        "t": "Your \"Tracker\" Attributes are",
+        "t": "Your \"Tracker\" Attributes are ",
         "c": "gray"
+      },
+      {
+        "range": [
+          2,
+          20
+        ],
+        "unit": "%",
+        "c": "dark_gray"
       },
       {
         "t": " "
       },
       {
         "range": [
-          2,
-          20
+          3,
+          30
         ],
         "unit": "%",
         "c": "green"
@@ -31173,54 +29714,6 @@
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Doomspiral ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -31269,7 +29762,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -31289,21 +29782,21 @@
       },
       {
         "range": [
-          0.01,
-          0.1
+          2.5,
+          25
         ],
         "unit": "%",
         "c": "gold"
       },
       {
-        "t": " chance to drop",
+        "t": " chance to get a",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "a ",
+        "t": "bonus ",
         "c": "gray"
       },
       {
@@ -31319,88 +29812,38 @@
         "c": "yellow"
       },
       {
-        "t": " a",
+        "t": " "
+      },
+      {
+        "t": "a ",
+        "c": "gray"
+      },
+      {
+        "t": "SPARKLING ",
+        "c": "gold",
+        "bold": true
+      },
+      {
+        "t": " Critter",
+        "c": "green"
+      },
+      {
+        "t": " in the",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "mob.",
+        "t": "Critter Safari",
+        "c": "dark_green"
+      },
+      {
+        "t": ".",
         "c": "gray"
       }
     ],
     "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Macaw ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
       [
         {
           "t": " ",
@@ -31449,7 +29892,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -31627,6 +30070,9 @@
         "c": "green"
       },
       {
+        "t": " "
+      },
+      {
         "t": "Tuning Points.",
         "c": "gray"
       }
@@ -31713,18 +30159,14 @@
         "t": " "
       },
       {
-        "t": " Double Hook",
+        "t": " Double Hook Chance",
         "c": "blue"
       },
       {
         "t": " "
       },
       {
-        "t": "Chance",
-        "c": "blue"
-      },
-      {
-        "t": " while on ",
+        "t": "while on ",
         "c": "gray"
       },
       {
@@ -32640,11 +31082,8 @@
     "id": "queenly_echo",
     "description": [
       {
-        "t": "Your \"Visitor\" Attributes are",
+        "t": "Your \"Visitor\" Attributes are ",
         "c": "gray"
-      },
-      {
-        "t": " "
       },
       {
         "range": [
@@ -32652,7 +31091,21 @@
           50
         ],
         "unit": "%",
+        "c": "dark_gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "range": [
+          7.5,
+          75
+        ],
+        "unit": "%",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": "stronger.",
@@ -32729,6 +31182,9 @@
         ],
         "unit": "%",
         "c": "red"
+      },
+      {
+        "t": " "
       },
       {
         "t": ".",
@@ -32899,6 +31355,9 @@
         "c": "blue"
       },
       {
+        "t": " "
+      },
+      {
         "t": ".",
         "c": "gray"
       }
@@ -32975,11 +31434,8 @@
         "c": "red"
       },
       {
-        "t": "by",
+        "t": "by ",
         "c": "gray"
-      },
-      {
-        "t": " "
       },
       {
         "range": [
@@ -33200,16 +31656,24 @@
     "id": "almighty_echo",
     "description": [
       {
-        "t": "Your \"Unlimited\" Attributes are",
+        "t": "Your \"Unlimited\" Attributes are ",
         "c": "gray"
+      },
+      {
+        "range": [
+          5,
+          50
+        ],
+        "unit": "%",
+        "c": "dark_gray"
       },
       {
         "t": " "
       },
       {
         "range": [
-          5,
-          50
+          7.5,
+          75
         ],
         "unit": "%",
         "c": "green"
@@ -33289,6 +31753,9 @@
         ],
         "unit": "%",
         "c": "green"
+      },
+      {
+        "t": " "
       },
       {
         "t": ".",
@@ -33508,18 +31975,14 @@
         "t": " "
       },
       {
-        "t": " Double Hook",
+        "t": " Double Hook Chance",
         "c": "blue"
       },
       {
         "t": " "
       },
       {
-        "t": "Chance",
-        "c": "blue"
-      },
-      {
-        "t": " while on ",
+        "t": "while on ",
         "c": "gray"
       },
       {
@@ -33665,7 +32128,7 @@
           "obfuscated": true
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
@@ -33692,15 +32155,11 @@
         "c": "green"
       },
       {
-        "t": " discount on",
+        "t": " discount on starting",
         "c": "gray"
       },
       {
         "t": " "
-      },
-      {
-        "t": "starting ",
-        "c": "gray"
       },
       {
         "t": "Slayer Quests",
@@ -33779,15 +32238,11 @@
         "c": "green"
       },
       {
-        "t": " in",
+        "t": " in your",
         "c": "gray"
       },
       {
         "t": " "
-      },
-      {
-        "t": "your ",
-        "c": "gray"
       },
       {
         "t": "Greenhouse",
@@ -33891,54 +32346,6 @@
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Wumpa ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
           "t": "Catch a ",
           "c": "gray"
         },
@@ -33977,7 +32384,7 @@
           "t": " "
         },
         {
-          "t": "Safari Zone",
+          "t": "Critter Safari",
           "c": "dark_green"
         },
         {
