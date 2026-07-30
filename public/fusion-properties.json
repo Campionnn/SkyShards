@@ -32,7 +32,7 @@
     ],
     "input1": "Combat&Common",
     "input2": "Uncommon+",
-    "id_result": "Lapis Zombie",
+    "id_result": "Howling Spirit",
     "id_origin": []
   },
   "C4": {
@@ -44,7 +44,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Howling Spirit",
+    "id_result": "Phanflare",
     "id_origin": [
       "Grove"
     ]
@@ -66,15 +66,15 @@
   "C6": {
     "name": "Howling Spirit",
     "rarity": "Common",
-    "category": "Forest",
+    "category": "Combat",
     "family": [
       "Cave Dweller"
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Phanflare",
+    "id_result": "Lapis Zombie",
     "id_origin": [
-      "Phanpyre"
+      "Flash"
     ]
   },
   "C7": {
@@ -88,7 +88,7 @@
     "input2": "",
     "id_result": "Hideonleaf",
     "id_origin": [
-      "Howling Spirit"
+      "Phanpyre"
     ]
   },
   "C8": {
@@ -116,7 +116,7 @@
     "input2": "",
     "id_result": "Chill",
     "id_origin": [
-      "Flash"
+      "Howling Spirit"
     ]
   },
   "C10": {
@@ -190,7 +190,9 @@
     "name": "Voracious Spider",
     "rarity": "Common",
     "category": "Combat",
-    "family": [],
+    "family": [
+      "Spider"
+    ],
     "input1": "",
     "input2": "",
     "id_result": "Tank Zombie",
@@ -291,7 +293,8 @@
     "rarity": "Common",
     "category": "Water",
     "family": [
-      "Axolotl"
+      "Axolotl",
+      "Amphibian"
     ],
     "input1": "",
     "input2": "",
@@ -773,9 +776,7 @@
     "input1": "",
     "input2": "",
     "id_result": "Field Mouse",
-    "id_origin": [
-      "Chameleon"
-    ]
+    "id_origin": []
   },
   "U5": {
     "name": "Goldfin",
@@ -843,7 +844,7 @@
     "category": "Forest",
     "family": [
       "Trash Lover",
-      "Evasive"
+      "Elusive"
     ],
     "input1": "",
     "input2": "",
@@ -1137,7 +1138,9 @@
     "name": "Flaming Spider",
     "rarity": "Uncommon",
     "category": "Combat",
-    "family": [],
+    "family": [
+      "Spider"
+    ],
     "input1": "",
     "input2": "",
     "id_result": "Zealot Bruiser",
@@ -1299,7 +1302,7 @@
     "rarity": "Uncommon",
     "category": "Water",
     "family": [
-      "Evasive"
+      "Elusive"
     ],
     "input1": "",
     "input2": "",
@@ -1346,7 +1349,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Sprawl",
+    "id_result": "Shuddersquid",
     "id_origin": [
       "Bayou Sludge",
       "Osedax"
@@ -1381,18 +1384,6 @@
     ]
   },
   "U53": {
-    "name": "Sprawl",
-    "rarity": "Uncommon",
-    "category": "Water",
-    "family": [],
-    "input1": "",
-    "input2": "",
-    "id_result": "Shuddersquid",
-    "id_origin": [
-      "Water Snake"
-    ]
-  },
-  "U54": {
     "name": "Shuddersquid",
     "rarity": "Uncommon",
     "category": "Water",
@@ -1403,7 +1394,7 @@
     "input2": "",
     "id_result": "Sepialot",
     "id_origin": [
-      "Sprawl"
+      "Water Snake"
     ]
   },
   "U55": {
@@ -1437,39 +1428,25 @@
   "U57": {
     "name": "Honey Badger",
     "rarity": "Uncommon",
-    "category": "Forest",
+    "category": "Combat",
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "Driftling",
+    "id_result": "Minos Hunter",
     "id_origin": []
   },
   "U58": {
-    "name": "Queen Ant",
-    "rarity": "Uncommon",
-    "category": "Forest",
-    "family": [
-      "Bug",
-      "Evasive"
-    ],
-    "input1": "Ant Shard",
-    "input2": "Evasive",
-    "id_result": "Woodchucker",
-    "id_origin": []
-  },
-  "U58-1": {
     "name": "Driftling",
     "rarity": "Uncommon",
     "category": "Forest",
     "family": [
       "Cave Dweller"
     ],
-    "input1": "",
-    "input2": "",
+    "input1": "Ant Shard",
+    "input2": "Elusive",
     "id_result": "Woodchucker",
     "id_origin": [
-      "Solsnatcher",
-      "Honey Badger"
+      "Solsnatcher"
     ]
   },
   "U59": {
@@ -1496,23 +1473,11 @@
     "input2": "",
     "id_result": "Parched",
     "id_origin": [
-      "Gazer"
+      "Gazer",
+      "Honey Badger"
     ]
   },
   "U61": {
-    "name": "Woodchucker",
-    "rarity": "Uncommon",
-    "category": "Forest",
-    "family": [],
-    "input1": "",
-    "input2": "",
-    "id_result": "Bloodbat",
-    "id_origin": [
-      "Queen Ant",
-      "Driftling"
-    ]
-  },
-  "U61-1": {
     "name": "Hawk",
     "rarity": "Uncommon",
     "category": "Forest",
@@ -1523,6 +1488,18 @@
     "input2": "",
     "id_result": "Bloodbat",
     "id_origin": []
+  },
+  "U61-1": {
+    "name": "Woodchucker",
+    "rarity": "Uncommon",
+    "category": "Forest",
+    "family": [],
+    "input1": "",
+    "input2": "",
+    "id_result": "Bloodbat",
+    "id_origin": [
+      "Driftling"
+    ]
   },
   "U62": {
     "name": "Solar",
@@ -1551,6 +1528,19 @@
     ]
   },
   "U64": {
+    "name": "Bloodbat",
+    "rarity": "Uncommon",
+    "category": "Forest",
+    "family": [],
+    "input1": "",
+    "input2": "",
+    "id_result": "Woodlouse",
+    "id_origin": [
+      "Hawk",
+      "Woodchucker"
+    ]
+  },
+  "U64-1": {
     "name": "Dung Beetle",
     "rarity": "Uncommon",
     "category": "Forest",
@@ -1562,19 +1552,6 @@
     "input2": "",
     "id_result": "Woodlouse",
     "id_origin": []
-  },
-  "U64-1": {
-    "name": "Bloodbat",
-    "rarity": "Uncommon",
-    "category": "Forest",
-    "family": [],
-    "input1": "",
-    "input2": "",
-    "id_result": "Woodlouse",
-    "id_origin": [
-      "Woodchucker",
-      "Hawk"
-    ]
   },
   "U65": {
     "name": "Dustybit",
@@ -1590,18 +1567,6 @@
       "Solar"
     ]
   },
-  "U66": {
-    "name": "Rabbit Cat",
-    "rarity": "Uncommon",
-    "category": "Forest",
-    "family": [
-      "Crime"
-    ],
-    "input1": "",
-    "input2": "",
-    "id_result": "Woodlouse",
-    "id_origin": []
-  },
   "U67": {
     "name": "Woodlouse",
     "rarity": "Uncommon",
@@ -1615,9 +1580,8 @@
     "input2": "",
     "id_result": "Rat",
     "id_origin": [
-      "Dung Beetle",
       "Bloodbat",
-      "Rabbit Cat"
+      "Dung Beetle"
     ]
   },
   "U68": {
@@ -1629,7 +1593,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Sprawl",
     "id_origin": [
       "Dustybit"
     ]
@@ -1654,12 +1618,24 @@
     "category": "Forest",
     "family": [
       "Panda",
-      "Evasive"
+      "Elusive"
     ],
     "input1": "",
     "input2": "",
     "id_result": "Rat",
     "id_origin": []
+  },
+  "U71": {
+    "name": "Sprawl",
+    "rarity": "Uncommon",
+    "category": "Water",
+    "family": [],
+    "input1": "",
+    "input2": "",
+    "id_result": "",
+    "id_origin": [
+      "Ember"
+    ]
   },
   "U72": {
     "name": "Sneaky Tiki",
@@ -1698,22 +1674,33 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Rat",
     "id_origin": []
   },
   "U78": {
     "name": "Honeymite",
     "rarity": "Uncommon",
     "category": "Combat",
-    "family": [
-      "Bug"
-    ],
+    "family": [],
     "input1": "",
     "input2": "",
     "id_result": "",
     "id_origin": [
       "Shrieky Tiki"
     ]
+  },
+  "U79": {
+    "name": "Queen Ant",
+    "rarity": "Uncommon",
+    "category": "Forest",
+    "family": [
+      "Bug",
+      "Elusive"
+    ],
+    "input1": "Ant Shard",
+    "input2": "Elusive",
+    "id_result": "Rat",
+    "id_origin": []
   },
   "U85": {
     "name": "June Bug",
@@ -1740,6 +1727,8 @@
     "id_origin": [
       "Woodlouse",
       "Red Panda",
+      "Woodpecker",
+      "Queen Ant",
       "June Bug"
     ]
   },
@@ -1800,6 +1789,18 @@
     "id_origin": [
       "Moth"
     ]
+  },
+  "U106": {
+    "name": "Rabbit Cat",
+    "rarity": "Uncommon",
+    "category": "Forest",
+    "family": [
+      "Crime"
+    ],
+    "input1": "",
+    "input2": "",
+    "id_result": "",
+    "id_origin": []
   },
   "R1": {
     "name": "Sylvan",
@@ -1979,7 +1980,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Dreadwing",
+    "id_result": "Thyst",
     "id_origin": [
       "Invisibug",
       "Hideongeon"
@@ -1989,7 +1990,9 @@
     "name": "Drowned",
     "rarity": "Rare",
     "category": "Combat",
-    "family": [],
+    "family": [
+      "Drowned"
+    ],
     "input1": "",
     "input2": "",
     "id_result": "Star Sentry",
@@ -2008,7 +2011,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Thyst",
     "id_origin": []
   },
   "R21": {
@@ -2032,7 +2035,7 @@
     ],
     "input1": "Shulker",
     "input2": "Demon",
-    "id_result": "Dreadwing",
+    "id_result": "Thyst",
     "id_origin": []
   },
   "R23": {
@@ -2072,7 +2075,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Dreadwing",
+    "id_result": "Thyst",
     "id_origin": []
   },
   "R26": {
@@ -2120,7 +2123,7 @@
     "family": [],
     "input1": "Lapis Skeleton Shard",
     "input2": "Rare+",
-    "id_result": "Thyst",
+    "id_result": "Kada Knight",
     "id_origin": [
       "Revenant"
     ]
@@ -2128,15 +2131,18 @@
   "R31": {
     "name": "Thyst",
     "rarity": "Rare",
-    "category": "Combat",
+    "category": "Forest",
     "family": [
       "Cave Dweller"
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Kada Knight",
+    "id_result": "Dreadwing",
     "id_origin": [
-      "Skeletor"
+      "Beetle",
+      "Vulture",
+      "Hideondra",
+      "Bitbug"
     ]
   },
   "R32": {
@@ -2200,7 +2206,7 @@
     "input2": "",
     "id_result": "Wither Spectre",
     "id_origin": [
-      "Thyst",
+      "Skeletor",
       "Quartzfang"
     ]
   },
@@ -2213,7 +2219,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Dreadwing",
     "id_origin": []
   },
   "R38": {
@@ -2269,7 +2275,7 @@
     "family": [
       "Bug"
     ],
-    "input1": "Shard",
+    "input1": "Earthworm Shard",
     "input2": "Invisibug Shard",
     "id_result": "Dreadwing",
     "id_origin": []
@@ -2304,6 +2310,16 @@
     ]
   },
   "R46": {
+    "name": "Wild Hog",
+    "rarity": "Rare",
+    "category": "Forest",
+    "family": [],
+    "input1": "Groundhog Shard",
+    "input2": "Honeyhog Shard",
+    "id_result": "Dreadwing",
+    "id_origin": []
+  },
+  "R47": {
     "name": "Bullfrog",
     "rarity": "Rare",
     "category": "Water",
@@ -2314,16 +2330,6 @@
     "input1": "Frog",
     "input2": "Forest&Rare+",
     "id_result": "Joydive",
-    "id_origin": []
-  },
-  "R48": {
-    "name": "Wild Hog",
-    "rarity": "Rare",
-    "category": "Forest",
-    "family": [],
-    "input1": "Groundhog Shard",
-    "input2": "Honeyhog Shard",
-    "id_result": "Dreadwing",
     "id_origin": []
   },
   "R49": {
@@ -2337,10 +2343,9 @@
     "input2": "Rare+",
     "id_result": "Fungloom",
     "id_origin": [
-      "Beetle",
-      "Hideondra",
-      "Bitbug",
+      "Thyst",
       "Hideonring",
+      "Hummingbird",
       "Badger",
       "Ladybug",
       "Wild Hog"
@@ -2462,7 +2467,7 @@
     ],
     "input1": "Bird",
     "input2": "Rare+",
-    "id_result": "",
+    "id_result": "Hivethief",
     "id_origin": []
   },
   "R59": {
@@ -2510,7 +2515,7 @@
     "category": "Water",
     "family": [
       "Creation",
-      "Evasive"
+      "Elusive"
     ],
     "input1": "Creation&Epic+",
     "input2": "Shrieky Tiki Shard|Sneaky Tiki Shard|Cheeky Tiki Shard",
@@ -2539,6 +2544,7 @@
     "id_result": "Parakeet",
     "id_origin": [
       "Hewver",
+      "Falcon",
       "Gecko"
     ]
   },
@@ -2576,7 +2582,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Hideyho",
     "id_origin": [
       "Hivethief"
     ]
@@ -2586,7 +2592,7 @@
     "rarity": "Rare",
     "category": "Water",
     "family": [
-      "Evasive"
+      "Elusive"
     ],
     "input1": "",
     "input2": "",
@@ -2607,7 +2613,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Billygoat",
+    "id_result": "Scrappy",
     "id_origin": [
       "Snoozle"
     ]
@@ -2622,20 +2628,6 @@
     "id_result": "Hideyho",
     "id_origin": []
   },
-  "R71": {
-    "name": "Billygoat",
-    "rarity": "Rare",
-    "category": "Combat",
-    "family": [
-      "Arctic"
-    ],
-    "input1": "",
-    "input2": "",
-    "id_result": "Scrappy",
-    "id_origin": [
-      "Rockmite"
-    ]
-  },
   "R72": {
     "name": "Scrappy",
     "rarity": "Rare",
@@ -2647,7 +2639,7 @@
     "input2": "",
     "id_result": "Chuckwalla",
     "id_origin": [
-      "Billygoat"
+      "Rockmite"
     ]
   },
   "R73": {
@@ -2661,6 +2653,7 @@
     "input2": "",
     "id_result": "Hideonfloor",
     "id_origin": [
+      "Parakeet",
       "Anteater"
     ]
   },
@@ -2688,7 +2681,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Stoneworm",
+    "id_result": "Billygoat",
     "id_origin": [
       "Scrappy"
     ]
@@ -2722,17 +2715,18 @@
     ]
   },
   "R78": {
-    "name": "Black Widow",
+    "name": "Billygoat",
     "rarity": "Rare",
     "category": "Combat",
     "family": [
-      "Spider",
-      "Evasive"
+      "Arctic"
     ],
     "input1": "",
     "input2": "",
     "id_result": "Stoneworm",
-    "id_origin": []
+    "id_origin": [
+      "Chuckwalla"
+    ]
   },
   "R79": {
     "name": "Hideonwall",
@@ -2771,8 +2765,7 @@
     "input2": "",
     "id_result": "Zombuddy",
     "id_origin": [
-      "Chuckwalla",
-      "Black Widow"
+      "Billygoat"
     ]
   },
   "R82": {
@@ -2830,6 +2823,18 @@
     ]
   },
   "R86": {
+    "name": "Goldolot",
+    "rarity": "Rare",
+    "category": "Water",
+    "family": [
+      "Axolotl"
+    ],
+    "input1": "",
+    "input2": "",
+    "id_result": "Giant Water Bug",
+    "id_origin": []
+  },
+  "R86-1": {
     "name": "Troodon",
     "rarity": "Rare",
     "category": "Water",
@@ -2843,16 +2848,17 @@
       "Stingray"
     ]
   },
-  "R86-1": {
-    "name": "Goldolot",
+  "R87": {
+    "name": "Black Widow",
     "rarity": "Rare",
-    "category": "Water",
+    "category": "Combat",
     "family": [
-      "Axolotl"
+      "Spider",
+      "Elusive"
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Giant Water Bug",
+    "id_result": "",
     "id_origin": []
   },
   "R88": {
@@ -2878,8 +2884,8 @@
     "input2": "",
     "id_result": "Torrid",
     "id_origin": [
-      "Troodon",
-      "Goldolot"
+      "Goldolot",
+      "Troodon"
     ]
   },
   "R91": {
@@ -3010,14 +3016,14 @@
   "E7": {
     "name": "Fenlord",
     "rarity": "Epic",
-    "category": "Water",
+    "category": "Forest",
     "family": [
       "Frog",
       "Amphibian"
     ],
     "input1": "Bullfrog Shard",
     "input2": "Forest&Rare+",
-    "id_result": "Abyssal Miner",
+    "id_result": "XYZ",
     "id_origin": []
   },
   "E8": {
@@ -3026,15 +3032,14 @@
     "category": "Water",
     "family": [
       "Cave Dweller",
-      "Evasive"
+      "Elusive"
     ],
     "input1": "",
     "input2": "",
     "id_result": "Water Hydra",
     "id_origin": [
       "Cryo",
-      "Leviathan",
-      "Fenlord"
+      "Leviathan"
     ]
   },
   "E9": {
@@ -3081,10 +3086,10 @@
     "rarity": "Epic",
     "category": "Combat",
     "family": [
-      "Evasive"
+      "Elusive"
     ],
     "input1": "Zealot Shard",
-    "input2": "Combat&Evasive",
+    "input2": "Combat&Elusive",
     "id_result": "Bal",
     "id_origin": [
       "Aero",
@@ -3113,7 +3118,7 @@
       "Amphibian"
     ],
     "input1": "Moray Eel Shard",
-    "input2": "Firefox Shard|Firefly Shard|Eel Shard",
+    "input2": "Eel Shard|Firefox Shard|Firefly Shard",
     "id_result": "Water Hydra",
     "id_origin": []
   },
@@ -3140,7 +3145,7 @@
     ],
     "input1": "Shulker&Rare+",
     "input2": "Epic+",
-    "id_result": "",
+    "id_result": "XYZ",
     "id_origin": []
   },
   "E17": {
@@ -3235,7 +3240,7 @@
     "rarity": "Epic",
     "category": "Combat",
     "family": [
-      "Evasive",
+      "Elusive",
       "Poltergeist"
     ],
     "input1": "",
@@ -3250,7 +3255,7 @@
     "rarity": "Epic",
     "category": "Forest",
     "family": [
-      "Evasive"
+      "Elusive"
     ],
     "input1": "",
     "input2": "",
@@ -3278,11 +3283,11 @@
     "rarity": "Epic",
     "category": "Combat",
     "family": [
-      "Evasive"
+      "Elusive"
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Inferno Demonlord",
+    "id_result": "Ghost",
     "id_origin": [
       "Mimic"
     ]
@@ -3298,20 +3303,6 @@
     "input2": "Epic+",
     "id_result": "XYZ",
     "id_origin": []
-  },
-  "E29": {
-    "name": "Inferno Demonlord",
-    "rarity": "Epic",
-    "category": "Combat",
-    "family": [
-      "Demon"
-    ],
-    "input1": "",
-    "input2": "",
-    "id_result": "Ghost",
-    "id_origin": [
-      "Barbarian Duke X"
-    ]
   },
   "E30": {
     "name": "Caiman",
@@ -3363,7 +3354,7 @@
     "input2": "",
     "id_result": "Sphinx",
     "id_origin": [
-      "Inferno Demonlord",
+      "Barbarian Duke X",
       "Caiman"
     ]
   },
@@ -3374,17 +3365,20 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "Thorn",
+    "id_result": "Dive Ghast",
     "id_origin": [
       "Terra",
       "Pandarai",
+      "Fenlord",
       "Iguana",
       "Lunar Moth",
+      "Hideonsack",
       "Murderwing",
       "Komodo Dragon",
       "Wolverine",
       "Toucan",
-      "Firefly"
+      "Firefly",
+      "Chameleon"
     ]
   },
   "E35": {
@@ -3421,7 +3415,7 @@
     ],
     "input1": "Firefly Shard",
     "input2": "Dragon",
-    "id_result": "Thorn",
+    "id_result": "Dive Ghast",
     "id_origin": []
   },
   "E39": {
@@ -3435,19 +3429,6 @@
     "id_origin": [
       "Ghost",
       "Cavernshade"
-    ]
-  },
-  "E40": {
-    "name": "Thorn",
-    "rarity": "Epic",
-    "category": "Forest",
-    "family": [],
-    "input1": "",
-    "input2": "",
-    "id_result": "Dive Ghast",
-    "id_origin": [
-      "XYZ",
-      "Dragonfly"
     ]
   },
   "E42": {
@@ -3471,7 +3452,8 @@
     "input2": "",
     "id_result": "Mountain Goat",
     "id_origin": [
-      "Thorn"
+      "XYZ",
+      "Dragonfly"
     ]
   },
   "E44": {
@@ -3497,7 +3479,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Scarf",
+    "id_result": "Inferno Demonlord",
     "id_origin": [
       "King Minos"
     ]
@@ -3511,19 +3493,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Scarf",
-    "id_origin": []
-  },
-  "E46": {
-    "name": "Rabbit Godmother",
-    "rarity": "Epic",
-    "category": "Forest",
-    "family": [
-      "Crime"
-    ],
-    "input1": "",
-    "input2": "",
-    "id_result": "Mountain Goat",
+    "id_result": "Inferno Demonlord",
     "id_origin": []
   },
   "E47": {
@@ -3532,13 +3502,28 @@
     "category": "Water",
     "family": [
       "Crustacean",
-      "Evasive"
+      "Elusive"
     ],
     "input1": "",
     "input2": "",
     "id_result": "",
     "id_origin": [
       "Silkbreeze"
+    ]
+  },
+  "E48": {
+    "name": "Inferno Demonlord",
+    "rarity": "Epic",
+    "category": "Combat",
+    "family": [
+      "Demon"
+    ],
+    "input1": "",
+    "input2": "",
+    "id_result": "Scarf",
+    "id_origin": [
+      "Littlefoot",
+      "Gemzie"
     ]
   },
   "E49": {
@@ -3571,7 +3556,7 @@
     "category": "Forest",
     "family": [
       "Bug",
-      "Evasive"
+      "Elusive"
     ],
     "input1": "Queen Bee Shard",
     "input2": "Lunar Moth Shard",
@@ -3585,11 +3570,22 @@
     "family": [],
     "input1": "",
     "input2": "",
+    "id_result": "Thorn",
+    "id_origin": [
+      "Inferno Demonlord",
+      "Bonzo"
+    ]
+  },
+  "E57": {
+    "name": "Thorn",
+    "rarity": "Epic",
+    "category": "Combat",
+    "family": [],
+    "input1": "",
+    "input2": "",
     "id_result": "Scatha",
     "id_origin": [
-      "Littlefoot",
-      "Gemzie",
-      "Bonzo"
+      "Scarf"
     ]
   },
   "E58": {
@@ -3602,7 +3598,6 @@
     "id_result": "",
     "id_origin": [
       "Dive Ghast",
-      "Rabbit Godmother",
       "Queen Bee",
       "Beeheemoth"
     ]
@@ -3618,7 +3613,7 @@
     "input2": "",
     "id_result": "",
     "id_origin": [
-      "Scarf"
+      "Thorn"
     ]
   },
   "E63": {
@@ -3679,7 +3674,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Sparrow",
+    "id_result": "XYZ",
     "id_origin": []
   },
   "L5": {
@@ -3755,7 +3750,7 @@
     "family": [
       "Crime"
     ],
-    "input1": "Rabbit Godmother Shard",
+    "input1": "Shard",
     "input2": "Combat&Legendary+",
     "id_result": "Macaw",
     "id_origin": []
@@ -3777,7 +3772,9 @@
     "name": "Lapis Creeper",
     "rarity": "Legendary",
     "category": "Combat",
-    "family": [],
+    "family": [
+      "Lapis"
+    ],
     "input1": "Lapis Skeleton Shard",
     "input2": "Ghost Shard|Legendary+",
     "id_result": "Kraken",
@@ -3885,7 +3882,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Cinderbat",
+    "id_result": "",
     "id_origin": [
       "Tenebris",
       "Wyvern",
@@ -3928,7 +3925,7 @@
     ],
     "input1": "Shulker&Epic+",
     "input2": "Legendary+",
-    "id_result": "Cinderbat",
+    "id_result": "",
     "id_origin": []
   },
   "L26": {
@@ -3937,7 +3934,7 @@
     "category": "Water",
     "family": [
       "Creation",
-      "Evasive"
+      "Elusive"
     ],
     "input1": "",
     "input2": "",
@@ -3969,10 +3966,7 @@
     "input1": "",
     "input2": "",
     "id_result": "Grizzly Bear",
-    "id_origin": [
-      "Macaw",
-      "Hideonbox"
-    ]
+    "id_origin": []
   },
   "L29": {
     "name": "Megalith",
@@ -4010,7 +4004,7 @@
     ],
     "input1": "Bird",
     "input2": "Legendary+",
-    "id_result": "Grizzly Bear",
+    "id_result": "",
     "id_origin": []
   },
   "L32": {
@@ -4044,7 +4038,7 @@
     ],
     "input1": "Condor Shard",
     "input2": "Legendary+",
-    "id_result": "Grizzly Bear",
+    "id_result": "",
     "id_origin": []
   },
   "L35": {
@@ -4096,7 +4090,7 @@
     ],
     "input1": "Apex Dragon Shard",
     "input2": "Kraken Shard",
-    "id_result": "",
+    "id_result": "Paragon",
     "id_origin": []
   },
   "L40": {
@@ -4108,9 +4102,7 @@
     "input2": "",
     "id_result": "Rainbug",
     "id_origin": [
-      "Cinderbat",
-      "Condor",
-      "Dodo"
+      "Cinderbat"
     ]
   },
   "L41": {
@@ -4180,7 +4172,7 @@
       "Reptile",
       "Serpent",
       "Scaled",
-      "Evasive"
+      "Elusive"
     ],
     "input1": "",
     "input2": "",
@@ -4223,6 +4215,7 @@
       "Power Dragon",
       "Apex Dragon",
       "Jormung",
+      "Etherdrake",
       "Molthorn",
       "Primordial"
     ]
