@@ -25,24 +25,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -129,24 +111,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -233,24 +197,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -628,14 +574,18 @@
         "c": "green"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": " Animal ",
+        "t": "Animal ",
         "c": "green"
       },
       {
@@ -645,24 +595,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -883,14 +815,18 @@
         "c": "green"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "blue"
       },
       {
         "t": " "
       },
       {
-        "t": " Aquatic ",
+        "t": "Aquatic ",
         "c": "blue"
       },
       {
@@ -900,24 +836,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -1621,14 +1539,18 @@
         "c": "green"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "dark_red"
       },
       {
         "t": " "
       },
       {
-        "t": " Arthropod ",
+        "t": "Arthropod ",
         "c": "dark_red"
       },
       {
@@ -1638,24 +1560,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -1732,19 +1636,15 @@
         "t": " "
       },
       {
-        "t": "chance to obtain",
+        "t": "chance to obtain an extra ",
         "c": "gray"
+      },
+      {
+        "t": "Winter Gift",
+        "c": "white"
       },
       {
         "t": " "
-      },
-      {
-        "t": "an extra ",
-        "c": "gray"
-      },
-      {
-        "t": "Winter Gift ",
-        "c": "white"
       },
       {
         "t": "when finding one.",
@@ -1954,24 +1854,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -2049,21 +1931,14 @@
         "c": "dark_green"
       },
       {
-        "t": " "
-      },
-      {
-        "t": " Sweep ",
+        "t": " Sweep",
         "c": "dark_green"
       },
       {
-        "t": "towards Fig",
-        "c": "gray"
-      },
-      {
         "t": " "
       },
       {
-        "t": "Trees.",
+        "t": "towards Fig Trees.",
         "c": "gray"
       },
       {
@@ -2319,14 +2194,18 @@
         "c": "green"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "dark_purple"
       },
       {
         "t": " "
       },
       {
-        "t": " Ender ",
+        "t": "Ender ",
         "c": "dark_purple"
       },
       {
@@ -2336,24 +2215,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -2488,14 +2349,14 @@
         "t": " "
       },
       {
-        "t": "chance to",
+        "t": "chance to gain",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "gain extra Chums.",
+        "t": "extra Chums.",
         "c": "gray"
       }
     ],
@@ -2611,8 +2472,11 @@
         "c": "dark_green"
       },
       {
-        "t": "by ",
+        "t": "by",
         "c": "gray"
+      },
+      {
+        "t": " "
       },
       {
         "range": [
@@ -2776,9 +2640,6 @@
         ],
         "unit": "%",
         "c": "green"
-      },
-      {
-        "t": " "
       },
       {
         "t": " "
@@ -3076,18 +2937,14 @@
         "c": "dark_green"
       },
       {
-        "t": " while in ",
+        "t": " while in",
         "c": "gray"
-      },
-      {
-        "t": "The",
-        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "Garden",
+        "t": "The Garden",
         "c": "green"
       },
       {
@@ -3324,14 +3181,18 @@
         "c": "green"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "dark_red"
       },
       {
         "t": " "
       },
       {
-        "t": " Infernal ",
+        "t": "Infernal ",
         "c": "dark_red"
       },
       {
@@ -3341,24 +3202,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -3458,14 +3301,18 @@
         "c": "green"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "dark_green"
       },
       {
         "t": " "
       },
       {
-        "t": " Woodland ",
+        "t": "Woodland ",
         "c": "dark_green"
       },
       {
@@ -3475,24 +3322,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -3728,14 +3557,14 @@
         "c": "green"
       },
       {
-        "t": " more Pet EXP",
+        "t": " more Pet",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "from Fann",
+        "t": "EXP from Fann",
         "c": "gray"
       },
       {
@@ -4100,11 +3929,15 @@
         "c": "aqua"
       },
       {
-        "t": " while on",
+        "t": " while",
         "c": "gray"
       },
       {
         "t": " "
+      },
+      {
+        "t": "on ",
+        "c": "gray"
       },
       {
         "t": "Fishing Islands",
@@ -4211,24 +4044,6 @@
       {
         "t": "mobs.",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -4457,11 +4272,15 @@
         "c": "aqua"
       },
       {
-        "t": " while on",
+        "t": " while",
         "c": "gray"
       },
       {
         "t": " "
+      },
+      {
+        "t": "on ",
+        "c": "gray"
       },
       {
         "t": "Mining Islands",
@@ -4555,14 +4374,18 @@
         "c": "green"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "white"
       },
       {
         "t": " "
       },
       {
-        "t": " Frozen ",
+        "t": "Frozen ",
         "c": "white"
       },
       {
@@ -4572,24 +4395,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -4702,9 +4507,6 @@
         "c": "gold"
       },
       {
-        "t": " "
-      },
-      {
         "t": " Ore Fortune",
         "c": "gold"
       },
@@ -4762,14 +4564,18 @@
         "c": "green"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "white"
       },
       {
         "t": " "
       },
       {
-        "t": " Skeletal ",
+        "t": "Skeletal ",
         "c": "white"
       },
       {
@@ -4779,24 +4585,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -4968,14 +4756,18 @@
         "c": "green"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "gold"
       },
       {
         "t": " "
       },
       {
-        "t": " Subterranean ",
+        "t": "Subterranean ",
         "c": "gold"
       },
       {
@@ -4985,24 +4777,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -5122,14 +4896,18 @@
         "c": "green"
       },
       {
-        "t": "against",
+        "t": "against ",
         "c": "gray"
+      },
+      {
+        "t": "",
+        "c": "dark_purple"
       },
       {
         "t": " "
       },
       {
-        "t": " Arcane ",
+        "t": "Arcane ",
         "c": "dark_purple"
       },
       {
@@ -5139,24 +4917,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -5441,7 +5201,14 @@
         "c": "dark_green"
       },
       {
-        "t": " during the day.",
+        "t": " during the",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "day.",
         "c": "gray"
       }
     ],
@@ -5512,14 +5279,18 @@
         "t": " "
       },
       {
-        "t": " Pressure Resistance",
+        "t": " Pressure",
         "c": "blue"
       },
       {
         "t": " "
       },
       {
-        "t": "while on ",
+        "t": "Resistance",
+        "c": "blue"
+      },
+      {
+        "t": " while on ",
         "c": "gray"
       },
       {
@@ -5622,14 +5393,18 @@
         "c": "green"
       },
       {
-        "t": "against",
+        "t": "against ",
+        "c": "gray"
+      },
+      {
+        "t": "",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": " Airborne ",
+        "t": "Airborne ",
         "c": "gray"
       },
       {
@@ -5639,24 +5414,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Resistance",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -5807,14 +5564,14 @@
         "t": " "
       },
       {
-        "t": "chance to",
+        "t": "chance",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "contain double the ",
+        "t": "to contain double the ",
         "c": "gray"
       },
       {
@@ -5912,14 +5669,14 @@
         "t": " "
       },
       {
-        "t": "chance to attract a second",
+        "t": "chance to attract a",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "mob.",
+        "t": "second mob.",
         "c": "gray"
       }
     ],
@@ -6004,24 +5761,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -6104,24 +5843,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -6204,24 +5925,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -6302,25 +6005,21 @@
         "c": "gold"
       },
       {
-        "t": " for every",
+        "t": " for",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "digit in your Fig Log collection. ",
+        "t": "every digit in your Fig Log collection.",
         "c": "gray"
-      },
-      {
-        "t": "(Max",
-        "c": "dark_gray"
       },
       {
         "t": " "
       },
       {
-        "t": "10M collection)",
+        "t": "(Max 10M collection)",
         "c": "dark_gray"
       }
     ],
@@ -6441,18 +6140,14 @@
         "t": " "
       },
       {
-        "t": "more ",
+        "t": "more",
         "c": "gray"
-      },
-      {
-        "t": "HOTM",
-        "c": "dark_purple"
       },
       {
         "t": " "
       },
       {
-        "t": "Exp",
+        "t": "HOTM Exp",
         "c": "dark_purple"
       },
       {
@@ -6521,24 +6216,21 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
-        "t": " chance to find",
+        "t": " chance",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "an extra item in Treasure Chests",
+        "t": "to find an extra item in Treasure",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "and the Crystal Nucleus.",
+        "t": "Chests and the Crystal Nucleus.",
         "c": "gray"
       }
     ],
@@ -7180,21 +6872,14 @@
         "c": "dark_green"
       },
       {
-        "t": " "
-      },
-      {
-        "t": " Sweep ",
+        "t": " Sweep",
         "c": "dark_green"
       },
       {
-        "t": "towards",
-        "c": "gray"
-      },
-      {
         "t": " "
       },
       {
-        "t": "Mangrove Trees.",
+        "t": "towards Mangrove Trees.",
         "c": "gray"
       },
       {
@@ -7258,18 +6943,19 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": " Damage",
+        "t": "",
         "c": "red"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Damage ",
+        "c": "red"
       },
       {
         "t": "against ",
@@ -7611,18 +7297,14 @@
         "c": "gold"
       },
       {
-        "t": "on ",
+        "t": "on",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "dark_green"
       },
       {
         "t": " "
       },
       {
-        "t": "Pests",
+        "t": " Pests",
         "c": "dark_green"
       },
       {
@@ -7871,23 +7553,31 @@
           10
         ],
         "unit": "%",
+        "c": "dark_gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "range": [
+          1.3,
+          13
+        ],
+        "unit": "%",
         "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": " "
-      },
-      {
-        "t": "more stats from the weapon they",
+        "t": "more stats from the",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "hold.",
+        "t": "weapon they hold.",
         "c": "gray"
       }
     ],
@@ -8523,14 +8213,14 @@
         "t": " "
       },
       {
-        "t": "of your max health",
+        "t": "of your max",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "each time you kill a mob.",
+        "t": "health each time you kill a mob.",
         "c": "gray"
       },
       {
@@ -8627,21 +8317,17 @@
         "c": "gold"
       },
       {
-        "t": " for",
+        "t": " "
+      },
+      {
+        "t": "for every digit in your Mangrove",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "every digit in your Mangrove Log",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "collection. ",
+        "t": "Log collection. ",
         "c": "gray"
       },
       {
@@ -8698,19 +8384,19 @@
         "c": "gray"
       },
       {
-        "t": " Damage",
+        "t": " Damage ",
         "c": "red"
-      },
-      {
-        "t": " "
       },
       {
         "t": "against ",
         "c": "gray"
       },
       {
-        "t": " Woodland ",
+        "t": " Woodland",
         "c": "dark_green"
+      },
+      {
+        "t": " "
       },
       {
         "t": "mobs",
@@ -9375,14 +9061,14 @@
         "c": "green"
       },
       {
-        "t": " less time to upgrade",
+        "t": " less time to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "a Pet.",
+        "t": "upgrade a Pet.",
         "c": "gray"
       }
     ],
@@ -9687,7 +9373,14 @@
         "t": " "
       },
       {
-        "t": " Strength",
+        "t": "",
+        "c": "red"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Strength",
         "c": "red"
       },
       {
@@ -9927,14 +9620,14 @@
         "t": " "
       },
       {
-        "t": "more likely to",
+        "t": "more",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "be ",
+        "t": "likely to be ",
         "c": "gray"
       },
       {
@@ -9989,18 +9682,19 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": " Damage",
+        "t": "",
         "c": "red"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Damage ",
+        "c": "red"
       },
       {
         "t": "against ",
@@ -10132,14 +9826,14 @@
         "t": " "
       },
       {
-        "t": " Foraging",
+        "t": "",
         "c": "gold"
       },
       {
         "t": " "
       },
       {
-        "t": "Fortune",
+        "t": "Foraging Fortune",
         "c": "gold"
       },
       {
@@ -10457,18 +10151,19 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": " Damage",
+        "t": "",
         "c": "red"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Damage ",
+        "c": "red"
       },
       {
         "t": "against ",
@@ -10577,18 +10272,14 @@
         "t": " "
       },
       {
-        "t": "while in the ",
+        "t": "while in the",
         "c": "gray"
-      },
-      {
-        "t": "Tomb",
-        "c": "red"
       },
       {
         "t": " "
       },
       {
-        "t": "Floodway",
+        "t": "Tomb Floodway",
         "c": "red"
       },
       {
@@ -10638,18 +10329,19 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": " Damage",
+        "t": "",
         "c": "red"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Damage ",
+        "c": "red"
       },
       {
         "t": "against ",
@@ -10748,14 +10440,14 @@
         "c": "green"
       },
       {
-        "t": " more likely to",
+        "t": " more likely",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "be ",
+        "t": "to be ",
         "c": "gray"
       },
       {
@@ -11026,9 +10718,6 @@
         "c": "light_purple"
       },
       {
-        "t": " "
-      },
-      {
         "t": " ",
         "c": "gray"
       },
@@ -11130,9 +10819,6 @@
         ],
         "unit": "%",
         "c": "green"
-      },
-      {
-        "t": " "
       },
       {
         "t": " "
@@ -11479,9 +11165,6 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
         "t": " extra",
         "c": "gray"
       },
@@ -11732,22 +11415,26 @@
         "t": " "
       },
       {
-        "t": "chance to instantly",
+        "t": "chance to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "attract a mob when lathering a ",
+        "t": "instantly attract a mob when",
         "c": "gray"
       },
       {
-        "t": "Tree",
+        "t": " "
+      },
+      {
+        "t": "lathering a ",
+        "c": "gray"
+      },
+      {
+        "t": "Tree ",
         "c": "green"
-      },
-      {
-        "t": " "
       },
       {
         "t": "with ",
@@ -11788,8 +11475,8 @@
     ]
   },
   "U58": {
-    "title": "Elusive Ruler",
-    "id": "elusive_ruler",
+    "title": "Subterranean Ruler",
+    "id": "subterranean_ruler",
     "description": [
       {
         "t": "Grants ",
@@ -11804,26 +11491,30 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": " Damage",
+        "t": "",
         "c": "red"
       },
       {
         "t": " "
       },
       {
+        "t": "Damage ",
+        "c": "red"
+      },
+      {
         "t": "against ",
         "c": "gray"
       },
       {
-        "t": " Elusive ",
-        "c": "light_purple"
+        "t": " Subterranean",
+        "c": "gold"
+      },
+      {
+        "t": " "
       },
       {
         "t": "mobs",
@@ -11845,87 +11536,46 @@
           "c": "gray"
         },
         {
-          "t": "Fusing ",
+          "t": "Catch a ",
           "c": "gray"
         },
         {
-          "t": "Ant ",
-          "c": "white"
-        },
-        {
-          "t": "Shard ",
-          "c": "gray"
-        },
-        {
-          "t": "with ",
-          "c": "gray"
-        },
-        {
-          "t": "Elusive",
+          "t": "Driftling",
           "c": "green"
+        },
+        {
+          "t": " with a ",
+          "c": "gray"
+        },
+        {
+          "t": "Critter",
+          "c": "red"
         },
         {
           "t": " "
         },
         {
-          "t": "Family",
+          "t": "Capsule",
+          "c": "red"
+        },
+        {
+          "t": " in the ",
           "c": "gray"
         },
         {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Queen Ant ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Place ",
-          "c": "gray"
-        },
-        {
-          "t": "Hunting Traps ",
+          "t": "Cavern Biome",
           "c": "gold"
         },
         {
-          "t": "in ",
+          "t": " of the",
           "c": "gray"
         },
         {
-          "t": "Ant's Cave",
-          "c": "gold"
+          "t": " "
+        },
+        {
+          "t": "Critter Safari",
+          "c": "dark_green"
         },
         {
           "t": ".",
@@ -12095,18 +11745,19 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": " Damage",
+        "t": "",
         "c": "red"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Damage ",
+        "c": "red"
       },
       {
         "t": "against ",
@@ -12253,7 +11904,7 @@
           1,
           10
         ],
-        "unit": "%",
+        "unit": "",
         "c": "gold"
       },
       {
@@ -12528,9 +12179,6 @@
         "t": " "
       },
       {
-        "t": " "
-      },
-      {
         "t": "chance to bring ",
         "c": "gray"
       },
@@ -12645,8 +12293,8 @@
       },
       {
         "range": [
-          0.25,
-          2.5
+          1,
+          10
         ],
         "unit": "%",
         "c": "green"
@@ -12729,14 +12377,11 @@
       },
       {
         "range": [
-          1,
-          10
+          0.25,
+          2.5
         ],
         "unit": "%",
         "c": "green"
-      },
-      {
-        "t": " "
       },
       {
         "t": " "
@@ -13045,9 +12690,6 @@
         "t": " "
       },
       {
-        "t": " "
-      },
-      {
         "t": "chance to bring ",
         "c": "gray"
       },
@@ -13139,14 +12781,14 @@
         "c": "gray"
       },
       {
-        "t": "Heart of the Forest",
+        "t": "Heart of the",
         "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "Exp",
+        "t": "Forest Exp",
         "c": "green"
       },
       {
@@ -13287,14 +12929,10 @@
         "c": "gold"
       },
       {
-        "t": " while",
-        "c": "gray"
-      },
-      {
         "t": " "
       },
       {
-        "t": "in the ",
+        "t": "while in the ",
         "c": "gray"
       },
       {
@@ -13355,9 +12993,6 @@
         "t": " "
       },
       {
-        "t": " "
-      },
-      {
         "t": "chance to bring ",
         "c": "gray"
       },
@@ -13412,18 +13047,19 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": " Damage",
+        "t": "",
         "c": "red"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Damage ",
+        "c": "red"
       },
       {
         "t": "against ",
@@ -13596,18 +13232,19 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
         "t": "more ",
         "c": "gray"
       },
       {
-        "t": " Damage",
+        "t": "",
         "c": "red"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Damage ",
+        "c": "red"
       },
       {
         "t": "against ",
@@ -13671,14 +13308,14 @@
         "t": " "
       },
       {
-        "t": "chance to fell an entire",
+        "t": "chance to fell an",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "tree!",
+        "t": "entire tree!",
         "c": "gray"
       }
     ],
@@ -13727,14 +13364,14 @@
         "t": " "
       },
       {
-        "t": "chance to spawn an",
+        "t": "chance to spawn",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "additional ",
+        "t": "an additional ",
         "c": "gray"
       },
       {
@@ -13742,11 +13379,15 @@
         "c": "light_purple"
       },
       {
-        "t": "when mining",
+        "t": "when",
         "c": "gray"
       },
       {
         "t": " "
+      },
+      {
+        "t": "mining ",
+        "c": "gray"
       },
       {
         "t": "Ender Nodes",
@@ -14089,11 +13730,15 @@
         "c": "gray"
       },
       {
-        "t": " Pests",
+        "t": "",
         "c": "dark_green"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Pests ",
+        "c": "dark_green"
       },
       {
         "t": "to drop an extra ",
@@ -14333,17 +13978,6 @@
     "id": "pest_cooldown",
     "description": [
       {
-        "t": "Pest Cooldown ",
-        "c": "gold"
-      },
-      {
-        "t": "(Farming)",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
         "t": "Reduces the spawn cooldown of ",
         "c": "gray"
       },
@@ -14446,11 +14080,15 @@
         "t": " "
       },
       {
-        "t": "chance to find an",
+        "t": "chance to find",
         "c": "gray"
       },
       {
         "t": " "
+      },
+      {
+        "t": "an ",
+        "c": "gray"
       },
       {
         "t": "Enchanted Crop ",
@@ -14615,24 +14253,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -14715,24 +14335,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -14815,24 +14417,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -14982,14 +14566,14 @@
         "t": " "
       },
       {
-        "t": "chance to jump",
+        "t": "chance to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "1 less time.",
+        "t": "jump 1 less time.",
         "c": "gray"
       }
     ],
@@ -15168,11 +14752,15 @@
         "t": " "
       },
       {
-        "t": "stronger on you. Gain a",
+        "t": "stronger on you.",
         "c": "gray"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Gain a ",
+        "c": "gray"
       },
       {
         "range": [
@@ -15186,15 +14774,15 @@
         "t": " "
       },
       {
-        "t": "chance to find ",
+        "t": "chance to find",
         "c": "gray"
       },
       {
-        "t": "Signal Enhancers",
-        "c": "gold"
+        "t": " "
       },
       {
-        "t": " "
+        "t": "Signal Enhancers ",
+        "c": "gold"
       },
       {
         "t": "in ",
@@ -16132,21 +15720,14 @@
         "c": "dark_green"
       },
       {
-        "t": " "
-      },
-      {
-        "t": " Sweep ",
+        "t": " Sweep",
         "c": "dark_green"
       },
       {
-        "t": "towards",
-        "c": "gray"
-      },
-      {
         "t": " "
       },
       {
-        "t": "Helix Trees.",
+        "t": "towards Helix Trees.",
         "c": "gray"
       },
       {
@@ -16297,17 +15878,14 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
-        "t": " chance to have an",
+        "t": " chance to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "extra ",
+        "t": "have an extra ",
         "c": "gray"
       },
       {
@@ -16315,14 +15893,14 @@
         "c": "dark_purple"
       },
       {
-        "t": "in the Paid",
+        "t": "in the",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "Reward Chest.",
+        "t": "Paid Reward Chest.",
         "c": "gray"
       }
     ],
@@ -16553,17 +16131,6 @@
     "id": "cookie_eater",
     "description": [
       {
-        "t": "Cookie Eater ",
-        "c": "gold"
-      },
-      {
-        "t": "(Global)",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
         "range": [
           5,
           50
@@ -16636,14 +16203,7 @@
         "c": "gray"
       },
       {
-        "t": "Crimson",
-        "c": "red"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Essence",
+        "t": "Crimson Essence",
         "c": "red"
       },
       {
@@ -16970,14 +16530,7 @@
         "c": "gray"
       },
       {
-        "t": "Gemstone",
-        "c": "light_purple"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Powder",
+        "t": "Gemstone Powder",
         "c": "light_purple"
       },
       {
@@ -17090,14 +16643,14 @@
         "t": " "
       },
       {
-        "t": "more likely to",
+        "t": "more",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "be ",
+        "t": "likely to be ",
         "c": "gray"
       },
       {
@@ -17555,18 +17108,14 @@
         "t": " "
       },
       {
-        "t": "chance to Chop ",
+        "t": "chance to Chop",
         "c": "gray"
-      },
-      {
-        "t": "an",
-        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "extra log",
+        "t": "an extra log",
         "c": "green"
       },
       {
@@ -18001,9 +17550,6 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
         "t": " more ",
         "c": "gray"
       },
@@ -18012,14 +17558,18 @@
         "c": "red"
       },
       {
-        "t": "from",
+        "t": "from ",
         "c": "gray"
+      },
+      {
+        "t": "Garden",
+        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "Garden Visitors",
+        "t": "Visitors",
         "c": "green"
       },
       {
@@ -18246,18 +17796,14 @@
         "c": "aqua"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "Animal ",
+        "t": " Animal ",
         "c": "green"
       },
       {
@@ -18837,14 +18383,14 @@
         "t": " "
       },
       {
-        "t": "chance to gain",
+        "t": "chance to gain an",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "an additional Chisel ",
+        "t": "additional Chisel ",
         "c": "gray"
       },
       {
@@ -19122,18 +18668,14 @@
         "c": "aqua"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "Critter ",
+        "t": " Critter ",
         "c": "green"
       },
       {
@@ -19428,7 +18970,14 @@
         "c": "green"
       },
       {
-        "t": " more EXP from Combat.",
+        "t": " more EXP from",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Combat.",
         "c": "gray"
       }
     ],
@@ -19736,18 +19285,14 @@
         "c": "aqua"
       },
       {
-        "t": "against ",
-        "c": "gray"
-      },
-      {
-        "t": "",
+        "t": "against",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "Construct ",
+        "t": " Construct ",
         "c": "gray"
       },
       {
@@ -19885,18 +19430,14 @@
         "c": "aqua"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "dark_green"
       },
       {
         "t": " "
       },
       {
-        "t": "Mythological ",
+        "t": " Mythological ",
         "c": "dark_green"
       },
       {
@@ -20013,18 +19554,14 @@
         "c": "aqua"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "green"
       },
       {
         "t": " "
       },
       {
-        "t": "Cubic ",
+        "t": " Cubic ",
         "c": "green"
       },
       {
@@ -20108,14 +19645,14 @@
         "c": "green"
       },
       {
-        "t": " more likely to",
+        "t": " more likely",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "be ",
+        "t": "to be ",
         "c": "gray"
       },
       {
@@ -20572,14 +20109,14 @@
         "t": " "
       },
       {
-        "t": "chance to gain double",
+        "t": "chance to gain",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "loot from ",
+        "t": "double loot from ",
         "c": "gray"
       },
       {
@@ -20769,11 +20306,15 @@
         "c": "gray"
       },
       {
-        "t": " Elusive",
+        "t": "",
         "c": "light_purple"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Elusive ",
+        "c": "light_purple"
       },
       {
         "t": "mobs.",
@@ -21250,11 +20791,15 @@
         "c": "gray"
       },
       {
-        "t": " Frozen",
+        "t": "",
         "c": "white"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Frozen ",
+        "c": "white"
       },
       {
         "t": "mobs.",
@@ -21348,11 +20893,15 @@
         "c": "gray"
       },
       {
-        "t": " Arcane",
+        "t": "",
         "c": "dark_purple"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Arcane ",
+        "c": "dark_purple"
       },
       {
         "t": "mobs.",
@@ -21870,14 +21419,14 @@
         "t": " "
       },
       {
-        "t": "chance to",
+        "t": "chance",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "instantly re-mutate at their first",
+        "t": "to instantly re-mutate at their first",
         "c": "gray"
       },
       {
@@ -21963,11 +21512,15 @@
         "c": "gray"
       },
       {
-        "t": "Tree Gifts",
+        "t": "Tree",
         "c": "dark_green"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Gifts ",
+        "c": "dark_green"
       },
       {
         "t": "to contain double loot.",
@@ -22026,30 +21579,19 @@
     "id": "echo_of_buckets",
     "description": [
       {
-        "t": "Your \"Bucket\" Attributes are ",
+        "t": "Your \"Bucket\" Attributes are",
         "c": "gray"
       },
       {
-        "range": [
-          1,
-          10
-        ],
-        "unit": "%",
-        "c": "dark_gray"
-      },
-      {
         "t": " "
       },
       {
         "range": [
-          1.3,
-          13
+          2,
+          20
         ],
         "unit": "%",
         "c": "green"
-      },
-      {
-        "t": " "
       },
       {
         "t": "stronger.",
@@ -22239,8 +21781,8 @@
       },
       {
         "range": [
-          2,
-          20
+          1,
+          10
         ],
         "unit": "%",
         "c": "green"
@@ -22344,18 +21886,14 @@
         "c": "aqua"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "dark_red"
       },
       {
         "t": " "
       },
       {
-        "t": "Arthropod ",
+        "t": " Arthropod ",
         "c": "dark_red"
       },
       {
@@ -22469,18 +22007,14 @@
         "c": "aqua"
       },
       {
-        "t": "against ",
+        "t": "against",
         "c": "gray"
-      },
-      {
-        "t": "",
-        "c": "blue"
       },
       {
         "t": " "
       },
       {
-        "t": "Aquatic ",
+        "t": " Aquatic ",
         "c": "blue"
       },
       {
@@ -22575,21 +22109,21 @@
         "t": " "
       },
       {
-        "t": "chance to",
+        "t": "chance",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "add 1 Bonus Score to your Dungeon",
+        "t": "to add 1 Bonus Score to your",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "Run.",
+        "t": "Dungeon Run.",
         "c": "gray"
       },
       {
@@ -22953,24 +22487,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -23053,24 +22569,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -23153,24 +22651,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -23406,8 +22886,11 @@
     "id": "echo_of_resistance",
     "description": [
       {
-        "t": "Your Resistance Attributes are ",
+        "t": "Your Resistance Attributes are",
         "c": "gray"
+      },
+      {
+        "t": " "
       },
       {
         "range": [
@@ -23415,21 +22898,7 @@
           20
         ],
         "unit": "%",
-        "c": "dark_gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "range": [
-          3,
-          30
-        ],
-        "unit": "%",
         "c": "green"
-      },
-      {
-        "t": " "
       },
       {
         "t": "stronger.",
@@ -23806,8 +23275,11 @@
     "id": "echo_of_atomized",
     "description": [
       {
-        "t": "Your Atomized Attributes are ",
+        "t": "Your Atomized Attributes are",
         "c": "gray"
+      },
+      {
+        "t": " "
       },
       {
         "range": [
@@ -23815,21 +23287,7 @@
           20
         ],
         "unit": "%",
-        "c": "dark_gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "range": [
-          3,
-          30
-        ],
-        "unit": "%",
         "c": "green"
-      },
-      {
-        "t": " "
       },
       {
         "t": "stronger.",
@@ -23983,8 +23441,11 @@
         "c": "dark_purple"
       },
       {
-        "t": "you drop have a ",
+        "t": "you drop have a",
         "c": "gray"
+      },
+      {
+        "t": " "
       },
       {
         "range": [
@@ -23998,7 +23459,14 @@
         "t": " "
       },
       {
-        "t": "chance to be recombobulated.",
+        "t": "chance to be",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "recombobulated.",
         "c": "gray"
       },
       {
@@ -24550,7 +24018,14 @@
         "t": " "
       },
       {
-        "t": "more items.",
+        "t": "more",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "items.",
         "c": "gray"
       }
     ],
@@ -25101,8 +24576,11 @@
     "id": "echo_of_essence",
     "description": [
       {
-        "t": "Your Essence Attributes are ",
+        "t": "Your Essence Attributes are",
         "c": "gray"
+      },
+      {
+        "t": " "
       },
       {
         "range": [
@@ -25110,21 +24588,7 @@
           20
         ],
         "unit": "%",
-        "c": "dark_gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "range": [
-          3,
-          30
-        ],
-        "unit": "%",
         "c": "green"
-      },
-      {
-        "t": " "
       },
       {
         "t": "stronger.",
@@ -25620,8 +25084,11 @@
     "id": "why_not_more",
     "description": [
       {
-        "t": "Your pet's EXP Share grants ",
+        "t": "Your pet's EXP Share grants",
         "c": "gray"
+      },
+      {
+        "t": " "
       },
       {
         "range": [
@@ -25632,10 +25099,7 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
-        "t": "more EXP.",
+        "t": " more EXP.",
         "c": "gray"
       }
     ],
@@ -25702,10 +25166,18 @@
           20
         ],
         "unit": "%",
-        "c": "green"
+        "c": "dark_gray"
       },
       {
         "t": " "
+      },
+      {
+        "range": [
+          3,
+          30
+        ],
+        "unit": "%",
+        "c": "green"
       },
       {
         "t": " "
@@ -27373,14 +26845,14 @@
         "t": " "
       },
       {
-        "t": "chance to",
+        "t": "chance",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "refill instantly.",
+        "t": "to refill instantly.",
         "c": "gray"
       }
     ],
@@ -27726,14 +27198,14 @@
         "c": "red"
       },
       {
-        "t": "when at",
+        "t": "when",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
-        "t": "full health.",
+        "t": "at full health.",
         "c": "gray"
       }
     ],
@@ -27941,8 +27413,11 @@
         "c": "gold"
       },
       {
-        "t": "and ",
+        "t": "and",
         "c": "gray"
+      },
+      {
+        "t": " "
       },
       {
         "range": [
@@ -27960,18 +27435,14 @@
         "c": "gold"
       },
       {
-        "t": " while in the ",
+        "t": " while in the",
         "c": "gray"
-      },
-      {
-        "t": "Mines of",
-        "c": "dark_green"
       },
       {
         "t": " "
       },
       {
-        "t": "Divan",
+        "t": "Mines of Divan",
         "c": "dark_green"
       },
       {
@@ -28050,24 +27521,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -28165,24 +27618,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -28280,24 +27715,6 @@
       {
         "t": ".",
         "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Elemental",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
       }
     ],
     "how_to_hunt": [
@@ -28437,11 +27854,15 @@
         "t": " "
       },
       {
-        "t": " Double Hook Chance",
+        "t": " Double Hook",
         "c": "blue"
       },
       {
         "t": " "
+      },
+      {
+        "t": "Chance ",
+        "c": "blue"
       },
       {
         "t": "while on ",
@@ -28686,14 +28107,14 @@
         "t": " "
       },
       {
-        "t": " True",
+        "t": "",
         "c": "white"
       },
       {
         "t": " "
       },
       {
-        "t": "Defense",
+        "t": "True Defense",
         "c": "white"
       },
       {
@@ -28771,24 +28192,16 @@
         "c": "green"
       },
       {
-        "t": "is increased by ",
+        "t": "is increased by",
         "c": "gray"
-      },
-      {
-        "range": [
-          0.2,
-          2
-        ],
-        "unit": "%",
-        "c": "dark_gray"
       },
       {
         "t": " "
       },
       {
         "range": [
-          0.35,
-          3.5
+          0.2,
+          2
         ],
         "unit": "%",
         "c": "green"
@@ -28827,17 +28240,6 @@
     "title": "Egg Finder",
     "id": "egg_finder",
     "description": [
-      {
-        "t": "Egg Finder ",
-        "c": "gold"
-      },
-      {
-        "t": "(Global)",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
       {
         "t": "Finds a ",
         "c": "gray"
@@ -29127,18 +28529,29 @@
         "t": " "
       },
       {
-        "t": "chance to obtain a",
+        "t": "chance to",
         "c": "gray"
       },
       {
         "t": " "
       },
       {
+        "t": "obtain a ",
+        "c": "gray"
+      },
+      {
         "t": "Warty ",
         "c": "dark_purple"
       },
       {
-        "t": "when breaking Nether Warts.",
+        "t": "when breaking Nether",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Warts.",
         "c": "gray"
       }
     ],
@@ -29404,9 +28817,6 @@
         ],
         "unit": "%",
         "c": "aqua"
-      },
-      {
-        "t": " "
       },
       {
         "t": ".",
@@ -29686,24 +29096,16 @@
     "id": "echo_of_tracking",
     "description": [
       {
-        "t": "Your \"Tracker\" Attributes are ",
+        "t": "Your \"Tracker\" Attributes are",
         "c": "gray"
-      },
-      {
-        "range": [
-          2,
-          20
-        ],
-        "unit": "%",
-        "c": "dark_gray"
       },
       {
         "t": " "
       },
       {
         "range": [
-          3,
-          30
+          2,
+          20
         ],
         "unit": "%",
         "c": "green"
@@ -30070,9 +29472,6 @@
         "c": "green"
       },
       {
-        "t": " "
-      },
-      {
         "t": "Tuning Points.",
         "c": "gray"
       }
@@ -30159,14 +29558,18 @@
         "t": " "
       },
       {
-        "t": " Double Hook Chance",
+        "t": " Double Hook",
         "c": "blue"
       },
       {
         "t": " "
       },
       {
-        "t": "while on ",
+        "t": "Chance",
+        "c": "blue"
+      },
+      {
+        "t": " while on ",
         "c": "gray"
       },
       {
@@ -31082,8 +30485,11 @@
     "id": "queenly_echo",
     "description": [
       {
-        "t": "Your \"Visitor\" Attributes are ",
+        "t": "Your \"Visitor\" Attributes are",
         "c": "gray"
+      },
+      {
+        "t": " "
       },
       {
         "range": [
@@ -31091,21 +30497,7 @@
           50
         ],
         "unit": "%",
-        "c": "dark_gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "range": [
-          7.5,
-          75
-        ],
-        "unit": "%",
         "c": "green"
-      },
-      {
-        "t": " "
       },
       {
         "t": "stronger.",
@@ -31182,9 +30574,6 @@
         ],
         "unit": "%",
         "c": "red"
-      },
-      {
-        "t": " "
       },
       {
         "t": ".",
@@ -31355,9 +30744,6 @@
         "c": "blue"
       },
       {
-        "t": " "
-      },
-      {
         "t": ".",
         "c": "gray"
       }
@@ -31434,8 +30820,11 @@
         "c": "red"
       },
       {
-        "t": "by ",
+        "t": "by",
         "c": "gray"
+      },
+      {
+        "t": " "
       },
       {
         "range": [
@@ -31656,24 +31045,16 @@
     "id": "almighty_echo",
     "description": [
       {
-        "t": "Your \"Unlimited\" Attributes are ",
+        "t": "Your \"Unlimited\" Attributes are",
         "c": "gray"
-      },
-      {
-        "range": [
-          5,
-          50
-        ],
-        "unit": "%",
-        "c": "dark_gray"
       },
       {
         "t": " "
       },
       {
         "range": [
-          7.5,
-          75
+          5,
+          50
         ],
         "unit": "%",
         "c": "green"
@@ -31753,9 +31134,6 @@
         ],
         "unit": "%",
         "c": "green"
-      },
-      {
-        "t": " "
       },
       {
         "t": ".",
@@ -31975,14 +31353,18 @@
         "t": " "
       },
       {
-        "t": " Double Hook Chance",
+        "t": " Double Hook",
         "c": "blue"
       },
       {
         "t": " "
       },
       {
-        "t": "while on ",
+        "t": "Chance",
+        "c": "blue"
+      },
+      {
+        "t": " while on ",
         "c": "gray"
       },
       {
@@ -32155,11 +31537,15 @@
         "c": "green"
       },
       {
-        "t": " discount on starting",
+        "t": " discount on",
         "c": "gray"
       },
       {
         "t": " "
+      },
+      {
+        "t": "starting ",
+        "c": "gray"
       },
       {
         "t": "Slayer Quests",
@@ -32238,11 +31624,15 @@
         "c": "green"
       },
       {
-        "t": " in your",
+        "t": " in",
         "c": "gray"
       },
       {
         "t": " "
+      },
+      {
+        "t": "your ",
+        "c": "gray"
       },
       {
         "t": "Greenhouse",
