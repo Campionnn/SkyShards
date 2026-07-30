@@ -462,15 +462,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                       <div className="space-y-2">
                         <div className="text-slate-200 font-semibold">Sources</div>
                         <ul className="space-y-0.5">
-                          <li><span className="font-semibold">+50</span> <span className="text-slate-300">HotF 6 perk</span></li>
+                          <li><span className="font-semibold">+50</span> <span className="text-slate-300">HotF 3 perk</span></li>
+                          <li><span className="font-semibold">+50</span> <span className="text-slate-300">Hunting level 50</span></li>
                           <li><span className="font-semibold">+30</span> <span className="text-slate-300">David's Cloak (Attribute Stacks 30)</span></li>
-                          <li><span className="font-semibold">+25</span> <span className="text-slate-300">Hunting level 25</span></li>
                           <li><span className="font-semibold">+13</span> <span className="text-slate-300">Megalith (Sea Serpent + Tiamat max)</span></li>
                           <li><span className="font-semibold">+3</span> <span className="text-slate-300">Infernal Kuudra Core</span></li>
                           <li><span className="font-semibold">+1</span> <span className="text-slate-300">Starborn Century Cake </span></li>
                         </ul>
                         <div className="h-px bg-white/10"></div>
-                        <div className="text-slate-300">Universal fortune total: <span className="text-amber-300 font-semibold">122</span></div>
+                        <div className="text-slate-300">Universal fortune total: <span className="text-amber-300 font-semibold">147</span></div>
 
                         <div className="text-slate-200 font-semibold pt-1">Rarity bonuses</div>
                         <ul className="pl-0 space-y-0.5 text-xs">
@@ -483,11 +483,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
 
                         <div className="text-slate-200 font-semibold pt-1">Totals</div>
                         <ul className="pl-0 space-y-0.5 text-xs">
-                          <li className="flex items-center justify-between"><span className="text-white">Common</span><span className="text-white font-semibold">148</span></li>
-                          <li className="flex items-center justify-between"><span className="text-green-400">Uncommon</span><span className="text-green-400 font-semibold">148</span></li>
-                          <li className="flex items-center justify-between"><span className="text-blue-400">Rare</span><span className="text-blue-400 font-semibold">135</span></li>
-                          <li className="flex items-center justify-between"><span className="text-purple-400">Epic</span><span className="text-purple-400 font-semibold">135</span></li>
-                          <li className="flex items-center justify-between"><span className="text-yellow-400">Legendary</span><span className="text-yellow-400 font-semibold">122</span></li>
+                          <li className="flex items-center justify-between"><span className="text-white">Common</span><span className="text-white font-semibold">173</span></li>
+                          <li className="flex items-center justify-between"><span className="text-green-400">Uncommon</span><span className="text-green-400 font-semibold">173</span></li>
+                          <li className="flex items-center justify-between"><span className="text-blue-400">Rare</span><span className="text-blue-400 font-semibold">160</span></li>
+                          <li className="flex items-center justify-between"><span className="text-purple-400">Epic</span><span className="text-purple-400 font-semibold">160</span></li>
+                          <li className="flex items-center justify-between"><span className="text-yellow-400">Legendary</span><span className="text-yellow-400 font-semibold">147</span></li>
                         </ul>
 
                       </div>
