@@ -46,7 +46,8 @@
     "input2": "",
     "id_result": "Phanflare",
     "id_origin": [
-      "Grove"
+      "Grove",
+      "Chameleon"
     ]
   },
   "C5": {
@@ -1442,8 +1443,8 @@
     "family": [
       "Cave Dweller"
     ],
-    "input1": "Ant Shard",
-    "input2": "Elusive",
+    "input1": "",
+    "input2": "",
     "id_result": "Woodchucker",
     "id_origin": [
       "Solsnatcher"
@@ -3377,8 +3378,7 @@
       "Komodo Dragon",
       "Wolverine",
       "Toucan",
-      "Firefly",
-      "Chameleon"
+      "Firefly"
     ]
   },
   "E35": {
@@ -3674,7 +3674,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "XYZ",
+    "id_result": "Phanpyre",
     "id_origin": []
   },
   "L5": {
@@ -3882,7 +3882,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "",
+    "id_result": "Cinderbat",
     "id_origin": [
       "Tenebris",
       "Wyvern",
@@ -3925,7 +3925,7 @@
     ],
     "input1": "Shulker&Epic+",
     "input2": "Legendary+",
-    "id_result": "",
+    "id_result": "Cinderbat",
     "id_origin": []
   },
   "L26": {
@@ -3966,7 +3966,10 @@
     "input1": "",
     "input2": "",
     "id_result": "Grizzly Bear",
-    "id_origin": []
+    "id_origin": [
+      "Macaw",
+      "Hideonbox"
+    ]
   },
   "L29": {
     "name": "Megalith",
@@ -4004,7 +4007,7 @@
     ],
     "input1": "Bird",
     "input2": "Legendary+",
-    "id_result": "",
+    "id_result": "Grizzly Bear",
     "id_origin": []
   },
   "L32": {
@@ -4038,7 +4041,7 @@
     ],
     "input1": "Condor Shard",
     "input2": "Legendary+",
-    "id_result": "",
+    "id_result": "Grizzly Bear",
     "id_origin": []
   },
   "L35": {
@@ -4102,7 +4105,9 @@
     "input2": "",
     "id_result": "Rainbug",
     "id_origin": [
-      "Cinderbat"
+      "Cinderbat",
+      "Condor",
+      "Dodo"
     ]
   },
   "L41": {
