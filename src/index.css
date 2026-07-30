@@ -1,29 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
-/*
- * Surface palette. Overrides Tailwind's stock `slate` (OKLCH hue ~265, which reads
- * violet on wide-gamut displays) with a true blue-black ramp at hue 220, and pulls
- * the 600-950 end darker so panels sit close to the page background.
- * Every bg-/border-/text-slate-* utility in the app picks these up automatically.
- */
-@theme {
-  --color-slate-50: #f7f9fd;
-  --color-slate-100: #eff3fa;
-  --color-slate-200: #dfe5f2;
-  --color-slate-300: #c7d1e4;
-  --color-slate-400: #8f9dba;
-  --color-slate-500: #637089;
-  --color-slate-600: #222a39;
-  --color-slate-700: #171d29;
-  --color-slate-800: #11161f;
-  --color-slate-900: #0d1118;
-  --color-slate-950: #0a0d14;
-}
-
 @font-face {
   font-family: 'Minecraft';
-  src: url('/fonts/unifont-17.0.03.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -31,7 +10,7 @@
 
 body {
   font-family: "Inter", "Minecraft", sans-serif;
-  background-color: #0a0d14;
+  background-color: #0f172a;
   color: #f1f5f9;
 }
 
@@ -93,14 +72,14 @@ input[type="number"] {
 }
 
 ::-webkit-scrollbar-track {
-  background: #11161f;
+  background: #1e293b;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2b3548;
+  background: #475569;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3d4a61;
+  background: #64748b;
 }

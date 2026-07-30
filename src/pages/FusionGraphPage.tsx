@@ -190,9 +190,9 @@ const FusionGraphInner: React.FC = () => {
         colorMode="dark"
         proOptions={{ hideAttribution: true }}
       >
-        <Background color="#2b3548" gap={24} />
+        <Background color="#334155" gap={24} />
         <Controls className="!bg-slate-800 !border-slate-700" />
-        <MiniMap pannable zoomable className="!bg-slate-900" maskColor="rgba(10,13,20,0.7)" />
+        <MiniMap pannable zoomable className="!bg-slate-900" maskColor="rgba(2,6,23,0.7)" />
       </ReactFlow>
 
       {/* Search + controls overlay */}
