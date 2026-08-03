@@ -194,9 +194,11 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
             </div>
             <h3 className="text-lg font-semibold text-white">View Fusion Tree</h3>
           </div>
-          <h6 className="text-sm text-slate-400">Select one of your shards to view its full fusion tree. Alternatives you set here apply to every shard.</h6>
-          <FusionTreeSortDropown value={materialTreeSortSelection} onChange={setMaterialTreeSortSelection} />
-          <MaterialTreeSelector shards={sortedShards} value={materialTreeShardKey} onChange={(key) => onMaterialTreeShardChange?.(key)} />
+          <p className="text-sm text-slate-400">Select one of your shards to view its full fusion tree. Alternatives you set here apply to every shard.</p>
+          <div className="flex items-center gap-2">
+            <MaterialTreeSelector shards={sortedShards} value={materialTreeShardKey} onChange={(key) => onMaterialTreeShardChange?.(key)}/>
+            <FusionTreeSortDropown value={materialTreeSortSelection} onChange={setMaterialTreeSortSelection} />
+          </div>
         </div>
       )}
       {materialsOnly && selectedTreeResult && data.shards[materialTreeShardKey] && (
