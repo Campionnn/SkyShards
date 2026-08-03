@@ -140,6 +140,7 @@ export interface CalculationResultsProps {
   materialsOnly?: boolean;
   materialShardResults?: Map<string, CalculationResult>;
   materialTreeShardKey?: string;
+  materialTreeSorter?: string;
   onMaterialTreeShardChange?: (key: string) => void;
 }
 

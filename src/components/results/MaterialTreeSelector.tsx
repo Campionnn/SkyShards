@@ -24,7 +24,8 @@ export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shar
     const list = trimmed
       ? shards.filter((s) => s.name.toLowerCase().includes(trimmed) || s.family.toLowerCase().includes(trimmed) || s.type.toLowerCase().includes(trimmed))
       : shards;
-    return [...list].sort((a, b) => a.name.localeCompare(b.name));
+    //return [...list].sort((a, b) => a.name.localeCompare(b.name));
+    return list;
   }, [shards, query]);
 
   const handleSelect = useCallback(

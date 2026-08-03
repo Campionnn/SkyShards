@@ -1,13 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { BarChart3, Hammer } from "lucide-react";
 import { formatLargeNumber } from "../../utilities";
-import type { CalculationResultsProps, ShardWithKey } from "../../types/types";
+import type { CalculationResult, CalculationResultsProps, ShardWithKey } from "../../types/types";
 import { MaterialItem, useToast } from "../ui";
 import pako from "pako";
 import { CopyTreeModal } from "../modals";
 import { ResultSummaryCards } from "./ResultSummaryCards";
 import { FusionTreeView } from "./FusionTreeView";
 import { MaterialTreeSelector } from "./MaterialTreeSelector";
+import { FusionTreeSortDropown } from "./FusionTreeViewSortDropdown";
 
 export const CalculationResults: React.FC<CalculationResultsProps> = ({
   result,
@@ -25,6 +26,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   onMaterialTreeShardChange,
 }) => {
   const [copyModalOpen, setCopyModalOpen] = useState(false);
+    const [materialTreeSortSelection, setMaterialTreeSortSelection] = useState("default");
   const { toast } = useToast();
 
   const gzipBase64 = (text: string) => {
@@ -67,7 +69,28 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     return Array.from(materialShardResults.keys())
       .filter((key) => data.shards[key])
       .map((key) => ({ ...data.shards[key], key }));
-  }, [materialShardResults, data]);
+  }, [materialShardResults, data]); 
+
+  const sortByShortestTime = (shardsToSort: ShardWithKey[], shardData: Map<string, CalculationResult> | undefined) => {
+      if(!shardsToSort) return [];
+      if(!shardData) return shardsToSort;
+      return [...shardsToSort].map(key => ({key, value: shardData.get(key.key)?.totalTime}))
+      .sort(({value: shardATime}, {value: shardBTime}) => {
+        if(shardATime === undefined && shardBTime === undefined) return 0;
+        if(shardATime === undefined) return 1;
+        if(shardBTime === undefined) return -1;
+        return shardATime - shardBTime;
+      }).map(({ key}) => key);
+  }
+
+  const sortedShards = useMemo<ShardWithKey[]>(() => {
+    switch (materialTreeSortSelection) {
+      case "shortest": return sortByShortestTime(selectableShards, materialShardResults);
+      case "alphabetically": return [...selectableShards].sort((a, b) => a.name.localeCompare(b.name));
+      case "rarity": return selectableShards;
+      default: return [...selectableShards].sort((a, b) => a.name.localeCompare(b.name));
+    }
+  }, [selectableShards, materialTreeSortSelection, materialShardResults]);
 
   const selectedTreeResult = materialTreeShardKey ? materialShardResults?.get(materialTreeShardKey) : undefined;
 
@@ -171,8 +194,9 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
             </div>
             <h3 className="text-lg font-semibold text-white">View Fusion Tree</h3>
           </div>
-          <p className="text-sm text-slate-400">Select one of your shards to view its full fusion tree. Alternatives you set here apply to every shard.</p>
-          <MaterialTreeSelector shards={selectableShards} value={materialTreeShardKey} onChange={(key) => onMaterialTreeShardChange?.(key)} />
+          <h6 className="text-sm text-slate-400">Select one of your shards to view its full fusion tree. Alternatives you set here apply to every shard.</h6>
+          <FusionTreeSortDropown value={materialTreeSortSelection} onChange={setMaterialTreeSortSelection} />
+          <MaterialTreeSelector shards={sortedShards} value={materialTreeShardKey} onChange={(key) => onMaterialTreeShardChange?.(key)} />
         </div>
       )}
       {materialsOnly && selectedTreeResult && data.shards[materialTreeShardKey] && (
