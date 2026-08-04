@@ -202,7 +202,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
     setCraftPenaltyInput("");
   }, [form.ironManView]);
 
-  // The six reptile lines only exist on an ironman profile.
+  // Only Crocodile is shown on a normal profile; the rest are ironman-only.
   const levelItems = LEVELED_SHARDS.filter((item) => form.ironManView || !item.ironmanOnly);
 
   // Materials Only mode state

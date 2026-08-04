@@ -7,9 +7,9 @@ export const NO_FORTUNE_SHARDS = ["C19", "U4", "U16", "U28", "R24", "R25", "R27"
  * The nine shards whose attribute level the player sets by hand. Drives both the
  * form's level dropdowns and the Hypixel profile import.
  *
- * `rarity` feeds `fusedCountToTierLevel` on import; `ironmanOnly` marks the six
- * reptile lines that only exist on an ironman profile. Order is the display order of
- * the dropdown grid.
+ * `rarity` feeds `fusedCountToTierLevel` on import; `ironmanOnly` marks the eight
+ * lines the form hides on a normal profile, leaving Crocodile as the only level
+ * shown there. Order is the display order of the dropdown grid.
  */
 export const LEVELED_SHARDS = [
   { key: "newtLevel", label: "Newt", shardId: "C35", rarity: "common", ironmanOnly: true },
@@ -18,8 +18,8 @@ export const LEVELED_SHARDS = [
   { key: "leviathanLevel", label: "Leviathan", shardId: "E5", rarity: "epic", ironmanOnly: true },
   { key: "pythonLevel", label: "Python", shardId: "R9", rarity: "rare", ironmanOnly: true },
   { key: "kingCobraLevel", label: "King Cobra", shardId: "R54", rarity: "rare", ironmanOnly: true },
-  { key: "seaSerpentLevel", label: "Sea Serpent", shardId: "E32", rarity: "epic", ironmanOnly: false },
-  { key: "tiamatLevel", label: "Tiamat", shardId: "L6", rarity: "legendary", ironmanOnly: false },
+  { key: "seaSerpentLevel", label: "Sea Serpent", shardId: "E32", rarity: "epic", ironmanOnly: true },
+  { key: "tiamatLevel", label: "Tiamat", shardId: "L6", rarity: "legendary", ironmanOnly: true },
   { key: "crocodileLevel", label: "Crocodile", shardId: "R45", rarity: "rare", ironmanOnly: false },
 ] as const satisfies ReadonlyArray<{
   // `keyof CalculationFormData` is the load-bearing part: a typo in a key, or a field
