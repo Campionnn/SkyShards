@@ -68,7 +68,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
   const handleMaxStats = () => {
     const updatedForm: CalculationFormData = {
       ...form,
-      hunterFortune: 122,
+      hunterFortune: 180.5,
       newtLevel: 10,
       salamanderLevel: 10,
       lizardKingLevel: 10,
@@ -465,12 +465,14 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                           <li><span className="font-semibold">+50</span> <span className="text-slate-300">HotF 3 perk</span></li>
                           <li><span className="font-semibold">+50</span> <span className="text-slate-300">Hunting level 50</span></li>
                           <li><span className="font-semibold">+30</span> <span className="text-slate-300">David's Cloak (Attribute Stacks 30)</span></li>
+                          <li><span className="font-semibold">+30</span> <span className="text-slate-300">Safari Belt (Max Haunted Biome Milestone)</span></li>
                           <li><span className="font-semibold">+13</span> <span className="text-slate-300">Megalith (Sea Serpent + Tiamat max)</span></li>
+                          <li><span className="font-semibold">+3.5</span> <span className="text-slate-300">Safari Belt Mythic Reforge</span></li>
                           <li><span className="font-semibold">+3</span> <span className="text-slate-300">Infernal Kuudra Core</span></li>
                           <li><span className="font-semibold">+1</span> <span className="text-slate-300">Starborn Century Cake </span></li>
                         </ul>
                         <div className="h-px bg-white/10"></div>
-                        <div className="text-slate-300">Universal fortune total: <span className="text-amber-300 font-semibold">147</span></div>
+                        <div className="text-slate-300">Universal fortune total: <span className="text-amber-300 font-semibold">180.5</span></div>
 
                         <div className="text-slate-200 font-semibold pt-1">Rarity bonuses</div>
                         <ul className="pl-0 space-y-0.5 text-xs">
@@ -483,11 +485,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
 
                         <div className="text-slate-200 font-semibold pt-1">Totals</div>
                         <ul className="pl-0 space-y-0.5 text-xs">
-                          <li className="flex items-center justify-between"><span className="text-white">Common</span><span className="text-white font-semibold">173</span></li>
-                          <li className="flex items-center justify-between"><span className="text-green-400">Uncommon</span><span className="text-green-400 font-semibold">173</span></li>
-                          <li className="flex items-center justify-between"><span className="text-blue-400">Rare</span><span className="text-blue-400 font-semibold">160</span></li>
-                          <li className="flex items-center justify-between"><span className="text-purple-400">Epic</span><span className="text-purple-400 font-semibold">160</span></li>
-                          <li className="flex items-center justify-between"><span className="text-yellow-400">Legendary</span><span className="text-yellow-400 font-semibold">147</span></li>
+                          <li className="flex items-center justify-between"><span className="text-white">Common</span><span className="text-white font-semibold">206.5</span></li>
+                          <li className="flex items-center justify-between"><span className="text-green-400">Uncommon</span><span className="text-green-400 font-semibold">206.5</span></li>
+                          <li className="flex items-center justify-between"><span className="text-blue-400">Rare</span><span className="text-blue-400 font-semibold">193.5</span></li>
+                          <li className="flex items-center justify-between"><span className="text-purple-400">Epic</span><span className="text-purple-400 font-semibold">193.5</span></li>
+                          <li className="flex items-center justify-between"><span className="text-yellow-400">Legendary</span><span className="text-yellow-400 font-semibold">180.5</span></li>
                         </ul>
 
                       </div>
@@ -498,6 +500,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
               <input
                   type="number"
                   min="0"
+                  step="0.5"
                   value={form.hunterFortune === 0 ? "" : form.hunterFortune}
                   placeholder="0"
                   onChange={(e) => handleInputChange("hunterFortune", Number(e.target.value))}
