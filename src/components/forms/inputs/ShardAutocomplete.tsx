@@ -1,23 +1,33 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Search, X, LayoutGrid } from "lucide-react";
 import { DataService } from "../../../services";
-import { debounce } from "../../../utilities";
-import type { ShardWithKey, ShardAutocompleteProps } from "../../../types/types";
+import { debounce, isFocusRestoredByWindow } from "../../../utilities";
+import type { Shard } from "../../../types/types";
 import { SuggestionItem } from "../search";
 import { BrowseAllShardsModal } from "../../modals";
 
+interface ShardAutocompleteProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSelect: (shard: Shard) => void;
+  onFocus?: () => void;
+  placeholder?: string;
+  className?: string;
+  searchMode?: "enhanced" | "name-only";
+}
+
 export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onChange, onSelect, onFocus, placeholder = "Search for a shard...", className = "", searchMode = "enhanced" }) => {
-  const [suggestions, setSuggestions] = useState<ShardWithKey[]>([]);
+  const [suggestions, setSuggestions] = useState<Shard[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [isSelecting, setIsSelecting] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [dropdownWidth, setDropdownWidth] = useState<number | undefined>(undefined);
   const [isBrowseModalOpen, setIsBrowseModalOpen] = useState(false);
-  const [allShards, setAllShards] = useState<ShardWithKey[]>([]);
+  const [allShards, setAllShards] = useState<Shard[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Memoized debounced search function
   const debouncedSearch = useMemo(
@@ -65,7 +75,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
   );
 
   const handleSelect = useCallback(
-    (shard: ShardWithKey) => {
+    (shard: Shard) => {
       setIsSelecting(true);
       setIsOpen(false);
       setSuggestions([]);
@@ -153,7 +163,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
   }, [allShards]);
 
   const handleShardSelect = useCallback(
-    (shard: ShardWithKey) => {
+    (shard: Shard) => {
       setIsSelecting(true);
       setIsBrowseModalOpen(false);
       onChange(shard.name);
@@ -178,6 +188,10 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      // The pending timeout is set by the input/select handlers, not by this effect,
+      // so it has to be read at cleanup time. Copying it into the effect body (what
+      // the rule suggests) would capture null at mount and clear nothing.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       const searchTimeout = searchTimeoutRef.current;
       if (searchTimeout) {
         clearTimeout(searchTimeout);
@@ -197,8 +211,11 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => {
-            if (onFocus) onFocus();
+          onFocus={(e) => {
+            // Consumers use onFocus to clear the box for a fresh search, so only tell them
+            // about focus the user asked for - not focus handed back after an alt-tab.
+            const restored = isFocusRestoredByWindow(e.target);
+            if (onFocus && !restored) onFocus();
             handleInputFocus();
           }}
           placeholder={placeholder}
@@ -229,7 +246,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           style={{ width: dropdownWidth ? `${dropdownWidth}px` : "100%" }}
         >
           {suggestions.map((shard, index) => (
-            <SuggestionItem key={shard.key} shard={shard} index={index} focusedIndex={focusedIndex} onSelect={handleSelect} isSelecting={isSelecting} setFocusedIndex={setFocusedIndex} />
+            <SuggestionItem key={shard.id} shard={shard} index={index} focusedIndex={focusedIndex} onSelect={handleSelect} isSelecting={isSelecting} setFocusedIndex={setFocusedIndex} />
           ))}
         </ul>
       )}

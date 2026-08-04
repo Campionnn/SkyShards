@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Package, Eye, EyeOff } from "lucide-react";
-import { getRarityColor } from "../../utilities";
+import { getRarityColor, shardIconUrl } from "../../utilities";
 import type { Data } from "../../types/types";
 
 interface ShardsUsedProps {
@@ -77,7 +77,7 @@ export const ShardsUsed: React.FC<ShardsUsedProps> = ({
                 <span className="text-slate-300 font-medium text-base flex-shrink-0">{amountUsed}x</span>
                 <span className={`mt-0 font-medium text-sm ${getRarityColor(shard.rarity)} flex items-center min-w-0`}>
                   <img
-                    src={`${import.meta.env.BASE_URL}shardIcons/${shardId}.png`}
+                    src={shardIconUrl(shardId)}
                     alt={shard.name}
                     className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-2"
                     loading="lazy"

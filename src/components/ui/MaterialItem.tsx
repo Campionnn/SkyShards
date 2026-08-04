@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Info } from "lucide-react";
-import { formatNumber, getRarityColor, formatShardDescription, formatTime, formatLargeNumber } from "../../utilities";
+import { formatLargeNumber, formatNumber, formatTime, getRarityColor, shardIconUrl } from "../../utilities";
 import { Tooltip } from "./Tooltip";
+import { ShardDescription } from "./ShardDescription";
 import { MaterialBreakdownModal } from "../modals";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 import type { Shard } from "../../types/types";
@@ -26,7 +27,7 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
         <div className="flex flex-col items-start min-w-0 justify-center h-full">
           <span className="text-slate-300 font-medium text-base flex-shrink-0">{quantity}x</span>
           <Tooltip
-            content={formatShardDescription(shardDesc?.description || "No description available.")}
+            content={<ShardDescription record={shardDesc} />}
             title={shardDesc?.title}
             shardName={shard.name}
             shardIcon={shard.id}
@@ -37,7 +38,7 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
             className="cursor-pointer"
           >
             <span className={`mt-0 font-medium text-sm ${getRarityColor(shard.rarity)} flex items-center min-w-0`}>
-              <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.id}.png`} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-2" loading="lazy" />
+              <img src={shardIconUrl(shard.id)} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-2" loading="lazy" />
               <span className="truncate">{shard.name}</span>
             </span>
           </Tooltip>

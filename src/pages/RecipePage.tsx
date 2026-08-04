@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { ShardAutocomplete, RecipeCountBadge, SearchFilterInput, ShardDisplay, DropdownButton } from "../components";
-import { getRarityColor } from "../utilities";
+import { getRarityColor, shardIconUrl } from "../utilities";
 import { useFusionData, useDropdownManager, useRecipeState } from "../hooks";
-import { processOutputRecipes, categorizeAndGroupRecipes, filterCategorizedRecipes, type Recipe, type CategorizedRecipes, type GroupedRecipe, type FusionData } from "../utilities";
-import type { ShardWithKey } from "../types/types";
+import { processOutputRecipes, categorizeAndGroupRecipes, filterCategorizedRecipes, type PairRecipe, type CategorizedRecipes, type GroupedRecipe } from "../utilities";
+import type { FusionJson, Shard } from "../types/types";
 
 type RecipeMode = "input" | "output" | null;
 
@@ -15,7 +15,7 @@ export const RecipePage = () => {
   const [outputSearchValue, setOutputSearchValue] = useState("");
   const [filterValue, setFilterValue] = useState("");
 
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [recipes, setRecipes] = useState<PairRecipe[]>([]);
   const [categorizedRecipes, setCategorizedRecipes] = useState<CategorizedRecipes>({
     special: [],
     id: [],
@@ -27,15 +27,15 @@ export const RecipePage = () => {
   const [dropdownSearch, setDropdownSearch] = useState<{ [dropdownId: string]: string }>({});
   const groupDropdowns = useDropdownManager();
 
-  const getInputRecipes = (shard: ShardWithKey, fusionData: FusionData): Recipe[] => {
-    const recipes: Recipe[] = [];
+  const getInputRecipes = (shard: Shard, fusionData: FusionJson): PairRecipe[] => {
+    const recipes: PairRecipe[] = [];
     Object.entries(fusionData.recipes).forEach(([outputShardId, recipeData]) => {
       Object.entries(recipeData).forEach(([quantityStr, recipeList]) => {
         const outputQuantity = parseInt(quantityStr, 10);
         recipeList.forEach((recipe) => {
           if (recipe.length === 2) {
             const [input1, input2] = recipe;
-            if (input1 === shard.key || input2 === shard.key) {
+            if (input1 === shard.id || input2 === shard.id) {
               recipes.push({ input1, input2, quantity: outputQuantity, output: outputShardId });
             }
           }
@@ -53,7 +53,7 @@ export const RecipePage = () => {
       return;
     }
 
-    let newRecipes: Recipe[] = [];
+    let newRecipes: PairRecipe[] = [];
     let newMode: RecipeMode = null;
 
     if (selectedShard && !selectedOutputShard) {
@@ -74,7 +74,7 @@ export const RecipePage = () => {
     }
   }, [selectedShard, selectedOutputShard, fusionData]);
 
-  const handleShardSelect = (shard: ShardWithKey) => {
+  const handleShardSelect = (shard: Shard) => {
     setMode("input");
     setSelectedShard(shard);
     setSelectedOutputShard(null);
@@ -82,7 +82,7 @@ export const RecipePage = () => {
     setFilterValue("");
   };
 
-  const handleOutputShardSelect = (shard: ShardWithKey) => {
+  const handleOutputShardSelect = (shard: Shard) => {
     setMode("output");
     setSelectedOutputShard(shard);
     setSelectedShard(null);
@@ -327,7 +327,7 @@ export const RecipePage = () => {
 
               let actualOutput = "";
               if (mode === "output" && selectedOutputShard) {
-                actualOutput = selectedOutputShard.key;
+                actualOutput = selectedOutputShard.id;
               } else if (mode === "input") {
                 actualOutput = activeRecipe.output;
               } else if (activeRecipe.output) {
@@ -351,7 +351,7 @@ export const RecipePage = () => {
 
             let actualOutput = "";
             if (mode === "output" && selectedOutputShard) {
-              actualOutput = selectedOutputShard.key;
+              actualOutput = selectedOutputShard.id;
             } else if (mode === "input") {
               actualOutput = recipe.output;
             } else if (recipe.output) {
@@ -400,7 +400,7 @@ export const RecipePage = () => {
               <div className="flex items-center justify-center gap-2 lg:gap-3">
                 <div className="flex items-center gap-1 text-sm">
                   <span className="text-slate-300">What can you make with</span>
-                  <img src={`${import.meta.env.BASE_URL}shardIcons/${selectedShard.key}.png`} alt={selectedShard.name} className="w-5 h-5 object-contain" loading="lazy" />
+                  <img src={shardIconUrl(selectedShard.id)} alt={selectedShard.name} className="w-5 h-5 object-contain" loading="lazy" />
                   <span className={`font-semibold ${getRarityColor(selectedShard.rarity)}`}>{selectedShard.name}</span>
                   <span className="text-slate-400">?</span>
                 </div>
@@ -435,7 +435,7 @@ export const RecipePage = () => {
               <div className="flex items-center justify-center gap-2 lg:gap-3">
                 <div className="flex items-center gap-1 text-sm">
                   <span className="text-slate-300">How to make</span>
-                  <img src={`${import.meta.env.BASE_URL}shardIcons/${selectedOutputShard.key}.png`} alt={selectedOutputShard.name} className="w-5 h-5 object-contain" loading="lazy" />
+                  <img src={shardIconUrl(selectedOutputShard.id)} alt={selectedOutputShard.name} className="w-5 h-5 object-contain" loading="lazy" />
                   <span className={`font-semibold ${getRarityColor(selectedOutputShard.rarity)}`}>{selectedOutputShard.name}</span>
                   <span className="text-slate-400">?</span>
                 </div>

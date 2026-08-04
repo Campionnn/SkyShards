@@ -1,12 +1,13 @@
-import { getRarityColor, formatShardDescription } from "../../utilities";
+import { getRarityColor, shardIconUrl } from "../../utilities";
 import { Tooltip } from "./Tooltip";
+import { ShardDescription } from "./ShardDescription";
 import { SHARD_DESCRIPTIONS } from "../../constants";
-import type { FusionData } from "../../utilities";
+import type { FusionJson } from "../../types/types";
 
 interface ShardDisplayProps {
   shardId: string;
   quantity?: number;
-  fusionData: FusionData;
+  fusionData: FusionJson;
   size?: "sm" | "md";
   tooltipVisible?: boolean;
 }
@@ -24,7 +25,7 @@ export const ShardDisplay = ({ shardId, quantity, fusionData, size = "md", toolt
     <div className="flex items-center gap-1 lg:gap-2 xl:gap-3 min-w-0">
       <span className="text-xs lg:text-sm xl:text-base text-slate-400 font-medium flex-shrink-0">{actualQuantity}x</span>
       <Tooltip
-        content={formatShardDescription(shardDesc?.description || "No description available.")}
+        content={<ShardDescription record={shardDesc} />}
         title={shardDesc?.title}
         shardName={shard.name}
         shardIcon={shardId}
@@ -36,7 +37,7 @@ export const ShardDisplay = ({ shardId, quantity, fusionData, size = "md", toolt
         visible={tooltipVisible}
       >
         <div className="flex items-center gap-1 lg:gap-2 xl:gap-3">
-          <img src={`${import.meta.env.BASE_URL}shardIcons/${shardId}.png`} alt={shard.name} className={`${iconSize} object-contain flex-shrink-0`} loading="lazy" />
+          <img src={shardIconUrl(shardId)} alt={shard.name} className={`${iconSize} object-contain flex-shrink-0`} loading="lazy" />
           <span className={`text-xs lg:text-sm xl:text-base font-medium truncate ${getRarityColor(shard.rarity)}`} title={shard.name}>
             {shard.name}
           </span>

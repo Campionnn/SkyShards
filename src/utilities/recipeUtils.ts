@@ -1,21 +1,12 @@
-import type { ShardWithKey } from "../types/types";
+import type { FusionJson, Shard } from "../types/types";
 
-export interface FusionData {
-  recipes: Record<string, Record<string, string[][]>>;
-  shards: Record<
-    string,
-    {
-      name: string;
-      family: string;
-      type: string;
-      rarity: string;
-      fuse_amount: number;
-      internal_id: string;
-    }
-  >;
-}
-
-export interface Recipe {
+/**
+ * A single fusion written out as an ordered pair, for display. Distinct from the
+ * domain `Recipe` in types/types.ts (`{inputs, outputQuantity, isReptile}`), which is
+ * what the cost solver runs on — this one carries the left/right split the recipe
+ * browser groups and renders by.
+ */
+export interface PairRecipe {
   input1: string;
   input2: string;
   quantity: number;
@@ -23,7 +14,7 @@ export interface Recipe {
 }
 
 export interface GroupedRecipe {
-  recipes: Recipe[];
+  recipes: PairRecipe[];
   isGroup: boolean;
   commonShard: string;
   commonPosition: "input1" | "input2" | "";
@@ -43,7 +34,7 @@ export interface CategorizedRecipes {
 
 const RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary"];
 
-const iterateRecipes = (fusionData: FusionData, callback: (outputId: string, recipe: string[], quantity: number) => void) => {
+const iterateRecipes = (fusionData: FusionJson, callback: (outputId: string, recipe: string[], quantity: number) => void) => {
   Object.entries(fusionData.recipes).forEach(([outputShardId, recipeData]) => {
     Object.entries(recipeData).forEach(([quantityStr, recipeList]) => {
       const outputQuantity = parseInt(quantityStr, 10);
@@ -56,10 +47,10 @@ const iterateRecipes = (fusionData: FusionData, callback: (outputId: string, rec
   });
 };
 
-export const processOutputRecipes = (selectedShard: ShardWithKey, fusionData: FusionData): Recipe[] => {
-  const recipes: Recipe[] = [];
+export const processOutputRecipes = (selectedShard: Shard, fusionData: FusionJson): PairRecipe[] => {
+  const recipes: PairRecipe[] = [];
   iterateRecipes(fusionData, (outputShardId, recipe, outputQuantity) => {
-    if (outputShardId === selectedShard.key) {
+    if (outputShardId === selectedShard.id) {
       const [input1, input2] = recipe;
       recipes.push({ input1, input2, quantity: outputQuantity, output: outputShardId });
     }
@@ -67,7 +58,7 @@ export const processOutputRecipes = (selectedShard: ShardWithKey, fusionData: Fu
   return recipes;
 };
 
-const classifyFusion = (recipe: Recipe): "special" | "id" | "chameleon" => {
+const classifyFusion = (recipe: PairRecipe): "special" | "id" | "chameleon" => {
   const isChameleon = recipe.input1 === "L4" || recipe.input2 === "L4";
   if (isChameleon) return "chameleon";
   if (recipe.quantity === 2) return "special";
@@ -79,7 +70,7 @@ const createRecipeKey = (input1: string, input2: string, quantity: number): stri
   return `${sortedInputs[0]}-${sortedInputs[1]}-${quantity}`;
 };
 
-const analyzeShardPositions = (recipes: Recipe[]) => {
+const analyzeShardPositions = (recipes: PairRecipe[]) => {
   const position1Count = new Map<string, number>();
   const position2Count = new Map<string, number>();
   
@@ -97,7 +88,7 @@ const getPreferredPosition = (shardId: string, position1Count: Map<string, numbe
   return count1 >= count2 ? "input1" : "input2";
 };
 
-const chooseBetterRecipe = (recipe1: Recipe, recipe2: Recipe, fusionData: FusionData, positionAnalysis: { position1Count: Map<string, number>, position2Count: Map<string, number> }): Recipe => {
+const chooseBetterRecipe = (recipe1: PairRecipe, recipe2: PairRecipe, fusionData: FusionJson, positionAnalysis: { position1Count: Map<string, number>, position2Count: Map<string, number> }): PairRecipe => {
   const shard1A = fusionData.shards[recipe1.input1];
   const shard1B = fusionData.shards[recipe1.input2];
   const shard2A = fusionData.shards[recipe2.input1];
@@ -141,7 +132,7 @@ const chooseBetterRecipe = (recipe1: Recipe, recipe2: Recipe, fusionData: Fusion
   return recipe1.input1.localeCompare(recipe2.input1) <= 0 ? recipe1 : recipe2;
 };
 
-const groupRecipesByCommonShard = (recipes: Recipe[]): GroupedRecipe[] => {
+const groupRecipesByCommonShard = (recipes: PairRecipe[]): GroupedRecipe[] => {
   const groups: GroupedRecipe[] = [];
   const processed = new Set<number>();
   recipes.forEach((recipe, index) => {
@@ -184,10 +175,10 @@ const groupRecipesByCommonShard = (recipes: Recipe[]): GroupedRecipe[] => {
   return groups;
 };
 
-export const categorizeAndGroupRecipes = (recipes: Recipe[], fusionData: FusionData): CategorizedRecipes => {
+export const categorizeAndGroupRecipes = (recipes: PairRecipe[], fusionData: FusionJson): CategorizedRecipes => {
   const positionAnalysis = analyzeShardPositions(recipes);
-  const recipeMap = new Map<string, Recipe>();
-  const duplicates = new Map<string, Recipe[]>();
+  const recipeMap = new Map<string, PairRecipe>();
+  const duplicates = new Map<string, PairRecipe[]>();
   recipes.forEach(recipe => {
     const key = createRecipeKey(recipe.input1, recipe.input2, recipe.quantity) + `-${recipe.output}`;
     if (recipeMap.has(key)) {
@@ -204,12 +195,12 @@ export const categorizeAndGroupRecipes = (recipes: Recipe[], fusionData: FusionD
     recipeMap.set(key, best);
   });
   const culled = Array.from(recipeMap.values());
-  const byType: Record<string, Recipe[]> = { special: [], id: [], chameleon: [] };
+  const byType: Record<string, PairRecipe[]> = { special: [], id: [], chameleon: [] };
   culled.forEach(r => byType[classifyFusion(r)].push(r));
 
-  const build = (list: Recipe[]): GroupedRecipe[] => {
+  const build = (list: PairRecipe[]): GroupedRecipe[] => {
     // Partition by output only (ignore quantity to allow flexible grouping)
-    const partitions = new Map<string, Recipe[]>();
+    const partitions = new Map<string, PairRecipe[]>();
     list.forEach(r => {
       const k = r.output;
       (partitions.get(k) || partitions.set(k, []).get(k)!).push(r);
@@ -250,7 +241,7 @@ export const categorizeAndGroupRecipes = (recipes: Recipe[], fusionData: FusionD
         if (variantLeft[0] > variantRight[0]) return;
 
         // Collect all recipes that connect these variant sets
-        const groupRecipes: Recipe[] = [];
+        const groupRecipes: PairRecipe[] = [];
         recList.forEach((r, idx) => {
           const aInLeft = variantLeft.includes(r.input1) && variantRight.includes(r.input2);
           const bInLeft = variantLeft.includes(r.input2) && variantRight.includes(r.input1);
@@ -279,7 +270,7 @@ export const categorizeAndGroupRecipes = (recipes: Recipe[], fusionData: FusionD
       const remaining = recList.filter((_, idx) => !used.has(idx));
       if (remaining.length) {
         // Group by quantity for traditional grouping
-        const byQty = new Map<number, Recipe[]>();
+        const byQty = new Map<number, PairRecipe[]>();
         remaining.forEach(r => {
           (byQty.get(r.quantity) || byQty.set(r.quantity, []).get(r.quantity)!).push(r);
         });
@@ -299,14 +290,14 @@ export const categorizeAndGroupRecipes = (recipes: Recipe[], fusionData: FusionD
   };
 };
 
-export const filterCategorizedRecipes = (categorized: CategorizedRecipes, filterValue: string, fusionData: FusionData): CategorizedRecipes => {
+export const filterCategorizedRecipes = (categorized: CategorizedRecipes, filterValue: string, fusionData: FusionJson): CategorizedRecipes => {
   if (!filterValue.trim()) return categorized;
   const term = filterValue.toLowerCase();
   const filter = (arr: GroupedRecipe[]) =>
     arr.filter(g => g.recipes.some(r => {
       const s1 = fusionData.shards[r.input1]?.name.toLowerCase() || "";
       const s2 = fusionData.shards[r.input2]?.name.toLowerCase() || "";
-      const outId = (r as Recipe).output as string | undefined;
+      const outId = (r as PairRecipe).output as string | undefined;
       const outName = outId ? (fusionData.shards[outId]?.name.toLowerCase() || "") : "";
       return s1.includes(term) || s2.includes(term) || outName.includes(term);
     }));

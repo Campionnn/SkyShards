@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Search, RotateCcw, Save, AlignLeft } from "lucide-react";
 import { useShardsWithRecipes, useCustomRates } from "../hooks";
-import { debounce, formatShardDescription, filterShards, DEFAULT_FILTER_CONFIG } from "../utilities";
+import { debounce, filterShards, DEFAULT_FILTER_CONFIG, isFocusRestoredByWindow } from "../utilities";
+import { ShardDescription } from "../components/ui/ShardDescription";
 import { RarityDropdown, TypeDropdown, ShardItem } from "../components";
 import { SHARD_DESCRIPTIONS } from "../constants";
 import type { ShardWithDirectInfo } from "../types/types";
@@ -66,6 +67,13 @@ export const SettingsPage: React.FC = () => {
     setFilter(e.target.value);
   }, []);
 
+  // Focusing the box starts a new search, so it clears the old one - unless the browser is
+  // just handing focus back after the user alt-tabbed away mid-search.
+  const handleFilterFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    if (isFocusRestoredByWindow(e.target)) return;
+    setFilter("");
+  }, []);
+
   if (shardsLoading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -94,7 +102,7 @@ export const SettingsPage: React.FC = () => {
               type="text"
               value={filter}
               onChange={handleFilterChange}
-              onFocus={() => setFilter("")}
+              onFocus={handleFilterFocus}
               placeholder="Search by name, perk, or description..."
               className="
                 w-full pl-10 pr-4 py-2.5 
@@ -162,7 +170,7 @@ export const SettingsPage: React.FC = () => {
               type="text"
               value={filter}
               onChange={handleFilterChange}
-              onFocus={() => setFilter("")}
+              onFocus={handleFilterFocus}
               placeholder="Search by name, perk, or description..."
               className="
                 w-full pl-10 pr-4 py-2.5 
@@ -231,18 +239,18 @@ export const SettingsPage: React.FC = () => {
 
       <div className="bg-white/5 border border-white/10 rounded-md overflow-hidden flex-1">
         <div className="h-full overflow-y-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-3 auto-rows-fr">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 p-3 items-start">
             {filteredShards.map((shard) => {
-              const desc = SHARD_DESCRIPTIONS[shard.key as keyof typeof SHARD_DESCRIPTIONS];
+              const desc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
               return (
                 <ShardItem
-                  key={shard.key}
+                  key={shard.id}
                   shard={shard}
                   title={desc?.title || shard.name}
-                  description={formatShardDescription(desc?.description || "No description.")}
+                  description={<ShardDescription record={desc} fallback="No description." collapsibleHowToHunt />}
                   detailed={detailedShard}
-                  rate={customRates[shard.key] !== undefined ? customRates[shard.key]! : defaultRates[shard.key]}
-                  defaultRate={defaultRates[shard.key]}
+                  rate={customRates[shard.id] !== undefined ? customRates[shard.id]! : defaultRates[shard.id]}
+                  defaultRate={defaultRates[shard.id]}
                   onRateChange={handleRateChange}
                 />
               );

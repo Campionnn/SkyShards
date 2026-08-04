@@ -1,7 +1,6 @@
 import dagre from "@dagrejs/dagre";
 import type { Edge, Node } from "@xyflow/react";
-import type { Data, Recipes } from "../types/types";
-import type { FusionData } from "./recipeUtils";
+import type { Data, FusionJson, Recipes } from "../types/types";
 import { buildFusionGraph, type FusionEdgeType, type FusionGraph } from "./fusionLines";
 
 // React Flow / dagre layout for the fusion-lines graph: turns the dominance-pruned
@@ -43,18 +42,18 @@ export type FusionEdge = Edge<FusionEdgeData>;
 /** Convert the raw fusion-data.json shape (recipes nested by output quantity) into
  * the `Data` type consumed by `buildFusionGraph`. Mirrors `CalculationService.buildData`,
  * minus the rate/fortune work the graph never uses. */
-export function fusionDataToData(fusionJson: FusionData, rates?: Record<string, number>): Data {
+export function fusionDataToData(fusionJson: FusionJson, rates?: Record<string, number>): Data {
   const recipes: Recipes = {};
   for (const output in fusionJson.recipes) {
     recipes[output] = [];
     for (const qtyStr in fusionJson.recipes[output]) {
       const outputQuantity = parseInt(qtyStr, 10);
       for (const inputs of fusionJson.recipes[output][qtyStr]) {
-        recipes[output].push({ inputs: inputs as [string, string], outputQuantity, isReptile: false });
+        recipes[output].push({ inputs, outputQuantity, isReptile: false });
       }
     }
   }
-  const shards = fusionJson.shards as unknown as Data["shards"];
+  const shards: Data["shards"] = fusionJson.shards;
   if (rates) {
     for (const id in shards) shards[id] = { ...shards[id], rate: rates[id] ?? 0 };
   }

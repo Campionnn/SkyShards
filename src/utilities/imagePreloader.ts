@@ -1,62 +1,52 @@
-export class ImagePreloader {
-  private static instance: ImagePreloader;
-  private loadedImages: Map<string, HTMLImageElement> = new Map();
-  private loading: Promise<void> | null = null;
+import { shardIconUrl } from "./shardIcon";
 
-  private constructor() {}
+/**
+ * Warms the browser cache with every shard icon so they don't pop in a beat late the
+ * first time a fusion tree or the shard browser renders them.
+ *
+ * There are 300+ icons totalling a few MB, so this deliberately stays off the
+ * critical path: it waits for the browser to go idle after first paint, then fetches
+ * a few at a time. Decoded images are not retained — the HTTP cache entry is the
+ * point, and holding 300 bitmaps alive would cost far more memory than it saves.
+ */
 
-  static getInstance(): ImagePreloader {
-    if (!ImagePreloader.instance) {
-      ImagePreloader.instance = new ImagePreloader();
-    }
-    return ImagePreloader.instance;
+/** Enough to keep the connection busy, few enough to not starve real requests. */
+const CONCURRENCY = 6;
+
+let started = false;
+
+const whenIdle = (run: () => void) => {
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(run, { timeout: 3000 });
+  } else {
+    setTimeout(run, 1000);
   }
+};
 
-  async preloadShardIcons(shardIds: string[]): Promise<void> {
-    // Return existing loading promise if already loading
-    if (this.loading) {
-      return this.loading;
-    }
+/** Don't pull megabytes uninvited on metered or very slow connections. */
+const shouldSkip = (): boolean => {
+  const connection = (navigator as { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  if (!connection) return false;
+  return connection.saveData === true || connection.effectiveType === "slow-2g" || connection.effectiveType === "2g";
+};
 
-    // Return immediately if already loaded
-    if (this.loadedImages.size === shardIds.length) {
-      return Promise.resolve();
-    }
+export function preloadShardIcons(shardIds: string[]): void {
+  if (started || shardIds.length === 0 || shouldSkip()) return;
+  started = true;
 
-    this.loading = this.loadImages(shardIds);
-    return this.loading;
-  }
+  whenIdle(() => {
+    const queue = [...shardIds];
 
-  private async loadImages(shardIds: string[]): Promise<void> {
-    const baseUrl = import.meta.env.BASE_URL;
+    const next = (): void => {
+      const shardId = queue.shift();
+      if (shardId === undefined) return;
 
-    // Create promises for all images
-    const imagePromises = shardIds.map((shardId) => {
-      // Skip if already loaded
-      if (this.loadedImages.has(shardId)) {
-        return Promise.resolve();
-      }
+      const img = new Image();
+      // Advance on failure too — one missing icon must not stall the rest.
+      img.onload = img.onerror = next;
+      img.src = shardIconUrl(shardId);
+    };
 
-      return new Promise<void>((resolve) => {
-        const img = new Image();
-
-        img.onload = () => {
-          this.loadedImages.set(shardId, img);
-          resolve();
-        };
-
-        img.onerror = () => {
-          console.warn(`Failed to load shard icon: ${shardId}`);
-          resolve(); // Resolve anyway to not block other images
-        };
-
-        img.src = `${baseUrl}shardIcons/${shardId}.png`;
-      });
-    });
-
-    await Promise.all(imagePromises);
-    this.loading = null;
-  }
+    for (let i = 0; i < CONCURRENCY; i++) next();
+  });
 }
-
-export const imagePreloader = ImagePreloader.getInstance();

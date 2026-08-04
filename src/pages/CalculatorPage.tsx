@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Menu, X, ChevronDown, ChevronRight, Package } from "lucide-react";
 import { CalculatorForm, CalculationResults, InventoryCalculationResults } from "../components";
-import { WelcomeProfileModal, InventoryManagementModal } from "../components";
+import { WelcomeProfileModal, InventoryManagementModal, ActiveAlternativesModal } from "../components";
 import { useCustomRates, useCalculatorState } from "../hooks";
-import { DataService, InvCalculationService, CalculationService } from "../services";
+import { DataService, InvCalculationService, CalculationService, buildCalculationParams } from "../services";
 import type { CalculationFormData } from "../schemas";
 import type { CalculationResult, CalculationParams, RecipeOverride, Data, InventoryCalculationResult } from "../types/types";
 import { isFirstVisit, setSaveEnabled, loadInventory, saveInventory, loadOwnedAttributes, saveOwnedAttributes, loadDisabledShards, saveDisabledShards } from "../utilities";
@@ -14,17 +14,15 @@ const INVENTORY_ENABLED_KEY = "skyshards_use_inventory";
 
 const CalculatorFormWithContext: React.FC<{
   onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void;
-  inventory?: Map<string, number>;
   ownedAttributes?: Map<string, number>;
   useInventory: boolean;
   onUseInventoryChange: (enabled: boolean) => void;
-}> = ({ onSubmit, inventory, ownedAttributes, useInventory, onUseInventoryChange }) => {
+}> = ({ onSubmit, ownedAttributes, useInventory, onUseInventoryChange }) => {
   const { setForm } = useCalculatorState();
   const stableOnSubmit = useCallback((data: CalculationFormData) => onSubmit(data, setForm), [onSubmit, setForm]);
   return (
     <CalculatorForm
       onSubmit={stableOnSubmit}
-      inventory={inventory}
       ownedAttributes={ownedAttributes}
       useInventory={useInventory}
       onUseInventoryChange={onUseInventoryChange}
@@ -72,33 +70,7 @@ const performCalculation = async (
       return null;
     }
 
-    const dataService = DataService.getInstance();
-    const filteredCustomRates = Object.fromEntries(
-      Object.entries(customRates).filter(([, v]) => v !== undefined)
-    ) as { [shardId: string]: number };
-
-    const params = {
-      customRates: formData.ironManView ? filteredCustomRates : await dataService.loadShardCosts(formData.instantBuyPrices),
-      hunterFortune: formData.hunterFortune,
-      excludeChameleon: formData.excludeChameleon,
-      frogBonus: formData.frogBonus,
-      newtLevel: formData.newtLevel,
-      salamanderLevel: formData.salamanderLevel,
-      lizardKingLevel: formData.lizardKingLevel,
-      leviathanLevel: formData.leviathanLevel,
-      pythonLevel: formData.pythonLevel,
-      kingCobraLevel: formData.kingCobraLevel,
-      seaSerpentLevel: formData.seaSerpentLevel,
-      tiamatLevel: formData.tiamatLevel,
-      crocodileLevel: formData.crocodileLevel,
-      kuudraTier: formData.kuudraTier,
-      moneyPerHour: formData.moneyPerHour,
-      customKuudraTime: formData.customKuudraTime,
-      kuudraTimeSeconds: formData.kuudraTimeSeconds,
-      noWoodenBait: formData.noWoodenBait,
-      rateAsCoinValue: !formData.ironManView,
-      craftPenalty: formData.craftPenalty,
-    };
+    const params = await buildCalculationParams(formData, customRates);
 
     callbacks.setCurrentParams(params);
     callbacks.setCalculating(true);
@@ -106,9 +78,9 @@ const performCalculation = async (
 
     const shardQuantitiesMap = new Map<string, number>();
     if (formData.shardQuantities) {
-      formData.shardQuantities.forEach((item: { shard?: { key: string }; quantity?: number }) => {
+      formData.shardQuantities.forEach((item: { shard?: { id: string }; quantity?: number }) => {
         if (item.shard && item.quantity) {
-          shardQuantitiesMap.set(item.shard.key, item.quantity);
+          shardQuantitiesMap.set(item.shard.id, item.quantity);
         }
       });
     }
@@ -215,32 +187,7 @@ const performCalculation = async (
   callbacks.setCurrentShardKey(shardKey);
   callbacks.setCurrentQuantity(formData.quantity);
 
-  const filteredCustomRates = Object.fromEntries(
-    Object.entries(customRates).filter(([, v]) => v !== undefined)
-  ) as { [shardId: string]: number };
-
-  const params = {
-    customRates: formData.ironManView ? filteredCustomRates : await dataService.loadShardCosts(formData.instantBuyPrices),
-    hunterFortune: formData.hunterFortune,
-    excludeChameleon: formData.excludeChameleon,
-    frogBonus: formData.frogBonus,
-    newtLevel: formData.newtLevel,
-    salamanderLevel: formData.salamanderLevel,
-    lizardKingLevel: formData.lizardKingLevel,
-    leviathanLevel: formData.leviathanLevel,
-    pythonLevel: formData.pythonLevel,
-    kingCobraLevel: formData.kingCobraLevel,
-    seaSerpentLevel: formData.seaSerpentLevel,
-    tiamatLevel: formData.tiamatLevel,
-    crocodileLevel: formData.crocodileLevel,
-    kuudraTier: formData.kuudraTier,
-    moneyPerHour: formData.moneyPerHour,
-    customKuudraTime: formData.customKuudraTime,
-    kuudraTimeSeconds: formData.kuudraTimeSeconds,
-    noWoodenBait: formData.noWoodenBait,
-    rateAsCoinValue: !formData.ironManView,
-    craftPenalty: formData.craftPenalty,
-  };
+  const params = await buildCalculationParams(formData, customRates);
 
   callbacks.setCurrentParams(params);
   callbacks.setResult(null);
@@ -280,7 +227,7 @@ const performCalculation = async (
   };
 };
 
-const CalculatorPageContent: React.FC = () => {
+export const CalculatorPage: React.FC = () => {
   const { result, setResult, calculationData, setCalculationData, targetShardName, setTargetShardName, form, setForm } = useCalculatorState();
   const { customRates } = useCustomRates();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -288,6 +235,7 @@ const CalculatorPageContent: React.FC = () => {
   const [currentShardKey, setCurrentShardKey] = useState<string>("");
   const [currentQuantity, setCurrentQuantity] = useState<number>(1);
   const [recipeOverrides, setRecipeOverrides] = useState<RecipeOverride[]>([]);
+  const [activeAlternativesOpen, setActiveAlternativesOpen] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
   const [progress, setProgress] = useState<WorkerProgress | null>(null);
 
@@ -325,7 +273,7 @@ const CalculatorPageContent: React.FC = () => {
     try {
       const dataService = DataService.getInstance();
       const shards = await dataService.loadShards();
-      const shard = shards.find(s => s.key === shardKey);
+      const shard = shards.find(s => s.id === shardKey);
       
       if (shard) {
         // Calculate remaining quantity based on owned attributes
@@ -339,33 +287,24 @@ const CalculatorPageContent: React.FC = () => {
         setTargetShardName(shard.name);
         setCurrentShardKey(shardKey);
         setCurrentQuantity(remaining);
-        // Trigger calculation after a brief delay to ensure form is updated
-        setTimeout(() => {
-          const submit = async (formData: CalculationFormData) => {
-            await performCalculation(
-              formData,
-              customRates,
-              recipeOverrides,
-              {
-                setTargetShardName,
-                setCurrentShardKey,
-                setCurrentQuantity,
-                setCurrentParams,
-                setResult,
-                setCalculationData,
-                setCalculating: setIsCalculating,
-                setProgress,
-                setMaterialShardResults,
-              }
-            );
-          };
-          submit(updatedForm).catch(console.error);
-        }, 0);
+        // performCalculation is handed the new form explicitly, so it does not need to
+        // wait for the setForm above to commit.
+        performCalculation(updatedForm, customRates, recipeOverrides, {
+          setTargetShardName,
+          setCurrentShardKey,
+          setCurrentQuantity,
+          setCurrentParams,
+          setResult,
+          setCalculationData,
+          setCalculating: setIsCalculating,
+          setProgress,
+          setMaterialShardResults,
+        }).catch(console.error);
       }
     } catch (error) {
       console.error("Failed to load shard from key:", error);
     }
-  }, [form, setForm, setTargetShardName, customRates, recipeOverrides, ownedAttributes]);
+  }, [form, setForm, setTargetShardName, setResult, setCalculationData, customRates, recipeOverrides, ownedAttributes]);
 
   // Handler for importing shard levels from profile
   const handleShardLevelsImport = useCallback((levels: {
@@ -440,7 +379,7 @@ const CalculatorPageContent: React.FC = () => {
     setInventoryResult(null);
     setInvCalculationData(null);
 
-    debouncedCalculate(newForm, 100).catch(console.error);
+    debouncedCalculate(newForm, 100);
 
     setShowWelcome(false);
   };
@@ -459,32 +398,7 @@ const CalculatorPageContent: React.FC = () => {
       return;
     }
 
-    const filteredCustomRates = Object.fromEntries(
-      Object.entries(customRates).filter(([, v]) => v !== undefined)
-    ) as { [shardId: string]: number };
-
-    const params: CalculationParams = {
-      customRates: formData.ironManView ? filteredCustomRates : await dataService.loadShardCosts(formData.instantBuyPrices),
-      hunterFortune: formData.hunterFortune,
-      excludeChameleon: formData.excludeChameleon,
-      frogBonus: formData.frogBonus,
-      newtLevel: formData.newtLevel,
-      salamanderLevel: formData.salamanderLevel,
-      lizardKingLevel: formData.lizardKingLevel,
-      leviathanLevel: formData.leviathanLevel,
-      pythonLevel: formData.pythonLevel,
-      kingCobraLevel: formData.kingCobraLevel,
-      seaSerpentLevel: formData.seaSerpentLevel,
-      tiamatLevel: formData.tiamatLevel,
-      crocodileLevel: formData.crocodileLevel,
-      kuudraTier: formData.kuudraTier,
-      moneyPerHour: formData.moneyPerHour,
-      customKuudraTime: formData.customKuudraTime,
-      kuudraTimeSeconds: formData.kuudraTimeSeconds,
-      noWoodenBait: formData.noWoodenBait,
-      rateAsCoinValue: !formData.ironManView,
-      craftPenalty: formData.craftPenalty,
-    };
+    const params = await buildCalculationParams(formData, customRates);
 
     setInvCurrentParams(params);
     setIsCalculating(true);
@@ -513,11 +427,14 @@ const CalculatorPageContent: React.FC = () => {
   }, [customRates, inventory, disabledShards, recipeOverrides, ownedAttributes]);
 
   // ─── Standard debounced calculation ───
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cancelRef = useRef<(() => void) | null>(null);
 
+  // Not async: the work happens inside the setTimeout below, so a returned promise
+  // would resolve before the calculation starts. Failures are handled inside that
+  // callback, the only place they can be observed.
   const debouncedCalculate = useCallback(
-    async (formData: CalculationFormData, delay = 300) => {
+    (formData: CalculationFormData, delay = 300) => {
       // Clear existing timeout
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
@@ -570,17 +487,21 @@ const CalculatorPageContent: React.FC = () => {
   const formRef = useRef(form);
   formRef.current = form;
 
-  const handleCalculate = useCallback(async (formData: CalculationFormData, setFormFn: (data: CalculationFormData) => void) => {
-    setFormFn(formData);
-    // For immediate fields like shard selection, calculate immediately
+  const handleCalculate = useCallback((formData: CalculationFormData, setFormFn: (data: CalculationFormData) => void) => {
+    // Read formRef before setFormFn: the update is only scheduled, so this still
+    // holds the previous form, which is what the comparison below needs.
     const currentForm = formRef.current;
+    setFormFn(formData);
+
+    // Picking a shard or changing what is being made should feel immediate; tweaking
+    // a setting can wait for the user to stop fiddling.
     const materialsOnlyChanged = formData.materialsOnly !== currentForm?.materialsOnly;
     const selectedShardsChanged = JSON.stringify(formData.selectedShardKeys) !== JSON.stringify(currentForm?.selectedShardKeys);
 
     if (formData.shard !== currentForm?.shard || formData.quantity !== currentForm?.quantity || materialsOnlyChanged || selectedShardsChanged) {
-      await debouncedCalculate(formData, 100);
+      debouncedCalculate(formData, 100);
     } else {
-      await debouncedCalculate(formData, 300);
+      debouncedCalculate(formData, 300);
     }
   }, [debouncedCalculate]);
 
@@ -596,6 +517,10 @@ const CalculatorPageContent: React.FC = () => {
     setRecipeOverrides([]);
   };
 
+  const removeRecipeOverride = (shardId: string) => {
+    setRecipeOverrides((overrides) => overrides.filter((override) => override.shardId !== shardId));
+  };
+
   // Re-calculate when customRates, recipeOverrides, inventory, or useInventory change and form is valid
   useEffect(() => {
     const currentForm = formRef.current;
@@ -605,9 +530,8 @@ const CalculatorPageContent: React.FC = () => {
     );
 
     if (isValidForm) {
-      debouncedCalculate(currentForm, 150).catch(console.error);
+      debouncedCalculate(currentForm, 150);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customRates, recipeOverrides, inventory, useInventory, debouncedCalculate]);
 
   // Initialize params from form for inventory mode display
@@ -615,33 +539,7 @@ const CalculatorPageContent: React.FC = () => {
     if (!useInventory || !form) return;
 
     const initializeParams = async () => {
-      const dataService = DataService.getInstance();
-      const filteredCustomRates = Object.fromEntries(
-        Object.entries(customRates).filter(([, v]) => v !== undefined)
-      ) as { [shardId: string]: number };
-
-      const params: CalculationParams = {
-        customRates: form.ironManView ? filteredCustomRates : await dataService.loadShardCosts(form.instantBuyPrices),
-        hunterFortune: form.hunterFortune,
-        excludeChameleon: form.excludeChameleon,
-        frogBonus: form.frogBonus,
-        newtLevel: form.newtLevel,
-        salamanderLevel: form.salamanderLevel,
-        lizardKingLevel: form.lizardKingLevel,
-        leviathanLevel: form.leviathanLevel,
-        pythonLevel: form.pythonLevel,
-        kingCobraLevel: form.kingCobraLevel,
-        seaSerpentLevel: form.seaSerpentLevel,
-        tiamatLevel: form.tiamatLevel,
-        crocodileLevel: form.crocodileLevel,
-        kuudraTier: form.kuudraTier,
-        moneyPerHour: form.moneyPerHour,
-        customKuudraTime: form.customKuudraTime,
-        kuudraTimeSeconds: form.kuudraTimeSeconds,
-        noWoodenBait: form.noWoodenBait,
-        rateAsCoinValue: !form.ironManView,
-        craftPenalty: form.craftPenalty,
-      };
+      const params = await buildCalculationParams(form, customRates);
 
       setInvCurrentParams(params);
     };
@@ -735,7 +633,6 @@ const CalculatorPageContent: React.FC = () => {
               {/* Calculator Settings Form */}
               <CalculatorFormWithContext
                 onSubmit={handleCalculate}
-                inventory={useInventory ? inventory : undefined}
                 ownedAttributes={ownedAttributes}
                 useInventory={useInventory}
                 onUseInventoryChange={handleUseInventoryChange}
@@ -773,6 +670,7 @@ const CalculatorPageContent: React.FC = () => {
                 recipeOverrides={recipeOverrides}
                 onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
                 onResetRecipeOverrides={resetRecipeOverrides}
+                onShowActiveAlternatives={() => setActiveAlternativesOpen(true)}
                 inventory={inventory}
                 disabledShards={disabledShards}
                 onDisabledShardsChange={setDisabledShards}
@@ -792,6 +690,7 @@ const CalculatorPageContent: React.FC = () => {
                 recipeOverrides={recipeOverrides}
                 onRecipeOverridesUpdate={handleRecipeOverridesUpdate}
                 onResetRecipeOverrides={resetRecipeOverrides}
+                onShowActiveAlternatives={() => setActiveAlternativesOpen(true)}
                 ironManView={form.ironManView}
                 materialsOnly={form.materialsOnly}
                 materialShardResults={materialShardResults}
@@ -835,8 +734,17 @@ const CalculatorPageContent: React.FC = () => {
         onShardClick={handleShardClickFromInventory}
         onShardLevelsImport={handleShardLevelsImport}
       />
+
+      {/* Alternatives currently applied to the fusion tree. Lives here so it stays open while the tree recalculates. */}
+      <ActiveAlternativesModal
+        open={activeAlternativesOpen}
+        onClose={() => setActiveAlternativesOpen(false)}
+        recipeOverrides={recipeOverrides}
+        rateAsCoinValue={!form.ironManView}
+        onRemove={removeRecipeOverride}
+        onRemoveAll={resetRecipeOverrides}
+      />
     </>
   );
 };
 
-export const CalculatorPage: React.FC = () => <CalculatorPageContent />;
