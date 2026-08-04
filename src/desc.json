@@ -6756,177 +6756,7 @@
       ]
     ]
   },
-  "U15": {
-    "title": "Dragon Shortbow Improvement",
-    "id": "dragon_shortbow_improvement",
-    "description": [
-      {
-        "t": "Your ",
-        "c": "gray"
-      },
-      {
-        "t": "Dragon Shortbow ",
-        "c": "dark_purple"
-      },
-      {
-        "t": "gains ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          2,
-          20
-        ],
-        "unit": "%",
-        "c": "green"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "more ",
-        "c": "gray"
-      },
-      {
-        "t": " Damage ",
-        "c": "red"
-      },
-      {
-        "t": "while in ",
-        "c": "gray"
-      },
-      {
-        "t": "The End",
-        "c": "light_purple"
-      },
-      {
-        "t": ".",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Seer ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
-  "U16": {
-    "title": "Mangrove Sharpening",
-    "id": "mangrove_sharpening",
-    "description": [
-      {
-        "t": "Grants ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          10,
-          100
-        ],
-        "unit": "",
-        "c": "dark_green"
-      },
-      {
-        "t": " Sweep",
-        "c": "dark_green"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "towards Mangrove Trees.",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Buffed by ",
-        "c": "dark_gray"
-      },
-      {
-        "t": "Echo of Sharpening",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "attribute.",
-        "c": "dark_gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Purchased in ",
-          "c": "gray"
-        },
-        {
-          "t": "Agatha's Shop",
-          "c": "aqua"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
-  "U17": {
+  "U14": {
     "title": "Humanoid Ruler",
     "id": "humanoid_ruler",
     "description": [
@@ -7115,7 +6945,177 @@
       ]
     ]
   },
-  "U17-1": {
+  "U15": {
+    "title": "Dragon Shortbow Improvement",
+    "id": "dragon_shortbow_improvement",
+    "description": [
+      {
+        "t": "Your ",
+        "c": "gray"
+      },
+      {
+        "t": "Dragon Shortbow ",
+        "c": "dark_purple"
+      },
+      {
+        "t": "gains ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          2,
+          20
+        ],
+        "unit": "%",
+        "c": "green"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "more ",
+        "c": "gray"
+      },
+      {
+        "t": " Damage ",
+        "c": "red"
+      },
+      {
+        "t": "while in ",
+        "c": "gray"
+      },
+      {
+        "t": "The End",
+        "c": "light_purple"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Catch with ",
+          "c": "gray"
+        },
+        {
+          "t": "Pocket Black Hole",
+          "c": "red"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Kill Seer ",
+          "c": "gray"
+        },
+        {
+          "t": "while using ",
+          "c": "gray"
+        },
+        {
+          "t": "Salts",
+          "c": "light_purple"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "U16": {
+    "title": "Mangrove Sharpening",
+    "id": "mangrove_sharpening",
+    "description": [
+      {
+        "t": "Grants ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          10,
+          100
+        ],
+        "unit": "",
+        "c": "dark_green"
+      },
+      {
+        "t": " Sweep",
+        "c": "dark_green"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "towards Mangrove Trees.",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Buffed by ",
+        "c": "dark_gray"
+      },
+      {
+        "t": "Echo of Sharpening",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "attribute.",
+        "c": "dark_gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Purchased in ",
+          "c": "gray"
+        },
+        {
+          "t": "Agatha's Shop",
+          "c": "aqua"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "U17": {
     "title": "Witch's Fortune",
     "id": "witch_s_fortune",
     "description": [
@@ -11881,77 +11881,6 @@
     ]
   },
   "U61": {
-    "title": "Helix Collector",
-    "id": "helix_collector",
-    "description": [
-      {
-        "t": "Grants ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          1,
-          10
-        ],
-        "unit": "",
-        "c": "gold"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": " Helix Fortune",
-        "c": "gold"
-      },
-      {
-        "t": " for",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "every digit in your Helix Log",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "collection. ",
-        "c": "gray"
-      },
-      {
-        "t": "(Max 10M collection)",
-        "c": "dark_gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Unlocked from ",
-          "c": "gray"
-        },
-        {
-          "t": "Helix Collection VII",
-          "c": "green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
-  "U61-1": {
     "title": "Builder Discount",
     "id": "builder_discount",
     "description": [
@@ -12344,143 +12273,6 @@
         {
           "t": "Critter Safari",
           "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
-  "U64-1": {
-    "title": "Visitor Dung",
-    "id": "visitor_dung",
-    "description": [
-      {
-        "t": "Garden Visitors",
-        "c": "green"
-      },
-      {
-        "t": " have a ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          0.25,
-          2.5
-        ],
-        "unit": "%",
-        "c": "green"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "chance to bring ",
-        "c": "gray"
-      },
-      {
-        "t": "Dung",
-        "c": "green"
-      },
-      {
-        "t": ".",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Place ",
-          "c": "gray"
-        },
-        {
-          "t": "Hunting Traps ",
-          "c": "gold"
-        },
-        {
-          "t": "in ",
-          "c": "gray"
-        },
-        {
-          "t": "Torrhus Canyon",
-          "c": "gold"
-        },
-        {
-          "t": ". ",
-          "c": "gray"
-        },
-        {
-          "t": "(",
-          "c": "gray"
-        },
-        {
-          "t": "On Land",
-          "c": "aqua"
-        },
-        {
-          "t": ").",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Place ",
-          "c": "gray"
-        },
-        {
-          "t": "Hunting Traps ",
-          "c": "gold"
-        },
-        {
-          "t": "in ",
-          "c": "gray"
-        },
-        {
-          "t": "Spring Path",
-          "c": "gold"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Floor Drop ",
-          "c": "yellow"
-        },
-        {
-          "t": "in ",
-          "c": "gray"
-        },
-        {
-          "t": "Torrhus Canyon",
-          "c": "gold"
         },
         {
           "t": ".",
@@ -13616,6 +13408,77 @@
       ]
     ]
   },
+  "U82": {
+    "title": "Helix Collector",
+    "id": "helix_collector",
+    "description": [
+      {
+        "t": "Grants ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          1,
+          10
+        ],
+        "unit": "",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": " Helix Fortune",
+        "c": "gold"
+      },
+      {
+        "t": " for",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "every digit in your Helix Log",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "collection. ",
+        "c": "gray"
+      },
+      {
+        "t": "(Max 10M collection)",
+        "c": "dark_gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Unlocked from ",
+          "c": "gray"
+        },
+        {
+          "t": "Helix Collection VII",
+          "c": "green"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
   "U85": {
     "title": "Ticket Discount",
     "id": "ticket_discount",
@@ -13687,6 +13550,143 @@
         {
           "t": "Ruby Veilshroom Collection IV",
           "c": "green"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "U88": {
+    "title": "Visitor Dung",
+    "id": "visitor_dung",
+    "description": [
+      {
+        "t": "Garden Visitors",
+        "c": "green"
+      },
+      {
+        "t": " have a ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          0.25,
+          2.5
+        ],
+        "unit": "%",
+        "c": "green"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "chance to bring ",
+        "c": "gray"
+      },
+      {
+        "t": "Dung",
+        "c": "green"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Place ",
+          "c": "gray"
+        },
+        {
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Torrhus Canyon",
+          "c": "gold"
+        },
+        {
+          "t": ". ",
+          "c": "gray"
+        },
+        {
+          "t": "(",
+          "c": "gray"
+        },
+        {
+          "t": "On Land",
+          "c": "aqua"
+        },
+        {
+          "t": ").",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Place ",
+          "c": "gray"
+        },
+        {
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Spring Path",
+          "c": "gold"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Floor Drop ",
+          "c": "yellow"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Torrhus Canyon",
+          "c": "gold"
         },
         {
           "t": ".",
@@ -21545,203 +21545,6 @@
     ]
   },
   "R86": {
-    "title": "Echo of Buckets",
-    "id": "echo_of_buckets",
-    "description": [
-      {
-        "t": "Your \"Bucket\" Attributes are",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "range": [
-          2,
-          20
-        ],
-        "unit": "%",
-        "c": "green"
-      },
-      {
-        "t": "stronger.",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with a ",
-          "c": "gray"
-        },
-        {
-          "t": "Fishing Net",
-          "c": "aqua"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Place ",
-          "c": "gray"
-        },
-        {
-          "t": "Hunting Traps ",
-          "c": "gold"
-        },
-        {
-          "t": "in ",
-          "c": "gray"
-        },
-        {
-          "t": "Spring Depths",
-          "c": "blue"
-        },
-        {
-          "t": ". ",
-          "c": "gray"
-        },
-        {
-          "t": "(",
-          "c": "gray"
-        },
-        {
-          "t": "Underwater",
-          "c": "aqua"
-        },
-        {
-          "t": ").",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Place ",
-          "c": "gray"
-        },
-        {
-          "t": "Hunting Traps ",
-          "c": "gold"
-        },
-        {
-          "t": "in ",
-          "c": "gray"
-        },
-        {
-          "t": "Spring Shallows",
-          "c": "aqua"
-        },
-        {
-          "t": ". ",
-          "c": "gray"
-        },
-        {
-          "t": "(",
-          "c": "gray"
-        },
-        {
-          "t": "Underwater",
-          "c": "aqua"
-        },
-        {
-          "t": ").",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Place ",
-          "c": "gray"
-        },
-        {
-          "t": "Hunting Traps ",
-          "c": "gold"
-        },
-        {
-          "t": "in ",
-          "c": "gray"
-        },
-        {
-          "t": "Torrhus Springs",
-          "c": "aqua"
-        },
-        {
-          "t": ". ",
-          "c": "gray"
-        },
-        {
-          "t": "(",
-          "c": "gray"
-        },
-        {
-          "t": "On Land",
-          "c": "aqua"
-        },
-        {
-          "t": ").",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
-  "R86-1": {
     "title": "Essence of Fossils",
     "id": "essence_of_fossils",
     "description": [
@@ -22154,6 +21957,203 @@
         },
         {
           "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "R92": {
+    "title": "Echo of Buckets",
+    "id": "echo_of_buckets",
+    "description": [
+      {
+        "t": "Your \"Bucket\" Attributes are",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "range": [
+          2,
+          20
+        ],
+        "unit": "%",
+        "c": "green"
+      },
+      {
+        "t": "stronger.",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Catch with a ",
+          "c": "gray"
+        },
+        {
+          "t": "Fishing Net",
+          "c": "aqua"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Catch with ",
+          "c": "gray"
+        },
+        {
+          "t": "Lasso",
+          "c": "dark_green"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Place ",
+          "c": "gray"
+        },
+        {
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Spring Depths",
+          "c": "blue"
+        },
+        {
+          "t": ". ",
+          "c": "gray"
+        },
+        {
+          "t": "(",
+          "c": "gray"
+        },
+        {
+          "t": "Underwater",
+          "c": "aqua"
+        },
+        {
+          "t": ").",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Place ",
+          "c": "gray"
+        },
+        {
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Spring Shallows",
+          "c": "aqua"
+        },
+        {
+          "t": ". ",
+          "c": "gray"
+        },
+        {
+          "t": "(",
+          "c": "gray"
+        },
+        {
+          "t": "Underwater",
+          "c": "aqua"
+        },
+        {
+          "t": ").",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Place ",
+          "c": "gray"
+        },
+        {
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Torrhus Springs",
+          "c": "aqua"
+        },
+        {
+          "t": ". ",
+          "c": "gray"
+        },
+        {
+          "t": "(",
+          "c": "gray"
+        },
+        {
+          "t": "On Land",
+          "c": "aqua"
+        },
+        {
+          "t": ").",
           "c": "gray"
         }
       ]
@@ -23751,47 +23751,6 @@
           "c": "gray"
         },
         {
-          "t": "Eel ",
-          "c": "blue"
-        },
-        {
-          "t": "Shard ",
-          "c": "gray"
-        },
-        {
-          "t": "with ",
-          "c": "gray"
-        },
-        {
-          "t": "Moray Eel",
-          "c": "dark_purple"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Shard",
-          "c": "gray"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Fusing ",
-          "c": "gray"
-        },
-        {
           "t": "Moray Eel ",
           "c": "dark_purple"
         },
@@ -23820,6 +23779,47 @@
         },
         {
           "t": "Shards",
+          "c": "gray"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Fusing ",
+          "c": "gray"
+        },
+        {
+          "t": "Eel ",
+          "c": "blue"
+        },
+        {
+          "t": "Shard ",
+          "c": "gray"
+        },
+        {
+          "t": "with ",
+          "c": "gray"
+        },
+        {
+          "t": "Moray Eel",
+          "c": "dark_purple"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Shard",
           "c": "gray"
         },
         {
@@ -26454,122 +26454,6 @@
     ]
   },
   "E45": {
-    "title": "Freezing Spread",
-    "id": "freezing_spread",
-    "description": [
-      {
-        "t": "Grants ",
-        "c": "gray"
-      },
-      {
-        "t": "+0.5 ",
-        "c": "yellow"
-      },
-      {
-        "t": " Gemstone Spread ",
-        "c": "yellow"
-      },
-      {
-        "t": "for",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "every ",
-        "c": "gray"
-      },
-      {
-        "range": [
-          29,
-          20
-        ],
-        "unit": "",
-        "c": "aqua"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": " Cold Resistance",
-        "c": "aqua"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "you have while in the ",
-        "c": "gray"
-      },
-      {
-        "t": "Glacite",
-        "c": "aqua"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "Mineshafts",
-        "c": "aqua"
-      },
-      {
-        "t": ".",
-        "c": "gray"
-      }
-    ],
-    "how_to_hunt": [
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Pocket Black Hole",
-          "c": "red"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Kill Littlefoot ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ]
-    ]
-  },
-  "E45-1": {
     "title": "Devouring Spread",
     "id": "devouring_spread",
     "description": [
@@ -27508,6 +27392,122 @@
         {
           "t": "or higher",
           "c": "gray"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "E66": {
+    "title": "Freezing Spread",
+    "id": "freezing_spread",
+    "description": [
+      {
+        "t": "Grants ",
+        "c": "gray"
+      },
+      {
+        "t": "+0.5 ",
+        "c": "yellow"
+      },
+      {
+        "t": " Gemstone Spread ",
+        "c": "yellow"
+      },
+      {
+        "t": "for",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "every ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          29,
+          20
+        ],
+        "unit": "",
+        "c": "aqua"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": " Cold Resistance",
+        "c": "aqua"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "you have while in the ",
+        "c": "gray"
+      },
+      {
+        "t": "Glacite",
+        "c": "aqua"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Mineshafts",
+        "c": "aqua"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Catch with ",
+          "c": "gray"
+        },
+        {
+          "t": "Pocket Black Hole",
+          "c": "red"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Kill Littlefoot ",
+          "c": "gray"
+        },
+        {
+          "t": "while using ",
+          "c": "gray"
+        },
+        {
+          "t": "Salts",
+          "c": "light_purple"
         },
         {
           "t": ".",
