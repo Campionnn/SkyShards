@@ -1438,7 +1438,7 @@
   },
   "C14": {
     "title": "Creature Fisher",
-    "id": "creature_fisher",
+    "id": "hunter",
     "description": [
       {
         "t": "Grants ",
@@ -1517,7 +1517,7 @@
   },
   "C15": {
     "title": "Arthropod Resistance",
-    "id": "arthropod_resistance",
+    "id": "arachno_resistance",
     "description": [
       {
         "t": "Grants ",
@@ -2623,7 +2623,7 @@
   },
   "C25": {
     "title": "Visitor Speed",
-    "id": "visitor_speed",
+    "id": "visitor_bait",
     "description": [
       {
         "t": "Garden Visitors ",
@@ -7541,7 +7541,7 @@
   },
   "U21": {
     "title": "Hunter's Fang",
-    "id": "hunter_s_fang",
+    "id": "hunters_fangs",
     "description": [
       {
         "t": "Your Hunting Axes gain ",
@@ -7551,17 +7551,6 @@
         "range": [
           1,
           10
-        ],
-        "unit": "%",
-        "c": "dark_gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "range": [
-          1.3,
-          13
         ],
         "unit": "%",
         "c": "green"
@@ -7649,7 +7638,7 @@
   },
   "U22": {
     "title": "Pest Ruler",
-    "id": "pest_ruler",
+    "id": "insect_power",
     "description": [
       {
         "t": "Grants ",
@@ -7853,7 +7842,7 @@
   },
   "U24": {
     "title": "Undead Ruler",
-    "id": "undead_ruler",
+    "id": "undead",
     "description": [
       {
         "t": "Grants ",
@@ -8362,7 +8351,7 @@
   },
   "U29": {
     "title": "Woodland Ruler",
-    "id": "woodland_ruler",
+    "id": "spirit_axe",
     "description": [
       {
         "t": "Grants ",
@@ -8944,7 +8933,7 @@
   },
   "U33": {
     "title": "Arthropod Ruler",
-    "id": "arthropod_ruler",
+    "id": "arachno",
     "description": [
       {
         "t": "Grants ",
@@ -9042,7 +9031,7 @@
   },
   "U34": {
     "title": "Kat's Favorite",
-    "id": "kat_s_favorite",
+    "id": "kat_favorite",
     "description": [
       {
         "t": "Kat ",
@@ -9119,7 +9108,7 @@
   },
   "U36": {
     "title": "Ender Ruler",
-    "id": "ender_ruler",
+    "id": "ender",
     "description": [
       {
         "t": "Grants ",
@@ -14636,7 +14625,7 @@
   },
   "R6": {
     "title": "Essence of Ice",
-    "id": "essence_of_ice",
+    "id": "ice_essence",
     "description": [
       {
         "t": "Gain ",
@@ -14921,7 +14910,7 @@
   },
   "R9": {
     "title": "Hunter's Pressure",
-    "id": "hunter_s_pressure",
+    "id": "hunters_pressure",
     "description": [
       {
         "t": "Your Black Holes capture creatures",
@@ -15282,7 +15271,7 @@
   },
   "R13": {
     "title": "Catacombs Box",
-    "id": "catacombs_box",
+    "id": "catacomb_box",
     "description": [
       {
         "t": "Increases the quality of boss",
@@ -15309,18 +15298,10 @@
           10
         ],
         "unit": "",
-        "c": "dark_gray"
+        "c": "green"
       },
       {
         "t": " "
-      },
-      {
-        "range": [
-          1.3,
-          13
-        ],
-        "unit": "",
-        "c": "green"
       },
       {
         "t": ".",
@@ -15863,7 +15844,7 @@
   },
   "R22": {
     "title": "Kuudra's Box",
-    "id": "kuudra_s_box",
+    "id": "kuudra_box",
     "description": [
       {
         "t": "Gives ",
@@ -16045,7 +16026,7 @@
   },
   "R24": {
     "title": "Essence of Arthropods",
-    "id": "essence_of_arthropods",
+    "id": "spider_essence",
     "description": [
       {
         "t": "Gain ",
@@ -16242,7 +16223,7 @@
   },
   "R27": {
     "title": "Essence of Unliving",
-    "id": "essence_of_unliving",
+    "id": "undead_essence",
     "description": [
       {
         "t": "Gain ",
@@ -16878,7 +16859,7 @@
   },
   "R35": {
     "title": "Winter's Serendipity",
-    "id": "winter_s_serendipity",
+    "id": "winter_serendipity",
     "description": [
       {
         "t": "Increases the odds of finding rare",
@@ -17535,7 +17516,7 @@
   },
   "R43": {
     "title": "Visitor Copper",
-    "id": "visitor_copper",
+    "id": "pretty_clothes",
     "description": [
       {
         "t": "Gain ",
@@ -17957,7 +17938,7 @@
   },
   "R49": {
     "title": "Essence of the Forest",
-    "id": "essence_of_the_forest",
+    "id": "forest_essence",
     "description": [
       {
         "t": "Gain ",
@@ -18554,7 +18535,7 @@
   },
   "R54": {
     "title": "Hunter's Grasp",
-    "id": "hunter_s_grasp",
+    "id": "hunters_grasp",
     "description": [
       {
         "t": "Your Black Holes gain ",
@@ -18898,7 +18879,7 @@
   },
   "R57": {
     "title": "Essence of Dragons",
-    "id": "essence_of_dragons",
+    "id": "dragon_essence",
     "description": [
       {
         "t": "Gain ",
@@ -19131,7 +19112,7 @@
   },
   "R60": {
     "title": "Essence of Wither",
-    "id": "essence_of_wither",
+    "id": "wither_essence",
     "description": [
       {
         "t": "Gain ",
@@ -19213,17 +19194,6 @@
         "range": [
           2,
           20
-        ],
-        "unit": "%",
-        "c": "dark_gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "range": [
-          3,
-          30
         ],
         "unit": "%",
         "c": "green"
@@ -23181,7 +23151,7 @@
   },
   "E9": {
     "title": "Hunter's Suppress",
-    "id": "hunter_s_suppress",
+    "id": "hunters_suppress",
     "description": [
       {
         "t": "Lassos deplete Stamina ",
@@ -24168,7 +24138,7 @@
   },
   "E18": {
     "title": "Infernal Ruler",
-    "id": "infernal_ruler",
+    "id": "blazing",
     "description": [
       {
         "t": "Grants ",
@@ -24364,7 +24334,7 @@
   },
   "E20": {
     "title": "Sea Wisdom",
-    "id": "sea_wisdom",
+    "id": "fishing_experience",
     "description": [
       {
         "t": "Grants ",
@@ -25166,17 +25136,6 @@
           20
         ],
         "unit": "%",
-        "c": "dark_gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "range": [
-          3,
-          30
-        ],
-        "unit": "%",
         "c": "green"
       },
       {
@@ -25433,17 +25392,6 @@
         "range": [
           2,
           20
-        ],
-        "unit": "%",
-        "c": "dark_gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "range": [
-          3,
-          30
         ],
         "unit": "%",
         "c": "green"
@@ -26053,7 +26001,7 @@
   },
   "E39": {
     "title": "Mythological Tracker",
-    "id": "mythological_tracker",
+    "id": "big_game_hunter",
     "description": [
       {
         "t": "Grants ",
@@ -26700,6 +26648,79 @@
         {
           "t": "Critter Safari",
           "c": "dark_green"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "E46": {
+    "title": "Divine Rabbit Luck",
+    "id": "divine_rabbit_luck",
+    "description": [
+      {
+        "t": "Increases your chance of finding",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "DIVINE ",
+        "c": "aqua",
+        "bold": true
+      },
+      {
+        "t": "Rabbits during ",
+        "c": "gray"
+      },
+      {
+        "t": "Hoppity's",
+        "c": "light_purple"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Hunt ",
+        "c": "light_purple"
+      },
+      {
+        "t": "by ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          1,
+          10
+        ],
+        "unit": "%",
+        "c": "green"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Purchased in ",
+          "c": "gray"
+        },
+        {
+          "t": "Chocolate Shop",
+          "c": "gold"
         },
         {
           "t": ".",
@@ -28001,17 +28022,6 @@
           20
         ],
         "unit": "%",
-        "c": "dark_gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "range": [
-          3,
-          30
-        ],
-        "unit": "%",
         "c": "green"
       },
       {
@@ -28181,7 +28191,7 @@
   },
   "L9": {
     "title": "Unlimited Fortitude",
-    "id": "unlimited_fortitude",
+    "id": "fortitude",
     "description": [
       {
         "t": "Your ",
@@ -28290,31 +28300,38 @@
           "c": "gray"
         },
         {
-          "t": "Fusing  ",
+          "t": "Fusing ",
           "c": "gray"
         },
         {
-          "t": "Shard ",
+          "t": "Rabbit Godmother ",
+          "c": "dark_purple"
+        },
+        {
+          "t": "Shard",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "with ",
           "c": "gray"
         },
         {
-          "t": "Combat",
+          "t": "Combat ",
           "c": "red"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Legendary ",
@@ -28740,7 +28757,7 @@
   },
   "L15": {
     "title": "Vitality",
-    "id": "vitality",
+    "id": "mending",
     "description": [
       {
         "t": "Grants ",
@@ -28793,7 +28810,7 @@
   },
   "L17": {
     "title": "Unlimited Torment",
-    "id": "unlimited_torment",
+    "id": "maximal_torment",
     "description": [
       {
         "t": "Your ",
@@ -29306,7 +29323,7 @@
   },
   "L23": {
     "title": "Help From Above",
-    "id": "help_from_above",
+    "id": "life_regeneration",
     "description": [
       {
         "t": "Grants ",
@@ -29540,7 +29557,7 @@
   },
   "L26": {
     "title": "Crimson Hook",
-    "id": "crimson_hook",
+    "id": "double_hook",
     "description": [
       {
         "t": "Grants ",
@@ -29951,7 +29968,7 @@
   },
   "L29": {
     "title": "Hunter's Karma",
-    "id": "hunter_s_karma",
+    "id": "hunter_karma",
     "description": [
       {
         "t": "Grants ",
@@ -30409,7 +30426,7 @@
   },
   "L34": {
     "title": "Tracking",
-    "id": "tracking",
+    "id": "rare_bird",
     "description": [
       {
         "t": "Grants ",
@@ -31042,7 +31059,7 @@
   },
   "L42": {
     "title": "Almighty Echo",
-    "id": "almighty_echo",
+    "id": "almighty",
     "description": [
       {
         "t": "Your \"Unlimited\" Attributes are",
@@ -31335,7 +31352,7 @@
   },
   "L47": {
     "title": "Bayou Hook",
-    "id": "bayou_hook",
+    "id": "bayou_biter",
     "description": [
       {
         "t": "Grants ",
