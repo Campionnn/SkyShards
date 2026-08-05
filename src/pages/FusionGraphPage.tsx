@@ -15,9 +15,10 @@ import {
 import "@xyflow/react/dist/style.css";
 import { Search, X } from "lucide-react";
 import { useFusionData } from "../hooks";
-import { CalculationService } from "../services/calculationService";
+import { CalculationService } from "../services";
 import { DEFAULT_CALCULATION_PARAMS } from "../constants";
 import { ShardGraphNode } from "../components/graph";
+import { isBlurCausedByWindow, shardIconUrl } from "../utilities";
 import {
   EDGE_COLORS,
   NODE_HEIGHT,
@@ -75,7 +76,7 @@ const FusionGraphInner: React.FC = () => {
     const hasRates = Object.keys(rates).length > 0;
     // Structural min cost (neutral params) so we can drop backwards "expensive ->
     // cheap" edges; a pricier shard is never used to fuse a cheaper one.
-    const { minCosts } = new CalculationService().computeMinCosts(data, DEFAULT_CALCULATION_PARAMS);
+    const { minCosts } = CalculationService.getInstance().computeMinCosts(data, DEFAULT_CALCULATION_PARAMS);
     const g = buildFusionGraph(
       data,
       hasRates
@@ -207,6 +208,8 @@ const FusionGraphInner: React.FC = () => {
               }}
               onFocus={() => setShowResults(true)}
               onBlur={() => {
+                // Alt-tabbing away shouldn't collapse the results the user was reading.
+                if (isBlurCausedByWindow()) return;
                 blurTimer.current = setTimeout(() => setShowResults(false), 150);
               }}
               placeholder="Search shards…"
@@ -230,7 +233,7 @@ const FusionGraphInner: React.FC = () => {
                   className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-purple-500/20"
                 >
                   <img
-                    src={`${import.meta.env.BASE_URL}shardIcons/${node.id}.png`}
+                    src={shardIconUrl(node.id)}
                     alt=""
                     className="h-5 w-5 object-contain"
                   />

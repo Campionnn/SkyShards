@@ -1,4 +1,5 @@
 export { AlternativeRecipeModal } from "./AlternativeRecipeModal";
+export { ActiveAlternativesModal } from "./ActiveAlternativesModal";
 export { WelcomeProfileModal } from "./WelcomeProfileModal";
 export { CopyTreeModal } from "./CopyTreeModal";
 export { BrowseAllShardsModal } from "./BrowseAllShardsModal";

@@ -1,7 +1,15 @@
 import React, { useState, useCallback } from "react";
 import { CalculationService } from "../../services";
 import { AlternativeRecipeModal } from "../modals";
-import type { RecipeOverrideManagerProps, AlternativeRecipeOption, AlternativeSelectionContext, Recipe, Data } from "../../types/types";
+import type { AlternativeRecipeOption, AlternativeSelectionContext, CalculationParams, Data, Recipe, RecipeOverride } from "../../types/types";
+
+interface RecipeOverrideManagerProps {
+  params: CalculationParams;
+  recipeOverrides: RecipeOverride[];
+  onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
+  onResetRecipeOverrides: () => void;
+  children: (props: { showAlternatives: (shardId: string, context: AlternativeSelectionContext) => void; recipeOverrides: RecipeOverride[]; resetAlternatives: () => void }) => React.ReactNode;
+}
 
 interface ModalState {
   isOpen: boolean;

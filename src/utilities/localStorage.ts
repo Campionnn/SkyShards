@@ -1,139 +1,175 @@
-import type { CalculationFormData } from "../schemas";
+import { calculationSchema, type CalculationFormData } from "../schemas";
 
-const STORAGE_KEY = "calculator_data";
-const SAVE_ENABLED_KEY = "calculator_save_enabled";
+/**
+ * One persisted value. Every slot needs the same three things — a key, a way in and
+ * out of a string, and something to return when the entry is missing or unreadable —
+ * and the same `try/catch`, because `localStorage` throws on quota exhaustion and in
+ * private-mode Safari, and `JSON.parse` throws on anything hand-edited.
+ *
+ * Slots stay declared at module scope so the key strings have exactly one definition.
+ */
+interface SlotConfig<T> {
+  /** Human-readable name for the console warning when access fails. */
+  label: string;
+  fallback: () => T;
+  /** Defaults to `JSON.stringify`. */
+  serialize?: (value: T) => string;
+  /** Defaults to `JSON.parse`. Only called with a non-null raw string. */
+  deserialize?: (raw: string) => T;
+}
 
-const EXCLUDED_FIELDS = ['shard', 'quantity'] as const;
+interface StorageSlot<T> {
+  read: () => T;
+  write: (value: T) => void;
+  clear: () => void;
+  /** True when nothing has ever been written — distinct from "holds a default". */
+  isUnset: () => boolean;
+}
 
+const createStorageSlot = <T>(key: string, { label, fallback, serialize = JSON.stringify, deserialize = JSON.parse }: SlotConfig<T>): StorageSlot<T> => ({
+  read: () => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw === null ? fallback() : deserialize(raw);
+    } catch (error) {
+      console.warn(`Failed to load ${label} from localStorage:`, error);
+      return fallback();
+    }
+  },
+
+  write: (value: T) => {
+    try {
+      localStorage.setItem(key, serialize(value));
+    } catch (error) {
+      console.warn(`Failed to save ${label} to localStorage:`, error);
+    }
+  },
+
+  clear: () => {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.warn(`Failed to clear ${label} from localStorage:`, error);
+    }
+  },
+
+  isUnset: () => {
+    try {
+      return localStorage.getItem(key) === null;
+    } catch {
+      return true;
+    }
+  },
+});
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+
+/**
+ * `Map<string, number>` <-> plain object, for the two count-keyed slots.
+ *
+ * Entries that don't parse to a finite number are dropped rather than stored as
+ * `NaN` — `Number("")` is 0 and `Number("abc")` is `NaN`, and a `NaN` count
+ * propagates silently through every cost calculation downstream.
+ */
+const countMapSlot = (key: string, label: string): StorageSlot<Map<string, number>> =>
+  createStorageSlot(key, {
+    label,
+    fallback: () => new Map(),
+    serialize: (map) => JSON.stringify(Object.fromEntries(map)),
+    deserialize: (raw) => {
+      const parsed: unknown = JSON.parse(raw);
+      if (!isPlainObject(parsed)) return new Map();
+      const entries: [string, number][] = [];
+      for (const [shardId, count] of Object.entries(parsed)) {
+        const amount = Number(count);
+        if (Number.isFinite(amount)) entries.push([shardId, amount]);
+      }
+      return new Map(entries);
+    },
+  });
+
+// ─── Form data ───
+
+const EXCLUDED_FIELDS = ["shard", "quantity"] as const;
+
+/** The target shard and its quantity are per-session, not settings — don't persist them. */
 const filterFormDataForSave = (data: CalculationFormData): Partial<CalculationFormData> => {
   const result: Partial<CalculationFormData> = {};
-  
+
   for (const [key, value] of Object.entries(data)) {
-    if (!EXCLUDED_FIELDS.includes(key as typeof EXCLUDED_FIELDS[number])) {
+    if (!EXCLUDED_FIELDS.includes(key as (typeof EXCLUDED_FIELDS)[number])) {
       (result as Record<string, unknown>)[key] = value;
     }
   }
-  
+
   return result;
 };
 
-export const saveFormData = (data: CalculationFormData): void => {
-  try {
-    const filteredData = filterFormDataForSave(data);
-    const serializedData = JSON.stringify(filteredData);
-    localStorage.setItem(STORAGE_KEY, serializedData);
-  } catch (error) {
-    console.warn("Failed to save form data to localStorage:", error);
+/**
+ * Validate a saved form field-by-field rather than all-or-nothing.
+ *
+ * The consumer spreads this over the defaults (`{...defaultForm, ...savedData}`), so a
+ * dropped field simply falls back to its default. That makes per-field validation the
+ * natural fit: one corrupted entry costs you one setting, not every setting.
+ *
+ * A whole-object `calculationSchema.parse` will not work here: `filterFormDataForSave`
+ * strips `shard` and `quantity`, both of which the schema requires.
+ */
+const formFields = calculationSchema.shape;
+
+const sanitizeFormData = (raw: unknown): Partial<CalculationFormData> | null => {
+  if (!isPlainObject(raw)) return null;
+
+  const clean: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    const field = formFields[key as keyof typeof formFields];
+    // Unknown keys are dropped: they're either from an older build or hand-added.
+    if (!field) continue;
+    const result = field.safeParse(value);
+    if (result.success) clean[key] = result.data;
   }
+  return clean as Partial<CalculationFormData>;
 };
 
-export const getSaveEnabled = (): boolean => {
-  try {
-    const saved = localStorage.getItem(SAVE_ENABLED_KEY);
-    // Default to true (enabled) if no value is saved
-    return saved === null ? true : saved === "true";
-  } catch (error) {
-    console.warn("Failed to load save enabled state from localStorage:", error);
-    return true;
-  }
-};
+const formDataSlot = createStorageSlot<CalculationFormData | null>("calculator_data", {
+  label: "form data",
+  fallback: () => null,
+  serialize: (data) => JSON.stringify(data === null ? null : filterFormDataForSave(data)),
+  deserialize: (raw) => sanitizeFormData(JSON.parse(raw)) as CalculationFormData | null,
+});
 
-export const setSaveEnabled = (enabled: boolean): void => {
-  try {
-    localStorage.setItem(SAVE_ENABLED_KEY, enabled ? "true" : "false");
-  } catch (error) {
-    console.warn("Failed to set save enabled state in localStorage:", error);
-  }
-};
+export const saveFormData = (data: CalculationFormData): void => formDataSlot.write(data);
+export const loadFormData = (): CalculationFormData | null => formDataSlot.read();
+export const clearFormData = (): void => formDataSlot.clear();
 
-export const isFirstVisit = (): boolean => {
-  try {
-    // If the save enabled key is not set, it's the first visit
-    return localStorage.getItem(SAVE_ENABLED_KEY) === null;
-  } catch {
-    return true;
-  }
-};
+// ─── Auto-save toggle ───
 
-export const loadFormData = (): CalculationFormData | null => {
-  try {
-    const serializedData = localStorage.getItem(STORAGE_KEY);
-    if (serializedData) {
-      return JSON.parse(serializedData);
-    }
-    return null;
-  } catch (error) {
-    console.warn("Failed to load form data from localStorage:", error);
-    return null;
-  }
-};
+/** Stored as a bare "true"/"false", not JSON, and defaults to enabled when absent. */
+const saveEnabledSlot = createStorageSlot<boolean>("calculator_save_enabled", {
+  label: "save enabled state",
+  fallback: () => true,
+  serialize: (enabled) => (enabled ? "true" : "false"),
+  deserialize: (raw) => raw === "true",
+});
 
-export const clearFormData = (): void => {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch (error) {
-    console.warn("Failed to clear form data from localStorage:", error);
-  }
-};
+export const getSaveEnabled = (): boolean => saveEnabledSlot.read();
+export const setSaveEnabled = (enabled: boolean): void => saveEnabledSlot.write(enabled);
 
-const INVENTORY_STORAGE_KEY = "inventory";
-export const saveInventory = (inventory: Map<string, number>): void => {
-  try {
-    const obj = Object.fromEntries(inventory);
-    localStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(obj));
-  } catch (error) {
-    console.warn("Failed to save inventory to localStorage:", error);
-  }
-};
+/** Nothing has written the auto-save preference yet, so this is a brand-new visitor. */
+export const isFirstVisit = (): boolean => saveEnabledSlot.isUnset();
 
-export const loadInventory = (): Map<string, number> => {
-  try {
-    const stored = localStorage.getItem(INVENTORY_STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return new Map(Object.entries(parsed).map(([k, v]) => [k, Number(v)]));
-    }
-  } catch (error) {
-    console.warn("Failed to load inventory from localStorage:", error);
-  }
-  return new Map();
-};
+// ─── Inventory and attributes ───
 
-// Owned attributes storage
-const OWNED_ATTRIBUTES_STORAGE_KEY = "owned_attributes";
+const inventorySlot = countMapSlot("inventory", "inventory");
+const ownedAttributesSlot = countMapSlot("owned_attributes", "owned attributes");
 
-export const saveOwnedAttributes = (attributes: Map<string, number>): void => {
-  try {
-    const obj = Object.fromEntries(attributes);
-    localStorage.setItem(OWNED_ATTRIBUTES_STORAGE_KEY, JSON.stringify(obj));
-  } catch (error) {
-    console.warn("Failed to save owned attributes to localStorage:", error);
-  }
-};
+export const saveInventory = (inventory: Map<string, number>): void => inventorySlot.write(inventory);
+export const loadInventory = (): Map<string, number> => inventorySlot.read();
 
-export const loadOwnedAttributes = (): Map<string, number> => {
-  try {
-    const stored = localStorage.getItem(OWNED_ATTRIBUTES_STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return new Map(Object.entries(parsed).map(([k, v]) => [k, Number(v)]));
-    }
-  } catch (error) {
-    console.warn("Failed to load owned attributes from localStorage:", error);
-  }
-  return new Map();
-};
+export const saveOwnedAttributes = (attributes: Map<string, number>): void => ownedAttributesSlot.write(attributes);
+export const loadOwnedAttributes = (): Map<string, number> => ownedAttributesSlot.read();
 
-export const clearOwnedAttributes = (): void => {
-  try {
-    localStorage.removeItem(OWNED_ATTRIBUTES_STORAGE_KEY);
-  } catch (error) {
-    console.warn("Failed to clear owned attributes from localStorage:", error);
-  }
-};
-
-// Hypixel profile metadata
-const HYPIXEL_PROFILE_META_KEY = "hypixel_profile_meta";
+// ─── Hypixel profile metadata ───
 
 export interface HypixelProfileMeta {
   username: string;
@@ -141,62 +177,40 @@ export interface HypixelProfileMeta {
   lastImportTime: number;
 }
 
-export const saveHypixelProfileMeta = (meta: HypixelProfileMeta): void => {
-  try {
-    localStorage.setItem(HYPIXEL_PROFILE_META_KEY, JSON.stringify(meta));
-  } catch (error) {
-    console.warn("Failed to save Hypixel profile meta to localStorage:", error);
-  }
-};
-
-export const loadHypixelProfileMeta = (): HypixelProfileMeta | null => {
-  try {
-    const stored = localStorage.getItem(HYPIXEL_PROFILE_META_KEY);
-    if (stored) {
-      return JSON.parse(stored);
+const profileMetaSlot = createStorageSlot<HypixelProfileMeta | null>("hypixel_profile_meta", {
+  label: "Hypixel profile meta",
+  fallback: () => null,
+  deserialize: (raw) => {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isPlainObject(parsed)) return null;
+    const { username, profileName, lastImportTime } = parsed;
+    // All three are rendered directly in the inventory modal's header; a partial
+    // record would show "undefined" and an Invalid Date.
+    if (typeof username !== "string" || typeof profileName !== "string" || typeof lastImportTime !== "number" || !Number.isFinite(lastImportTime)) {
+      return null;
     }
-  } catch (error) {
-    console.warn("Failed to load Hypixel profile meta from localStorage:", error);
-  }
-  return null;
-};
+    return { username, profileName, lastImportTime };
+  },
+});
 
-export const clearHypixelProfileMeta = (): void => {
-  try {
-    localStorage.removeItem(HYPIXEL_PROFILE_META_KEY);
-  } catch (error) {
-    console.warn("Failed to clear Hypixel profile meta from localStorage:", error);
-  }
-};
+export const saveHypixelProfileMeta = (meta: HypixelProfileMeta): void => profileMetaSlot.write(meta);
+export const loadHypixelProfileMeta = (): HypixelProfileMeta | null => profileMetaSlot.read();
+export const clearHypixelProfileMeta = (): void => profileMetaSlot.clear();
 
-// Disabled shards storage
-const DISABLED_SHARDS_KEY = "inventory_disabled_shards";
+// ─── Disabled shards ───
 
-export const saveDisabledShards = (disabled: Set<string>): void => {
-  try {
-    localStorage.setItem(DISABLED_SHARDS_KEY, JSON.stringify([...disabled]));
-  } catch (error) {
-    console.warn("Failed to save disabled shards to localStorage:", error);
-  }
-};
+const disabledShardsSlot = createStorageSlot<Set<string>>("inventory_disabled_shards", {
+  label: "disabled shards",
+  fallback: () => new Set(),
+  serialize: (disabled) => JSON.stringify([...disabled]),
+  deserialize: (raw) => {
+    const parsed: unknown = JSON.parse(raw);
+    // Non-strings would silently never match a shard id, which looks like the
+    // disable simply not working.
+    return new Set(Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : []);
+  },
+});
 
-export const loadDisabledShards = (): Set<string> => {
-  try {
-    const stored = localStorage.getItem(DISABLED_SHARDS_KEY);
-    if (stored) {
-      return new Set(JSON.parse(stored) as string[]);
-    }
-  } catch (error) {
-    console.warn("Failed to load disabled shards from localStorage:", error);
-  }
-  return new Set();
-};
-
-export const clearDisabledShards = (): void => {
-  try {
-    localStorage.removeItem(DISABLED_SHARDS_KEY);
-  } catch (error) {
-    console.warn("Failed to clear disabled shards from localStorage:", error);
-  }
-};
-
+export const saveDisabledShards = (disabled: Set<string>): void => disabledShardsSlot.write(disabled);
+export const loadDisabledShards = (): Set<string> => disabledShardsSlot.read();
+export const clearDisabledShards = (): void => disabledShardsSlot.clear();

@@ -1,7 +1,7 @@
 import React from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { ShardNode } from "../../utilities/fusionGraphLayout";
-import { getRarityColor } from "../../utilities";
+import { getRarityColor, shardIconUrl } from "../../utilities";
 
 const rarityBorder: Record<string, string> = {
   common: "border-slate-400/60",
@@ -30,7 +30,7 @@ const ShardGraphNodeComponent: React.FC<NodeProps<ShardNode>> = ({ data, selecte
         className="!h-2 !w-2 !border-slate-600 !bg-slate-500"
       />
       <img
-        src={`${import.meta.env.BASE_URL}shardIcons/${shardId}.png`}
+        src={shardIconUrl(shardId)}
         alt={name}
         width={28}
         height={28}

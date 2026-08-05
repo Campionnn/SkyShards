@@ -1,8 +1,22 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { ChevronDown } from "lucide-react";
-import type { LevelDropdownProps } from "../../types/types";
+
 import { Tooltip } from "../ui";
 import { SHARD_LEVELS } from "../../constants";
+
+interface LevelDropdownProps {
+  value: number;
+  onChange: (value: number) => void;
+  label: string;
+  tooltipTitle?: string;
+  tooltipContent?: React.ReactNode;
+  tooltipShardName?: string;
+  tooltipShardIcon?: string;
+  tooltipRarity?: string;
+  tooltipWarning?: string;
+  tooltipFamily?: string;
+  tooltipType?: string;
+}
 
 export const LevelDropdown: React.FC<LevelDropdownProps> = React.memo(
   ({ value, onChange, label, tooltipTitle, tooltipContent, tooltipShardName, tooltipShardIcon, tooltipRarity, tooltipWarning, tooltipFamily, tooltipType }) => {
