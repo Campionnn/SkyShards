@@ -5,9 +5,18 @@ export const formatTime = (decimalHours: number): string => {
     return `${totalSeconds} sec`;
   }
 
-  const hours = Math.floor(decimalHours);
-  const minutes = Math.round((decimalHours - hours) * 60);
 
+  console.group("Format Time");
+  console.log(decimalHours);
+  console.groupEnd();
+
+  const days = Math.floor(decimalHours / 24);
+  const hours = Math.floor(decimalHours) - (days * 24);
+  const minutes = Math.round((decimalHours - hours - (days * 24)) * 60);
+
+
+
+  if (days === 0) {
   if (hours === 0) {
     return `${minutes} min`;
   }
@@ -15,6 +24,8 @@ export const formatTime = (decimalHours: number): string => {
     return `${hours} hr`;
   }
   return `${hours} hr ${minutes} min`;
+  }
+  return `${days} d ${hours} hr ${minutes} min`
 };
 
 export const formatNumber = (num: number): string => {
