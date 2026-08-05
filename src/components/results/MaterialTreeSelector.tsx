@@ -10,7 +10,7 @@ interface MaterialTreeSelectorProps {
   onChange: (key: string) => void;
 }
 
-export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shards, value, onChange }) => {
+export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shards, value, onChange}) => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -24,7 +24,8 @@ export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shar
     const list = trimmed
       ? shards.filter((s) => s.name.toLowerCase().includes(trimmed) || s.family.toLowerCase().includes(trimmed) || s.type.toLowerCase().includes(trimmed))
       : shards;
-    return [...list].sort((a, b) => a.name.localeCompare(b.name));
+    //return [...list].sort((a, b) => a.name.localeCompare(b.name));
+    return list;
   }, [shards, query]);
 
   const handleSelect = useCallback(
@@ -89,7 +90,7 @@ export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shar
   }, []);
 
   return (
-    <div className="relative">
+    <div className={`relative flex-1`}>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           {selectedShard && !isOpen ? (
