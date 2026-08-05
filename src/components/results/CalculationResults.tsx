@@ -74,13 +74,14 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   const sortByShortestTime = (shardsToSort: ShardWithKey[], shardData: Map<string, CalculationResult> | undefined) => {
       if(!shardsToSort) return [];
       if(!shardData) return shardsToSort;
-      return [...shardsToSort].map(key => ({key, value: shardData.get(key.key)?.totalTime}))
+      return shardsToSort
+      .map(shard => ({shard, value: shardData.get(shard.key)?.totalTime}))
       .sort(({value: shardATime}, {value: shardBTime}) => {
         if(shardATime === undefined && shardBTime === undefined) return 0;
         if(shardATime === undefined) return 1;
         if(shardBTime === undefined) return -1;
         return shardATime - shardBTime;
-      }).map(({ key}) => key);
+      }).map(({ shard }) => shard);
   }
 
   const sortedShards = useMemo<ShardWithKey[]>(() => {
