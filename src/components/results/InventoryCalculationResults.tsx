@@ -21,6 +21,7 @@ interface InventoryCalculationResultsProps {
   recipeOverrides: RecipeOverride[];
   onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
   onResetRecipeOverrides: () => void;
+  onShowActiveAlternatives: () => void;
   inventory: Map<string, number>;
   disabledShards: Set<string>;
   onDisabledShardsChange: (disabled: Set<string>) => void;
@@ -40,6 +41,7 @@ export const InventoryCalculationResults: React.FC<InventoryCalculationResultsPr
   recipeOverrides,
   onRecipeOverridesUpdate,
   onResetRecipeOverrides,
+  onShowActiveAlternatives,
   inventory,
   disabledShards,
   onDisabledShardsChange,
@@ -171,7 +173,7 @@ export const InventoryCalculationResults: React.FC<InventoryCalculationResultsPr
                 onRecipeOverridesUpdate={onRecipeOverridesUpdate}
                 onResetRecipeOverrides={onResetRecipeOverrides}
               >
-                {({ showAlternatives, resetAlternatives }) => (
+                {({ showAlternatives }) => (
                   <>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-3">
                       <h3 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -181,14 +183,12 @@ export const InventoryCalculationResults: React.FC<InventoryCalculationResultsPr
                         Fusion Tree
                       </h3>
                       <div className="flex gap-2 flex-wrap">
-                        {recipeOverrides.length > 0 && (
-                          <button
-                            onClick={resetAlternatives}
-                            className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/20 hover:border-red-500/30"
-                          >
-                            <span>Reset Alternatives</span>
-                          </button>
-                        )}
+                        <button
+                          onClick={onShowActiveAlternatives}
+                          className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/20 hover:border-purple-500/30"
+                        >
+                          <span>Alternatives{recipeOverrides.length > 0 ? ` (${recipeOverrides.length})` : ""}</span>
+                        </button>
                         <button
                           onClick={onExpandAll}
                           className="px-2 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex items-center space-x-1 cursor-pointer bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 hover:border-green-500/30"

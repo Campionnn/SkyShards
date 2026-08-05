@@ -1,17 +1,13 @@
 import type { BazaarData } from "../types/hypixelApiTypes.ts";
-import type { ShardWithKey, Shard } from "../types/types";
+import type { FusionJson, Shard } from "../types/types";
 import { sortShardsByNameWithPrefixAwareness, filterShards, BASIC_FILTER_CONFIG, NAME_ONLY_FILTER_CONFIG } from "../utilities";
-
-interface FusionData {
-  shards: Record<string, Shard>;
-  recipes: Record<string, unknown>;
-}
 
 export class DataService {
   private static instance: DataService;
-  private shardsCache: ShardWithKey[] | null = null;
+  private shardsCache: Shard[] | null = null;
   private shardNameToKeyCache: Record<string, string> | null = null;
-  private defaultRatesCache: Record<string, number> | null = null;
+  private fusionJsonCache: Promise<FusionJson> | null = null;
+  private defaultRatesCache: Promise<Record<string, number>> | null = null;
   private bazaarPriceCache: Record<string, Record<string, number>> | null = null;
 
   public static getInstance(): DataService {
@@ -47,18 +43,17 @@ export class DataService {
     }
   }
 
-  async loadShards(): Promise<ShardWithKey[]> {
+  async loadShards(): Promise<Shard[]> {
     if (this.shardsCache) {
       return this.shardsCache;
     }
 
-    const [fusionData, defaultRates] = await Promise.all([this.fetchJson<FusionData>("fusion-data.json"), this.loadDefaultRates()]);
+    const [fusionData, defaultRates] = await Promise.all([this.loadFusionJson(), this.loadDefaultRates()]);
 
-    this.shardsCache = Object.entries(fusionData.shards).map(([key, shard]: [string, Shard]) => ({
-        key,
+    this.shardsCache = Object.entries(fusionData.shards).map(([id, shard]: [string, Shard]) => ({
         ...shard,
-        id: key,
-        rate: defaultRates[key] || 0,
+        id,
+        rate: defaultRates[id] || 0,
     }));
 
     return this.shardsCache;
@@ -71,19 +66,42 @@ export class DataService {
 
     const shards = await this.loadShards();
     this.shardNameToKeyCache = shards.reduce((acc, shard) => {
-      acc[shard.name.toLowerCase()] = shard.key;
+      acc[shard.name.toLowerCase()] = shard.id;
       return acc;
     }, {} as Record<string, string>);
 
     return this.shardNameToKeyCache;
   }
 
-  async loadDefaultRates(): Promise<Record<string, number>> {
-    if (this.defaultRatesCache) {
-      return this.defaultRatesCache;
+  /**
+   * The raw `fusion-data.json`, memoised. The file is ~6.5 MB, so this caches the
+   * in-flight promise rather than the result: concurrent callers on a cold cache share
+   * one request and one parse instead of racing to do both twice.
+   *
+   * A failed load clears the cache so the next caller retries rather than being handed
+   * a permanently rejected promise.
+   */
+  async loadFusionJson(): Promise<FusionJson> {
+    if (!this.fusionJsonCache) {
+      this.fusionJsonCache = this.fetchJson<FusionJson>("fusion-data.json").catch((error) => {
+        this.fusionJsonCache = null;
+        throw error;
+      });
     }
+    return this.fusionJsonCache;
+  }
 
-    this.defaultRatesCache = await this.fetchJson<Record<string, number>>("rates.json");
+  /**
+   * Promise-cached like `loadFusionJson`: caching the awaited result instead leaves a
+   * window where two concurrent callers both see an empty cache and both fetch.
+   */
+  async loadDefaultRates(): Promise<Record<string, number>> {
+    if (!this.defaultRatesCache) {
+      this.defaultRatesCache = this.fetchJson<Record<string, number>>("rates.json").catch((error) => {
+        this.defaultRatesCache = null;
+        throw error;
+      });
+    }
     return this.defaultRatesCache;
   }
 
@@ -100,22 +118,30 @@ export class DataService {
     this.bazaarPriceCache[cacheKey] = {};
 
     for (const shard of shards) {
-      const buyPrice = bazaarData.products[`${shard.internal_id}`]?.buy_summary[0]?.pricePerUnit;
-      const sellPrice = bazaarData.products[`${shard.internal_id}`]?.sell_summary[0]?.pricePerUnit;
-
-      this.bazaarPriceCache[cacheKey][shard.id] = useInstantBuyPrices ? buyPrice : sellPrice;
+      const product = bazaarData.products[shard.internal_id];
+      // Annotated as optional because the index signatures lie: shards absent from the
+      // Bazaar response, and products with an empty order book on one side, both resolve
+      // to `undefined` at runtime.
+      const order: { pricePerUnit: number } | undefined = useInstantBuyPrices
+        ? product?.buy_summary?.[0]
+        : product?.sell_summary?.[0];
+      // Leave the key unset rather than storing `undefined` in a Record<string, number>,
+      // so consumers' `?? fallback` fires as intended.
+      if (order !== undefined) {
+        this.bazaarPriceCache[cacheKey][shard.id] = order.pricePerUnit;
+      }
     }
   
     return this.bazaarPriceCache[cacheKey];
   }
 
-  private sortShardsByQuery(shards: ShardWithKey[], query: string): ShardWithKey[] {
+  private sortShardsByQuery(shards: Shard[], query: string): Shard[] {
     const lowerQuery = query.toLowerCase();
     return shards.sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
-      const aKey = a.key.toLowerCase();
-      const bKey = b.key.toLowerCase();
+      const aKey = a.id.toLowerCase();
+      const bKey = b.id.toLowerCase();
       const aStarts = aName.startsWith(lowerQuery) || aKey.startsWith(lowerQuery);
       const bStarts = bName.startsWith(lowerQuery) || bKey.startsWith(lowerQuery);
       
@@ -125,7 +151,7 @@ export class DataService {
     });
   }
 
-  async searchShards(query: string): Promise<ShardWithKey[]> {
+  async searchShards(query: string): Promise<Shard[]> {
     const shards = await this.loadShards();
     const filtered = filterShards(shards, {
       query,
@@ -135,7 +161,7 @@ export class DataService {
     return this.sortShardsByQuery(filtered, query);
   }
 
-  async searchShardsByNameOnly(query: string): Promise<ShardWithKey[]> {
+  async searchShardsByNameOnly(query: string): Promise<Shard[]> {
     const shards = await this.loadShards();
     const filtered = filterShards(shards, {
       query,
@@ -146,7 +172,7 @@ export class DataService {
     if (filtered.length === 0) {
       const fallbackConfig = {
         name: false,
-        key: false,
+        id: false,
         family: false,
         type: false,
         title: true,

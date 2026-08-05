@@ -1,34 +1,26 @@
-import { useState, useEffect } from "react";
-import type { FusionData } from "../utilities";
+import { DataService } from "../services";
+import type { FusionJson } from "../types/types";
+import { useAsyncData } from "./useAsyncData";
+
+interface FusionDataBundle {
+  fusionData: FusionJson | null;
+  rates: Record<string, number> | null;
+}
+
+const EMPTY: FusionDataBundle = { fusionData: null, rates: null };
+
+const loadBundle = async (): Promise<FusionDataBundle> => {
+  const dataService = DataService.getInstance();
+  const [fusionData, rates] = await Promise.all([
+    dataService.loadFusionJson(),
+    // A missing rates.json degrades to an empty map rather than failing the page: the
+    // graph still renders, and its `hasRates` check skips cost-based pruning.
+    dataService.loadDefaultRates().catch(() => ({})),
+  ]);
+  return { fusionData, rates };
+};
 
 export const useFusionData = () => {
-  const [fusionData, setFusionData] = useState<FusionData | null>(null);
-  const [rates, setRates] = useState<Record<string, number> | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const [fusionResponse, ratesResponse] = await Promise.all([
-          fetch(`${import.meta.env.BASE_URL}fusion-data.json`),
-          fetch(`${import.meta.env.BASE_URL}rates.json`),
-        ]);
-        if (!fusionResponse.ok) {
-          throw new Error(`HTTP error! status: ${fusionResponse.status}`);
-        }
-        setFusionData(await fusionResponse.json());
-        setRates(ratesResponse.ok ? await ratesResponse.json() : {});
-      } catch (error) {
-        console.error("Failed to load fusion data:", error);
-        setFusionData(null);
-        setRates(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData().catch(console.error);
-  }, []);
-
-  return { fusionData, rates, loading };
+  const { data, loading } = useAsyncData(loadBundle, EMPTY, "Failed to load fusion data");
+  return { fusionData: data.fusionData, rates: data.rates, loading };
 };

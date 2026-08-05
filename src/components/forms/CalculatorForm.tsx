@@ -4,25 +4,22 @@ import { type CalculationFormData } from "../../schemas";
 import { ShardAutocomplete, MoneyInput } from "./inputs";
 import { useCalculatorState, useShards } from "../../hooks";
 import { LevelDropdown, KuudraDropdown } from "../calculator";
-import {MAX_QUANTITIES, SHARD_DESCRIPTIONS} from "../../constants";
-import { isValidShardName, formatShardDescription } from "../../utilities";
+import {LEVELED_SHARDS, MAX_QUANTITIES, SHARD_DESCRIPTIONS, type ShardLevelKey} from "../../constants";
+import { isValidShardName } from "../../utilities";
+import { ShardDescription } from "../ui/ShardDescription";
 import { Tooltip, ToggleSwitch } from "../ui";
-import type { ShardWithKey } from "../../types/types";
+import type { Shard } from "../../types/types";
 import { MultiSelectShardModal } from "../modals";
 import { DataService } from "../../services";
 
 interface CalculatorFormProps {
   onSubmit: (data: CalculationFormData) => void;
-  inventory?: Map<string, number>;
   ownedAttributes?: Map<string, number>;
   useInventory?: boolean;
   onUseInventoryChange?: (enabled: boolean) => void;
 }
 
-type LevelKey = keyof Pick<
-  CalculationFormData,
-  "newtLevel" | "salamanderLevel" | "lizardKingLevel" | "leviathanLevel" | "pythonLevel" | "kingCobraLevel" | "seaSerpentLevel" | "tiamatLevel" | "crocodileLevel"
->;
+type LevelKey = ShardLevelKey;
 
 export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedAttributes, useInventory, onUseInventoryChange }) => {
   const { form, setForm, saveEnabled, setSaveEnabledState } = useCalculatorState();
@@ -51,12 +48,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
       }
     };
     checkAndSubmit().catch(console.error);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.shard, form.quantity]);
 
   // Only call onSubmit immediately for non-shard/quantity fields
   const handleInputChange = <K extends keyof CalculationFormData>(field: K, value: CalculationFormData[K]) => {
-    const updatedForm = { ...form, [field]: value } as CalculationFormData;
+    const updatedForm = { ...form, [field]: value };
     setForm(updatedForm);
     if (field !== "shard" && field !== "quantity" && field !== "customKuudraTime") {
       onSubmit(updatedForm);
@@ -66,13 +62,13 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
   const handleLevelChange =
     <K extends LevelKey>(key: K) =>
     (value: number) => {
-      handleInputChange(key, value as CalculationFormData[K]);
+      handleInputChange(key, value);
     };
 
   const handleMaxStats = () => {
-    const updatedForm = {
+    const updatedForm: CalculationFormData = {
       ...form,
-      hunterFortune: 122,
+      hunterFortune: 180.5,
       newtLevel: 10,
       salamanderLevel: 10,
       lizardKingLevel: 10,
@@ -82,12 +78,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
       seaSerpentLevel: 10,
       tiamatLevel: 10,
       crocodileLevel: 10,
-      kuudraTier: "t5" as CalculationFormData["kuudraTier"], // Set Kuudra to t5 on max stats, type-safe
-    } as CalculationFormData;
+      kuudraTier: "t5", // Set Kuudra to t5 on max stats
+    };
     setForm(updatedForm);
-    setTimeout(() => {
-      onSubmit(updatedForm);
-    }, 0);
+    onSubmit(updatedForm);
   };
 
   const handleReset = () => {
@@ -129,9 +123,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
     setForm(resetFormData);
     setMoneyInput(""); // Clear the input field
     setKuudraTimeInput(""); // Clear the kuudra time input field
-    setTimeout(() => {
-      onSubmit(resetFormData);
-    }, 0);
+    onSubmit(resetFormData);
   };
 
   // Utility to parse shorthand like 10k, 53m, 2.5b
@@ -158,11 +150,10 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
   const setMoneyToInfinity = React.useCallback(() => {
     const moneyNullishOrZero = form.moneyPerHour === undefined || form.moneyPerHour === null || form.moneyPerHour === 0;
     if (moneyNullishOrZero && moneyInput === "") {
-      const updated = { ...latestFormRef.current, moneyPerHour: Infinity } as CalculationFormData;
+      const updated = { ...latestFormRef.current, moneyPerHour: Infinity };
       setForm(updated);
       onSubmitRef.current(updated);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.moneyPerHour, moneyInput, setForm]);
 
   React.useEffect(() => {
@@ -179,7 +170,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
   // Clear shard input on focus if a shard is already selected
   const handleShardInputFocus = () => {
     if (form.shard) {
-      handleInputChange("shard", "" as CalculationFormData["shard"]);
+      handleInputChange("shard", "");
     }
   };
 
@@ -189,19 +180,18 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
     const isNullish = form.craftPenalty === undefined || form.craftPenalty === null;
 
     if (isNullish) {
-      const updated = { ...latestFormRef.current, craftPenalty: desiredDefault } as CalculationFormData;
+      const updated = { ...latestFormRef.current, craftPenalty: desiredDefault };
       setForm(updated);
       onSubmitRef.current(updated);
     } else if (form.ironManView && form.craftPenalty === 1000) {
-      const updated = { ...latestFormRef.current, craftPenalty: 0.8 } as CalculationFormData;
+      const updated = { ...latestFormRef.current, craftPenalty: 0.8 };
       setForm(updated);
       onSubmitRef.current(updated);
     } else if (!form.ironManView && form.craftPenalty === 0.8) {
-      const updated = { ...latestFormRef.current, craftPenalty: 1000 } as CalculationFormData;
+      const updated = { ...latestFormRef.current, craftPenalty: 1000 };
       setForm(updated);
       onSubmitRef.current(updated);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.ironManView, form.craftPenalty, setForm]);
 
   // For craftPenalty, keep a local string state for user input
@@ -212,45 +202,31 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
     setCraftPenaltyInput("");
   }, [form.ironManView]);
 
-  // Build level items with strict typing for keys
-  const levelItems: Array<{ key: LevelKey; label: string; shardId: string }> = [
-    ...(form.ironManView
-      ? ([
-          { key: "newtLevel", label: "Newt", shardId: "C35" },
-          { key: "salamanderLevel", label: "Salamander", shardId: "U8" },
-          { key: "lizardKingLevel", label: "Lizard King", shardId: "R8" },
-          { key: "leviathanLevel", label: "Leviathan", shardId: "E5" },
-          { key: "pythonLevel", label: "Python", shardId: "R9" },
-          { key: "kingCobraLevel", label: "King Cobra", shardId: "R54" },
-        ] as Array<{ key: LevelKey; label: string; shardId: string }>)
-      : []),
-    { key: "seaSerpentLevel", label: "Sea Serpent", shardId: "E32" },
-    { key: "tiamatLevel", label: "Tiamat", shardId: "L6" },
-    { key: "crocodileLevel", label: "Crocodile", shardId: "R45" },
-  ];
+  // Only Crocodile is shown on a normal profile; the rest are ironman-only.
+  const levelItems = LEVELED_SHARDS.filter((item) => form.ironManView || !item.ironmanOnly);
 
   // Materials Only mode state
   const [isMultiSelectModalOpen, setIsMultiSelectModalOpen] = React.useState(false);
-  const [allShards, setAllShards] = React.useState<ShardWithKey[]>([]);
+  const [allShards, setAllShards] = React.useState<Shard[]>([]);
 
   const handleOpenMultiSelect = React.useCallback(async () => {
     if (allShards.length === 0) {
       const dataService = DataService.getInstance();
       const shards = await dataService.loadShards();
       // Filter out Chameleon shard (L4) as it's only used for fusions
-      const filteredShards = shards.filter(shard => shard.key !== 'L4');
+      const filteredShards = shards.filter(shard => shard.id !== 'L4');
       setAllShards(filteredShards);
     }
     setIsMultiSelectModalOpen(true);
   }, [allShards]);
 
   const handleMultiSelectDone = React.useCallback(
-    (selectedData: Array<{ shard: ShardWithKey; quantity: number }>) => {
-      const selectedKeys = selectedData.map((item) => item.shard.key);
-      const updated = { ...latestFormRef.current, selectedShardKeys: selectedKeys, shardQuantities: selectedData } as CalculationFormData;
+    (selectedData: Array<{ shard: Shard; quantity: number }>) => {
+      const selectedKeys = selectedData.map((item) => item.shard.id);
+      const updated = { ...latestFormRef.current, selectedShardKeys: selectedKeys, shardQuantities: selectedData };
       setForm(updated);
       setIsMultiSelectModalOpen(false);
-      setTimeout(() => onSubmitRef.current(updated), 0);
+      onSubmitRef.current(updated);
     },
     [setForm]
   );
@@ -283,49 +259,23 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
         {/* Use Inventory + Auto Save toggles */}
         <div className="flex justify-between gap-6 mb-3">
           {onUseInventoryChange && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-slate-200">Use Inventory</span>
-              <Tooltip content="Enable inventory-aware calculations. When enabled, your imported inventory shards will be factored into the optimal fusion path. Does not work with material only mode yet. This is very experimental, so let me know on Discord or GitHub if it isn't working properly"></Tooltip>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={useInventory ?? false}
-                onClick={() => onUseInventoryChange(!useInventory)}
-                className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
-                  ${useInventory ? "bg-purple-600" : "bg-white/5"}
-                  hover:border-purple-400`}
-                style={{ boxShadow: "none" }}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform duration-200 border border-white/10
-                  ${useInventory ? "bg-purple-400" : "bg-slate-300/70"}
-                  ${useInventory ? "translate-x-4" : "translate-x-0.5"}`}
-                  style={{ paddingLeft: "1px" }}
-                />
-              </button>
-            </div>
+            <ToggleSwitch
+              size="sm"
+              accent="purple"
+              label="Use Inventory"
+              tooltip="Enable inventory-aware calculations. When enabled, your imported inventory shards will be factored into the optimal fusion path. Does not work with material only mode yet. This is very experimental, so let me know on Discord or GitHub if it isn't working properly"
+              checked={useInventory ?? false}
+              onChange={onUseInventoryChange}
+            />
           )}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-slate-200">Auto Save</span>
-            <Tooltip content="Automatically saves all your settings (fortune, shard levels, etc.) in your browser. Data is restored when the page reloads."></Tooltip>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={saveEnabled}
-              onClick={() => setSaveEnabledState(!saveEnabled)}
-              className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
-                ${saveEnabled ? "bg-emerald-600" : "bg-white/5"}
-                hover:border-emerald-400`}
-              style={{ boxShadow: "none" }}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform duration-200 border border-white/10
-                ${saveEnabled ? "bg-emerald-400" : "bg-slate-300/70"}
-                ${saveEnabled ? "translate-x-4" : "translate-x-0.5"}`}
-                style={{ paddingLeft: "1px" }}
-              />
-            </button>
-          </div>
+          <ToggleSwitch
+            size="sm"
+            accent="emerald"
+            label="Auto Save"
+            tooltip="Automatically saves all your settings (fortune, shard levels, etc.) in your browser. Data is restored when the page reloads."
+            checked={saveEnabled}
+            onChange={setSaveEnabledState}
+          />
         </div>
 
         {/* Target Shard or Select Shards */}
@@ -336,27 +286,15 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                 <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                 {form.materialsOnly ? "Select Shards" : "Target Shard"}
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-white">Materials Only</span>
-                <Tooltip content="Calculate combined materials for multiple shards without showing the fusion tree. Does not work with use inventory"></Tooltip>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={form.materialsOnly}
-                  onClick={() => handleInputChange("materialsOnly", !form.materialsOnly)}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full border border-white/10 transition-colors duration-200 cursor-pointer
-                    ${form.materialsOnly ? "bg-blue-600" : "bg-white/5"}
-                    hover:border-blue-400`}
-                  style={{ boxShadow: "none" }}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform duration-200 border border-white/10
-                    ${form.materialsOnly ? "bg-blue-400" : "bg-slate-300/70"}
-                    ${form.materialsOnly ? "translate-x-4" : "translate-x-0.5"}`}
-                    style={{ paddingLeft: "1px" }}
-                  />
-                </button>
-              </div>
+              <ToggleSwitch
+                size="sm"
+                accent="blue"
+                label="Materials Only"
+                labelClassName="text-white"
+                tooltip="Calculate combined materials for multiple shards without showing the fusion tree. Does not work with use inventory"
+                checked={form.materialsOnly}
+                onChange={(checked) => handleInputChange("materialsOnly", checked)}
+              />
             </div>
             {form.materialsOnly && form.ironManView ? (
               <div className="flex gap-2">
@@ -372,9 +310,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   <button
                     type="button"
                     onClick={() => {
-                      const updated = { ...form, selectedShardKeys: [], shardQuantities: [] } as CalculationFormData;
+                      const updated = { ...form, selectedShardKeys: [], shardQuantities: [] };
                       setForm(updated);
-                      setTimeout(() => onSubmit(updated), 0);
+                      onSubmit(updated);
                     }}
                     className="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/20 hover:border-red-500/30 rounded-md text-red-400 font-medium transition-colors flex items-center justify-center cursor-pointer text-sm"
                     title="Clear selection"
@@ -388,7 +326,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                 <ShardAutocomplete
                   value={form.shard}
                   onChange={(value: string) => handleInputChange("shard", value)}
-                  onSelect={(shard: ShardWithKey) => {
+                  onSelect={(shard: Shard) => {
                     // Use the rarity directly from the selected shard (provided by autocomplete)
                     let rarityKey = "common";
                     if (shard) {
@@ -396,11 +334,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                       if (normalized in MAX_QUANTITIES) rarityKey = normalized as keyof typeof MAX_QUANTITIES as string;
                     }
                     const maxQuantity: number = MAX_QUANTITIES[rarityKey as keyof typeof MAX_QUANTITIES];
-                    const owned = ownedAttributes?.get(shard.key) ?? 0;
+                    const owned = ownedAttributes?.get(shard.id) ?? 0;
                     const remaining = owned >= maxQuantity ? maxQuantity : Math.max(1, maxQuantity - owned);
-                    const updated = { ...form, shard: shard.name, quantity: remaining } as CalculationFormData;
+                    const updated = { ...form, shard: shard.name, quantity: remaining };
                     setForm(updated);
-                    setTimeout(() => onSubmit(updated), 0);
+                    onSubmit(updated);
                   }}
                   onFocus={handleShardInputFocus}
                   placeholder="Search for a shard..."
@@ -418,7 +356,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   min="1"
                   value={form.quantity === 0 ? "" : form.quantity}
                   placeholder="1"
-                  onChange={(e) => handleInputChange("quantity", Number(e.target.value) as CalculationFormData["quantity"])}
+                  onChange={(e) => handleInputChange("quantity", Number(e.target.value))}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -439,9 +377,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                     <button
                       type="button"
                       onClick={() => {
-                        const updated = { ...form, quantity: maxQty } as CalculationFormData;
+                        const updated = { ...form, quantity: maxQty };
                         setForm(updated);
-                        setTimeout(() => onSubmit(updated), 0);
+                        onSubmit(updated);
                       }}
                       className="px-2.5 py-1.5 text-xs font-medium bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-md text-slate-300 hover:text-white transition-colors duration-200 cursor-pointer"
                       title={`Set to max (${maxQty})`}
@@ -463,7 +401,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
           onDone={handleMultiSelectDone}
           initialSelections={
             new Map(
-              (form.shardQuantities || []).map((item) => [item.shard.key, item.quantity])
+              (form.shardQuantities || []).map((item) => [item.shard.id, item.quantity])
             )
           }
           ownedAttributes={ownedAttributes}
@@ -520,48 +458,52 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                     rarity="legendary"
                     title=""
                     showRomanNumerals={false}
-                    content={`
-                      <div class="space-y-2">
-                        <div class="text-slate-200 font-semibold">Sources</div>
-                        <ul class="space-y-0.5">
-                          <li><span class="font-semibold">+50</span> <span class="text-slate-300">— HotF 6 perk</span></li>
-                          <li><span class="font-semibold">+30</span> <span class="text-slate-300">— David's Cloak (Attribute Stacks 30)</span></li>
-                          <li><span class="font-semibold">+25</span> <span class="text-slate-300">— Hunting level 25</span></li>
-                          <li><span class="font-semibold">+13</span> <span class="text-slate-300">— Megalith (Sea Serpent + Tiamat max)</span></li>
-                          <li><span class="font-semibold">+3</span> <span class="text-slate-300">— Infernal Kuudra Core</span></li>
+                    content={
+                      <div className="space-y-2">
+                        <div className="text-slate-200 font-semibold">Sources</div>
+                        <ul className="space-y-0.5">
+                          <li><span className="font-semibold">+50</span> <span className="text-slate-300">HotF 3 perk</span></li>
+                          <li><span className="font-semibold">+50</span> <span className="text-slate-300">Hunting level 50</span></li>
+                          <li><span className="font-semibold">+30</span> <span className="text-slate-300">David's Cloak (Attribute Stacks 30)</span></li>
+                          <li><span className="font-semibold">+30</span> <span className="text-slate-300">Safari Belt (Max Haunted Biome Milestone)</span></li>
+                          <li><span className="font-semibold">+13</span> <span className="text-slate-300">Megalith (Sea Serpent + Tiamat max)</span></li>
+                          <li><span className="font-semibold">+3.5</span> <span className="text-slate-300">Safari Belt Mythic Reforge</span></li>
+                          <li><span className="font-semibold">+3</span> <span className="text-slate-300">Infernal Kuudra Core</span></li>
+                          <li><span className="font-semibold">+1</span> <span className="text-slate-300">Starborn Century Cake </span></li>
                         </ul>
-                        <div class="h-px bg-white/10"></div>
-                        <div class="text-slate-300">Universal fortune total: <span class="text-amber-300 font-semibold">121</span></div>
+                        <div className="h-px bg-white/10"></div>
+                        <div className="text-slate-300">Universal fortune total: <span className="text-amber-300 font-semibold">180.5</span></div>
 
-                        <div class="text-slate-200 font-semibold pt-1">Rarity bonuses</div>
-                        <ul class="pl-0 space-y-0.5 text-xs">
-                          <li class="flex items-center justify-between"><span><span class="font-semibold text-white">+26</span> <span class="text-white">Common</span></span><span class="text-slate-400">Newt</span></li>
-                          <li class="flex items-center justify-between"><span><span class="font-semibold text-green-400">+26</span> <span class="text-green-400">Uncommon</span></span><span class="text-slate-400">Salamander</span></li>
-                          <li class="flex items-center justify-between"><span><span class="font-semibold text-blue-400">+13</span> <span class="text-blue-400">Rare</span></span><span class="text-slate-400">Lizard King</span></li>
-                          <li class="flex items-center justify-between"><span><span class="font-semibold text-purple-400">+13</span> <span class="text-purple-400">Epic</span></span><span class="text-slate-400">Leviathan</span></li>
-                          <li class="flex items-center justify-between"><span><span class="font-semibold text-yellow-400">+0</span> <span class="text-yellow-400">Legendary</span></span><span class="text-slate-500">—</span></li>
+                        <div className="text-slate-200 font-semibold pt-1">Rarity bonuses</div>
+                        <ul className="pl-0 space-y-0.5 text-xs">
+                          <li className="flex items-center justify-between"><span><span className="font-semibold text-white">+26</span> <span className="text-white">Common</span></span><span className="text-slate-400">Newt</span></li>
+                          <li className="flex items-center justify-between"><span><span className="font-semibold text-green-400">+26</span> <span className="text-green-400">Uncommon</span></span><span className="text-slate-400">Salamander</span></li>
+                          <li className="flex items-center justify-between"><span><span className="font-semibold text-blue-400">+13</span> <span className="text-blue-400">Rare</span></span><span className="text-slate-400">Lizard King</span></li>
+                          <li className="flex items-center justify-between"><span><span className="font-semibold text-purple-400">+13</span> <span className="text-purple-400">Epic</span></span><span className="text-slate-400">Leviathan</span></li>
+                          <li className="flex items-center justify-between"><span><span className="font-semibold text-yellow-400">+0</span> <span className="text-yellow-400">Legendary</span></span><span className="text-slate-500"></span></li>
                         </ul>
 
-                        <div class="text-slate-200 font-semibold pt-1">Totals</div>
-                        <ul class="pl-0 space-y-0.5 text-xs">
-                          <li class="flex items-center justify-between"><span class="text-white">Common</span><span class="text-white font-semibold">147</span></li>
-                          <li class="flex items-center justify-between"><span class="text-green-400">Uncommon</span><span class="text-green-400 font-semibold">147</span></li>
-                          <li class="flex items-center justify-between"><span class="text-blue-400">Rare</span><span class="text-blue-400 font-semibold">134</span></li>
-                          <li class="flex items-center justify-between"><span class="text-purple-400">Epic</span><span class="text-purple-400 font-semibold">134</span></li>
-                          <li class="flex items-center justify-between"><span class="text-yellow-400">Legendary</span><span class="text-yellow-400 font-semibold">121</span></li>
+                        <div className="text-slate-200 font-semibold pt-1">Totals</div>
+                        <ul className="pl-0 space-y-0.5 text-xs">
+                          <li className="flex items-center justify-between"><span className="text-white">Common</span><span className="text-white font-semibold">206.5</span></li>
+                          <li className="flex items-center justify-between"><span className="text-green-400">Uncommon</span><span className="text-green-400 font-semibold">206.5</span></li>
+                          <li className="flex items-center justify-between"><span className="text-blue-400">Rare</span><span className="text-blue-400 font-semibold">193.5</span></li>
+                          <li className="flex items-center justify-between"><span className="text-purple-400">Epic</span><span className="text-purple-400 font-semibold">193.5</span></li>
+                          <li className="flex items-center justify-between"><span className="text-yellow-400">Legendary</span><span className="text-yellow-400 font-semibold">180.5</span></li>
                         </ul>
 
                       </div>
-                    `}
+                    }
                   />
                   </div>
                 </div>
               <input
                   type="number"
                   min="0"
+                  step="0.5"
                   value={form.hunterFortune === 0 ? "" : form.hunterFortune}
                   placeholder="0"
-                  onChange={(e) => handleInputChange("hunterFortune", Number(e.target.value) as CalculationFormData["hunterFortune"])}
+                  onChange={(e) => handleInputChange("hunterFortune", Number(e.target.value))}
                   onWheel={(e) => (e.target as HTMLInputElement).blur()}
                   className="
                   w-full px-3 py-2 text-sm
@@ -609,7 +551,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   onChange={handleLevelChange(key)}
                   label={label}
                   tooltipTitle={shardDesc?.title}
-                  tooltipContent={formatShardDescription(shardDesc?.description || "No description available.")}
+                  tooltipContent={<ShardDescription record={shardDesc} />}
                   tooltipShardName={label}
                   tooltipShardIcon={shardId}
                   tooltipRarity={shard?.rarity}
@@ -645,11 +587,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                 setCraftPenaltyInput(value);
                 // If empty, use default for calculation
                 if (value.trim() === "") {
-                  handleInputChange("craftPenalty", (form.ironManView ? 0.8 : 1000) as CalculationFormData["craftPenalty"]);
+                  handleInputChange("craftPenalty", (form.ironManView ? 0.8 : 1000));
                 } else {
                   const num = Number(value);
                   if (!isNaN(num) && num >= 0) {
-                    handleInputChange("craftPenalty", num as CalculationFormData["craftPenalty"]);
+                    handleInputChange("craftPenalty", num);
                   }
                 }
               }}
@@ -669,8 +611,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
             </h3>
             <div className="space-y-2">
               <KuudraDropdown
-                value={(form.kuudraTier ?? "none") as CalculationFormData["kuudraTier"]}
-                onChange={(value: string) => handleInputChange("kuudraTier", value as CalculationFormData["kuudraTier"])}
+                value={(form.kuudraTier ?? "none")}
+                onChange={(value) => handleInputChange("kuudraTier", value)}
                 label="Kuudra Tier"
               />
               <MoneyInput
@@ -678,11 +620,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                 onChange={(value: string) => {
                   setMoneyInput(value);
                   if (value.trim() === "") {
-                    handleInputChange("moneyPerHour", Infinity as CalculationFormData["moneyPerHour"]); // Infinity means ignore key cost
+                    handleInputChange("moneyPerHour", Infinity); // Infinity means ignore key cost
                     onSubmit({ ...form, moneyPerHour: Infinity }); // force update tree
                   } else {
                     const parsed = parseShorthandNumber(value);
-                    handleInputChange("moneyPerHour", parsed as CalculationFormData["moneyPerHour"]);
+                    handleInputChange("moneyPerHour", parsed);
                   }
                 }}
                 placeholder="200k, 2.5m, 2b..."
@@ -693,20 +635,18 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   label="Custom Kuudra Completion Time"
                   checked={form.customKuudraTime || false}
                   onChange={(checked) => {
-                    handleInputChange("customKuudraTime", checked as CalculationFormData["customKuudraTime"]);
+                    handleInputChange("customKuudraTime", checked);
                     if (!checked) {
                       // Reset time input when disabling custom time
-                      handleInputChange("kuudraTimeSeconds", null as CalculationFormData["kuudraTimeSeconds"]);
+                      handleInputChange("kuudraTimeSeconds", null);
                       setKuudraTimeInput("");
                     }
-                    // Manually trigger calculation after state update
-                    setTimeout(() => {
-                      const updatedForm = { ...form, customKuudraTime: checked } as CalculationFormData;
-                      if (!checked) {
-                        updatedForm.kuudraTimeSeconds = null;
-                      }
-                      onSubmit(updatedForm);
-                    }, 0);
+                    // handleInputChange does not submit for customKuudraTime, so do it here.
+                    const updatedForm = { ...form, customKuudraTime: checked };
+                    if (!checked) {
+                      updatedForm.kuudraTimeSeconds = null;
+                    }
+                    onSubmit(updatedForm);
                   }}
                 />
                 {form.customKuudraTime && (
@@ -723,11 +663,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                           const value = e.target.value;
                           setKuudraTimeInput(value);
                           if (value.trim() === "") {
-                            handleInputChange("kuudraTimeSeconds", null as CalculationFormData["kuudraTimeSeconds"]);
+                            handleInputChange("kuudraTimeSeconds", null);
                           } else {
                             const parsed = parseInt(value);
                             if (!isNaN(parsed) && parsed > 0) {
-                              handleInputChange("kuudraTimeSeconds", parsed as CalculationFormData["kuudraTimeSeconds"]);
+                              handleInputChange("kuudraTimeSeconds", parsed);
                             }
                           }
                         }}

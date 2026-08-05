@@ -1,6 +1,15 @@
 import React, { useCallback } from "react";
-import { getRarityColor } from "../../../utilities";
-import type { SuggestionItemProps } from "../../../types/types";
+import { getRarityColor, shardIconUrl } from "../../../utilities";
+import type { Shard } from "../../../types/types";
+
+interface SuggestionItemProps {
+  shard: Shard;
+  index: number;
+  focusedIndex: number;
+  onSelect: (shard: Shard) => void;
+  isSelecting: boolean;
+  setFocusedIndex: (index: number) => void;
+}
 
 export const SuggestionItem: React.FC<SuggestionItemProps> = React.memo(({ shard, index, focusedIndex, onSelect, isSelecting, setFocusedIndex }) => {
   const handleMouseDown = useCallback(
@@ -25,7 +34,7 @@ export const SuggestionItem: React.FC<SuggestionItemProps> = React.memo(({ shard
     >
       <div className="flex items-center justify-between min-w-0">
         <div className="flex items-center min-w-0 flex-1 gap-2">
-          <img src={`${import.meta.env.BASE_URL}shardIcons/${shard.key}.png`} alt={shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
+          <img src={shardIconUrl(shard.id)} alt={shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
           <div className="min-w-0 flex-1">
             <div className={`font-medium truncate ${getRarityColor(shard.rarity)}`}>{shard.name}</div>
             <div className="text-xs opacity-75 truncate">

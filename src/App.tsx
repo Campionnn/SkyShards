@@ -1,8 +1,8 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { Layout } from "./components";
-import { CalculatorStateProvider, RecipeStateProvider, ImagePreloadProvider } from "./context";
-import { usePageTitle } from "./hooks";
+import { CalculatorStateProvider, RecipeStateProvider } from "./context";
+import { usePageTitle, useShardIconPreload } from "./hooks";
 import { ToastProvider } from "./components";
 
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
@@ -31,15 +31,14 @@ const AppWithProviders = () => {
 
 const ProtectedLayout = () => {
   usePageTitle(); // Update page title based on route
+  useShardIconPreload(); // Warm the icon cache once the browser is idle
 
   return (
-    <ImagePreloadProvider>
-      <CalculatorStateProvider>
-        <RecipeStateProvider>
-          <AppWithProviders />
-        </RecipeStateProvider>
-      </CalculatorStateProvider>
-    </ImagePreloadProvider>
+    <CalculatorStateProvider>
+      <RecipeStateProvider>
+        <AppWithProviders />
+      </RecipeStateProvider>
+    </CalculatorStateProvider>
   );
 };
 

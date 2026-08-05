@@ -32,11 +32,6 @@ export interface HypixelProfileResponse {
   selected_profile_id: string | null;
 }
 
-export interface HypixelServiceError {
-  message: string;
-  status?: number;
-}
-
 class HypixelService {
   private static instance: HypixelService;
   private baseUrl: string;

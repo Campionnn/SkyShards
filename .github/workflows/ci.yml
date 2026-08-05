@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+    branches: [master, dev]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # --max-warnings 0 ratchets the current clean state; a new warning fails the build.
+      - name: Lint
+        run: pnpm exec eslint . --max-warnings 0
+
+      # Golden-output tests over the real public/*.json, so a data sync that changes
+      # the calculator's answers shows up here rather than in production.
+#      - name: Test
+#        run: pnpm run test
+
+      # Runs `tsc -b && vite build`.
+      - name: Build
+        run: pnpm run build

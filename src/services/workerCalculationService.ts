@@ -93,7 +93,6 @@ export function calculateMultipleShardsParallel(
   const completedChunks: Map<number, CalculationResult[]> = new Map();
   const completedBreakdowns: Map<number, Map<string, Map<string, number>>> = new Map();
   const chunkProgress: Map<number, number> = new Map(); // Track progress per chunk
-  const chunkPhases: Map<number, ProgressPhase> = new Map(); // Track phase per chunk
   let cancelled = false;
   const totalShards = targets.length;
 
@@ -142,7 +141,6 @@ export function calculateMultipleShardsParallel(
         // progress tracking for each chunk
         chunks.forEach((_, idx) => {
           chunkProgress.set(idx, 0);
-          chunkPhases.set(idx, "building");
         });
 
         const reportOverallProgress = () => {
@@ -176,7 +174,6 @@ export function calculateMultipleShardsParallel(
             if (data.type === "progress") {
               // Update this chunk's progress
               chunkProgress.set(chunkIndex, data.progress);
-              chunkPhases.set(chunkIndex, data.phase);
               reportOverallProgress();
             } else if (data.type === "batch-result") {
               worker.terminate();
