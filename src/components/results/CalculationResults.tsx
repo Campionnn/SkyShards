@@ -77,11 +77,15 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
       .map((key) => ({ ...data.shards[key], key }));
   }, [materialShardResults, data]); 
 
-  const sortByShortestTime = (shardsToSort: ShardWithKey[], shardData: Map<string, CalculationResult> | undefined) => {
+  const sortByShortestTime = (shardsToSort: Shard[], shardData: Map<string, CalculationResult> | undefined) => {
+      console.log("Heres shardsToSort: ");
+      console.log(shardsToSort);
+      console.log("Heres shardData: ");
+      console.log(shardData);
       if(!shardsToSort) return [];
       if(!shardData) return shardsToSort;
       return shardsToSort
-      .map(shard => ({shard, value: shardData.get(shard.key)?.totalTime}))
+      .map(shard => ({shard, value: shardData.get(shard.id)?.totalTime}))
       .sort(({value: shardATime}, {value: shardBTime}) => {
         if(shardATime === undefined && shardBTime === undefined) return 0;
         if(shardATime === undefined) return 1;
@@ -90,7 +94,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
       }).map(({ shard }) => shard);
   }
 
-  const sortedShards = useMemo<ShardWithKey[]>(() => {
+  const sortedShards = useMemo<Shard[]>(() => {
     switch (materialTreeSortSelection) {
       case "shortest": return sortByShortestTime(selectableShards, materialShardResults);
       case "alphabetically": return [...selectableShards].sort((a, b) => a.name.localeCompare(b.name));
