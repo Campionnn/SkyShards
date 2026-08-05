@@ -1,16 +1,17 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Search, X, ChevronDown } from "lucide-react";
-import type { Shard } from "../../types/types";
+import type { CalculationResult, Shard } from "../../types/types";
 import { getRarityColor, isFocusRestoredByWindow, shardIconUrl } from "../../utilities";
-import { SuggestionItem } from "../forms";
+import { MaterialSuggestionItem } from "./MaterialSuggestionItem";
 
 interface MaterialTreeSelectorProps {
   shards: Shard[];
+  shardCalculationData: Map<string, CalculationResult> | undefined;
   value: string;
   onChange: (key: string) => void;
 }
 
-export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shards, value, onChange}) => {
+export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shards, shardCalculationData, value, onChange}) => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -144,7 +145,7 @@ export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shar
       {isOpen && suggestions.length > 0 && (
         <ul ref={listRef} className="absolute z-50 mt-1 w-full bg-slate-800 border border-slate-600 rounded-md shadow-xl max-h-60 overflow-y-auto">
           {suggestions.map((shard, index) => (
-            <SuggestionItem key={shard.id} shard={shard} index={index} focusedIndex={focusedIndex} onSelect={handleSelect} isSelecting={false} setFocusedIndex={setFocusedIndex} />
+            <MaterialSuggestionItem key={shard.id} shard={shard} index={index} focusedIndex={focusedIndex} time={shardCalculationData?.get(shard.id)?.totalTime ?? Number.POSITIVE_INFINITY} onSelect={handleSelect} isSelecting={false} setFocusedIndex={setFocusedIndex} />
           ))}
         </ul>
       )}

@@ -78,10 +78,6 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   }, [materialShardResults, data]); 
 
   const sortByShortestTime = (shardsToSort: Shard[], shardData: Map<string, CalculationResult> | undefined) => {
-      console.log("Heres shardsToSort: ");
-      console.log(shardsToSort);
-      console.log("Heres shardData: ");
-      console.log(shardData);
       if(!shardsToSort) return [];
       if(!shardData) return shardsToSort;
       return shardsToSort
@@ -207,7 +203,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           </div>
           <p className="text-sm text-slate-400">Select one of your shards to view its full fusion tree. Alternatives you set here apply to every shard.</p>
           <div className="flex items-center gap-2">
-            <MaterialTreeSelector shards={sortedShards} value={materialTreeShardKey} onChange={(key) => onMaterialTreeShardChange?.(key)}/>
+            <MaterialTreeSelector shards={sortedShards} shardCalculationData={materialShardResults} value={materialTreeShardKey} onChange={(key) => onMaterialTreeShardChange?.(key)}/>
             <FusionTreeSortDropown value={materialTreeSortSelection} onChange={setMaterialTreeSortSelection} />
           </div>
         </div>

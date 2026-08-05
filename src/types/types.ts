@@ -113,7 +113,7 @@ export interface CalculationResult {
   craftTime: number;
   tree: RecipeTree | null;
   materialBreakdown?: Map<string, Map<string, number>>;
-}
+} 
 
 export interface ShardWithDirectInfo extends Shard {
   isDirect: boolean;
