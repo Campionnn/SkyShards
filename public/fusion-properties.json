@@ -3487,7 +3487,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Scarf",
+    "id_result": "Scatha",
     "id_origin": [
       "King Minos",
       "Gemzie"
@@ -3514,7 +3514,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Scarf",
+    "id_result": "Scatha",
     "id_origin": []
   },
   "E52": {
@@ -3537,11 +3537,8 @@
     "family": [],
     "input1": "",
     "input2": "",
-    "id_result": "Thorn",
-    "id_origin": [
-      "Inferno Demonlord",
-      "Bonzo"
-    ]
+    "id_result": "Scatha",
+    "id_origin": []
   },
   "E57": {
     "name": "Thorn",
@@ -3551,9 +3548,7 @@
     "input1": "",
     "input2": "",
     "id_result": "Scatha",
-    "id_origin": [
-      "Scarf"
-    ]
+    "id_origin": []
   },
   "E58": {
     "name": "Mountain Goat",
@@ -3581,6 +3576,9 @@
     "input2": "",
     "id_result": "Littlefoot",
     "id_origin": [
+      "Inferno Demonlord",
+      "Bonzo",
+      "Scarf",
       "Thorn"
     ]
   },
@@ -3927,7 +3925,7 @@
     ],
     "input1": "",
     "input2": "",
-    "id_result": "Power Dragon",
+    "id_result": "",
     "id_origin": [
       "Kraken",
       "Daemon",
@@ -3975,9 +3973,7 @@
     "input1": "",
     "input2": "",
     "id_result": "",
-    "id_origin": [
-      "Hellwisp"
-    ]
+    "id_origin": []
   },
   "L31": {
     "name": "Condor",
