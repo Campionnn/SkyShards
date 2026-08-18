@@ -334,6 +334,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                       if (normalized in MAX_QUANTITIES) rarityKey = normalized as keyof typeof MAX_QUANTITIES as string;
                     }
                     const maxQuantity: number = MAX_QUANTITIES[rarityKey as keyof typeof MAX_QUANTITIES];
+                    // Mirrors InventoryManagementModal's attributes tab ("My Shards") exactly.
                     const owned = ownedAttributes?.get(shard.id) ?? 0;
                     const remaining = owned >= maxQuantity ? maxQuantity : Math.max(1, maxQuantity - owned);
                     const updated = { ...form, shard: shard.name, quantity: remaining };
@@ -343,6 +344,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   onFocus={handleShardInputFocus}
                   placeholder="Search for a shard..."
                   searchMode="name-only"
+                  ownedAttributes={ownedAttributes}
                 />
               </>
             )}
