@@ -35,6 +35,11 @@ export const formatNumber = (num: number): string => {
   return num.toFixed(2).replace(/\.00$/, "");
 };
 
+export const formatQuantity = (quantity: number): string => {
+  if (!Number.isFinite(quantity)) return String(quantity);
+  return String(Math.round(quantity * 100) / 100);
+};
+
 export const getRarityColor = (rarity: string): string => {
   const colors = {
     common: "text-white",

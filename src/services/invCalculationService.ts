@@ -1,4 +1,4 @@
-import { CalculationService } from "./calculationService";
+import { CalculationService, craftsForQuantity, snapToInteger } from "./calculationService";
 import { computeFreelyUsableShards } from "../utilities";
 import type {
   CalculationParams,
@@ -52,7 +52,7 @@ export class InvCalculationService {
       const recipe = tree.recipe;
       const {crocodileMultiplier} = this.service.calculateMultipliers(params);
       const outputQuantity = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
-      const craftsNeeded = Math.ceil(newQuantity / outputQuantity);
+      const craftsNeeded = craftsForQuantity(newQuantity, outputQuantity);
       tree.craftsNeeded = craftsNeeded;
 
       const [input1Id, input2Id] = recipe.inputs;
@@ -446,17 +446,15 @@ export class InvCalculationService {
         break;
       }
 
-      const craftsForRemaining = Math.ceil(remainingQuantity / bestCandidate.outputQuantity);
+      const craftsForRemaining = craftsForQuantity(remainingQuantity, bestCandidate.outputQuantity);
       const craftsToUse = Math.min(bestCandidate.craftsSupported, craftsForRemaining);
 
       if (craftsToUse <= 0) {
         break;
       }
 
-      const quantityProduced = Math.min(
-        remainingQuantity,
-        craftsToUse * bestCandidate.outputQuantity
-      );
+      const wholeOutput = Math.floor(snapToInteger(craftsToUse * bestCandidate.outputQuantity));
+      const quantityProduced = Math.min(remainingQuantity, wholeOutput);
 
       if (quantityProduced <= 0) {
         break;
@@ -619,7 +617,7 @@ export class InvCalculationService {
           const recipe = craftedPortion.recipe;
           const {crocodileMultiplier} = this.service.calculateMultipliers(params);
           const outputQuantity = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
-          const newCraftsNeeded = Math.ceil(remainingQuantity / outputQuantity);
+          const newCraftsNeeded = craftsForQuantity(remainingQuantity, outputQuantity);
           craftedPortion.craftsNeeded = newCraftsNeeded;
 
           const [input1Id, input2Id] = recipe.inputs;

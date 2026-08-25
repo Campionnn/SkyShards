@@ -266,7 +266,7 @@ export const RecipeTreeNode: React.FC<RecipeTreeNodeProps> = ({
   const input1Shard = data.shards[input1.shard];
   const input2Shard = data.shards[input2.shard];
   const crafts = "craftsNeeded" in tree ? tree.craftsNeeded ?? 1 : 1;
-  const displayQuantity = isTopLevel ? totalShardsProduced : tree.quantity;
+  const displayQuantity = isTopLevel ? Math.floor(totalShardsProduced) : tree.quantity;
   const crocProcs = getCrocodileProcs(tree, data);
 
   return (
