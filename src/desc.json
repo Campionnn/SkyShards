@@ -6758,7 +6758,7 @@
   },
   "U14": {
     "title": "Humanoid Ruler",
-    "id": "humanoid_ruler",
+    "id": "humanoid_ruler_new",
     "description": [
       {
         "t": "Grants ",
@@ -7117,7 +7117,7 @@
   },
   "U17": {
     "title": "Witch's Fortune",
-    "id": "witch_s_fortune",
+    "id": "witchs_fortune",
     "description": [
       {
         "t": "Increases your chance of dropping",
@@ -15547,7 +15547,7 @@
   },
   "R18": {
     "title": "Undead Fortune",
-    "id": "undead_fortune",
+    "id": "humanoid_ruler",
     "description": [
       {
         "t": "Grants ",
@@ -16162,7 +16162,7 @@
   },
   "R26": {
     "title": "Essence of Crimson",
-    "id": "essence_of_crimson",
+    "id": "crimson_essence",
     "description": [
       {
         "t": "Gain ",
@@ -21093,7 +21093,7 @@
           "c": "gray"
         },
         {
-          "t": "Kill Worm ",
+          "t": "Kill Stoneworm ",
           "c": "gray"
         },
         {
@@ -26343,7 +26343,7 @@
   },
   "E44": {
     "title": "Forager's Fortune",
-    "id": "forager_s_fortune",
+    "id": "foragers_fortune",
     "description": [
       {
         "t": "Grants ",
@@ -26615,7 +26615,7 @@
   },
   "E47": {
     "title": "Fisher's Fortune",
-    "id": "fisher_s_fortune",
+    "id": "fishers_fortune",
     "description": [
       {
         "t": "Grants ",
