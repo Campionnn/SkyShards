@@ -1,5 +1,5 @@
 import React from "react";
-import { formatLargeNumber, formatNumber, isOrderSensitiveRecipe } from "../../utilities";
+import { formatLargeNumber, formatNumber } from "../../utilities";
 import { Package } from "lucide-react";
 import type { AlternativeSelectionContext, Data, InventoryRecipeTree, Shard } from "../../types/types";
 import { ShardInfo, RecipeDisplay, RecipeSummary, CrocodileProcsBadge, AlternativesButton, CycleHeader } from "./shared";
@@ -127,7 +127,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
     const input2Shard = data.shards[recipeTree.recipe.inputs[1]];
     const input1Quantity = input1Shard.fuse_amount * recipeTree.craftsNeeded;
     const input2Quantity = input2Shard.fuse_amount * recipeTree.craftsNeeded;
-    const orderMatters = isOrderSensitiveRecipe(recipeTree.shard, recipeTree.recipe, data.recipes);
     const subNodeId = `${nodePrefix}-${inputShard.id}`;
     const isExpanded = getExpansionState(subNodeId, true);
 
@@ -143,7 +142,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
           <div className="flex-1 text-left">
             <div className="flex items-center space-x-2">
               {renderChevron(isExpanded)}
-              <RecipeDisplay outputQuantity={recipeTree.quantity} outputShard={inputShard} input1Quantity={input1Quantity} input1Shard={input1Shard} input2Quantity={input2Quantity} input2Shard={input2Shard} orderMatters={orderMatters} />
+              <RecipeDisplay outputQuantity={recipeTree.quantity} outputShard={inputShard} input1Quantity={input1Quantity} input1Shard={input1Shard} input2Quantity={input2Quantity} input2Shard={input2Shard} />
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -248,7 +247,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
     const input2Shard = data.shards[input2ShardId];
 
     const crafts = tree.craftsNeeded ?? 1;
-    const displayQuantity = isTopLevel && totalShardsProduced ? totalShardsProduced : tree.quantity;
+    const displayQuantity = isTopLevel && totalShardsProduced ? Math.floor(totalShardsProduced) : tree.quantity;
     const crocProcs = getCrocodileProcs(tree, data);
 
     // A split node's quantity is spread across its branches, so sum them back up.
@@ -261,7 +260,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
 
     const input1Quantity = getQuantity(input1);
     const input2Quantity = getQuantity(input2);
-    const orderMatters = isOrderSensitiveRecipe(tree.shard, tree.recipe, data.recipes);
 
     return (
       <div className={`${isInCycle ? 'bg-slate-900' : 'bg-slate-800'} border border-slate-600 rounded-md overflow-hidden`}>
@@ -282,7 +280,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
                 input1Shard={input1Shard}
                 input2Quantity={input2Quantity}
                 input2Shard={input2Shard}
-                orderMatters={orderMatters}
               />
             </div>
           </div>
@@ -381,7 +378,6 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
                   let outputQuantity = recipe.outputQuantity;
                   if (recipe.isReptile) outputQuantity *= tree.multiplier;
                   const stepNumber = tree.steps.length - stepIndex;
-                  const orderMatters = isOrderSensitiveRecipe(step.outputShard, recipe, data.recipes);
 
                   const alternativesButton = onShowAlternatives && (
                     <AlternativesButton
@@ -411,7 +407,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
                           <div className="flex-1 text-left">
                             <div className="flex items-center space-x-2">
                               {renderChevron(stepIsExpanded)}
-                              <RecipeDisplay outputQuantity={outputQuantity} outputShard={outputShardData} input1Quantity={input1Quantity} input1Shard={input1Shard} input2Quantity={input2Quantity} input2Shard={input2Shard} showStep stepNumber={stepNumber} orderMatters={orderMatters} />
+                              <RecipeDisplay outputQuantity={outputQuantity} outputShard={outputShardData} input1Quantity={input1Quantity} input1Shard={input1Shard} input2Quantity={input2Quantity} input2Shard={input2Shard} showStep stepNumber={stepNumber} />
                             </div>
                           </div>
                           <div className="flex items-center gap-2">{alternativesButton}</div>
@@ -428,7 +424,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
                   } else {
                     return (
                       <div key={stepIndex} className="pl-3 pr-1 py-1 rounded border border-slate-400/50 flex items-center justify-between">
-                        <RecipeDisplay outputQuantity={outputQuantity} outputShard={outputShardData} input1Quantity={input1Quantity} input1Shard={input1Shard} input2Quantity={input2Quantity} input2Shard={input2Shard} showStep stepNumber={stepNumber} orderMatters={orderMatters} />
+                        <RecipeDisplay outputQuantity={outputQuantity} outputShard={outputShardData} input1Quantity={input1Quantity} input1Shard={input1Shard} input2Quantity={input2Quantity} input2Shard={input2Shard} showStep stepNumber={stepNumber} />
                         <div className="flex items-center gap-2">{alternativesButton}</div>
                       </div>
                     );

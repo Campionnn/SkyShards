@@ -16,6 +16,17 @@ import type {
 import { BLACK_HOLE_SHARD, NO_FORTUNE_SHARDS, WOODEN_BAIT_SHARDS } from "../constants";
 import { DataService } from "./dataService";
 
+const INTEGER_EPSILON = 1e-12;
+
+export const snapToInteger = (value: number): number => {
+  if (!Number.isFinite(value)) return value;
+  const rounded = Math.round(value);
+  return Math.abs(value - rounded) <= INTEGER_EPSILON * Math.max(1, Math.abs(value)) ? rounded : value;
+};
+
+export const craftsForQuantity = (quantity: number, outputQuantity: number): number =>
+  Math.ceil(snapToInteger(quantity / outputQuantity));
+
 export class CalculationService {
   private static instance: CalculationService;
   private dataCache: Map<string, Data> = new Map();
@@ -568,50 +579,9 @@ export class CalculationService {
     const directOption = alternatives.find((alt) => alt.recipe === null) || null;
     const fusionAlts = alternatives.filter((alt) => alt.recipe !== null);
 
-    // Build a set of valid input pairs for normalization check
-    const validPairs = new Set<string>();
-    for (const alt of fusionAlts) {
-      if (alt.recipe) {
-        const [a, b] = alt.recipe.inputs;
-        validPairs.add(`${a}-${b}-${alt.recipe.outputQuantity}`);
-      }
-    }
-
-    // Count how many times each shard appears in any input slot
-    const shardCount: Record<string, number> = {};
-    for (const alt of fusionAlts) {
-      if (alt.recipe) {
-        for (const shard of alt.recipe.inputs) {
-          shardCount[shard] = (shardCount[shard] || 0) + 1;
-        }
-      }
-    }
-
-    // For each recipe, put the most common shard in the first slot,
-    // but only if the normalized recipe exists
-    const normalized: AlternativeRecipeOption[] = fusionAlts.map((alt) => {
-      if (!alt.recipe) return alt;
-      const [a, b] = alt.recipe.inputs;
-      // If b is more common than a, and the swapped recipe exists, swap
-      if ((shardCount[b] ?? 0) > (shardCount[a] ?? 0)) {
-        const swappedKey = `${b}-${a}-${alt.recipe.outputQuantity}`;
-        if (validPairs.has(swappedKey)) {
-          return {
-            ...alt,
-            recipe: {
-              ...alt.recipe,
-              inputs: [b, a],
-            },
-          };
-        }
-      }
-      return alt;
-    });
-
-    // Remove mirrored recipes (same pair, different order)
     const seen = new Set<string>();
     const deduped: AlternativeRecipeOption[] = [];
-    for (const alt of normalized) {
+    for (const alt of fusionAlts) {
       if (!alt.recipe) continue;
       const key = `${alt.recipe.inputs[0]}-${alt.recipe.inputs[1]}-${alt.recipe.outputQuantity}`;
       if (!seen.has(key)) {
@@ -897,9 +867,10 @@ export class CalculationService {
    * Returns null when `steps` holds no recipe producing `shard`; every caller treats
    * that as "leave the node alone".
    *
-   * `netOutputPerCycle` is the sensitive part: a float subtraction feeding a
-   * `Math.ceil`, so e.g. `2 * 1.2 - 2` lands on 0.3999999999999999 and rounds a
-   * 250-craft loop up to 252. Pinned by tests rather than corrected.
+   * `netOutputPerCycle` is the sensitive part: a float subtraction feeding a ceil, so
+   * e.g. `2 * 1.2 - 2` lands on 0.3999999999999999, which used to round a 250-craft
+   * loop up to 252. `craftsForQuantity` snaps the ratio back onto the whole number it
+   * is a hair away from.
    */
   public computeCycleQuantities(
     shard: string,
@@ -927,8 +898,13 @@ export class CalculationService {
       });
     });
 
-    const netOutputPerCycle = expectedOutput - totalInputsConsumed;
-    const expectedCrafts = netOutputPerCycle > 0 ? Math.ceil(requiredQuantity / netOutputPerCycle) : Math.ceil(requiredQuantity / expectedOutput);
+    // Snapped before the sign test: `5 * 1.2 - 6` is 8.9e-16, i.e. a loop that nets
+    // exactly nothing would otherwise read as net-positive and demand a preposterous
+    // number of crafts instead of falling through to the expectedOutput branch.
+    const netOutputPerCycle = snapToInteger(expectedOutput - totalInputsConsumed);
+    const expectedCrafts = netOutputPerCycle > 0
+      ? craftsForQuantity(requiredQuantity, netOutputPerCycle)
+      : craftsForQuantity(requiredQuantity, expectedOutput);
     const stepCount = steps.length;
     // Every step of the loop runs the same number of times, so round up to a whole
     // number of laps.
@@ -972,7 +948,7 @@ export class CalculationService {
       case "recipe": {
         const recipe = tree.recipe;
         const outputQuantity = this.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
-        const craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
+        const craftsNeeded = craftsForQuantity(requiredQuantity, outputQuantity);
         tree.craftsNeeded = craftsNeeded;
         craftCounter.total += craftsNeeded;
 
@@ -1095,8 +1071,10 @@ export class CalculationService {
     const choice = choices.get(targetShard);
     if (choice?.recipe) {
       const outputQuantity = choice.recipe.isReptile ? choice.recipe.outputQuantity * crocodileMultiplier : choice.recipe.outputQuantity;
-      craftsNeeded = Math.ceil(requiredQuantity / outputQuantity);
-      totalShardsProduced = craftsNeeded * outputQuantity;
+      craftsNeeded = craftsForQuantity(requiredQuantity, outputQuantity);
+      // Genuinely fractional (crafts x expected reptile output), so only the float
+      // noise is snapped away — the .2 in "7.2 shards produced" is real.
+      totalShardsProduced = snapToInteger(craftsNeeded * outputQuantity);
     }
     const shardWeights = this.calculateShardWeights(totalQuantities, data, params, getDirectCostFn);
     return { totalShardsProduced, craftsNeeded, shardWeights };

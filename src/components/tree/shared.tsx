@@ -1,7 +1,7 @@
 import React from "react";
 import { GiGecko } from "react-icons/gi";
-import { ArrowLeftRight, MoveRight, Settings } from "lucide-react";
-import { formatLargeNumber, formatNumber, getRarityColor, shardIconUrl } from "../../utilities";
+import { MoveRight, Settings } from "lucide-react";
+import { formatLargeNumber, formatNumber, formatQuantity, getRarityColor, shardIconUrl } from "../../utilities";
 import { ShardChip, Tooltip } from "../ui";
 import { ShardDescription } from "../ui/ShardDescription";
 import { SHARD_DESCRIPTIONS } from "../../constants";
@@ -24,7 +24,7 @@ interface ShardInfoProps {
 /** `<n>x <icon> <name>` plus the per-hour rate (ironman) or coin value (bazaar). */
 export const ShardInfo: React.FC<ShardInfoProps> = ({ quantity, shard, ironManView, showRate = true }) => (
   <>
-    <span className="text-white">{quantity}x</span>
+    <span className="text-white">{formatQuantity(quantity)}x</span>
     <ShardChip shard={shard} />
     {showRate && (
       <div className="text-right min-w-[80px] ml-2">
@@ -45,33 +45,6 @@ export const ShardInfo: React.FC<ShardInfoProps> = ({ quantity, shard, ironManVi
   </>
 );
 
-export const OrderMattersBadge: React.FC<{ input1Shard: Shard; input2Shard: Shard }> = ({ input1Shard, input2Shard }) => (
-  <Tooltip
-    shardName="Order matters"
-    content={
-      <>
-        <div>This fusion only works one way round. Add the shards to the fusion machine in this order:</div>
-        <div className="flex flex-col gap-1 mt-1.5">
-          {[input1Shard, input2Shard].map((shard, index) => (
-            <div key={shard.id} className="flex items-center gap-1.5">
-              <span className="text-slate-500">{index + 1}.</span>
-              <img src={shardIconUrl(shard.id)} alt="" className="w-4 h-4 object-contain flex-shrink-0" loading="lazy" />
-              <span className={getRarityColor(shard.rarity)}>{shard.name}</span>
-            </div>
-          ))}
-        </div>
-      </>
-    }
-    warning="Swapping them gives a different shard."
-    className="cursor-help"
-  >
-    <div className="flex items-center gap-1 px-[5px] py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded whitespace-nowrap">
-      <ArrowLeftRight className="w-3 h-3 flex-shrink-0" />
-      <span className="text-[11px] font-medium">Order matters</span>
-    </div>
-  </Tooltip>
-);
-
 interface RecipeDisplayProps {
   outputQuantity: number;
   outputShard: Shard;
@@ -81,7 +54,6 @@ interface RecipeDisplayProps {
   input2Shard: Shard;
   showStep?: boolean;
   stepNumber?: number;
-  orderMatters?: boolean;
 }
 
 /** Compact `<out> = <in1> + <in2>` used for cycle steps and sub-recipes. */
@@ -94,26 +66,23 @@ export const RecipeDisplay: React.FC<RecipeDisplayProps> = ({
   input2Shard,
   showStep = false,
   stepNumber,
-  orderMatters = false,
 }) => (
   <div className="flex flex-wrap items-center gap-x-2 text-sm font-medium">
     {showStep && <span className="font-normal text-xs text-amber-300">Step {stepNumber} :</span>}
 
-    <span className="text-white">{outputQuantity}x</span>
+    <span className="text-white">{formatQuantity(outputQuantity)}x</span>
     <ShardChip shard={outputShard} />
 
     <span> = </span>
 
-    <span className="text-slate-400">{input1Quantity}x</span>
+    <span className="text-slate-400">{formatQuantity(input1Quantity)}x</span>
     <ShardChip shard={input1Shard} />
 
     <span> + </span>
 
-    <span className="text-slate-400">{input2Quantity}x</span>
+    <span className="text-slate-400">{formatQuantity(input2Quantity)}x</span>
     {/* Only this one falls back to the shard name when there is no description. */}
     <ShardChip shard={input2Shard} fallbackTitleToName />
-
-    {orderMatters && <OrderMattersBadge input1Shard={input1Shard} input2Shard={input2Shard} />}
   </div>
 );
 
@@ -166,32 +135,33 @@ interface RecipeSummaryProps {
   input1Shard: Shard;
   input2Quantity: number;
   input2Shard: Shard;
-  orderMatters?: boolean;
 }
 
 /**
  * The headline row of an expanded recipe node: `<n>x Output = <a>x In1 + <b>x In2`.
  * Wider and truncating, unlike the compact RecipeDisplay used further down the tree.
+ *
+ * Quantities arrive whole (the calculator keeps node quantities integral); they are
+ * formatted rather than floored so a fractional one would read as "0.2x" — visibly
+ * odd — instead of silently collapsing to a "0x" node that still lists full inputs.
  */
-export const RecipeSummary: React.FC<RecipeSummaryProps> = ({ outputQuantity, outputShard, input1Quantity, input1Shard, input2Quantity, input2Shard, orderMatters = false }) => (
+export const RecipeSummary: React.FC<RecipeSummaryProps> = ({ outputQuantity, outputShard, input1Quantity, input1Shard, input2Quantity, input2Shard }) => (
   <div className="text-white flex items-center">
-    <span className="font-medium text-sm">{Math.floor(outputQuantity)}x</span>
+    <span className="font-medium text-sm">{formatQuantity(outputQuantity)}x</span>
 
     <TreeShardChip shard={outputShard} emphasis />
 
     <span className="text-slate-400 text-sm font-medium flex items-center">
       <span className="mr-2 text-white">=</span>
-      <span>{Math.floor(input1Quantity)}x</span>
+      <span>{formatQuantity(input1Quantity)}x</span>
 
       <TreeShardChip shard={input1Shard} />
 
       <span className="mr-2 text-white">+</span>
-      <span>{Math.floor(input2Quantity)}x</span>
+      <span>{formatQuantity(input2Quantity)}x</span>
 
       <TreeShardChip shard={input2Shard} />
     </span>
-
-    {orderMatters && <OrderMattersBadge input1Shard={input1Shard} input2Shard={input2Shard} />}
   </div>
 );
 
@@ -251,7 +221,7 @@ export const CycleHeader: React.FC<CycleHeaderProps> = ({ shard, quantity, runCo
           <div className="text-xs text-amber-300">{runCount} crafts</div>
           <MoveRight className="w-4 text-amber-400" />
           <div className="flex items-center space-x-2 text-sm">
-            <ShardInfo quantity={Math.floor(quantity)} shard={shard} ironManView={ironManView} showRate={false} />
+            <ShardInfo quantity={quantity} shard={shard} ironManView={ironManView} showRate={false} />
             <span className="px-1 py-0.4 text-xs bg-amber-500/20 text-amber-400 border border-amber-400/40 text-[11px] font-medium rounded-md">Cycle</span>
           </div>
         </div>
