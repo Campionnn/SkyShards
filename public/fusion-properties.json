@@ -1726,8 +1726,7 @@
     "rarity": "Uncommon",
     "category": "Forest",
     "family": [
-      "Trash Lover",
-      "Elusive"
+      "Trash Lover"
     ],
     "input1": "",
     "input2": "",
@@ -2642,9 +2641,7 @@
     "name": "Osedax",
     "rarity": "Uncommon",
     "category": "Water",
-    "family": [
-      "Elusive"
-    ],
+    "family": [],
     "input1": "",
     "input2": "",
     "synthesized": false,
@@ -2856,6 +2853,7 @@
     "rarity": "Uncommon",
     "category": "Water",
     "family": [
+      "Amphibian",
       "Axolotl"
     ],
     "input1": "",
@@ -2863,7 +2861,7 @@
     "synthesized": true,
     "chameleon": true,
     "recipe_type": null,
-    "fuse_amount": 5,
+    "fuse_amount": 2,
     "id_result": "Tewtil",
     "chameleon_result": [
       "Honey Badger",
@@ -3217,8 +3215,7 @@
     "rarity": "Uncommon",
     "category": "Forest",
     "family": [
-      "Panda",
-      "Elusive"
+      "Panda"
     ],
     "input1": "",
     "input2": "",
@@ -3373,8 +3370,7 @@
     "rarity": "Uncommon",
     "category": "Forest",
     "family": [
-      "Bug",
-      "Elusive"
+      "Bug"
     ],
     "input1": "Ant Shard",
     "input2": "Queen Bee Shard",
@@ -5110,8 +5106,7 @@
     "rarity": "Rare",
     "category": "Water",
     "family": [
-      "Creation",
-      "Elusive"
+      "Creation"
     ],
     "input1": "Epic+&Creation",
     "input2": "Sneaky Tiki Shard|Shrieky Tiki Shard|Cheeky Tiki Shard",
@@ -5267,9 +5262,7 @@
     "name": "Thunder",
     "rarity": "Rare",
     "category": "Water",
-    "family": [
-      "Elusive"
-    ],
+    "family": [],
     "input1": "",
     "input2": "",
     "synthesized": true,
@@ -5755,8 +5748,7 @@
     "rarity": "Rare",
     "category": "Combat",
     "family": [
-      "Spider",
-      "Elusive"
+      "Spider"
     ],
     "input1": "",
     "input2": "",
@@ -5862,6 +5854,7 @@
     "rarity": "Rare",
     "category": "Water",
     "family": [
+      "Amphibian",
       "Axolotl"
     ],
     "input1": "",
@@ -5869,7 +5862,7 @@
     "synthesized": true,
     "chameleon": true,
     "recipe_type": null,
-    "fuse_amount": 5,
+    "fuse_amount": 2,
     "id_result": "Torrid",
     "chameleon_result": [
       "Terra",
@@ -6178,8 +6171,7 @@
     "rarity": "Epic",
     "category": "Water",
     "family": [
-      "Cave Dweller",
-      "Elusive"
+      "Cave Dweller"
     ],
     "input1": "",
     "input2": "",
@@ -6288,9 +6280,7 @@
     "name": "Special Zealot",
     "rarity": "Epic",
     "category": "Combat",
-    "family": [
-      "Elusive"
-    ],
+    "family": [],
     "input1": "",
     "input2": "",
     "synthesized": true,
@@ -6611,7 +6601,6 @@
     "rarity": "Epic",
     "category": "Combat",
     "family": [
-      "Elusive",
       "Poltergeist"
     ],
     "input1": "",
@@ -6639,9 +6628,7 @@
     "name": "Wolverine",
     "rarity": "Epic",
     "category": "Forest",
-    "family": [
-      "Elusive"
-    ],
+    "family": [],
     "input1": "",
     "input2": "",
     "synthesized": false,
@@ -6695,9 +6682,7 @@
     "name": "Barbarian Duke X",
     "rarity": "Epic",
     "category": "Combat",
-    "family": [
-      "Elusive"
-    ],
+    "family": [],
     "input1": "",
     "input2": "",
     "synthesized": true,
@@ -7126,8 +7111,7 @@
     "rarity": "Epic",
     "category": "Water",
     "family": [
-      "Crustacean",
-      "Elusive"
+      "Crustacean"
     ],
     "input1": "",
     "input2": "",
@@ -7235,8 +7219,7 @@
     "rarity": "Epic",
     "category": "Forest",
     "family": [
-      "Bug",
-      "Elusive"
+      "Bug"
     ],
     "input1": "Queen Bee Shard",
     "input2": "Lunar Moth Shard",
@@ -8011,8 +7994,7 @@
     "rarity": "Legendary",
     "category": "Water",
     "family": [
-      "Creation",
-      "Elusive"
+      "Creation"
     ],
     "input1": "",
     "input2": "",
@@ -8485,8 +8467,7 @@
     "family": [
       "Reptile",
       "Serpent",
-      "Scaled",
-      "Elusive"
+      "Scaled"
     ],
     "input1": "",
     "input2": "",
