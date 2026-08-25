@@ -6,6 +6,7 @@ import {
   filterShards,
   getRarityColor,
   getShardSearchText,
+  getStatGlyphInfo,
   resolveMinecraftColor,
   shardIconUrl,
   sortByShardKey,
@@ -39,51 +40,55 @@ function ownedCountFor(shardId: string, ownedAttributes?: Map<string, number>): 
 }
 
 // Every stat actually granted by at least one shard's description, so the filter never
-// offers a choice that yields zero results. `glyph` and `color` are pulled directly from
-// how that stat is actually rendered in-game (src/desc.json's description segments) —
-// the same private-use-area icon font and Minecraft color codes ShardDescription uses,
-// not a guessed icon. Wisdom stats use the game's literal "☯" glyph, which isn't in the
-// PUA icon font; StatGlyph renders it as plain text since it has no GLYPH_MAP entry.
-const STAT_OPTIONS: { name: string; color: string; glyph: string }[] = [
-  { name: "Attack Speed", color: "yellow", glyph: "" },
-  { name: "Block Fortune", color: "gold", glyph: "" },
-  { name: "Bonus Pest Chance", color: "dark_green", glyph: "" },
-  { name: "Cold Resistance", color: "aqua", glyph: "" },
-  { name: "Combat Wisdom", color: "dark_aqua", glyph: "☯" },
-  { name: "Crit Damage", color: "blue", glyph: "" },
-  { name: "Defense", color: "green", glyph: "" },
-  { name: "Enchanting Wisdom", color: "dark_aqua", glyph: "☯" },
-  { name: "Farming Fortune", color: "gold", glyph: "" },
-  { name: "Farming Wisdom", color: "dark_aqua", glyph: "☯" },
-  { name: "Fishing Speed", color: "aqua", glyph: "" },
-  { name: "Fishing Wisdom", color: "dark_aqua", glyph: "☯" },
-  { name: "Foraging Fortune", color: "gold", glyph: "" },
-  { name: "Foraging Wisdom", color: "dark_aqua", glyph: "☯" },
-  { name: "Gemstone Spread", color: "yellow", glyph: "" },
-  { name: "Health", color: "red", glyph: "" },
-  { name: "Health Regen", color: "red", glyph: "" },
-  { name: "Heat Resistance", color: "red", glyph: "" },
-  { name: "Hunting Fortune", color: "light_purple", glyph: "" },
-  { name: "Hunting Wisdom", color: "dark_aqua", glyph: "☯" },
-  { name: "Intelligence", color: "aqua", glyph: "" },
-  { name: "Magic Find", color: "aqua", glyph: "" },
-  { name: "Mining Fortune", color: "gold", glyph: "" },
-  { name: "Mining Speed", color: "gold", glyph: "" },
-  { name: "Mining Spread", color: "yellow", glyph: "" },
-  { name: "Mining Wisdom", color: "dark_aqua", glyph: "☯" },
-  { name: "Ore Fortune", color: "gold", glyph: "" },
-  { name: "Respiration", color: "dark_aqua", glyph: "" },
-  { name: "Sea Creature Chance", color: "dark_aqua", glyph: "" },
-  { name: "Social Wisdom", color: "dark_aqua", glyph: "☯" },
-  { name: "Speed", color: "white", glyph: "" },
-  { name: "Strength", color: "red", glyph: "" },
-  { name: "Sweep", color: "dark_green", glyph: "" },
-  { name: "Taming Wisdom", color: "dark_aqua", glyph: "☯" },
-  { name: "Tracking", color: "light_purple", glyph: "" },
-  { name: "Trophy Chance", color: "gold", glyph: "" },
-  { name: "True Defense", color: "white", glyph: "" },
-  { name: "Vitality", color: "dark_red", glyph: "" },
+// offers a choice that yields zero results. This list only picks *which* stats to offer;
+// `getStatGlyphInfo` reads the icon glyph and Minecraft color for each straight out of
+// src/desc.json's description segments, so nothing here can drift from what the game
+// actually renders.
+const STAT_NAMES = [
+  "Attack Speed",
+  "Block Fortune",
+  "Bonus Pest Chance",
+  "Cold Resistance",
+  "Combat Wisdom",
+  "Crit Damage",
+  "Defense",
+  "Enchanting Wisdom",
+  "Farming Fortune",
+  "Farming Wisdom",
+  "Fishing Speed",
+  "Fishing Wisdom",
+  "Foraging Fortune",
+  "Foraging Wisdom",
+  "Gemstone Spread",
+  "Health",
+  "Health Regen",
+  "Heat Resistance",
+  "Hunting Fortune",
+  "Hunting Wisdom",
+  "Intelligence",
+  "Magic Find",
+  "Mining Fortune",
+  "Mining Speed",
+  "Mining Spread",
+  "Mining Wisdom",
+  "Ore Fortune",
+  "Respiration",
+  "Sea Creature Chance",
+  "Social Wisdom",
+  "Speed",
+  "Strength",
+  "Sweep",
+  "Taming Wisdom",
+  "Tracking",
+  "Trophy Chance",
+  "True Defense",
+  "Vitality",
 ];
+
+const STAT_OPTIONS: { name: string; color: string; glyph: string }[] = STAT_NAMES.map((name) => {
+  const info = getStatGlyphInfo(name);
+  return { name, color: info?.color ?? "gray", glyph: info?.glyph ?? "" };
+});
 
 const StatIcon: React.FC<{ stat: { color: string; glyph: string } }> = ({ stat }) => (
   <span className="inline-flex items-center justify-center flex-shrink-0 text-base leading-none" style={{ color: resolveMinecraftColor(stat.color) }}>
