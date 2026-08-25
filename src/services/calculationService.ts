@@ -568,50 +568,9 @@ export class CalculationService {
     const directOption = alternatives.find((alt) => alt.recipe === null) || null;
     const fusionAlts = alternatives.filter((alt) => alt.recipe !== null);
 
-    // Build a set of valid input pairs for normalization check
-    const validPairs = new Set<string>();
-    for (const alt of fusionAlts) {
-      if (alt.recipe) {
-        const [a, b] = alt.recipe.inputs;
-        validPairs.add(`${a}-${b}-${alt.recipe.outputQuantity}`);
-      }
-    }
-
-    // Count how many times each shard appears in any input slot
-    const shardCount: Record<string, number> = {};
-    for (const alt of fusionAlts) {
-      if (alt.recipe) {
-        for (const shard of alt.recipe.inputs) {
-          shardCount[shard] = (shardCount[shard] || 0) + 1;
-        }
-      }
-    }
-
-    // For each recipe, put the most common shard in the first slot,
-    // but only if the normalized recipe exists
-    const normalized: AlternativeRecipeOption[] = fusionAlts.map((alt) => {
-      if (!alt.recipe) return alt;
-      const [a, b] = alt.recipe.inputs;
-      // If b is more common than a, and the swapped recipe exists, swap
-      if ((shardCount[b] ?? 0) > (shardCount[a] ?? 0)) {
-        const swappedKey = `${b}-${a}-${alt.recipe.outputQuantity}`;
-        if (validPairs.has(swappedKey)) {
-          return {
-            ...alt,
-            recipe: {
-              ...alt.recipe,
-              inputs: [b, a],
-            },
-          };
-        }
-      }
-      return alt;
-    });
-
-    // Remove mirrored recipes (same pair, different order)
     const seen = new Set<string>();
     const deduped: AlternativeRecipeOption[] = [];
-    for (const alt of normalized) {
+    for (const alt of fusionAlts) {
       if (!alt.recipe) continue;
       const key = `${alt.recipe.inputs[0]}-${alt.recipe.inputs[1]}-${alt.recipe.outputQuantity}`;
       if (!seen.has(key)) {
