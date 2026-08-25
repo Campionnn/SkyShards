@@ -2,7 +2,6 @@ export * from "./utilityFunctions";
 export { isValidShardName } from "./isValidShardName";
 export * from "./localStorage";
 export * from "./recipeUtils";
-export * from "./recipeOrder";
 export * from "./shardFilters";
 export * from "./fusionLines";
 export * from "./segments";
