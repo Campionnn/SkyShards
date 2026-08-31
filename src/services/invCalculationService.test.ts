@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { CalculationService } from "./calculationService";
 import { InvCalculationService } from "./invCalculationService";
 import { fmtCost, makeParams, serializeTree, sortedEntries } from "../test/fixtures";
-import type { CalculationParams, RecipeOverride } from "../types/types";
+import type { CalculationParams, InventoryRecipeTree, RecipeOverride } from "../types/types";
 
 /**
  * Golden-output tests for `calculateOptimalPath` — the inventory-aware entry point.
@@ -146,6 +146,62 @@ describe("calculateOptimalPath", () => {
       totalQuantities: sortedEntries(result.totalQuantities),
     }).toMatchSnapshot();
   });
+});
+
+describe("calculateOptimalPath — whole shard quantities", () => {
+  /**
+   * A reptile recipe's expected output is fractional (`outputQuantity *
+   * crocodileMultiplier`, e.g. 2 * 1.2 = 2.4), so a split that credited a segment with
+   * the raw product used to leave the next segment holding the fraction: a node with
+   * `quantity` 0.20000000000000018, which the tree renders as "0x <shard>" while still
+   * listing a full set of inputs and a fusion count.
+   */
+  const nonWholeNodes = (tree: InventoryRecipeTree, path = "root"): string[] => {
+    if (Array.isArray(tree)) return tree.flatMap((branch, i) => nonWholeNodes(branch, `${path}[${i}]`));
+
+    const bad: string[] = [];
+    if (!Number.isInteger(tree.quantity)) bad.push(`${path} ${tree.shard} qty=${tree.quantity} (fractional)`);
+    else if (tree.quantity <= 0) bad.push(`${path} ${tree.shard} qty=${tree.quantity} (node produces nothing)`);
+
+    if (tree.method === "recipe") {
+      bad.push(...nonWholeNodes(tree.inputs[0], `${path}.0`), ...nonWholeNodes(tree.inputs[1], `${path}.1`));
+    } else if (tree.method === "cycle") {
+      bad.push(...nonWholeNodes(tree.inputRecipe, `${path}.inputRecipe`));
+      bad.push(...tree.cycleInputs.flatMap((input, i) => nonWholeNodes(input, `${path}.cycle[${i}]`)));
+    }
+    return bad;
+  };
+
+  /** The user-reported case: Dodo, built from an inventory that splits Condor across
+   * three recipes. The third segment used to come out as "0x Condor = 5x Harpy + 2x
+   * Titanoboa, fusions 1". */
+  it("splits Condor into whole segments that add up — reported Dodo case", async () => {
+    const inventory = new Map([
+      ["L29", 2],   // Megalith
+      ["C24", 367], // Harpy
+      ["L6", 4],    // Tiamat
+      ["L47", 2],   // Titanoboa
+    ]);
+
+    const result = await invSvc.calculateOptimalPath("L34", 2, PARAMS, inventory);
+    expect(nonWholeNodes(result.tree!)).toEqual([]);
+    expect(serializeTree(result.tree!)).toMatchSnapshot();
+  });
+
+  for (const [target, quantity] of TARGETS) {
+    it(`keeps every node quantity a whole number — ${target}`, async () => {
+      const plain = await plainPath(target, quantity);
+
+      // Sweep the inventory depth: how much is owned decides how many segments a node
+      // splits into, and it was the last, leftover segment that held the fraction.
+      for (const share of [0.25, 0.5, 0.75, 0.9, 1]) {
+        const inventory = new Map([...plain.totalQuantities].map(([shardId, qty]) => [shardId, Math.floor(qty * share)] as const));
+        const result = await invSvc.calculateOptimalPath(target, quantity, PARAMS, inventory);
+
+        expect(nonWholeNodes(result.tree!), `${target} @ ${share}`).toEqual([]);
+      }
+    });
+  }
 });
 
 describe("calculateOptimalPath — cycle case", () => {

@@ -11,13 +11,44 @@ import type { Data, Recipe, Shard } from "../types/types";
  * data changes with every sync, so this exercises a wide space of synthetic cycles —
  * including shapes the current data cannot produce.
  *
- * `referenceCycleMath` is the independent implementation. Do not refactor it to share
- * code with the function under test; its value is being written separately.
+ * `referenceCycleMath` is the independent implementation, and it works in exact
+ * integer hundredths rather than floats — so it pins that `computeCycleQuantities`
+ * lands on the mathematically correct craft count, not merely on whatever its float
+ * arithmetic happens to produce. Do not refactor it to share code with the function
+ * under test; its value is being written separately.
  */
 
 const svc = CalculationService.getInstance();
 
 type Step = { outputShard: string; recipe: Recipe };
+
+/**
+ * Exact `Math.ceil(numerator / divisor)`, in integer arithmetic.
+ *
+ * Both arguments arrive scaled by 100, which makes them whole numbers: the only
+ * fractional quantity in this math is `outputQuantity * crocodileMultiplier`, and the
+ * multiplier is always `1 + 2 * level / 100`. Working in hundredths therefore removes
+ * the binary-fraction error entirely, rather than compensating for it — which is the
+ * point, since what is being checked is the implementation's compensation.
+ *
+ * Division by zero keeps the float semantics the callers depend on (NaN for 0/0,
+ * a signed Infinity otherwise).
+ */
+const exactCeilDiv = (numerator: number, divisor: number): number => {
+  if (divisor === 0) return numerator === 0 ? NaN : numerator > 0 ? Infinity : -Infinity;
+
+  let quotient = Math.trunc(numerator / divisor);
+  let remainder = numerator - quotient * divisor;
+  // trunc of a float division can land one either side of the true quotient; the
+  // remainder is exact, so correct against it.
+  while (Math.abs(remainder) >= Math.abs(divisor)) {
+    quotient += Math.sign(remainder) * Math.sign(divisor);
+    remainder = numerator - quotient * divisor;
+  }
+  // A remainder pointing the same way as the divisor means the quotient was truncated
+  // toward zero from above, so round it up.
+  return remainder !== 0 && Math.sign(remainder) === Math.sign(divisor) ? quotient + 1 : quotient;
+};
 
 /** Independent implementation of the cycle quantity math, for comparison. */
 const referenceCycleMath = (
@@ -32,7 +63,9 @@ const referenceCycleMath = (
 
   const recipe = outputStep.recipe;
   const baseOutput = recipe.outputQuantity;
-  const expectedOutput = recipe.isReptile ? baseOutput * crocodileMultiplier : baseOutput;
+  // In hundredths. `crocodileMultiplier` is always 1 + 2 * level / 100, so rounding
+  // its scaled form recovers the whole number it was meant to be.
+  const expectedOutput = recipe.isReptile ? baseOutput * Math.round(crocodileMultiplier * 100) : baseOutput * 100;
 
   let totalInputsConsumed = 0;
   steps.forEach((step) => {
@@ -44,8 +77,11 @@ const referenceCycleMath = (
     });
   });
 
-  const netOutputPerCycle = expectedOutput - totalInputsConsumed;
-  const expectedCrafts = netOutputPerCycle > 0 ? Math.ceil(requiredQuantity / netOutputPerCycle) : Math.ceil(requiredQuantity / expectedOutput);
+  const netOutputPerCycle = expectedOutput - totalInputsConsumed * 100;
+  const expectedCrafts =
+    netOutputPerCycle > 0
+      ? exactCeilDiv(requiredQuantity * 100, netOutputPerCycle)
+      : exactCeilDiv(requiredQuantity * 100, expectedOutput);
   const stepCount = steps.length;
   const roundedCrafts = Math.ceil(expectedCrafts / stepCount) * stepCount;
 
@@ -116,7 +152,7 @@ const randomCycle = (next: () => number) => {
   return { data: { shards, recipes: {} } as Data, steps, loop, externals };
 };
 
-describe("computeCycleQuantities matches the code it replaced", () => {
+describe("computeCycleQuantities matches exact integer arithmetic", () => {
   it("agrees on 20000 randomly generated cycles", () => {
     const next = rng(0x5EED);
     const mismatches: string[] = [];

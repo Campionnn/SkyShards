@@ -247,7 +247,7 @@ export const InventoryRecipeTreeNode: React.FC<InventoryRecipeTreeNodeProps> = (
     const input2Shard = data.shards[input2ShardId];
 
     const crafts = tree.craftsNeeded ?? 1;
-    const displayQuantity = isTopLevel && totalShardsProduced ? totalShardsProduced : tree.quantity;
+    const displayQuantity = isTopLevel && totalShardsProduced ? Math.floor(totalShardsProduced) : tree.quantity;
     const crocProcs = getCrocodileProcs(tree, data);
 
     // A split node's quantity is spread across its branches, so sum them back up.
