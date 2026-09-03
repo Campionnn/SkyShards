@@ -1207,7 +1207,7 @@
     "chameleon_result": [
       "Shyworm",
       "Brineling",
-      "Bramble"
+      "Chocobun"
     ],
     "id_origin": [
       "Cretan Bull",
@@ -1235,7 +1235,7 @@
     "id_result": "Firefox",
     "chameleon_result": [
       "Brineling",
-      "Bramble",
+      "Chocobun",
       "Foxtrot"
     ],
     "id_origin": [],
@@ -1258,9 +1258,9 @@
     "fuse_amount": 5,
     "id_result": "Timil",
     "chameleon_result": [
-      "Bramble",
+      "Chocobun",
       "Foxtrot",
-      "Tide"
+      "Bramble"
     ],
     "id_origin": [
       "Haggard"
@@ -1269,6 +1269,32 @@
       "Haggard",
       "Honeyhog",
       "Shyworm"
+    ]
+  },
+  "C48": {
+    "name": "Chocobun",
+    "rarity": "Common",
+    "category": "Forest",
+    "family": [
+      "Crime"
+    ],
+    "input1": "Bunbun Shard",
+    "input2": "Crime",
+    "synthesized": true,
+    "chameleon": true,
+    "recipe_type": null,
+    "fuse_amount": 5,
+    "id_result": null,
+    "chameleon_result": [
+      "Foxtrot",
+      "Bramble",
+      "Tide"
+    ],
+    "id_origin": [],
+    "chameleon_origin": [
+      "Honeyhog",
+      "Shyworm",
+      "Brineling"
     ]
   },
   "C49": {
@@ -1291,7 +1317,8 @@
     "id_origin": [],
     "chameleon_origin": [
       "Shyworm",
-      "Brineling"
+      "Brineling",
+      "Chocobun"
     ]
   },
   "C52": {
@@ -1494,9 +1521,8 @@
     ],
     "id_origin": [],
     "chameleon_origin": [
-      "Honeyhog",
-      "Shyworm",
       "Brineling",
+      "Chocobun",
       "Foxtrot",
       "Firefox",
       "Groundhog",
@@ -1528,7 +1554,7 @@
     ],
     "id_origin": [],
     "chameleon_origin": [
-      "Brineling",
+      "Chocobun",
       "Foxtrot",
       "Firefox",
       "Timil",
