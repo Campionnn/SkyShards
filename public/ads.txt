@@ -1,48 +1,71 @@
-# PubNation Ads.txt v20260716
-managerdomain=pubnation.com
-contact=sales@pubnation.com
+# Mediavine Ads.txt v20260904
+managerdomain=mediavine.com
+contact=sales@mediavine.com
 ownerdomain=skyshards.com
-pubnation.com, 8dad3e982e28444de8e0d53b8bd371b1, DIRECT, 1363c924529b3998
-aps.amazon.com, b8e296dd-fc9f-4561-b5be-0262680b7abd, DIRECT
-appnexus.com, 13329, DIRECT, f5ab79cb980f11d1
-indexexchange.com, 199830, DIRECT, 50b1c356f2c5c8fc
-indexexchange.com, 199825, DIRECT, 50b1c356f2c5c8fc
-indexexchange.com, 199823, DIRECT, 50b1c356f2c5c8fc
-google.com, pub-6445234841753687, RESELLER, f08c47fec0942fa0
-openx.com, 557899709, DIRECT, 6a698e2ec38604c6
-openx.com, 557903419, DIRECT, 6a698e2ec38604c6
-contextweb.com, 562728, DIRECT, 89ff185a4c4e857c
-yahoo.com, 59914, DIRECT, e1a5b5b6e3255540
-triplelift.com, 12324, DIRECT, 6c33edb13117fd86
-triplelift.com, 12324-EB, DIRECT, 6c33edb13117fd86
-lijit.com, 406310, DIRECT, fafdf38b16bf6b2b
-lijit.com, 406310-eb, DIRECT, fafdf38b16bf6b2b
-gumgum.com, 15635, DIRECT, ffdef49475d318a9
-yieldmo.com, 3037227543858979302, DIRECT
-yieldmo.com, 3077814941638402211, DIRECT
-rubiconproject.com, 24214, DIRECT, 0bfd66d529a55807
-rubiconproject.com, 24854, DIRECT, 0bfd66d529a55807
-media.net, 8CU78ML61, DIRECT
-media.net, 8CU5PDM78, DIRECT
-media.net, 8CUVOJ1Q5, DIRECT
-pubmatic.com, 162150, DIRECT, 5d62403b186f2ace
-pubmatic.com, 162244, DIRECT, 5d62403b186f2ace
-themediagrid.com, J54GBA, DIRECT, 35d5010d7789b49d
+mediavine.com, 14359e3f92635c8d70e72c1cd4c7c30f, DIRECT, 1363c924529b3998
+aps.amazon.com, 38918095-8e45-4332-88bf-226b3514cb64, DIRECT
+blis.com, 1247, DIRECT, 61453ae19a4b73f4
+rubiconproject.com, 16928, RESELLER, 0bfd66d529a55807
+themediagrid.com, 29IN8P, RESELLER, 9fac4a4a87c2a44f
+appnexus.com, 3626, DIRECT, f5ab79cb980f11d1
+indexexchange.com, 184188, DIRECT, 50b1c356f2c5c8fc
+indexexchange.com, 184807, DIRECT, 50b1c356f2c5c8fc
+indexexchange.com, 193478, DIRECT, 50b1c356f2c5c8fc
+indexexchange.com, 193092, DIRECT
+google.com, pub-1601477034266482, DIRECT, f08c47fec0942fa0
+google.com, pub-1601477034266482, RESELLER, f08c47fec0942fa0
+openx.com, 537154278, DIRECT, 6a698e2ec38604c6
+openx.com, 537144493, DIRECT, 6a698e2ec38604c6
+openx.com, 566087334, DIRECT, 6a698e2ec38604c6
+contextweb.com, 562036, DIRECT, 89ff185a4c4e857c
+aolcloud.net, 9560, DIRECT
+yahoo.com, 57172, DIRECT, e1a5b5b6e3255540
+triplelift.com, 4203, DIRECT, 6c33edb13117fd86
+triplelift.com, 4116-EB, DIRECT, 6c33edb13117fd86
+triplelift.com, 4116, DIRECT, 6c33edb13117fd86
+sovrn.com, 217201, DIRECT, fafdf38b16bf6b2b
+lijit.com, 217201, DIRECT, fafdf38b16bf6b2b
+lijit.com, 217201-eb, DIRECT, fafdf38b16bf6b2b
+appnexus.com, 2758, RESELLER, f5ab79cb980f11d1
+chicoryapp.com, 1641021363254de6830750e1ca78e06d, DIRECT
+pubmatic.com, 166545, RESELLER, 5d62403b186f2ace
+33across.com, 0013300001r0t9mAAA, RESELLER, bbea06d9c4d2853c
+indexexchange.com, 177754, RESELLER, 50b1c356f2c5c8fc
+gumgum.com, 9534, DIRECT, ffdef49475d318a9
+openx.com, 537149485, RESELLER, 6a698e2ec38604c6
+rubiconproject.com, 23434, RESELLER, 0bfd66d529a55807
+yieldmo.com, 1803631463666189593, DIRECT
+yieldmo.com, 2231250809323685813, DIRECT
+yieldmo.com, 4101312048497893773, DIRECT
+rubiconproject.com, 17404, DIRECT, 0bfd66d529a55807
+rubiconproject.com, 17484, DIRECT, 0bfd66d529a55807
+media.net, 8CU5E5U43, DIRECT
+media.net, 8CUG3CC31, DIRECT
+media.net, 8CUBOT259, DIRECT
+pubmatic.com, 157108, DIRECT, 5d62403b186f2ace
+pubmatic.com, 157109, DIRECT, 5d62403b186f2ace
+pubmatic.com, 160748, DIRECT, 5d62403b186f2ace
+rhythmone.com, 949103067, DIRECT, a670c89d4a324e47
+video.unrulymedia.com, 949103067, DIRECT
+themediagrid.com, U1NDYR, DIRECT, 35d5010d7789b49d
 themediagrid.com, ICAFX4, DIRECT, 35d5010d7789b49d
-improvedigital.com, 2042, DIRECT
-sharethrough.com, nCAkiYrZ, DIRECT, d53b998a7bd4ecd2
-sharethrough.com, 5034, RESELLER, d53b998a7bd4ecd2
-nativo.com, 5833, DIRECT, 59521ca7cc5e9fee
-themediagrid.com, ZF1EW5, DIRECT, 35d5010d7789b49d
-kargo.com, 8797, DIRECT
-kargo.com, 8850, DIRECT
-rubiconproject.com, 11864, RESELLER, 0bfd66d529a55807
-appnexus.com, 8173, RESELLER, f5ab79cb980f11d1
-contextweb.com, 562001, RESELLER, 89ff185a4c4e857c
-video.unrulymedia.com, 1858504412, RESELLER
+improvedigital.com, 1625, DIRECT
+conversantmedia.com, 41025, DIRECT, 03113cd04947736d
+smartadserver.com, 3860, DIRECT
+sharethrough.com, 47b99924, DIRECT, d53b998a7bd4ecd2
+sharethrough.com, 3860, RESELLER, d53b998a7bd4ecd2
+nativo.com, 5705, DIRECT, 59521ca7cc5e9fee
+nativo.com, 6153, DIRECT, 59521ca7cc5e9fee
+nativo.com, 6078, RESELLER, 59521ca7cc5e9fee
+themediagrid.com, 8CAIJY, DIRECT, 9fac4a4a87c2a44f
 fabrik.com, 87, DIRECT
-conversantmedia.com, 100711, RESELLER, 03113cd04947736d
-video.unrulymedia.com, 226162434, DIRECT
+kargo.com, 8797, DIRECT
+undertone.com, 4238, DIRECT
+openx.com, 537153564, RESELLER, 6a698e2ec38604c6
+rubiconproject.com, 22412, RESELLER, 0bfd66d529a55807
+pubmatic.com, 160318, RESELLER, 5d62403b186f2ace
+video.unrulymedia.com, 3408527385, DIRECT
+trustx.org, 4113, DIRECT, 1d2c8a747a749d25
 # Blockthrough Seats
 blockthrough.com,5161256536244224, DIRECT
 trustedstack.com, TS3YM7Z35, RESELLER
@@ -50,39 +73,82 @@ rubiconproject.com, 26144, RESELLER, 0bfd66d529a55807
 pubmatic.com, 164187, RESELLER, 5d62403b186f2ace
 video.unrulymedia.com, 799061815, RESELLER
 # End Blockthrough Seats
-smilewanted.com, 5672, DIRECT
+dxkulture.com, 12002, DIRECT
+zetaglobal.net, 790, DIRECT
+smilewanted.com, 5374, DIRECT
 pubmatic.com, 158810, RESELLER, 5d62403b186f2ace
 rubiconproject.com, 19814, RESELLER, 0bfd66d529a55807
-emxdgt.com, 46, DIRECT, 1e1d41537f7cad7f
-ssp.cadent.com, 46, DIRECT, 1e1d41537f7cad7f
-The-ozone-project.com, OZONEPBN0001, DIRECT
+The-ozone-project.com, OZONEMDV0001, DIRECT
 appnexus.com, 9979, RESELLER
 openx.com, 540731760, RESELLER, 6a698e2ec38604c6
-adform.com, 2657, RESELLER, 9f5210a2f0999e32
 pubmatic.com, 160557, RESELLER, 5d62403b186f2ace
-smartadserver.com, 5034, DIRECT, 060d053dcf45cbf3
-e-planning.net,011a0cd116da3304,DIRECT,c1ba615865ed87b2
-connatix.com, 2124253207421523, DIRECT, 2af98acdee0e81ed
-connatix.com, 2123337082124529, RESELLER, 2af98acdee0e81ed
+indexexchange.com, 206233, RESELLER, 50b1c356f2c5c8fc
+adform.com, 2657, RESELLER, 9f5210a2f0999e32
+e-planning.net,e4ff9f6416211a05,DIRECT,c1ba615865ed87b2
+connatix.com, 2114078464564569, DIRECT, 2af98acdee0e81ed
+connatix.com, 2122661585266952, RESELLER, 2af98acdee0e81ed
 video.unrulymedia.com, 687806135, RESELLER
 pubmatic.com, 156592, RESELLER, 5d62403b186f2ace
 rubiconproject.com, 19564, RESELLER, 0bfd66d529a55807
+amxrtb.com, 105199953, DIRECT
+pubmatic.com, 158355, RESELLER
 trustedstack.com, TSUKNZU26, DIRECT
-insticator.com, 9be2403e-f58b-4c92-8499-2aaa9cfa1c7d, DIRECT, b3511ffcafb23a32
+insticator.com, f37c1a05-256f-4d34-a27f-7c8822716631, DIRECT, b3511ffcafb23a32
 rubiconproject.com, 17062, DIRECT, 0bfd66d529a55807
 sharethrough.com, Q9IzHdvp, DIRECT, d53b998a7bd4ecd2
 lijit.com, 257618, DIRECT, fafdf38b16bf6b2b
 pubmatic.com, 95054, DIRECT, 5d62403b186f2ace
 triplelift.com, 6998, DIRECT, 6c33edb13117fd86
 themediagrid.com, DQ6AMB, DIRECT, 35d5010d7789b49d
-video.unrulymedia.com, 136898039, DIRECT
-loopme.com, 11530, DIRECT, 6c8d5f95897a5a3b
 adform.com, 2996, DIRECT
-risecodes.com, 6124caed9c7adb0001c028d8, DIRECT
-minutemedia.com, 01garg96c88b, DIRECT
-blis.com, 1268, DIRECT, 61453ae19a4b73f4
-rubiconproject.com, 16928, RESELLER, 0bfd66d529a55807
-themediagrid.com, 29IN8P, RESELLER, 9fac4a4a87c2a44f
+connectad.io, 534, DIRECT, 85ac85a30c93b3e5
+adform.com, 768, RESELLER, 9f5210a2f0999e32
+rubiconproject.com, 26800, RESELLER, 0bfd66d529a55807
+onetag.com, 95c9026ad15398d, DIRECT
+onetag.com, 9688f9e05d60d08, DIRECT
+onetag.com, 96ab42f8beba46e, DIRECT
+appnexus.com, 13099, RESELLER
+pubmatic.com, 161593, RESELLER, 5d62403b186f2ace
+rubiconproject.com, 11006, RESELLER, 0bfd66d529a55807
+video.unrulymedia.com, 586616193, RESELLER
+smartadserver.com, 4111, RESELLER
+minutemedia.com, 01hkmpfn2nne, DIRECT
+pubmatic.com, 161683, RESELLER, 5d62403b186f2ace
+rubiconproject.com, 17598, RESELLER, 0bfd66d529a55807
+media.net, 8CUWNDO6S, RESELLER
+yieldmo.com, 2954622693783052507, RESELLER
+33across.com, 0013300001jlr99AAA, RESELLER, bbea06d9c4d2853c
+smaato.com, 1100059964, DIRECT, d641df8625486a7b
+smaato.com, 1100004890, DIRECT, 07bcf65f187117b4
+genieesspv.jp, 38558, DIRECT
+appnexus.com, 16480, RESELLER, f5ab79cb980f11d1
+rubiconproject.com, 11534, RESELLER, 0bfd66d529a55807
+pubmatic.com, 156322, RESELLER, 5d62403b186f2ace
+video.unrulymedia.com, 234364657, RESELLER, 98c21ef9a666c68b
+oxiem.com, 8884d461eb, DIRECT, d1a215d9eb5aee9e
+oxiem.com, 8884d461eb, DIRECT, b7aba0bfd04aa6b6
+sonobi.com, 8884d461eb, DIRECT, d1a215d9eb5aee9e
+pubmatic.com, 166397, RESELLER, 5d62403b186f2ace
+risecodes.com, 676413518a2ed400014edca3, DIRECT
+rubiconproject.com, 23876, RESELLER, 0bfd66d529a55807
+media.net, 8CUQ6928Q, RESELLER
+openx.com, 537140488, RESELLER, 6a698e2ec38604c6
+pubmatic.com, 160295, RESELLER, 5d62403b186f2ace
+xandr.com, 14082, RESELLER
+seedtag.com, 68d41e72450be60007156a5a, DIRECT
+xandr.com, 4009, DIRECT, f5ab79cb980f11d1
+smartadserver.com, 3050, DIRECT
+rubiconproject.com, 17280, DIRECT, 0bfd66d529a55807
+pubmatic.com, 157743, DIRECT, 5d62403b186f2ace
+sharethrough.com, 3050, RESELLER, d53b998a7bd4ecd2
+rubiconproject.com, 28785, DIRECT, 0bfd66d529a55807
+inmobi.com, d7ada47670d044a69337cb48018d1d94, DIRECT, 83e75a7ae333ca9d
+ssp.cadent.com, 3695, DIRECT, 1e1d41537f7cad7f
+omni-dex.io, 100095, DIRECT
+rubiconproject.com, 21274, RESELLER, 0bfd66d529a55807
+pubmatic.com, 165321, RESELLER, 5d62403b186f2ace
+xandr.com, 11201, RESELLER
+risecodes.com, 636cc1381c35e10001b200c7, RESELLER
 
 
 
