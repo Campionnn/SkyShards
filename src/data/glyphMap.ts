@@ -55,6 +55,7 @@ export const GLYPH_MAP: Record<string, Glyph> = {
   "\ue02b": { w: 7, h: 7, path: "M3 0h1v1h-1zM1 1h1v1h-1zM5 1h1v1h-1zM2 2h3v1h-3zM0 3h1v1h-1zM2 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM2 4h3v1h-3zM1 5h1v1h-1zM5 5h1v1h-1zM3 6h1v1h-1z" },
   "\ue02c": { w: 7, h: 7, path: "M2 0h4v1h-4zM2 1h3v1h-3zM1 2h3v1h-3zM0 3h7v1h-7zM4 4h2v1h-2zM3 5h2v1h-2zM3 6h1v1h-1z" },
   "\ue02d": { w: 7, h: 7, path: "M0 0h1v1h-1zM1 1h2v1h-2zM6 1h1v1h-1zM1 2h1v1h-1zM3 2h3v1h-3zM2 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM2 4h2v1h-2zM5 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM6 5h1v1h-1zM1 6h1v1h-1zM3 6h1v1h-1zM5 6h1v1h-1z" },
+  "\ue02e": { w: 7, h: 7, path: "M1 0h2v1h-2zM4 0h2v1h-2zM0 1h3v1h-3zM4 1h3v1h-3zM0 2h3v1h-3zM4 2h3v1h-3zM2 3h1v1h-1zM4 3h1v1h-1zM2 4h1v1h-1zM4 4h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM1 6h2v1h-2zM4 6h2v1h-2z" },
   "\ue050": { w: 7, h: 7, path: "M5 0h2v1h-2zM4 1h3v1h-3zM1 2h1v1h-1zM3 2h3v1h-3zM1 3h4v1h-4zM2 4h2v1h-2zM1 5h1v1h-1zM3 5h2v1h-2zM0 6h1v1h-1z" },
   "\ue051": { w: 7, h: 7, path: "M1 0h5v1h-5zM1 1h3v1h-3zM5 1h2v1h-2zM2 2h1v1h-1zM6 2h1v1h-1zM2 3h1v1h-1zM3 4h1v1h-1zM3 5h1v1h-1zM3 6h1v1h-1z" },
   "\ue052": { w: 7, h: 7, path: "M6 0h1v1h-1zM5 1h2v1h-2zM4 2h1v1h-1zM6 2h1v1h-1zM3 3h1v1h-1zM6 3h1v1h-1zM1 4h2v1h-2zM6 4h1v1h-1zM1 5h2v1h-2zM4 5h1v1h-1zM6 5h1v1h-1zM0 6h1v1h-1zM5 6h1v1h-1z" },
@@ -100,8 +101,27 @@ export const GLYPH_MAP: Record<string, Glyph> = {
   "\ue085": { w: 7, h: 7, path: "M0 0h7v1h-7zM1 1h5v1h-5zM0 2h7v1h-7zM0 3h1v1h-1zM3 3h1v1h-1zM6 3h1v1h-1zM1 4h5v1h-5zM0 5h1v1h-1zM6 5h1v1h-1zM0 6h7v1h-7z" },
   "\ue086": { w: 7, h: 7, path: "M3 0h4v1h-4zM1 1h2v1h-2zM5 1h2v1h-2zM0 2h1v1h-1zM2 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM0 3h1v1h-1zM3 3h1v1h-1zM6 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM4 4h2v1h-2zM1 5h1v1h-1zM5 5h1v1h-1zM0 6h1v1h-1zM2 6h3v1h-3z" },
   "\ue087": { w: 7, h: 7, path: "M1 0h5v1h-5zM0 1h1v1h-1zM6 1h1v1h-1zM1 2h5v1h-5zM0 3h1v1h-1zM1 4h3v1h-3zM4 5h1v1h-1zM3 6h1v1h-1z" },
+  "\ue088": { w: 7, h: 7, path: "M1 0h2v1h-2zM4 0h2v1h-2zM1 2h2v1h-2zM4 2h2v1h-2zM1 3h2v1h-2zM4 3h2v1h-2zM1 4h2v1h-2zM4 4h2v1h-2zM0 5h3v1h-3zM4 5h3v1h-3zM0 6h2v1h-2zM5 6h2v1h-2z" },
   "\u12de": { w: 3, h: 7, path: "M2 0h1v1h-1zM0 1h1v1h-1zM2 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM0 3h3v1h-3zM0 4h1v1h-1zM2 4h1v1h-1zM0 5h1v1h-1zM2 5h1v1h-1zM0 6h1v1h-1z" },
+  "\ue090": { w: 7, h: 7, path: "M0 0h2v1h-2zM5 0h2v1h-2zM0 1h3v1h-3zM4 1h3v1h-3zM1 2h2v1h-2zM4 2h2v1h-2zM3 4h1v1h-1zM2 5h3v1h-3zM1 6h5v1h-5z" },
+  "\ue091": { w: 7, h: 7, path: "M1 0h5v1h-5zM0 1h7v1h-7zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM0 3h1v1h-1zM3 3h1v1h-1zM6 3h1v1h-1zM0 4h7v1h-7zM2 5h3v1h-3zM2 6h3v1h-3z" },
+  "\ue092": { w: 7, h: 7, path: "M0 0h1v1h-1zM3 0h2v1h-2zM6 0h1v1h-1zM2 1h4v1h-4zM2 2h4v1h-4zM0 3h1v1h-1zM1 4h2v1h-2zM4 4h3v1h-3zM1 5h2v1h-2zM4 5h3v1h-3zM2 6h4v1h-4z" },
+  "\ue093": { w: 7, h: 7, path: "M1 0h2v1h-2zM4 0h2v1h-2zM0 1h3v1h-3zM4 1h3v1h-3zM0 2h2v1h-2zM5 2h2v1h-2zM3 3h1v1h-1zM0 4h2v1h-2zM5 4h2v1h-2zM0 5h3v1h-3zM4 5h3v1h-3zM1 6h2v1h-2zM4 6h2v1h-2z" },
+  "\ue094": { w: 7, h: 7, path: "M0 1h1v1h-1zM4 1h2v1h-2zM1 2h3v1h-3zM6 2h1v1h-1zM0 4h1v1h-1zM3 4h3v1h-3zM1 5h2v1h-2zM6 5h1v1h-1z" },
+  "\ue095": { w: 7, h: 7, path: "M0 0h1v1h-1zM2 0h2v1h-2zM6 0h1v1h-1zM0 1h2v1h-2zM3 1h2v1h-2zM4 2h2v1h-2zM0 3h7v1h-7zM1 4h2v1h-2zM2 5h2v1h-2zM5 5h2v1h-2zM0 6h1v1h-1zM3 6h2v1h-2zM6 6h1v1h-1z" },
+  "\ue096": { w: 7, h: 7, path: "M1 0h3v1h-3zM0 1h1v1h-1zM2 1h2v1h-2zM5 1h1v1h-1zM6 2h1v1h-1zM1 3h3v1h-3zM5 3h2v1h-2zM0 4h7v1h-7zM0 5h7v1h-7zM1 6h5v1h-5z" },
+  "\ue097": { w: 7, h: 7, path: "M0 0h3v1h-3zM4 0h3v1h-3zM1 1h2v1h-2zM5 1h2v1h-2zM0 2h2v1h-2zM4 2h2v1h-2zM0 3h3v1h-3zM4 3h3v1h-3zM1 4h2v1h-2zM5 4h2v1h-2zM1 6h5v1h-5z" },
+  "\ue098": { w: 7, h: 7, path: "M2 0h3v1h-3zM0 1h1v1h-1zM5 1h2v1h-2zM1 2h3v1h-3zM3 4h3v1h-3zM0 5h2v1h-2zM6 5h1v1h-1zM2 6h3v1h-3z" },
+  "\ue099": { w: 7, h: 7, path: "M1 0h4v1h-4zM0 1h3v1h-3zM5 1h1v1h-1zM0 2h2v1h-2zM0 3h2v1h-2zM0 4h2v1h-2zM0 5h3v1h-3zM5 5h1v1h-1zM1 6h4v1h-4z" },
+  "\ue09a": { w: 7, h: 7, path: "M4 0h1v1h-1zM0 1h1v1h-1zM2 1h1v1h-1zM4 1h1v1h-1zM6 1h1v1h-1zM0 2h1v1h-1zM6 2h1v1h-1zM2 3h3v1h-3zM1 4h5v1h-5zM3 5h1v1h-1zM2 6h2v1h-2z" },
+  "\ue09b": { w: 7, h: 7, path: "M0 0h1v1h-1zM2 0h2v1h-2zM5 0h1v1h-1zM1 1h3v1h-3zM1 2h2v1h-2zM4 2h2v1h-2zM4 3h3v1h-3zM1 4h2v1h-2zM5 4h2v1h-2zM0 5h3v1h-3zM0 6h2v1h-2zM5 6h1v1h-1z" },
+  "\ue09c": { w: 7, h: 7, path: "M3 0h3v1h-3zM1 1h6v1h-6zM0 2h7v1h-7zM0 3h7v1h-7zM0 4h2v1h-2zM3 4h3v1h-3zM0 5h1v1h-1zM1 6h1v1h-1z" },
+  "\ue09d": { w: 7, h: 7, path: "M0 0h1v1h-1zM3 0h3v1h-3zM0 1h7v1h-7zM1 2h3v1h-3zM6 2h1v1h-1zM0 4h1v1h-1zM3 4h3v1h-3zM0 5h7v1h-7zM1 6h3v1h-3zM6 6h1v1h-1z" },
+  "\ue09e": { w: 7, h: 7, path: "M1 0h1v1h-1zM5 0h1v1h-1zM0 1h1v1h-1zM2 1h1v1h-1zM4 1h1v1h-1zM6 1h1v1h-1zM1 2h5v1h-5zM2 3h1v1h-1zM4 3h1v1h-1zM1 4h5v1h-5zM0 5h1v1h-1zM2 5h1v1h-1zM4 5h1v1h-1zM6 5h1v1h-1zM1 6h1v1h-1zM5 6h1v1h-1z" },
+  "\ue09f": { w: 7, h: 7, path: "M0 0h1v1h-1zM2 0h1v1h-1zM4 0h1v1h-1zM6 0h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM2 3h3v1h-3zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM0 6h1v1h-1zM2 6h1v1h-1zM4 6h1v1h-1zM6 6h1v1h-1z" },
+  "\ue100": { w: 7, h: 7, path: "M4 0h2v1h-2zM2 1h3v1h-3zM1 2h3v1h-3zM0 3h7v1h-7zM3 4h3v1h-3zM2 5h3v1h-3zM1 6h2v1h-2z" },
+  "\ue101": { w: 7, h: 7, path: "M4 0h1v1h-1zM6 0h1v1h-1zM0 1h1v1h-1zM2 1h1v1h-1zM4 1h1v1h-1zM0 2h1v1h-1zM6 2h1v1h-1zM2 3h3v1h-3zM1 4h5v1h-5zM1 5h5v1h-5zM3 6h1v1h-1z" },
 };
 
 /** Capturing char class of every mapped glyph; use with String.split to keep matches. */
-export const GLYPH_REGEX = /([\ue000\ue001\ue002\ue003\ue004\ue005\ue006\ue007\ue008\ue009\ue00a\ue00b\ue00c\ue00d\ue00e\ue00f\ue010\ue011\ue012\ue013\ue014\ue015\ue016\ue017\ue018\ue019\ue01a\ue01b\ue01c\ue01d\ue01e\ue01f\ue020\ue021\ue022\ue023\ue024\ue025\ue026\ue027\ue028\ue029\ue02a\ue02b\ue02c\ue02d\ue050\ue051\ue052\ue053\ue054\ue055\ue056\ue057\ue058\ue059\ue05a\ue05b\ue060\ue061\ue062\ue063\u2714\u2716\ue066\ue067\ue068\ue070\ue071\ue072\ue073\ue074\ue075\ue076\ue077\ue078\ue079\ue07a\ue07b\ue07c\ue07d\ue07e\ue07f\ue080\ue081\ue082\ue083\ue084\ue085\ue086\ue087\u12de])/;
+export const GLYPH_REGEX = /([\ue000\ue001\ue002\ue003\ue004\ue005\ue006\ue007\ue008\ue009\ue00a\ue00b\ue00c\ue00d\ue00e\ue00f\ue010\ue011\ue012\ue013\ue014\ue015\ue016\ue017\ue018\ue019\ue01a\ue01b\ue01c\ue01d\ue01e\ue01f\ue020\ue021\ue022\ue023\ue024\ue025\ue026\ue027\ue028\ue029\ue02a\ue02b\ue02c\ue02d\ue02e\ue050\ue051\ue052\ue053\ue054\ue055\ue056\ue057\ue058\ue059\ue05a\ue05b\ue060\ue061\ue062\ue063\u2714\u2716\ue066\ue067\ue068\ue070\ue071\ue072\ue073\ue074\ue075\ue076\ue077\ue078\ue079\ue07a\ue07b\ue07c\ue07d\ue07e\ue07f\ue080\ue081\ue082\ue083\ue084\ue085\ue086\ue087\ue088\u12de\ue090\ue091\ue092\ue093\ue094\ue095\ue096\ue097\ue098\ue099\ue09a\ue09b\ue09c\ue09d\ue09e\ue09f\ue100\ue101])/;

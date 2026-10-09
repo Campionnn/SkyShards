@@ -4902,6 +4902,21 @@
           "c": "gray"
         },
         {
+          "t": " or ",
+          "c": "gray"
+        },
+        {
+          "t": "Cocoaleech",
+          "c": "gold"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Shard",
+          "c": "gray"
+        },
+        {
           "t": ".",
           "c": "gray"
         }
@@ -12695,6 +12710,95 @@
       ]
     ]
   },
+  "U73": {
+    "title": "Fiesta Fortune",
+    "description": [
+      {
+        "t": "Grants ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          5,
+          50
+        ],
+        "unit": "",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": " Gemstone Fortune",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "while ",
+        "c": "gray"
+      },
+      {
+        "t": "Mayor Cole's ",
+        "c": "aqua"
+      },
+      {
+        "t": "Mining Fiesta ",
+        "c": "gold"
+      },
+      {
+        "t": "perk",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "is active.",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Purchased from ",
+          "c": "gray"
+        },
+        {
+          "t": "Brynmor's Shop ",
+          "c": "gold"
+        },
+        {
+          "t": "while ",
+          "c": "gray"
+        },
+        {
+          "t": "Mayor Cole's",
+          "c": "aqua"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Mining Fiesta ",
+          "c": "gold"
+        },
+        {
+          "t": "perk is active.",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
   "U75": {
     "title": "Construct Ruler",
     "id": "construct_ruler",
@@ -13662,7 +13766,7 @@
         "c": "gray"
       },
       {
-        "t": "",
+        "t": "",
         "c": "dark_green"
       },
       {
@@ -13692,8 +13796,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -13722,16 +13825,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Moth ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Moth",
+          "c": "red"
         },
         {
           "t": ".",
@@ -15926,6 +16025,87 @@
       ]
     ]
   },
+  "R28": {
+    "title": "Catacombs Cap",
+    "description": [
+      {
+        "t": "Increases your ",
+        "c": "gray"
+      },
+      {
+        "t": " Speed Cap",
+        "c": "white"
+      },
+      {
+        "t": " by",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "range": [
+          5,
+          50
+        ],
+        "unit": "",
+        "c": "green"
+      },
+      {
+        "t": " while in ",
+        "c": "gray"
+      },
+      {
+        "t": "The Catacombs",
+        "c": "red"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Fusing ",
+          "c": "gray"
+        },
+        {
+          "t": "Soul of the Alpha ",
+          "c": "green"
+        },
+        {
+          "t": "Shard ",
+          "c": "gray"
+        },
+        {
+          "t": "with ",
+          "c": "gray"
+        },
+        {
+          "t": "Epic ",
+          "c": "dark_purple",
+          "bold": true
+        },
+        {
+          "t": "or higher",
+          "c": "gray"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
   "R29": {
     "title": "Crystal Serendipity",
     "id": "crystal_serendipity",
@@ -16310,18 +16490,7 @@
     "id": "quartz_speed",
     "description": [
       {
-        "t": " Mining Speed ",
-        "c": "gold"
-      },
-      {
-        "t": "from events is",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "increased by ",
+        "t": "Grants ",
         "c": "gray"
       },
       {
@@ -16329,11 +16498,33 @@
           10,
           100
         ],
-        "unit": "%",
+        "unit": "",
         "c": "gold"
       },
       {
-        "t": ".",
+        "t": " "
+      },
+      {
+        "t": " Mining Speed",
+        "c": "gold"
+      },
+      {
+        "t": " while",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "any ",
+        "c": "gray"
+      },
+      {
+        "t": "Weather ",
+        "c": "aqua"
+      },
+      {
+        "t": "is active.",
         "c": "gray"
       }
     ],
@@ -22989,7 +23180,7 @@
       },
       {
         "range": [
-          5,
+          null,
           50
         ],
         "unit": "",
@@ -23006,7 +23197,7 @@
         "t": " "
       },
       {
-        "t": "during the Night.",
+        "t": "during the night.",
         "c": "gray"
       }
     ],
@@ -25476,8 +25667,8 @@
       },
       {
         "range": [
-          1,
-          10
+          2.5,
+          25
         ],
         "unit": "%",
         "c": "green"
@@ -29419,16 +29610,39 @@
         "t": " "
       },
       {
-        "t": "bosses ",
-        "c": "green"
+        "t": "Minibosses",
+        "c": "red"
       },
       {
-        "t": "and ",
+        "t": ", ",
         "c": "gray"
       },
       {
-        "t": "mini-bosses",
-        "c": "green"
+        "t": "Bosses",
+        "c": "red"
+      },
+      {
+        "t": ", ",
+        "c": "gray"
+      },
+      {
+        "t": "Slayer",
+        "c": "dark_red"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Minibosses",
+        "c": "dark_red"
+      },
+      {
+        "t": ", and ",
+        "c": "gray"
+      },
+      {
+        "t": "Slayer Bosses",
+        "c": "dark_red"
       },
       {
         "t": ".",
@@ -30826,6 +31040,89 @@
         {
           "t": "Critter Safari",
           "c": "dark_green"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "L52": {
+    "title": "Unique Bonus",
+    "description": [
+      {
+        "t": "Counts as ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          1,
+          10
+        ],
+        "unit": "",
+        "c": "green"
+      },
+      {
+        "t": " towards the ",
+        "c": "gray"
+      },
+      {
+        "t": "Unique",
+        "c": "yellow"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Crop Bonus ",
+        "c": "yellow"
+      },
+      {
+        "t": "in your ",
+        "c": "gray"
+      },
+      {
+        "t": "Greenhouse",
+        "c": "green"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Has a chance to drop when analyzing ",
+          "c": "gray"
+        },
+        {
+          "t": "mutations ",
+          "c": "red"
+        },
+        {
+          "t": "using",
+          "c": "gray"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "the ",
+          "c": "gray"
+        },
+        {
+          "t": "Crop Analyzer",
+          "c": "yellow"
         },
         {
           "t": ".",
