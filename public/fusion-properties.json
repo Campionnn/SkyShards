@@ -1279,7 +1279,7 @@
       "Crime"
     ],
     "input1": "Bunbun Shard",
-    "input2": "Crime",
+    "input2": "Cocoaleech Shard|Crime",
     "synthesized": true,
     "chameleon": true,
     "recipe_type": null,
@@ -3158,7 +3158,7 @@
     "chameleon": true,
     "recipe_type": null,
     "fuse_amount": 5,
-    "id_result": "Rat",
+    "id_result": "Packrat",
     "chameleon_result": [
       "Ember",
       "Cheeky Tiki",
@@ -3249,11 +3249,11 @@
     "chameleon": true,
     "recipe_type": null,
     "fuse_amount": 5,
-    "id_result": "Rat",
+    "id_result": "Packrat",
     "chameleon_result": [
       "Sprawl",
       "Sneaky Tiki",
-      "Sylvan"
+      "Packrat"
     ],
     "id_origin": [],
     "chameleon_origin": [
@@ -3276,8 +3276,8 @@
     "id_result": null,
     "chameleon_result": [
       "Sneaky Tiki",
-      "Sylvan",
-      "Cascade"
+      "Packrat",
+      "Sylvan"
     ],
     "id_origin": [
       "Ember"
@@ -3303,8 +3303,8 @@
     "fuse_amount": 5,
     "id_result": "Shrieky Tiki",
     "chameleon_result": [
+      "Packrat",
       "Sylvan",
-      "Cascade",
       "Shrieky Tiki"
     ],
     "id_origin": [
@@ -3314,6 +3314,35 @@
       "Cheeky Tiki",
       "Red Panda",
       "Sprawl"
+    ]
+  },
+  "U73": {
+    "name": "Packrat",
+    "rarity": "Uncommon",
+    "category": "Forest",
+    "family": [
+      "Cave Dweller"
+    ],
+    "input1": "",
+    "input2": "",
+    "synthesized": true,
+    "chameleon": true,
+    "recipe_type": null,
+    "fuse_amount": 5,
+    "id_result": "Rat",
+    "chameleon_result": [
+      "Sylvan",
+      "Shrieky Tiki",
+      "Woodpecker"
+    ],
+    "id_origin": [
+      "Woodlouse",
+      "Red Panda"
+    ],
+    "chameleon_origin": [
+      "Red Panda",
+      "Sprawl",
+      "Sneaky Tiki"
     ]
   },
   "U75": {
@@ -3339,7 +3368,8 @@
       "Sneaky Tiki"
     ],
     "chameleon_origin": [
-      "Sneaky Tiki"
+      "Sneaky Tiki",
+      "Packrat"
     ]
   },
   "U76": {
@@ -3363,6 +3393,7 @@
     ],
     "id_origin": [],
     "chameleon_origin": [
+      "Packrat",
       "Shrieky Tiki"
     ]
   },
@@ -3509,8 +3540,7 @@
       "Keeled Slug"
     ],
     "id_origin": [
-      "Woodlouse",
-      "Red Panda",
+      "Packrat",
       "Woodpecker",
       "Queen Ant",
       "Hawk",
@@ -3685,9 +3715,9 @@
       "Parched",
       "Bloodbat",
       "Dustybit",
-      "Red Panda",
       "Sprawl",
       "Sneaky Tiki",
+      "Packrat",
       "Shrieky Tiki",
       "Woodpecker",
       "Honeymite",
@@ -3725,8 +3755,6 @@
     "id_origin": [],
     "chameleon_origin": [
       "Kiwi",
-      "Sprawl",
-      "Sneaky Tiki",
       "Honeymite",
       "Queen Ant",
       "Hawk",
@@ -4238,7 +4266,7 @@
     "chameleon_result": [
       "Lava Leech",
       "Revenant",
-      "Terra"
+      "Folf"
     ],
     "id_origin": [],
     "chameleon_origin": []
@@ -4257,7 +4285,7 @@
     "id_result": "Silentdepth",
     "chameleon_result": [
       "Revenant",
-      "Terra",
+      "Folf",
       "Silentdepth"
     ],
     "id_origin": [
@@ -4282,7 +4310,7 @@
     "fuse_amount": 5,
     "id_result": "Skeletor",
     "chameleon_result": [
-      "Terra",
+      "Folf",
       "Silentdepth",
       "Skeletor"
     ],
@@ -4293,6 +4321,30 @@
       "Arachne",
       "Bitbug",
       "Lava Leech"
+    ]
+  },
+  "R28": {
+    "name": "Folf",
+    "rarity": "Rare",
+    "category": "Combat",
+    "family": [],
+    "input1": "Soul of the Alpha Shard",
+    "input2": "Epic+",
+    "synthesized": true,
+    "chameleon": true,
+    "recipe_type": "GENERIC_PLUS",
+    "fuse_amount": 5,
+    "id_result": null,
+    "chameleon_result": [
+      "Silentdepth",
+      "Skeletor",
+      "Thyst"
+    ],
+    "id_origin": [],
+    "chameleon_origin": [
+      "Bitbug",
+      "Lava Leech",
+      "Revenant"
     ]
   },
   "R29": {
@@ -4319,7 +4371,8 @@
     ],
     "chameleon_origin": [
       "Lava Leech",
-      "Revenant"
+      "Revenant",
+      "Folf"
     ]
   },
   "R30": {
@@ -4344,6 +4397,7 @@
     ],
     "chameleon_origin": [
       "Revenant",
+      "Folf",
       "Silentdepth"
     ]
   },
@@ -4373,6 +4427,7 @@
       "Bitbug"
     ],
     "chameleon_origin": [
+      "Folf",
       "Silentdepth",
       "Skeletor"
     ]
@@ -6010,9 +6065,6 @@
       "Beetle",
       "Drowned",
       "Vulture",
-      "Bitbug",
-      "Lava Leech",
-      "Revenant",
       "Carrot King",
       "Wither Spectre",
       "Badger",
@@ -8526,6 +8578,22 @@
       "Miracle",
       "Bug"
     ],
+    "input1": "",
+    "input2": "",
+    "synthesized": false,
+    "chameleon": false,
+    "recipe_type": null,
+    "fuse_amount": 5,
+    "id_result": null,
+    "chameleon_result": [],
+    "id_origin": [],
+    "chameleon_origin": []
+  },
+  "L52": {
+    "name": "Flora",
+    "rarity": "Legendary",
+    "category": "Forest",
+    "family": [],
     "input1": "",
     "input2": "",
     "synthesized": false,
