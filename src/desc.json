@@ -12712,6 +12712,7 @@
   },
   "U73": {
     "title": "Fiesta Fortune",
+    "id": "fiesta_fortune",
     "description": [
       {
         "t": "Grants ",
@@ -16027,6 +16028,7 @@
   },
   "R28": {
     "title": "Catacombs Cap",
+    "id": "catacombs_cap",
     "description": [
       {
         "t": "Increases your ",
@@ -31050,6 +31052,7 @@
   },
   "L52": {
     "title": "Unique Bonus",
+    "id": "flora",
     "description": [
       {
         "t": "Counts as ",
