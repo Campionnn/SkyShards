@@ -39,20 +39,22 @@ function decodePngAlpha(path: string): { width: number; height: number; alpha: U
   const bitDepth = buf[24];
   const colorType = buf[25];
   const interlace = buf[28];
-  if (bitDepth !== 8 || colorType !== 6 || interlace !== 0) {
-    throw new Error(`${path}: only 8-bit RGBA non-interlaced PNGs are supported (got depth=${bitDepth} type=${colorType} interlace=${interlace})`);
+  if (bitDepth !== 8 || (colorType !== 6 && colorType !== 3) || interlace !== 0) {
+    throw new Error(`${path}: only 8-bit RGBA or 8-bit indexed non-interlaced PNGs are supported (got depth=${bitDepth} type=${colorType} interlace=${interlace})`);
   }
 
   const idat: Buffer[] = [];
+  let trns: Buffer | null = null;
   for (let pos = 8; pos < buf.length; ) {
     const len = buf.readUInt32BE(pos);
     const type = buf.toString("ascii", pos + 4, pos + 8);
     if (type === "IDAT") idat.push(buf.subarray(pos + 8, pos + 8 + len));
+    if (type === "tRNS") trns = buf.subarray(pos + 8, pos + 8 + len);
     pos += 12 + len;
   }
   const raw = inflateSync(Buffer.concat(idat));
 
-  const bpp = 4;
+  const bpp = colorType === 6 ? 4 : 1;
   const stride = width * bpp;
   const pixels = new Uint8Array(height * stride);
   for (let y = 0; y < height; y++) {
@@ -83,7 +85,10 @@ function decodePngAlpha(path: string): { width: number; height: number; alpha: U
   }
 
   const alpha = new Uint8Array(width * height);
-  for (let i = 0; i < width * height; i++) alpha[i] = pixels[i * bpp + 3];
+  for (let i = 0; i < width * height; i++) {
+    if (colorType === 6) alpha[i] = pixels[i * bpp + 3];
+    else alpha[i] = trns && pixels[i] < trns.length ? trns[pixels[i]] : 255; // indexed: alpha from tRNS
+  }
   return { width, height, alpha };
 }
 

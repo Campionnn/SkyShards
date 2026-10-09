@@ -126,7 +126,8 @@ export class InvCalculationService {
     surplusDiscounts?: Map<string, number>,
     exclusivityScores?: Map<string, number>,
     freelyUsableShards?: Set<string>,
-    sharedInputs?: Set<string>
+    sharedInputs?: Set<string>,
+    craftsNeeded = 1
   ): number {
     const [input1Id, input2Id] = recipe.inputs;
     const fuse1 = parsed.shards[input1Id].fuse_amount;
@@ -141,11 +142,17 @@ export class InvCalculationService {
     const baseCost1 = (minCosts.get(input1Id) || Infinity) * fuse1;
     const baseCost2 = (minCosts.get(input2Id) || Infinity) * fuse2;
 
+    // Fraction of this recipe's total input requirement that inventory can cover.
+    const coverage = (inv: number, fuse: number) =>
+      craftsNeeded > 0 ? Math.min(1, inv / (fuse * craftsNeeded)) : (inv >= fuse ? 1 : 0);
+    const cov1 = coverage(inv1, fuse1);
+    const cov2 = coverage(inv2, fuse2);
+
     const cost1 = inv1 >= fuse1
-      ? (1 - (surplusDiscounts?.get(input1Id) ?? 1)) * baseCost1
+      ? (1 - cov1 * (surplusDiscounts?.get(input1Id) ?? 1)) * baseCost1
       : baseCost1;
     const cost2 = inv2 >= fuse2
-      ? (1 - (surplusDiscounts?.get(input2Id) ?? 1)) * baseCost2
+      ? (1 - cov2 * (surplusDiscounts?.get(input2Id) ?? 1)) * baseCost2
       : baseCost2;
 
     // Additive opportunity cost for exclusive shards. Only inputs UNIQUE to this
@@ -322,15 +329,7 @@ export class InvCalculationService {
         }
       }
 
-      // Current recipe cost with full inventory discount (no exclusivity penalty).
-      const currentEffectiveCost = this.calculateEffectiveCost(
-        node.recipe,
-        workingInventory,
-        parsed,
-        minCosts,
-        crocodileMultiplier,
-        craftPenalty
-      );
+      const currentOutputQuantity = this.service.getEffectiveOutputQuantity(node.recipe, crocodileMultiplier);
 
       let bestCandidate:
         | {recipe: Recipe; outputQuantity: number; craftsSupported: number; effectiveCost: number}
@@ -391,27 +390,6 @@ export class InvCalculationService {
           }
         }
 
-        // Calculate effective cost with fair inventory and surplus discounts
-        // Pass exclusivityScores so additive opportunity cost penalizes
-        // consuming exclusive shards for recipes where alternatives exist
-        const effectiveCost = this.calculateEffectiveCost(
-          recipe,
-          fairInventory,
-          parsed,
-          minCosts,
-          crocodileMultiplier,
-          craftPenalty,
-          surplusDiscounts,
-          exclusivityScores,
-          freelyUsableShards,
-          currentInputSet
-        );
-
-        // Only consider if genuinely cheaper than the current recipe
-        if (effectiveCost >= currentEffectiveCost) {
-          continue;
-        }
-
         // Calculate how many crafts are supported by inventory.
         // Shared inputs: don't limit (consumed by current recipe too, handled by processNode)
         // Unique inputs in surplus: limit based on surplus availability
@@ -433,6 +411,51 @@ export class InvCalculationService {
           : 0;
 
         if (craftsSupported <= 0) {
+          continue;
+        }
+
+        // Price both recipes over the SAME batch — the segment this alternative could
+        // actually fill. Comparing an alternative's price for one segment against the
+        // current recipe's price for the whole remainder is what let a recipe with a
+        // token amount of inventory (50 Rat against 2500 needed) read as free and
+        // block every alternative: `inv >= fuse` credited it in full.
+        const segmentCrafts = Math.min(craftsSupported, craftsForQuantity(remainingQuantity, outputQuantity));
+        const segmentQuantity = Math.min(remainingQuantity, segmentCrafts * outputQuantity);
+
+        // Current recipe cost with full inventory discount (no exclusivity penalty).
+        const currentEffectiveCost = this.calculateEffectiveCost(
+          node.recipe,
+          workingInventory,
+          parsed,
+          minCosts,
+          crocodileMultiplier,
+          craftPenalty,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          craftsForQuantity(segmentQuantity, currentOutputQuantity)
+        );
+
+        // Calculate effective cost with fair inventory and surplus discounts
+        // Pass exclusivityScores so additive opportunity cost penalizes
+        // consuming exclusive shards for recipes where alternatives exist
+        const effectiveCost = this.calculateEffectiveCost(
+          recipe,
+          fairInventory,
+          parsed,
+          minCosts,
+          crocodileMultiplier,
+          craftPenalty,
+          surplusDiscounts,
+          exclusivityScores,
+          freelyUsableShards,
+          currentInputSet,
+          segmentCrafts
+        );
+
+        // Only consider if genuinely cheaper than the current recipe
+        if (effectiveCost >= currentEffectiveCost) {
           continue;
         }
 

@@ -146,6 +146,34 @@ describe("calculateOptimalPath", () => {
       totalQuantities: sortedEntries(result.totalQuantities),
     }).toMatchSnapshot();
   });
+
+  /**
+   * The user-reported Bramble case. Bramble is craftable as Rat + Glacite Walker or
+   * Field Mouse + Glacite Walker, and only the first is the min-cost default.
+   *
+   * Owning a *token* amount of the default's input used to veto every alternative:
+   * `calculateEffectiveCost` discounted an input on `inv >= fuse_amount` — enough for
+   * a single craft — so 50 Rat against the 2500 the build needs priced the whole Rat
+   * recipe as free. Nothing can beat free, so the 5000 Field Mouse were never
+   * considered and the remaining 2450 Rat were farmed from scratch.
+   */
+  it("does not let a token amount of an input veto a fully-owned alternative — reported Bramble case", async () => {
+    const inventory = new Map([
+      ["R6", 10000], // Glacite Walker — shared by both recipes
+      ["U91", 50],   // Rat — the default recipe's input, but only 50 of the 2500 needed
+      ["U10", 5000], // Field Mouse — enough to cover the alternative outright
+    ]);
+
+    const result = await invSvc.calculateOptimalPath("U1", 1000, PARAMS, new Map(inventory));
+
+    // Everything is on hand one way or the other, so nothing needs farming.
+    expect(result.totalTime).toBe(0);
+    expect(serializeTree(result.tree!)).toEqual([
+      "U1 recipe qty=1000 crafts=500 [U10+R6 x2]",
+      "  U10 inventory qty=2500",
+      "  R6 inventory qty=2500",
+    ]);
+  });
 });
 
 describe("calculateOptimalPath — whole shard quantities", () => {

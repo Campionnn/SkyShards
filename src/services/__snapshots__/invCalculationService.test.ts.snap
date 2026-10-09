@@ -5,23 +5,23 @@ exports[`calculateOptimalPath > pins the substituted tree and totals — C67 1`]
   "craftsNeeded": 176,
   "remainingInventory": {
     "C61": 0,
-    "U50": 0,
+    "U59": 0,
   },
   "totalQuantities": {
     "C61": 355,
-    "U50": 176,
+    "U59": 176,
   },
-  "totalTime": "0.382245",
+  "totalTime": "0.407067",
   "tree": [
-    "C67 recipe qty=40 crafts=34 [C64+U50 x1 reptile]",
-    "  C64 recipe qty=170 crafts=142 [C61+U50 x1 reptile]",
+    "C67 recipe qty=40 crafts=34 [C64+U59 x1 reptile]",
+    "  C64 recipe qty=170 crafts=142 [C61+U59 x1 reptile]",
     "    split:",
     "      C61 inventory qty=355",
     "      C61 direct qty=355",
     "    split:",
-    "      U50 inventory qty=176",
-    "      U50 direct qty=108",
-    "  U50 direct qty=68",
+    "      U59 inventory qty=176",
+    "      U59 direct qty=108",
+    "  U59 direct qty=68",
   ],
 }
 `;

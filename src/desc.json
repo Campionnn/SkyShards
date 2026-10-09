@@ -50,11 +50,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Common",
@@ -66,8 +63,11 @@
           "c": "gray"
         },
         {
-          "t": "with ",
+          "t": "with",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Uncommon ",
@@ -136,11 +136,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Common",
@@ -156,9 +153,12 @@
           "c": "gray"
         },
         {
-          "t": "Uncommon ",
+          "t": "Uncommon",
           "c": "green",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -222,11 +222,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Common",
@@ -238,8 +235,11 @@
           "c": "gray"
         },
         {
-          "t": "with ",
+          "t": "with",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Uncommon ",
@@ -288,8 +288,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -600,8 +599,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -630,23 +628,20 @@
           "c": "gray"
         },
         {
-          "t": "Kill Howling Spirit",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": " or Pack Spirit",
+          "t": "Howling Spirit",
+          "c": "red"
+        },
+        {
+          "t": " or ",
           "c": "gray"
         },
         {
-          "t": " "
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Pack Spirit",
+          "c": "red"
         },
         {
           "t": ".",
@@ -705,8 +700,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -849,19 +843,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Dumpster Diver ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Dumpster Diver",
+          "c": "red"
         },
         {
           "t": ".",
@@ -949,8 +936,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -979,16 +965,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Lapis Zombie ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Lapis Zombie",
+          "c": "red"
         },
         {
           "t": ".",
@@ -1268,8 +1250,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -1298,27 +1279,20 @@
           "c": "gray"
         },
         {
-          "t": "Kill Chillshot",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": " or Chillblade ",
+          "t": "Chillshot",
+          "c": "red"
+        },
+        {
+          "t": " or ",
           "c": "gray"
         },
         {
-          "t": "while",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Chillblade",
+          "c": "red"
         },
         {
           "t": ".",
@@ -1388,8 +1362,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -1418,16 +1391,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Fly ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Fly",
+          "c": "red"
         },
         {
           "t": ".",
@@ -1467,8 +1436,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -1497,16 +1465,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Bogged ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Bogged",
+          "c": "red"
         },
         {
           "t": ".",
@@ -1565,8 +1529,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -1595,19 +1558,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Voracious Spider ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Voracious Spider",
+          "c": "red"
         },
         {
           "t": ".",
@@ -1674,11 +1630,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Common ",
@@ -1867,45 +1820,43 @@
           "c": "gray"
         },
         {
-          "t": "Kill Super Tank Zombie",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": ", Crypt Tank",
+          "t": "Super Tank Zombie",
+          "c": "red"
+        },
+        {
+          "t": ", ",
           "c": "gray"
+        },
+        {
+          "t": "Crypt Tank Zombie",
+          "c": "red"
+        },
+        {
+          "t": ", ",
+          "c": "gray"
+        },
+        {
+          "t": "Master",
+          "c": "red"
         },
         {
           "t": " "
         },
         {
-          "t": "Zombie",
+          "t": "Crypt Tank Zombie",
+          "c": "red"
+        },
+        {
+          "t": ", or ",
           "c": "gray"
         },
         {
-          "t": ", Master Crypt Tank Zombie",
-          "c": "gray"
-        },
-        {
-          "t": ", or",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Master Super Tank Zombie ",
-          "c": "gray"
-        },
-        {
-          "t": "while using",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Master Super Tank Zombie",
+          "c": "red"
         },
         {
           "t": ".",
@@ -2032,8 +1983,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -2062,16 +2012,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Tadgang ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Tadgang",
+          "c": "red"
         },
         {
           "t": ".",
@@ -2220,8 +2166,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -2250,16 +2195,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Zealot ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Zealot",
+          "c": "red"
         },
         {
           "t": ".",
@@ -2518,11 +2459,8 @@
           "c": "gray"
         },
         {
-          "t": "Combat",
+          "t": "Combat ",
           "c": "red"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -2535,8 +2473,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -2565,7 +2502,7 @@
           "c": "gray"
         },
         {
-          "t": "Kill ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
@@ -2581,14 +2518,18 @@
           "c": "dark_green"
         },
         {
-          "t": ",",
+          "t": ", ",
           "c": "gray"
+        },
+        {
+          "t": "Venerable",
+          "c": "dark_green"
         },
         {
           "t": " "
         },
         {
-          "t": "Venerable Harpy",
+          "t": "Harpy",
           "c": "dark_green"
         },
         {
@@ -2596,23 +2537,8 @@
           "c": "gray"
         },
         {
-          "t": "Empyrean",
+          "t": "Empyrean Harpy",
           "c": "dark_green"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Harpy ",
-          "c": "dark_green"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
         },
         {
           "t": ".",
@@ -2861,8 +2787,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -2891,20 +2816,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "Golden Ghoul ",
+          "t": "Golden Ghoul",
           "c": "gold"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
         },
         {
           "t": ".",
@@ -2955,8 +2872,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -2985,16 +2901,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Locust ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Locust",
+          "c": "red"
         },
         {
           "t": ".",
@@ -3207,8 +3119,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -3237,16 +3148,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Bezal ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Bezal",
+          "c": "red"
         },
         {
           "t": ".",
@@ -3327,8 +3234,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -3413,8 +3319,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -3443,16 +3348,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Inkling ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Inkling",
+          "c": "red"
         },
         {
           "t": ".",
@@ -3492,8 +3393,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -3522,16 +3422,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Yog ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Yog",
+          "c": "red"
         },
         {
           "t": ".",
@@ -3604,14 +3500,7 @@
           "bold": true
         },
         {
-          "t": "or",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "higher",
+          "t": "or higher",
           "c": "gray"
         },
         {
@@ -3688,11 +3577,8 @@
           "c": "gray"
         },
         {
-          "t": "Water",
+          "t": "Water ",
           "c": "aqua"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -3736,8 +3622,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -3766,16 +3651,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Miner Zombie ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Miner Zombie",
+          "c": "red"
         },
         {
           "t": ".",
@@ -3835,14 +3716,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -3850,15 +3724,19 @@
           "c": "gray"
         },
         {
-          "t": "Cavern Biome",
+          "t": "Cavern",
           "c": "gold"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "gold"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -3971,14 +3849,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -3990,11 +3861,11 @@
           "c": "blue"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -4049,8 +3920,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -4079,7 +3949,7 @@
           "c": "gray"
         },
         {
-          "t": "Kill ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
@@ -4091,22 +3961,7 @@
           "c": "gray"
         },
         {
-          "t": "Exalted",
-          "c": "dark_green"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Cretan Bull",
-          "c": "dark_green"
-        },
-        {
-          "t": ", ",
-          "c": "gray"
-        },
-        {
-          "t": "Stalwart Cretan Bull",
+          "t": "Exalted Cretan Bull",
           "c": "dark_green"
         },
         {
@@ -4115,6 +3970,14 @@
         },
         {
           "t": " "
+        },
+        {
+          "t": "Stalwart Cretan Bull",
+          "c": "dark_green"
+        },
+        {
+          "t": ", ",
+          "c": "gray"
         },
         {
           "t": "Blessed Cretan Bull",
@@ -4132,16 +3995,8 @@
           "t": " "
         },
         {
-          "t": "Cretan Bull ",
+          "t": "Cretan Bull",
           "c": "dark_green"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
         },
         {
           "t": ".",
@@ -4200,16 +4055,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Ant ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Ant",
+          "c": "red"
         },
         {
           "t": ".",
@@ -4314,30 +4165,23 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
+          "t": "Critter Capsule",
           "c": "red"
+        },
+        {
+          "t": " in the",
+          "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
         },
         {
           "t": "Cavern Biome",
           "c": "gold"
         },
         {
-          "t": " of the",
+          "t": " of the ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Safari",
@@ -4420,14 +4264,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -4435,15 +4272,19 @@
           "c": "gray"
         },
         {
-          "t": "Icy Biome",
+          "t": "Icy",
           "c": "blue"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "blue"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -4598,16 +4439,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Haggard ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Haggard",
+          "c": "red"
         },
         {
           "t": ".",
@@ -4624,15 +4461,35 @@
           "c": "gray"
         },
         {
-          "t": "Catch with a ",
+          "t": "Place ",
           "c": "gray"
         },
         {
-          "t": "Fishing Net",
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Spring Shallows",
           "c": "aqua"
         },
         {
-          "t": ".",
+          "t": ". ",
+          "c": "gray"
+        },
+        {
+          "t": "(",
+          "c": "gray"
+        },
+        {
+          "t": "Underwater",
+          "c": "aqua"
+        },
+        {
+          "t": ").",
           "c": "gray"
         }
       ]
@@ -4802,14 +4659,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -4817,15 +4667,19 @@
           "c": "gray"
         },
         {
-          "t": "Cavern Biome",
+          "t": "Cavern",
           "c": "gold"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "gold"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -4930,16 +4784,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Brineling ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Brineling",
+          "c": "red"
         },
         {
           "t": ".",
@@ -4956,12 +4806,115 @@
           "c": "gray"
         },
         {
-          "t": "Catch with a ",
+          "t": "Place ",
           "c": "gray"
         },
         {
-          "t": "Fishing Net",
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Spring Shallows",
           "c": "aqua"
+        },
+        {
+          "t": ". ",
+          "c": "gray"
+        },
+        {
+          "t": "(",
+          "c": "gray"
+        },
+        {
+          "t": "Underwater",
+          "c": "aqua"
+        },
+        {
+          "t": ").",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "C48": {
+    "title": "Rabbit Youth",
+    "id": "rabbit_youth",
+    "description": [
+      {
+        "t": "Rabbit Bro, Cousin, and Sis can have",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "range": [
+          1,
+          10
+        ],
+        "unit": "",
+        "c": "green"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "extra levels.",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Fusing ",
+          "c": "gray"
+        },
+        {
+          "t": "Bunbun ",
+          "c": "white"
+        },
+        {
+          "t": "Shard ",
+          "c": "gray"
+        },
+        {
+          "t": "with ",
+          "c": "gray"
+        },
+        {
+          "t": "Crime ",
+          "c": "dark_red"
+        },
+        {
+          "t": "Family",
+          "c": "gray"
+        },
+        {
+          "t": " or ",
+          "c": "gray"
+        },
+        {
+          "t": "Cocoaleech",
+          "c": "gold"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Shard",
+          "c": "gray"
         },
         {
           "t": ".",
@@ -5032,14 +4985,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -5047,15 +4993,19 @@
           "c": "gray"
         },
         {
-          "t": "Forest Biome",
+          "t": "Forest",
           "c": "dark_green"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "dark_green"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -5133,8 +5083,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -5215,8 +5164,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -5419,8 +5367,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -5476,8 +5423,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -5586,8 +5532,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -5683,8 +5628,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -5786,11 +5730,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Uncommon ",
@@ -5802,9 +5743,12 @@
           "c": "gray"
         },
         {
-          "t": "Rare ",
+          "t": "Rare",
           "c": "blue",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -5868,11 +5812,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Uncommon ",
@@ -5889,7 +5830,14 @@
           "bold": true
         },
         {
-          "t": "or higher",
+          "t": "or",
+          "c": "gray"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "higher",
           "c": "gray"
         },
         {
@@ -5950,11 +5898,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Uncommon ",
@@ -5966,9 +5911,12 @@
           "c": "gray"
         },
         {
-          "t": "Rare ",
+          "t": "Rare",
           "c": "blue",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -6099,11 +6047,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Water ",
@@ -6178,11 +6123,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Combat ",
@@ -6261,14 +6203,7 @@
           "c": "gray"
         },
         {
-          "t": "Cave",
-          "c": "green"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Dweller ",
+          "t": "Cave Dweller ",
           "c": "green"
         },
         {
@@ -6349,11 +6284,8 @@
           "c": "gray"
         },
         {
-          "t": "Water",
+          "t": "Water ",
           "c": "aqua"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -6420,11 +6352,8 @@
           "c": "gray"
         },
         {
-          "t": "Reptile",
+          "t": "Reptile ",
           "c": "green"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Family",
@@ -6465,7 +6394,7 @@
         "c": "gray"
       },
       {
-        "t": " Pests",
+        "t": " Pests",
         "c": "dark_green"
       },
       {
@@ -6476,8 +6405,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -6506,19 +6434,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Field Mouse ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Field Mouse",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -6575,11 +6507,8 @@
           "c": "gray"
         },
         {
-          "t": "Forest",
+          "t": "Forest ",
           "c": "dark_green"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -6697,8 +6626,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -6727,8 +6655,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Rain Slime",
+          "t": "Charm ",
           "c": "gray"
+        },
+        {
+          "t": "Rain Slime",
+          "c": "red"
         },
         {
           "t": " or ",
@@ -6737,17 +6669,6 @@
         {
           "t": "Toxic Rain Slime",
           "c": "green"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
         },
         {
           "t": ".",
@@ -6807,8 +6728,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -6837,16 +6757,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Wetwing ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Wetwing",
+          "c": "red"
         },
         {
           "t": ".",
@@ -6996,8 +6912,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -7026,16 +6941,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Seer ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Seer",
+          "c": "red"
         },
         {
           "t": ".",
@@ -7173,16 +7084,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Sea Witch ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Sea Witch",
+          "c": "red"
         },
         {
           "t": ".",
@@ -7222,8 +7129,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -7252,19 +7158,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Obsidian Defender ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Obsidian Defender",
+          "c": "red"
         },
         {
           "t": ".",
@@ -7304,7 +7203,7 @@
         "t": " "
       },
       {
-        "t": " Pests",
+        "t": " Pests",
         "c": "dark_green"
       },
       {
@@ -7315,8 +7214,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -7345,16 +7243,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Cricket ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Cricket",
+          "c": "red"
         },
         {
           "t": ".",
@@ -7597,11 +7491,8 @@
           "c": "gray"
         },
         {
-          "t": "Combat",
+          "t": "Combat ",
           "c": "red"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -7671,7 +7562,7 @@
         "c": "gray"
       },
       {
-        "t": " Pest ",
+        "t": " Pest ",
         "c": "dark_green"
       },
       {
@@ -7686,8 +7577,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -7716,16 +7606,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Praying Mantis ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Praying Mantis",
+          "c": "red"
         },
         {
           "t": ".",
@@ -7898,38 +7784,43 @@
           "c": "gray"
         },
         {
-          "t": "Kill Zombie Knight",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": ", Zombie Soldier",
+          "t": "Zombie Knight",
+          "c": "red"
+        },
+        {
+          "t": ", ",
           "c": "gray"
         },
         {
-          "t": ",",
+          "t": "Zombie Soldier",
+          "c": "red"
+        },
+        {
+          "t": ", ",
           "c": "gray"
+        },
+        {
+          "t": "Zombie",
+          "c": "red"
         },
         {
           "t": " "
         },
         {
-          "t": "Zombie Commander",
+          "t": "Commander",
+          "c": "red"
+        },
+        {
+          "t": ", or ",
           "c": "gray"
         },
         {
-          "t": ", or Zombie Lord",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Zombie Lord",
+          "c": "red"
         },
         {
           "t": ".",
@@ -8089,8 +7980,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -8119,19 +8009,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Treasure Hoarder ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Treasure Hoarder",
+          "c": "red"
         },
         {
           "t": ".",
@@ -8227,8 +8110,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -8257,23 +8139,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Revenant Sycophant ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Revenant Sycophant",
+          "c": "red"
         },
         {
           "t": ".",
@@ -8399,8 +8270,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -8429,16 +8299,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Ent ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Ent",
+          "c": "red"
         },
         {
           "t": ".",
@@ -8594,8 +8460,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -8624,23 +8489,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "Soul of the Alpha ",
+          "t": "Soul of the Alpha",
           "c": "dark_aqua"
-        },
-        {
-          "t": "while using",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
         },
         {
           "t": ".",
@@ -8819,8 +8673,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -8849,16 +8702,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Magma Slug ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Magma Slug",
+          "c": "red"
         },
         {
           "t": ".",
@@ -8981,8 +8830,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -9011,16 +8859,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Flaming Spider ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Flaming Spider",
+          "c": "red"
         },
         {
           "t": ".",
@@ -9088,12 +8932,9 @@
           "c": "gray"
         },
         {
-          "t": "Uncommon",
+          "t": "Uncommon ",
           "c": "green",
           "bold": true
-        },
-        {
-          "t": " "
         },
         {
           "t": "or higher",
@@ -9156,8 +8997,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -9186,19 +9026,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Zealot Bruiser ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Zealot Bruiser",
+          "c": "red"
         },
         {
           "t": ".",
@@ -9257,8 +9090,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -9287,23 +9119,20 @@
           "c": "gray"
         },
         {
-          "t": "Kill Strider Surfer",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": " or Strider",
+          "t": "Strider Surfer",
+          "c": "red"
+        },
+        {
+          "t": " or ",
           "c": "gray"
         },
         {
-          "t": " "
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Strider",
+          "c": "red"
         },
         {
           "t": ".",
@@ -9404,11 +9233,8 @@
           "c": "gray"
         },
         {
-          "t": "Combat",
+          "t": "Combat ",
           "c": "red"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -9456,7 +9282,7 @@
         "c": "gray"
       },
       {
-        "t": "",
+        "t": "",
         "c": "dark_green"
       },
       {
@@ -9498,11 +9324,8 @@
           "c": "gray"
         },
         {
-          "t": "Mining",
+          "t": "Mining ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Attribute Category",
@@ -9515,8 +9338,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -9537,8 +9359,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -9567,16 +9388,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Earthworm ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Earthworm",
+          "c": "red"
         },
         {
           "t": ".",
@@ -9725,14 +9542,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -9740,15 +9550,19 @@
           "c": "gray"
         },
         {
-          "t": "Icy Biome",
+          "t": "Icy",
           "c": "blue"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "blue"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -9853,30 +9667,23 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
+          "t": "Critter Capsule",
           "c": "red"
+        },
+        {
+          "t": " in the",
+          "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
         },
         {
           "t": "Forest Biome",
           "c": "dark_green"
         },
         {
-          "t": " of the",
+          "t": " of the ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Safari",
@@ -9966,16 +9773,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Bayou Sludge ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Bayou Sludge",
+          "c": "red"
         },
         {
           "t": ".",
@@ -10087,14 +9890,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -10102,15 +9898,19 @@
           "c": "gray"
         },
         {
-          "t": "Haunted Biome",
+          "t": "Haunted",
           "c": "dark_purple"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "dark_purple"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -10194,14 +9994,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -10209,15 +10002,19 @@
           "c": "gray"
         },
         {
-          "t": "Forest Biome",
+          "t": "Forest",
           "c": "dark_green"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "dark_green"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -10372,14 +10169,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -10387,15 +10177,19 @@
           "c": "gray"
         },
         {
-          "t": "Haunted Biome",
+          "t": "Haunted",
           "c": "dark_purple"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "dark_purple"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -10472,30 +10266,23 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
+          "t": "Critter Capsule",
           "c": "red"
+        },
+        {
+          "t": " in the",
+          "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
         },
         {
           "t": "Haunted Biome",
           "c": "dark_purple"
         },
         {
-          "t": " of the",
+          "t": " of the ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Safari",
@@ -10753,14 +10540,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -10768,15 +10548,19 @@
           "c": "gray"
         },
         {
-          "t": "Haunted Biome",
+          "t": "Haunted",
           "c": "dark_purple"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "dark_purple"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -10848,30 +10632,23 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
+          "t": "Critter Capsule",
           "c": "red"
+        },
+        {
+          "t": " in the",
+          "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
         },
         {
           "t": "Forest Biome",
           "c": "dark_green"
         },
         {
-          "t": " of the",
+          "t": " of the ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Safari",
@@ -10976,33 +10753,26 @@
           "c": "green"
         },
         {
-          "t": " with a",
+          "t": " with a ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Capsule",
           "c": "red"
         },
         {
-          "t": " in the ",
-          "c": "gray"
-        },
-        {
-          "t": "Icy Biome",
-          "c": "blue"
-        },
-        {
-          "t": " of",
+          "t": " in the",
           "c": "gray"
         },
         {
           "t": " "
         },
         {
-          "t": "the ",
+          "t": "Icy Biome",
+          "c": "blue"
+        },
+        {
+          "t": " of the ",
           "c": "gray"
         },
         {
@@ -11067,30 +10837,23 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
+          "t": "Critter Capsule",
           "c": "red"
+        },
+        {
+          "t": " in the",
+          "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
         },
         {
           "t": "Haunted Biome",
           "c": "dark_purple"
         },
         {
-          "t": " of the",
+          "t": " of the ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Safari",
@@ -11537,14 +11300,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -11552,15 +11308,19 @@
           "c": "gray"
         },
         {
-          "t": "Cavern Biome",
+          "t": "Cavern",
           "c": "gold"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "gold"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -11768,8 +11528,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -11798,11 +11557,19 @@
           "c": "gray"
         },
         {
-          "t": "Kill ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
           "t": "Stalwart Minos Hunter",
+          "c": "dark_green"
+        },
+        {
+          "t": ", ",
+          "c": "gray"
+        },
+        {
+          "t": "Venerable Minos Hunter",
           "c": "dark_green"
         },
         {
@@ -11813,22 +11580,7 @@
           "t": " "
         },
         {
-          "t": "Venerable Minos Hunter",
-          "c": "dark_green"
-        },
-        {
-          "t": ", ",
-          "c": "gray"
-        },
-        {
-          "t": "Blessed",
-          "c": "dark_green"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Minos Hunter",
+          "t": "Blessed Minos Hunter",
           "c": "dark_green"
         },
         {
@@ -11840,14 +11592,18 @@
           "c": "dark_green"
         },
         {
-          "t": ",",
+          "t": ", ",
           "c": "gray"
+        },
+        {
+          "t": "Exalted",
+          "c": "dark_green"
         },
         {
           "t": " "
         },
         {
-          "t": "Exalted Minos Hunter",
+          "t": "Minos Hunter",
           "c": "dark_green"
         },
         {
@@ -11855,23 +11611,8 @@
           "c": "gray"
         },
         {
-          "t": "Minos",
+          "t": "Minos Hunter",
           "c": "dark_green"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Hunter ",
-          "c": "dark_green"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
         },
         {
           "t": ".",
@@ -11931,29 +11672,26 @@
           "c": "green"
         },
         {
-          "t": " with a",
+          "t": " with a ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Capsule",
           "c": "red"
         },
         {
-          "t": " in the ",
+          "t": " in the",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Forest Biome",
           "c": "dark_green"
         },
         {
-          "t": " "
-        },
-        {
-          "t": "of the ",
+          "t": " of the ",
           "c": "gray"
         },
         {
@@ -12112,8 +11850,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -12142,16 +11879,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Parched ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Parched",
+          "c": "red"
         },
         {
           "t": ".",
@@ -12245,30 +11978,23 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
+          "t": "Critter Capsule",
           "c": "red"
+        },
+        {
+          "t": " in the",
+          "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
         },
         {
           "t": "Haunted Biome",
           "c": "dark_purple"
         },
         {
-          "t": " of the",
+          "t": " of the ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Safari",
@@ -12336,11 +12062,8 @@
           "c": "gray"
         },
         {
-          "t": "Combat",
+          "t": "Combat ",
           "c": "red"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -12486,8 +12209,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -12728,8 +12450,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -12870,16 +12591,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Sprawl ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Sprawl",
+          "c": "red"
         },
         {
           "t": ".",
@@ -12896,37 +12613,35 @@
           "c": "gray"
         },
         {
-          "t": "Catch with a ",
+          "t": "Place ",
           "c": "gray"
         },
         {
-          "t": "Fishing Net",
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Spring Shallows",
           "c": "aqua"
         },
         {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
+          "t": ". ",
           "c": "gray"
         },
         {
-          "t": "- ",
+          "t": "(",
           "c": "gray"
         },
         {
-          "t": "Catch with ",
-          "c": "gray"
+          "t": "Underwater",
+          "c": "aqua"
         },
         {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
+          "t": ").",
           "c": "gray"
         }
       ]
@@ -12974,8 +12689,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -12991,6 +12705,95 @@
         },
         {
           "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "U73": {
+    "title": "Fiesta Fortune",
+    "description": [
+      {
+        "t": "Grants ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          5,
+          50
+        ],
+        "unit": "",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": " Gemstone Fortune",
+        "c": "gold"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "while ",
+        "c": "gray"
+      },
+      {
+        "t": "Mayor Cole's ",
+        "c": "aqua"
+      },
+      {
+        "t": "Mining Fiesta ",
+        "c": "gold"
+      },
+      {
+        "t": "perk",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "is active.",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Purchased from ",
+          "c": "gray"
+        },
+        {
+          "t": "Brynmor's Shop ",
+          "c": "gold"
+        },
+        {
+          "t": "while ",
+          "c": "gray"
+        },
+        {
+          "t": "Mayor Cole's",
+          "c": "aqua"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Mining Fiesta ",
+          "c": "gold"
+        },
+        {
+          "t": "perk is active.",
           "c": "gray"
         }
       ]
@@ -13047,8 +12850,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -13070,7 +12872,7 @@
     ]
   },
   "U76": {
-    "title": "Forest Felling",
+    "title": "Helix Timber",
     "id": "forest_felling",
     "description": [
       {
@@ -13082,21 +12884,33 @@
           0.1,
           1
         ],
-        "unit": "%",
-        "c": "green"
+        "unit": "",
+        "c": "dark_red"
       },
       {
         "t": " "
       },
       {
-        "t": "chance to fell an",
+        "t": " Timber ",
+        "c": "dark_red"
+      },
+      {
+        "t": "on ",
         "c": "gray"
       },
       {
+        "t": "Helix",
+        "c": "gold"
+      },
+      {
         "t": " "
       },
       {
-        "t": "entire tree!",
+        "t": "Trees",
+        "c": "gold"
+      },
+      {
+        "t": ".",
         "c": "gray"
       }
     ],
@@ -13182,8 +12996,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -13212,16 +13025,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Honeymite ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Honeymite",
+          "c": "red"
         },
         {
           "t": ".",
@@ -13335,14 +13144,11 @@
           "c": "gray"
         },
         {
-          "t": "Elusive",
-          "c": "green"
+          "t": "Queen Bee ",
+          "c": "dark_purple"
         },
         {
-          "t": " "
-        },
-        {
-          "t": "Family",
+          "t": "Shard",
           "c": "gray"
         },
         {
@@ -13360,19 +13166,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Queen Ant ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Queen Ant",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ],
@@ -13719,7 +13529,7 @@
         "c": "gray"
       },
       {
-        "t": "",
+        "t": "",
         "c": "dark_green"
       },
       {
@@ -13752,8 +13562,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -13782,16 +13591,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Rat ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Rat",
+          "c": "red"
         },
         {
           "t": ".",
@@ -13831,8 +13636,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -13861,16 +13665,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Slug ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Slug",
+          "c": "red"
         },
         {
           "t": ".",
@@ -13914,8 +13714,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -13944,16 +13743,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Mite ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Mite",
+          "c": "red"
         },
         {
           "t": ".",
@@ -13971,7 +13766,7 @@
         "c": "gray"
       },
       {
-        "t": "",
+        "t": "",
         "c": "dark_green"
       },
       {
@@ -14001,8 +13796,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -14031,16 +13825,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Moth ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Moth",
+          "c": "red"
         },
         {
           "t": ".",
@@ -14099,8 +13889,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -14129,16 +13918,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Mosquito ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Mosquito",
+          "c": "red"
         },
         {
           "t": ".",
@@ -14267,11 +14052,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Rare ",
@@ -14288,7 +14070,14 @@
           "bold": true
         },
         {
-          "t": "or higher",
+          "t": "or",
+          "c": "gray"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "higher",
           "c": "gray"
         },
         {
@@ -14353,12 +14142,9 @@
           "c": "gray"
         },
         {
-          "t": "Rare",
+          "t": "Rare ",
           "c": "blue",
           "bold": true
-        },
-        {
-          "t": " "
         },
         {
           "t": "with ",
@@ -14431,11 +14217,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Rare ",
@@ -14452,7 +14235,14 @@
           "bold": true
         },
         {
-          "t": "or higher",
+          "t": "or",
+          "c": "gray"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "higher",
           "c": "gray"
         },
         {
@@ -14513,11 +14303,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Uncommon ",
@@ -14593,19 +14380,19 @@
           "c": "gray"
         },
         {
-          "t": "Forest",
+          "t": "Forest ",
           "c": "dark_green"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Uncommon ",
@@ -14658,8 +14445,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -14688,16 +14474,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Glacite Walker ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Glacite Walker",
+          "c": "red"
         },
         {
           "t": ".",
@@ -14878,19 +14660,19 @@
           "c": "gray"
         },
         {
-          "t": "Water",
+          "t": "Water ",
           "c": "aqua"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Uncommon ",
@@ -14962,19 +14744,19 @@
           "c": "gray"
         },
         {
-          "t": "Combat",
+          "t": "Combat ",
           "c": "red"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Uncommon ",
@@ -15335,11 +15117,8 @@
           "c": "gray"
         },
         {
-          "t": "Wither",
+          "t": "Wither ",
           "c": "blue"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Shard",
@@ -15425,11 +15204,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Rare ",
@@ -15497,8 +15273,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -15527,16 +15302,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Beetle ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Beetle",
+          "c": "red"
         },
         {
           "t": ".",
@@ -15591,8 +15362,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -15621,31 +15391,28 @@
           "c": "gray"
         },
         {
-          "t": "Kill Seacurse",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": ", Hydrospear",
+          "t": "Seacurse",
+          "c": "red"
+        },
+        {
+          "t": ", ",
           "c": "gray"
         },
         {
-          "t": ", or",
+          "t": "Hydrospear",
+          "c": "red"
+        },
+        {
+          "t": ", or ",
           "c": "gray"
         },
         {
-          "t": " "
-        },
-        {
-          "t": "Tidetot ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Tidetot",
+          "c": "red"
         },
         {
           "t": ".",
@@ -15790,8 +15557,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -15820,20 +15586,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "Star Sentry ",
+          "t": "Star Sentry",
           "c": "dark_purple"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
         },
         {
           "t": ".",
@@ -15912,11 +15670,8 @@
           "c": "gray"
         },
         {
-          "t": "Demon",
+          "t": "Demon ",
           "c": "green"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Family",
@@ -16067,16 +15822,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Arachne ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Arachne",
+          "c": "red"
         },
         {
           "t": ".",
@@ -16203,16 +15954,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Lava Leech ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Lava Leech",
+          "c": "red"
         },
         {
           "t": ".",
@@ -16270,6 +16017,87 @@
         {
           "t": "Revenant Horror",
           "c": "red"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
+  "R28": {
+    "title": "Catacombs Cap",
+    "description": [
+      {
+        "t": "Increases your ",
+        "c": "gray"
+      },
+      {
+        "t": " Speed Cap",
+        "c": "white"
+      },
+      {
+        "t": " by",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "range": [
+          5,
+          50
+        ],
+        "unit": "",
+        "c": "green"
+      },
+      {
+        "t": " while in ",
+        "c": "gray"
+      },
+      {
+        "t": "The Catacombs",
+        "c": "red"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Fusing ",
+          "c": "gray"
+        },
+        {
+          "t": "Soul of the Alpha ",
+          "c": "green"
+        },
+        {
+          "t": "Shard ",
+          "c": "gray"
+        },
+        {
+          "t": "with ",
+          "c": "gray"
+        },
+        {
+          "t": "Epic ",
+          "c": "dark_purple",
+          "bold": true
+        },
+        {
+          "t": "or higher",
+          "c": "gray"
         },
         {
           "t": ".",
@@ -16439,11 +16267,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Rare ",
@@ -16469,16 +16294,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Skeletor ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Skeletor",
+          "c": "red"
         },
         {
           "t": ".",
@@ -16522,8 +16343,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -16552,16 +16372,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Thyst ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Thyst",
+          "c": "red"
         },
         {
           "t": ".",
@@ -16674,18 +16490,7 @@
     "id": "quartz_speed",
     "description": [
       {
-        "t": " Mining Speed ",
-        "c": "gold"
-      },
-      {
-        "t": "from events is",
-        "c": "gray"
-      },
-      {
-        "t": " "
-      },
-      {
-        "t": "increased by ",
+        "t": "Grants ",
         "c": "gray"
       },
       {
@@ -16693,11 +16498,33 @@
           10,
           100
         ],
-        "unit": "%",
+        "unit": "",
         "c": "gold"
       },
       {
-        "t": ".",
+        "t": " "
+      },
+      {
+        "t": " Mining Speed",
+        "c": "gold"
+      },
+      {
+        "t": " while",
+        "c": "gray"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "any ",
+        "c": "gray"
+      },
+      {
+        "t": "Weather ",
+        "c": "aqua"
+      },
+      {
+        "t": "is active.",
         "c": "gray"
       }
     ],
@@ -16724,11 +16551,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Cave Dweller ",
@@ -16739,18 +16563,14 @@
           "c": "gray"
         },
         {
-          "t": " or ",
+          "t": " or",
           "c": "gray"
-        },
-        {
-          "t": "Abyssal",
-          "c": "blue"
         },
         {
           "t": " "
         },
         {
-          "t": "Lanternfish ",
+          "t": "Abyssal Lanternfish ",
           "c": "blue"
         },
         {
@@ -16826,12 +16646,9 @@
           "c": "gray"
         },
         {
-          "t": "Rare",
+          "t": "Rare ",
           "c": "blue",
           "bold": true
-        },
-        {
-          "t": " "
         },
         {
           "t": "or higher ",
@@ -16842,9 +16659,12 @@
           "c": "gray"
         },
         {
-          "t": "Rare ",
+          "t": "Rare",
           "c": "blue",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -16999,8 +16819,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -17029,16 +16848,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Kada Knight ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Kada Knight",
+          "c": "red"
         },
         {
           "t": ".",
@@ -17154,8 +16969,8 @@
       },
       {
         "range": [
-          2,
-          20
+          5,
+          50
         ],
         "unit": "",
         "c": "green"
@@ -17179,8 +16994,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -17209,16 +17023,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Carrot King ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Carrot King",
+          "c": "red"
         },
         {
           "t": ".",
@@ -17273,8 +17083,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -17303,19 +17112,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Wither Spectre ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Wither Spectre",
+          "c": "red"
         },
         {
           "t": ".",
@@ -17444,8 +17246,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -17474,16 +17275,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Matcho ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Matcho",
+          "c": "red"
         },
         {
           "t": ".",
@@ -17581,11 +17378,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Invisibug ",
@@ -17815,11 +17609,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Honeyhog ",
@@ -17906,11 +17697,8 @@
           "c": "gray"
         },
         {
-          "t": "Forest",
+          "t": "Forest ",
           "c": "dark_green"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -17921,9 +17709,12 @@
           "c": "gray"
         },
         {
-          "t": "Rare ",
+          "t": "Rare",
           "c": "blue",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -17991,11 +17782,8 @@
           "c": "gray"
         },
         {
-          "t": "Phanflare",
+          "t": "Phanflare ",
           "c": "white"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Shards ",
@@ -18006,9 +17794,12 @@
           "c": "gray"
         },
         {
-          "t": "Rare ",
+          "t": "Rare",
           "c": "blue",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -18021,8 +17812,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -18043,8 +17833,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -18073,16 +17862,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Dreadwing ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Dreadwing",
+          "c": "red"
         },
         {
           "t": ".",
@@ -18308,11 +18093,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Cave Dweller ",
@@ -18323,15 +18105,15 @@
           "c": "gray"
         },
         {
-          "t": " or ",
+          "t": " or",
           "c": "gray"
         },
         {
-          "t": "Silentdepth",
-          "c": "blue"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Silentdepth ",
+          "c": "blue"
         },
         {
           "t": "Shard",
@@ -18421,11 +18203,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Forest ",
@@ -18436,8 +18215,11 @@
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Epic ",
@@ -18595,19 +18377,19 @@
           "c": "gray"
         },
         {
-          "t": "Combat",
+          "t": "Combat ",
           "c": "red"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Uncommon ",
@@ -18667,8 +18449,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -18765,8 +18546,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -18795,16 +18575,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Lava Flame ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Lava Flame",
+          "c": "red"
         },
         {
           "t": ".",
@@ -18994,14 +18770,7 @@
           "bold": true
         },
         {
-          "t": "or",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "higher",
+          "t": "or higher",
           "c": "gray"
         },
         {
@@ -19297,20 +19066,20 @@
           "c": "gray"
         },
         {
-          "t": "Epic",
+          "t": "Epic ",
           "c": "dark_purple",
           "bold": true
-        },
-        {
-          "t": " "
         },
         {
           "t": "or higher ",
           "c": "gray"
         },
         {
-          "t": "with ",
+          "t": "with",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Shrieky Tiki",
@@ -19321,14 +19090,7 @@
           "c": "gray"
         },
         {
-          "t": "Sneaky",
-          "c": "green"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Tiki",
+          "t": "Sneaky Tiki",
           "c": "green"
         },
         {
@@ -19358,19 +19120,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Wiki Tiki ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Wiki Tiki",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -19418,8 +19184,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -19448,7 +19213,7 @@
           "c": "gray"
         },
         {
-          "t": "Kill ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
@@ -19460,38 +19225,19 @@
           "c": "gray"
         },
         {
-          "t": "Venerable",
+          "t": "Venerable Minotaur",
           "c": "dark_green"
         },
         {
-          "t": " "
-        },
-        {
-          "t": "Minotaur",
-          "c": "dark_green"
-        },
-        {
-          "t": ", or ",
-          "c": "gray"
-        },
-        {
-          "t": "Empyrean Minotaur ",
-          "c": "dark_green"
-        },
-        {
-          "t": "while",
+          "t": ", or",
           "c": "gray"
         },
         {
           "t": " "
         },
         {
-          "t": "using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Empyrean Minotaur",
+          "c": "dark_green"
         },
         {
           "t": ".",
@@ -19542,8 +19288,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -19658,11 +19403,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Bug ",
@@ -19673,8 +19415,11 @@
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Uncommon ",
@@ -19743,14 +19488,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -19758,15 +19496,19 @@
           "c": "gray"
         },
         {
-          "t": "Cavern Biome",
+          "t": "Cavern",
           "c": "gold"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "gold"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -19845,14 +19587,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -19860,15 +19595,19 @@
           "c": "gray"
         },
         {
-          "t": "Forest Biome",
+          "t": "Forest",
           "c": "dark_green"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "dark_green"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -19943,19 +19682,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Thunder ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Thunder",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -20023,14 +19766,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -20038,15 +19774,19 @@
           "c": "gray"
         },
         {
-          "t": "Cavern Biome",
+          "t": "Cavern",
           "c": "gold"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "gold"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -20125,14 +19865,7 @@
           "c": "gray"
         },
         {
-          "t": "King",
-          "c": "blue"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Cobra ",
+          "t": "King Cobra ",
           "c": "blue"
         },
         {
@@ -20212,14 +19945,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -20227,15 +19953,19 @@
           "c": "gray"
         },
         {
-          "t": "Cavern Biome",
+          "t": "Cavern",
           "c": "gold"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "gold"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -20395,33 +20125,26 @@
           "c": "blue"
         },
         {
-          "t": " with a",
+          "t": " with a ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Capsule",
           "c": "red"
         },
         {
-          "t": " in the ",
-          "c": "gray"
-        },
-        {
-          "t": "Icy Biome",
-          "c": "blue"
-        },
-        {
-          "t": " of",
+          "t": " in the",
           "c": "gray"
         },
         {
           "t": " "
         },
         {
-          "t": "the ",
+          "t": "Icy Biome",
+          "c": "blue"
+        },
+        {
+          "t": " of the ",
           "c": "gray"
         },
         {
@@ -20501,30 +20224,23 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
+          "t": "Critter Capsule",
           "c": "red"
+        },
+        {
+          "t": " in the",
+          "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
         },
         {
           "t": "Cavern Biome",
           "c": "gold"
         },
         {
-          "t": " of the",
+          "t": " of the ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Safari",
@@ -20603,30 +20319,23 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
+          "t": "Critter Capsule",
           "c": "red"
+        },
+        {
+          "t": " in the",
+          "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
         },
         {
           "t": "Forest Biome",
           "c": "dark_green"
         },
         {
-          "t": " of the",
+          "t": " of the ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Safari",
@@ -20697,30 +20406,23 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
+          "t": "Critter Capsule",
           "c": "red"
+        },
+        {
+          "t": " in the",
+          "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
         },
         {
           "t": "Haunted Biome",
           "c": "dark_purple"
         },
         {
-          "t": " of the",
+          "t": " of the ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Safari",
@@ -20799,14 +20501,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -20814,15 +20509,19 @@
           "c": "gray"
         },
         {
-          "t": "Icy Biome",
+          "t": "Icy",
           "c": "blue"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "blue"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -20901,30 +20600,23 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
+          "t": "Critter Capsule",
           "c": "red"
+        },
+        {
+          "t": " in the",
+          "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
         },
         {
           "t": "Haunted Biome",
           "c": "dark_purple"
         },
         {
-          "t": " of the",
+          "t": " of the ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Safari",
@@ -20999,14 +20691,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -21014,15 +20699,19 @@
           "c": "gray"
         },
         {
-          "t": "Icy Biome",
+          "t": "Icy",
           "c": "blue"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "blue"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -21093,16 +20782,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Stoneworm ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Stoneworm",
+          "c": "red"
         },
         {
           "t": ".",
@@ -21173,14 +20858,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -21188,15 +20866,19 @@
           "c": "gray"
         },
         {
-          "t": "Forest Biome",
+          "t": "Forest",
           "c": "dark_green"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "dark_green"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -21379,8 +21061,8 @@
       },
       {
         "range": [
-          0.5,
-          5
+          0.1,
+          1
         ],
         "unit": "%",
         "c": "green"
@@ -21410,8 +21092,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -21440,16 +21121,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Zombuddy ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Zombuddy",
+          "c": "red"
         },
         {
           "t": ".",
@@ -21500,8 +21177,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -21599,14 +21275,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -21614,15 +21283,19 @@
           "c": "gray"
         },
         {
-          "t": "Icy Biome",
+          "t": "Icy",
           "c": "blue"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "blue"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -21734,8 +21407,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -21910,8 +21582,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -22286,16 +21957,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Torrid ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Torrid",
+          "c": "red"
         },
         {
           "t": ".",
@@ -22312,37 +21979,35 @@
           "c": "gray"
         },
         {
-          "t": "Catch with a ",
+          "t": "Place ",
           "c": "gray"
         },
         {
-          "t": "Fishing Net",
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Spring Depths",
+          "c": "blue"
+        },
+        {
+          "t": ". ",
+          "c": "gray"
+        },
+        {
+          "t": "(",
+          "c": "gray"
+        },
+        {
+          "t": "Underwater",
           "c": "aqua"
         },
         {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
+          "t": ").",
           "c": "gray"
         }
       ]
@@ -22387,8 +22052,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -22486,21 +22150,21 @@
           "c": "gray"
         },
         {
-          "t": "Epic",
+          "t": "Epic ",
           "c": "dark_purple",
           "bold": true
-        },
-        {
-          "t": " "
         },
         {
           "t": "with ",
           "c": "gray"
         },
         {
-          "t": "Legendary ",
+          "t": "Legendary",
           "c": "gold",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -22568,21 +22232,21 @@
           "c": "gray"
         },
         {
-          "t": "Epic",
+          "t": "Epic ",
           "c": "dark_purple",
           "bold": true
-        },
-        {
-          "t": " "
         },
         {
           "t": "with ",
           "c": "gray"
         },
         {
-          "t": "Legendary ",
+          "t": "Legendary",
           "c": "gold",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -22650,21 +22314,21 @@
           "c": "gray"
         },
         {
-          "t": "Epic",
+          "t": "Epic ",
           "c": "dark_purple",
           "bold": true
-        },
-        {
-          "t": " "
         },
         {
           "t": "with ",
           "c": "gray"
         },
         {
-          "t": "Legendary ",
+          "t": "Legendary",
           "c": "gold",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -22737,14 +22401,7 @@
           "bold": true
         },
         {
-          "t": "or",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "higher",
+          "t": "or higher",
           "c": "gray"
         },
         {
@@ -22821,11 +22478,8 @@
           "c": "gray"
         },
         {
-          "t": "Water",
+          "t": "Water ",
           "c": "aqua"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -22836,9 +22490,12 @@
           "c": "gray"
         },
         {
-          "t": "Rare ",
+          "t": "Rare",
           "c": "blue",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -22898,11 +22555,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Combat ",
@@ -22913,8 +22567,11 @@
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Rare ",
@@ -22922,14 +22579,7 @@
           "bold": true
         },
         {
-          "t": "or",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "higher",
+          "t": "or higher",
           "c": "gray"
         },
         {
@@ -22947,19 +22597,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Alligator ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Alligator",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ],
@@ -23058,19 +22712,19 @@
           "c": "gray"
         },
         {
-          "t": "Forest",
+          "t": "Forest ",
           "c": "dark_green"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Rare ",
@@ -23131,19 +22785,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Abyssal Miner ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Abyssal Miner",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -23199,11 +22857,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Combat ",
@@ -23214,8 +22869,11 @@
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Rare ",
@@ -23223,14 +22881,7 @@
           "bold": true
         },
         {
-          "t": "or",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "higher",
+          "t": "or higher",
           "c": "gray"
         },
         {
@@ -23291,11 +22942,8 @@
           "c": "gray"
         },
         {
-          "t": "Forest",
+          "t": "Forest ",
           "c": "dark_green"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -23306,9 +22954,12 @@
           "c": "gray"
         },
         {
-          "t": "Rare ",
+          "t": "Rare",
           "c": "blue",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -23372,11 +23023,8 @@
           "c": "gray"
         },
         {
-          "t": "Water",
+          "t": "Water ",
           "c": "aqua"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -23392,7 +23040,14 @@
           "bold": true
         },
         {
-          "t": "or higher",
+          "t": "or",
+          "c": "gray"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "higher",
           "c": "gray"
         },
         {
@@ -23464,61 +23119,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Fusing ",
-          "c": "gray"
-        },
-        {
-          "t": "Zealot ",
-          "c": "white"
-        },
-        {
-          "t": "Shard ",
-          "c": "gray"
-        },
-        {
-          "t": "with ",
-          "c": "gray"
-        },
-        {
-          "t": "Combat",
-          "c": "red"
-        },
-        {
           "t": " "
-        },
-        {
-          "t": "Category",
-          "c": "gray"
-        },
-        {
-          "t": " and ",
-          "c": "gray"
-        },
-        {
-          "t": "Elusive ",
-          "c": "green"
-        },
-        {
-          "t": "Family",
-          "c": "gray"
-        },
-        {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
         },
         {
           "t": "- ",
@@ -23547,26 +23148,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Zealot Special Enderman ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while",
+          "t": "Special Zealot",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": " "
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": "using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -23582,7 +23180,7 @@
       },
       {
         "range": [
-          5,
+          null,
           50
         ],
         "unit": "",
@@ -23599,7 +23197,7 @@
         "t": " "
       },
       {
-        "t": "during the Night.",
+        "t": "during the night.",
         "c": "gray"
       }
     ],
@@ -23630,11 +23228,8 @@
           "c": "gray"
         },
         {
-          "t": "Bug",
+          "t": "Bug ",
           "c": "green"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Family",
@@ -23650,7 +23245,14 @@
           "bold": true
         },
         {
-          "t": "or higher",
+          "t": "or",
+          "c": "gray"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "higher",
           "c": "gray"
         },
         {
@@ -23660,8 +23262,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -23690,16 +23291,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Lunar Moth ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Lunar Moth",
+          "c": "red"
         },
         {
           "t": ".",
@@ -23751,34 +23348,23 @@
           "c": "gray"
         },
         {
-          "t": "Moray Eel ",
-          "c": "dark_purple"
+          "t": "Eel ",
+          "c": "blue"
         },
         {
           "t": "Shard ",
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
         },
         {
-          "t": " "
-        },
-        {
-          "t": "Firefox",
-          "c": "white"
-        },
-        {
-          "t": " and ",
-          "c": "gray"
-        },
-        {
-          "t": "Firefly ",
+          "t": "Moray Eel ",
           "c": "dark_purple"
         },
         {
-          "t": "Shards",
+          "t": "Shard",
           "c": "gray"
         },
         {
@@ -23800,8 +23386,8 @@
           "c": "gray"
         },
         {
-          "t": "Eel ",
-          "c": "blue"
+          "t": "Moray Eel ",
+          "c": "dark_purple"
         },
         {
           "t": "Shard ",
@@ -23812,14 +23398,22 @@
           "c": "gray"
         },
         {
-          "t": "Moray Eel",
+          "t": "Firefox",
+          "c": "white"
+        },
+        {
+          "t": " and ",
+          "c": "gray"
+        },
+        {
+          "t": "Firefly",
           "c": "dark_purple"
         },
         {
           "t": " "
         },
         {
-          "t": "Shard",
+          "t": "Shards",
           "c": "gray"
         },
         {
@@ -23829,8 +23423,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -23859,16 +23452,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Fire Eel ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Fire Eel",
+          "c": "red"
         },
         {
           "t": ".",
@@ -23945,21 +23534,13 @@
           "c": "gray"
         },
         {
-          "t": "Kill ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "Bal ",
+          "t": "Bal",
           "c": "red",
           "bold": true
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
         },
         {
           "t": ".",
@@ -24026,12 +23607,9 @@
           "c": "gray"
         },
         {
-          "t": "Rare",
+          "t": "Rare ",
           "c": "blue",
           "bold": true
-        },
-        {
-          "t": " "
         },
         {
           "t": "or higher ",
@@ -24042,9 +23620,12 @@
           "c": "gray"
         },
         {
-          "t": "Epic ",
+          "t": "Epic",
           "c": "dark_purple",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -24088,8 +23669,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -24118,19 +23698,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Water Hydra ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Water Hydra",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -24186,8 +23770,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -24216,16 +23799,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Flare ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Flare",
+          "c": "red"
         },
         {
           "t": ".",
@@ -24314,12 +23893,9 @@
           "c": "gray"
         },
         {
-          "t": "Epic",
+          "t": "Epic ",
           "c": "dark_purple",
           "bold": true
-        },
-        {
-          "t": " "
         },
         {
           "t": "or higher",
@@ -24363,8 +23939,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -24393,22 +23968,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill The Loch Emperor ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using",
+          "t": "The Loch Emperor",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": " "
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -24467,72 +24043,78 @@
           "c": "gray"
         },
         {
-          "t": "Kill Prince Bernhard",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": ", Prince",
+          "t": "Prince Bernhard",
+          "c": "red"
+        },
+        {
+          "t": ", ",
+          "c": "gray"
+        },
+        {
+          "t": "Prince Christian",
+          "c": "red"
+        },
+        {
+          "t": ", ",
+          "c": "gray"
+        },
+        {
+          "t": "Prince",
+          "c": "red"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Pieter",
+          "c": "red"
+        },
+        {
+          "t": ", ",
+          "c": "gray"
+        },
+        {
+          "t": "Prince Nicholas",
+          "c": "red"
+        },
+        {
+          "t": ", ",
+          "c": "gray"
+        },
+        {
+          "t": "Prince Alexander",
+          "c": "red"
+        },
+        {
+          "t": ", ",
+          "c": "gray"
+        },
+        {
+          "t": "Prince Marius",
+          "c": "red"
+        },
+        {
+          "t": ",",
           "c": "gray"
         },
         {
           "t": " "
         },
         {
-          "t": "Christian",
+          "t": "Prince Valentin",
+          "c": "red"
+        },
+        {
+          "t": ", or ",
           "c": "gray"
         },
         {
-          "t": ", Prince Pieter",
-          "c": "gray"
-        },
-        {
-          "t": ", Prince",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Nicholas",
-          "c": "gray"
-        },
-        {
-          "t": ", Prince Alexander",
-          "c": "gray"
-        },
-        {
-          "t": ", Prince",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Marius",
-          "c": "gray"
-        },
-        {
-          "t": ", Prince Valentin",
-          "c": "gray"
-        },
-        {
-          "t": ", or Prince",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Friedrich ",
-          "c": "gray"
-        },
-        {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Prince Friedrich",
+          "c": "red"
         },
         {
           "t": ".",
@@ -24592,11 +24174,8 @@
           "c": "gray"
         },
         {
-          "t": "Forest",
+          "t": "Forest ",
           "c": "dark_green"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -24607,9 +24186,12 @@
           "c": "gray"
         },
         {
-          "t": "Rare ",
+          "t": "Rare",
           "c": "blue",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -24686,11 +24268,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Rare ",
@@ -24702,15 +24281,15 @@
           "c": "gray"
         },
         {
-          "t": "with ",
+          "t": "with",
           "c": "gray"
         },
         {
-          "t": "Treasure Fish",
-          "c": "green"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Treasure Fish ",
+          "c": "green"
         },
         {
           "t": "Family",
@@ -24771,16 +24350,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Mimic ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Mimic",
+          "c": "red"
         },
         {
           "t": ".",
@@ -24967,8 +24542,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -24997,28 +24571,13 @@
           "c": "gray"
         },
         {
-          "t": "Kill ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "Barbarian Duke X ",
+          "t": "Barbarian Duke X",
           "c": "dark_gray",
           "bold": true
-        },
-        {
-          "t": "while",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
         },
         {
           "t": ".",
@@ -25105,14 +24664,7 @@
           "bold": true
         },
         {
-          "t": "or",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "higher",
+          "t": "or higher",
           "c": "gray"
         },
         {
@@ -25173,19 +24725,19 @@
           "c": "gray"
         },
         {
-          "t": "Combat",
+          "t": "Combat ",
           "c": "red"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Rare ",
@@ -25257,11 +24809,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Bezal",
@@ -25276,8 +24825,11 @@
           "c": "gold"
         },
         {
-          "t": ", ",
+          "t": ",",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Flare",
@@ -25292,11 +24844,8 @@
           "c": "blue"
         },
         {
-          "t": ",",
+          "t": ", ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Fire Eel",
@@ -25332,8 +24881,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -25362,16 +24910,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Firefly ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Firefly",
+          "c": "red"
         },
         {
           "t": ".",
@@ -25431,19 +24975,19 @@
           "c": "gray"
         },
         {
-          "t": "Water",
+          "t": "Water ",
           "c": "aqua"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Rare ",
@@ -25492,8 +25036,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -25522,16 +25065,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Ghost ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Ghost",
+          "c": "red"
         },
         {
           "t": ".",
@@ -25571,8 +25110,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -25601,16 +25139,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Atom ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Atom",
+          "c": "red"
         },
         {
           "t": ".",
@@ -25748,19 +25282,19 @@
           "c": "gray"
         },
         {
-          "t": "Water",
+          "t": "Water ",
           "c": "aqua"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Rare ",
@@ -25829,11 +25363,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Rare ",
@@ -25845,15 +25376,15 @@
           "c": "gray"
         },
         {
-          "t": "with ",
+          "t": "with",
           "c": "gray"
         },
         {
-          "t": "Cave Dweller",
-          "c": "green"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Cave Dweller ",
+          "c": "green"
         },
         {
           "t": "Family",
@@ -25934,11 +25465,8 @@
           "c": "gray"
         },
         {
-          "t": "Dragon",
+          "t": "Dragon ",
           "c": "green"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Family",
@@ -25951,8 +25479,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -25981,16 +25508,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Dragonfly ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Dragonfly",
+          "c": "red"
         },
         {
           "t": ".",
@@ -26045,8 +25568,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -26075,7 +25597,7 @@
           "c": "gray"
         },
         {
-          "t": "Kill ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
@@ -26087,26 +25609,26 @@
           "c": "gray"
         },
         {
-          "t": "Empyrean",
+          "t": "Empyrean Sphinx",
           "c": "dark_green"
+        },
+        {
+          "t": ".",
+          "c": "gray"
         },
         {
           "t": " "
         },
         {
-          "t": "Sphinx ",
-          "c": "dark_green"
-        },
-        {
-          "t": "while using ",
+          "t": "(",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -26145,8 +25667,8 @@
       },
       {
         "range": [
-          1,
-          10
+          2.5,
+          25
         ],
         "unit": "%",
         "c": "green"
@@ -26159,8 +25681,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -26189,30 +25710,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "Empyrean King Minos ",
+          "t": "Empyrean King Minos",
           "c": "dark_green"
         },
         {
-          "t": "while",
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": " "
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": "using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
-        },
-        {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -26293,8 +25807,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -26323,16 +25836,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Dive Ghast ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Dive Ghast",
+          "c": "red"
         },
         {
           "t": ".",
@@ -26391,19 +25900,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Silkbreeze ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Silkbreeze",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ],
@@ -26417,37 +25930,35 @@
           "c": "gray"
         },
         {
-          "t": "Catch with a ",
+          "t": "Place ",
           "c": "gray"
         },
         {
-          "t": "Fishing Net",
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Spring Depths",
+          "c": "blue"
+        },
+        {
+          "t": ". ",
+          "c": "gray"
+        },
+        {
+          "t": "(",
+          "c": "gray"
+        },
+        {
+          "t": "Underwater",
           "c": "aqua"
         },
         {
-          "t": ".",
-          "c": "gray"
-        }
-      ],
-      [
-        {
-          "t": " ",
-          "c": "gray"
-        },
-        {
-          "t": "- ",
-          "c": "gray"
-        },
-        {
-          "t": "Catch with ",
-          "c": "gray"
-        },
-        {
-          "t": "Lasso",
-          "c": "dark_green"
-        },
-        {
-          "t": ".",
+          "t": ").",
           "c": "gray"
         }
       ]
@@ -26504,14 +26015,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -26519,15 +26023,19 @@
           "c": "gray"
         },
         {
-          "t": "Cavern Biome",
+          "t": "Cavern",
           "c": "gold"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "gold"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -26663,19 +26171,65 @@
           "c": "gray"
         },
         {
-          "t": "Kill Giant Isopod ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Giant Isopod",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Place ",
+          "c": "gray"
+        },
+        {
+          "t": "Hunting Traps ",
+          "c": "gold"
+        },
+        {
+          "t": "in ",
+          "c": "gray"
+        },
+        {
+          "t": "Spring Depths",
+          "c": "blue"
+        },
+        {
+          "t": ". ",
+          "c": "gray"
+        },
+        {
+          "t": "(",
+          "c": "gray"
+        },
+        {
+          "t": "Underwater",
+          "c": "aqua"
+        },
+        {
+          "t": ").",
           "c": "gray"
         }
       ]
@@ -26946,11 +26500,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Lunar Moth ",
@@ -26967,8 +26518,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -27170,8 +26720,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -27272,8 +26821,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -27289,6 +26837,36 @@
         },
         {
           "t": ".",
+          "c": "gray"
+        }
+      ],
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Charm ",
+          "c": "gray"
+        },
+        {
+          "t": "Scatha",
+          "c": "red"
+        },
+        {
+          "t": ". (",
+          "c": "gray"
+        },
+        {
+          "t": "Guaranteed Drop",
+          "c": "green"
+        },
+        {
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -27378,11 +26956,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Legendary ",
@@ -27468,8 +27043,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -27498,19 +27072,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Littlefoot ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Littlefoot",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -27567,11 +27145,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Legendary ",
@@ -27579,8 +27154,11 @@
           "bold": true
         },
         {
-          "t": "with ",
+          "t": "with",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Elemental ",
@@ -27591,10 +27169,7 @@
           "c": "gray"
         },
         {
-          "t": " "
-        },
-        {
-          "t": "and ",
+          "t": " and ",
           "c": "gray"
         },
         {
@@ -27664,11 +27239,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Legendary ",
@@ -27676,8 +27248,11 @@
           "bold": true
         },
         {
-          "t": "with ",
+          "t": "with",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Elemental ",
@@ -27688,10 +27263,7 @@
           "c": "gray"
         },
         {
-          "t": " "
-        },
-        {
-          "t": "and ",
+          "t": " and ",
           "c": "gray"
         },
         {
@@ -27761,11 +27333,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Legendary ",
@@ -27773,8 +27342,11 @@
           "bold": true
         },
         {
-          "t": "with ",
+          "t": "with",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Elemental ",
@@ -27785,10 +27357,7 @@
           "c": "gray"
         },
         {
-          "t": " "
-        },
-        {
-          "t": "and ",
+          "t": " and ",
           "c": "gray"
         },
         {
@@ -27909,19 +27478,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Nessie ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Nessie",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ]
@@ -27978,11 +27551,8 @@
           "c": "gray"
         },
         {
-          "t": "Combat",
+          "t": "Combat ",
           "c": "red"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -27993,9 +27563,12 @@
           "c": "gray"
         },
         {
-          "t": "Epic ",
+          "t": "Epic",
           "c": "dark_purple",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -28055,11 +27628,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Forest ",
@@ -28070,7 +27640,10 @@
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " "
+        },
+        {
+          "t": "and ",
           "c": "gray"
         },
         {
@@ -28155,11 +27728,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Water ",
@@ -28170,8 +27740,11 @@
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Epic ",
@@ -28308,11 +27881,8 @@
           "c": "dark_purple"
         },
         {
-          "t": "Shard",
+          "t": "Shard ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "with ",
@@ -28327,11 +27897,11 @@
           "c": "gray"
         },
         {
-          "t": " and",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "and ",
+          "c": "gray"
         },
         {
           "t": "Legendary ",
@@ -28400,11 +27970,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Water ",
@@ -28415,8 +27982,11 @@
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Epic ",
@@ -28485,11 +28055,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Ghost ",
@@ -28500,8 +28067,11 @@
           "c": "gray"
         },
         {
-          "t": " or ",
+          "t": " or",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Legendary ",
@@ -28509,14 +28079,7 @@
           "bold": true
         },
         {
-          "t": "or",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "higher",
+          "t": "or higher",
           "c": "gray"
         },
         {
@@ -28595,11 +28158,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Lunar Moth ",
@@ -28843,8 +28403,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -28873,16 +28432,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Taurus ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Taurus",
+          "c": "red"
         },
         {
           "t": ".",
@@ -28972,11 +28527,8 @@
           "c": "gray"
         },
         {
-          "t": "Kraken",
+          "t": "Kraken ",
           "c": "gold"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Shard",
@@ -29069,11 +28621,8 @@
           "c": "gray"
         },
         {
-          "t": "Water",
+          "t": "Water ",
           "c": "aqua"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -29155,30 +28704,23 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
+          "t": "Critter Capsule",
           "c": "red"
+        },
+        {
+          "t": " in the",
+          "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "Capsule",
-          "c": "red"
-        },
-        {
-          "t": " in the ",
-          "c": "gray"
         },
         {
           "t": "Haunted Biome",
           "c": "dark_purple"
         },
         {
-          "t": " of the",
+          "t": " of the ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Critter Safari",
@@ -29285,14 +28827,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -29300,15 +28835,19 @@
           "c": "gray"
         },
         {
-          "t": "Forest Biome",
+          "t": "Forest",
           "c": "dark_green"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "Biome",
+          "c": "dark_green"
+        },
+        {
+          "t": " of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
@@ -29433,11 +28972,8 @@
           "c": "gray"
         },
         {
-          "t": "Bird",
+          "t": "Bird ",
           "c": "green"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Family",
@@ -29525,19 +29061,15 @@
           "bold": true
         },
         {
-          "t": "or",
+          "t": "or higher ",
+          "c": "gray"
+        },
+        {
+          "t": "with",
           "c": "gray"
         },
         {
           "t": " "
-        },
-        {
-          "t": "higher ",
-          "c": "gray"
-        },
-        {
-          "t": "with ",
-          "c": "gray"
         },
         {
           "t": "Legendary ",
@@ -29601,8 +29133,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -29631,19 +29162,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Lord Jawbus ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Lord Jawbus",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ],
@@ -29713,8 +29248,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -29743,16 +29277,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Hellwisp ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Hellwisp",
+          "c": "red"
         },
         {
           "t": ".",
@@ -29844,8 +29374,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -29866,8 +29395,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -29896,16 +29424,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Cinderbat ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
-          "c": "gray"
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Cinderbat",
+          "c": "red"
         },
         {
           "t": ".",
@@ -30021,11 +29545,8 @@
           "c": "gray"
         },
         {
-          "t": "Water",
+          "t": "Water ",
           "c": "aqua"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Category",
@@ -30036,9 +29557,12 @@
           "c": "gray"
         },
         {
-          "t": "Epic ",
+          "t": "Epic",
           "c": "dark_purple",
           "bold": true
+        },
+        {
+          "t": " "
         },
         {
           "t": "or higher",
@@ -30086,16 +29610,39 @@
         "t": " "
       },
       {
-        "t": "bosses ",
-        "c": "green"
+        "t": "Minibosses",
+        "c": "red"
       },
       {
-        "t": "and ",
+        "t": ", ",
         "c": "gray"
       },
       {
-        "t": "mini-bosses",
-        "c": "green"
+        "t": "Bosses",
+        "c": "red"
+      },
+      {
+        "t": ", ",
+        "c": "gray"
+      },
+      {
+        "t": "Slayer",
+        "c": "dark_red"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Minibosses",
+        "c": "dark_red"
+      },
+      {
+        "t": ", and ",
+        "c": "gray"
+      },
+      {
+        "t": "Slayer Bosses",
+        "c": "dark_red"
       },
       {
         "t": ".",
@@ -30178,11 +29725,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Legendary ",
@@ -30266,11 +29810,8 @@
           "c": "white"
         },
         {
-          "t": ",",
+          "t": ", ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Cinderbat",
@@ -30285,8 +29826,11 @@
           "c": "dark_purple"
         },
         {
-          "t": ", ",
+          "t": ",",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Lava Flame",
@@ -30297,14 +29841,7 @@
           "c": "gray"
         },
         {
-          "t": "Fire",
-          "c": "dark_purple"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Eel",
+          "t": "Fire Eel",
           "c": "dark_purple"
         },
         {
@@ -30385,14 +29922,7 @@
           "c": "gray"
         },
         {
-          "t": "with",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "any Shard",
+          "t": "with any Shard",
           "c": "gray"
         },
         {
@@ -30475,11 +30005,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Legendary ",
@@ -30544,11 +30071,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Queen Ant ",
@@ -30620,11 +30144,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Kraken ",
@@ -30692,11 +30213,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Poltergeist ",
@@ -30707,8 +30225,11 @@
           "c": "gray"
         },
         {
-          "t": " and ",
+          "t": " and",
           "c": "gray"
+        },
+        {
+          "t": " "
         },
         {
           "t": "Rare ",
@@ -30716,14 +30237,7 @@
           "bold": true
         },
         {
-          "t": "or",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "higher",
+          "t": "or higher",
           "c": "gray"
         },
         {
@@ -30788,11 +30302,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Kraken ",
@@ -30859,8 +30370,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -30881,8 +30391,7 @@
       ],
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -30911,19 +30420,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Grizzly Bear ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Grizzly Bear",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ],
@@ -31036,14 +30549,7 @@
           "c": "gray"
         },
         {
-          "t": "Sun",
-          "c": "gold"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Fish ",
+          "t": "Sun Fish ",
           "c": "gold"
         },
         {
@@ -31104,11 +30610,8 @@
           "c": "gray"
         },
         {
-          "t": "with",
+          "t": "with ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Jormung ",
@@ -31180,11 +30683,8 @@
           "c": "gray"
         },
         {
-          "t": " and",
+          "t": " and ",
           "c": "gray"
-        },
-        {
-          "t": " "
         },
         {
           "t": "Legendary ",
@@ -31196,7 +30696,14 @@
           "c": "gray"
         },
         {
-          "t": "Galaxy Fish ",
+          "t": "Galaxy",
+          "c": "gold"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "Fish ",
           "c": "gold"
         },
         {
@@ -31295,7 +30802,7 @@
     "id": "groovy_radar",
     "description": [
       {
-        "t": " Pests ",
+        "t": " Pests ",
         "c": "dark_green"
       },
       {
@@ -31404,19 +30911,23 @@
           "c": "gray"
         },
         {
-          "t": "Kill Titanoboa ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using ",
+          "t": "Titanoboa",
+          "c": "red"
+        },
+        {
+          "t": ". (",
           "c": "gray"
         },
         {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Guaranteed Drop",
+          "c": "green"
         },
         {
-          "t": ".",
+          "t": ")",
           "c": "gray"
         }
       ],
@@ -31537,6 +31048,89 @@
       ]
     ]
   },
+  "L52": {
+    "title": "Unique Bonus",
+    "description": [
+      {
+        "t": "Counts as ",
+        "c": "gray"
+      },
+      {
+        "range": [
+          1,
+          10
+        ],
+        "unit": "",
+        "c": "green"
+      },
+      {
+        "t": " towards the ",
+        "c": "gray"
+      },
+      {
+        "t": "Unique",
+        "c": "yellow"
+      },
+      {
+        "t": " "
+      },
+      {
+        "t": "Crop Bonus ",
+        "c": "yellow"
+      },
+      {
+        "t": "in your ",
+        "c": "gray"
+      },
+      {
+        "t": "Greenhouse",
+        "c": "green"
+      },
+      {
+        "t": ".",
+        "c": "gray"
+      }
+    ],
+    "how_to_hunt": [
+      [
+        {
+          "t": " ",
+          "c": "gray"
+        },
+        {
+          "t": "- ",
+          "c": "gray"
+        },
+        {
+          "t": "Has a chance to drop when analyzing ",
+          "c": "gray"
+        },
+        {
+          "t": "mutations ",
+          "c": "red"
+        },
+        {
+          "t": "using",
+          "c": "gray"
+        },
+        {
+          "t": " "
+        },
+        {
+          "t": "the ",
+          "c": "gray"
+        },
+        {
+          "t": "Crop Analyzer",
+          "c": "yellow"
+        },
+        {
+          "t": ".",
+          "c": "gray"
+        }
+      ]
+    ]
+  },
   "L54": {
     "title": "Slayer Discount",
     "id": "slayer_discount",
@@ -31627,8 +31221,8 @@
       },
       {
         "range": [
-          0.5,
-          5
+          0.1,
+          1
         ],
         "unit": "%",
         "c": "green"
@@ -31663,8 +31257,7 @@
     "how_to_hunt": [
       [
         {
-          "t": " ",
-          "c": "gray"
+          "t": " "
         },
         {
           "t": "- ",
@@ -31693,19 +31286,12 @@
           "c": "gray"
         },
         {
-          "t": "Kill Timestalk Clone ",
+          "t": "Charm ",
           "c": "gray"
         },
         {
-          "t": "while using",
-          "c": "gray"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Salts",
-          "c": "light_purple"
+          "t": "Timestalk Clone",
+          "c": "red"
         },
         {
           "t": ".",
@@ -31765,14 +31351,7 @@
           "c": "gray"
         },
         {
-          "t": "Critter",
-          "c": "red"
-        },
-        {
-          "t": " "
-        },
-        {
-          "t": "Capsule",
+          "t": "Critter Capsule",
           "c": "red"
         },
         {
@@ -31784,11 +31363,11 @@
           "c": "blue"
         },
         {
-          "t": " of the",
-          "c": "gray"
+          "t": " "
         },
         {
-          "t": " "
+          "t": "of the ",
+          "c": "gray"
         },
         {
           "t": "Critter Safari",
