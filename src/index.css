@@ -53,6 +53,18 @@ body {
   }
 }
 
+/* Ad blocker detected (set in index.html): collapse every reserved ad slot so there is
+   no empty space. Pure CSS, so it applies on first paint and on every route. */
+html.ads-blocked .pn-left,
+html.ads-blocked .pn-leaderboard,
+html.ads-blocked .pn-sidebar {
+  display: none !important;
+}
+
+html.ads-blocked .pn-page {
+  display: block;
+}
+
 /* Remove number input spinners */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {

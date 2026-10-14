@@ -20,8 +20,98 @@
 
     <meta name="google-site-verification" content="kQISkGfHKAntOvnVha8SStTJclrpjlkjAdSgr_l7_Ak" />
 
+    <!--
+      Ad-block detection. Runs before the ad script so it can never miss its error event.
+      Sets `html.ads-blocked`, which CSS (src/index.css) uses to collapse the reserved ad
+      slots — no React re-render, no timers on the happy path.
+        1. The ad script's own onerror fires the moment a blocker (uBlock, ABP, Brave,
+           Pi-hole/DNS, strict tracking protection) cancels the request. If the script can't
+           load, no ads can render, so hiding the space is correct either way.
+        2. A cosmetic bait element catches blockers that hide ad elements instead.
+        3. The last result is cached, so returning blocked visitors get the collapsed layout
+           on first paint. It's cleared again once the script loads and the bait survives.
+    -->
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var KEY = "ss_ads_blocked";
+        var blocked = false;
+        var scriptOk = false;
+        var baitDone = false;
+
+        function store(v) {
+          try {
+            v ? localStorage.setItem(KEY, "1") : localStorage.removeItem(KEY);
+          } catch (e) {}
+        }
+        function block() {
+          if (blocked) return;
+          blocked = true;
+          root.classList.add("ads-blocked");
+          store(true);
+        }
+        function settle() {
+          if (blocked || !scriptOk || !baitDone) return;
+          root.classList.remove("ads-blocked");
+          store(false);
+        }
+
+        try {
+          if (localStorage.getItem(KEY) === "1") root.classList.add("ads-blocked");
+        } catch (e) {}
+
+        window.__ssAds = {
+          isBlocked: function () {
+            return root.classList.contains("ads-blocked");
+          },
+          onScriptError: block,
+          onScriptLoad: function () {
+            scriptOk = true;
+            settle();
+          },
+          bait: function () {
+            var el = document.createElement("div");
+            el.className = "adsbox ad-banner ad-placement pub_300x250 textads banner-ads adsbygoogle";
+            el.setAttribute("aria-hidden", "true");
+            el.style.cssText =
+              "position:absolute!important;left:-10000px!important;top:-10000px!important;width:1px!important;height:1px!important;pointer-events:none!important;";
+            document.body.appendChild(el);
+
+            function hidden() {
+              if (!el.isConnected || el.offsetHeight === 0 || el.offsetParent === null) return true;
+              var cs = getComputedStyle(el);
+              return cs.display === "none" || cs.visibility === "hidden";
+            }
+            // Element-hiding styles usually apply by the first frame; a few later checks
+            // cover blockers that inject their cosmetic CSS asynchronously.
+            var delays = [0, 100, 400, 1200];
+            var i = 0;
+            function check() {
+              if (hidden()) block();
+              if (blocked || ++i >= delays.length) {
+                if (el.parentNode) el.parentNode.removeChild(el);
+                baitDone = true;
+                settle();
+                return;
+              }
+              setTimeout(check, delays[i] - delays[i - 1]);
+            }
+            requestAnimationFrame(check);
+          },
+        };
+      })();
+    </script>
+
     <!-- Mediavine -->
-    <script type="text/javascript" async="async" data-noptimize="1" data-cfasync="false" src="//scripts.pubnation.com/tags/6e017b39-3ffd-4419-9249-02a9c0704325.js"></script>
+    <script
+      type="text/javascript"
+      async="async"
+      data-noptimize="1"
+      data-cfasync="false"
+      src="//scripts.pubnation.com/tags/6e017b39-3ffd-4419-9249-02a9c0704325.js"
+      onerror="window.__ssAds && window.__ssAds.onScriptError()"
+      onload="window.__ssAds && window.__ssAds.onScriptLoad()"
+    ></script>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
@@ -133,6 +223,9 @@
     </script>
   </head>
   <body>
+    <script>
+      window.__ssAds && window.__ssAds.bait();
+    </script>
     <!-- Privacy Policy link for advertisers -->
     <a href="https://skyshards.com/client-privacy-policy" style="position: absolute; left: -9999px; top: -9999px;" aria-hidden="true">Privacy Policy</a>
 
