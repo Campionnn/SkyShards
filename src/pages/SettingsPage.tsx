@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Search, RotateCcw, Save, AlignLeft } from "lucide-react";
-import { useShardsWithRecipes, useCustomRates } from "../hooks";
+import { useShardsWithRecipes, useCustomRates, useCustomPrices, useCalculatorState } from "../hooks";
 import { debounce, filterShards, DEFAULT_FILTER_CONFIG, isFocusRestoredByWindow } from "../utilities";
 import { ShardDescription } from "../components/ui/ShardDescription";
 import { RarityDropdown, TypeDropdown, ShardItem } from "../components";
 import { SHARD_DESCRIPTIONS } from "../constants";
-import type { ShardWithDirectInfo } from "../types/types";
+import { DataService } from "../services";
+import type { ShardWithDirectInfo } from "../types/types"; 
 
 export const SettingsPage: React.FC = () => {
   const { shards, loading: shardsLoading } = useShardsWithRecipes();
   const { customRates, defaultRates, updateRate, resetRates } = useCustomRates();
+  const { customPrices, updatePrices, resetPrices } = useCustomPrices();
+  const { form } = useCalculatorState();
   const [filter, setFilter] = useState("");
   const [rarityFilter, setRarityFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -17,11 +20,20 @@ export const SettingsPage: React.FC = () => {
   const [detailedShard, setDetailedShard] = useState(true);
 
   const [debouncedFilter, setDebouncedFilter] = useState("");
+  const [livePrices, setLivePrices] = useState<Record<string, number>>({});
+
+  const isPrices = !form.ironManView;
+  const values = isPrices ? "prices" : "rates";
 
   const debouncedSetFilter = useMemo(() => debounce((value: string) => setDebouncedFilter(value), 300), []);
   useEffect(() => {
     debouncedSetFilter(filter);
   }, [filter, debouncedSetFilter]);
+
+  useEffect(() => {
+    if (!isPrices) return;
+    DataService.getInstance().loadShardCosts(form.instantBuyPrices).then(setLivePrices).catch(console.error);
+  }, [isPrices, form.instantBuyPrices]);
 
   const filteredShards = useMemo(() => {
     return filterShards<ShardWithDirectInfo>(shards, {
@@ -52,12 +64,24 @@ export const SettingsPage: React.FC = () => {
     [updateRate, defaultRates, customRates]
   );
 
-  const handleResetRates = useCallback(() => {
-    if (confirm("Are you sure you want to reset all rates to their defaults? This will clear all custom rates.")) {
-      resetRates();
+
+  const handlePriceChange = useCallback(
+    (shardId: string, newPrice: number | undefined) => {
+      const price = newPrice === undefined || newPrice === (livePrices[shardId] ?? 0) ? undefined : newPrice;
+      updatePrices(shardId, price);
+      
+      if (price !== undefined) setHasChanges(true);
+    },
+    [updatePrices, livePrices, customPrices]
+  );
+
+  const handleResetAll = useCallback(() => {
+    if (confirm(`Are you sure you want to reset all ${values} to their defaults? This will clear all custom ${values}.`)) {
+      if (isPrices) resetPrices();
+      else resetRates();
       setHasChanges(false);
     }
-  }, [resetRates]);
+  }, [values, isPrices, resetRates, resetPrices]);
 
   const handleSave = useCallback(() => {
     setHasChanges(false);
@@ -89,8 +113,9 @@ export const SettingsPage: React.FC = () => {
         <div className="text-center pb-6 pt-2">
           <h1 className="text-2xl font-black text-purple-400 mb-2">Shard Overview and Rates</h1>
           <p className="text-slate-400">
-            Customize gathering rates<span className="font-bold text-slate-500 mx-0.5">/</span>
-            <span className="text-slate-500">hr</span> for more accurate calculations
+            Customize {!isPrices ? "" : (form.instantBuyPrices ? "instant" : "buy order")} {values} 
+            {!isPrices && <><span className="font-bold text-slate-500 mx-0.5">/</span>
+            <span className="text-slate-500">hr</span></>} for more accurate calculations
           </p>
         </div>
         <div className="md:hidden space-y-3">
@@ -131,7 +156,7 @@ export const SettingsPage: React.FC = () => {
               <span>{detailedShard ? "Hide Details" : "Show Details"}</span>
             </button>
             <button
-              onClick={handleResetRates}
+              onClick={handleResetAll}
               className="
                 px-3 py-2.5 bg-red-500/20 hover:bg-red-500/30 
                 text-red-400 font-medium rounded-md 
@@ -199,7 +224,7 @@ export const SettingsPage: React.FC = () => {
           </button>
           <div className="flex gap-2">
             <button
-              onClick={handleResetRates}
+              onClick={handleResetAll}
               className="
                 px-3 py-2.5 bg-red-500/20 hover:bg-red-500/30 
                 text-red-400 font-medium rounded-md 
@@ -232,7 +257,8 @@ export const SettingsPage: React.FC = () => {
 
         <div className="mt-3 text-sm text-slate-400">
           <p>
-            Base rates (shards/hour) • Showing {filteredShards.length} of {shards.length} shards
+            {isPrices ? (form.instantBuyPrices ? "Instant" : "Buy order" + " prices ") : "Base rates (shards/hour) "} 
+            • Showing {filteredShards.length} of {shards.length} shards
           </p>
         </div>
       </div>
@@ -249,9 +275,11 @@ export const SettingsPage: React.FC = () => {
                   title={desc?.title || shard.name}
                   description={<ShardDescription record={desc} fallback="No description." collapsibleHowToHunt />}
                   detailed={detailedShard}
-                  rate={customRates[shard.id] !== undefined ? customRates[shard.id]! : defaultRates[shard.id]}
-                  defaultRate={defaultRates[shard.id]}
-                  onRateChange={handleRateChange}
+                  rate={isPrices
+                    ? (customPrices.get(shard.id) ?? livePrices[shard.id] ?? 0)
+                    : customRates[shard.id] !== undefined ? customRates[shard.id]! : defaultRates[shard.id]}
+                  defaultRate={isPrices ? livePrices[shard.id] ?? 0 : defaultRates[shard.id]}
+                  onRateChange={isPrices ? handlePriceChange : handleRateChange}
                 />
               );
             })}

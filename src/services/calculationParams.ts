@@ -1,6 +1,7 @@
 import type { CalculationFormData } from "../schemas";
 import type { CalculationParams } from "../types/types";
 import { DataService } from "./dataService";
+import { loadCustomPrices } from "../utilities";
 
 /**
  * Single source of the calculator form -> CalculationParams mapping.
@@ -12,12 +13,16 @@ import { DataService } from "./dataService";
  */
 export const buildCalculationParams = async (
   formData: CalculationFormData,
-  customRates: { [shardId: string]: number | undefined }
+  customRates: { [shardId: string]: number | undefined },
+  customPrices: Map<string, number> = loadCustomPrices()
 ): Promise<CalculationParams> => {
   const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
 
   return {
-    customRates: formData.ironManView ? filteredCustomRates : await DataService.getInstance().loadShardCosts(formData.instantBuyPrices),
+    customRates: formData.ironManView ? filteredCustomRates : {
+      ...(await DataService.getInstance().loadShardCosts(formData.instantBuyPrices)),
+      ...Object.fromEntries(customPrices)
+    },
     hunterFortune: formData.hunterFortune,
     excludeChameleon: formData.excludeChameleon,
     frogBonus: formData.frogBonus,
