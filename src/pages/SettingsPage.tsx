@@ -69,7 +69,7 @@ export const SettingsPage: React.FC = () => {
     (shardId: string, newPrice: number | undefined) => {
       const price = newPrice === undefined || newPrice === (livePrices[shardId] ?? 0) ? undefined : newPrice;
       updatePrices(shardId, price);
-      
+
       if (price !== undefined) setHasChanges(true);
     },
     [updatePrices, livePrices, customPrices]
@@ -113,7 +113,7 @@ export const SettingsPage: React.FC = () => {
         <div className="text-center pb-6 pt-2">
           <h1 className="text-2xl font-black text-purple-400 mb-2">Shard Overview and Rates</h1>
           <p className="text-slate-400">
-            Customize {!isPrices ? "" : (form.instantBuyPrices ? "instant" : "buy order")} {values} 
+            Customize {!isPrices ? "" : (form.instantBuyPrices ? "instant buy" : "buy order")} {values} 
             {!isPrices && <><span className="font-bold text-slate-500 mx-0.5">/</span>
             <span className="text-slate-500">hr</span></>} for more accurate calculations
           </p>
@@ -257,7 +257,7 @@ export const SettingsPage: React.FC = () => {
 
         <div className="mt-3 text-sm text-slate-400">
           <p>
-            {isPrices ? (form.instantBuyPrices ? "Instant" : "Buy order" + " prices ") : "Base rates (shards/hour) "} 
+            {isPrices ? (form.instantBuyPrices ? "Instant buy" : "Buy order") + " prices " : "Base rates (shards/hour) "} 
             • Showing {filteredShards.length} of {shards.length} shards
           </p>
         </div>
