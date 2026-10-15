@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { CalculationFormData } from "../schemas";
-import { loadDisabledShards, loadFormData, loadHypixelProfileMeta, loadInventory, saveDisabledShards, saveFormData, saveInventory } from "./localStorage";
+import { loadDisabledShards, loadFormData, loadHypixelProfileMeta, loadInventory, saveDisabledShards, saveFormData, saveInventory, saveCustomPrices, loadCustomPrices } from "./localStorage";
 
 /**
  * Minimal in-memory `localStorage`. The vitest environment is `node`, so there isn't
@@ -177,5 +177,17 @@ describe("profile meta validation", () => {
     const meta = { username: "someone", profileName: "Mango", lastImportTime: 1_700_000_000_000 };
     storage.seed("hypixel_profile_meta", JSON.stringify(meta));
     expect(loadHypixelProfileMeta()).toEqual(meta);
+  });
+});
+
+describe("custom price validation", () => {
+  it("makes an empty map even when nothing is written", () => {
+    expect(loadCustomPrices()).toEqual(new Map());
+  });
+
+  it("accepts a valid entry", () => {
+    const newPrice = new Map([["C35", 72315]]);
+    saveCustomPrices(newPrice);
+    expect(loadCustomPrices()).toEqual(newPrice);
   });
 });
