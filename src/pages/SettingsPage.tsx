@@ -72,7 +72,7 @@ export const SettingsPage: React.FC = () => {
 
       if (price !== undefined) setHasChanges(true);
     },
-    [updatePrices, livePrices, customPrices]
+    [updatePrices, livePrices]
   );
 
   const handleResetAll = useCallback(() => {
