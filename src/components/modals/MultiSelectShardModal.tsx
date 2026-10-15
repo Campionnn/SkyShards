@@ -11,7 +11,7 @@ interface MultiSelectShardModalProps {
   shards: Shard[];
   onDone: (selectedShards: Array<{ shard: Shard; quantity: number }>) => void;
   initialSelections?: Map<string, number>; // Map of shard key to quantity
-  ownedAttributes?: Map<string, number>; // Map of shard key to attribute level (fused count)
+  ownedAttributes?: Map<string, number>; // Map of shard key to shards already fused into its attribute (see InventoryManagementModal's attributes tab)
 }
 
 export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ isOpen, onClose, shards, onDone, initialSelections = new Map(), ownedAttributes = new Map() }) => {
