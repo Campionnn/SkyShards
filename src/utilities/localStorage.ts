@@ -158,16 +158,20 @@ export const setSaveEnabled = (enabled: boolean): void => saveEnabledSlot.write(
 /** Nothing has written the auto-save preference yet, so this is a brand-new visitor. */
 export const isFirstVisit = (): boolean => saveEnabledSlot.isUnset();
 
-// ─── Inventory and attributes ───
+// ─── Inventory, attributes, and prices ───
 
 const inventorySlot = countMapSlot("inventory", "inventory");
 const ownedAttributesSlot = countMapSlot("owned_attributes", "owned attributes");
+const customPricesSlot = countMapSlot("custom_prices", "custom_prices");
 
 export const saveInventory = (inventory: Map<string, number>): void => inventorySlot.write(inventory);
 export const loadInventory = (): Map<string, number> => inventorySlot.read();
 
 export const saveOwnedAttributes = (attributes: Map<string, number>): void => ownedAttributesSlot.write(attributes);
 export const loadOwnedAttributes = (): Map<string, number> => ownedAttributesSlot.read();
+
+export const saveCustomPrices = (prices: Map<string, number>): void => customPricesSlot.write(prices);
+export const loadCustomPrices = (): Map<string, number> => customPricesSlot.read();
 
 // ─── Hypixel profile metadata ───
 

@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { DataService } from "../services";
+import { useState, useEffect, useCallback } from "react";
+import { DataService } from "../services/index.ts";
+import { saveCustomPrices, loadCustomPrices } from "../utilities";
 
 export const useCustomRates = () => {
   const [customRates, setCustomRates] = useState<Record<string, number | undefined>>({});
@@ -57,4 +58,23 @@ export const useCustomRates = () => {
     updateRate,
     resetRates,
   };
+};
+
+export const useCustomPrices = () => {
+  const [customPrices, setCustomPrices] = useState<Map<string, number>>(loadCustomPrices);
+  useEffect(() => {
+    saveCustomPrices(customPrices);
+  }, [customPrices]);
+  
+  const updatePrices = useCallback((id: string, price: number | undefined) => {
+    setCustomPrices((prev) => {
+      const next = new Map(prev);
+      if (price === undefined) next.delete(id);
+      else next.set(id, price);
+      return next;
+    });
+  }, []);
+
+  const resetPrices = useCallback(() => setCustomPrices(new Map()), []);
+  return { customPrices, updatePrices, resetPrices };
 };
