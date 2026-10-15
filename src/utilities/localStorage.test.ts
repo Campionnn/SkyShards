@@ -182,12 +182,31 @@ describe("profile meta validation", () => {
 
 describe("custom price validation", () => {
   it("makes an empty map even when nothing is written", () => {
-    expect(loadCustomPrices()).toEqual(new Map());
+    expect(loadCustomPrices(false)).toEqual(new Map());
+    expect(loadCustomPrices(true)).toEqual(new Map());
   });
 
   it("accepts a valid entry", () => {
     const newPrice = new Map([["C35", 72315]]);
-    saveCustomPrices(newPrice);
-    expect(loadCustomPrices()).toEqual(newPrice);
+    saveCustomPrices(false, newPrice);
+    expect(loadCustomPrices(false)).toEqual(newPrice);
+  });
+
+  it("keeps buy order and instant buy overrides separate", () => {
+    saveCustomPrices(false, new Map([["C35", 100]]));
+    saveCustomPrices(true, new Map([["C35", 250]]));
+    expect(loadCustomPrices(false)).toEqual(new Map([["C35", 100]]));
+    expect(loadCustomPrices(true)).toEqual(new Map([["C35", 250]]));
+  });
+
+  it("removes the entry when saving an empty map", () => {
+    saveCustomPrices(true, new Map([["C35", 250]]));
+    saveCustomPrices(true, new Map());
+    expect(storage.getItem("custom_prices_instant_buy")).toBeNull();
+  });
+
+  it("drops non-numeric prices", () => {
+    storage.seed("custom_prices_buy_order", JSON.stringify({ C35: "abc", U8: 12 }));
+    expect(loadCustomPrices(false)).toEqual(new Map([["U8", 12]]));
   });
 });

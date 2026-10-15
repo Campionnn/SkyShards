@@ -1,6 +1,6 @@
 export { useAsyncData } from "./useAsyncData";
 export { useCopyToClipboard } from "./useCopyToClipboard";
-export { useCustomRates, useCustomPrices } from "./useCustomRatesPrices.ts";
+export { useCustomRates, useCustomPrices } from "./useCustomRates";
 export { useDropdownManager } from "./useDropdownManager";
 export { useFusionData } from "./useFusionData";
 export { usePageTitle } from "./usePageTitle";

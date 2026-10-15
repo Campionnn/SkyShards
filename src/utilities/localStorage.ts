@@ -65,7 +65,7 @@ const createStorageSlot = <T>(key: string, { label, fallback, serialize = JSON.s
 const isPlainObject = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 
 /**
- * `Map<string, number>` <-> plain object, for the two count-keyed slots.
+ * `Map<string, number>` <-> plain object, for the shard-keyed number slots.
  *
  * Entries that don't parse to a finite number are dropped rather than stored as
  * `NaN` — `Number("")` is 0 and `Number("abc")` is `NaN`, and a `NaN` count
@@ -162,7 +162,12 @@ export const isFirstVisit = (): boolean => saveEnabledSlot.isUnset();
 
 const inventorySlot = countMapSlot("inventory", "inventory");
 const ownedAttributesSlot = countMapSlot("owned_attributes", "owned attributes");
-const customPricesSlot = countMapSlot("custom_prices", "custom_prices");
+/** Price overrides, stored separately per Bazaar price source. */
+const customPriceSlots = {
+  buyOrder: countMapSlot("custom_prices_buy_order", "custom buy order prices"),
+  instantBuy: countMapSlot("custom_prices_instant_buy", "custom instant buy prices"),
+};
+const customPriceSlot = (instantBuy: boolean) => (instantBuy ? customPriceSlots.instantBuy : customPriceSlots.buyOrder);
 
 export const saveInventory = (inventory: Map<string, number>): void => inventorySlot.write(inventory);
 export const loadInventory = (): Map<string, number> => inventorySlot.read();
@@ -170,8 +175,13 @@ export const loadInventory = (): Map<string, number> => inventorySlot.read();
 export const saveOwnedAttributes = (attributes: Map<string, number>): void => ownedAttributesSlot.write(attributes);
 export const loadOwnedAttributes = (): Map<string, number> => ownedAttributesSlot.read();
 
-export const saveCustomPrices = (prices: Map<string, number>): void => customPricesSlot.write(prices);
-export const loadCustomPrices = (): Map<string, number> => customPricesSlot.read();
+/** An empty map clears the entry. */
+export const saveCustomPrices = (instantBuy: boolean, prices: Map<string, number>): void => {
+  const slot = customPriceSlot(instantBuy);
+  if (prices.size === 0) slot.clear();
+  else slot.write(prices);
+};
+export const loadCustomPrices = (instantBuy: boolean): Map<string, number> => customPriceSlot(instantBuy).read();
 
 // ─── Hypixel profile metadata ───
 

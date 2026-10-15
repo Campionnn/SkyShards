@@ -10,15 +10,18 @@ interface ShardItemProps {
   detailed: boolean;
   rate: number;
   defaultRate: number;
+  /** Name of the reset value, e.g. "Default" or "Live". */
+  defaultLabel?: string;
   onRateChange: (shardId: string, newRate: number | undefined) => void;
   onCardClick?: () => void;
 }
 
-export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, title, description, detailed, rate, defaultRate, onRateChange, onCardClick }) => {
+export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, title, description, detailed, rate, defaultRate, defaultLabel = "Default", onRateChange, onCardClick }) => {
   const [inputValue, setInputValue] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
 
   const isChanged = rate !== defaultRate;
+  const resetTitle = `Reset to ${defaultLabel.toLowerCase()} value (${defaultRate})`;
 
   const handleRateChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +72,11 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, title, d
             ) : (
               <span className="px-1.5 py-0.5 text-xs bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-md flex-shrink-0">Fuse</span>
             )}
-            {isChanged && <span className="px-1.5 py-0.5 text-xs bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 rounded-md flex-shrink-0">Changed</span>}
+            {isChanged && (
+              <span title={`${defaultLabel} value: ${defaultRate}`} className="px-1.5 py-0.5 text-xs bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 rounded-md flex-shrink-0">
+                Changed
+              </span>
+            )}
           </div>
           <div className="text-xs text-slate-400 truncate">
             {shard.id} • {shard.family} • {shard.type}
@@ -90,7 +97,7 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, title, d
             {!detailed && (
               <button
                 type="button"
-                title="Reset to default"
+                title={resetTitle}
                 className="flex items-center justify-center px-1.5 py-1.5 cursor-pointer text-sm text-center bg-red-500/20 border border-red-500/30 rounded-md text-red-400 hover:bg-red-500/30 hover:text-red-300 transition-colors duration-150 focus:outline-none focus:ring-1 focus:ring-red-500/40 focus:border-red-500/40"
                 onClick={() => onRateChange(shard.id, defaultRate)}
                 tabIndex={0}
@@ -112,7 +119,7 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, title, d
             {detailed && (
               <button
                 type="button"
-                title="Reset to default"
+                title={resetTitle}
                 className="flex items-center justify-center gap-1 px-2 py-1 cursor-pointer text-xs text-center bg-red-500/20 border border-red-500/30 rounded-md text-red-400 hover:bg-red-500/30 hover:text-red-300 transition-colors duration-150 focus:outline-none focus:ring-1 focus:ring-red-500/40 focus:border-red-500/40 whitespace-nowrap"
                 onClick={() => onRateChange(shard.id, defaultRate)}
                 tabIndex={0}

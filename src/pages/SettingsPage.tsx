@@ -6,13 +6,23 @@ import { ShardDescription } from "../components/ui/ShardDescription";
 import { RarityDropdown, TypeDropdown, ShardItem } from "../components";
 import { SHARD_DESCRIPTIONS } from "../constants";
 import { DataService } from "../services";
-import type { ShardWithDirectInfo } from "../types/types"; 
+import type { ShardWithDirectInfo } from "../types/types";
+
+type EditMode = "rates" | "prices";
+
+const segmentClass = (active: boolean) =>
+  `px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 border cursor-pointer ${
+    active ? "bg-purple-500/30 text-purple-200 border-purple-400/50" : "bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 border-slate-600/50 hover:border-slate-500/50"
+  }`;
 
 export const SettingsPage: React.FC = () => {
   const { shards, loading: shardsLoading } = useShardsWithRecipes();
-  const { customRates, defaultRates, updateRate, resetRates } = useCustomRates();
-  const { customPrices, updatePrices, resetPrices } = useCustomPrices();
   const { form } = useCalculatorState();
+  // Defaults to the calculator's mode; switching here doesn't change the calculator.
+  const [editMode, setEditMode] = useState<EditMode>(() => (form.ironManView ? "rates" : "prices"));
+  const [instantBuy, setInstantBuy] = useState(form.instantBuyPrices);
+  const { customRates, defaultRates, updateRate, resetRates } = useCustomRates();
+  const { customPrices, updatePrice, resetPrices } = useCustomPrices(instantBuy);
   const [filter, setFilter] = useState("");
   const [rarityFilter, setRarityFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -22,8 +32,8 @@ export const SettingsPage: React.FC = () => {
   const [debouncedFilter, setDebouncedFilter] = useState("");
   const [livePrices, setLivePrices] = useState<Record<string, number>>({});
 
-  const isPrices = !form.ironManView;
-  const values = isPrices ? "prices" : "rates";
+  const isPrices = editMode === "prices";
+  const priceSourceLabel = instantBuy ? "instant buy" : "buy order";
 
   const debouncedSetFilter = useMemo(() => debounce((value: string) => setDebouncedFilter(value), 300), []);
   useEffect(() => {
@@ -32,8 +42,27 @@ export const SettingsPage: React.FC = () => {
 
   useEffect(() => {
     if (!isPrices) return;
-    DataService.getInstance().loadShardCosts(form.instantBuyPrices).then(setLivePrices).catch(console.error);
-  }, [isPrices, form.instantBuyPrices]);
+    let cancelled = false;
+    DataService.getInstance()
+      .loadShardCosts(instantBuy)
+      .then((prices) => {
+        if (!cancelled) setLivePrices(prices);
+      })
+      .catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, [isPrices, instantBuy]);
+
+  const switchEditMode = useCallback((mode: EditMode) => {
+    setEditMode(mode);
+    setHasChanges(false);
+  }, []);
+
+  const switchPriceSource = useCallback((useInstantBuy: boolean) => {
+    setInstantBuy(useInstantBuy);
+    setHasChanges(false);
+  }, []);
 
   const filteredShards = useMemo(() => {
     return filterShards<ShardWithDirectInfo>(shards, {
@@ -67,21 +96,25 @@ export const SettingsPage: React.FC = () => {
 
   const handlePriceChange = useCallback(
     (shardId: string, newPrice: number | undefined) => {
+      // A value equal to the live price isn't an override.
       const price = newPrice === undefined || newPrice === (livePrices[shardId] ?? 0) ? undefined : newPrice;
-      updatePrices(shardId, price);
+      updatePrice(shardId, price);
 
-      if (price !== undefined) setHasChanges(true);
+      const otherOverrides = [...customPrices.keys()].some((id) => id !== shardId);
+      setHasChanges(price !== undefined || otherOverrides);
     },
-    [updatePrices, livePrices]
+    [updatePrice, livePrices, customPrices]
   );
 
   const handleResetAll = useCallback(() => {
-    if (confirm(`Are you sure you want to reset all ${values} to their defaults? This will clear all custom ${values}.`)) {
+    const what = isPrices ? `${priceSourceLabel} prices` : "rates";
+    const to = isPrices ? "live Bazaar prices" : "their defaults";
+    if (confirm(`Are you sure you want to reset all ${what} to ${to}? This will clear all custom ${what}.`)) {
       if (isPrices) resetPrices();
       else resetRates();
       setHasChanges(false);
     }
-  }, [values, isPrices, resetRates, resetPrices]);
+  }, [isPrices, priceSourceLabel, resetRates, resetPrices]);
 
   const handleSave = useCallback(() => {
     setHasChanges(false);
@@ -111,12 +144,43 @@ export const SettingsPage: React.FC = () => {
       {/* Controls */}
       <div className="bg-white/5 border border-white/10 rounded-md p-4">
         <div className="text-center pb-6 pt-2">
-          <h1 className="text-2xl font-black text-purple-400 mb-2">Shard Overview and Rates</h1>
+          <h1 className="text-2xl font-black text-purple-400 mb-2">Shard Overview, Rates and Prices</h1>
           <p className="text-slate-400">
-            Customize {!isPrices ? "" : (form.instantBuyPrices ? "instant buy" : "buy order")} {values} 
-            {!isPrices && <><span className="font-bold text-slate-500 mx-0.5">/</span>
-            <span className="text-slate-500">hr</span></>} for more accurate calculations
+            {isPrices ? (
+              <>Override {priceSourceLabel} Bazaar prices used by Normal Profile calculations</>
+            ) : (
+              <>
+                Customize gathering rates<span className="font-bold text-slate-500 mx-0.5">/</span>
+                <span className="text-slate-500">hr</span> used by Ironman Profile calculations
+              </>
+            )}
           </p>
+          <div className="flex flex-wrap justify-center gap-2 mt-4">
+            <div className="flex gap-2">
+              <button type="button" className={segmentClass(!isPrices)} onClick={() => switchEditMode("rates")}>
+                Ironman Rates
+              </button>
+              <button type="button" className={segmentClass(isPrices)} onClick={() => switchEditMode("prices")}>
+                Bazaar Prices
+              </button>
+            </div>
+            {isPrices && (
+              <div className="flex gap-2">
+                <button type="button" className={segmentClass(!instantBuy)} onClick={() => switchPriceSource(false)}>
+                  Buy Order
+                </button>
+                <button type="button" className={segmentClass(instantBuy)} onClick={() => switchPriceSource(true)}>
+                  Instant Buy
+                </button>
+              </div>
+            )}
+          </div>
+          {isPrices && customPrices.size > 0 && (
+            <p className="mt-3 text-xs text-yellow-300/80">
+              {customPrices.size} custom {priceSourceLabel} {customPrices.size === 1 ? "price replaces" : "prices replace"} the live Bazaar price and won't follow
+              the market.
+            </p>
+          )}
         </div>
         <div className="md:hidden space-y-3">
           <div className="relative">
@@ -257,8 +321,8 @@ export const SettingsPage: React.FC = () => {
 
         <div className="mt-3 text-sm text-slate-400">
           <p>
-            {isPrices ? (form.instantBuyPrices ? "Instant buy" : "Buy order") + " prices " : "Base rates (shards/hour) "} 
-            • Showing {filteredShards.length} of {shards.length} shards
+            {isPrices ? `${instantBuy ? "Instant buy" : "Buy order"} prices (coins/shard)` : "Base rates (shards/hour)"} • Showing {filteredShards.length} of{" "}
+            {shards.length} shards
           </p>
         </div>
       </div>
@@ -275,10 +339,15 @@ export const SettingsPage: React.FC = () => {
                   title={desc?.title || shard.name}
                   description={<ShardDescription record={desc} fallback="No description." collapsibleHowToHunt />}
                   detailed={detailedShard}
-                  rate={isPrices
-                    ? (customPrices.get(shard.id) ?? livePrices[shard.id] ?? 0)
-                    : customRates[shard.id] !== undefined ? customRates[shard.id]! : defaultRates[shard.id]}
-                  defaultRate={isPrices ? livePrices[shard.id] ?? 0 : defaultRates[shard.id]}
+                  rate={
+                    isPrices
+                      ? (customPrices.get(shard.id) ?? livePrices[shard.id] ?? 0)
+                      : customRates[shard.id] !== undefined
+                        ? customRates[shard.id]!
+                        : defaultRates[shard.id]
+                  }
+                  defaultRate={isPrices ? (livePrices[shard.id] ?? 0) : defaultRates[shard.id]}
+                  defaultLabel={isPrices ? "Live" : "Default"}
                   onRateChange={isPrices ? handlePriceChange : handleRateChange}
                 />
               );

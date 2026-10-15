@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { DataService } from "../services/index.ts";
+import { DataService } from "../services";
 import { saveCustomPrices, loadCustomPrices } from "../utilities";
 
 export const useCustomRates = () => {
@@ -60,21 +60,36 @@ export const useCustomRates = () => {
   };
 };
 
-export const useCustomPrices = () => {
-  const [customPrices, setCustomPrices] = useState<Map<string, number>>(loadCustomPrices);
-  useEffect(() => {
-    saveCustomPrices(customPrices);
-  }, [customPrices]);
-  
-  const updatePrices = useCallback((id: string, price: number | undefined) => {
-    setCustomPrices((prev) => {
-      const next = new Map(prev);
-      if (price === undefined) next.delete(id);
-      else next.set(id, price);
-      return next;
-    });
-  }, []);
+type PriceSource = "buyOrder" | "instantBuy";
 
-  const resetPrices = useCallback(() => setCustomPrices(new Map()), []);
-  return { customPrices, updatePrices, resetPrices };
+/** Bazaar price overrides for the price source selected by `instantBuy`. */
+export const useCustomPrices = (instantBuy: boolean) => {
+  const [pricesBySource, setPricesBySource] = useState<Record<PriceSource, Map<string, number>>>(() => ({
+    buyOrder: loadCustomPrices(false),
+    instantBuy: loadCustomPrices(true),
+  }));
+  const source: PriceSource = instantBuy ? "instantBuy" : "buyOrder";
+
+  useEffect(() => {
+    saveCustomPrices(false, pricesBySource.buyOrder);
+    saveCustomPrices(true, pricesBySource.instantBuy);
+  }, [pricesBySource]);
+
+  const updatePrice = useCallback(
+    (id: string, price: number | undefined) => {
+      setPricesBySource((prev) => {
+        const next = new Map(prev[source]);
+        if (price === undefined) next.delete(id);
+        else next.set(id, price);
+        return { ...prev, [source]: next };
+      });
+    },
+    [source]
+  );
+
+  const resetPrices = useCallback(() => {
+    setPricesBySource((prev) => ({ ...prev, [source]: new Map() }));
+  }, [source]);
+
+  return { customPrices: pricesBySource[source], updatePrice, resetPrices };
 };

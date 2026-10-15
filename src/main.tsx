@@ -12,7 +12,10 @@ const VALID_KEYS = [
   "inventory",
   "owned_attributes",
   "hypixel_profile_meta",
-  "greenhouse_modal_seen"
+  "inventory_disabled_shards",
+  "custom_prices_buy_order",
+  "custom_prices_instant_buy",
+  "greenhouse_modal_seen",
 ];
 function cleanupLocalStorage() {
   for (let i = localStorage.length - 1; i >= 0; i--) {
