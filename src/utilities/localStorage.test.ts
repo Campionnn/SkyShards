@@ -10,6 +10,7 @@ import {
   saveInventory,
   saveCustomPrices,
   loadCustomPrices,
+  pruneUnknownStorageKeys,
 } from "./localStorage";
 
 /**
@@ -29,6 +30,12 @@ class FakeStorage {
   }
   seed(key: string, value: string): void {
     this.map.set(key, value);
+  }
+  get length(): number {
+    return this.map.size;
+  }
+  key(index: number): string | null {
+    return [...this.map.keys()][index] ?? null;
   }
 }
 
@@ -238,5 +245,20 @@ describe("custom price validation", () => {
   it("drops non-numeric prices", () => {
     storage.seed("custom_prices_buy_order", JSON.stringify({ C35: "abc", U8: 12 }));
     expect(loadCustomPrices(false)).toEqual(new Map([["U8", 12]]));
+  });
+});
+
+describe("pruneUnknownStorageKeys", () => {
+  it("keeps known keys and drops unknown ones", () => {
+    const known = ["calculator_data", "inventory", "skyshards_use_inventory", "ss_ads_blocked"];
+    for (const key of known) storage.seed(key, "x");
+    storage.seed("old_build_leftover", "x");
+    storage.seed("theme", "x");
+
+    pruneUnknownStorageKeys();
+
+    for (const key of known) expect(storage.getItem(key)).toBe("x");
+    expect(storage.getItem("old_build_leftover")).toBeNull();
+    expect(storage.getItem("theme")).toBeNull();
   });
 });

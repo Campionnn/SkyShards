@@ -296,6 +296,8 @@ const KNOWN_KEYS: ReadonlySet<string> = new Set([
   "custom_prices_buy_order",
   "custom_prices_instant_buy",
   "greenhouse_modal_seen",
+  // Owned by the inline ad-block detector in index.html (first-paint cache), not by a slot here.
+  "ss_ads_blocked",
 ]);
 
 export const pruneUnknownStorageKeys = (): void => {
