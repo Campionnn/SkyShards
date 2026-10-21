@@ -3,7 +3,7 @@ import { Shield } from "lucide-react";
 
 const Divider = () => <hr className="my-6 border-slate-700" />;
 
-const PrivacyPolicy: React.FC = () => (
+export const PrivacyPolicy: React.FC = () => (
   <div className="max-w-2xl mx-auto p-6 text-slate-200">
     <div className="text-center mb-6">
       <div className="w-16 h-16 bg-purple-500/20 border border-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -113,5 +113,3 @@ const PrivacyPolicy: React.FC = () => (
     </p>
   </div>
 );
-
-export default PrivacyPolicy;
