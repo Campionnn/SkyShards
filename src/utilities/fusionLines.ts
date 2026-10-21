@@ -201,7 +201,7 @@ function pruneUnobtainableRoots(graph: FusionGraph, isDirectlyObtainable: (id: s
 /** Shards reachable downstream from `shardId` over special edges only, including
  * the shard itself — its family-backbone fusion line, excluding id-fusion jumps
  * into unrelated targets. Cycle-safe. */
-export function getSpecialDownstreamClosure(shardId: string, graph: FusionGraph, memo?: Map<string, Set<string>>): Set<string> {
+function getSpecialDownstreamClosure(shardId: string, graph: FusionGraph, memo?: Map<string, Set<string>>): Set<string> {
   if (memo?.has(shardId)) return memo.get(shardId)!;
 
   const closure = new Set<string>([shardId]);

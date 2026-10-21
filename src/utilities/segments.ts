@@ -10,7 +10,7 @@ export function formatRangeValue(value: number | null): string {
 }
 
 /** Flatten segments to plain text (glyphs stripped, ranges as "2→20%") for search. */
-export function flattenSegments(segments: Segment[]): string {
+function flattenSegments(segments: Segment[]): string {
   return segments
     .map((seg) => {
       if (isRangeSegment(seg)) {
