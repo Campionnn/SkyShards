@@ -67,4 +67,3 @@ class HypixelService {
 }
 
 export const hypixelService = HypixelService.getInstance();
-export default HypixelService;

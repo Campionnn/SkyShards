@@ -15,11 +15,12 @@ import {
   saveOwnedAttributes,
   loadDisabledShards,
   saveDisabledShards,
+  loadUseInventory,
+  saveUseInventory,
+  saveProfileType,
 } from "../utilities";
 import { calculateOptimalPathWithWorker, calculateMultipleShardsParallel, type WorkerProgress } from "../services/workerCalculationService";
 import { MAX_QUANTITIES } from "../constants";
-
-const INVENTORY_ENABLED_KEY = "skyshards_use_inventory";
 
 const CalculatorFormWithContext: React.FC<{
   onSubmit: (data: CalculationFormData, setForm: (data: CalculationFormData) => void) => void;
@@ -258,10 +259,7 @@ export const CalculatorPage: React.FC = () => {
   }, []);
 
   // Inventory state
-  const [useInventory, setUseInventory] = useState<boolean>(() => {
-    const stored = localStorage.getItem(INVENTORY_ENABLED_KEY);
-    return stored === "true";
-  });
+  const [useInventory, setUseInventory] = useState<boolean>(loadUseInventory);
 
   const [inventory, setInventory] = useState<Map<string, number>>(loadInventory);
   const [ownedAttributes, setOwnedAttributes] = useState<Map<string, number>>(loadOwnedAttributes);
@@ -336,11 +334,7 @@ export const CalculatorPage: React.FC = () => {
 
   // Persist inventory toggle
   useEffect(() => {
-    try {
-      localStorage.setItem(INVENTORY_ENABLED_KEY, useInventory ? "true" : "false");
-    } catch {
-      /* ignore */
-    }
+    saveUseInventory(useInventory);
   }, [useInventory]);
 
   // Save inventory data to localStorage
@@ -391,7 +385,7 @@ export const CalculatorPage: React.FC = () => {
 
   // ─── Profile select ───
   const handleSelectProfile = (profile: "ironman" | "normal") => {
-    localStorage.setItem("skyshards_profile_type", profile);
+    saveProfileType(profile);
     setSaveEnabled(true);
 
     const newForm = {

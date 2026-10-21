@@ -1,19 +1,17 @@
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
-import { Suspense, lazy } from "react";
-import { Layout } from "./components";
+import { Suspense, lazy, type ComponentType, type LazyExoticComponent } from "react";
+import { createBrowserRouter, Navigate, RouterProvider, type RouteObject } from "react-router-dom";
+import { Layout, ToastProvider } from "./components";
 import { CalculatorStateProvider, RecipeStateProvider } from "./context";
 import { usePageTitle, useShardIconPreload } from "./hooks";
-import { ToastProvider } from "./components";
 
-const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((module) => ({ default: module.CalculatorPage })));
-const SettingsPage = lazy(() => import("./pages/SettingsPage").then((module) => ({ default: module.SettingsPage })));
-const RecipePage = lazy(() => import("./pages/RecipePage"));
-const FusionGraphPage = lazy(() => import("./pages/FusionGraphPage").then((module) => ({ default: module.FusionGraphPage })));
-const GuidePage = lazy(() => import("./pages/GuidePage").then((module) => ({ default: module.GuidePage })));
-const AboutPage = lazy(() => import("./pages/AboutPage").then((module) => ({ default: module.AboutPage })));
-
-const ContactPage = lazy(() => import("./pages/ContactPage").then((module) => ({ default: module.ContactPage })));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((m) => ({ default: m.CalculatorPage })));
+const SettingsPage = lazy(() => import("./pages/SettingsPage").then((m) => ({ default: m.SettingsPage })));
+const RecipePage = lazy(() => import("./pages/RecipePage").then((m) => ({ default: m.RecipePage })));
+const FusionGraphPage = lazy(() => import("./pages/FusionGraphPage").then((m) => ({ default: m.FusionGraphPage })));
+const GuidePage = lazy(() => import("./pages/GuidePage").then((m) => ({ default: m.GuidePage })));
+const AboutPage = lazy(() => import("./pages/AboutPage").then((m) => ({ default: m.AboutPage })));
+const ContactPage = lazy(() => import("./pages/ContactPage").then((m) => ({ default: m.ContactPage })));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy").then((m) => ({ default: m.PrivacyPolicy })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center py-12">
@@ -21,123 +19,52 @@ const LoadingSpinner = () => (
   </div>
 );
 
-const AppWithProviders = () => {
-  return (
-    <ToastProvider>
-      <Layout />
-    </ToastProvider>
-  );
-};
-
-const ProtectedLayout = () => {
-  usePageTitle(); // Update page title based on route
-  useShardIconPreload(); // Warm the icon cache once the browser is idle
+const RootLayout = () => {
+  usePageTitle();
+  useShardIconPreload();
 
   return (
     <CalculatorStateProvider>
       <RecipeStateProvider>
-        <AppWithProviders />
+        <ToastProvider>
+          <Layout />
+        </ToastProvider>
       </RecipeStateProvider>
     </CalculatorStateProvider>
   );
 };
 
-const isProd = import.meta.env.PROD;
-const isGitHubPages = import.meta.env.BASE_URL.includes("/SkyShards/");
-const basename = isProd && isGitHubPages ? "/SkyShards" : "";
+/** Every page is code-split. A page without a path is the index route. */
+const PAGES: Array<{ path?: string; Page: LazyExoticComponent<ComponentType> }> = [
+  { Page: CalculatorPage },
+  { path: "shards", Page: SettingsPage },
+  { path: "recipes", Page: RecipePage },
+  { path: "fusion-lines", Page: FusionGraphPage },
+  { path: "guide", Page: GuidePage },
+  { path: "about", Page: AboutPage },
+  { path: "contact", Page: ContactPage },
+  { path: "privacy-policy", Page: PrivacyPolicy },
+  { path: "client-privacy-policy", Page: PrivacyPolicy },
+];
+
+const pageRoutes: RouteObject[] = PAGES.map(({ path, Page }) => {
+  const element = (
+    <Suspense fallback={<LoadingSpinner />}>
+      <Page />
+    </Suspense>
+  );
+  return path ? { path, element } : { index: true, element };
+});
+
+// "/" normally; "/SkyShards/" for the GitHub Pages build (see vite.config.ts).
+const basename = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const router = createBrowserRouter(
   [
-    {
-      path: "/",
-      element: <ProtectedLayout />,
-      children: [
-        {
-          index: true,
-          element: (
-            <Suspense fallback={<LoadingSpinner />}>
-              <CalculatorPage />
-            </Suspense>
-          ),
-        },
-        {
-          path: "shards",
-          element: (
-            <Suspense fallback={<LoadingSpinner />}>
-              <SettingsPage />
-            </Suspense>
-          ),
-        },
-        {
-          path: "recipes",
-          element: (
-            <Suspense fallback={<LoadingSpinner />}>
-              <RecipePage />
-            </Suspense>
-          ),
-        },
-        {
-          path: "fusion-lines",
-          element: (
-            <Suspense fallback={<LoadingSpinner />}>
-              <FusionGraphPage />
-            </Suspense>
-          ),
-        },
-        {
-          path: "guide",
-          element: (
-            <Suspense fallback={<LoadingSpinner />}>
-              <GuidePage />
-            </Suspense>
-          ),
-        },
-        {
-          path: "about",
-          element: (
-            <Suspense fallback={<LoadingSpinner />}>
-              <AboutPage />
-            </Suspense>
-          ),
-        },
-        {
-          path: "contact",
-          element: (
-            <Suspense fallback={<LoadingSpinner />}>
-              <ContactPage />
-            </Suspense>
-          ),
-        },
-        {
-          path: "privacy-policy",
-          element: (
-            <Suspense fallback={<LoadingSpinner />}>
-              <PrivacyPolicy />
-            </Suspense>
-          ),
-        },
-        {
-          path: "client-privacy-policy",
-          element: (
-            <Suspense fallback={<LoadingSpinner />}>
-              <PrivacyPolicy />
-            </Suspense>
-          ),
-        },
-      ],
-    },
-    {
-      path: "*",
-      element: <Navigate to="/" replace />,
-    },
+    { path: "/", element: <RootLayout />, children: pageRoutes },
+    { path: "*", element: <Navigate to="/" replace /> },
   ],
-  {
-    basename,
-  },
+  { basename },
 );
 
-const App = () => {
-  return <RouterProvider router={router} />;
-};
-
-export default App;
+export const App = () => <RouterProvider router={router} />;

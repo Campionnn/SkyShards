@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Navigation } from "./Navigation";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { PnPageAutoScale } from "../PnPageAutoScale";
 import { GreenhouseModal } from "../modals";
-
-const GREENHOUSE_MODAL_SEEN_KEY = "greenhouse_modal_seen";
+import { hasSeenGreenhouseModal, markGreenhouseModalSeen } from "../../utilities";
 
 export const Layout: React.FC = () => {
   const location = useLocation();
-  const [showGreenhouseModal, setShowGreenhouseModal] = useState(false);
+  const [showGreenhouseModal, setShowGreenhouseModal] = useState(() => !hasSeenGreenhouseModal());
 
   const cleanPath = location.pathname.replace(/\/+$/, "");
   // The fusion graph hosts a React Flow canvas, which breaks under an ancestor CSS
@@ -21,17 +20,8 @@ export const Layout: React.FC = () => {
   // out of React means it applies on first paint without a re-render or layout shift.
   const disableAds = cleanPath.endsWith("/fusion-lines");
 
-  useEffect(() => {
-    // Check if user has seen the modal before
-    const hasSeenModal = localStorage.getItem(GREENHOUSE_MODAL_SEEN_KEY);
-    if (!hasSeenModal) {
-      setShowGreenhouseModal(true);
-    }
-  }, []);
-
   const handleCloseGreenhouseModal = () => {
-    // Mark modal as seen in localStorage
-    localStorage.setItem(GREENHOUSE_MODAL_SEEN_KEY, "true");
+    markGreenhouseModalSeen();
     setShowGreenhouseModal(false);
   };
 

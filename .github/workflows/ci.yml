@@ -24,7 +24,10 @@ jobs:
 
       # --max-warnings 0 ratchets the current clean state; a new warning fails the build.
       - name: Lint
-        run: pnpm exec eslint . --max-warnings 0
+        run: pnpm run lint
+
+      - name: Format
+        run: pnpm run format:check
 
       # Golden-output tests over the real public/*.json, so a data sync that changes
       # the calculator's answers shows up here rather than in production.

@@ -273,5 +273,3 @@ export const FusionGraphPage: React.FC = () => (
     <FusionGraphInner />
   </ReactFlowProvider>
 );
-
-export default FusionGraphPage;

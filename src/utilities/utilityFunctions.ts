@@ -1,28 +1,20 @@
+/** Hours -> "42 sec" / "5 min" / "2 hr" / "2 hr 5 min" / "1 d 3 hr 0 min". */
 export const formatTime = (decimalHours: number): string => {
+  if (!Number.isFinite(decimalHours)) return String(decimalHours);
+
   const totalSeconds = Math.round(decimalHours * 3600);
+  if (totalSeconds < 60) return `${totalSeconds} sec`;
 
-  if (totalSeconds < 60) {
-    return `${totalSeconds} sec`;
-  }
+  // Round once, on whole minutes, so 1.999 hr reads "2 hr" and never "1 hr 60 min".
+  const totalMinutes = Math.round(totalSeconds / 60);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
 
-  console.group("Format Time");
-  console.log(decimalHours);
-  console.groupEnd();
-
-  const days = Math.floor(decimalHours / 24);
-  const hours = Math.floor(decimalHours) - days * 24;
-  const minutes = Math.round((decimalHours - hours - days * 24) * 60);
-
-  if (days === 0) {
-    if (hours === 0) {
-      return `${minutes} min`;
-    }
-    if (minutes === 0 || isNaN(minutes)) {
-      return `${hours} hr`;
-    }
-    return `${hours} hr ${minutes} min`;
-  }
-  return `${days} d ${hours} hr ${minutes} min`;
+  if (days > 0) return `${days} d ${hours} hr ${minutes} min`;
+  if (hours === 0) return `${minutes} min`;
+  if (minutes === 0) return `${hours} hr`;
+  return `${hours} hr ${minutes} min`;
 };
 
 export const formatNumber = (num: number): string => {
@@ -144,5 +136,3 @@ export const sortShardsByNameWithPrefixAwareness = (a: { name: string; id: strin
   // Otherwise, sort alphabetically by name
   return aName.localeCompare(bName);
 };
-
-export { isValidShardName } from "./isValidShardName";

@@ -228,3 +228,83 @@ const disabledShardsSlot = createStorageSlot<Set<string>>("inventory_disabled_sh
 export const saveDisabledShards = (disabled: Set<string>): void => disabledShardsSlot.write(disabled);
 export const loadDisabledShards = (): Set<string> => disabledShardsSlot.read();
 export const clearDisabledShards = (): void => disabledShardsSlot.clear();
+
+// ─── Custom acquisition rates (ironman) ───
+
+/** Only rates that differ from rates.json are stored. */
+const customRatesSlot = createStorageSlot<Record<string, number>>("customRates", {
+  label: "custom rates",
+  fallback: () => ({}),
+  deserialize: (raw) => {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isPlainObject(parsed)) return {};
+    return Object.fromEntries(Object.entries(parsed).filter((entry): entry is [string, number] => typeof entry[1] === "number" && Number.isFinite(entry[1])));
+  },
+});
+
+export const loadCustomRates = (): Record<string, number> => customRatesSlot.read();
+/** An empty record clears the entry. */
+export const saveCustomRates = (rates: Record<string, number>): void => {
+  if (Object.keys(rates).length === 0) customRatesSlot.clear();
+  else customRatesSlot.write(rates);
+};
+
+// ─── Flags ───
+
+const booleanSlot = (key: string, label: string) =>
+  createStorageSlot<boolean>(key, {
+    label,
+    fallback: () => false,
+    serialize: (value) => String(value),
+    deserialize: (raw) => raw === "true",
+  });
+
+const useInventorySlot = booleanSlot("skyshards_use_inventory", "use inventory toggle");
+export const loadUseInventory = (): boolean => useInventorySlot.read();
+export const saveUseInventory = (enabled: boolean): void => useInventorySlot.write(enabled);
+
+const greenhouseSeenSlot = booleanSlot("greenhouse_modal_seen", "greenhouse modal seen");
+export const hasSeenGreenhouseModal = (): boolean => greenhouseSeenSlot.read();
+export const markGreenhouseModalSeen = (): void => greenhouseSeenSlot.write(true);
+
+export type ProfileType = "ironman" | "normal";
+
+const profileTypeSlot = createStorageSlot<ProfileType>("skyshards_profile_type", {
+  label: "profile type",
+  fallback: () => "ironman",
+  serialize: (type) => type,
+  deserialize: (raw) => (raw === "normal" ? "normal" : "ironman"),
+});
+export const saveProfileType = (type: ProfileType): void => profileTypeSlot.write(type);
+
+// ─── Housekeeping ───
+
+/**
+ * Every key this app writes. Anything else is left over from an older build and is
+ * removed on startup by `pruneUnknownStorageKeys` — so a new slot must be listed here.
+ */
+const KNOWN_KEYS: ReadonlySet<string> = new Set([
+  "calculator_data",
+  "calculator_save_enabled",
+  "customRates",
+  "skyshards_profile_type",
+  "skyshards_use_inventory",
+  "inventory",
+  "owned_attributes",
+  "hypixel_profile_meta",
+  "inventory_disabled_shards",
+  "custom_prices_buy_order",
+  "custom_prices_instant_buy",
+  "greenhouse_modal_seen",
+]);
+
+export const pruneUnknownStorageKeys = (): void => {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key !== null && !KNOWN_KEYS.has(key)) localStorage.removeItem(key);
+    }
+  } catch (error) {
+    console.warn("Failed to prune localStorage:", error);
+  }
+};

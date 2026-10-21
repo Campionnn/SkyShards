@@ -1,34 +1,26 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { AppWithRedirect } from "./components/AppWithRedirect";
+import { App } from "./App";
+import { pruneUnknownStorageKeys } from "./utilities";
 
-// Clean up legacy/unused localStorage keys
-const VALID_KEYS = [
-  "calculator_data",
-  "calculator_save_enabled",
-  "customRates",
-  "skyshards_profile_type",
-  "inventory",
-  "owned_attributes",
-  "hypixel_profile_meta",
-  "inventory_disabled_shards",
-  "custom_prices_buy_order",
-  "custom_prices_instant_buy",
-  "greenhouse_modal_seen",
-];
-function cleanupLocalStorage() {
-  for (let i = localStorage.length - 1; i >= 0; i--) {
-    const key = localStorage.key(i);
-    if (key && !VALID_KEYS.includes(key)) {
-      localStorage.removeItem(key);
-    }
-  }
-}
-cleanupLocalStorage();
+/**
+ * GitHub Pages serves public/404.html for deep links; it stashes the requested path and
+ * bounces to "/". Put the original path back and let the (already created) router see it.
+ */
+const restoreRedirectedPath = () => {
+  const target = sessionStorage.getItem("pathToRedirect");
+  sessionStorage.removeItem("pathToRedirect");
+  if (!target || target === window.location.pathname + window.location.search + window.location.hash) return;
+  window.history.replaceState(null, "", target);
+  window.dispatchEvent(new PopStateEvent("popstate"));
+};
+
+pruneUnknownStorageKeys();
+restoreRedirectedPath();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AppWithRedirect />
+    <App />
   </StrictMode>,
 );

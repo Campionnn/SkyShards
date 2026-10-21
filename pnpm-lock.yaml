@@ -11,9 +11,6 @@ importers:
       '@dagrejs/dagre':
         specifier: ^3.0.0
         version: 3.0.0
-      '@hookform/resolvers':
-        specifier: ^5.5.7
-        version: 5.5.7(react-hook-form@7.83.0(react@19.2.8))(zod@3.25.76)
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@7.1.5(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.49.0)(tsx@4.23.1))
@@ -35,9 +32,6 @@ importers:
       react-dom:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
-      react-hook-form:
-        specifier: ^7.83.0
-        version: 7.83.0(react@19.2.8)
       react-icons:
         specifier: ^5.7.0
         version: 5.7.0(react@19.2.8)
@@ -550,84 +544,6 @@ packages:
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@hookform/resolvers@5.5.7':
-    resolution: {integrity: sha512-CyPCYV8/KlXfEXLWj8HHHhVsR/IZ6Ckm3b/a4fWtO/lRnRK1huqncb8LlAWrmpPRsse5glF5aVuDRMHEr3UGag==}
-    peerDependencies:
-      '@sinclair/typebox': '>=0.25.24'
-      '@standard-schema/spec': ^1.0.0
-      '@typeschema/main': '>=0.13.7'
-      '@vinejs/vine': ^2.0.0 || ^3.0.0
-      ajv: ^8.12.0
-      ajv-errors: ^3.0.0
-      ajv-formats: ^2.1.1
-      arktype: ^2.0.0
-      ata-validator: ^0.7.0
-      class-transformer: '>=0.4.0'
-      class-validator: '>=0.12.0'
-      computed-types: ^1.0.0
-      effect: ^3.10.3
-      fluentvalidation-ts: ^3.0.0
-      fp-ts: ^2.7.0
-      io-ts: ^2.0.0
-      joi: ^17.0.0
-      nope-validator: '>=0.12.0'
-      react-hook-form: ^7.55.0
-      superstruct: '>=0.12.0'
-      typanion: ^3.3.2
-      valibot: '>=0.31.0 || ^1.0.0-beta.4 || ^1.0.0-rc'
-      vest: '>=3.0.0'
-      yup: ^1.0.0
-      zod: ^3.25.0 || ^4.0.0
-    peerDependenciesMeta:
-      '@sinclair/typebox':
-        optional: true
-      '@standard-schema/spec':
-        optional: true
-      '@typeschema/main':
-        optional: true
-      '@vinejs/vine':
-        optional: true
-      ajv:
-        optional: true
-      ajv-errors:
-        optional: true
-      ajv-formats:
-        optional: true
-      arktype:
-        optional: true
-      ata-validator:
-        optional: true
-      class-transformer:
-        optional: true
-      class-validator:
-        optional: true
-      computed-types:
-        optional: true
-      effect:
-        optional: true
-      fluentvalidation-ts:
-        optional: true
-      fp-ts:
-        optional: true
-      io-ts:
-        optional: true
-      joi:
-        optional: true
-      nope-validator:
-        optional: true
-      superstruct:
-        optional: true
-      typanion:
-        optional: true
-      valibot:
-        optional: true
-      vest:
-        optional: true
-      yup:
-        optional: true
-      zod:
-        optional: true
-
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
     engines: {node: '>=18.18.0'}
@@ -806,9 +722,6 @@ packages:
     resolution: {integrity: sha512-MOG/3gTOn4Fwf574RVOaY61I5o6P90legkFADiTyn1hyjNydT+cerU2rLUwPdZkKKyJ+iT+K9p7WXK4LM1Ka6g==}
     cpu: [x64]
     os: [win32]
-
-  '@standard-schema/utils@0.3.0':
-    resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
   '@tailwindcss/node@4.3.3':
     resolution: {integrity: sha512-/T8IKEsf9VTU6tLjgC7+sv2mOPtQxzE2jMw7u4Tt40Tx+QSZxpzh95/H6cMKoja9XuW7iMdLJYBB0o9G1CaAgg==}
@@ -2001,12 +1914,6 @@ packages:
     peerDependencies:
       react: ^19.2.8
 
-  react-hook-form@7.83.0:
-    resolution: {integrity: sha512-AXt8cMCmx5a7u4uvpb2uRFVrWQhllI4pV+LSykxIac/hjt44TnQkmX9BKuQi2i+LDC62esmiLpilkav+kjVf/A==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      react: ^16.8.0 || ^17 || ^18 || ^19
-
   react-icons@5.7.0:
     resolution: {integrity: sha512-LBLy340Rzqy6+/yVhZKT3B/QpP1BZaesGqasf09HPOBzRarcDIFH0WwXlXQfE7q7ipxK4MSiC5DIBWURCny6fw==}
     peerDependencies:
@@ -2705,13 +2612,6 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
-  '@hookform/resolvers@5.5.7(react-hook-form@7.83.0(react@19.2.8))(zod@3.25.76)':
-    dependencies:
-      '@standard-schema/utils': 0.3.0
-      react-hook-form: 7.83.0(react@19.2.8)
-    optionalDependencies:
-      zod: 3.25.76
-
   '@humanfs/core@0.19.2':
     dependencies:
       '@humanfs/types': 0.15.0
@@ -2841,8 +2741,6 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.62.3':
     optional: true
-
-  '@standard-schema/utils@0.3.0': {}
 
   '@tailwindcss/node@4.3.3':
     dependencies:
@@ -4267,10 +4165,6 @@ snapshots:
     dependencies:
       react: 19.2.8
       scheduler: 0.27.0
-
-  react-hook-form@7.83.0(react@19.2.8):
-    dependencies:
-      react: 19.2.8
 
   react-icons@5.7.0(react@19.2.8):
     dependencies:

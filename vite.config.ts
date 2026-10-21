@@ -5,18 +5,16 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const isProd = mode === "production";
-  const isGitHubPages = env.GITHUB_PAGES === "true";
-
-  const apiTarget = env.VITE_API_TARGET || "https://api.skyshards.com";
 
   return {
     plugins: [react(), tailwindcss()],
-    base: isProd && isGitHubPages ? "/SkyShards/" : "/",
+    // GITHUB_PAGES=true builds for the /SkyShards/ project path; the router derives its basename from BASE_URL.
+    base: mode === "production" && env.GITHUB_PAGES === "true" ? "/SkyShards/" : "/",
     server: {
       proxy: {
+        // In dev, hypixelService calls /api so the backend needs no CORS setup. Target is set in .env.local.
         "/api": {
-          target: apiTarget,
+          target: env.VITE_API_TARGET || "https://api.skyshards.com",
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ""),
         },
@@ -27,18 +25,13 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             vendor: ["react", "react-dom", "react-router-dom"],
-            forms: ["react-hook-form", "@hookform/resolvers", "zod"],
             icons: ["lucide-react"],
           },
         },
       },
       target: "es2015",
       sourcemap: false,
-      cssCodeSplit: true,
       chunkSizeWarningLimit: 1000,
-    },
-    optimizeDeps: {
-      include: ["react", "react-dom", "react-router-dom"],
     },
   };
 });

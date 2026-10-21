@@ -936,5 +936,3 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
     </Modal>
   );
 };
-
-export default InventoryManagementModal;

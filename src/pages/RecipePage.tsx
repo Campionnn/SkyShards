@@ -491,5 +491,3 @@ export const RecipePage = () => {
     </div>
   );
 };
-
-export default RecipePage;
