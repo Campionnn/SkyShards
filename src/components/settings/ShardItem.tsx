@@ -16,84 +16,88 @@ interface ShardItemProps {
   onCardClick?: () => void;
 }
 
-export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, title, description, detailed, rate, defaultRate, defaultLabel = "Default", onRateChange, onCardClick }) => {
-  const [inputValue, setInputValue] = useState<string>("");
-  const [isEditing, setIsEditing] = useState(false);
+export const ShardItem: React.FC<ShardItemProps> = React.memo(
+  ({ shard, title, description, detailed, rate, defaultRate, defaultLabel = "Default", onRateChange, onCardClick }) => {
+    const [inputValue, setInputValue] = useState<string>("");
+    const [isEditing, setIsEditing] = useState(false);
 
-  const isChanged = rate !== defaultRate;
-  const resetTitle = `Reset to ${defaultLabel.toLowerCase()} value (${defaultRate})`;
+    const isChanged = rate !== defaultRate;
+    const resetTitle = `Reset to ${defaultLabel.toLowerCase()} value (${defaultRate})`;
 
-  const handleRateChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setInputValue(e.target.value);
-      if (e.target.value !== "") {
-        onRateChange(shard.id, parseFloat(e.target.value) || 0);
+    const handleRateChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        setInputValue(e.target.value);
+        if (e.target.value !== "") {
+          onRateChange(shard.id, parseFloat(e.target.value) || 0);
+        }
+      },
+      [shard.id, onRateChange],
+    );
+
+    const handleFocus = () => {
+      // Alt-tabbing back refocuses the input; don't restart the edit and overwrite what is
+      // already typed there.
+      if (isEditing) return;
+      setIsEditing(true);
+      setInputValue(rate.toString());
+    };
+
+    const handleBlur = () => {
+      // Switching windows isn't finishing the edit, so leave the half-typed value alone.
+      if (isBlurCausedByWindow()) return;
+
+      setIsEditing(false);
+      if (inputValue === "") {
+        onRateChange(shard.id, defaultRate);
+      } else {
+        onRateChange(shard.id, parseFloat(inputValue) || 0);
       }
-    },
-    [shard.id, onRateChange]
-  );
+      setInputValue("");
+    };
 
-  const handleFocus = () => {
-    // Alt-tabbing back refocuses the input; don't restart the edit and overwrite what is
-    // already typed there.
-    if (isEditing) return;
-    setIsEditing(true);
-    setInputValue(rate.toString());
-  };
-
-  const handleBlur = () => {
-    // Switching windows isn't finishing the edit, so leave the half-typed value alone.
-    if (isBlurCausedByWindow()) return;
-
-    setIsEditing(false);
-    if (inputValue === "") {
-      onRateChange(shard.id, defaultRate);
-    } else {
-      onRateChange(shard.id, parseFloat(inputValue) || 0);
-    }
-    setInputValue("");
-  };
-
-  return (
-    <div
-      className="bg-white/5 border border-white/10 rounded-md p-3 hover:bg-white/10 transition-colors duration-200 flex"
-      onClick={onCardClick}
-      tabIndex={onCardClick ? 0 : undefined}
-      role={onCardClick ? "button" : undefined}
-      style={onCardClick ? { cursor: "pointer" } : {}}
-    >
-      <div className="flex items-start justify-between gap-2 w-full">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1 mb-1">
-            <img src={shardIconUrl(shard.id)} alt={shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
-            <div className={`font-medium text-sm ${getRarityColor(shard.rarity)} truncate`}>{shard.name}</div>
-            {shard.isDirect ? (
-              <span className="px-1.5 py-0.5 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
-            ) : (
-              <span className="px-1.5 py-0.5 text-xs bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-md flex-shrink-0">Fuse</span>
-            )}
-            {isChanged && (
-              <span title={`${defaultLabel} value: ${defaultRate}`} className="px-1.5 py-0.5 text-xs bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 rounded-md flex-shrink-0">
-                Changed
-              </span>
-            )}
-          </div>
-          <div className="text-xs text-slate-400 truncate">
-            {shard.id} • {shard.family} • {shard.type}
-          </div>
-          {detailed && (
-            <div className="mt-2 text-xs text-slate-400">
-              <div className="font-medium text-yellow-500 gap-1 flex items-center truncate mb-1">
-                {title}
-                <span className="flex items-center">
-                  I<MoveRight className="w-4" />X
+    return (
+      <div
+        className="bg-white/5 border border-white/10 rounded-md p-3 hover:bg-white/10 transition-colors duration-200 flex"
+        onClick={onCardClick}
+        tabIndex={onCardClick ? 0 : undefined}
+        role={onCardClick ? "button" : undefined}
+        style={onCardClick ? { cursor: "pointer" } : {}}
+      >
+        <div className="flex items-start justify-between gap-2 w-full">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1 mb-1">
+              <img src={shardIconUrl(shard.id)} alt={shard.name} className="w-6 h-6 object-contain flex-shrink-0" loading="lazy" />
+              <div className={`font-medium text-sm ${getRarityColor(shard.rarity)} truncate`}>{shard.name}</div>
+              {shard.isDirect ? (
+                <span className="px-1.5 py-0.5 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">Direct</span>
+              ) : (
+                <span className="px-1.5 py-0.5 text-xs bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/30 rounded-md flex-shrink-0">Fuse</span>
+              )}
+              {isChanged && (
+                <span
+                  title={`${defaultLabel} value: ${defaultRate}`}
+                  className="px-1.5 py-0.5 text-xs bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 rounded-md flex-shrink-0"
+                >
+                  Changed
                 </span>
-              </div>
-              <div className="text-slate-300 break-words">{description}</div>
+              )}
             </div>
-          )}
-        </div>
-          <div className={`flex ${detailed ? 'flex-col' : 'flex-row'} gap-1.5 flex-shrink-0 self-center`} onClick={(e) => e.stopPropagation()}>
+            <div className="text-xs text-slate-400 truncate">
+              {shard.id} • {shard.family} • {shard.type}
+            </div>
+            {detailed && (
+              <div className="mt-2 text-xs text-slate-400">
+                <div className="font-medium text-yellow-500 gap-1 flex items-center truncate mb-1">
+                  {title}
+                  <span className="flex items-center">
+                    I<MoveRight className="w-4" />X
+                  </span>
+                </div>
+                <div className="text-slate-300 break-words">{description}</div>
+              </div>
+            )}
+          </div>
+          <div className={`flex ${detailed ? "flex-col" : "flex-row"} gap-1.5 flex-shrink-0 self-center`} onClick={(e) => e.stopPropagation()}>
             {!detailed && (
               <button
                 type="button"
@@ -129,7 +133,8 @@ export const ShardItem: React.FC<ShardItemProps> = React.memo(({ shard, title, d
               </button>
             )}
           </div>
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);

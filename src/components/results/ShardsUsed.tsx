@@ -11,13 +11,7 @@ interface ShardsUsedProps {
   onDisabledShardsChange: (disabled: Set<string>) => void;
 }
 
-export const ShardsUsed: React.FC<ShardsUsedProps> = ({
-  inventory,
-  remainingInventory,
-  data,
-  disabledShards,
-  onDisabledShardsChange,
-}) => {
+export const ShardsUsed: React.FC<ShardsUsedProps> = ({ inventory, remainingInventory, data, disabledShards, onDisabledShardsChange }) => {
   // Compute shards used: inventory amount minus remaining
   const shardsUsed = useMemo(() => {
     const used: { shardId: string; amountUsed: number; remaining: number; total: number }[] = [];

@@ -118,9 +118,7 @@ export const GuidePage: React.FC = () => {
                 {children}
               </blockquote>
             ),
-            hr: ({ ...props }) => (
-              <hr className="border-white/20 my-8" {...props} />
-            ),
+            hr: ({ ...props }) => <hr className="border-white/20 my-8" {...props} />,
           }}
         >
           {markdownContent}

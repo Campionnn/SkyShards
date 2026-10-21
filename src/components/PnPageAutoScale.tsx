@@ -13,12 +13,7 @@ interface PnPageAutoScaleProps {
   disabled?: boolean;
 }
 
-export const PnPageAutoScale: React.FC<PnPageAutoScaleProps> = ({
-  children,
-  minWidth = 1920,
-  mobileBreakpoint = 1280,
-  disabled = false,
-}) => {
+export const PnPageAutoScale: React.FC<PnPageAutoScaleProps> = ({ children, minWidth = 1920, mobileBreakpoint = 1280, disabled = false }) => {
   const [scale, setScale] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
 

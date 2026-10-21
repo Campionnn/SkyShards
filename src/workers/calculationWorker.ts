@@ -118,7 +118,7 @@ async function handleSingleCalculation(data: StartMsg) {
       totalQuantities,
       data: parsed,
       params,
-      getDirectCostFn: service.getDirectCost.bind(service)
+      getDirectCostFn: service.getDirectCost.bind(service),
     });
 
     const totalTime = service.calculateTotalTimeFromQuantities(totalQuantities, craftTime, parsed, params);
@@ -209,7 +209,7 @@ async function handleBatchCalculationWithData(data: BatchStartWithDataMsg) {
         totalQuantities,
         data: parsedData,
         params,
-        getDirectCostFn: service.getDirectCost.bind(service)
+        getDirectCostFn: service.getDirectCost.bind(service),
       });
 
       const totalTime = service.calculateTotalTimeFromQuantities(totalQuantities, craftTime, parsedData, params);

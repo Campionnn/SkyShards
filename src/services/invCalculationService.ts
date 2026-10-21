@@ -1,19 +1,8 @@
 import { CalculationService, craftsForQuantity, snapToInteger } from "./calculationService";
 import { computeFreelyUsableShards } from "../utilities";
-import type {
-  CalculationParams,
-  Data,
-  InventoryCalculationResult,
-  InventoryRecipeTree,
-  Recipe,
-  RecipeChoice,
-  RecipeOverride,
-} from "../types/types";
+import type { CalculationParams, Data, InventoryCalculationResult, InventoryRecipeTree, Recipe, RecipeChoice, RecipeOverride } from "../types/types";
 
-type InventoryRecipeNode = Extract<
-  InventoryRecipeTree,
-  { method: "recipe" }
->;
+type InventoryRecipeNode = Extract<InventoryRecipeTree, { method: "recipe" }>;
 
 // Tiny residual opportunity-cost factor applied to "freely usable" inventory
 // shards (whose special-fusion line is fully maxed). Far smaller than the farm
@@ -35,12 +24,7 @@ export class InvCalculationService {
   }
 
   // Updates quantity and derived fields for a tree node.
-  private recalculateTreeQuantities(
-    tree: InventoryRecipeTree,
-    newQuantity: number,
-    parsed: Data,
-    params: CalculationParams
-  ): void {
+  private recalculateTreeQuantities(tree: InventoryRecipeTree, newQuantity: number, parsed: Data, params: CalculationParams): void {
     // Skip array nodes
     if (Array.isArray(tree)) {
       return;
@@ -50,7 +34,7 @@ export class InvCalculationService {
 
     if (tree.method === "recipe") {
       const recipe = tree.recipe;
-      const {crocodileMultiplier} = this.service.calculateMultipliers(params);
+      const { crocodileMultiplier } = this.service.calculateMultipliers(params);
       const outputQuantity = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
       const craftsNeeded = craftsForQuantity(newQuantity, outputQuantity);
       tree.craftsNeeded = craftsNeeded;
@@ -62,7 +46,7 @@ export class InvCalculationService {
       this.recalculateTreeQuantities(tree.inputs[0], craftsNeeded * fuse1, parsed, params);
       this.recalculateTreeQuantities(tree.inputs[1], craftsNeeded * fuse2, parsed, params);
     } else if (tree.method === "cycle") {
-      const {crocodileMultiplier} = this.service.calculateMultipliers(params);
+      const { crocodileMultiplier } = this.service.calculateMultipliers(params);
       const cycle = this.service.computeCycleQuantities(tree.shard, tree.steps, newQuantity, parsed, crocodileMultiplier);
       if (!cycle) return;
 
@@ -127,7 +111,7 @@ export class InvCalculationService {
     exclusivityScores?: Map<string, number>,
     freelyUsableShards?: Set<string>,
     sharedInputs?: Set<string>,
-    craftsNeeded = 1
+    craftsNeeded = 1,
   ): number {
     const [input1Id, input2Id] = recipe.inputs;
     const fuse1 = parsed.shards[input1Id].fuse_amount;
@@ -143,17 +127,12 @@ export class InvCalculationService {
     const baseCost2 = (minCosts.get(input2Id) || Infinity) * fuse2;
 
     // Fraction of this recipe's total input requirement that inventory can cover.
-    const coverage = (inv: number, fuse: number) =>
-      craftsNeeded > 0 ? Math.min(1, inv / (fuse * craftsNeeded)) : (inv >= fuse ? 1 : 0);
+    const coverage = (inv: number, fuse: number) => (craftsNeeded > 0 ? Math.min(1, inv / (fuse * craftsNeeded)) : inv >= fuse ? 1 : 0);
     const cov1 = coverage(inv1, fuse1);
     const cov2 = coverage(inv2, fuse2);
 
-    const cost1 = inv1 >= fuse1
-      ? (1 - cov1 * (surplusDiscounts?.get(input1Id) ?? 1)) * baseCost1
-      : baseCost1;
-    const cost2 = inv2 >= fuse2
-      ? (1 - cov2 * (surplusDiscounts?.get(input2Id) ?? 1)) * baseCost2
-      : baseCost2;
+    const cost1 = inv1 >= fuse1 ? (1 - cov1 * (surplusDiscounts?.get(input1Id) ?? 1)) * baseCost1 : baseCost1;
+    const cost2 = inv2 >= fuse2 ? (1 - cov2 * (surplusDiscounts?.get(input2Id) ?? 1)) * baseCost2 : baseCost2;
 
     // Additive opportunity cost for exclusive shards. Only inputs UNIQUE to this
     // recipe are penalized — inputs shared with the recipe being compared against
@@ -192,21 +171,12 @@ export class InvCalculationService {
     params: CalculationParams,
     choices: Map<string, RecipeChoice>,
     cycleNodes: string[][],
-    recipeOverrides: RecipeOverride[]
+    recipeOverrides: RecipeOverride[],
   ): InventoryRecipeTree {
     const tree = this.service.buildRecipeTree(parsed, shardId, choices, cycleNodes, params, recipeOverrides);
-    const craftCounter = {total: 0};
-    const {crocodileMultiplier} = this.service.calculateMultipliers(params);
-    this.service.assignQuantities(
-      tree,
-      quantity,
-      parsed,
-      craftCounter,
-      choices,
-      crocodileMultiplier,
-      params,
-      recipeOverrides
-    );
+    const craftCounter = { total: 0 };
+    const { crocodileMultiplier } = this.service.calculateMultipliers(params);
+    this.service.assignQuantities(tree, quantity, parsed, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
     return tree as InventoryRecipeTree;
   }
 
@@ -219,7 +189,7 @@ export class InvCalculationService {
     params: CalculationParams,
     choices: Map<string, RecipeChoice>,
     cycleNodes: string[][],
-    recipeOverrides: RecipeOverride[]
+    recipeOverrides: RecipeOverride[],
   ): InventoryRecipeTree {
     const [input1, input2] = recipe.inputs;
     const fuse1 = parsed.shards[input1].fuse_amount;
@@ -227,24 +197,8 @@ export class InvCalculationService {
     const inputQuantity1 = craftsNeeded * fuse1;
     const inputQuantity2 = craftsNeeded * fuse2;
 
-    const inputTree1 = this.buildInputTree(
-      input1,
-      inputQuantity1,
-      parsed,
-      params,
-      choices,
-      cycleNodes,
-      recipeOverrides
-    );
-    const inputTree2 = this.buildInputTree(
-      input2,
-      inputQuantity2,
-      parsed,
-      params,
-      choices,
-      cycleNodes,
-      recipeOverrides
-    );
+    const inputTree1 = this.buildInputTree(input1, inputQuantity1, parsed, params, choices, cycleNodes, recipeOverrides);
+    const inputTree2 = this.buildInputTree(input2, inputQuantity2, parsed, params, choices, cycleNodes, recipeOverrides);
 
     return {
       shard: shardId,
@@ -269,7 +223,7 @@ export class InvCalculationService {
     treeDemand: Map<string, number>,
     exclusivityScores: Map<string, number>,
     freelyUsableShards: Set<string>,
-    path: Set<string>
+    path: Set<string>,
   ): InventoryRecipeTree | null {
     if (node.method !== "recipe" || !node.recipe) {
       return null;
@@ -290,14 +244,12 @@ export class InvCalculationService {
       return null;
     }
 
-    const alternatives = availableRecipes.filter(
-      (recipe) => !this.service.areRecipesEqual(recipe, node.recipe)
-    );
+    const alternatives = availableRecipes.filter((recipe) => !this.service.areRecipesEqual(recipe, node.recipe));
     if (alternatives.length === 0) {
       return null;
     }
 
-    const {crocodileMultiplier, craftPenalty} = this.service.calculateMultipliers(params);
+    const { crocodileMultiplier, craftPenalty } = this.service.calculateMultipliers(params);
     let remainingQuantity = node.quantity;
     const segments: InventoryRecipeTree[] = [];
 
@@ -331,9 +283,7 @@ export class InvCalculationService {
 
       const currentOutputQuantity = this.service.getEffectiveOutputQuantity(node.recipe, crocodileMultiplier);
 
-      let bestCandidate:
-        | {recipe: Recipe; outputQuantity: number; craftsSupported: number; effectiveCost: number}
-        | null = null;
+      let bestCandidate: { recipe: Recipe; outputQuantity: number; craftsSupported: number; effectiveCost: number } | null = null;
 
       for (const recipe of alternatives) {
         // Reject alternatives that consume the shard we're currently producing, or
@@ -406,9 +356,7 @@ export class InvCalculationService {
             inventoryCraftLimits.push(Math.floor(available / fuseAmount));
           }
         }
-        const craftsSupported = inventoryCraftLimits.length > 0
-          ? Math.min(...inventoryCraftLimits)
-          : 0;
+        const craftsSupported = inventoryCraftLimits.length > 0 ? Math.min(...inventoryCraftLimits) : 0;
 
         if (craftsSupported <= 0) {
           continue;
@@ -434,7 +382,7 @@ export class InvCalculationService {
           undefined,
           undefined,
           undefined,
-          craftsForQuantity(segmentQuantity, currentOutputQuantity)
+          craftsForQuantity(segmentQuantity, currentOutputQuantity),
         );
 
         // Calculate effective cost with fair inventory and surplus discounts
@@ -451,7 +399,7 @@ export class InvCalculationService {
           exclusivityScores,
           freelyUsableShards,
           currentInputSet,
-          segmentCrafts
+          segmentCrafts,
         );
 
         // Only consider if genuinely cheaper than the current recipe
@@ -461,7 +409,7 @@ export class InvCalculationService {
 
         // Pick the alternative with the lowest effective cost
         if (!bestCandidate || effectiveCost < bestCandidate.effectiveCost) {
-          bestCandidate = {recipe, outputQuantity, craftsSupported, effectiveCost};
+          bestCandidate = { recipe, outputQuantity, craftsSupported, effectiveCost };
         }
       }
 
@@ -492,7 +440,7 @@ export class InvCalculationService {
         params,
         choices,
         cycleNodes,
-        recipeOverrides
+        recipeOverrides,
       ) as InventoryRecipeNode;
       // Don't re-alt the just-chosen node, but DO let its children swap their own
       // inputs (e.g. a nested catalyst) — process children with alternatives enabled.
@@ -527,7 +475,7 @@ export class InvCalculationService {
     minCosts: Map<string, number>,
     exclusivityScores: Map<string, number>,
     freelyUsableShards: Set<string>,
-    allowAlternatives = true
+    allowAlternatives = true,
   ): InventoryRecipeTree {
     const workingInventory = new Map(inventory);
     const processedNodes = new WeakMap<object, InventoryRecipeTree>();
@@ -537,11 +485,7 @@ export class InvCalculationService {
     // that are needed by nodes deeper in the tree.
     const treeDemand = this.collectTreeDemand(tree);
 
-    const processNode = (
-      node: InventoryRecipeTree,
-      allowAlternatives = true,
-      path: Set<string> = new Set()
-    ): InventoryRecipeTree => {
+    const processNode = (node: InventoryRecipeTree, allowAlternatives = true, path: Set<string> = new Set()): InventoryRecipeTree => {
       // Handle array nodes by processing each element
       if (Array.isArray(node)) {
         const processedArray: InventoryRecipeTree[] = [];
@@ -561,7 +505,7 @@ export class InvCalculationService {
         // Don't satisfy a shard from inventory inside its own build subtree —
         // it's an ancestor we're producing, so consuming it here is a net-negative
         // loop. Craft it instead (see the ancestor guard in tryApplyInventoryAlternatives).
-        const invQty = path.has(node.shard) ? 0 : (workingInventory.get(node.shard) || 0);
+        const invQty = path.has(node.shard) ? 0 : workingInventory.get(node.shard) || 0;
 
         if (invQty >= node.quantity) {
           workingInventory.set(node.shard, invQty - node.quantity);
@@ -593,7 +537,6 @@ export class InvCalculationService {
         return node;
       }
 
-
       // Check if we've already processed this exact node object
       if (processedNodes.has(node)) {
         return processedNodes.get(node)!;
@@ -606,7 +549,7 @@ export class InvCalculationService {
       // farming cascade while 120 sat in inventory).
       // Ancestor guard: never pull the shard we're in the middle of producing from
       // inventory inside its own subtree.
-      const invQty = path.has(node.shard) ? 0 : (workingInventory.get(node.shard) || 0);
+      const invQty = path.has(node.shard) ? 0 : workingInventory.get(node.shard) || 0;
 
       // Full replacement with inventory
       if (invQty >= node.quantity) {
@@ -638,7 +581,7 @@ export class InvCalculationService {
         // Recalculate quantities for crafted portion
         if (craftedPortion.method === "recipe") {
           const recipe = craftedPortion.recipe;
-          const {crocodileMultiplier} = this.service.calculateMultipliers(params);
+          const { crocodileMultiplier } = this.service.calculateMultipliers(params);
           const outputQuantity = this.service.getEffectiveOutputQuantity(recipe, crocodileMultiplier);
           const newCraftsNeeded = craftsForQuantity(remainingQuantity, outputQuantity);
           craftedPortion.craftsNeeded = newCraftsNeeded;
@@ -650,7 +593,7 @@ export class InvCalculationService {
           this.recalculateTreeQuantities(craftedPortion.inputs[0], newCraftsNeeded * fuse1, parsed, params);
           this.recalculateTreeQuantities(craftedPortion.inputs[1], newCraftsNeeded * fuse2, parsed, params);
         } else if (craftedPortion.method === "cycle") {
-          const {crocodileMultiplier} = this.service.calculateMultipliers(params);
+          const { crocodileMultiplier } = this.service.calculateMultipliers(params);
           const cycle = this.service.computeCycleQuantities(craftedPortion.shard, craftedPortion.steps, remainingQuantity, parsed, crocodileMultiplier);
           if (cycle) {
             craftedPortion.craftsNeeded = cycle.roundedCrafts;
@@ -687,7 +630,7 @@ export class InvCalculationService {
           treeDemand,
           exclusivityScores,
           freelyUsableShards,
-          path
+          path,
         );
         if (alternative) {
           processedNodes.set(node, alternative);
@@ -759,10 +702,7 @@ export class InvCalculationService {
     if (tree.method === "recipe" && tree.inputs) {
       return {
         ...tree,
-        inputs: [
-          this.mergeTreeSegments(tree.inputs[0]),
-          this.mergeTreeSegments(tree.inputs[1]),
-        ],
+        inputs: [this.mergeTreeSegments(tree.inputs[0]), this.mergeTreeSegments(tree.inputs[1])],
       };
     }
     if (tree.method === "cycle") {
@@ -778,10 +718,7 @@ export class InvCalculationService {
   }
 
   // Checks if two nodes can be merged (same shard, same method, same recipe).
-  private canMergeNodes(
-    a: Exclude<InventoryRecipeTree, InventoryRecipeTree[]>,
-    b: Exclude<InventoryRecipeTree, InventoryRecipeTree[]>
-  ): boolean {
+  private canMergeNodes(a: Exclude<InventoryRecipeTree, InventoryRecipeTree[]>, b: Exclude<InventoryRecipeTree, InventoryRecipeTree[]>): boolean {
     if (a.shard !== b.shard || a.method !== b.method) return false;
 
     if (a.method === "direct" || a.method === "inventory") return true;
@@ -797,7 +734,7 @@ export class InvCalculationService {
   // Merges two compatible nodes. Precondition: canMergeNodes(a, b) === true.
   private mergeNodes(
     a: Exclude<InventoryRecipeTree, InventoryRecipeTree[]>,
-    b: Exclude<InventoryRecipeTree, InventoryRecipeTree[]>
+    b: Exclude<InventoryRecipeTree, InventoryRecipeTree[]>,
   ): Exclude<InventoryRecipeTree, InventoryRecipeTree[]> {
     if (a.method === "direct" && b.method === "direct") {
       return { shard: a.shard, method: "direct", quantity: a.quantity + b.quantity };
@@ -811,12 +748,8 @@ export class InvCalculationService {
       // Merge recipe nodes: combine quantities and craftsNeeded,
       // then merge sub-trees by concatenating inputs into arrays
       // and recursively merging them
-      const mergedInput0 = this.mergeTreeSegments(
-        [a.inputs[0], b.inputs[0]] as InventoryRecipeTree
-      );
-      const mergedInput1 = this.mergeTreeSegments(
-        [a.inputs[1], b.inputs[1]] as InventoryRecipeTree
-      );
+      const mergedInput0 = this.mergeTreeSegments([a.inputs[0], b.inputs[0]] as InventoryRecipeTree);
+      const mergedInput1 = this.mergeTreeSegments([a.inputs[1], b.inputs[1]] as InventoryRecipeTree);
 
       return {
         shard: a.shard,
@@ -838,7 +771,7 @@ export class InvCalculationService {
     params: CalculationParams,
     inventory: Map<string, number>,
     recipeOverrides: RecipeOverride[] = [],
-    ownedAttributes: Map<string, number> = new Map()
+    ownedAttributes: Map<string, number> = new Map(),
   ): Promise<InventoryCalculationResult> {
     const parsed = await this.service.parseData(params);
 
@@ -850,11 +783,11 @@ export class InvCalculationService {
         craftsNeeded: 0,
         totalQuantities: new Map<string, number>(),
         craftTime: 0,
-        tree: {shard: targetShard, method: "direct", quantity: 0},
-      }
+        tree: { shard: targetShard, method: "direct", quantity: 0 },
+      };
     }
 
-    const {minCosts, choices} = this.service.computeMinCosts(parsed, params, recipeOverrides);
+    const { minCosts, choices } = this.service.computeMinCosts(parsed, params, recipeOverrides);
 
     // Compute exclusivity scores: measures how irreplaceable each shard is
     // in the recipe graph, weighted by the value of outputs it uniquely enables.
@@ -867,36 +800,18 @@ export class InvCalculationService {
       parsed,
       ownedAttributes,
       (id) => (defaultRates[id] ?? 0) > 0,
-      (id) => minCosts.get(id) ?? Infinity
+      (id) => minCosts.get(id) ?? Infinity,
     );
 
     // Find cycle nodes to prevent infinite recursion in buildRecipeTree
-    const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0
-      ? this.service.findCycleNodes(choices)
-      : [];
+    const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0 ? this.service.findCycleNodes(choices) : [];
 
-    const {crocodileMultiplier} = this.service.calculateMultipliers(params);
+    const { crocodileMultiplier } = this.service.calculateMultipliers(params);
 
     const buildTree = (): InventoryRecipeTree => {
-      const recipeTree = this.service.buildRecipeTree(
-        parsed,
-        targetShard,
-        choices,
-        cycleNodes,
-        params,
-        recipeOverrides
-      );
-      const craftCounter = {total: 0};
-      this.service.assignQuantities(
-        recipeTree,
-        requiredQuantity,
-        parsed,
-        craftCounter,
-        choices,
-        crocodileMultiplier,
-        params,
-        recipeOverrides
-      );
+      const recipeTree = this.service.buildRecipeTree(parsed, targetShard, choices, cycleNodes, params, recipeOverrides);
+      const craftCounter = { total: 0 };
+      this.service.assignQuantities(recipeTree, requiredQuantity, parsed, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
       return recipeTree;
     };
 
@@ -913,16 +828,11 @@ export class InvCalculationService {
         minCosts,
         exclusivityScores,
         freelyUsableShards,
-        allowAlternatives
+        allowAlternatives,
       );
-      const {craftsNeeded, craftTime, totalQuantities} = this.service.collectTreeStats(tree, params);
-      const totalTime = this.service.calculateTotalTimeFromQuantities(
-        totalQuantities,
-        craftTime,
-        parsed,
-        params
-      );
-      return {tree, workingInventory, craftsNeeded, craftTime, totalQuantities, totalTime};
+      const { craftsNeeded, craftTime, totalQuantities } = this.service.collectTreeStats(tree, params);
+      const totalTime = this.service.calculateTotalTimeFromQuantities(totalQuantities, craftTime, parsed, params);
+      return { tree, workingInventory, craftsNeeded, craftTime, totalQuantities, totalTime };
     };
 
     // The alternative-recipe machinery is heuristic and can occasionally pick a
@@ -932,9 +842,7 @@ export class InvCalculationService {
     // increases the total time.
     const withAlternatives = evaluate(true);
     const substitutionOnly = evaluate(false);
-    const best = withAlternatives.totalTime <= substitutionOnly.totalTime
-      ? withAlternatives
-      : substitutionOnly;
+    const best = withAlternatives.totalTime <= substitutionOnly.totalTime ? withAlternatives : substitutionOnly;
 
     const timePerShard = requiredQuantity > 0 ? best.totalTime / requiredQuantity : 0;
 

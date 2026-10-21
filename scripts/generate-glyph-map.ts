@@ -40,12 +40,14 @@ function decodePngAlpha(path: string): { width: number; height: number; alpha: U
   const colorType = buf[25];
   const interlace = buf[28];
   if (bitDepth !== 8 || (colorType !== 6 && colorType !== 3) || interlace !== 0) {
-    throw new Error(`${path}: only 8-bit RGBA or 8-bit indexed non-interlaced PNGs are supported (got depth=${bitDepth} type=${colorType} interlace=${interlace})`);
+    throw new Error(
+      `${path}: only 8-bit RGBA or 8-bit indexed non-interlaced PNGs are supported (got depth=${bitDepth} type=${colorType} interlace=${interlace})`,
+    );
   }
 
   const idat: Buffer[] = [];
   let trns: Buffer | null = null;
-  for (let pos = 8; pos < buf.length; ) {
+  for (let pos = 8; pos < buf.length;) {
     const len = buf.readUInt32BE(pos);
     const type = buf.toString("ascii", pos + 4, pos + 8);
     if (type === "IDAT") idat.push(buf.subarray(pos + 8, pos + 8 + len));
@@ -68,17 +70,27 @@ function decodePngAlpha(path: string): { width: number; height: number; alpha: U
       const c = x >= bpp && prev ? prev[x - bpp] : 0; // up-left
       let val = line[x];
       switch (filter) {
-        case 0: break;
-        case 1: val += a; break;
-        case 2: val += b; break;
-        case 3: val += (a + b) >> 1; break;
+        case 0:
+          break;
+        case 1:
+          val += a;
+          break;
+        case 2:
+          val += b;
+          break;
+        case 3:
+          val += (a + b) >> 1;
+          break;
         case 4: {
           const p = a + b - c;
-          const pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+          const pa = Math.abs(p - a),
+            pb = Math.abs(p - b),
+            pc = Math.abs(p - c);
           val += pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
           break;
         }
-        default: throw new Error(`${path}: unknown PNG filter ${filter}`);
+        default:
+          throw new Error(`${path}: unknown PNG filter ${filter}`);
       }
       out[x] = val & 0xff;
     }
@@ -96,7 +108,7 @@ function decodePngAlpha(path: string): { width: number; height: number; alpha: U
 function cellPath(alpha: Uint8Array, sheetW: number, x0: number, y0: number, w: number, h: number): string {
   const parts: string[] = [];
   for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; ) {
+    for (let x = 0; x < w;) {
       if (alpha[(y0 + y) * sheetW + x0 + x] > 0) {
         let len = 1;
         while (x + len < w && alpha[(y0 + y) * sheetW + x0 + x + len] > 0) len++;
@@ -112,7 +124,10 @@ function cellPath(alpha: Uint8Array, sheetW: number, x0: number, y0: number, w: 
 
 /** "hypixel_skyblock:gui/icons/staff.png" -> "staff" */
 function sheetName(file: string): string {
-  return file.split("/").pop()!.replace(/\.png$/, "");
+  return file
+    .split("/")
+    .pop()!
+    .replace(/\.png$/, "");
 }
 
 function esc(char: string): string {

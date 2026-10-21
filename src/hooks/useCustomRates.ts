@@ -84,7 +84,7 @@ export const useCustomPrices = (instantBuy: boolean) => {
         return { ...prev, [source]: next };
       });
     },
-    [source]
+    [source],
   );
 
   const resetPrices = useCallback(() => {

@@ -19,13 +19,20 @@ export const MaterialBreakdownModal: React.FC<MaterialBreakdownModalProps> = ({ 
   const totalQuantity = Array.from(breakdown.values()).reduce((sum, qty) => sum + qty, 0);
 
   return (
-    <Modal open={isOpen} onClose={onClose} labelledBy="material-breakdown-title" panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-6xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      labelledBy="material-breakdown-title"
+      panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-6xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+    >
       {/* Header */}
       <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5 text-blue-400" />
-            <h2 id="material-breakdown-title" className="text-lg font-semibold text-white">Material Usage Breakdown</h2>
+            <h2 id="material-breakdown-title" className="text-lg font-semibold text-white">
+              Material Usage Breakdown
+            </h2>
             <span className="flex items-center gap-1 text-slate-400 text-sm">
               <span>for</span>
               <img src={shardIconUrl(materialShard.id)} alt={materialShard.name} className="w-5 h-5 object-contain" loading="lazy" />
@@ -62,7 +69,10 @@ export const MaterialBreakdownModal: React.FC<MaterialBreakdownModalProps> = ({ 
               const percentage = ((qty / totalQuantity) * 100).toFixed(1);
 
               return (
-                <div key={targetShardId} className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-3 hover:bg-slate-700/50 hover:border-slate-500 transition-all duration-200">
+                <div
+                  key={targetShardId}
+                  className="bg-slate-800/50 border border-slate-600/50 rounded-lg p-3 hover:bg-slate-700/50 hover:border-slate-500 transition-all duration-200"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <img src={shardIconUrl(targetShard.id)} alt={targetShard.name} className="w-8 h-8 object-contain flex-shrink-0" loading="lazy" />

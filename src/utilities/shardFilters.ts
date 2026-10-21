@@ -53,11 +53,7 @@ export const BASIC_FILTER_CONFIG: ShardFilterConfig = {
   description: false,
 };
 
-export function matchesSearchQuery(
-  shard: Shard,
-  query: string,
-  config: ShardFilterConfig = DEFAULT_FILTER_CONFIG
-): boolean {
+export function matchesSearchQuery(shard: Shard, query: string, config: ShardFilterConfig = DEFAULT_FILTER_CONFIG): boolean {
   if (!query.trim()) return true;
 
   const search = query.toLowerCase();
@@ -105,16 +101,8 @@ export interface ShardFilterOptions {
   searchConfig?: ShardFilterConfig;
 }
 
-export function filterShards<T extends Shard>(
-  shards: T[],
-  options: ShardFilterOptions = {}
-): T[] {
-  const {
-    query = "",
-    rarity = "all",
-    type = "all",
-    searchConfig = DEFAULT_FILTER_CONFIG,
-  } = options;
+export function filterShards<T extends Shard>(shards: T[], options: ShardFilterOptions = {}): T[] {
+  const { query = "", rarity = "all", type = "all", searchConfig = DEFAULT_FILTER_CONFIG } = options;
 
   return shards.filter((shard) => {
     const matchesSearch = matchesSearchQuery(shard, query, searchConfig);
@@ -129,4 +117,3 @@ export function filterShards<T extends Shard>(
     return matchesSearch && matchesRarity && matchesType;
   });
 }
-

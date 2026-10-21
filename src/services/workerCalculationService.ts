@@ -39,7 +39,7 @@ export function calculateOptimalPathWithWorker(
   requiredQuantity: number,
   params: CalculationParams,
   recipeOverrides: RecipeOverride[] = [],
-  onProgress?: (p: WorkerProgress) => void
+  onProgress?: (p: WorkerProgress) => void,
 ): { promise: Promise<CalculationResult>; cancel: () => void } {
   const worker = new Worker(new URL("../workers/calculationWorker.ts", import.meta.url), { type: "module" });
 
@@ -84,7 +84,7 @@ export function calculateMultipleShardsParallel(
   targets: Array<{ shard: string; quantity: number }>,
   params: CalculationParams,
   recipeOverrides: RecipeOverride[] = [],
-  onProgress?: (p: WorkerProgress) => void
+  onProgress?: (p: WorkerProgress) => void,
 ): { promise: Promise<CalculationResult[]>; cancel: () => void } {
   // Determine optimal number of workers (use CPU cores, max 8 to avoid overhead)
   const maxWorkers = Math.min(navigator.hardwareConcurrency || 4, 8, targets.length);
@@ -103,7 +103,7 @@ export function calculateMultipleShardsParallel(
         onProgress?.({
           phase: "parsing",
           progress: 0,
-          message: "Parsing data..."
+          message: "Parsing data...",
         });
 
         const { CalculationService } = await import("../services/calculationService");
@@ -113,7 +113,7 @@ export function calculateMultipleShardsParallel(
         onProgress?.({
           phase: "computing",
           progress: 0,
-          message: "Computing optimal costs..."
+          message: "Computing optimal costs...",
         });
 
         const { choices } = service.computeMinCosts(parsedData, params, recipeOverrides);
@@ -127,7 +127,7 @@ export function calculateMultipleShardsParallel(
         onProgress?.({
           phase: "building",
           progress: 0,
-          message: `Starting ${Math.min(maxWorkers, targets.length)} parallel workers...`
+          message: `Starting ${Math.min(maxWorkers, targets.length)} parallel workers...`,
         });
 
         // split targets into chunks for each worker
@@ -156,7 +156,7 @@ export function calculateMultipleShardsParallel(
           onProgress?.({
             phase: "building",
             progress: overallProgress,
-            message: `Calculating ${shardsCompleted} of ${totalShards} shards...`
+            message: `Calculating ${shardsCompleted} of ${totalShards} shards...`,
           });
         };
 
@@ -193,7 +193,7 @@ export function calculateMultipleShardsParallel(
               onProgress?.({
                 phase: "finalizing",
                 progress: totalCompleted / totalShards,
-                message: `Completed ${Math.floor(totalCompleted)} of ${totalShards} shards...`
+                message: `Completed ${Math.floor(totalCompleted)} of ${totalShards} shards...`,
               });
 
               // Check if all workers completed
@@ -222,7 +222,7 @@ export function calculateMultipleShardsParallel(
                 });
 
                 // Add the merged breakdown to all results
-                allResults.forEach(result => {
+                allResults.forEach((result) => {
                   result.materialBreakdown = globalMaterialBreakdown;
                 });
 
@@ -230,7 +230,7 @@ export function calculateMultipleShardsParallel(
               }
             } else if (data.type === "error") {
               worker.terminate();
-              workers.forEach(w => w.terminate());
+              workers.forEach((w) => w.terminate());
               reject(new Error(data.message || "Worker calculation failed"));
             }
           };
@@ -238,7 +238,7 @@ export function calculateMultipleShardsParallel(
           worker.onerror = (err) => {
             if (cancelled) return;
             worker.terminate();
-            workers.forEach(w => w.terminate());
+            workers.forEach((w) => w.terminate());
             reject(err);
           };
 
@@ -255,7 +255,7 @@ export function calculateMultipleShardsParallel(
           worker.postMessage(startMsg);
         });
       } catch (err) {
-        workers.forEach(w => w.terminate());
+        workers.forEach((w) => w.terminate());
         reject(err);
       }
     })();
@@ -263,7 +263,7 @@ export function calculateMultipleShardsParallel(
 
   const cancel = () => {
     cancelled = true;
-    workers.forEach(w => w.terminate());
+    workers.forEach((w) => w.terminate());
   };
 
   return { promise, cancel };

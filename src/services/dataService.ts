@@ -31,9 +31,7 @@ export class DataService {
 
   private async fetchApi<T>(endpoint: string): Promise<T> {
     try {
-      const response = await fetch(
-        `https://api.hypixel.net/v2/skyblock${endpoint}`
-      );
+      const response = await fetch(`https://api.hypixel.net/v2/skyblock${endpoint}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -51,9 +49,9 @@ export class DataService {
     const [fusionData, defaultRates] = await Promise.all([this.loadFusionJson(), this.loadDefaultRates()]);
 
     this.shardsCache = Object.entries(fusionData.shards).map(([id, shard]: [string, Shard]) => ({
-        ...shard,
-        id,
-        rate: defaultRates[id] || 0,
+      ...shard,
+      id,
+      rate: defaultRates[id] || 0,
     }));
 
     return this.shardsCache;
@@ -65,10 +63,13 @@ export class DataService {
     }
 
     const shards = await this.loadShards();
-    this.shardNameToKeyCache = shards.reduce((acc, shard) => {
-      acc[shard.name.toLowerCase()] = shard.id;
-      return acc;
-    }, {} as Record<string, string>);
+    this.shardNameToKeyCache = shards.reduce(
+      (acc, shard) => {
+        acc[shard.name.toLowerCase()] = shard.id;
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
 
     return this.shardNameToKeyCache;
   }
@@ -107,7 +108,7 @@ export class DataService {
 
   async loadShardCosts(useInstantBuyPrices: boolean): Promise<Record<string, number>> {
     const cacheKey = useInstantBuyPrices ? "instant_buy" : "buy_offer";
-  
+
     if (this.bazaarPriceCache?.[cacheKey]) {
       return this.bazaarPriceCache[cacheKey];
     }
@@ -122,16 +123,14 @@ export class DataService {
       // Annotated as optional because the index signatures lie: shards absent from the
       // Bazaar response, and products with an empty order book on one side, both resolve
       // to `undefined` at runtime.
-      const order: { pricePerUnit: number } | undefined = useInstantBuyPrices
-        ? product?.buy_summary?.[0]
-        : product?.sell_summary?.[0];
+      const order: { pricePerUnit: number } | undefined = useInstantBuyPrices ? product?.buy_summary?.[0] : product?.sell_summary?.[0];
       // Leave the key unset rather than storing `undefined` in a Record<string, number>,
       // so consumers' `?? fallback` fires as intended.
       if (order !== undefined) {
         this.bazaarPriceCache[cacheKey][shard.id] = order.pricePerUnit;
       }
     }
-  
+
     return this.bazaarPriceCache[cacheKey];
   }
 
@@ -144,7 +143,7 @@ export class DataService {
       const bKey = b.id.toLowerCase();
       const aStarts = aName.startsWith(lowerQuery) || aKey.startsWith(lowerQuery);
       const bStarts = bName.startsWith(lowerQuery) || bKey.startsWith(lowerQuery);
-      
+
       if (aStarts && !bStarts) return -1;
       if (!aStarts && bStarts) return 1;
       return sortShardsByNameWithPrefixAwareness(a, b);

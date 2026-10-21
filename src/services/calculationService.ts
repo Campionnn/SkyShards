@@ -24,8 +24,7 @@ export const snapToInteger = (value: number): number => {
   return Math.abs(value - rounded) <= INTEGER_EPSILON * Math.max(1, Math.abs(value)) ? rounded : value;
 };
 
-export const craftsForQuantity = (quantity: number, outputQuantity: number): number =>
-  Math.ceil(snapToInteger(quantity / outputQuantity));
+export const craftsForQuantity = (quantity: number, outputQuantity: number): number => Math.ceil(snapToInteger(quantity / outputQuantity));
 
 export class CalculationService {
   private static instance: CalculationService;
@@ -33,10 +32,7 @@ export class CalculationService {
   /** Caches the min-cost graph buildRecipeTree solves when called without a cache,
    * so inventory substitution doesn't re-solve the whole graph for every node it
    * builds. */
-  private buildTreeMinCostCache = new WeakMap<
-    Data,
-    { key: string; minCosts: Map<string, number>; choices: Map<string, RecipeChoice> }
-  >();
+  private buildTreeMinCostCache = new WeakMap<Data, { key: string; minCosts: Map<string, number>; choices: Map<string, RecipeChoice> }>();
   /** Base (rates.json) acquisition rates, captured by buildData. Used for the
    * structural "is this shard directly obtainable" check, independent of params. */
   private defaultRates: Record<string, number> = {};
@@ -216,7 +212,7 @@ export class CalculationService {
   public calculateMultipliers(params: CalculationParams) {
     const tiamatMultiplier = 1 + (5 * params.tiamatLevel) / 100;
     const seaSerpentMultiplier = 1 + ((2 * params.seaSerpentLevel) / 100) * tiamatMultiplier;
-    const crocodileMultiplier = 1 + ((2 * params.crocodileLevel) / 100);
+    const crocodileMultiplier = 1 + (2 * params.crocodileLevel) / 100;
     const pythonMultiplier = ((5 * params.pythonLevel) / 100) * seaSerpentMultiplier;
     const kingCobraMultiplier = (params.kingCobraLevel / 100) * seaSerpentMultiplier;
     let craftPenalty: number;
@@ -290,7 +286,7 @@ export class CalculationService {
   computeMinCosts(
     data: Data,
     params: CalculationParams,
-    recipeOverrides: RecipeOverride[] = []
+    recipeOverrides: RecipeOverride[] = [],
   ): { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> } {
     const minCosts = new Map<string, number>();
     const choices = new Map<string, RecipeChoice>();
@@ -349,7 +345,7 @@ export class CalculationService {
 
       // if all cycle nodes have infinite cost, initialize with temporary cost
       for (const cycle of cyclesInOverrides) {
-        const allInfinite = cycle.every(shardId => !isFinite(minCosts.get(shardId) || Infinity));
+        const allInfinite = cycle.every((shardId) => !isFinite(minCosts.get(shardId) || Infinity));
 
         if (allInfinite) {
           for (const shardId of cycle) {
@@ -360,7 +356,7 @@ export class CalculationService {
 
       // reset choices back to direct for the main loop
       shards.forEach((shard) => {
-        const hasOverride = recipeOverrides.some(ro => ro.shardId === shard);
+        const hasOverride = recipeOverrides.some((ro) => ro.shardId === shard);
         if (!hasOverride) {
           choices.set(shard, { recipe: null });
         }
@@ -452,10 +448,7 @@ export class CalculationService {
   }
 
   // Computes exclusivity scores for each shard.
-  public computeExclusivityScores(
-    data: Data,
-    minCosts: Map<string, number>
-  ): Map<string, number> {
+  public computeExclusivityScores(data: Data, minCosts: Map<string, number>): Map<string, number> {
     // Track max weighted exclusivity per shard (not sum)
     const maxExclusivity = new Map<string, number>();
     const shardIds = Object.keys(data.shards);
@@ -520,17 +513,17 @@ export class CalculationService {
         for (const [inputShard, usageCount] of inputUsageCounts) {
           // Presence ratio: 1.0 = used in all recipes (fully exclusive)
           const presenceRatio = usageCount / totalRecipes;
-          
+
           // Only consider high presence ratios as "exclusive"
           // A shard in 50% of recipes isn't really exclusive
           // Use a threshold: only ratios >= 0.8 count as exclusive
           if (presenceRatio < 0.8) continue;
-          
+
           // Weighted exclusivity: how valuable is this exclusive relationship?
           // Scale presence ratio above threshold to [0, 1]
           const exclusivityStrength = (presenceRatio - 0.8) / 0.2; // 0.8->0, 1.0->1
           const weightedExclusivity = exclusivityStrength * weight;
-          
+
           // Update max
           const current = maxExclusivity.get(inputShard) || 0;
           if (weightedExclusivity > current) {
@@ -574,7 +567,10 @@ export class CalculationService {
     return totalCost / effectiveOutput;
   }
 
-  private groupAlternativeRecipes(alternatives: AlternativeRecipeOption[]): { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> } {
+  private groupAlternativeRecipes(alternatives: AlternativeRecipeOption[]): {
+    direct: AlternativeRecipeOption | null;
+    grouped: Record<string, AlternativeRecipeOption[]>;
+  } {
     // Separate direct option from fusion recipes
     const directOption = alternatives.find((alt) => alt.recipe === null) || null;
     const fusionAlts = alternatives.filter((alt) => alt.recipe !== null);
@@ -611,7 +607,7 @@ export class CalculationService {
     outputShard: string,
     params: CalculationParams,
     recipeOverrides: RecipeOverride[] = [],
-    recipeFilter?: (recipe: Recipe) => boolean
+    recipeFilter?: (recipe: Recipe) => boolean,
   ): Promise<{ direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> }> {
     const data = await this.parseData(params);
     const { minCosts } = this.computeMinCosts(data, params, recipeOverrides);
@@ -640,7 +636,7 @@ export class CalculationService {
     outputShard: string,
     params: CalculationParams,
     currentRecipe?: Recipe | null,
-    recipeOverrides: RecipeOverride[] = []
+    recipeOverrides: RecipeOverride[] = [],
   ): Promise<{ direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> }> {
     const result = await this.getAlternativeRecipe(outputShard, params, recipeOverrides);
 
@@ -660,7 +656,7 @@ export class CalculationService {
     shardId: string,
     params: CalculationParams,
     context: AlternativeSelectionContext,
-    recipeOverrides: RecipeOverride[] = []
+    recipeOverrides: RecipeOverride[] = [],
   ): Promise<{ direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> }> {
     try {
       if (context?.isDirectInput) {
@@ -750,10 +746,7 @@ export class CalculationService {
     return [];
   }
 
-  private findExternalCycleInputs(
-    steps: { outputShard: string; recipe: Recipe }[],
-    data: Data
-  ): { shard: Shard; quantityPerCraft: number }[] {
+  private findExternalCycleInputs(steps: { outputShard: string; recipe: Recipe }[], data: Data): { shard: Shard; quantityPerCraft: number }[] {
     const outputShards = new Set(steps.map((step) => step.outputShard));
     const inputTotals: Map<string, { shard: Shard; quantityPerCraft: number }> = new Map();
 
@@ -779,7 +772,7 @@ export class CalculationService {
     cycleNodes: string[][],
     params: CalculationParams,
     recipeOverrides: RecipeOverride[] = [],
-    minCostsCache?: { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> }
+    minCostsCache?: { minCosts: Map<string, number>; choices: Map<string, RecipeChoice> },
   ): RecipeTree {
     if (!minCostsCache) {
       const memoKey = `${params.craftPenalty}|${params.rateAsCoinValue}`;
@@ -877,7 +870,7 @@ export class CalculationService {
     steps: { outputShard: string; recipe: Recipe }[],
     requiredQuantity: number,
     data: Data,
-    crocodileMultiplier: number
+    crocodileMultiplier: number,
   ): { roundedCrafts: number; stepCount: number; quantityForInput: (inputShard: string) => number } | null {
     const outputStep = steps.find((step) => step.outputShard === shard);
     if (!outputStep) return null;
@@ -902,9 +895,7 @@ export class CalculationService {
     // exactly nothing would otherwise read as net-positive and demand a preposterous
     // number of crafts instead of falling through to the expectedOutput branch.
     const netOutputPerCycle = snapToInteger(expectedOutput - totalInputsConsumed);
-    const expectedCrafts = netOutputPerCycle > 0
-      ? craftsForQuantity(requiredQuantity, netOutputPerCycle)
-      : craftsForQuantity(requiredQuantity, expectedOutput);
+    const expectedCrafts = netOutputPerCycle > 0 ? craftsForQuantity(requiredQuantity, netOutputPerCycle) : craftsForQuantity(requiredQuantity, expectedOutput);
     const stepCount = steps.length;
     // Every step of the loop runs the same number of times, so round up to a whole
     // number of laps.
@@ -972,7 +963,16 @@ export class CalculationService {
         tree.craftsNeeded = cycle.roundedCrafts;
 
         tree.cycleInputs.forEach((cycleInput) => {
-          this.assignQuantities(cycleInput, cycle.quantityForInput(cycleInput.shard), data, craftCounter, choices, crocodileMultiplier, params, recipeOverrides);
+          this.assignQuantities(
+            cycleInput,
+            cycle.quantityForInput(cycleInput.shard),
+            data,
+            craftCounter,
+            choices,
+            crocodileMultiplier,
+            params,
+            recipeOverrides,
+          );
         });
         break;
       }
@@ -981,7 +981,7 @@ export class CalculationService {
 
   public collectTreeStats(
     tree: RecipeTree | InventoryRecipeTree,
-    params: CalculationParams
+    params: CalculationParams,
   ): {
     craftsNeeded: number;
     craftTime: number;
@@ -1032,7 +1032,7 @@ export class CalculationService {
     totalQuantities: Map<string, number>,
     data: Data,
     params: CalculationParams,
-    getDirectCostFn?: (shard: Shard, asCoin: boolean) => number
+    getDirectCostFn?: (shard: Shard, asCoin: boolean) => number,
   ): Map<string, number> {
     const shardWeights = new Map<string, number>();
     const costFn = getDirectCostFn || this.getDirectCost.bind(this);
@@ -1048,14 +1048,14 @@ export class CalculationService {
   }
 
   public calculateShardProductionStats({
-   requiredQuantity,
-   targetShard,
-   choices,
-   crocodileMultiplier,
-   totalQuantities,
-   data,
-   params,
-   getDirectCostFn
+    requiredQuantity,
+    targetShard,
+    choices,
+    crocodileMultiplier,
+    totalQuantities,
+    data,
+    params,
+    getDirectCostFn,
   }: {
     requiredQuantity: number;
     targetShard: string;
@@ -1080,23 +1080,14 @@ export class CalculationService {
     return { totalShardsProduced, craftsNeeded, shardWeights };
   }
 
-  public calculateTotalTimeFromQuantities(
-    totalQuantities: Map<string, number>,
-    craftTime: number,
-    data: Data,
-    params: CalculationParams
-  ): number {
+  public calculateTotalTimeFromQuantities(totalQuantities: Map<string, number>, craftTime: number, data: Data, params: CalculationParams): number {
     const shardWeights = this.calculateShardWeights(totalQuantities, data, params);
     const materialTime = Array.from(shardWeights.values()).reduce((sum, weight) => sum + weight, 0);
     return materialTime + craftTime;
   }
 
   // Recipe overrides management
-  applyRecipeOverride(
-    shardId: string,
-    selectedRecipe: Recipe | null,
-    existingOverrides: RecipeOverride[] = []
-  ): RecipeOverride[] {
+  applyRecipeOverride(shardId: string, selectedRecipe: Recipe | null, existingOverrides: RecipeOverride[] = []): RecipeOverride[] {
     // Create new override
     const newOverride: RecipeOverride = {
       shardId,

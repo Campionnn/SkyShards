@@ -132,7 +132,7 @@ describe("calculateOptimalPath", () => {
       Object.keys(plain.data.shards)
         .filter((shardId) => !plain.totalQuantities.has(shardId))
         .slice(0, 20)
-        .map((shardId) => [shardId, 1000] as const)
+        .map((shardId) => [shardId, 1000] as const),
     );
 
     const result = await invSvc.calculateOptimalPath(target, quantity, PARAMS, new Map(offPath));
@@ -140,7 +140,9 @@ describe("calculateOptimalPath", () => {
     expect(result.totalTime).toBeLessThanOrEqual(plain.totalTime + 1e-9);
     expect({
       offPathOwned: [...offPath.keys()],
-      consumed: sortedEntries(new Map([...offPath].map(([id, n]) => [id, n - (result.remainingInventory?.get(id) ?? 0)]).filter(([, used]) => used !== 0) as [string, number][])),
+      consumed: sortedEntries(
+        new Map([...offPath].map(([id, n]) => [id, n - (result.remainingInventory?.get(id) ?? 0)]).filter(([, used]) => used !== 0) as [string, number][]),
+      ),
       totalTime: fmtCost(result.totalTime),
       plainTotalTime: fmtCost(plain.totalTime),
       totalQuantities: sortedEntries(result.totalQuantities),
@@ -160,7 +162,7 @@ describe("calculateOptimalPath", () => {
   it("does not let a token amount of an input veto a fully-owned alternative — reported Bramble case", async () => {
     const inventory = new Map([
       ["R6", 10000], // Glacite Walker — shared by both recipes
-      ["U91", 50],   // Rat — the default recipe's input, but only 50 of the 2500 needed
+      ["U91", 50], // Rat — the default recipe's input, but only 50 of the 2500 needed
       ["U10", 5000], // Field Mouse — enough to cover the alternative outright
     ]);
 
@@ -168,11 +170,7 @@ describe("calculateOptimalPath", () => {
 
     // Everything is on hand one way or the other, so nothing needs farming.
     expect(result.totalTime).toBe(0);
-    expect(serializeTree(result.tree!)).toEqual([
-      "U1 recipe qty=1000 crafts=500 [U10+R6 x2]",
-      "  U10 inventory qty=2500",
-      "  R6 inventory qty=2500",
-    ]);
+    expect(serializeTree(result.tree!)).toEqual(["U1 recipe qty=1000 crafts=500 [U10+R6 x2]", "  U10 inventory qty=2500", "  R6 inventory qty=2500"]);
   });
 });
 
@@ -205,10 +203,10 @@ describe("calculateOptimalPath — whole shard quantities", () => {
    * Titanoboa, fusions 1". */
   it("splits Condor into whole segments that add up — reported Dodo case", async () => {
     const inventory = new Map([
-      ["L29", 2],   // Megalith
+      ["L29", 2], // Megalith
       ["C24", 367], // Harpy
-      ["L6", 4],    // Tiamat
-      ["L47", 2],   // Titanoboa
+      ["L6", 4], // Tiamat
+      ["L47", 2], // Titanoboa
     ]);
 
     const result = await invSvc.calculateOptimalPath("L34", 2, PARAMS, inventory);

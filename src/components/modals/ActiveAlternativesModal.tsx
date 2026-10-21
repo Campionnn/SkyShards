@@ -51,17 +51,16 @@ export const ActiveAlternativesModal: React.FC<ActiveAlternativesModalProps> = (
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <img
-                src={shardIconUrl(override.shardId)}
-                alt={outputShard?.name || override.shardId}
-                className="w-5 h-5 object-contain"
-                loading="lazy"
-              />
-              <span className={(outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300") + " font-semibold"}>{outputShard?.name || override.shardId}</span>
+              <img src={shardIconUrl(override.shardId)} alt={outputShard?.name || override.shardId} className="w-5 h-5 object-contain" loading="lazy" />
+              <span className={(outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300") + " font-semibold"}>
+                {outputShard?.name || override.shardId}
+              </span>
               {override.recipe ? (
                 <span className="px-1 py-0.4 text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md flex-shrink-0">Fusion</span>
               ) : (
-                <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-300 border border-green-500/30 rounded-md flex-shrink-0">{rateAsCoinValue ? "Bazaar" : "Direct"}</span>
+                <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-300 border border-green-500/30 rounded-md flex-shrink-0">
+                  {rateAsCoinValue ? "Bazaar" : "Direct"}
+                </span>
               )}
             </div>
 
@@ -94,13 +93,20 @@ export const ActiveAlternativesModal: React.FC<ActiveAlternativesModalProps> = (
   };
 
   return (
-    <Modal open={open} onClose={onClose} labelledBy="active-alternatives-title" panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+    <Modal
+      open={open}
+      onClose={onClose}
+      labelledBy="active-alternatives-title"
+      panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+    >
       {/* Header */}
       <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Star className="w-5 h-5 text-purple-400" />
-            <h2 id="active-alternatives-title" className="text-lg font-semibold text-white">Active Alternatives</h2>
+            <h2 id="active-alternatives-title" className="text-lg font-semibold text-white">
+              Active Alternatives
+            </h2>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer" aria-label="Close">
             <X className="w-5 h-5 text-slate-400" />

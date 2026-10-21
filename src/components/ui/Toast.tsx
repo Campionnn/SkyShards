@@ -48,10 +48,13 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({ children }) =
     }
   }, []);
 
-  const dismiss = useCallback<ToastContextValue["dismiss"]>((id) => {
-    clearTimer(id);
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, [clearTimer]);
+  const dismiss = useCallback<ToastContextValue["dismiss"]>(
+    (id) => {
+      clearTimer(id);
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    },
+    [clearTimer],
+  );
 
   const dismissAll = useCallback<ToastContextValue["dismissAll"]>(() => {
     timers.current.forEach((t) => window.clearTimeout(t));
@@ -59,29 +62,32 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({ children }) =
     setToasts([]);
   }, []);
 
-  const toast = useCallback<ToastContextValue["toast"]>((opts) => {
-    const id = opts.id ?? genId();
-    const variant: ToastVariant = opts.variant ?? "info";
-    const duration = Math.max(800, opts.duration ?? 2500);
-    const entry: Toast = {
-      id,
-      title: opts.title,
-      description: opts.description ?? "",
-      variant,
-      duration,
-    };
+  const toast = useCallback<ToastContextValue["toast"]>(
+    (opts) => {
+      const id = opts.id ?? genId();
+      const variant: ToastVariant = opts.variant ?? "info";
+      const duration = Math.max(800, opts.duration ?? 2500);
+      const entry: Toast = {
+        id,
+        title: opts.title,
+        description: opts.description ?? "",
+        variant,
+        duration,
+      };
 
-    setToasts((prev) => {
-      const arr = [...prev, entry];
-      if (arr.length > 5) arr.shift();
-      return arr;
-    });
+      setToasts((prev) => {
+        const arr = [...prev, entry];
+        if (arr.length > 5) arr.shift();
+        return arr;
+      });
 
-    const timeout = window.setTimeout(() => dismiss(id), duration);
-    timers.current.set(id, timeout);
+      const timeout = window.setTimeout(() => dismiss(id), duration);
+      timers.current.set(id, timeout);
 
-    return id;
-  }, [dismiss]);
+      return id;
+    },
+    [dismiss],
+  );
 
   const value = useMemo<ToastContextValue>(() => ({ toast, dismiss, dismissAll }), [toast, dismiss, dismissAll]);
 
@@ -95,12 +101,7 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({ children }) =
         {toasts.map((t) => {
           const s = variantStyles[t.variant];
           return (
-            <div
-              key={t.id}
-              className={`relative overflow-hidden rounded-md border px-3 py-2 ${s.container}`}
-              role="status"
-              aria-live="polite"
-            >
+            <div key={t.id} className={`relative overflow-hidden rounded-md border px-3 py-2 ${s.container}`} role="status" aria-live="polite">
               <div className="flex items-start gap-2">
                 <span className={`px-1.5 py-0.5 text-xs border rounded-md flex-shrink-0 self-center ${s.badge}`}>{t.variant.toUpperCase()}</span>
                 <div className="flex-1 min-w-0">

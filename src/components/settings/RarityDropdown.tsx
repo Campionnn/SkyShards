@@ -21,7 +21,7 @@ export const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value
       { value: "epic", label: "Epic", color: "text-purple-400" },
       { value: "legendary", label: "Legendary", color: "text-yellow-400" },
     ],
-    []
+    [],
   );
 
   const currentRarity = useMemo(() => rarities.find((r) => r.value === value) || rarities[0], [rarities, value]);
@@ -53,7 +53,6 @@ export const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value
     }
   }, [isOpen]);
 
-
   return (
     <>
       <div className="relative rarity-dropdown">
@@ -72,9 +71,7 @@ export const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value
             <Filter className={`w-5 h-5 ${currentRarity.color}`} />
             <span className={`font-medium ${currentRarity.color}`}>{currentRarity.label}</span>
           </div>
-          <ChevronDown
-            className={`w-4 h-4 ${currentRarity.color} transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-          />
+          <ChevronDown className={`w-4 h-4 ${currentRarity.color} transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
         </button>
       </div>
 
@@ -109,7 +106,7 @@ export const RarityDropdown: React.FC<RarityDropdownProps> = React.memo(({ value
               </button>
             ))}
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );

@@ -4,7 +4,19 @@ import { X, Search, Package, RefreshCw, User, ChevronDown, AlertTriangle, Check,
 import { hypixelService } from "../../services";
 import type { HypixelProfileResponse, ProfileData } from "../../services";
 import { useShards } from "../../hooks";
-import { DEFAULT_FILTER_CONFIG, clearDisabledShards, clearHypixelProfileMeta, compareShardKeys, filterShards, getShardSearchText, loadHypixelProfileMeta, saveHypixelProfileMeta, shardIconUrl, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
+import {
+  DEFAULT_FILTER_CONFIG,
+  clearDisabledShards,
+  clearHypixelProfileMeta,
+  compareShardKeys,
+  filterShards,
+  getShardSearchText,
+  loadHypixelProfileMeta,
+  saveHypixelProfileMeta,
+  shardIconUrl,
+  sortByShardKey,
+  sortShardsByNameWithPrefixAwareness,
+} from "../../utilities";
 import type { HypixelProfileMeta } from "../../utilities";
 import { SHARD_DESCRIPTIONS, MAX_QUANTITIES, LEVELED_SHARDS, fusedCountToTierLevel } from "../../constants";
 
@@ -34,12 +46,12 @@ interface InventoryManagementModalProps {
 type TabType = "shards" | "attributes";
 
 const RARITY_OPTIONS = [
-  { value: "all",       label: "All Rarities", color: "text-violet-400" },
-  { value: "common",    label: "Common",        color: "text-white" },
-  { value: "uncommon",  label: "Uncommon",      color: "text-green-400" },
-  { value: "rare",      label: "Rare",          color: "text-blue-400" },
-  { value: "epic",      label: "Epic",          color: "text-purple-400" },
-  { value: "legendary", label: "Legendary",     color: "text-yellow-400" },
+  { value: "all", label: "All Rarities", color: "text-violet-400" },
+  { value: "common", label: "Common", color: "text-white" },
+  { value: "uncommon", label: "Uncommon", color: "text-green-400" },
+  { value: "rare", label: "Rare", color: "text-blue-400" },
+  { value: "epic", label: "Epic", color: "text-purple-400" },
+  { value: "legendary", label: "Legendary", color: "text-yellow-400" },
 ];
 
 export const InventoryManagementModal: React.FC<InventoryManagementModalProps> = ({
@@ -148,13 +160,14 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
   // Filtered + sorted shards (same logic as BrowseAllShardsModal)
   const filteredShards = useMemo(() => {
     // When no query and no rarity filter, only show inventory items
-    const baseFilter = !shardsQuery.trim() && shardsRarity === "all"
-      ? shardsArray.filter((s) => inventory.has(s.id))
-      : filterShards(shardsArray, {
-          query: shardsQuery,
-          rarity: shardsRarity,
-          searchConfig: DEFAULT_FILTER_CONFIG,
-        });
+    const baseFilter =
+      !shardsQuery.trim() && shardsRarity === "all"
+        ? shardsArray.filter((s) => inventory.has(s.id))
+        : filterShards(shardsArray, {
+            query: shardsQuery,
+            rarity: shardsRarity,
+            searchConfig: DEFAULT_FILTER_CONFIG,
+          });
 
     if (!shardsQuery.trim()) {
       return baseFilter.sort(sortByShardKey);
@@ -180,56 +193,54 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
   }, [shardsArray]);
 
   const attributesList = useMemo(() => {
-    return Object.entries(SHARD_DESCRIPTIONS).map(([id, desc]) => {
-      const prefix = id[0].toUpperCase();
-      const rarity =
-        prefix === "C" ? "common"
-        : prefix === "U" ? "uncommon"
-        : prefix === "R" ? "rare"
-        : prefix === "E" ? "epic"
-        : "legendary";
-      return {
-        id,
-        rarity,
-        title: desc.title,
-        shardName: shardKeyToName[id] ?? "",
-        level: ownedAttributes.get(id) ?? 0,
-      };
-    }).sort((a, b) => {
-      if (b.level !== a.level) return b.level - a.level;
-      // compareShardKeys orders by (rarity, base number, "-N" suffix), so a
-      // duplicate-placeholder id like "U17-1" sorts right after its base "U17".
-      return compareShardKeys(a.id, b.id);
-    });
+    return Object.entries(SHARD_DESCRIPTIONS)
+      .map(([id, desc]) => {
+        const prefix = id[0].toUpperCase();
+        const rarity = prefix === "C" ? "common" : prefix === "U" ? "uncommon" : prefix === "R" ? "rare" : prefix === "E" ? "epic" : "legendary";
+        return {
+          id,
+          rarity,
+          title: desc.title,
+          shardName: shardKeyToName[id] ?? "",
+          level: ownedAttributes.get(id) ?? 0,
+        };
+      })
+      .sort((a, b) => {
+        if (b.level !== a.level) return b.level - a.level;
+        // compareShardKeys orders by (rarity, base number, "-N" suffix), so a
+        // duplicate-placeholder id like "U17-1" sorts right after its base "U17".
+        return compareShardKeys(a.id, b.id);
+      });
   }, [ownedAttributes, shardKeyToName]);
 
   // Filtered attributes — search across shard name, attribute title, id, family, type, description
   const filteredAttributes = useMemo(() => {
     return attributesList.filter((attr) => {
       const maxForRarity =
-        attr.rarity === "common"    ? MAX_QUANTITIES.common
-        : attr.rarity === "uncommon" ? MAX_QUANTITIES.uncommon
-        : attr.rarity === "rare"     ? MAX_QUANTITIES.rare
-        : attr.rarity === "epic"     ? MAX_QUANTITIES.epic
-        :                              MAX_QUANTITIES.legendary;
+        attr.rarity === "common"
+          ? MAX_QUANTITIES.common
+          : attr.rarity === "uncommon"
+            ? MAX_QUANTITIES.uncommon
+            : attr.rarity === "rare"
+              ? MAX_QUANTITIES.rare
+              : attr.rarity === "epic"
+                ? MAX_QUANTITIES.epic
+                : MAX_QUANTITIES.legendary;
       const capped = attr.level >= maxForRarity;
 
       const matchesRarity = attrsRarity === "all" || attr.rarity === attrsRarity;
-      const matchesLock =
-        attrsLockFilter === "both"
-        || (attrsLockFilter === "capped" && capped)
-        || (attrsLockFilter === "unlocked" && !capped);
+      const matchesLock = attrsLockFilter === "both" || (attrsLockFilter === "capped" && capped) || (attrsLockFilter === "unlocked" && !capped);
       if (!attrsQuery.trim()) return matchesRarity && matchesLock;
       const q = attrsQuery.toLowerCase();
       // Match against attribute title, shard key, shard name, and description fields
       const matchingShardDef = shardsArray.find((s) => s.id === attr.id);
       const matchesSearch =
-        attr.title.toLowerCase().includes(q)
-        || attr.id.toLowerCase().includes(q)
-        || attr.shardName.toLowerCase().includes(q)
-        || (matchingShardDef?.family?.toLowerCase().includes(q) ?? false)
-        || (matchingShardDef?.type?.toLowerCase().includes(q) ?? false)
-        || getShardSearchText(attr.id).includes(q);
+        attr.title.toLowerCase().includes(q) ||
+        attr.id.toLowerCase().includes(q) ||
+        attr.shardName.toLowerCase().includes(q) ||
+        (matchingShardDef?.family?.toLowerCase().includes(q) ?? false) ||
+        (matchingShardDef?.type?.toLowerCase().includes(q) ?? false) ||
+        getShardSearchText(attr.id).includes(q);
       return matchesRarity && matchesLock && matchesSearch;
     });
   }, [attributesList, attrsQuery, attrsRarity, attrsLockFilter, shardsArray]);
@@ -256,12 +267,12 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
         newInventory.set(shard.id, shard.amount);
       }
     }
-    
+
     // Auto-fill the 9 shard level shards based on attribute levels
     const shardLevels: Record<string, number> = {};
 
     for (const { shardId, rarity, key: formKey } of LEVELED_SHARDS) {
-      const fusedCount = profileData.attributes.find(attr => attr.id.toUpperCase() === shardId.toUpperCase())?.level ?? 0;
+      const fusedCount = profileData.attributes.find((attr) => attr.id.toUpperCase() === shardId.toUpperCase())?.level ?? 0;
       // Store the tier level for the form
       shardLevels[formKey] = fusedCountToTierLevel(fusedCount, rarity);
     }
@@ -308,9 +319,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
         return;
       }
 
-      const mostRecent = data.profiles.reduce((prev, curr) =>
-        curr.profile.last_save > prev.profile.last_save ? curr : prev
-      );
+      const mostRecent = data.profiles.reduce((prev, curr) => (curr.profile.last_save > prev.profile.last_save ? curr : prev));
       setSelectedProfileId(mostRecent.profile.profile_id);
       importProfileData(mostRecent, data.username);
     } catch (err) {
@@ -386,24 +395,28 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
   if (!open) return null;
 
   const shardsCurrentRarity = RARITY_OPTIONS.find((r) => r.value === shardsRarity) ?? RARITY_OPTIONS[0];
-  const attrsCurrentRarity  = RARITY_OPTIONS.find((r) => r.value === attrsRarity)  ?? RARITY_OPTIONS[0];
+  const attrsCurrentRarity = RARITY_OPTIONS.find((r) => r.value === attrsRarity) ?? RARITY_OPTIONS[0];
 
   return (
-    <Modal open={open} onClose={onClose} labelledBy="inventory-management-title" panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col" backdropClassName="bg-black/60 p-4">
+    <Modal
+      open={open}
+      onClose={onClose}
+      labelledBy="inventory-management-title"
+      panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col"
+      backdropClassName="bg-black/60 p-4"
+    >
       {/* Header */}
       <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5 text-purple-400" />
-            <h2 id="inventory-management-title" className="text-lg font-semibold text-white">Inventory</h2>
+            <h2 id="inventory-management-title" className="text-lg font-semibold text-white">
+              Inventory
+            </h2>
           </div>
           <div className="flex items-center gap-1">
             {(inventory.size > 0 || ownedAttributes.size > 0) && (
-              <button
-                onClick={handleClearAll}
-                title="Clear all inventory"
-                className="p-2 hover:bg-red-500/20 rounded-lg transition-colors cursor-pointer"
-              >
+              <button onClick={handleClearAll} title="Clear all inventory" className="p-2 hover:bg-red-500/20 rounded-lg transition-colors cursor-pointer">
                 <Trash2 className="w-5 h-5 text-red-400" />
               </button>
             )}
@@ -473,8 +486,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                     {sortedProfiles.map((profileData) => (
                       <option key={profileData.profile.profile_id} value={profileData.profile.profile_id}>
                         {profileData.profile.cute_name}
-                        {profileData.profile.game_mode ? ` (${profileData.profile.game_mode})` : ""} -{" "}
-                        {formatDate(profileData.profile.last_save)}
+                        {profileData.profile.game_mode ? ` (${profileData.profile.game_mode})` : ""} - {formatDate(profileData.profile.last_save)}
                       </option>
                     ))}
                   </select>
@@ -496,9 +508,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
             }`}
           >
             Shards
-            {inventory.size > 0 && (
-              <span className="text-xs bg-purple-500/30 px-1.5 py-0.5 rounded">{inventory.size}</span>
-            )}
+            {inventory.size > 0 && <span className="text-xs bg-purple-500/30 px-1.5 py-0.5 rounded">{inventory.size}</span>}
           </button>
           <button
             onClick={() => setActiveTab("attributes")}
@@ -509,9 +519,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
             }`}
           >
             Attributes
-            {ownedAttributes.size > 0 && (
-              <span className="text-xs bg-purple-500/30 px-1.5 py-0.5 rounded">{ownedAttributes.size}</span>
-            )}
+            {ownedAttributes.size > 0 && <span className="text-xs bg-purple-500/30 px-1.5 py-0.5 rounded">{ownedAttributes.size}</span>}
           </button>
         </div>
       </div>
@@ -553,7 +561,10 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                       <button
                         key={opt.value}
                         type="button"
-                        onClick={() => { setShardsRarity(opt.value); setShardsRarityOpen(false); }}
+                        onClick={() => {
+                          setShardsRarity(opt.value);
+                          setShardsRarityOpen(false);
+                        }}
                         className={`w-full px-4 py-2 text-sm text-left font-medium transition-colors cursor-pointer ${
                           shardsRarity === opt.value ? "bg-purple-500/30 " + opt.color : opt.color + " hover:bg-purple-500/10"
                         }`}
@@ -567,7 +578,10 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
 
               {/* Reset */}
               <button
-                onClick={() => { setShardsQuery(""); setShardsRarity("all"); }}
+                onClick={() => {
+                  setShardsQuery("");
+                  setShardsRarity("all");
+                }}
                 title="Reset filters"
                 className="px-3 py-2 h-[38px] bg-slate-600/50 hover:bg-slate-600 border border-slate-500/50 hover:border-slate-500 rounded-md text-slate-300 hover:text-white transition-colors cursor-pointer flex items-center"
               >
@@ -601,18 +615,26 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                   const inv = inventory.get(shardId) ?? 0;
                   const disabled = disabledShards.has(shardId);
                   const shardRarityBorder =
-                    shard.rarity === "common"    ? "border-slate-500/50"
-                    : shard.rarity === "uncommon" ? "border-green-500/50"
-                    : shard.rarity === "rare"     ? "border-blue-500/50"
-                    : shard.rarity === "epic"     ? "border-purple-500/50"
-                    :                               "border-amber-500/50";
+                    shard.rarity === "common"
+                      ? "border-slate-500/50"
+                      : shard.rarity === "uncommon"
+                        ? "border-green-500/50"
+                        : shard.rarity === "rare"
+                          ? "border-blue-500/50"
+                          : shard.rarity === "epic"
+                            ? "border-purple-500/50"
+                            : "border-amber-500/50";
 
                   const shardRarityText =
-                    shard.rarity === "common"    ? "text-slate-300"
-                    : shard.rarity === "uncommon" ? "text-green-300"
-                    : shard.rarity === "rare"     ? "text-blue-300"
-                    : shard.rarity === "epic"     ? "text-purple-300"
-                    :                               "text-amber-300";
+                    shard.rarity === "common"
+                      ? "text-slate-300"
+                      : shard.rarity === "uncommon"
+                        ? "text-green-300"
+                        : shard.rarity === "rare"
+                          ? "text-blue-300"
+                          : shard.rarity === "epic"
+                            ? "text-purple-300"
+                            : "text-amber-300";
 
                   const handleToggleDisabled = () => {
                     const next = new Set(disabledShards);
@@ -624,12 +646,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                   return (
                     <div key={shardId} className={`bg-slate-800/50 border ${shardRarityBorder} rounded-md p-2 space-y-2 ${disabled ? "opacity-50" : ""}`}>
                       <div className="flex items-center gap-2">
-                        <img
-                          src={shardIconUrl(shardId)}
-                          alt={shard.name}
-                          className="w-5 h-5 object-contain flex-shrink-0"
-                          loading="lazy"
-                        />
+                        <img src={shardIconUrl(shardId)} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0" loading="lazy" />
                         <span className={`text-sm font-medium flex-1 truncate ${shardRarityText}`}>{shard.name}</span>
                         <button
                           type="button"
@@ -697,7 +714,10 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                       <button
                         key={opt.value}
                         type="button"
-                        onClick={() => { setAttrsRarity(opt.value); setAttrsRarityOpen(false); }}
+                        onClick={() => {
+                          setAttrsRarity(opt.value);
+                          setAttrsRarityOpen(false);
+                        }}
                         className={`w-full px-4 py-2 text-sm text-left font-medium transition-colors cursor-pointer ${
                           attrsRarity === opt.value ? "bg-purple-500/30 " + opt.color : opt.color + " hover:bg-purple-500/10"
                         }`}
@@ -716,9 +736,9 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                   onClick={() => setAttrsLockOpen(!attrsLockOpen)}
                   className="flex items-center justify-between gap-2 px-3 py-2 h-[38px] bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30 rounded-md hover:bg-purple-500/20 transition-colors cursor-pointer"
                 >
-                <span className="text-sm font-medium text-purple-300">
-                  {attrsLockFilter === "both" ? "All" : attrsLockFilter === "unlocked" ? "In Progress" : "Completed"}
-                </span>
+                  <span className="text-sm font-medium text-purple-300">
+                    {attrsLockFilter === "both" ? "All" : attrsLockFilter === "unlocked" ? "In Progress" : "Completed"}
+                  </span>
                   <ChevronDown className={`w-4 h-4 text-purple-300 transition-transform ${attrsLockOpen ? "rotate-180" : ""}`} />
                 </button>
                 {attrsLockOpen && (
@@ -727,11 +747,12 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                       <button
                         key={val}
                         type="button"
-                        onClick={() => { setAttrsLockFilter(val); setAttrsLockOpen(false); }}
+                        onClick={() => {
+                          setAttrsLockFilter(val);
+                          setAttrsLockOpen(false);
+                        }}
                         className={`w-full px-4 py-2 text-sm text-left font-medium transition-colors cursor-pointer ${
-                          attrsLockFilter === val
-                            ? "bg-purple-500/30 text-purple-200"
-                            : "text-slate-300 hover:bg-purple-500/10"
+                          attrsLockFilter === val ? "bg-purple-500/30 text-purple-200" : "text-slate-300 hover:bg-purple-500/10"
                         }`}
                       >
                         {val === "both" ? "All" : val === "unlocked" ? "In Progress" : "Completed"}
@@ -743,7 +764,11 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
 
               {/* Reset */}
               <button
-                onClick={() => { setAttrsQuery(""); setAttrsRarity("all"); setAttrsLockFilter("both"); }}
+                onClick={() => {
+                  setAttrsQuery("");
+                  setAttrsRarity("all");
+                  setAttrsLockFilter("both");
+                }}
                 title="Reset filters"
                 className="px-3 py-2 h-[38px] bg-slate-600/50 hover:bg-slate-600 border border-slate-500/50 hover:border-slate-500 rounded-md text-slate-300 hover:text-white transition-colors cursor-pointer flex items-center"
               >
@@ -765,37 +790,51 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                 {filteredAttributes.map((attr) => {
                   const owned = attr.level > 0;
                   const maxForRarity =
-                    attr.rarity === "common"    ? MAX_QUANTITIES.common
-                    : attr.rarity === "uncommon" ? MAX_QUANTITIES.uncommon
-                    : attr.rarity === "rare"     ? MAX_QUANTITIES.rare
-                    : attr.rarity === "epic"     ? MAX_QUANTITIES.epic
-                    :                              MAX_QUANTITIES.legendary;
+                    attr.rarity === "common"
+                      ? MAX_QUANTITIES.common
+                      : attr.rarity === "uncommon"
+                        ? MAX_QUANTITIES.uncommon
+                        : attr.rarity === "rare"
+                          ? MAX_QUANTITIES.rare
+                          : attr.rarity === "epic"
+                            ? MAX_QUANTITIES.epic
+                            : MAX_QUANTITIES.legendary;
                   const capped = attr.level >= maxForRarity;
 
                   const rarityBorder =
-                    attr.rarity === "common"    ? "border-slate-500/50"
-                    : attr.rarity === "uncommon" ? "border-green-500/50"
-                    : attr.rarity === "rare"     ? "border-blue-500/50"
-                    : attr.rarity === "epic"     ? "border-purple-500/50"
-                    :                              "border-amber-500/50";
+                    attr.rarity === "common"
+                      ? "border-slate-500/50"
+                      : attr.rarity === "uncommon"
+                        ? "border-green-500/50"
+                        : attr.rarity === "rare"
+                          ? "border-blue-500/50"
+                          : attr.rarity === "epic"
+                            ? "border-purple-500/50"
+                            : "border-amber-500/50";
 
                   const rarityText =
-                    attr.rarity === "common"    ? "text-slate-300"
-                    : attr.rarity === "uncommon" ? "text-green-300"
-                    : attr.rarity === "rare"     ? "text-blue-300"
-                    : attr.rarity === "epic"     ? "text-purple-300"
-                    :                              "text-amber-300";
+                    attr.rarity === "common"
+                      ? "text-slate-300"
+                      : attr.rarity === "uncommon"
+                        ? "text-green-300"
+                        : attr.rarity === "rare"
+                          ? "text-blue-300"
+                          : attr.rarity === "epic"
+                            ? "text-purple-300"
+                            : "text-amber-300";
 
                   const barColor =
-                    attr.rarity === "common"    ? "bg-slate-400"
-                    : attr.rarity === "uncommon" ? "bg-green-400"
-                    : attr.rarity === "rare"     ? "bg-blue-400"
-                    : attr.rarity === "epic"     ? "bg-purple-400"
-                    :                              "bg-amber-400";
+                    attr.rarity === "common"
+                      ? "bg-slate-400"
+                      : attr.rarity === "uncommon"
+                        ? "bg-green-400"
+                        : attr.rarity === "rare"
+                          ? "bg-blue-400"
+                          : attr.rarity === "epic"
+                            ? "bg-purple-400"
+                            : "bg-amber-400";
 
-                  const percentage = owned
-                    ? Math.min(100, Math.round((attr.level / maxForRarity) * 100))
-                    : 0;
+                  const percentage = owned ? Math.min(100, Math.round((attr.level / maxForRarity) * 100)) : 0;
 
                   return (
                     <div
@@ -813,12 +852,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                       {/* Icon + title row */}
                       <div className="flex items-center gap-1.5">
                         <div className="relative flex-shrink-0">
-                          <img
-                            src={shardIconUrl(attr.id)}
-                            alt={attr.title}
-                            className="w-8 h-8 object-contain"
-                            loading="lazy"
-                          />
+                          <img src={shardIconUrl(attr.id)} alt={attr.title} className="w-8 h-8 object-contain" loading="lazy" />
                           {capped && (
                             <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-amber-400 flex items-center justify-center">
                               <span className="text-[8px] font-bold text-slate-900">✓</span>
@@ -826,14 +860,8 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                           )}
                         </div>
                         <div className="min-w-0">
-                          <span className={`text-xs font-medium leading-tight ${rarityText} truncate block`}>
-                            {attr.title}
-                          </span>
-                          {attr.shardName && (
-                            <span className="text-[10px] text-slate-500 truncate block">
-                              {attr.shardName}
-                            </span>
-                          )}
+                          <span className={`text-xs font-medium leading-tight ${rarityText} truncate block`}>{attr.title}</span>
+                          {attr.shardName && <span className="text-[10px] text-slate-500 truncate block">{attr.shardName}</span>}
                         </div>
                       </div>
 
@@ -846,10 +874,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
                           </span>
                         </div>
                         <div className="h-1 w-full rounded-full bg-slate-700 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${barColor}`}
-                            style={{ width: `${percentage}%` }}
-                          />
+                          <div className={`h-full rounded-full ${barColor}`} style={{ width: `${percentage}%` }} />
                         </div>
                       </div>
                     </div>
@@ -894,8 +919,7 @@ export const InventoryManagementModal: React.FC<InventoryManagementModalProps> =
               <div className="text-xs text-slate-400">
                 {profileMeta && (
                   <span>
-                    Last imported: {profileMeta.username} ({profileMeta.profileName}) -{" "}
-                    {new Date(profileMeta.lastImportTime).toLocaleDateString()}
+                    Last imported: {profileMeta.username} ({profileMeta.profileName}) - {new Date(profileMeta.lastImportTime).toLocaleDateString()}
                   </span>
                 )}
               </div>

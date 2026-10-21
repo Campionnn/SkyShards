@@ -57,7 +57,6 @@ const addEdge = (fwd: Map<string, Set<string>>, rev: Map<string, Set<string>>, f
   r.add(from);
 };
 
-
 /** Build the dominance-pruned, type-tagged fusion graph. Chameleon recipes are
  * excluded. An edge X -> Y is added when X appears in at least `dominanceThreshold`
  * of Y's recipes (for that output quantity) and at least `minCount` of them. */
@@ -143,7 +142,7 @@ const pruneBackwardEdges = (
   fwd: Map<string, Set<string>>,
   rev: Map<string, Set<string>>,
   minCost: (id: string) => number,
-  allow: (from: string, to: string) => boolean
+  allow: (from: string, to: string) => boolean,
 ) => {
   const doomed: [string, string][] = [];
   for (const [from, tos] of fwd) {
@@ -202,11 +201,7 @@ function pruneUnobtainableRoots(graph: FusionGraph, isDirectlyObtainable: (id: s
 /** Shards reachable downstream from `shardId` over special edges only, including
  * the shard itself — its family-backbone fusion line, excluding id-fusion jumps
  * into unrelated targets. Cycle-safe. */
-export function getSpecialDownstreamClosure(
-  shardId: string,
-  graph: FusionGraph,
-  memo?: Map<string, Set<string>>
-): Set<string> {
+export function getSpecialDownstreamClosure(shardId: string, graph: FusionGraph, memo?: Map<string, Set<string>>): Set<string> {
   if (memo?.has(shardId)) return memo.get(shardId)!;
 
   const closure = new Set<string>([shardId]);
@@ -233,7 +228,7 @@ export function computeFreelyUsableShards(
   data: Data,
   ownedAttributes: Map<string, number>,
   isDirectlyObtainable?: (id: string) => boolean,
-  minCost?: (id: string) => number
+  minCost?: (id: string) => number,
 ): Set<string> {
   if (ownedAttributes.size === 0) return new Set();
 

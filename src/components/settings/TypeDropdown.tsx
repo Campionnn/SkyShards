@@ -18,7 +18,7 @@ export const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, on
       { value: "direct", label: "Direct", color: "text-green-400" },
       { value: "fuse", label: "Fuse", color: "text-fuchsia-400" },
     ],
-    []
+    [],
   );
 
   const currentType = useMemo(() => types.find((t) => t.value === value) || types[0], [types, value]);
@@ -50,7 +50,6 @@ export const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, on
     }
   }, [isOpen]);
 
-
   return (
     <>
       <div className="relative type-dropdown">
@@ -69,9 +68,7 @@ export const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, on
             <Layers className={`w-5 h-5 ${currentType.color}`} />
             <span className={`font-medium ${currentType.color}`}>{currentType.label}</span>
           </div>
-          <ChevronDown
-            className={`w-4 h-4 ${currentType.color} transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-          />
+          <ChevronDown className={`w-4 h-4 ${currentType.color} transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
         </button>
       </div>
 
@@ -106,7 +103,7 @@ export const TypeDropdown: React.FC<TypeDropdownProps> = React.memo(({ value, on
               </button>
             ))}
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );

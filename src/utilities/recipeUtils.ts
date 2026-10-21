@@ -73,12 +73,12 @@ const createRecipeKey = (input1: string, input2: string, quantity: number): stri
 const analyzeShardPositions = (recipes: PairRecipe[]) => {
   const position1Count = new Map<string, number>();
   const position2Count = new Map<string, number>();
-  
-  recipes.forEach(recipe => {
+
+  recipes.forEach((recipe) => {
     position1Count.set(recipe.input1, (position1Count.get(recipe.input1) || 0) + 1);
     position2Count.set(recipe.input2, (position2Count.get(recipe.input2) || 0) + 1);
   });
-  
+
   return { position1Count, position2Count };
 };
 
@@ -88,7 +88,12 @@ const getPreferredPosition = (shardId: string, position1Count: Map<string, numbe
   return count1 >= count2 ? "input1" : "input2";
 };
 
-const chooseBetterRecipe = (recipe1: PairRecipe, recipe2: PairRecipe, fusionData: FusionJson, positionAnalysis: { position1Count: Map<string, number>, position2Count: Map<string, number> }): PairRecipe => {
+const chooseBetterRecipe = (
+  recipe1: PairRecipe,
+  recipe2: PairRecipe,
+  fusionData: FusionJson,
+  positionAnalysis: { position1Count: Map<string, number>; position2Count: Map<string, number> },
+): PairRecipe => {
   const shard1A = fusionData.shards[recipe1.input1];
   const shard1B = fusionData.shards[recipe1.input2];
   const shard2A = fusionData.shards[recipe2.input1];
@@ -111,20 +116,20 @@ const chooseBetterRecipe = (recipe1: PairRecipe, recipe2: PairRecipe, fusionData
   const rarity1B = getRarityIndex(shard1B?.rarity);
   const rarity2A = getRarityIndex(shard2A?.rarity);
   const rarity2B = getRarityIndex(shard2B?.rarity);
-  
+
   if (rarity1A < rarity1B && rarity2A >= rarity2B) return recipe1;
   if (rarity2A < rarity2B && rarity1A >= rarity1B) return recipe2;
 
   const { position1Count, position2Count } = positionAnalysis;
-  
-  const recipe1Score = 
+
+  const recipe1Score =
     (getPreferredPosition(recipe1.input1, position1Count, position2Count) === "input1" ? 1 : 0) +
     (getPreferredPosition(recipe1.input2, position1Count, position2Count) === "input2" ? 1 : 0);
-    
-  const recipe2Score = 
+
+  const recipe2Score =
     (getPreferredPosition(recipe2.input1, position1Count, position2Count) === "input1" ? 1 : 0) +
     (getPreferredPosition(recipe2.input2, position1Count, position2Count) === "input2" ? 1 : 0);
-  
+
   if (recipe1Score !== recipe2Score) {
     return recipe1Score > recipe2Score ? recipe1 : recipe2;
   }
@@ -149,7 +154,7 @@ const groupRecipesByCommonShard = (recipes: PairRecipe[]): GroupedRecipe[] => {
         fusionType: classifyFusion(recipe),
       });
       processed.add(index);
-      sameInput1.forEach(r => processed.add(recipes.indexOf(r)));
+      sameInput1.forEach((r) => processed.add(recipes.indexOf(r)));
     } else if (sameInput2.length > 0) {
       const groupRecipes = [recipe, ...sameInput2];
       groups.push({
@@ -160,7 +165,7 @@ const groupRecipesByCommonShard = (recipes: PairRecipe[]): GroupedRecipe[] => {
         fusionType: classifyFusion(recipe),
       });
       processed.add(index);
-      sameInput2.forEach(r => processed.add(recipes.indexOf(r)));
+      sameInput2.forEach((r) => processed.add(recipes.indexOf(r)));
     } else {
       groups.push({
         recipes: [recipe],
@@ -179,7 +184,7 @@ export const categorizeAndGroupRecipes = (recipes: PairRecipe[], fusionData: Fus
   const positionAnalysis = analyzeShardPositions(recipes);
   const recipeMap = new Map<string, PairRecipe>();
   const duplicates = new Map<string, PairRecipe[]>();
-  recipes.forEach(recipe => {
+  recipes.forEach((recipe) => {
     const key = createRecipeKey(recipe.input1, recipe.input2, recipe.quantity) + `-${recipe.output}`;
     if (recipeMap.has(key)) {
       const existing = recipeMap.get(key)!;
@@ -196,23 +201,23 @@ export const categorizeAndGroupRecipes = (recipes: PairRecipe[], fusionData: Fus
   });
   const culled = Array.from(recipeMap.values());
   const byType: Record<string, PairRecipe[]> = { special: [], id: [], chameleon: [] };
-  culled.forEach(r => byType[classifyFusion(r)].push(r));
+  culled.forEach((r) => byType[classifyFusion(r)].push(r));
 
   const build = (list: PairRecipe[]): GroupedRecipe[] => {
     // Partition by output only (ignore quantity to allow flexible grouping)
     const partitions = new Map<string, PairRecipe[]>();
-    list.forEach(r => {
+    list.forEach((r) => {
       const k = r.output;
       (partitions.get(k) || partitions.set(k, []).get(k)!).push(r);
     });
     const result: GroupedRecipe[] = [];
 
-    partitions.forEach(recList => {
+    partitions.forEach((recList) => {
       const used = new Set<number>();
 
       // Build partner map: each shard -> set of its partners
       const partnerMap = new Map<string, Set<string>>();
-      recList.forEach(r => {
+      recList.forEach((r) => {
         if (!partnerMap.has(r.input1)) partnerMap.set(r.input1, new Set());
         if (!partnerMap.has(r.input2)) partnerMap.set(r.input2, new Set());
         partnerMap.get(r.input1)!.add(r.input2);
@@ -271,10 +276,10 @@ export const categorizeAndGroupRecipes = (recipes: PairRecipe[], fusionData: Fus
       if (remaining.length) {
         // Group by quantity for traditional grouping
         const byQty = new Map<number, PairRecipe[]>();
-        remaining.forEach(r => {
+        remaining.forEach((r) => {
           (byQty.get(r.quantity) || byQty.set(r.quantity, []).get(r.quantity)!).push(r);
         });
-        byQty.forEach(sub => {
+        byQty.forEach((sub) => {
           result.push(...groupRecipesByCommonShard(sub));
         });
       }
@@ -294,13 +299,15 @@ export const filterCategorizedRecipes = (categorized: CategorizedRecipes, filter
   if (!filterValue.trim()) return categorized;
   const term = filterValue.toLowerCase();
   const filter = (arr: GroupedRecipe[]) =>
-    arr.filter(g => g.recipes.some(r => {
-      const s1 = fusionData.shards[r.input1]?.name.toLowerCase() || "";
-      const s2 = fusionData.shards[r.input2]?.name.toLowerCase() || "";
-      const outId = (r as PairRecipe).output as string | undefined;
-      const outName = outId ? (fusionData.shards[outId]?.name.toLowerCase() || "") : "";
-      return s1.includes(term) || s2.includes(term) || outName.includes(term);
-    }));
+    arr.filter((g) =>
+      g.recipes.some((r) => {
+        const s1 = fusionData.shards[r.input1]?.name.toLowerCase() || "";
+        const s2 = fusionData.shards[r.input2]?.name.toLowerCase() || "";
+        const outId = (r as PairRecipe).output as string | undefined;
+        const outName = outId ? fusionData.shards[outId]?.name.toLowerCase() || "" : "";
+        return s1.includes(term) || s2.includes(term) || outName.includes(term);
+      }),
+    );
   return {
     special: filter(categorized.special),
     id: filter(categorized.id),

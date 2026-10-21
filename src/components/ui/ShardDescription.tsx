@@ -29,11 +29,7 @@ const SegmentSpan: React.FC<{ seg: Segment }> = ({ seg }) => {
   }
   if (typeof seg.t !== "string") return null;
   const parts = seg.t.split(GLYPH_REGEX);
-  return (
-    <span style={textStyle(seg)}>
-      {parts.map((part, i) => (part in GLYPH_MAP ? <StatGlyph key={i} char={part} /> : part))}
-    </span>
-  );
+  return <span style={textStyle(seg)}>{parts.map((part, i) => (part in GLYPH_MAP ? <StatGlyph key={i} char={part} /> : part))}</span>;
 };
 
 export const SegmentLine: React.FC<{ segments: Segment[] }> = ({ segments }) => (
@@ -47,9 +43,7 @@ export const SegmentLine: React.FC<{ segments: Segment[] }> = ({ segments }) => 
 // Drops the trailing "Buffed by <attribute> attribute." tag appended to some descriptions,
 // along with any whitespace-only segments that precede it.
 function stripBuffedBy(segments: Segment[]): Segment[] {
-  const idx = segments.findIndex(
-    (seg) => !isRangeSegment(seg) && typeof seg.t === "string" && seg.t.trimStart().toLowerCase().startsWith("buffed by"),
-  );
+  const idx = segments.findIndex((seg) => !isRangeSegment(seg) && typeof seg.t === "string" && seg.t.trimStart().toLowerCase().startsWith("buffed by"));
   if (idx === -1) return segments;
   let end = idx;
   while (end > 0) {
@@ -105,7 +99,12 @@ interface ShardDescriptionProps {
   collapsibleHowToHunt?: boolean;
 }
 
-export const ShardDescription: React.FC<ShardDescriptionProps> = ({ record, fallback = "No description available.", showHowToHunt = true, collapsibleHowToHunt = false }) => {
+export const ShardDescription: React.FC<ShardDescriptionProps> = ({
+  record,
+  fallback = "No description available.",
+  showHowToHunt = true,
+  collapsibleHowToHunt = false,
+}) => {
   if (!record) return <>{fallback}</>;
   const hasHowToHunt = showHowToHunt && record.how_to_hunt.length > 0;
   return (

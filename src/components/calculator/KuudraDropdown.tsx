@@ -43,7 +43,9 @@ export const KuudraDropdown: React.FC<KuudraDropdownProps> = React.memo(({ value
         >
           {selectedTier?.label || "Select tier"}
         </button>
-        <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
         {isOpen && (
           <div className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-md shadow-xl max-h-48 overflow-y-auto">
             {KUUDRA_TIERS.map((tier) => (

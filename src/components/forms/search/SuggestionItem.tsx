@@ -18,7 +18,7 @@ export const SuggestionItem: React.FC<SuggestionItemProps> = React.memo(({ shard
       e.stopPropagation();
       onSelect(shard);
     },
-    [onSelect, shard]
+    [onSelect, shard],
   );
 
   const handleMouseEnter = useCallback(() => {

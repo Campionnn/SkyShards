@@ -14,13 +14,20 @@ export const WelcomeProfileModal: React.FC<WelcomeProfileModalProps> = ({ open, 
   if (!open) return null;
 
   return (
-    <Modal open={open} onClose={onClose} labelledBy="welcome-profile-title" panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-md w-full overflow-hidden flex flex-col">
+    <Modal
+      open={open}
+      onClose={onClose}
+      labelledBy="welcome-profile-title"
+      panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-md w-full overflow-hidden flex flex-col"
+    >
       {/* Header */}
       <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Star className="w-5 h-5 text-purple-400" />
-            <h2 id="welcome-profile-title" className="text-lg font-semibold text-white">Choose Profile</h2>
+            <h2 id="welcome-profile-title" className="text-lg font-semibold text-white">
+              Choose Profile
+            </h2>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-lg transition-colors cursor-pointer" aria-label="Close">
             <X className="w-5 h-5 text-slate-400" />

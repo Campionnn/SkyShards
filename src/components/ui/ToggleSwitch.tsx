@@ -42,14 +42,23 @@ interface ToggleSwitchProps {
   labelClassName?: string;
 }
 
-export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ label, checked, onChange, id, size = "md", accent = "fuchsia", tooltip, labelClassName = "text-slate-200" }) => {
+export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
+  label,
+  checked,
+  onChange,
+  id,
+  size = "md",
+  accent = "fuchsia",
+  tooltip,
+  labelClassName = "text-slate-200",
+}) => {
   const handleToggle = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       onChange(!checked);
     },
-    [checked, onChange]
+    [checked, onChange],
   );
 
   const sizing = SIZES[size];
@@ -59,7 +68,10 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ label, checked, onCh
 
   return (
     <div className={sizing.row}>
-      <span onClick={labelToggles ? handleToggle : undefined} className={`text-sm font-medium ${labelClassName}${labelToggles ? " flex-1 cursor-pointer" : ""}`}>
+      <span
+        onClick={labelToggles ? handleToggle : undefined}
+        className={`text-sm font-medium ${labelClassName}${labelToggles ? " flex-1 cursor-pointer" : ""}`}
+      >
         {label}
       </span>
       {tooltip !== undefined && <Tooltip content={tooltip}></Tooltip>}

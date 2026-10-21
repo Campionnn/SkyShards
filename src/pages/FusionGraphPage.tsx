@@ -77,12 +77,7 @@ const FusionGraphInner: React.FC = () => {
     // Structural min cost (neutral params) so we can drop backwards "expensive ->
     // cheap" edges; a pricier shard is never used to fuse a cheaper one.
     const { minCosts } = CalculationService.getInstance().computeMinCosts(data, DEFAULT_CALCULATION_PARAMS);
-    const g = buildFusionGraph(
-      data,
-      hasRates
-        ? { isDirectlyObtainable: (id) => (rates[id] ?? 0) > 0, minCost: (id) => minCosts.get(id) ?? Infinity }
-        : {}
-    );
+    const g = buildFusionGraph(data, hasRates ? { isDirectlyObtainable: (id) => (rates[id] ?? 0) > 0, minCost: (id) => minCosts.get(id) ?? Infinity } : {});
     const { nodes: builtNodes, edges } = buildGraphElements(data, g);
     setGraph(g);
     setBaseEdges(edges);
@@ -97,7 +92,7 @@ const FusionGraphInner: React.FC = () => {
 
   const isTypeVisible = useCallback(
     (node: ShardNode) => edgeFilter === "both" || (edgeFilter === "special" ? node.data.inSpecial : node.data.inId),
-    [edgeFilter]
+    [edgeFilter],
   );
 
   const nodesInitialized = useNodesInitialized();
@@ -125,9 +120,9 @@ const FusionGraphInner: React.FC = () => {
         .map((node) =>
           (connectedLine ? !connectedLine.has(node.id) : false) === node.data.dimmed
             ? node
-            : { ...node, data: { ...node.data, dimmed: connectedLine ? !connectedLine.has(node.id) : false } }
+            : { ...node, data: { ...node.data, dimmed: connectedLine ? !connectedLine.has(node.id) : false } },
         ),
-    [nodes, connectedLine, isTypeVisible]
+    [nodes, connectedLine, isTypeVisible],
   );
 
   const displayEdges = useMemo(
@@ -143,7 +138,7 @@ const FusionGraphInner: React.FC = () => {
             markerEnd: { type: MarkerType.ArrowClosed, color, width: 14, height: 14, markerUnits: "userSpaceOnUse" },
           };
         }),
-    [baseEdges, edgeFilter, connectedLine]
+    [baseEdges, edgeFilter, connectedLine],
   );
 
   const searchResults = useMemo(() => {
@@ -162,7 +157,7 @@ const FusionGraphInner: React.FC = () => {
       setQuery("");
       setShowResults(false);
     },
-    [setCenter]
+    [setCenter],
   );
 
   const onNodeClick: NodeMouseHandler = useCallback((_, node) => setSelectedId((prev) => (prev === node.id ? null : node.id)), []);
@@ -227,16 +222,8 @@ const FusionGraphInner: React.FC = () => {
               onMouseDown={() => blurTimer.current && clearTimeout(blurTimer.current)}
             >
               {searchResults.map((node) => (
-                <button
-                  key={node.id}
-                  onClick={() => focusShard(node)}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-purple-500/20"
-                >
-                  <img
-                    src={shardIconUrl(node.id)}
-                    alt=""
-                    className="h-5 w-5 object-contain"
-                  />
+                <button key={node.id} onClick={() => focusShard(node)} className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-purple-500/20">
+                  <img src={shardIconUrl(node.id)} alt="" className="h-5 w-5 object-contain" />
                   <span className="truncate text-sm text-slate-200">{node.data.name}</span>
                   <span className="ml-auto text-[10px] text-slate-500">{node.id}</span>
                 </button>

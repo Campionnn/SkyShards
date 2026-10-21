@@ -2,7 +2,14 @@ import { useState, useEffect } from "react";
 import { ShardAutocomplete, RecipeCountBadge, SearchFilterInput, ShardDisplay, DropdownButton } from "../components";
 import { getRarityColor, shardIconUrl } from "../utilities";
 import { useFusionData, useDropdownManager, useRecipeState } from "../hooks";
-import { processOutputRecipes, categorizeAndGroupRecipes, filterCategorizedRecipes, type PairRecipe, type CategorizedRecipes, type GroupedRecipe } from "../utilities";
+import {
+  processOutputRecipes,
+  categorizeAndGroupRecipes,
+  filterCategorizedRecipes,
+  type PairRecipe,
+  type CategorizedRecipes,
+  type GroupedRecipe,
+} from "../utilities";
 import type { FusionJson, Shard } from "../types/types";
 
 type RecipeMode = "input" | "output" | null;
@@ -159,8 +166,12 @@ export const RecipePage = () => {
               // Search state for dropdowns
               const leftSearch = dropdownSearch[leftDropdownId] || "";
               const rightSearch = dropdownSearch[rightDropdownId] || "";
-              const filteredLeft = group.variantLeft!.filter((id) => !leftSearch || fusionData.shards[id]?.name.toLowerCase().includes(leftSearch.toLowerCase()));
-              const filteredRight = group.variantRight!.filter((id) => !rightSearch || fusionData.shards[id]?.name.toLowerCase().includes(rightSearch.toLowerCase()));
+              const filteredLeft = group.variantLeft!.filter(
+                (id) => !leftSearch || fusionData.shards[id]?.name.toLowerCase().includes(leftSearch.toLowerCase()),
+              );
+              const filteredRight = group.variantRight!.filter(
+                (id) => !rightSearch || fusionData.shards[id]?.name.toLowerCase().includes(rightSearch.toLowerCase()),
+              );
 
               return (
                 <div key={gKey} className="px-2">
@@ -461,7 +472,9 @@ export const RecipePage = () => {
           </div>
         ) : mode && recipes.length === 0 ? (
           <div className="text-center py-12 lg:py-16">
-            <div className="text-slate-400 text-base lg:text-lg">{mode === "input" ? "No fusion recipes found using this shard." : "No recipes found to create this shard."}</div>
+            <div className="text-slate-400 text-base lg:text-lg">
+              {mode === "input" ? "No fusion recipes found using this shard." : "No recipes found to create this shard."}
+            </div>
             <div className="text-slate-500 text-xs lg:text-sm mt-2">
               {mode === "input" ? "This shard might not be used in any fusion recipes." : "This shard might be obtained directly or not fuseable."}
             </div>
@@ -469,7 +482,9 @@ export const RecipePage = () => {
         ) : (
           <div className="text-center py-12 lg:py-20">
             <div className="text-slate-400 text-lg lg:text-xl">Select an input shard or output shard to see recipes</div>
-            <div className="text-slate-500 text-xs lg:text-sm mt-2 lg:mt-3 px-4">Choose a shard on the left to see what you can make, or on the right to see how to make it.</div>
+            <div className="text-slate-500 text-xs lg:text-sm mt-2 lg:mt-3 px-4">
+              Choose a shard on the left to see what you can make, or on the right to see how to make it.
+            </div>
           </div>
         )}
       </div>

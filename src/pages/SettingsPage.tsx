@@ -12,7 +12,9 @@ type EditMode = "rates" | "prices";
 
 const segmentClass = (active: boolean) =>
   `px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 border cursor-pointer ${
-    active ? "bg-purple-500/30 text-purple-200 border-purple-400/50" : "bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 border-slate-600/50 hover:border-slate-500/50"
+    active
+      ? "bg-purple-500/30 text-purple-200 border-purple-400/50"
+      : "bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 border-slate-600/50 hover:border-slate-500/50"
   }`;
 
 export const SettingsPage: React.FC = () => {
@@ -90,9 +92,8 @@ export const SettingsPage: React.FC = () => {
 
       setHasChanges(hasActualChange || otherChanges);
     },
-    [updateRate, defaultRates, customRates]
+    [updateRate, defaultRates, customRates],
   );
-
 
   const handlePriceChange = useCallback(
     (shardId: string, newPrice: number | undefined) => {
@@ -103,7 +104,7 @@ export const SettingsPage: React.FC = () => {
       const otherOverrides = [...customPrices.keys()].some((id) => id !== shardId);
       setHasChanges(price !== undefined || otherOverrides);
     },
-    [updatePrice, livePrices, customPrices]
+    [updatePrice, livePrices, customPrices],
   );
 
   const handleResetAll = useCallback(() => {
@@ -177,8 +178,8 @@ export const SettingsPage: React.FC = () => {
           </div>
           {isPrices && customPrices.size > 0 && (
             <p className="mt-3 text-xs text-yellow-300/80">
-              {customPrices.size} custom {priceSourceLabel} {customPrices.size === 1 ? "price replaces" : "prices replace"} the live Bazaar price and won't follow
-              the market.
+              {customPrices.size} custom {priceSourceLabel} {customPrices.size === 1 ? "price replaces" : "prices replace"} the live Bazaar price and won't
+              follow the market.
             </p>
           )}
         </div>

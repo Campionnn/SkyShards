@@ -47,7 +47,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
 }) => {
   const [copyModalOpen, setCopyModalOpen] = useState(false);
   const copyToClipboard = useCopyToClipboard();
-  
+
   const [materialTreeSortSelection, setMaterialTreeSortSelection] = useState("default");
 
   // Materials-only copy (no tree): flatten the combined totals
@@ -68,34 +68,38 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
     return "<SkyHanniRecipe>(V1):" + gzipBase64(JSON.stringify(list));
   };
 
-
   // Shards available to view individually (the selected target shards)
   const selectableShards = useMemo<Shard[]>(() => {
     if (!materialShardResults) return [];
     return Array.from(materialShardResults.keys())
       .filter((key) => data.shards[key])
       .map((key) => ({ ...data.shards[key], key }));
-  }, [materialShardResults, data]); 
+  }, [materialShardResults, data]);
 
   const sortByShortestTime = (shardsToSort: Shard[], shardData: Map<string, CalculationResult> | undefined) => {
-      if(!shardsToSort) return [];
-      if(!shardData) return shardsToSort;
-      return shardsToSort
-      .map(shard => ({shard, value: shardData.get(shard.id)?.totalTime}))
-      .sort(({value: shardATime}, {value: shardBTime}) => {
-        if(shardATime === undefined && shardBTime === undefined) return 0;
-        if(shardATime === undefined) return 1;
-        if(shardBTime === undefined) return -1;
+    if (!shardsToSort) return [];
+    if (!shardData) return shardsToSort;
+    return shardsToSort
+      .map((shard) => ({ shard, value: shardData.get(shard.id)?.totalTime }))
+      .sort(({ value: shardATime }, { value: shardBTime }) => {
+        if (shardATime === undefined && shardBTime === undefined) return 0;
+        if (shardATime === undefined) return 1;
+        if (shardBTime === undefined) return -1;
         return shardATime - shardBTime;
-      }).map(({ shard }) => shard);
-  }
+      })
+      .map(({ shard }) => shard);
+  };
 
   const sortedShards = useMemo<Shard[]>(() => {
     switch (materialTreeSortSelection) {
-      case "shortest": return sortByShortestTime(selectableShards, materialShardResults);
-      case "alphabetically": return [...selectableShards].sort((a, b) => a.name.localeCompare(b.name));
-      case "rarity": return selectableShards;
-      default: return [...selectableShards].sort((a, b) => a.name.localeCompare(b.name));
+      case "shortest":
+        return sortByShortestTime(selectableShards, materialShardResults);
+      case "alphabetically":
+        return [...selectableShards].sort((a, b) => a.name.localeCompare(b.name));
+      case "rarity":
+        return selectableShards;
+      default:
+        return [...selectableShards].sort((a, b) => a.name.localeCompare(b.name));
     }
   }, [selectableShards, materialTreeSortSelection, materialShardResults]);
 
@@ -128,7 +132,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
               if (params.noWoodenBait) return null;
 
               const forestEssenceShards = Array.from(result.totalQuantities).filter(([shardId]) =>
-                ["shinyfish", "inferno koi", "abyssal lanternfish", "silentdepth"].includes(data.shards[shardId]?.name?.toLowerCase())
+                ["shinyfish", "inferno koi", "abyssal lanternfish", "silentdepth"].includes(data.shards[shardId]?.name?.toLowerCase()),
               );
 
               if (forestEssenceShards.length === 0) return null;
@@ -176,16 +180,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
               const breakdown = result.materialBreakdown?.get(shardId);
 
               if (materialsOnly && breakdown && breakdown.size > 0) {
-                return (
-                  <MaterialItem
-                    key={shardId}
-                    shard={shard}
-                    quantity={quantity}
-                    ironManView={ironManView}
-                    breakdown={breakdown}
-                    allShards={data.shards}
-                  />
-                );
+                return <MaterialItem key={shardId} shard={shard} quantity={quantity} ironManView={ironManView} breakdown={breakdown} allShards={data.shards} />;
               }
 
               return <MaterialItem key={shardId} shard={shard} quantity={quantity} ironManView={ironManView} />;
@@ -203,7 +198,12 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
           </div>
           <p className="text-sm text-slate-400">Select one of your shards to view its full fusion tree. Alternatives you set here apply to every shard.</p>
           <div className="flex items-center gap-2">
-            <MaterialTreeSelector shards={sortedShards} shardCalculationData={materialShardResults} value={materialTreeShardKey} onChange={(key) => onMaterialTreeShardChange?.(key)}/>
+            <MaterialTreeSelector
+              shards={sortedShards}
+              shardCalculationData={materialShardResults}
+              value={materialTreeShardKey}
+              onChange={(key) => onMaterialTreeShardChange?.(key)}
+            />
             <FusionTreeSortDropown value={materialTreeSortSelection} onChange={setMaterialTreeSortSelection} />
           </div>
         </div>

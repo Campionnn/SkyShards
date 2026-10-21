@@ -31,7 +31,8 @@ export const AboutPage: React.FC = () => {
       </div>
       <h1 className="text-2xl font-bold mb-4 text-slate-100">About SkyShards</h1>
       <p className="mb-2 text-slate-400">
-        SkyShards is a tool designed to help you calculate, plan, and optimize your shard fusions in the game. This project is open source and not affiliated with the game developers.
+        SkyShards is a tool designed to help you calculate, plan, and optimize your shard fusions in the game. This project is open source and not affiliated
+        with the game developers.
       </p>
       <Divider />
       <div className="mb-4 flex items-center gap-2">
@@ -43,7 +44,10 @@ export const AboutPage: React.FC = () => {
       <div className="mb-4 flex gap-2 items-center">
         <DiscordIcon className="w-7 h-7" />
         <div className="relative flex flex-col items-center min-w-[80px]">
-          <button className="font-mono cursor-pointer text-fuchsia-200 bg-slate-700 rounded-sm px-1 flex items-center gap-1 hover:bg-slate-800 transition" onClick={() => handleCopy("campionn")}>
+          <button
+            className="font-mono cursor-pointer text-fuchsia-200 bg-slate-700 rounded-sm px-1 flex items-center gap-1 hover:bg-slate-800 transition"
+            onClick={() => handleCopy("campionn")}
+          >
             campionn
             <Copy className="w-4 h-4 text-white" />
           </button>
@@ -63,7 +67,10 @@ export const AboutPage: React.FC = () => {
         </div>
         <span className="font-semibold text-slate-300">or</span>
         <div className="relative flex flex-col items-center min-w-[80px]">
-          <button className="font-mono cursor-pointer text-fuchsia-200 bg-slate-700 rounded-sm px-1 flex items-center gap-1 hover:bg-slate-800 transition" onClick={() => handleCopy("xkapy")}>
+          <button
+            className="font-mono cursor-pointer text-fuchsia-200 bg-slate-700 rounded-sm px-1 flex items-center gap-1 hover:bg-slate-800 transition"
+            onClick={() => handleCopy("xkapy")}
+          >
             xkapy
             <Copy className="w-4 h-4 text-white" />
           </button>

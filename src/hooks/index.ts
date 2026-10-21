@@ -7,5 +7,5 @@ export { usePageTitle } from "./usePageTitle";
 export { useShardIconPreload } from "./useShardIconPreload";
 export { useShards } from "./useShards";
 export { useShardsWithRecipes } from "./useShardsWithRecipes";
-export { useCalculatorState } from "./useCalculatorState.ts"
-export { useRecipeState } from "./useRecipeState.ts"
+export { useCalculatorState } from "./useCalculatorState.ts";
+export { useRecipeState } from "./useRecipeState.ts";

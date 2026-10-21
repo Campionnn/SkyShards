@@ -1,6 +1,16 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { CalculationFormData } from "../schemas";
-import { loadDisabledShards, loadFormData, loadHypixelProfileMeta, loadInventory, saveDisabledShards, saveFormData, saveInventory, saveCustomPrices, loadCustomPrices } from "./localStorage";
+import {
+  loadDisabledShards,
+  loadFormData,
+  loadHypixelProfileMeta,
+  loadInventory,
+  saveDisabledShards,
+  saveFormData,
+  saveInventory,
+  saveCustomPrices,
+  loadCustomPrices,
+} from "./localStorage";
 
 /**
  * Minimal in-memory `localStorage`. The vitest environment is `node`, so there isn't
@@ -72,7 +82,17 @@ describe("saved form round trip", () => {
   });
 
   it("keeps a freshly-defaulted form intact", () => {
-    const defaults: CalculationFormData = { ...validForm, hunterFortune: 0, crocodileLevel: 0, kuudraTier: "none", customKuudraTime: false, kuudraTimeSeconds: null, craftPenalty: 1000, selectedShardKeys: [], shardQuantities: [] };
+    const defaults: CalculationFormData = {
+      ...validForm,
+      hunterFortune: 0,
+      crocodileLevel: 0,
+      kuudraTier: "none",
+      customKuudraTime: false,
+      kuudraTimeSeconds: null,
+      craftPenalty: 1000,
+      selectedShardKeys: [],
+      shardQuantities: [],
+    };
     saveFormData(defaults);
     expect(loadFormData()).toEqual(persistedPart(defaults));
   });
@@ -132,7 +152,10 @@ describe("saved form validation", () => {
 
 describe("inventory validation", () => {
   it("round trips counts unchanged", () => {
-    const inventory = new Map([["C35", 40], ["L6", 2]]);
+    const inventory = new Map([
+      ["C35", 40],
+      ["L6", 2],
+    ]);
     saveInventory(inventory);
     expect(loadInventory()).toEqual(inventory);
   });
@@ -140,7 +163,14 @@ describe("inventory validation", () => {
   it("drops entries that are not finite numbers instead of storing NaN", () => {
     storage.seed("inventory", JSON.stringify({ C35: 40, U8: "abc", R8: null, E5: 12, L6: "7" }));
     // "7" coerces cleanly and is kept; "abc" -> NaN and null -> 0 are the interesting cases.
-    expect(loadInventory()).toEqual(new Map([["C35", 40], ["R8", 0], ["E5", 12], ["L6", 7]]));
+    expect(loadInventory()).toEqual(
+      new Map([
+        ["C35", 40],
+        ["R8", 0],
+        ["E5", 12],
+        ["L6", 7],
+      ]),
+    );
   });
 
   it("falls back to empty when the stored value is not an object", () => {

@@ -8,7 +8,11 @@ interface RecipeOverrideManagerProps {
   recipeOverrides: RecipeOverride[];
   onRecipeOverridesUpdate: (overrides: RecipeOverride[]) => void;
   onResetRecipeOverrides: () => void;
-  children: (props: { showAlternatives: (shardId: string, context: AlternativeSelectionContext) => void; recipeOverrides: RecipeOverride[]; resetAlternatives: () => void }) => React.ReactNode;
+  children: (props: {
+    showAlternatives: (shardId: string, context: AlternativeSelectionContext) => void;
+    recipeOverrides: RecipeOverride[];
+    resetAlternatives: () => void;
+  }) => React.ReactNode;
 }
 
 interface ModalState {
@@ -83,7 +87,7 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
         }));
       }
     },
-    [params, recipeOverrides]
+    [params, recipeOverrides],
   );
 
   const handleRecipeSelect = useCallback(
@@ -100,7 +104,7 @@ export const RecipeOverrideManager: React.FC<RecipeOverrideManagerProps> = ({
         console.error("Failed to apply recipe override:", error);
       }
     },
-    [modalState.shardId, recipeOverrides, onRecipeOverridesUpdate, closeModal]
+    [modalState.shardId, recipeOverrides, onRecipeOverridesUpdate, closeModal],
   );
 
   const resetAlternatives = useCallback(() => {

@@ -42,7 +42,10 @@ export const ContactPage: React.FC = () => {
         {/* Discord icon (use AboutPage SVG if you want, or keep as is) */}
         <DiscordIcon className="w-7 h-7" />
         <div className="relative flex flex-col items-center min-w-[80px]">
-          <button className="font-mono cursor-pointer text-fuchsia-200 bg-slate-700 rounded-sm px-1 flex items-center gap-1 hover:bg-slate-800 transition" onClick={() => handleCopy("campionn")}>
+          <button
+            className="font-mono cursor-pointer text-fuchsia-200 bg-slate-700 rounded-sm px-1 flex items-center gap-1 hover:bg-slate-800 transition"
+            onClick={() => handleCopy("campionn")}
+          >
             campionn
             <Copy className="w-4 h-4 text-white" />
           </button>
@@ -62,7 +65,10 @@ export const ContactPage: React.FC = () => {
         </div>
         <span className="font-semibold text-slate-300">or</span>
         <div className="relative flex flex-col items-center min-w-[80px]">
-          <button className="font-mono cursor-pointer text-fuchsia-200 bg-slate-700 rounded-sm px-1 flex items-center gap-1 hover:bg-slate-800 transition" onClick={() => handleCopy("xkapy")}>
+          <button
+            className="font-mono cursor-pointer text-fuchsia-200 bg-slate-700 rounded-sm px-1 flex items-center gap-1 hover:bg-slate-800 transition"
+            onClick={() => handleCopy("xkapy")}
+          >
             xkapy
             <Copy className="w-4 h-4 text-white" />
           </button>

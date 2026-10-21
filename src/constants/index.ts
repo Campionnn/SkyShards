@@ -200,7 +200,7 @@ export const ATTRIBUTE_TIER_TO_SHARD_COUNT: Record<string, Record<number, number
 export function fusedCountToTierLevel(fusedCount: number, rarity: string): number {
   const tierMap = ATTRIBUTE_TIER_TO_SHARD_COUNT[rarity.toLowerCase()];
   if (!tierMap) return 0;
-  
+
   // Calculate cumulative counts for each tier
   let cumulative = 0;
   for (let tier = 1; tier <= 10; tier++) {

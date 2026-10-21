@@ -14,12 +14,12 @@ export const FusionTreeSortDropown: React.FC<FusionTreeViewSortDropdownProps> = 
 
   const sortTypes = useMemo(
     () => [
-        { value: "default", label: "Sort", color: "text-white"},
-        { value: "shortest", label: "Shortest Time", color:"text-white"},
-        {value: "alphabetically", label: "Alphabetically", color:"text-white"},
+      { value: "default", label: "Sort", color: "text-white" },
+      { value: "shortest", label: "Shortest Time", color: "text-white" },
+      { value: "alphabetically", label: "Alphabetically", color: "text-white" },
       { value: "rarity", label: "Rarity", color: "text-white" },
     ],
-    []
+    [],
   );
 
   const currentSortType = useMemo(() => sortTypes.find((r) => r.value === value) || sortTypes[0], [sortTypes, value]);
@@ -51,7 +51,6 @@ export const FusionTreeSortDropown: React.FC<FusionTreeViewSortDropdownProps> = 
     }
   }, [isOpen]);
 
-
   return (
     <>
       <div className="relative fusion-tree-sort-dropdown">
@@ -70,9 +69,7 @@ export const FusionTreeSortDropown: React.FC<FusionTreeViewSortDropdownProps> = 
             <Filter className={`w-5 h-5 ${currentSortType.color}`} />
             <span className={`font-medium ${currentSortType.color}`}>{currentSortType.label}</span>
           </div>
-          <ChevronDown
-            className={`w-4 h-4 ${currentSortType.color} transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-          />
+          <ChevronDown className={`w-4 h-4 ${currentSortType.color} transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
         </button>
       </div>
 
@@ -86,15 +83,17 @@ export const FusionTreeSortDropown: React.FC<FusionTreeViewSortDropdownProps> = 
               width: Math.max(dropdownPosition.width, 140),
             }}
           >
-            {sortTypes.map((sortType) => (
-              !(sortType.value == "default") && <button
-                key={sortType.value}
-                type="button"
-                onClick={() => {
-                  onChange(sortType.value);
-                  setIsOpen(false);
-                }}
-                className={`
+            {sortTypes.map(
+              (sortType) =>
+                !(sortType.value == "default") && (
+                  <button
+                    key={sortType.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(sortType.value);
+                      setIsOpen(false);
+                    }}
+                    className={`
                   w-full px-4 py-3 text-sm text-left font-medium
                   transition-colors duration-200
                   ${value === sortType.value ? "bg-purple-500/30 " + sortType.color : sortType.color + " hover:bg-purple-500/10 hover:brightness-125"}
@@ -102,12 +101,13 @@ export const FusionTreeSortDropown: React.FC<FusionTreeViewSortDropdownProps> = 
                   ${sortType === sortTypes[0] ? "rounded-t-md" : ""}
                   ${sortType === sortTypes[sortTypes.length - 1] ? "rounded-b-md" : ""}
                 cursor-pointer`}
-              >
-                {sortType.label}
-              </button>
-            ))}
+                  >
+                    {sortType.label}
+                  </button>
+                ),
+            )}
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );

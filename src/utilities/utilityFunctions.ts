@@ -5,27 +5,24 @@ export const formatTime = (decimalHours: number): string => {
     return `${totalSeconds} sec`;
   }
 
-
   console.group("Format Time");
   console.log(decimalHours);
   console.groupEnd();
 
   const days = Math.floor(decimalHours / 24);
-  const hours = Math.floor(decimalHours) - (days * 24);
-  const minutes = Math.round((decimalHours - hours - (days * 24)) * 60);
-
-
+  const hours = Math.floor(decimalHours) - days * 24;
+  const minutes = Math.round((decimalHours - hours - days * 24) * 60);
 
   if (days === 0) {
-  if (hours === 0) {
-    return `${minutes} min`;
+    if (hours === 0) {
+      return `${minutes} min`;
+    }
+    if (minutes === 0 || isNaN(minutes)) {
+      return `${hours} hr`;
+    }
+    return `${hours} hr ${minutes} min`;
   }
-  if (minutes === 0 || isNaN(minutes)) {
-    return `${hours} hr`;
-  }
-  return `${hours} hr ${minutes} min`;
-  }
-  return `${days} d ${hours} hr ${minutes} min`
+  return `${days} d ${hours} hr ${minutes} min`;
 };
 
 export const formatNumber = (num: number): string => {
@@ -129,22 +126,21 @@ export const compareShardKeys = (aKey: string, bKey: string): number => {
 };
 
 // Helper function to sort by shard ID (rarity letter + number [+ suffix])
-export const sortByShardKey = (a: { id: string }, b: { id: string }): number =>
-  compareShardKeys(a.id, b.id);
+export const sortByShardKey = (a: { id: string }, b: { id: string }): number => compareShardKeys(a.id, b.id);
 
 // Sorting function that sorts by ID when names share a common prefix, otherwise alphabetically
 export const sortShardsByNameWithPrefixAwareness = (a: { name: string; id: string }, b: { name: string; id: string }): number => {
   const aName = a.name.toLowerCase();
   const bName = b.name.toLowerCase();
-  
+
   // Find the common prefix
   const commonPrefix = findCommonPrefix(aName, bName);
-  
+
   // If they share a common prefix of at least 3 characters, sort by ID
   if (commonPrefix.length >= 3) {
     return sortByShardKey(a, b);
   }
-  
+
   // Otherwise, sort alphabetically by name
   return aName.localeCompare(bName);
 };

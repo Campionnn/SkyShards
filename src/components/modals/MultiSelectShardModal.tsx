@@ -14,7 +14,14 @@ interface MultiSelectShardModalProps {
   ownedAttributes?: Map<string, number>; // Map of shard key to attribute level (fused count)
 }
 
-export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ isOpen, onClose, shards, onDone, initialSelections = new Map(), ownedAttributes = new Map() }) => {
+export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({
+  isOpen,
+  onClose,
+  shards,
+  onDone,
+  initialSelections = new Map(),
+  ownedAttributes = new Map(),
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [rarityFilter, setRarityFilter] = useState("all");
   const [isRarityDropdownOpen, setIsRarityDropdownOpen] = useState(false);
@@ -103,7 +110,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
   const toggleShard = (shardKey: string) => {
     // Store scroll position before toggling
     const scrollPos = scrollContainerRef.current?.scrollTop || 0;
-    
+
     setSelections((prev) => {
       const newMap = new Map(prev);
       if (newMap.has(shardKey)) {
@@ -183,11 +190,19 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
   if (!isOpen) return null;
 
   return (
-    <Modal open={isOpen} onClose={onClose} labelledBy="multi-select-shard-title" panelClassName="bg-slate-800 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] sm:max-h-[85vh] flex flex-col border border-slate-700" backdropClassName="bg-black/60 p-2 sm:p-4">
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      labelledBy="multi-select-shard-title"
+      panelClassName="bg-slate-800 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] sm:max-h-[85vh] flex flex-col border border-slate-700"
+      backdropClassName="bg-black/60 p-2 sm:p-4"
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-slate-700">
         <div>
-          <h2 id="multi-select-shard-title" className="text-xl font-bold text-white">Select Shards</h2>
+          <h2 id="multi-select-shard-title" className="text-xl font-bold text-white">
+            Select Shards
+          </h2>
           <p className="text-sm text-slate-400 mt-1">
             {selections.size} shard{selections.size !== 1 ? "s" : ""} selected
           </p>
@@ -260,12 +275,10 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
           </button>
         </div>
         <div className="flex items-center justify-between text-sm text-slate-400">
-          <span>Showing {filteredShards.length} of {shards.length} shards</span>
-          <ToggleSwitch
-            label="Show Selected First"
-            checked={showSelectedFirst}
-            onChange={setShowSelectedFirst}
-          />
+          <span>
+            Showing {filteredShards.length} of {shards.length} shards
+          </span>
+          <ToggleSwitch label="Show Selected First" checked={showSelectedFirst} onChange={setShowSelectedFirst} />
         </div>
       </div>
 
@@ -280,7 +293,9 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
                 key={shard.id}
                 onClick={() => toggleShard(shard.id)}
                 className={`flex items-center gap-2 p-2.5 rounded-lg transition-all duration-300 border cursor-pointer ${
-                  isSelected ? "bg-blue-500/20 border-blue-500/50 hover:border-blue-500/70" : "bg-slate-700/30 hover:bg-slate-700/60 border border-slate-600/50 hover:border-slate-500"
+                  isSelected
+                    ? "bg-blue-500/20 border-blue-500/50 hover:border-blue-500/70"
+                    : "bg-slate-700/30 hover:bg-slate-700/60 border border-slate-600/50 hover:border-slate-500"
                 }`}
               >
                 <div className="flex items-center gap-2 flex-1 min-w-0 group">
@@ -339,13 +354,18 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({ is
           >
             Select Missing
           </button>
-          <button onClick={() => setSelections(new Map())} className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors cursor-pointer" disabled={selections.size === 0}>
+          <button
+            onClick={() => setSelections(new Map())}
+            className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors cursor-pointer"
+            disabled={selections.size === 0}
+          >
             Clear All
           </button>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-slate-400">
-            Total: {Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0)} shard{Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0) !== 1 ? "s" : ""}
+            Total: {Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0)} shard
+            {Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0) !== 1 ? "s" : ""}
           </span>
           <button
             onClick={handleDone}

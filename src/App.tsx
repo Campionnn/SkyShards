@@ -133,7 +133,7 @@ const router = createBrowserRouter(
   ],
   {
     basename,
-  }
+  },
 );
 
 const App = () => {

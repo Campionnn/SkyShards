@@ -20,6 +20,6 @@ export const useCopyToClipboard = () => {
         toast({ title: "Copy failed", description: "Failed to copy to clipboard.", variant: "error" });
       }
     },
-    [toast]
+    [toast],
   );
 };

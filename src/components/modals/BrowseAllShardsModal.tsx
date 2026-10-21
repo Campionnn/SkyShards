@@ -83,10 +83,18 @@ export const BrowseAllShardsModal: React.FC<BrowseAllShardsModalProps> = ({ isOp
   if (!isOpen) return null;
 
   return (
-    <Modal open={isOpen} onClose={onClose} labelledBy="browse-all-shards-title" panelClassName="bg-slate-800 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] sm:max-h-[85vh] flex flex-col border border-slate-700" backdropClassName="bg-black/60 p-2 sm:p-4">
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      labelledBy="browse-all-shards-title"
+      panelClassName="bg-slate-800 rounded-lg shadow-2xl w-full max-w-5xl max-h-[90vh] sm:max-h-[85vh] flex flex-col border border-slate-700"
+      backdropClassName="bg-black/60 p-2 sm:p-4"
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-slate-700">
-        <h2 id="browse-all-shards-title" className="text-xl font-bold text-white">Browse All Shards</h2>
+        <h2 id="browse-all-shards-title" className="text-xl font-bold text-white">
+          Browse All Shards
+        </h2>
         <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors cursor-pointer" aria-label="Close modal">
           <X className="w-6 h-6" />
         </button>

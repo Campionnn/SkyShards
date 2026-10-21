@@ -11,7 +11,7 @@ interface MaterialTreeSelectorProps {
   onChange: (key: string) => void;
 }
 
-export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shards, shardCalculationData, value, onChange}) => {
+export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shards, shardCalculationData, value, onChange }) => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -37,7 +37,7 @@ export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shar
       setFocusedIndex(-1);
       inputRef.current?.blur();
     },
-    [onChange]
+    [onChange],
   );
 
   const handleKeyDown = useCallback(
@@ -67,7 +67,7 @@ export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shar
           break;
       }
     },
-    [isOpen, suggestions, focusedIndex, handleSelect]
+    [isOpen, suggestions, focusedIndex, handleSelect],
   );
 
   const handleClear = useCallback(() => {
@@ -103,7 +103,7 @@ export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shar
         <input
           ref={inputRef}
           type="text"
-          value={isOpen ? query : selectedShard?.name ?? ""}
+          value={isOpen ? query : (selectedShard?.name ?? "")}
           onChange={(e) => {
             setQuery(e.target.value);
             setIsOpen(true);
@@ -145,7 +145,16 @@ export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shar
       {isOpen && suggestions.length > 0 && (
         <ul ref={listRef} className="absolute z-50 mt-1 w-full bg-slate-800 border border-slate-600 rounded-md shadow-xl max-h-60 overflow-y-auto">
           {suggestions.map((shard, index) => (
-            <MaterialSuggestionItem key={shard.id} shard={shard} index={index} focusedIndex={focusedIndex} time={shardCalculationData?.get(shard.id)?.totalTime ?? Number.POSITIVE_INFINITY} onSelect={handleSelect} isSelecting={false} setFocusedIndex={setFocusedIndex} />
+            <MaterialSuggestionItem
+              key={shard.id}
+              shard={shard}
+              index={index}
+              focusedIndex={focusedIndex}
+              time={shardCalculationData?.get(shard.id)?.totalTime ?? Number.POSITIVE_INFINITY}
+              onSelect={handleSelect}
+              isSelecting={false}
+              setFocusedIndex={setFocusedIndex}
+            />
           ))}
         </ul>
       )}

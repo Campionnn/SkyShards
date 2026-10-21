@@ -30,5 +30,5 @@ cleanupLocalStorage();
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AppWithRedirect />
-  </StrictMode>
+  </StrictMode>,
 );

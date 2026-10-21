@@ -105,10 +105,10 @@ export const Navigation: React.FC = () => {
                 ? color === "blue"
                   ? "ring-1 ring-offset-0 ring-blue-300"
                   : color === "green"
-                  ? "ring-1 ring-offset-0 ring-green-300"
-                  : color === "yellow"
-                  ? "ring-1 ring-offset-0 ring-yellow-300"
-                  : "ring-1 ring-offset-0 ring-purple-300"
+                    ? "ring-1 ring-offset-0 ring-green-300"
+                    : color === "yellow"
+                      ? "ring-1 ring-offset-0 ring-yellow-300"
+                      : "ring-1 ring-offset-0 ring-purple-300"
                 : "";
               return (
                 <Link
@@ -174,10 +174,10 @@ export const Navigation: React.FC = () => {
                   ? color === "blue"
                     ? "ring-1 ring-offset-0 ring-blue-300"
                     : color === "green"
-                    ? "ring-1 ring-offset-0 ring-green-300"
-                    : color === "yellow"
-                    ? "ring-1 ring-offset-0 ring-yellow-300"
-                    : "ring-1 ring-offset-0 ring-purple-300"
+                      ? "ring-1 ring-offset-0 ring-green-300"
+                      : color === "yellow"
+                        ? "ring-1 ring-offset-0 ring-yellow-300"
+                        : "ring-1 ring-offset-0 ring-purple-300"
                   : "";
                 return (
                   <Link

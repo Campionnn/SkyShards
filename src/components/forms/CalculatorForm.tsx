@@ -4,7 +4,7 @@ import { type CalculationFormData } from "../../schemas";
 import { ShardAutocomplete, MoneyInput } from "./inputs";
 import { useCalculatorState, useShards } from "../../hooks";
 import { LevelDropdown, KuudraDropdown } from "../calculator";
-import {LEVELED_SHARDS, MAX_QUANTITIES, SHARD_DESCRIPTIONS, type ShardLevelKey} from "../../constants";
+import { LEVELED_SHARDS, MAX_QUANTITIES, SHARD_DESCRIPTIONS, type ShardLevelKey } from "../../constants";
 import { isValidShardName } from "../../utilities";
 import { ShardDescription } from "../ui/ShardDescription";
 import { Tooltip, ToggleSwitch } from "../ui";
@@ -214,7 +214,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
       const dataService = DataService.getInstance();
       const shards = await dataService.loadShards();
       // Filter out Chameleon shard (L4) as it's only used for fusions
-      const filteredShards = shards.filter(shard => shard.id !== 'L4');
+      const filteredShards = shards.filter((shard) => shard.id !== "L4");
       setAllShards(filteredShards);
     }
     setIsMultiSelectModalOpen(true);
@@ -228,7 +228,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
       setIsMultiSelectModalOpen(false);
       onSubmitRef.current(updated);
     },
-    [setForm]
+    [setForm],
   );
 
   return (
@@ -239,7 +239,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
           <button
             type="button"
             className={`px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex-1 border cursor-pointer ${
-              form.ironManView ? "bg-white/20 text-white border-white/30" : "bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 border-slate-600/50 hover:border-slate-500/50"
+              form.ironManView
+                ? "bg-white/20 text-white border-white/30"
+                : "bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 border-slate-600/50 hover:border-slate-500/50"
             }`}
             onClick={() => handleInputChange("ironManView", true)}
           >
@@ -248,7 +250,9 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
           <button
             type="button"
             className={`px-3 py-1.5 font-medium rounded-md text-xs transition-colors duration-200 flex-1 border cursor-pointer ${
-              !form.ironManView ? "bg-blue-500/30 text-blue-200 border-blue-400/50" : "bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 border-slate-600/50 hover:border-slate-500/50"
+              !form.ironManView
+                ? "bg-blue-500/30 text-blue-200 border-blue-400/50"
+                : "bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 border-slate-600/50 hover:border-slate-500/50"
             }`}
             onClick={() => handleInputChange("ironManView", false)}
           >
@@ -304,7 +308,11 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   className="flex-1 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 hover:border-blue-500/40 rounded-md text-blue-300 font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer text-sm"
                 >
                   <Layers className="w-4 h-4" />
-                  <span>{form.selectedShardKeys && form.selectedShardKeys.length > 0 ? `${form.selectedShardKeys.length} Shard${form.selectedShardKeys.length > 1 ? 's' : ''} Selected` : 'Select Shards'}</span>
+                  <span>
+                    {form.selectedShardKeys && form.selectedShardKeys.length > 0
+                      ? `${form.selectedShardKeys.length} Shard${form.selectedShardKeys.length > 1 ? "s" : ""} Selected`
+                      : "Select Shards"}
+                  </span>
                 </button>
                 {form.selectedShardKeys && form.selectedShardKeys.length > 0 && (
                   <button
@@ -347,7 +355,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
               </>
             )}
           </div>
-        {!form.materialsOnly && (
+          {!form.materialsOnly && (
             <div className="flex gap-1.5">
               <div className="flex-1">
                 <label className="block text-xs font-medium text-slate-300 mb-1">Quantity</label>
@@ -399,11 +407,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
           onClose={() => setIsMultiSelectModalOpen(false)}
           shards={allShards}
           onDone={handleMultiSelectDone}
-          initialSelections={
-            new Map(
-              (form.shardQuantities || []).map((item) => [item.shard.id, item.quantity])
-            )
-          }
+          initialSelections={new Map((form.shardQuantities || []).map((item) => [item.shard.id, item.quantity]))}
           ownedAttributes={ownedAttributes}
         />
 
@@ -453,51 +457,108 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                   <div className="w-2 h-2 bg-fuchsia-500 rounded-full"></div>
                   <span>Hunter Fortune</span>
                   <div className="-mb-[5px]">
-                  <Tooltip
-                    shardName="Hunter Fortune"
-                    rarity="legendary"
-                    title=""
-                    showRomanNumerals={false}
-                    content={
-                      <div className="space-y-2">
-                        <div className="text-slate-200 font-semibold">Sources</div>
-                        <ul className="space-y-0.5">
-                          <li><span className="font-semibold">+50</span> <span className="text-slate-300">HotF 3 perk</span></li>
-                          <li><span className="font-semibold">+50</span> <span className="text-slate-300">Hunting level 50</span></li>
-                          <li><span className="font-semibold">+30</span> <span className="text-slate-300">David's Cloak (Attribute Stacks 30)</span></li>
-                          <li><span className="font-semibold">+30</span> <span className="text-slate-300">Safari Belt (Max Haunted Biome Milestone)</span></li>
-                          <li><span className="font-semibold">+13</span> <span className="text-slate-300">Megalith (Sea Serpent + Tiamat max)</span></li>
-                          <li><span className="font-semibold">+4</span> <span className="text-slate-300">Safari Belt Mythic Reforge</span></li>
-                          <li><span className="font-semibold">+3</span> <span className="text-slate-300">Infernal Kuudra Core</span></li>
-                          <li><span className="font-semibold">+1</span> <span className="text-slate-300">Starborn Century Cake </span></li>
-                        </ul>
-                        <div className="h-px bg-white/10"></div>
-                        <div className="text-slate-300">Universal fortune total: <span className="text-amber-300 font-semibold">181</span></div>
+                    <Tooltip
+                      shardName="Hunter Fortune"
+                      rarity="legendary"
+                      title=""
+                      showRomanNumerals={false}
+                      content={
+                        <div className="space-y-2">
+                          <div className="text-slate-200 font-semibold">Sources</div>
+                          <ul className="space-y-0.5">
+                            <li>
+                              <span className="font-semibold">+50</span> <span className="text-slate-300">HotF 3 perk</span>
+                            </li>
+                            <li>
+                              <span className="font-semibold">+50</span> <span className="text-slate-300">Hunting level 50</span>
+                            </li>
+                            <li>
+                              <span className="font-semibold">+30</span> <span className="text-slate-300">David's Cloak (Attribute Stacks 30)</span>
+                            </li>
+                            <li>
+                              <span className="font-semibold">+30</span> <span className="text-slate-300">Safari Belt (Max Haunted Biome Milestone)</span>
+                            </li>
+                            <li>
+                              <span className="font-semibold">+13</span> <span className="text-slate-300">Megalith (Sea Serpent + Tiamat max)</span>
+                            </li>
+                            <li>
+                              <span className="font-semibold">+4</span> <span className="text-slate-300">Safari Belt Mythic Reforge</span>
+                            </li>
+                            <li>
+                              <span className="font-semibold">+3</span> <span className="text-slate-300">Infernal Kuudra Core</span>
+                            </li>
+                            <li>
+                              <span className="font-semibold">+1</span> <span className="text-slate-300">Starborn Century Cake </span>
+                            </li>
+                          </ul>
+                          <div className="h-px bg-white/10"></div>
+                          <div className="text-slate-300">
+                            Universal fortune total: <span className="text-amber-300 font-semibold">181</span>
+                          </div>
 
-                        <div className="text-slate-200 font-semibold pt-1">Rarity bonuses</div>
-                        <ul className="pl-0 space-y-0.5 text-xs">
-                          <li className="flex items-center justify-between"><span><span className="font-semibold text-white">+26</span> <span className="text-white">Common</span></span><span className="text-slate-400">Newt</span></li>
-                          <li className="flex items-center justify-between"><span><span className="font-semibold text-green-400">+26</span> <span className="text-green-400">Uncommon</span></span><span className="text-slate-400">Salamander</span></li>
-                          <li className="flex items-center justify-between"><span><span className="font-semibold text-blue-400">+13</span> <span className="text-blue-400">Rare</span></span><span className="text-slate-400">Lizard King</span></li>
-                          <li className="flex items-center justify-between"><span><span className="font-semibold text-purple-400">+13</span> <span className="text-purple-400">Epic</span></span><span className="text-slate-400">Leviathan</span></li>
-                          <li className="flex items-center justify-between"><span><span className="font-semibold text-yellow-400">+0</span> <span className="text-yellow-400">Legendary</span></span><span className="text-slate-500"></span></li>
-                        </ul>
+                          <div className="text-slate-200 font-semibold pt-1">Rarity bonuses</div>
+                          <ul className="pl-0 space-y-0.5 text-xs">
+                            <li className="flex items-center justify-between">
+                              <span>
+                                <span className="font-semibold text-white">+26</span> <span className="text-white">Common</span>
+                              </span>
+                              <span className="text-slate-400">Newt</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <span>
+                                <span className="font-semibold text-green-400">+26</span> <span className="text-green-400">Uncommon</span>
+                              </span>
+                              <span className="text-slate-400">Salamander</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <span>
+                                <span className="font-semibold text-blue-400">+13</span> <span className="text-blue-400">Rare</span>
+                              </span>
+                              <span className="text-slate-400">Lizard King</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <span>
+                                <span className="font-semibold text-purple-400">+13</span> <span className="text-purple-400">Epic</span>
+                              </span>
+                              <span className="text-slate-400">Leviathan</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <span>
+                                <span className="font-semibold text-yellow-400">+0</span> <span className="text-yellow-400">Legendary</span>
+                              </span>
+                              <span className="text-slate-500"></span>
+                            </li>
+                          </ul>
 
-                        <div className="text-slate-200 font-semibold pt-1">Totals</div>
-                        <ul className="pl-0 space-y-0.5 text-xs">
-                          <li className="flex items-center justify-between"><span className="text-white">Common</span><span className="text-white font-semibold">207</span></li>
-                          <li className="flex items-center justify-between"><span className="text-green-400">Uncommon</span><span className="text-green-400 font-semibold">207</span></li>
-                          <li className="flex items-center justify-between"><span className="text-blue-400">Rare</span><span className="text-blue-400 font-semibold">194</span></li>
-                          <li className="flex items-center justify-between"><span className="text-purple-400">Epic</span><span className="text-purple-400 font-semibold">194</span></li>
-                          <li className="flex items-center justify-between"><span className="text-yellow-400">Legendary</span><span className="text-yellow-400 font-semibold">181</span></li>
-                        </ul>
-
-                      </div>
-                    }
-                  />
+                          <div className="text-slate-200 font-semibold pt-1">Totals</div>
+                          <ul className="pl-0 space-y-0.5 text-xs">
+                            <li className="flex items-center justify-between">
+                              <span className="text-white">Common</span>
+                              <span className="text-white font-semibold">207</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <span className="text-green-400">Uncommon</span>
+                              <span className="text-green-400 font-semibold">207</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <span className="text-blue-400">Rare</span>
+                              <span className="text-blue-400 font-semibold">194</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <span className="text-purple-400">Epic</span>
+                              <span className="text-purple-400 font-semibold">194</span>
+                            </li>
+                            <li className="flex items-center justify-between">
+                              <span className="text-yellow-400">Legendary</span>
+                              <span className="text-yellow-400 font-semibold">181</span>
+                            </li>
+                          </ul>
+                        </div>
+                      }
+                    />
                   </div>
                 </div>
-              <input
+                <input
                   type="number"
                   min="0"
                   step="0.5"
@@ -521,14 +582,29 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
               {form.ironManView && (
                 <>
                   {/* Exclude Chameleon Switch */}
-                  <ToggleSwitch id="excludeChameleon" label="Exclude Chameleon" checked={form.excludeChameleon} onChange={(checked) => handleInputChange("excludeChameleon", checked)} />
+                  <ToggleSwitch
+                    id="excludeChameleon"
+                    label="Exclude Chameleon"
+                    checked={form.excludeChameleon}
+                    onChange={(checked) => handleInputChange("excludeChameleon", checked)}
+                  />
                   {/* Exclude Wooden Bait Switch */}
-                  <ToggleSwitch id="excludeWoodenBait" label="Exclude Wooden Bait" checked={form.noWoodenBait} onChange={(checked) => handleInputChange("noWoodenBait", checked)} />
+                  <ToggleSwitch
+                    id="excludeWoodenBait"
+                    label="Exclude Wooden Bait"
+                    checked={form.noWoodenBait}
+                    onChange={(checked) => handleInputChange("noWoodenBait", checked)}
+                  />
                 </>
               )}
               {/* Instant Buy Prices Switch */}
               {!form.ironManView && (
-                <ToggleSwitch id="instantBuyPrices" label="Use Instant Buy Prices" checked={form.instantBuyPrices} onChange={(checked) => handleInputChange("instantBuyPrices", checked)} />
+                <ToggleSwitch
+                  id="instantBuyPrices"
+                  label="Use Instant Buy Prices"
+                  checked={form.instantBuyPrices}
+                  onChange={(checked) => handleInputChange("instantBuyPrices", checked)}
+                />
               )}
             </div>
           </div>
@@ -587,7 +663,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
                 setCraftPenaltyInput(value);
                 // If empty, use default for calculation
                 if (value.trim() === "") {
-                  handleInputChange("craftPenalty", (form.ironManView ? 0.8 : 1000));
+                  handleInputChange("craftPenalty", form.ironManView ? 0.8 : 1000);
                 } else {
                   const num = Number(value);
                   if (!isNaN(num) && num >= 0) {
@@ -610,11 +686,7 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
               Kraken Shard
             </h3>
             <div className="space-y-2">
-              <KuudraDropdown
-                value={(form.kuudraTier ?? "none")}
-                onChange={(value) => handleInputChange("kuudraTier", value)}
-                label="Kuudra Tier"
-              />
+              <KuudraDropdown value={form.kuudraTier ?? "none"} onChange={(value) => handleInputChange("kuudraTier", value)} label="Kuudra Tier" />
               <MoneyInput
                 value={moneyInput}
                 onChange={(value: string) => {

@@ -30,9 +30,7 @@ export function getShardSearchText(key: string): string {
   let text = searchTextCache.get(key);
   if (text === undefined) {
     const record = SHARD_DESCRIPTIONS[key];
-    text = record
-      ? [flattenSegments(record.description), ...record.how_to_hunt.map(flattenSegments)].join("\n").toLowerCase()
-      : "";
+    text = record ? [flattenSegments(record.description), ...record.how_to_hunt.map(flattenSegments)].join("\n").toLowerCase() : "";
     searchTextCache.set(key, text);
   }
   return text;

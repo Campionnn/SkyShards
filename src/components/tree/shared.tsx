@@ -168,7 +168,12 @@ export const RecipeSummary: React.FC<RecipeSummaryProps> = ({ outputQuantity, ou
 /** How many Pure Reptile procs the node needs, shown beside the fusion count. */
 export const CrocodileProcsBadge: React.FC<{ procs: number }> = ({ procs }) => (
   <Tooltip
-    content={<>Crocodile has a chance to double the output of reptile recipes. You need <span className="text-green-400">{procs} Pure Reptile </span> triggers to have enough shards for the craft. This is based on average luck</>}
+    content={
+      <>
+        Crocodile has a chance to double the output of reptile recipes. You need <span className="text-green-400">{procs} Pure Reptile </span> triggers to have
+        enough shards for the craft. This is based on average luck
+      </>
+    }
     title="Pure Reptile"
     shardName="Crocodile"
     shardIcon="R45"

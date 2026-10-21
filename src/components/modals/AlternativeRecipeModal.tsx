@@ -174,7 +174,9 @@ export const AlternativeRecipeModal: React.FC<
         key="direct"
         onClick={() => handleSelect(option.recipe)}
         className={`w-full p-3 rounded-lg border text-left transition-all duration-200 ${
-          isCurrent ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30" : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
+          isCurrent
+            ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30"
+            : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
         }`}
         disabled={isCurrent}
       >
@@ -187,7 +189,9 @@ export const AlternativeRecipeModal: React.FC<
           <div className="flex items-center gap-1 text-slate-400 text-sm">
             <div className="text-right">
               <div>{formatFn(option.timePerShard)}</div>
-              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>}
+              {requiredQuantity && requiredQuantity > 0 && (
+                <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>
+              )}
             </div>
           </div>
         </div>
@@ -210,7 +214,9 @@ export const AlternativeRecipeModal: React.FC<
       <button
         onClick={() => handleSelect(option.recipe)}
         className={`w-full p-3 rounded-lg border text-left transition-all duration-200 cursor-pointer ${
-          isCurrent ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30" : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
+          isCurrent
+            ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30"
+            : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
         }`}
         disabled={isCurrent}
       >
@@ -257,12 +263,16 @@ export const AlternativeRecipeModal: React.FC<
                 <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300"}>{shardName}</span>
               </div>
             </div>
-            {isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0 ml-3 sm:ml-0">Current</span>}
+            {isCurrent && (
+              <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0 ml-3 sm:ml-0">Current</span>
+            )}
           </div>
           <div className="text-slate-400 text-sm">
             <div className="text-right">
               <div>{formatFn(option.timePerShard)}</div>
-              {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>}
+              {requiredQuantity && requiredQuantity > 0 && (
+                <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>
+              )}
             </div>
           </div>
         </div>
@@ -517,9 +527,15 @@ export const AlternativeRecipeModal: React.FC<
                             <img src={shardIconUrl(partnerShard)} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
                             <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>{partner?.name || partnerShard}</span>
                             {partner?.family?.includes("Reptile") && (
-                              <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">Reptile</span>
+                              <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">
+                                Reptile
+                              </span>
                             )}
-                            {selectedOption.isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
+                            {selectedOption.isCurrent && (
+                              <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">
+                                Current
+                              </span>
+                            )}
                           </>
                         );
                       })()}
@@ -587,16 +603,26 @@ export const AlternativeRecipeModal: React.FC<
                                 <Plus className="w-4 h-4 text-fuchsia-400" />
                                 <span className="text-slate-400 text-xs">{partner?.fuse_amount || 2}x</span>
                                 <img src={shardIconUrl(partnerShard)} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
-                                <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>{partner?.name || partnerShard}</span>
+                                <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>
+                                  {partner?.name || partnerShard}
+                                </span>
                                 {partner?.family?.includes("Reptile") && (
-                                  <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">Reptile</span>
+                                  <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">
+                                    Reptile
+                                  </span>
                                 )}
-                                {option.isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
+                                {option.isCurrent && (
+                                  <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">
+                                    Current
+                                  </span>
+                                )}
                               </div>
                               <div className="flex items-center gap-1 text-slate-400 text-xs">
                                 <div className="text-right">
                                   <div>{formatFn(option.timePerShard)}</div>
-                                  {requiredQuantity && requiredQuantity > 0 && <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>}
+                                  {requiredQuantity && requiredQuantity > 0 && (
+                                    <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -615,13 +641,20 @@ export const AlternativeRecipeModal: React.FC<
   };
 
   return (
-    <Modal open={isOpen} onClose={onClose} labelledBy="alternative-recipe-title" panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      labelledBy="alternative-recipe-title"
+      panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+    >
       {/* Header */}
       <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Star className="w-5 h-5 text-purple-400" />
-            <h2 id="alternative-recipe-title" className="text-lg font-semibold text-white">Alternative Recipes</h2>
+            <h2 id="alternative-recipe-title" className="text-lg font-semibold text-white">
+              Alternative Recipes
+            </h2>
             {/* Shard icon next to the shard name */}
             <span className="flex items-center gap-1 text-slate-400 text-sm">
               <span>for</span>

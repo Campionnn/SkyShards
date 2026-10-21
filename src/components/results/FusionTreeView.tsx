@@ -87,7 +87,6 @@ export const FusionTreeView: React.FC<FusionTreeViewProps> = ({
   const [copyModalOpen, setCopyModalOpen] = useState(false);
   const copyToClipboard = useCopyToClipboard();
 
-
   type SkyOceanDirect = { shard: string; method: "direct"; quantity: number };
   type SkyOceanCycleStep = { shard: string; inputs: [string, string] };
   type SkyOceanCycle = {

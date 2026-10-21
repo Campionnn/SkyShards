@@ -11,7 +11,8 @@ export const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard |
   return (recipe?.isReptile || input1Shard?.family?.toLowerCase().includes("reptile") || input2Shard?.family?.toLowerCase().includes("reptile")) as boolean;
 };
 
-export const renderChevron = (isExpanded: boolean) => (isExpanded ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-amber-400" />);
+export const renderChevron = (isExpanded: boolean) =>
+  isExpanded ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-amber-400" />;
 
 /**
  * Read a node's expand/collapse state, seeding a default the first time an id is seen.

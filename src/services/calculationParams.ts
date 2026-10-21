@@ -15,7 +15,7 @@ import { loadCustomPrices } from "../utilities";
 export const buildCalculationParams = async (
   formData: CalculationFormData,
   customRates: { [shardId: string]: number | undefined },
-  customPrices: Map<string, number> = loadCustomPrices(formData.instantBuyPrices)
+  customPrices: Map<string, number> = loadCustomPrices(formData.instantBuyPrices),
 ): Promise<CalculationParams> => {
   const filteredCustomRates = Object.fromEntries(Object.entries(customRates).filter(([, v]) => v !== undefined)) as { [shardId: string]: number };
 

@@ -41,14 +41,7 @@ export interface ModalProps {
   labelledBy?: string;
 }
 
-export const Modal: React.FC<ModalProps> = ({
-  open,
-  onClose,
-  children,
-  panelClassName = "",
-  backdropClassName = "bg-black/50 p-4",
-  labelledBy,
-}) => {
+export const Modal: React.FC<ModalProps> = ({ open, onClose, children, panelClassName = "", backdropClassName = "bg-black/50 p-4", labelledBy }) => {
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Call sites pass inline arrows, so read onClose through a ref rather than
@@ -117,7 +110,7 @@ export const Modal: React.FC<ModalProps> = ({
     if (event.key !== "Tab" || !panelRef.current) return;
 
     const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-      (element) => element.offsetParent !== null || element === document.activeElement
+      (element) => element.offsetParent !== null || element === document.activeElement,
     );
     if (focusable.length === 0) return;
 
@@ -148,6 +141,6 @@ export const Modal: React.FC<ModalProps> = ({
         {children}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
