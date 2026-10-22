@@ -1,13 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 
-@font-face {
-  font-family: "Minecraft";
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 body {
   font-family: "Inter", "Minecraft", sans-serif;
   background-color: #0f172a;

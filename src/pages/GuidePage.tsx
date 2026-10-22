@@ -71,7 +71,7 @@ export const GuidePage = () => {
   return (
     <div className="max-w-4xl mx-auto py-6 px-4">
       <PageHeaderIcon icon={BookOpen} className="mb-8" />
-      <div className="prose prose-invert prose-purple max-w-none">
+      <div>
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
           {markdownContent}
         </ReactMarkdown>
