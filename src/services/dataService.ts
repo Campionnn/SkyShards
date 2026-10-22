@@ -1,45 +1,41 @@
-import type { BazaarData } from "../types/hypixelApiTypes.ts";
+import type { BazaarData } from "../types/hypixelApiTypes";
 import type { FusionJson, Shard } from "../types/types";
-import { sortShardsByNameWithPrefixAwareness, filterShards, BASIC_FILTER_CONFIG, NAME_ONLY_FILTER_CONFIG } from "../utilities";
+import { sortShardsByNameWithPrefixAwareness, filterShards, BASIC_FILTER_CONFIG, NAME_ONLY_FILTER_CONFIG, type ShardFilterConfig } from "../utilities";
 
+/** Name-only search found nothing: fall back to the shard's description text. */
+const DESCRIPTION_FILTER_CONFIG: ShardFilterConfig = { title: true, description: true };
+
+const fetchJson = async <T>(url: string, errorPrefix: string): Promise<T> => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    throw new Error(`${errorPrefix}: ${error}`);
+  }
+};
+
+/** Static data files under public/. */
+const fetchPublicFile = <T>(filename: string) => fetchJson<T>(`${import.meta.env.BASE_URL}${filename}`, `Failed to load ${filename}`);
+
+/** Public Hypixel Skyblock API (no key needed). */
+const fetchSkyblockApi = <T>(endpoint: string) => fetchJson<T>(`https://api.hypixel.net/v2/skyblock${endpoint}`, `Failed to fetch API endpoint ${endpoint}`);
+
+/** Loads and caches the shard data files and Bazaar prices. */
 export class DataService {
-  private static instance: DataService;
+  private static instance: DataService | undefined;
+
+  public static getInstance(): DataService {
+    return (DataService.instance ??= new DataService());
+  }
+
   private shardsCache: Shard[] | null = null;
   private shardNameToKeyCache: Record<string, string> | null = null;
   private fusionJsonCache: Promise<FusionJson> | null = null;
   private defaultRatesCache: Promise<Record<string, number>> | null = null;
   private bazaarPriceCache: Record<string, Record<string, number>> | null = null;
-
-  public static getInstance(): DataService {
-    if (!DataService.instance) {
-      DataService.instance = new DataService();
-    }
-    return DataService.instance;
-  }
-
-  private async fetchJson<T>(filename: string): Promise<T> {
-    try {
-      const response = await fetch(`${import.meta.env.BASE_URL}${filename}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      throw new Error(`Failed to load ${filename}: ${error}`);
-    }
-  }
-
-  private async fetchApi<T>(endpoint: string): Promise<T> {
-    try {
-      const response = await fetch(`https://api.hypixel.net/v2/skyblock${endpoint}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      throw new Error(`Failed to fetch API endpoint ${endpoint}: ${error}`);
-    }
-  }
 
   async loadShards(): Promise<Shard[]> {
     if (this.shardsCache) {
@@ -84,7 +80,7 @@ export class DataService {
    */
   async loadFusionJson(): Promise<FusionJson> {
     if (!this.fusionJsonCache) {
-      this.fusionJsonCache = this.fetchJson<FusionJson>("fusion-data.json").catch((error) => {
+      this.fusionJsonCache = fetchPublicFile<FusionJson>("fusion-data.json").catch((error) => {
         this.fusionJsonCache = null;
         throw error;
       });
@@ -98,7 +94,7 @@ export class DataService {
    */
   async loadDefaultRates(): Promise<Record<string, number>> {
     if (!this.defaultRatesCache) {
-      this.defaultRatesCache = this.fetchJson<Record<string, number>>("rates.json").catch((error) => {
+      this.defaultRatesCache = fetchPublicFile<Record<string, number>>("rates.json").catch((error) => {
         this.defaultRatesCache = null;
         throw error;
       });
@@ -113,7 +109,7 @@ export class DataService {
       return this.bazaarPriceCache[cacheKey];
     }
 
-    const bazaarData = await this.fetchApi<BazaarData>("/bazaar");
+    const bazaarData = await fetchSkyblockApi<BazaarData>("/bazaar");
     const shards = await this.loadShards();
     this.bazaarPriceCache = this.bazaarPriceCache ?? {};
     this.bazaarPriceCache[cacheKey] = {};
@@ -152,40 +148,15 @@ export class DataService {
 
   async searchShards(query: string): Promise<Shard[]> {
     const shards = await this.loadShards();
-    const filtered = filterShards(shards, {
-      query,
-      searchConfig: BASIC_FILTER_CONFIG,
-    });
-
-    return this.sortShardsByQuery(filtered, query);
+    return this.sortShardsByQuery(filterShards(shards, { query, searchConfig: BASIC_FILTER_CONFIG }), query);
   }
 
   async searchShardsByNameOnly(query: string): Promise<Shard[]> {
     const shards = await this.loadShards();
-    const filtered = filterShards(shards, {
-      query,
-      searchConfig: NAME_ONLY_FILTER_CONFIG,
-    });
-
-    // If no results found searching by name only, try searching title and description
+    let filtered = filterShards(shards, { query, searchConfig: NAME_ONLY_FILTER_CONFIG });
     if (filtered.length === 0) {
-      const fallbackConfig = {
-        name: false,
-        id: false,
-        family: false,
-        type: false,
-        title: true,
-        description: true,
-      };
-
-      const fallbackFiltered = filterShards(shards, {
-        query,
-        searchConfig: fallbackConfig,
-      });
-
-      return this.sortShardsByQuery(fallbackFiltered, query);
+      filtered = filterShards(shards, { query, searchConfig: DESCRIPTION_FILTER_CONFIG });
     }
-
     return this.sortShardsByQuery(filtered, query);
   }
 }
