@@ -6,7 +6,7 @@ import { ShardChip, Tooltip } from "../ui";
 import { ShardDescription } from "../ui/ShardDescription";
 import { SHARD_DESCRIPTIONS } from "../../constants";
 import { renderChevron } from "./treeHelpers";
-import type { Shard } from "../../types/types";
+import type { AlternativeSelectionContext, Data, Recipe, Shard } from "../../types/types";
 
 /**
  * Presentation shared by RecipeTreeNode and InventoryRecipeTreeNode. `ironManView`
@@ -14,12 +14,29 @@ import type { Shard } from "../../types/types";
  * rather than fixed styling.
  */
 
+/** Wrap a handler so the click doesn't also toggle the row it sits in. */
+const stopping = (handler: () => void) => (event: React.MouseEvent) => {
+  event.stopPropagation();
+  handler();
+};
 interface ShardInfoProps {
   quantity: number;
   shard: Shard;
   ironManView: boolean;
   showRate?: boolean;
 }
+
+/** Per-hour rate (ironman) or total coin value (bazaar) of `quantity` shards. */
+const ShardRate: React.FC<Omit<ShardInfoProps, "showRate">> = ({ quantity, shard, ironManView }) =>
+  ironManView ? (
+    <>
+      <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
+      <span className="text-slate-500 text-xs mx-0.5">/</span>
+      <span className="text-slate-400 text-xs">hr</span>
+    </>
+  ) : (
+    <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(quantity * shard.rate)}</span>
+  );
 
 /** `<n>x <icon> <name>` plus the per-hour rate (ironman) or coin value (bazaar). */
 export const ShardInfo: React.FC<ShardInfoProps> = ({ quantity, shard, ironManView, showRate = true }) => (
@@ -28,21 +45,310 @@ export const ShardInfo: React.FC<ShardInfoProps> = ({ quantity, shard, ironManVi
     <ShardChip shard={shard} />
     {showRate && (
       <div className="text-right min-w-[80px] ml-2">
-        {ironManView && (
-          <>
-            <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
-            <span className="text-slate-500 text-xs mx-0.5">/</span>
-            <span className="text-slate-400 text-xs">hr</span>
-          </>
-        )}
-        {!ironManView && (
-          <>
-            <span className="text-slate-300 text-xs font-medium">{formatLargeNumber(quantity * shard.rate)}</span>
-          </>
-        )}
+        <ShardRate quantity={quantity} shard={shard} ironManView={ironManView} />
       </div>
     )}
   </>
+);
+
+const DirectBadge: React.FC<{ ironManView: boolean }> = ({ ironManView }) => (
+  <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">
+    {ironManView ? "Direct" : "Bazaar"}
+  </span>
+);
+
+interface DirectShardNodeProps {
+  quantity: number;
+  shard: Shard;
+  ironManView: boolean;
+  /** Nodes inside a cycle sit on the cycle's darker background. */
+  inCycle?: boolean;
+  onShowAlternatives?: () => void;
+}
+
+/** A leaf node: shards gathered directly (ironman) or bought from the bazaar. */
+export const DirectShardNode: React.FC<DirectShardNodeProps> = ({ quantity, shard, ironManView, inCycle = false, onShowAlternatives }) => (
+  <div className={`flex items-center justify-between pl-3.5 pr-1 py-1 ${inCycle ? "bg-slate-900" : "bg-slate-800"} rounded-md border border-slate-600`}>
+    <div className="flex items-center space-x-2 p-0.5 text-sm">
+      <div className="w-2 h-2 bg-green-400 rounded-full mr-2.5" />
+      <ShardInfo quantity={quantity} shard={shard} ironManView={ironManView} showRate={false} />
+      <DirectBadge ironManView={ironManView} />
+    </div>
+    <div className="flex items-center gap-2">
+      <div className="text-right">
+        <ShardRate quantity={quantity} shard={shard} ironManView={ironManView} />
+      </div>
+      {onShowAlternatives && <AlternativesButton onClick={stopping(onShowAlternatives)} />}
+    </div>
+  </div>
+);
+
+/** Compact leaf used inside the sub-recipe rows of a cycle. */
+export const DirectShardRow: React.FC<Omit<DirectShardNodeProps, "inCycle" | "onShowAlternatives">> = ({ quantity, shard, ironManView }) => (
+  <div className="rounded border border-slate-400/50 flex items-center justify-between px-3 py-1.5 text-sm font-medium gap-2">
+    <div className="flex items-center gap-2 min-w-0">
+      <div className="w-2 h-2 bg-green-400 rounded-full" />
+      <ShardInfo quantity={Math.ceil(quantity)} shard={shard} ironManView={ironManView} showRate={false} />
+      <DirectBadge ironManView={ironManView} />
+    </div>
+    <div className="flex items-center gap-2">
+      <div className="text-right min-w-[80px] ml-2">
+        <ShardRate quantity={quantity} shard={shard} ironManView={ironManView} />
+      </div>
+    </div>
+  </div>
+);
+
+interface SubRecipeRowProps {
+  quantity: number;
+  craftsNeeded: number;
+  recipe: Recipe;
+  outputShard: Shard;
+  shards: Data["shards"];
+  isExpanded: boolean;
+  onToggle: () => void;
+  /** The recipe's inputs, rendered when expanded. */
+  children: React.ReactNode;
+}
+
+/** A collapsible `<out> = <in1> + <in2>` row nested under a cycle step or fodder. */
+export const SubRecipeRow: React.FC<SubRecipeRowProps> = ({ quantity, craftsNeeded, recipe, outputShard, shards, isExpanded, onToggle, children }) => {
+  const input1Shard = shards[recipe.inputs[0]];
+  const input2Shard = shards[recipe.inputs[1]];
+
+  return (
+    <div className="rounded border border-slate-400/50 overflow-hidden">
+      <div className="flex items-center justify-between w-full px-3 py-1.5 hover:bg-slate-800/50 transition-colors cursor-pointer" onClick={stopping(onToggle)}>
+        <div className="flex-1 text-left">
+          <div className="flex items-center space-x-2">
+            {renderChevron(isExpanded)}
+            <RecipeDisplay
+              outputQuantity={quantity}
+              outputShard={outputShard}
+              input1Quantity={input1Shard.fuse_amount * craftsNeeded}
+              input1Shard={input1Shard}
+              input2Quantity={input2Shard.fuse_amount * craftsNeeded}
+              input2Shard={input2Shard}
+            />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="text-right min-w-[80px] ml-2">
+            <div className="flex items-center justify-end space-x-1.5">
+              <span className="text-xs text-slate-500">fusions</span>
+              <span className="font-medium text-white text-xs">{craftsNeeded}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {isExpanded && <div className="border-t border-slate-400/70 pl-3 pr-0.5 py-0.5 flex flex-col gap-0.5">{children}</div>}
+    </div>
+  );
+};
+
+interface RecipeNodeProps {
+  outputQuantity: number;
+  outputShard: Shard;
+  input1Quantity: number;
+  input1Shard: Shard;
+  input2Quantity: number;
+  input2Shard: Shard;
+  crafts: number;
+  crocProcs: number | null;
+  isExpanded: boolean;
+  inCycle?: boolean;
+  onToggle: () => void;
+  onShowAlternatives?: () => void;
+  /** The two input subtrees, rendered when expanded. */
+  children: React.ReactNode;
+}
+
+/** A fusion node: headline recipe row, fusion count, and its two inputs beneath. */
+export const RecipeNode: React.FC<RecipeNodeProps> = ({
+  outputQuantity,
+  outputShard,
+  input1Quantity,
+  input1Shard,
+  input2Quantity,
+  input2Shard,
+  crafts,
+  crocProcs,
+  isExpanded,
+  inCycle = false,
+  onToggle,
+  onShowAlternatives,
+  children,
+}) => (
+  <div className={`${inCycle ? "bg-slate-900" : "bg-slate-800"} border border-slate-600 rounded-md overflow-hidden`}>
+    <div
+      className="flex items-center justify-between w-full pl-3 pr-1 py-1 hover:bg-slate-700/30 transition-colors cursor-pointer"
+      onClick={stopping(onToggle)}
+    >
+      <div className="flex-1 text-left">
+        <div className="flex items-center space-x-1.5">
+          {renderChevron(isExpanded)}
+          <RecipeSummary
+            outputQuantity={outputQuantity}
+            outputShard={outputShard}
+            input1Quantity={input1Quantity}
+            input1Shard={input1Shard}
+            input2Quantity={input2Quantity}
+            input2Shard={input2Shard}
+          />
+        </div>
+      </div>
+      <div className="flex items-center gap-1">
+        <FusionCount crafts={crafts} />
+        {crocProcs !== null && <CrocodileProcsBadge procs={crocProcs} />}
+        {onShowAlternatives && <AlternativesButton onClick={stopping(onShowAlternatives)} />}
+      </div>
+    </div>
+    {isExpanded && <div className="border-t border-slate-600 pl-3 pr-0.5 py-0.5 space-y-0.5">{children}</div>}
+  </div>
+);
+
+const FusionCount: React.FC<{ crafts: number }> = ({ crafts }) => (
+  <div className="text-right">
+    <div className="flex py-1 px-1.5 gap-1 items-center cursor-pointer">
+      <span className="text-xs text-slate-400">fusions</span>
+      <span className="font-medium text-slate-300 text-xs">{crafts}</span>
+    </div>
+  </div>
+);
+
+/** The fields of a cycle node both tree shapes share. */
+interface CycleTree {
+  shard: string;
+  quantity: number;
+  steps: { outputShard: string; recipe: Recipe }[];
+  multiplier: number;
+  craftsNeeded: number;
+}
+
+interface CycleNodeProps {
+  tree: CycleTree;
+  shards: Data["shards"];
+  crocProcs: number | null;
+  isExpanded: boolean;
+  ironManView: boolean;
+  onToggle: () => void;
+  onShowAlternatives?: (shardId: string, context: AlternativeSelectionContext) => void;
+  /** Step 1 is the only step with its own input; it expands to show it. */
+  firstStepExpanded: boolean;
+  onToggleFirstStep: () => void;
+  firstStepInput: React.ReactNode;
+  /** The fodder subtrees fed into every run of the cycle. */
+  fodder: React.ReactNode;
+}
+
+/** A cycle node: header, its steps (last step first), then the cycle fodder. */
+export const CycleNode: React.FC<CycleNodeProps> = ({
+  tree,
+  shards,
+  crocProcs,
+  isExpanded,
+  ironManView,
+  onToggle,
+  onShowAlternatives,
+  firstStepExpanded,
+  onToggleFirstStep,
+  firstStepInput,
+  fodder,
+}) => (
+  <div className="flex flex-col border border-slate-400/50 rounded-md bg-slate-900">
+    <CycleHeader
+      shard={shards[tree.shard]}
+      quantity={tree.quantity}
+      runCount={tree.craftsNeeded}
+      crocProcs={crocProcs}
+      isExpanded={isExpanded}
+      ironManView={ironManView}
+      onToggle={onToggle}
+      onShowAlternatives={
+        onShowAlternatives &&
+        (() => {
+          // The recipe that produces the target shard within the cycle
+          const step = tree.steps.find((step) => step.outputShard === tree.shard);
+          onShowAlternatives(tree.shard, { currentRecipe: step?.recipe || null, requiredQuantity: tree.quantity });
+        })
+      }
+    />
+
+    {isExpanded && (
+      <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-0.5">
+        <div>
+          {[...tree.steps].reverse().map((step, stepIndex) => {
+            const { recipe } = step;
+            const input1Shard = shards[recipe.inputs[0]];
+            const input2Shard = shards[recipe.inputs[1]];
+            const outputQuantity = recipe.isReptile ? recipe.outputQuantity * tree.multiplier : recipe.outputQuantity;
+            const stepNumber = tree.steps.length - stepIndex;
+
+            const display = (
+              <RecipeDisplay
+                outputQuantity={outputQuantity}
+                outputShard={shards[step.outputShard]}
+                input1Quantity={input1Shard.fuse_amount}
+                input1Shard={input1Shard}
+                input2Quantity={input2Shard.fuse_amount}
+                input2Shard={input2Shard}
+                showStep
+                stepNumber={stepNumber}
+              />
+            );
+            const alternativesButton = (
+              <div className="flex items-center gap-2">
+                {onShowAlternatives && (
+                  <AlternativesButton
+                    onClick={stopping(() =>
+                      onShowAlternatives(step.outputShard, { currentRecipe: recipe, requiredQuantity: tree.craftsNeeded * outputQuantity }),
+                    )}
+                  />
+                )}
+              </div>
+            );
+
+            if (stepNumber !== 1) {
+              return (
+                <div key={stepIndex} className="pl-3 pr-1 py-1 rounded border border-slate-400/50 flex items-center justify-between">
+                  {display}
+                  {alternativesButton}
+                </div>
+              );
+            }
+
+            return (
+              <div key={stepIndex} className="rounded border border-slate-400/50 overflow-hidden">
+                <div
+                  className="flex items-center justify-between w-full pl-3 pr-1 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer"
+                  onClick={stopping(onToggleFirstStep)}
+                >
+                  <div className="flex-1 text-left">
+                    <div className="flex items-center space-x-2">
+                      {renderChevron(firstStepExpanded)}
+                      {display}
+                    </div>
+                  </div>
+                  {alternativesButton}
+                </div>
+                {firstStepExpanded && (
+                  <div className="border-t border-slate-400/50 pl-3 pr-0.5 py-0.5 space-y-1">
+                    <div className="space-y-1">{firstStepInput}</div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex gap-1.5 py-1 pl-2">
+          <div className="text-slate-400 text-xs border-l-1 border-slate-500 pl-1.5">Cycle Fodder</div>
+        </div>
+
+        <div className="flex flex-col gap-0.5 mt-0.5">{fodder}</div>
+      </div>
+    )}
+  </div>
 );
 
 interface RecipeDisplayProps {
@@ -211,14 +517,8 @@ interface CycleHeaderProps {
 }
 
 /** Header row of a cycle node — the toggle, craft count, and Pure Reptile badge. */
-export const CycleHeader: React.FC<CycleHeaderProps> = ({ shard, quantity, runCount, crocProcs, isExpanded, ironManView, onToggle, onShowAlternatives }) => (
-  <div
-    className="flex items-center justify-between w-full pl-3 pr-1 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer"
-    onClick={(e) => {
-      e.stopPropagation();
-      onToggle();
-    }}
-  >
+const CycleHeader: React.FC<CycleHeaderProps> = ({ shard, quantity, runCount, crocProcs, isExpanded, ironManView, onToggle, onShowAlternatives }) => (
+  <div className="flex items-center justify-between w-full pl-3 pr-1 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer" onClick={stopping(onToggle)}>
     <div className="flex-1 text-left">
       <div className="flex items-center space-x-2">
         {renderChevron(isExpanded)}
@@ -233,21 +533,9 @@ export const CycleHeader: React.FC<CycleHeaderProps> = ({ shard, quantity, runCo
       </div>
     </div>
     <div className="flex items-center gap-1">
-      <div className="text-right">
-        <div className="flex py-1 px-1.5 gap-1 items-center cursor-pointer">
-          <span className="text-xs text-slate-400">fusions</span>
-          <span className="font-medium text-slate-300 text-xs">{runCount}</span>
-        </div>
-      </div>
+      <FusionCount crafts={runCount} />
       {crocProcs !== null && <CrocodileProcsBadge procs={crocProcs} />}
-      {onShowAlternatives && (
-        <AlternativesButton
-          onClick={(e) => {
-            e.stopPropagation();
-            onShowAlternatives();
-          }}
-        />
-      )}
+      {onShowAlternatives && <AlternativesButton onClick={stopping(onShowAlternatives)} />}
     </div>
   </div>
 );
