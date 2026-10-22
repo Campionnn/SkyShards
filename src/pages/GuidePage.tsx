@@ -1,30 +1,49 @@
-import React, { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
+import { useEffect, useState } from "react";
+import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { BookOpen, Loader2 } from "lucide-react";
+import { PageHeaderIcon } from "../components";
 
-export const GuidePage: React.FC = () => {
-  const [markdownContent, setMarkdownContent] = useState<string>("");
+const MARKDOWN_COMPONENTS: Components = {
+  h1: (props) => <h1 className="text-3xl font-bold text-white mb-6" {...props} />,
+  h2: (props) => <h2 className="text-2xl font-semibold text-white mt-8 mb-4 pb-2 border-b border-white/10" {...props} />,
+  h3: (props) => <h3 className="text-xl font-semibold text-white mt-6 mb-3" {...props} />,
+  p: (props) => <p className="text-slate-300 leading-relaxed mb-4" {...props} />,
+  ul: (props) => <ul className="list-disc list-inside text-slate-300 mb-4 space-y-1" {...props} />,
+  ol: (props) => <ol className="list-decimal list-inside text-slate-300 mb-4 space-y-1" {...props} />,
+  li: (props) => <li className="text-slate-300" {...props} />,
+  strong: (props) => <strong className="text-white font-semibold" {...props} />,
+  code: (props) => <code className="bg-white/10 text-purple-300 px-2 py-1 rounded text-sm" {...props} />,
+  pre: (props) => <pre className="bg-white/5 border border-white/10 rounded-lg p-4 overflow-x-auto mb-4" {...props} />,
+  blockquote: (props) => <blockquote className="border-l-4 border-purple-400 pl-4 text-slate-400 italic mb-4" {...props} />,
+  hr: (props) => <hr className="border-white/20 my-8" {...props} />,
+};
+
+/** Renders public/guide.md. */
+export const GuidePage = () => {
+  const [markdownContent, setMarkdownContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchGuideContent = async () => {
-      try {
-        const response = await fetch("/guide.md");
-        if (!response.ok) {
-          throw new Error("Failed to fetch guide content");
-        }
-        const content = await response.text();
-        setMarkdownContent(content);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
-      }
+    let cancelled = false;
+    fetch(`${import.meta.env.BASE_URL}guide.md`)
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to fetch guide content");
+        return response.text();
+      })
+      .then((content) => {
+        if (!cancelled) setMarkdownContent(content);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "An error occurred");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
     };
-
-    fetchGuideContent().catch(console.error);
   }, []);
 
   if (loading) {
@@ -51,76 +70,9 @@ export const GuidePage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-purple-500/20 border border-purple-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-          <BookOpen className="w-8 h-8 text-purple-400" />
-        </div>
-      </div>
-
-      {/* Markdown Content */}
+      <PageHeaderIcon icon={BookOpen} className="mb-8" />
       <div className="prose prose-invert prose-purple max-w-none">
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          components={{
-            h1: ({ children, ...props }) => (
-              <h1 className="text-3xl font-bold text-white mb-6" {...props}>
-                {children}
-              </h1>
-            ),
-            h2: ({ children, ...props }) => (
-              <h2 className="text-2xl font-semibold text-white mt-8 mb-4 pb-2 border-b border-white/10" {...props}>
-                {children}
-              </h2>
-            ),
-            h3: ({ children, ...props }) => (
-              <h3 className="text-xl font-semibold text-white mt-6 mb-3" {...props}>
-                {children}
-              </h3>
-            ),
-            p: ({ children, ...props }) => (
-              <p className="text-slate-300 leading-relaxed mb-4" {...props}>
-                {children}
-              </p>
-            ),
-            ul: ({ children, ...props }) => (
-              <ul className="list-disc list-inside text-slate-300 mb-4 space-y-1" {...props}>
-                {children}
-              </ul>
-            ),
-            ol: ({ children, ...props }) => (
-              <ol className="list-decimal list-inside text-slate-300 mb-4 space-y-1" {...props}>
-                {children}
-              </ol>
-            ),
-            li: ({ children, ...props }) => (
-              <li className="text-slate-300" {...props}>
-                {children}
-              </li>
-            ),
-            strong: ({ children, ...props }) => (
-              <strong className="text-white font-semibold" {...props}>
-                {children}
-              </strong>
-            ),
-            code: ({ children, ...props }) => (
-              <code className="bg-white/10 text-purple-300 px-2 py-1 rounded text-sm" {...props}>
-                {children}
-              </code>
-            ),
-            pre: ({ children, ...props }) => (
-              <pre className="bg-white/5 border border-white/10 rounded-lg p-4 overflow-x-auto mb-4" {...props}>
-                {children}
-              </pre>
-            ),
-            blockquote: ({ children, ...props }) => (
-              <blockquote className="border-l-4 border-purple-400 pl-4 text-slate-400 italic mb-4" {...props}>
-                {children}
-              </blockquote>
-            ),
-            hr: ({ ...props }) => <hr className="border-white/20 my-8" {...props} />,
-          }}
-        >
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
           {markdownContent}
         </ReactMarkdown>
       </div>
