@@ -14,9 +14,20 @@ interface ShardAutocompleteProps {
   placeholder?: string;
   className?: string;
   searchMode?: "enhanced" | "name-only";
+  /** Shards already fused into their attribute, keyed by shard id. Forwarded to the browse-all-shards modal. */
+  ownedAttributes?: Map<string, number>;
 }
 
-export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onChange, onSelect, onFocus, placeholder = "Search for a shard...", className = "", searchMode = "enhanced" }) => {
+export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({
+  value,
+  onChange,
+  onSelect,
+  onFocus,
+  placeholder = "Search for a shard...",
+  className = "",
+  searchMode = "enhanced",
+  ownedAttributes,
+}) => {
   const [suggestions, setSuggestions] = useState<Shard[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -251,7 +262,13 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
         </ul>
       )}
 
-      <BrowseAllShardsModal isOpen={isBrowseModalOpen} onClose={() => setIsBrowseModalOpen(false)} shards={allShards} onSelectShard={handleShardSelect} />
+      <BrowseAllShardsModal
+        isOpen={isBrowseModalOpen}
+        onClose={() => setIsBrowseModalOpen(false)}
+        shards={allShards}
+        onSelectShard={handleShardSelect}
+        ownedAttributes={ownedAttributes}
+      />
     </div>
   );
 };
