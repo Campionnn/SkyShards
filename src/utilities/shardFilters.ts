@@ -80,9 +80,7 @@ export function matchesSearchQuery(shard: Shard, query: string, config: ShardFil
 
   // Check descriptions
   if (config.title || config.description) {
-    const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
-
-    if (config.title && shardDesc?.title?.toLowerCase().includes(search)) {
+    if (config.title && SHARD_DESCRIPTIONS[shard.id]?.title?.toLowerCase().includes(search)) {
       return true;
     }
 
@@ -109,10 +107,9 @@ export function filterShards<T extends Shard>(shards: T[], options: ShardFilterO
 
     const matchesRarity = rarity === "all" || shard.rarity.toLowerCase() === rarity.toLowerCase();
 
-    const matchesType =
-      type === "all" ||
-      (type === "direct" && "isDirect" in shard && (shard as { isDirect: boolean }).isDirect) ||
-      (type === "fuse" && "isDirect" in shard && !(shard as { isDirect: boolean }).isDirect);
+    // Only `ShardWithDirectInfo` carries `isDirect`; plain shards match neither "direct" nor "fuse".
+    const isDirect = "isDirect" in shard ? Boolean(shard.isDirect) : undefined;
+    const matchesType = type === "all" || (type === "direct" && isDirect === true) || (type === "fuse" && isDirect === false);
 
     return matchesSearch && matchesRarity && matchesType;
   });

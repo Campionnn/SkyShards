@@ -58,9 +58,12 @@ export const processOutputRecipes = (selectedShard: Shard, fusionData: FusionJso
   return recipes;
 };
 
+/** Chameleon (L4) fuses with almost anything, so its recipes get their own category. */
+const CHAMELEON_ID = "L4";
+const isChameleonRecipe = (recipe: PairRecipe): boolean => recipe.input1 === CHAMELEON_ID || recipe.input2 === CHAMELEON_ID;
+
 const classifyFusion = (recipe: PairRecipe): "special" | "id" | "chameleon" => {
-  const isChameleon = recipe.input1 === "L4" || recipe.input2 === "L4";
-  if (isChameleon) return "chameleon";
+  if (isChameleonRecipe(recipe)) return "chameleon";
   if (recipe.quantity === 2) return "special";
   return "id";
 };
@@ -101,12 +104,9 @@ const chooseBetterRecipe = (
 
   const getRarityIndex = (rarity?: string) => RARITY_ORDER.indexOf((rarity || "common").toLowerCase());
 
-  const isRecipe1Chameleon = recipe1.input1 === "L4" || recipe1.input2 === "L4";
-  const isRecipe2Chameleon = recipe2.input1 === "L4" || recipe2.input2 === "L4";
-
-  if (isRecipe1Chameleon && isRecipe2Chameleon) {
-    const recipe1HasL4First = recipe1.input1 === "L4";
-    const recipe2HasL4First = recipe2.input1 === "L4";
+  if (isChameleonRecipe(recipe1) && isChameleonRecipe(recipe2)) {
+    const recipe1HasL4First = recipe1.input1 === CHAMELEON_ID;
+    const recipe2HasL4First = recipe2.input1 === CHAMELEON_ID;
 
     if (recipe1HasL4First && !recipe2HasL4First) return recipe1;
     if (recipe2HasL4First && !recipe1HasL4First) return recipe2;
@@ -303,8 +303,7 @@ export const filterCategorizedRecipes = (categorized: CategorizedRecipes, filter
       g.recipes.some((r) => {
         const s1 = fusionData.shards[r.input1]?.name.toLowerCase() || "";
         const s2 = fusionData.shards[r.input2]?.name.toLowerCase() || "";
-        const outId = (r as PairRecipe).output as string | undefined;
-        const outName = outId ? fusionData.shards[outId]?.name.toLowerCase() || "" : "";
+        const outName = fusionData.shards[r.output]?.name.toLowerCase() || "";
         return s1.includes(term) || s2.includes(term) || outName.includes(term);
       }),
     );
