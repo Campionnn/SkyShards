@@ -11,7 +11,7 @@ export const RARITY_OPTIONS = [
 ];
 
 /** Border, text and progress-bar classes per rarity, for shard cards. */
-export const RARITY_CARD_STYLES: Record<string, { border: string; text: string; bar: string }> = {
+const RARITY_CARD_STYLES: Record<string, { border: string; text: string; bar: string }> = {
   common: { border: "border-slate-500/50", text: "text-slate-300", bar: "bg-slate-400" },
   uncommon: { border: "border-green-500/50", text: "text-green-300", bar: "bg-green-400" },
   rare: { border: "border-blue-500/50", text: "text-blue-300", bar: "bg-blue-400" },

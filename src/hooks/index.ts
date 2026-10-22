@@ -2,7 +2,6 @@ export { useCalculatorState } from "./useCalculatorState";
 export { useClickOutside } from "./useClickOutside";
 export { useCopyToClipboard } from "./useCopyToClipboard";
 export { useCustomRates, useCustomPrices } from "./useCustomRates";
-export { useDropdownManager } from "./useDropdownManager";
 export { useFusionData } from "./useFusionData";
 export { usePageTitle } from "./usePageTitle";
 export { useRecipeState } from "./useRecipeState";

@@ -1,4 +1,4 @@
-import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useRef, useState, type WheelEvent } from "react";
+import { type KeyboardEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState, type WheelEvent } from "react";
 import { Zap, RotateCcw, Settings, TriangleAlert, Layers } from "lucide-react";
 import type { CalculationFormData } from "../../schemas";
 import { ShardAutocomplete, MoneyInput } from "./inputs";
@@ -183,6 +183,9 @@ export const CalculatorForm = ({ onSubmit, ownedAttributes, useInventory, onUseI
     setIsMultiSelectModalOpen(true);
   };
 
+  // Stable identity: the modal resets its picks whenever this prop changes while open.
+  const initialSelections = useMemo(() => new Map((form.shardQuantities || []).map((item) => [item.shard.id, item.quantity])), [form.shardQuantities]);
+
   const handleMultiSelectDone = (selected: Array<{ shard: Shard; quantity: number }>) => {
     submitLatest({ selectedShardKeys: selected.map((item) => item.shard.id), shardQuantities: selected });
     setIsMultiSelectModalOpen(false);
@@ -338,7 +341,7 @@ export const CalculatorForm = ({ onSubmit, ownedAttributes, useInventory, onUseI
           onClose={() => setIsMultiSelectModalOpen(false)}
           shards={allShards}
           onDone={handleMultiSelectDone}
-          initialSelections={new Map((form.shardQuantities || []).map((item) => [item.shard.id, item.quantity]))}
+          initialSelections={initialSelections}
           ownedAttributes={ownedAttributes}
         />
 
