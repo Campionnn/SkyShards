@@ -8,7 +8,7 @@ import { CopyTreeModal } from "../modals";
 import { ResultSummaryCards } from "./ResultSummaryCards";
 import { FusionTreeView } from "./FusionTreeView";
 import { MaterialTreeSelector } from "./MaterialTreeSelector";
-import { FusionTreeSortDropown } from "./FusionTreeViewSortDropdown";
+import { FusionTreeSortDropdown, type FusionTreeSort } from "./FusionTreeSortDropdown";
 
 interface CalculationResultsProps {
   result: CalculationResult;
@@ -48,7 +48,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
   const [copyModalOpen, setCopyModalOpen] = useState(false);
   const copyToClipboard = useCopyToClipboard();
 
-  const [materialTreeSortSelection, setMaterialTreeSortSelection] = useState("default");
+  const [materialTreeSortSelection, setMaterialTreeSortSelection] = useState<FusionTreeSort>("default");
 
   // Materials-only copy (no tree): flatten the combined totals
   const buildNoFrillsString = () => {
@@ -204,7 +204,7 @@ export const CalculationResults: React.FC<CalculationResultsProps> = ({
               value={materialTreeShardKey}
               onChange={(key) => onMaterialTreeShardChange?.(key)}
             />
-            <FusionTreeSortDropown value={materialTreeSortSelection} onChange={setMaterialTreeSortSelection} />
+            <FusionTreeSortDropdown value={materialTreeSortSelection} onChange={setMaterialTreeSortSelection} />
           </div>
         </div>
       )}

@@ -5,7 +5,6 @@ import { ShardAutocomplete, MoneyInput } from "./inputs";
 import { useCalculatorState, useShards } from "../../hooks";
 import { LevelDropdown, KuudraDropdown } from "../calculator";
 import { LEVELED_SHARDS, MAX_QUANTITIES, SHARD_DESCRIPTIONS, type ShardLevelKey } from "../../constants";
-import { isValidShardName } from "../../utilities";
 import { ShardDescription } from "../ui/ShardDescription";
 import { Tooltip, ToggleSwitch } from "../ui";
 import type { Shard } from "../../types/types";
@@ -41,8 +40,8 @@ export const CalculatorForm: React.FC<CalculatorFormProps> = ({ onSubmit, ownedA
     const checkAndSubmit = async () => {
       const current = latestFormRef.current;
       if (current.shard && current.shard.trim() !== "") {
-        const isValid = await isValidShardName(current.shard);
-        if (isValid) {
+        const nameToKey = await DataService.getInstance().getShardNameToKeyMap();
+        if (nameToKey[current.shard.trim().toLowerCase()]) {
           onSubmitRef.current({ ...current, frogBonus: false });
         }
       }

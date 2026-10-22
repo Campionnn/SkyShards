@@ -7,7 +7,7 @@ import type { Data, InventoryRecipeTree, Recipe, Shard } from "../../types/types
  * file exports only components (react-refresh/only-export-components).
  */
 
-export const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard | undefined, input2Shard: Shard | undefined): boolean => {
+const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard | undefined, input2Shard: Shard | undefined): boolean => {
   return (recipe?.isReptile || input1Shard?.family?.toLowerCase().includes("reptile") || input2Shard?.family?.toLowerCase().includes("reptile")) as boolean;
 };
 
