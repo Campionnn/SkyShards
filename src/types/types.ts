@@ -52,34 +52,59 @@ export interface RecipeChoice {
   recipe: Recipe | null;
 }
 
-export type RecipeTree =
-  | {
-      shard: string;
-      method: "direct";
-      quantity: number;
-      craftsNeeded?: number;
-    }
-  | {
-      shard: string;
-      method: "recipe";
-      quantity: number;
-      recipe: Recipe;
-      inputs: [RecipeTree, RecipeTree];
-      craftsNeeded: number;
-    }
-  | {
-      shard: string;
-      method: "cycle";
-      quantity: number;
-      steps: {
-        outputShard: string;
-        recipe: Recipe;
-      }[];
-      multiplier: number;
-      craftsNeeded: number;
-      inputRecipe: RecipeTree;
-      cycleInputs: RecipeTree[];
-    };
+/** One fusion inside a recipe cycle: `outputShard` is made by `recipe`. */
+export interface CycleStep {
+  outputShard: string;
+  recipe: Recipe;
+}
+
+/*
+ * Tree node variants, shared by RecipeTree and InventoryRecipeTree. The recursive ones
+ * take the tree type their children belong to, so each tree stays closed over itself.
+ */
+
+/** A shard farmed directly. */
+export interface DirectTreeNode {
+  shard: string;
+  method: "direct";
+  quantity: number;
+  craftsNeeded?: number;
+}
+
+/** A shard fused from two inputs, `craftsNeeded` times. */
+export interface FusionTreeNode<Tree> {
+  shard: string;
+  method: "recipe";
+  quantity: number;
+  recipe: Recipe;
+  inputs: [Tree, Tree];
+  craftsNeeded: number;
+}
+
+/**
+ * A shard produced by a loop of recipes (only reachable through recipe overrides).
+ * `inputRecipe` is how the loop is first entered; `cycleInputs` are the external
+ * inputs consumed on every lap.
+ */
+export interface CycleTreeNode<Tree> {
+  shard: string;
+  method: "cycle";
+  quantity: number;
+  steps: CycleStep[];
+  multiplier: number;
+  craftsNeeded: number;
+  inputRecipe: Tree;
+  cycleInputs: Tree[];
+}
+
+/** A shard taken from the player's inventory (inventory calculations only). */
+export interface InventoryTreeNode {
+  shard: string;
+  method: "inventory";
+  quantity: number;
+}
+
+export type RecipeTree = DirectTreeNode | FusionTreeNode<RecipeTree> | CycleTreeNode<RecipeTree>;
 
 export interface CalculationParams {
   customRates: { [shardId: string]: number };
@@ -147,37 +172,10 @@ export interface InventoryCalculationResult {
   remainingInventory?: Map<string, number>;
 }
 
+/**
+ * RecipeTree plus inventory leaves and array nodes. An array is one shard demand split
+ * across several ways of satisfying it (e.g. part from inventory, part crafted).
+ * A RecipeTree is structurally assignable to this type.
+ */
 export type InventoryRecipeTree =
-  | InventoryRecipeTree[]
-  | {
-      shard: string;
-      method: "direct";
-      quantity: number;
-      craftsNeeded?: number;
-    }
-  | {
-      shard: string;
-      method: "inventory";
-      quantity: number;
-    }
-  | {
-      shard: string;
-      method: "recipe";
-      quantity: number;
-      recipe: Recipe;
-      inputs: [InventoryRecipeTree, InventoryRecipeTree];
-      craftsNeeded: number;
-    }
-  | {
-      shard: string;
-      method: "cycle";
-      quantity: number;
-      steps: {
-        outputShard: string;
-        recipe: Recipe;
-      }[];
-      multiplier: number;
-      craftsNeeded: number;
-      inputRecipe: InventoryRecipeTree;
-      cycleInputs: InventoryRecipeTree[];
-    };
+  InventoryRecipeTree[] | DirectTreeNode | InventoryTreeNode | FusionTreeNode<InventoryRecipeTree> | CycleTreeNode<InventoryRecipeTree>;
