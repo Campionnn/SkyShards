@@ -1,15 +1,16 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Modal } from "../ui";
 import { X, Star, Search, Plus, ChevronDown } from "lucide-react";
 import { NAME_AND_FAMILY_FILTER_CONFIG, formatLargeNumber, formatTime, getRarityColor, matchesSearchQuery, shardIconUrl } from "../../utilities";
-import type { AlternativeRecipeOption, CalculationParams, Data, Recipe } from "../../types/types";
+import type { AlternativeRecipeOption, CalculationParams, Data, Recipe, Shard } from "../../types/types";
 import { CalculationService } from "../../services";
+import { dropdownOrder, processAlternatives, sortGroup, sortedGroupKeys, type Alternatives } from "./alternativeOptions";
 
 interface AlternativeRecipeModalProps {
   isOpen: boolean;
   onClose: () => void;
   /** The direct-acquisition option, plus fusion alternatives grouped by shared input. */
-  alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
+  alternatives: Alternatives;
   onSelect: (recipe: Recipe | null) => void;
   shardName: string;
   data: Data;
@@ -18,627 +19,354 @@ interface AlternativeRecipeModalProps {
   params: CalculationParams;
 }
 
-export const AlternativeRecipeModal: React.FC<
-  AlternativeRecipeModalProps & {
-    alternatives: { direct: AlternativeRecipeOption | null; grouped: Record<string, AlternativeRecipeOption[]> };
-  }
-> = ({ isOpen, onClose, alternatives, onSelect, shardName, data, loading, requiredQuantity = 1, params }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedIndices, setSelectedIndices] = useState<Record<string, number>>({});
-  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
-  const [dropdownSearchQueries, setDropdownSearchQueries] = useState<Record<string, string>>({});
+/** What the modal's option rows need to show cost and pick a recipe. */
+interface OptionContext {
+  shards: Data["shards"];
+  outputShard: Shard | undefined;
+  shardName: string;
+  format: (value: number) => string;
+  /** Total cost of `requiredQuantity` shards via the option, or null when no quantity is known. */
+  totalFor: (option: AlternativeRecipeOption) => number | null;
+  select: (recipe: Recipe | null) => void;
+}
 
-  const calculateTotalTime = (option: AlternativeRecipeOption, requiredQuantity: number) => {
-    if (!option.recipe || !option.recipe.isReptile) {
-      return option.timePerShard * requiredQuantity;
-    }
+const CURRENT_BADGE = "px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0";
+const OPTION_BUTTON = "w-full p-3 rounded-lg border text-left transition-all duration-200";
+const optionButtonState = (isCurrent: boolean) =>
+  isCurrent ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30" : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500";
 
-    const { crocodileMultiplier } = CalculationService.getInstance().calculateMultipliers(params);
+const CurrentBadge = ({ className = "" }: { className?: string }) => <span className={`${CURRENT_BADGE} ${className}`}>Current</span>;
 
-    const outputPerCraft = option.recipe.outputQuantity * crocodileMultiplier;
-    const craftsNeeded = Math.ceil(requiredQuantity / outputPerCraft);
-    const totalShardsProduced = craftsNeeded * outputPerCraft;
+const OptionCost = ({ option, context }: { option: AlternativeRecipeOption; context: OptionContext }) => {
+  const total = context.totalFor(option);
+  return (
+    <div className="text-right">
+      <div>{context.format(option.timePerShard)}</div>
+      {total !== null && <div className="text-xs text-blue-400">Total: {context.format(total)}</div>}
+    </div>
+  );
+};
 
-    return option.timePerShard * totalShardsProduced;
-  };
+const ShardAmount = ({ quantity, shardId, shard, textClass = "" }: { quantity: number; shardId: string; shard: Shard | undefined; textClass?: string }) => (
+  <div className="flex items-center gap-1.5">
+    <span className="text-slate-300 text-xs">{quantity}x</span>
+    {shard && <img src={shardIconUrl(shardId)} alt={shard.name} className="w-4 h-4 object-contain" loading="lazy" />}
+    <span className={`${shard ? getRarityColor(shard.rarity) : "text-slate-300"} ${textClass}`}>{shard?.name}</span>
+  </div>
+);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setSearchQuery("");
-      setSelectedIndices({});
-      setOpenDropdowns({});
-      setDropdownSearchQueries({});
-    }
-  }, [isOpen]);
+const DirectOption = ({ option, context, rateAsCoinValue }: { option: AlternativeRecipeOption; context: OptionContext; rateAsCoinValue: boolean }) => {
+  // Not obtainable directly at all.
+  if (option.timePerShard === Infinity) return null;
 
-  // Reset selectedIndices when alternatives change (new current recipe)
-  useEffect(() => {
-    setSelectedIndices({});
-    setDropdownSearchQueries({});
-  }, [alternatives]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-
-      const isClickInsideDropdown = target.closest("[data-dropdown-container]");
-      if (!isClickInsideDropdown) {
-        setOpenDropdowns({});
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [isOpen]);
-
-  // Find the output shard from the data
-  const outputShard = useMemo(() => {
-    if (!data?.shards) return null;
-    return Object.values(data.shards).find((shard) => shard.name === shardName);
-  }, [data?.shards, shardName]);
-
-  const processedAlternatives = useMemo(() => {
-    if (!alternatives || !data?.shards) return { direct: null, grouped: {} };
-
-    let { direct, grouped } = alternatives;
-
-    // First, flatten all recipes to deduplicate mirrored ones globally
-    const allRecipes: AlternativeRecipeOption[] = [];
-    for (const group of Object.values(grouped)) {
-      allRecipes.push(...group);
-    }
-
-    // Remove mirrored recipes globally (same inputs in different order, same output, same time)
-    const dedupedRecipes: AlternativeRecipeOption[] = [];
-    const seen = new Set<string>();
-
-    for (const option of allRecipes) {
-      if (!option.recipe) continue;
-
-      // Create a normalized key for deduplication
-      const inputs = [...option.recipe.inputs].sort();
-      const key = `${inputs[0]}-${inputs[1]}-${option.recipe.outputQuantity}-${option.timePerShard}`;
-
-      if (!seen.has(key)) {
-        seen.add(key);
-        dedupedRecipes.push(option);
-      }
-    }
-
-    // Re-group the deduplicated recipes by the most common shard
-    const shardCount: Record<string, number> = {};
-    for (const option of dedupedRecipes) {
-      if (option.recipe) {
-        for (const shard of option.recipe.inputs) {
-          shardCount[shard] = (shardCount[shard] || 0) + 1;
-        }
-      }
-    }
-
-    // Re-group by most common shard
-    const newGrouped: Record<string, AlternativeRecipeOption[]> = {};
-    for (const option of dedupedRecipes) {
-      if (!option.recipe) continue;
-      const [a, b] = option.recipe.inputs;
-      // Default to left shard if both are equally common.
-      const mostCommon = (shardCount[a] ?? 0) >= (shardCount[b] ?? 0) ? a : b;
-      if (!newGrouped[mostCommon]) newGrouped[mostCommon] = [];
-      newGrouped[mostCommon].push(option);
-    }
-
-    // Filter grouped fusion options by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      const filteredGrouped: typeof newGrouped = {};
-      for (const [firstShard, group] of Object.entries(newGrouped)) {
-        const filteredGroup = group.filter((option) => {
-          if (!option.recipe) return false;
-          return option.recipe.inputs.some((inputId) => {
-            const inputShard = data.shards[inputId];
-            return !!inputShard && matchesSearchQuery(inputShard, query, NAME_AND_FAMILY_FILTER_CONFIG);
-          });
-        });
-        if (filteredGroup.length > 0) filteredGrouped[firstShard] = filteredGroup;
-      }
-      grouped = filteredGrouped;
-      // Hide direct if searching and it doesn't match
-      if (direct && !"direct collection".includes(query)) {
-        direct = null;
-      }
-    } else {
-      grouped = newGrouped;
-    }
-
-    return { direct, grouped };
-  }, [alternatives, searchQuery, data?.shards]);
-
-  if (!isOpen) return null;
-
-  const handleSelect = (recipe: Recipe | null) => {
-    onSelect(recipe);
-    onClose();
-  };
-
-  const formatFn = params.rateAsCoinValue ? formatLargeNumber : formatTime;
-
-  const renderDirectOption = (option: AlternativeRecipeOption) => {
-    const isCurrent = option.isCurrent;
-
-    // Don't show direct option if it has infinity time
-    if (option.timePerShard === Infinity) return null;
-
-    return (
-      <button
-        key="direct"
-        onClick={() => handleSelect(option.recipe)}
-        className={`w-full p-3 rounded-lg border text-left transition-all duration-200 ${
-          isCurrent
-            ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30"
-            : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
-        }`}
-        disabled={isCurrent}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-400 rounded-full" />
-            <span className="text-green-400 font-medium text-sm">{params.rateAsCoinValue ? "Buy from Bazaar" : "Direct"}</span>
-            {isCurrent && <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">Current</span>}
-          </div>
-          <div className="flex items-center gap-1 text-slate-400 text-sm">
-            <div className="text-right">
-              <div>{formatFn(option.timePerShard)}</div>
-              {requiredQuantity && requiredQuantity > 0 && (
-                <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>
-              )}
-            </div>
-          </div>
+  return (
+    <button onClick={() => context.select(option.recipe)} className={`${OPTION_BUTTON} ${optionButtonState(option.isCurrent)}`} disabled={option.isCurrent}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-green-400 rounded-full" />
+          <span className="text-green-400 font-medium text-sm">{rateAsCoinValue ? "Buy from Bazaar" : "Direct"}</span>
+          {option.isCurrent && <CurrentBadge />}
         </div>
-      </button>
-    );
-  };
+        <div className="flex items-center gap-1 text-slate-400 text-sm">
+          <OptionCost option={option} context={context} />
+        </div>
+      </div>
+    </button>
+  );
+};
 
-  const renderFusionOption = (option: AlternativeRecipeOption) => {
-    if (!option.recipe) return null;
+/** One fusion recipe as `a + b = output`, stacked on mobile. */
+const FusionOption = ({ option, context }: { option: AlternativeRecipeOption; context: OptionContext }) => {
+  if (!option.recipe) return null;
+  const [firstInput, partner] = option.recipe.inputs;
+  const firstShard = context.shards[firstInput];
+  const partnerShard = context.shards[partner];
+  if (!firstShard || !partnerShard) return null;
 
-    const [firstInput, partner] = option.recipe.inputs;
-    const firstInputShard = data?.shards?.[firstInput];
-    const partnerShard = data?.shards?.[partner];
+  const { outputShard, shardName } = context;
+  const outputClass = outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300";
+  const outputIcon = outputShard && <img src={shardIconUrl(outputShard.id)} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />;
 
-    if (!firstInputShard || !partnerShard) return null;
-
-    const isCurrent = option.isCurrent;
-
-    return (
-      <button
-        onClick={() => handleSelect(option.recipe)}
-        className={`w-full p-3 rounded-lg border text-left transition-all duration-200 cursor-pointer ${
-          isCurrent
-            ? "bg-blue-500/20 border-blue-500/50 ring-2 ring-blue-500/30"
-            : "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500"
-        }`}
-        disabled={isCurrent}
-      >
-        <div className="flex items-center justify-between text-nowrap overflow-x-auto">
-          <div className="flex items-center gap-0 sm:gap-3">
-            <div className="w-2 h-2 bg-purple-400 rounded-full ml-0.5" />
-            <div className="flex sm:hidden ml-4">
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5 mb-1 ml-5">
-                  <span className="text-slate-300 text-xs">{firstInputShard.fuse_amount}x</span>
-                  <img src={shardIconUrl(firstInput)} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
-                  <span className={getRarityColor(firstInputShard.rarity) + " text-sm"}>{firstInputShard.name}</span>
-                </div>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-slate-400 mr-1">+</span>
-                  <span className="text-slate-300 text-xs">{partnerShard.fuse_amount}x</span>
-                  <img src={shardIconUrl(partner)} alt={partnerShard.name} className="w-4 h-4 object-contain" loading="lazy" />
-                  <span className={getRarityColor(partnerShard.rarity) + " text-sm"}>{partnerShard.name}</span>
-                </div>
-                <div className="border-t border-slate-500 my-1"></div>
-                <div className="flex items-center gap-1.5 ml-5">
-                  <span className="text-slate-300 text-xs">{option.recipe.outputQuantity}x</span>
-                  {outputShard && <img src={shardIconUrl(outputShard.id)} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
-                  <span className={outputShard ? getRarityColor(outputShard.rarity) + " text-sm" : "text-slate-300 text-sm"}>{shardName}</span>
-                </div>
+  return (
+    <button
+      onClick={() => context.select(option.recipe)}
+      className={`${OPTION_BUTTON} cursor-pointer ${optionButtonState(option.isCurrent)}`}
+      disabled={option.isCurrent}
+    >
+      <div className="flex items-center justify-between text-nowrap overflow-x-auto">
+        <div className="flex items-center gap-0 sm:gap-3">
+          <div className="w-2 h-2 bg-purple-400 rounded-full ml-0.5" />
+          <div className="flex sm:hidden ml-4">
+            <div className="flex flex-col">
+              <div className="mb-1 ml-5">
+                <ShardAmount quantity={firstShard.fuse_amount} shardId={firstInput} shard={firstShard} textClass="text-sm" />
               </div>
-            </div>
-            <div className="hidden sm:flex flex-col sm:flex-row gap-1.5 text-sm">
-              <div className="flex items-center gap-1.5">
-                <span className="text-slate-300 text-xs">{firstInputShard.fuse_amount}x</span>
-                <img src={shardIconUrl(firstInput)} alt={firstInputShard.name} className="w-4 h-4 object-contain" loading="lazy" />
-                <span className={getRarityColor(firstInputShard.rarity)}>{firstInputShard.name}</span>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-slate-400 mr-1">+</span>
+                <ShardAmount quantity={partnerShard.fuse_amount} shardId={partner} shard={partnerShard} textClass="text-sm" />
               </div>
-              <p className="hidden sm:block text-slate-400 mb-0.5 mx-0.5">+</p>
-              <div className="flex items-center gap-1.5">
-                <span className="text-slate-300 text-xs">{partnerShard.fuse_amount}x</span>
-                <img src={shardIconUrl(partner)} alt={partnerShard.name} className="w-4 h-4 object-contain" loading="lazy" />
-                <span className={getRarityColor(partnerShard.rarity)}>{partnerShard.name}</span>
-              </div>
-              <p className="hidden sm:block text-slate-400 mb-0.5 mx-0.5">=</p>
-              <div className="flex items-center gap-1.5">
+              <div className="border-t border-slate-500 my-1"></div>
+              <div className="flex items-center gap-1.5 ml-5">
                 <span className="text-slate-300 text-xs">{option.recipe.outputQuantity}x</span>
-                {outputShard && <img src={shardIconUrl(outputShard.id)} alt={outputShard.name} className="w-4 h-4 object-contain" loading="lazy" />}
-                <span className={outputShard ? getRarityColor(outputShard.rarity) : "text-slate-300"}>{shardName}</span>
+                {outputIcon}
+                <span className={`${outputClass} text-sm`}>{shardName}</span>
               </div>
             </div>
-            {isCurrent && (
-              <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0 ml-3 sm:ml-0">Current</span>
-            )}
           </div>
-          <div className="text-slate-400 text-sm">
-            <div className="text-right">
-              <div>{formatFn(option.timePerShard)}</div>
-              {requiredQuantity && requiredQuantity > 0 && (
-                <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>
-              )}
+          <div className="hidden sm:flex flex-col sm:flex-row gap-1.5 text-sm">
+            <ShardAmount quantity={firstShard.fuse_amount} shardId={firstInput} shard={firstShard} />
+            <p className="hidden sm:block text-slate-400 mb-0.5 mx-0.5">+</p>
+            <ShardAmount quantity={partnerShard.fuse_amount} shardId={partner} shard={partnerShard} />
+            <p className="hidden sm:block text-slate-400 mb-0.5 mx-0.5">=</p>
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-300 text-xs">{option.recipe.outputQuantity}x</span>
+              {outputIcon}
+              <span className={outputClass}>{shardName}</span>
             </div>
           </div>
+          {option.isCurrent && <CurrentBadge className="ml-3 sm:ml-0" />}
         </div>
-      </button>
-    );
+        <div className="text-slate-400 text-sm">
+          <OptionCost option={option} context={context} />
+        </div>
+      </div>
+    </button>
+  );
+};
+
+/** `+ 2x Partner` with Reptile/Current badges: a dropdown row naming the group's other input. */
+const PartnerSummary = ({ partnerId, partner, isCurrent }: { partnerId: string; partner: Shard | undefined; isCurrent: boolean }) => (
+  <>
+    <Plus className="w-4 h-4 text-fuchsia-400" />
+    <span className="text-slate-400 text-xs">{partner?.fuse_amount || 2}x</span>
+    <img src={shardIconUrl(partnerId)} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
+    <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>{partner?.name || partnerId}</span>
+    {partner?.family?.includes("Reptile") && (
+      <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">Reptile</span>
+    )}
+    {isCurrent && <CurrentBadge />}
+  </>
+);
+
+const DROPDOWN_HEIGHT = 260;
+
+interface FusionGroupProps {
+  groupShard: string;
+  options: AlternativeRecipeOption[];
+  context: OptionContext;
+  /** The modal's scrolling body, scrolled so an opened dropdown is fully visible. */
+  scrollContainerRef: RefObject<HTMLDivElement | null>;
+}
+
+/**
+ * Every recipe sharing `groupShard` as an input: the chosen one shown as an option, and
+ * a searchable dropdown of the partners to switch between them.
+ */
+const FusionGroup = ({ groupShard, options, context, scrollContainerRef }: FusionGroupProps) => {
+  const [chosenIndex, setChosenIndex] = useState<number | undefined>(undefined);
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // A click outside every group's dropdown closes this one.
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleMouseDown = (event: MouseEvent) => {
+      if (!(event.target as Element).closest("[data-dropdown-container]")) setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => document.removeEventListener("mousedown", handleMouseDown);
+  }, [isOpen]);
+
+  const { shards } = context;
+  const group = sortGroup(options);
+  const partnerOf = ([a, b]: [string, string]) => (groupShard === a ? b : a);
+  // Until the user picks one, show the current recipe (or the fastest).
+  const currentIndex = group.findIndex((option) => option.isCurrent);
+  const selectedIndex = chosenIndex ?? (currentIndex >= 0 ? currentIndex : 0);
+  const selectedOption = group[selectedIndex] || group[0];
+  const groupShardData = shards[groupShard];
+
+  const listed = query.trim()
+    ? group.filter((option) => {
+        const partner = option.recipe && shards[partnerOf(option.recipe.inputs)];
+        return !!partner && matchesSearchQuery(partner, query, NAME_AND_FAMILY_FILTER_CONFIG);
+      })
+    : dropdownOrder(group, shards);
+
+  const toggle = () => {
+    if (!isOpen) {
+      // Once rendered, scroll the modal body so the whole dropdown is visible.
+      setTimeout(() => {
+        const button = buttonRef.current;
+        const container = scrollContainerRef.current;
+        if (!button || !container) return;
+        const overflow =
+          button.getBoundingClientRect().bottom - container.getBoundingClientRect().top + DROPDOWN_HEIGHT - container.getBoundingClientRect().height;
+        if (overflow > 0) container.scrollBy({ top: overflow + 20 });
+      }, 50);
+    }
+    setIsOpen(!isOpen);
   };
 
-  // Render grouped fusion options as custom dropdowns
-  const renderGroupedFusionOptions = (grouped: Record<string, AlternativeRecipeOption[]>) => {
-    // Sort groups by the fastest time in each group (ascending)
-    const groupKeys = Object.keys(grouped);
-    groupKeys.sort((a, b) => {
-      const groupA = grouped[a];
-      const groupB = grouped[b];
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-3">
+        {groupShardData && (
+          <>
+            <img src={shardIconUrl(groupShard)} alt={groupShardData.name} className="w-5 h-5 object-contain" loading="lazy" />
+            <span className={getRarityColor(groupShardData.rarity) + " font-semibold text-base"}>{groupShardData.name}</span>
+            <span className="text-xs text-slate-400">
+              ({group.length} recipe{group.length !== 1 ? "s" : ""})
+            </span>
+          </>
+        )}
+      </div>
 
-      // Find the fastest time in each group
-      const fastestTimeA = Math.min(...groupA.map((option) => option.timePerShard));
-      const fastestTimeB = Math.min(...groupB.map((option) => option.timePerShard));
+      {selectedOption && <FusionOption option={selectedOption} context={context} />}
 
-      return fastestTimeA - fastestTimeB;
-    });
-
-    return groupKeys.map((groupShard) => {
-      const getPartner = ([a, b]: [string, string]) => (groupShard === a ? b : a);
-
-      // Get all options for this group and sort by cost (lowest first)
-      const group = [...grouped[groupShard]].sort((a, b) => {
-        // First sort by time (ascending - fastest first)
-        const timeDiff = a.timePerShard - b.timePerShard;
-        if (timeDiff !== 0) return timeDiff;
-
-        // If times are equal, put current recipe first
-        if (a.isCurrent && !b.isCurrent) return -1;
-        if (!a.isCurrent && b.isCurrent) return 1;
-
-        return 0;
-      });
-      const firstShardObj = data?.shards?.[groupShard];
-
-      // Get selected index - find current recipe or default to 0 (best option)
-      let selectedIndex = selectedIndices[groupShard];
-
-      // If no manual selection, try to find the current recipe
-      if (selectedIndex === undefined) {
-        const currentIndex = group.findIndex((option) => option.isCurrent);
-        selectedIndex = currentIndex >= 0 ? currentIndex : 0;
-      }
-
-      const selectedOption = group[selectedIndex] || group[0];
-      const isOpen = openDropdowns[groupShard] || false;
-      const dropdownSearchQuery = dropdownSearchQueries[groupShard] || "";
-
-      // Filter group options based on dropdown search query
-      const filteredGroup = dropdownSearchQuery.trim()
-        ? group.filter((option) => {
-            if (!option.recipe) return false;
-            const partnerShard = getPartner(option.recipe.inputs);
-            const partner = data?.shards?.[partnerShard];
-            return !!partner && matchesSearchQuery(partner, dropdownSearchQuery, NAME_AND_FAMILY_FILTER_CONFIG);
-          })
-        : group;
-
-      const processedGroup = dropdownSearchQuery.trim()
-        ? filteredGroup
-        : (() => {
-            // Define reptile family groups
-            const reptileFamilyGroups = {
-              Turtle: ["Shellwise", "Leatherback", "Tortoise", "Megalith"],
-              Amphibian: ["Newt", "Salamander", "Lizard king", "Leviathan"],
-              Snake: ["Viper", "Python", "King cobra", "Basilisk"],
-              Lizard: ["Gecko", "Iguana", "Komodo dragon", "Wyvern"],
-              Crocodilian: ["Crocodile", "Alligator", "Caiman", "Tiamat"],
-            };
-
-            // Separate reptiles by family and non-reptiles
-            const reptileFamilies: Record<string, AlternativeRecipeOption[]> = {};
-            const nonReptiles: AlternativeRecipeOption[] = [];
-
-            for (const option of filteredGroup) {
-              if (!option.recipe) continue;
-              const [, partnerShard] = option.recipe.inputs;
-              const partner = data?.shards?.[partnerShard];
-
-              if (partner?.family?.includes("Reptile")) {
-                // Find which reptile family this belongs to
-                let familyGroup = "Other";
-                for (const [groupName, families] of Object.entries(reptileFamilyGroups)) {
-                  if (families.some((family) => partner.name.toLowerCase().includes(family.toLowerCase()))) {
-                    familyGroup = groupName;
-                    break;
-                  }
-                }
-
-                if (!reptileFamilies[familyGroup]) {
-                  reptileFamilies[familyGroup] = [];
-                }
-                reptileFamilies[familyGroup].push(option);
-              } else {
-                nonReptiles.push(option);
-              }
-            }
-
-            // For each reptile family, find the most efficient one (keep) and others (push to bottom)
-            const keptReptiles: AlternativeRecipeOption[] = [];
-            const bottomReptiles: AlternativeRecipeOption[] = [];
-
-            for (const familyOptions of Object.values(reptileFamilies)) {
-              if (familyOptions.length === 0) continue;
-
-              // Sort by efficiency: current first, then by time, then by rarity (lower is better)
-              familyOptions.sort((a, b) => {
-                if (a.isCurrent && !b.isCurrent) return -1;
-                if (!a.isCurrent && b.isCurrent) return 1;
-
-                const timeDiff = a.timePerShard - b.timePerShard;
-                if (timeDiff !== 0) return timeDiff;
-
-                // If times are the same, prefer lower rarity
-                if (!a.recipe || !b.recipe) return 0;
-                const [, partnerA] = a.recipe.inputs;
-                const [, partnerB] = b.recipe.inputs;
-                const shardA = data?.shards?.[partnerA];
-                const shardB = data?.shards?.[partnerB];
-
-                if (shardA?.rarity && shardB?.rarity) {
-                  const rarityOrder: Record<string, number> = {
-                    Common: 1,
-                    Uncommon: 2,
-                    Rare: 3,
-                    Epic: 4,
-                    Legendary: 5,
-                  };
-
-                  const rarityA = rarityOrder[shardA.rarity] || 999;
-                  const rarityB = rarityOrder[shardB.rarity] || 999;
-
-                  return rarityA - rarityB;
-                }
-
-                return 0;
-              });
-
-              // Keep the most efficient one, push the rest to bottom
-              keptReptiles.push(familyOptions[0]);
-              if (familyOptions.length > 1) {
-                bottomReptiles.push(...familyOptions.slice(1));
-              }
-            }
-
-            // Sort all groups
-            const allMainOptions = [...nonReptiles, ...keptReptiles];
-            allMainOptions.sort((a, b) => {
-              if (a.isCurrent && !b.isCurrent) return -1;
-              if (!a.isCurrent && b.isCurrent) return 1;
-              return a.timePerShard - b.timePerShard;
-            });
-
-            bottomReptiles.sort((a, b) => {
-              if (a.isCurrent && !b.isCurrent) return -1;
-              if (!a.isCurrent && b.isCurrent) return 1;
-              return a.timePerShard - b.timePerShard;
-            });
-
-            // Combine: main options (sorted by time with kept reptiles in their correct positions), then bottom reptiles
-            return [...allMainOptions, ...bottomReptiles];
-          })();
-
-      const toggleDropdown = () => {
-        setOpenDropdowns((prev) => {
-          const newState = {
-            ...prev,
-            [groupShard]: !prev[groupShard],
-          };
-
-          // Auto-scroll to show the full dropdown when opening
-          if (!prev[groupShard] && newState[groupShard]) {
-            setTimeout(() => {
-              const dropdownButton = document.querySelector(`[data-dropdown-button="${groupShard}"]`);
-              const popupContent = document.querySelector(".overflow-y-auto.flex-1.min-h-0") as HTMLElement;
-
-              if (dropdownButton && popupContent) {
-                const buttonRect = (dropdownButton as HTMLElement).getBoundingClientRect();
-                const popupRect = popupContent.getBoundingClientRect();
-                const dropdownHeight = 260; // Max height of dropdown
-
-                // Calculate how much space we need below the button
-                const spaceNeeded = buttonRect.bottom - popupRect.top + dropdownHeight;
-                const availableSpace = popupRect.height;
-
-                // If we need more space, scroll down to make room
-                if (spaceNeeded > availableSpace) {
-                  const scrollAmount = spaceNeeded - availableSpace + 20; // 20px padding
-                  popupContent.scrollBy({
-                    top: scrollAmount,
-                  });
-                }
-              }
-            }, 50);
-          }
-
-          return newState;
-        });
-      };
-
-      const selectOption = (index: number) => {
-        setSelectedIndices((prev) => ({
-          ...prev,
-          [groupShard]: index,
-        }));
-        setOpenDropdowns((prev) => ({
-          ...prev,
-          [groupShard]: false,
-        }));
-      };
-
-      return (
-        <div key={groupShard} className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            {firstShardObj && (
-              <>
-                <img src={shardIconUrl(groupShard)} alt={firstShardObj.name} className="w-5 h-5 object-contain" loading="lazy" />
-                <span className={getRarityColor(firstShardObj.rarity) + " font-semibold text-base"}>{firstShardObj.name}</span>
-                <span className="text-xs text-slate-400">
-                  ({group.length} recipe{group.length !== 1 ? "s" : ""})
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* Render selected recipe first */}
-          {selectedOption && renderFusionOption(selectedOption)}
-
-          {/* Custom Dropdown below recipe - only if more than one option */}
-          {group.length > 1 && (
-            <div className="mt-3" data-dropdown-container>
-              <button
-                type="button"
-                onClick={toggleDropdown}
-                data-dropdown-button={groupShard}
-                className="w-full px-4 py-3 bg-slate-800/95 border border-slate-600/70 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 hover:border-slate-500/80 hover:bg-slate-700/80 transition-all duration-200 cursor-pointer"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {selectedOption?.recipe &&
-                      (() => {
-                        const partnerShard = getPartner(selectedOption.recipe.inputs);
-                        const partner = data?.shards?.[partnerShard];
-                        return (
-                          <>
-                            <Plus className="w-4 h-4 text-fuchsia-400" />
-                            <span className="text-slate-400 text-xs">{partner?.fuse_amount || 2}x</span>
-                            <img src={shardIconUrl(partnerShard)} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
-                            <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>{partner?.name || partnerShard}</span>
-                            {partner?.family?.includes("Reptile") && (
-                              <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">
-                                Reptile
-                              </span>
-                            )}
-                            {selectedOption.isCurrent && (
-                              <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">
-                                Current
-                              </span>
-                            )}
-                          </>
-                        );
-                      })()}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 text-slate-400 text-xs">
-                      <div className="text-right">
-                        <div>{selectedOption ? formatFn(selectedOption.timePerShard) : ""}</div>
-                        {selectedOption && requiredQuantity && requiredQuantity > 0 && (
-                          <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(selectedOption, requiredQuantity))}</div>
-                        )}
-                      </div>
-                    </div>
-                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
-                  </div>
+      {group.length > 1 && (
+        <div className="mt-3" data-dropdown-container>
+          <button
+            ref={buttonRef}
+            type="button"
+            onClick={toggle}
+            className="w-full px-4 py-3 bg-slate-800/95 border border-slate-600/70 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 hover:border-slate-500/80 hover:bg-slate-700/80 transition-all duration-200 cursor-pointer"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {selectedOption?.recipe && (
+                  <PartnerSummary
+                    partnerId={partnerOf(selectedOption.recipe.inputs)}
+                    partner={shards[partnerOf(selectedOption.recipe.inputs)]}
+                    isCurrent={selectedOption.isCurrent}
+                  />
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 text-slate-400 text-xs">
+                  {selectedOption && <OptionCost option={selectedOption} context={context} />}
                 </div>
-              </button>
+                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+              </div>
+            </div>
+          </button>
 
-              {/* Dropdown Menu */}
-              {isOpen && (
-                <div className="w-full mt-1 bg-slate-900/98 backdrop-blur-sm border border-slate-700/80 rounded-lg shadow-xl max-h-64 overflow-hidden">
-                  {/* Search bar in dropdown */}
-                  <div className="p-2 border-b border-slate-700/50">
-                    <div className="relative">
-                      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-slate-400" />
-                      <input
-                        type="text"
-                        placeholder="Search name or family..."
-                        value={dropdownSearchQuery}
-                        onChange={(e) =>
-                          setDropdownSearchQueries((prev) => ({
-                            ...prev,
-                            [groupShard]: e.target.value,
-                          }))
-                        }
-                        className="w-full pl-7 pr-2 py-1.5 bg-slate-800 border border-slate-700 rounded text-white placeholder-slate-400 text-xs focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Options list */}
-                  <div className="max-h-52 overflow-y-auto pb-1">
-                    {processedGroup.length === 0 ? (
-                      <div className="px-4 py-3 text-center text-slate-400 text-xs">No shards found</div>
-                    ) : (
-                      processedGroup.map((option, idx) => {
-                        if (!option.recipe) return null;
-                        const partnerShard = getPartner(option.recipe.inputs);
-                        const partner = data?.shards?.[partnerShard];
-                        const originalIndex = group.findIndex((groupOption) => groupOption === option);
-                        const isSelected = originalIndex === selectedIndex;
-
-                        return (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => selectOption(originalIndex)}
-                            className={`w-full px-4 py-3 text-left hover:bg-slate-800/90 transition-colors duration-150 border-b border-slate-700/40 last:border-b-0 cursor-pointer ${
-                              isSelected ? "bg-purple-500/20 text-purple-200" : "text-white"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between w-full">
-                              <div className="flex items-center gap-2">
-                                <Plus className="w-4 h-4 text-fuchsia-400" />
-                                <span className="text-slate-400 text-xs">{partner?.fuse_amount || 2}x</span>
-                                <img src={shardIconUrl(partnerShard)} alt={partner?.name} className="w-4 h-4 object-contain" loading="lazy" />
-                                <span className={`text-xs ${partner ? getRarityColor(partner.rarity) : "text-slate-300"}`}>
-                                  {partner?.name || partnerShard}
-                                </span>
-                                {partner?.family?.includes("Reptile") && (
-                                  <span className="px-1 py-0.4 text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md flex-shrink-0">
-                                    Reptile
-                                  </span>
-                                )}
-                                {option.isCurrent && (
-                                  <span className="px-1 py-0.4 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md flex-shrink-0">
-                                    Current
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-1 text-slate-400 text-xs">
-                                <div className="text-right">
-                                  <div>{formatFn(option.timePerShard)}</div>
-                                  {requiredQuantity && requiredQuantity > 0 && (
-                                    <div className="text-xs text-blue-400">Total: {formatFn(calculateTotalTime(option, requiredQuantity))}</div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })
-                    )}
-                  </div>
+          {isOpen && (
+            <div className="w-full mt-1 bg-slate-900/98 backdrop-blur-sm border border-slate-700/80 rounded-lg shadow-xl max-h-64 overflow-hidden">
+              <div className="p-2 border-b border-slate-700/50">
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search name or family..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="w-full pl-7 pr-2 py-1.5 bg-slate-800 border border-slate-700 rounded text-white placeholder-slate-400 text-xs focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-transparent"
+                    onClick={(e) => e.stopPropagation()}
+                  />
                 </div>
-              )}
+              </div>
+
+              <div className="max-h-52 overflow-y-auto pb-1">
+                {listed.length === 0 ? (
+                  <div className="px-4 py-3 text-center text-slate-400 text-xs">No shards found</div>
+                ) : (
+                  listed.map((option, idx) => {
+                    if (!option.recipe) return null;
+                    const partnerId = partnerOf(option.recipe.inputs);
+                    const index = group.indexOf(option);
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setChosenIndex(index);
+                          setIsOpen(false);
+                        }}
+                        className={`w-full px-4 py-3 text-left hover:bg-slate-800/90 transition-colors duration-150 border-b border-slate-700/40 last:border-b-0 cursor-pointer ${
+                          index === selectedIndex ? "bg-purple-500/20 text-purple-200" : "text-white"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            <PartnerSummary partnerId={partnerId} partner={shards[partnerId]} isCurrent={option.isCurrent} />
+                          </div>
+                          <div className="flex items-center gap-1 text-slate-400 text-xs">
+                            <OptionCost option={option} context={context} />
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
             </div>
           )}
         </div>
-      );
-    });
+      )}
+    </div>
+  );
+};
+
+/** Picker for how a tree node's shard is obtained: directly, or via any fusion recipe that makes it. */
+export const AlternativeRecipeModal = ({
+  isOpen,
+  onClose,
+  alternatives,
+  onSelect,
+  shardName,
+  data,
+  loading,
+  requiredQuantity = 1,
+  params,
+}: AlternativeRecipeModalProps) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Each new set of alternatives starts with every group's dropdown reset.
+  const [generation, setGeneration] = useState(0);
+  const [lastAlternatives, setLastAlternatives] = useState(alternatives);
+  if (alternatives !== lastAlternatives) {
+    setLastAlternatives(alternatives);
+    setGeneration(generation + 1);
+  }
+
+  useEffect(() => {
+    if (!isOpen) setSearchQuery("");
+  }, [isOpen]);
+
+  const outputShard = useMemo(
+    () => (data?.shards ? Object.values(data.shards).find((shard) => shard.name === shardName) : undefined),
+    [data?.shards, shardName],
+  );
+  const processed = useMemo(() => processAlternatives(alternatives, data?.shards, searchQuery), [alternatives, searchQuery, data?.shards]);
+
+  if (!isOpen) return null;
+
+  // A reptile recipe can overshoot: Crocodile multiplies its output, and crafts are whole.
+  const totalFor = (option: AlternativeRecipeOption) => {
+    if (!(requiredQuantity > 0)) return null;
+    if (!option.recipe?.isReptile) return option.timePerShard * requiredQuantity;
+    const { crocodileMultiplier } = CalculationService.getInstance().calculateMultipliers(params);
+    const outputPerCraft = option.recipe.outputQuantity * crocodileMultiplier;
+    return option.timePerShard * Math.ceil(requiredQuantity / outputPerCraft) * outputPerCraft;
   };
+
+  const context: OptionContext = {
+    shards: data?.shards ?? {},
+    outputShard,
+    shardName,
+    format: params.rateAsCoinValue ? formatLargeNumber : formatTime,
+    totalFor,
+    select: (recipe) => {
+      onSelect(recipe);
+      onClose();
+    },
+  };
+
+  const fusionCount = Object.values(processed.grouped).reduce((sum, group) => sum + group.length, 0);
+  const isEmpty = processed.direct === null && fusionCount === 0;
 
   return (
     <Modal
@@ -647,7 +375,6 @@ export const AlternativeRecipeModal: React.FC<
       labelledBy="alternative-recipe-title"
       panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col"
     >
-      {/* Header */}
       <div className="p-4 border-b border-slate-700 bg-slate-800/50 flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -655,7 +382,6 @@ export const AlternativeRecipeModal: React.FC<
             <h2 id="alternative-recipe-title" className="text-lg font-semibold text-white">
               Alternative Recipes
             </h2>
-            {/* Shard icon next to the shard name */}
             <span className="flex items-center gap-1 text-slate-400 text-sm">
               <span>for</span>
               {outputShard && <img src={shardIconUrl(outputShard.id)} alt={outputShard.name} className="w-5 h-5 object-contain" loading="lazy" />}
@@ -667,7 +393,6 @@ export const AlternativeRecipeModal: React.FC<
           </button>
         </div>
 
-        {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -680,33 +405,35 @@ export const AlternativeRecipeModal: React.FC<
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4 overflow-y-auto flex-1 min-h-0">
+      <div ref={scrollContainerRef} className="p-4 overflow-y-auto flex-1 min-h-0">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="w-8 h-8 border-2 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
           </div>
-        ) : processedAlternatives.direct === null && Object.keys(processedAlternatives.grouped).length === 0 ? (
+        ) : isEmpty ? (
           <div className="text-center py-12 text-slate-400">{searchQuery ? `No alternatives found matching "${searchQuery}"` : "No alternatives found"}</div>
         ) : (
           <div className="space-y-4">
-            {/* Direct collection option */}
-            {processedAlternatives.direct && renderDirectOption(processedAlternatives.direct)}
-
-            {/* Grouped fusion recipes as dropdowns */}
-            {renderGroupedFusionOptions(processedAlternatives.grouped)}
+            {processed.direct && <DirectOption option={processed.direct} context={context} rateAsCoinValue={params.rateAsCoinValue} />}
+            {sortedGroupKeys(processed.grouped).map((groupShard) => (
+              <FusionGroup
+                key={`${generation}-${groupShard}`}
+                groupShard={groupShard}
+                options={processed.grouped[groupShard]}
+                context={context}
+                scrollContainerRef={scrollContainerRef}
+              />
+            ))}
           </div>
         )}
       </div>
 
-      {/* Footer */}
       <div className="p-4 border-t border-slate-700 bg-slate-800/50 flex-shrink-0">
         <div className="flex items-center justify-between text-sm text-slate-400">
           <span>Recipes grouped by most common input • Best options shown first</span>
           <span>
-            {processedAlternatives.direct && processedAlternatives.direct.timePerShard !== Infinity ? "1 direct + " : ""}
-            {Object.values(processedAlternatives.grouped).reduce((sum, group) => sum + group.length, 0)} fusion recipe
-            {Object.values(processedAlternatives.grouped).reduce((sum, group) => sum + group.length, 0) !== 1 ? "s" : ""}
+            {processed.direct && processed.direct.timePerShard !== Infinity ? "1 direct + " : ""}
+            {fusionCount} fusion recipe{fusionCount !== 1 ? "s" : ""}
             {searchQuery && ` (filtered)`}
           </span>
         </div>
