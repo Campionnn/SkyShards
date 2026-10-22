@@ -1,9 +1,11 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
-import { X, Search, Check, RotateCcw, Filter, ChevronDown } from "lucide-react";
-import { DEFAULT_FILTER_CONFIG, filterShards, getRarityColor, shardIconUrl, sortByShardKey, sortShardsByNameWithPrefixAwareness } from "../../utilities";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { X, Search, Check } from "lucide-react";
+import { getRarityColor, shardIconUrl } from "../../utilities";
 import type { Shard } from "../../types/types";
-import { MAX_QUANTITIES } from "../../constants";
+import { maxQuantityForRarity } from "../../constants";
 import { Modal, ToggleSwitch } from "../ui";
+import { RarityFilter, ResetFiltersButton, SearchInput } from "./shardPicker";
+import { MODAL_SEARCH_INPUT, searchShards } from "./shardSearch";
 
 interface MultiSelectShardModalProps {
   isOpen: boolean;
@@ -14,48 +16,22 @@ interface MultiSelectShardModalProps {
   ownedAttributes?: Map<string, number>; // Map of shard key to attribute level (fused count)
 }
 
-export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({
+const EMPTY_MAP = new Map<string, number>();
+
+/** Multi-shard mode's picker: choose shards and how many of each to make. */
+export const MultiSelectShardModal = ({
   isOpen,
   onClose,
   shards,
   onDone,
-  initialSelections = new Map(),
-  ownedAttributes = new Map(),
-}) => {
+  initialSelections = EMPTY_MAP,
+  ownedAttributes = EMPTY_MAP,
+}: MultiSelectShardModalProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [rarityFilter, setRarityFilter] = useState("all");
-  const [isRarityDropdownOpen, setIsRarityDropdownOpen] = useState(false);
   const [selections, setSelections] = useState<Map<string, number>>(new Map(initialSelections));
   const [showSelectedFirst, setShowSelectedFirst] = useState(false);
-  const rarityDropdownRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const rarityOptions = [
-    { value: "all", label: "All Rarities", color: "text-violet-400" },
-    { value: "common", label: "Common", color: "text-white" },
-    { value: "uncommon", label: "Uncommon", color: "text-green-400" },
-    { value: "rare", label: "Rare", color: "text-blue-400" },
-    { value: "epic", label: "Epic", color: "text-purple-400" },
-    { value: "legendary", label: "Legendary", color: "text-yellow-400" },
-  ];
-
-  const currentRarity = rarityOptions.find((r) => r.value === rarityFilter) || rarityOptions[0];
-
-  const sortByShardId = (a: Shard, b: Shard) => sortByShardKey(a, b);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (rarityDropdownRef.current && !rarityDropdownRef.current.contains(event.target as Node)) {
-        setIsRarityDropdownOpen(false);
-      }
-    };
-
-    if (isRarityDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [isRarityDropdownOpen]);
 
   // Reset search when modal closes
   useEffect(() => {
@@ -72,30 +48,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({
   }, [isOpen, initialSelections]);
 
   const filteredShards = useMemo(() => {
-    // Apply filters using centralized function
-    const filtered = filterShards(shards, {
-      query: searchQuery,
-      rarity: rarityFilter,
-      searchConfig: DEFAULT_FILTER_CONFIG,
-    });
-
-    // Sort results
-    let sorted: Shard[];
-    if (!searchQuery.trim()) {
-      sorted = filtered.sort(sortByShardId);
-    } else {
-      const lowerQuery = searchQuery.toLowerCase();
-      sorted = filtered.sort((a, b) => {
-        const aName = a.name.toLowerCase();
-        const bName = b.name.toLowerCase();
-        const aStarts = aName.startsWith(lowerQuery);
-        const bStarts = bName.startsWith(lowerQuery);
-
-        if (aStarts && !bStarts) return -1;
-        if (!aStarts && bStarts) return 1;
-        return sortShardsByNameWithPrefixAwareness(a, b);
-      });
-    }
+    const sorted = searchShards(shards, searchQuery, rarityFilter);
 
     // If showSelectedFirst is enabled, separate selected and unselected shards
     if (showSelectedFirst) {
@@ -107,86 +60,49 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({
     return sorted;
   }, [shards, searchQuery, rarityFilter, showSelectedFirst, selections]);
 
-  const toggleShard = (shardKey: string) => {
-    // Store scroll position before toggling
+  const toggleShard = (shard: Shard) => {
     const scrollPos = scrollContainerRef.current?.scrollTop || 0;
 
     setSelections((prev) => {
-      const newMap = new Map(prev);
-      if (newMap.has(shardKey)) {
-        newMap.delete(shardKey);
-      } else {
-        // Find the shard and set to max quantity based on rarity
-        const shard = shards.find((s) => s.id === shardKey);
-        if (shard) {
-          const rarity = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
-          const maxQty = MAX_QUANTITIES[rarity] || 1;
-          newMap.set(shardKey, maxQty);
-        } else {
-          newMap.set(shardKey, 1);
-        }
-      }
-      return newMap;
+      const next = new Map(prev);
+      if (next.has(shard.id)) next.delete(shard.id);
+      else next.set(shard.id, maxQuantityForRarity(shard.rarity));
+      return next;
     });
 
-    // Restore scroll position after state update
+    // Selected-first reorders the list under the cursor; keep the scroll position.
     if (showSelectedFirst) {
       requestAnimationFrame(() => {
-        if (scrollContainerRef.current) {
-          scrollContainerRef.current.scrollTop = scrollPos;
-        }
+        if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = scrollPos;
       });
     }
   };
 
   const updateQuantity = (shardKey: string, quantity: number) => {
-    setSelections((prev) => {
-      const newMap = new Map(prev);
-      if (quantity > 0) {
-        newMap.set(shardKey, quantity);
-      }
-      return newMap;
-    });
+    if (quantity > 0) setSelections((prev) => new Map(prev).set(shardKey, quantity));
   };
 
-  const handleSelectAll = () => {
-    const allSelections = new Map<string, number>();
-    shards.forEach((shard) => {
-      const rarity = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
-      const maxQty = MAX_QUANTITIES[rarity] || 1;
-      allSelections.set(shard.id, maxQty);
-    });
-    setSelections(allSelections);
-  };
+  const handleSelectAll = () => setSelections(new Map(shards.map((shard) => [shard.id, maxQuantityForRarity(shard.rarity)])));
 
+  // Every shard not yet maxed, for the quantity still needed to max it.
   const handleSelectMissing = () => {
     setSelections((prev) => {
-      const newMap = new Map(prev);
-      shards.forEach((shard) => {
-        const rarity = shard.rarity.toLowerCase() as keyof typeof MAX_QUANTITIES;
-        const maxQty = MAX_QUANTITIES[rarity] || 1;
-        const owned = ownedAttributes.get(shard.id) ?? 0;
-        const needed = maxQty - owned;
-        if (needed > 0) {
-          newMap.set(shard.id, needed);
-        } else {
-          newMap.delete(shard.id);
-        }
-      });
-      return newMap;
+      const next = new Map(prev);
+      for (const shard of shards) {
+        const needed = maxQuantityForRarity(shard.rarity) - (ownedAttributes.get(shard.id) ?? 0);
+        if (needed > 0) next.set(shard.id, needed);
+        else next.delete(shard.id);
+      }
+      return next;
     });
   };
 
   const handleDone = () => {
-    const selectedData = Array.from(selections.entries())
-      .map(([key, quantity]) => {
-        const shard = shards.find((s) => s.id === key);
-        return { shard: shard!, quantity };
-      })
-      .filter((item) => item.shard);
-    onDone(selectedData);
+    const shardsById = new Map(shards.map((shard) => [shard.id, shard]));
+    onDone(Array.from(selections, ([key, quantity]) => ({ shard: shardsById.get(key)!, quantity })).filter((item) => item.shard));
   };
 
+  const totalSelected = Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0);
   if (!isOpen) return null;
 
   return (
@@ -215,64 +131,14 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({
       {/* Search and Filters */}
       <div className="p-4 border-b border-slate-700 space-y-3">
         <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search shards..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
-              autoFocus
-            />
-          </div>
-
-          {/* Rarity Filter Dropdown */}
-          <div className="relative" ref={rarityDropdownRef}>
-            <button
-              type="button"
-              onClick={() => setIsRarityDropdownOpen(!isRarityDropdownOpen)}
-              className="flex items-center justify-between gap-2 px-3 py-2 h-[42px] min-w-[140px] bg-purple-500/10 border border-purple-500/20 hover:border-purple-400/30 rounded-md hover:bg-purple-500/20 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Filter className={`w-4 h-4 ${currentRarity.color}`} />
-                <span className={`text-sm font-medium ${currentRarity.color}`}>{currentRarity.label}</span>
-              </div>
-              <ChevronDown className={`w-4 h-4 ${currentRarity.color} transition-transform ${isRarityDropdownOpen ? "rotate-180" : ""}`} />
-            </button>
-
-            {isRarityDropdownOpen && (
-              <div className="absolute right-0 mt-1 w-48 bg-slate-800 border border-purple-500/20 rounded-md shadow-xl z-50 overflow-hidden">
-                {rarityOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      setRarityFilter(option.value);
-                      setIsRarityDropdownOpen(false);
-                    }}
-                    className={`w-full px-4 py-2.5 text-sm text-left font-medium transition-colors cursor-pointer ${
-                      rarityFilter === option.value ? "bg-purple-500/30 " + option.color : option.color + " hover:bg-purple-500/10 hover:brightness-125"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Reset Filter Button */}
-          <button
+          <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search shards..." className={MODAL_SEARCH_INPUT} autoFocus />
+          <RarityFilter value={rarityFilter} onChange={setRarityFilter} />
+          <ResetFiltersButton
             onClick={() => {
               setSearchQuery("");
               setRarityFilter("all");
             }}
-            className="px-3 py-2 h-[42px] text-sm bg-slate-600/50 hover:bg-slate-600 border border-slate-500/50 hover:border-slate-500 rounded-md text-slate-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1.5"
-            title="Reset filters"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
+          />
         </div>
         <div className="flex items-center justify-between text-sm text-slate-400">
           <span>
@@ -291,7 +157,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({
             return (
               <div
                 key={shard.id}
-                onClick={() => toggleShard(shard.id)}
+                onClick={() => toggleShard(shard)}
                 className={`flex items-center gap-2 p-2.5 rounded-lg transition-all duration-300 border cursor-pointer ${
                   isSelected
                     ? "bg-blue-500/20 border-blue-500/50 hover:border-blue-500/70"
@@ -364,8 +230,7 @@ export const MultiSelectShardModal: React.FC<MultiSelectShardModalProps> = ({
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm text-slate-400">
-            Total: {Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0)} shard
-            {Array.from(selections.values()).reduce((sum, qty) => sum + qty, 0) !== 1 ? "s" : ""}
+            Total: {totalSelected} shard{totalSelected !== 1 ? "s" : ""}
           </span>
           <button
             onClick={handleDone}
