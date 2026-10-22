@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, type ChangeEvent, type FocusEvent, type ReactNode } from "react";
 import { Search, RotateCcw, Save, AlignLeft } from "lucide-react";
 import { useShardsWithRecipes, useCustomRates, useCustomPrices, useCalculatorState } from "../hooks";
 import { debounce, filterShards, DEFAULT_FILTER_CONFIG, isFocusRestoredByWindow } from "../utilities";
@@ -17,7 +17,49 @@ const segmentClass = (active: boolean) =>
       : "bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 border-slate-600/50 hover:border-slate-500/50"
   }`;
 
-export const SettingsPage: React.FC = () => {
+const SearchBox = ({
+  value,
+  onChange,
+  onFocus,
+  className = "",
+}: {
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onFocus: (e: FocusEvent<HTMLInputElement>) => void;
+  className?: string;
+}) => (
+  <div className={`relative ${className}`}>
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <Search className="h-5 w-5 text-slate-400" />
+    </div>
+    <input
+      type="text"
+      value={value}
+      onChange={onChange}
+      onFocus={onFocus}
+      placeholder="Search by name, perk, or description..."
+      className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-md text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-colors duration-200"
+    />
+  </div>
+);
+
+// Full class strings so Tailwind can find them.
+const ACTION_COLORS = {
+  indigo: "bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 border-indigo-500/20 hover:border-indigo-500/30",
+  red: "bg-red-500/20 hover:bg-red-500/30 text-red-400 border-red-500/20 hover:border-red-500/30",
+  green: "bg-green-500/20 hover:bg-green-500/30 text-green-400 border-green-500/20 hover:border-green-500/30",
+} as const;
+
+const ActionButton = ({ color, onClick, children }: { color: keyof typeof ACTION_COLORS; onClick: () => void; children: ReactNode }) => (
+  <button
+    onClick={onClick}
+    className={`px-3 py-2.5 font-medium rounded-md border transition-colors duration-200 flex items-center space-x-2 cursor-pointer ${ACTION_COLORS[color]}`}
+  >
+    {children}
+  </button>
+);
+
+export const SettingsPage = () => {
   const { shards, loading: shardsLoading } = useShardsWithRecipes();
   const { form } = useCalculatorState();
   // Defaults to the calculator's mode; switching here doesn't change the calculator.
@@ -79,18 +121,10 @@ export const SettingsPage: React.FC = () => {
     (shardId: string, newRate: number | undefined) => {
       updateRate(shardId, newRate);
 
-      // Only show save button if there are actual changes from defaults
-      // Check if the new rate is different from the default rate
-      const defaultRate = defaultRates[shardId];
-      const hasActualChange = newRate !== undefined && newRate !== defaultRate;
-
-      // Check if any other shards have custom rates that differ from defaults
-      const otherChanges = Object.entries(customRates).some(([id, rate]) => {
-        if (id === shardId) return false; // Skip the current shard being changed
-        return rate !== undefined && rate !== defaultRates[id];
-      });
-
-      setHasChanges(hasActualChange || otherChanges);
+      // "Save" shows while any shard's rate differs from its default.
+      const isOverride = (id: string, rate: number | undefined) => rate !== undefined && rate !== defaultRates[id];
+      const otherOverrides = Object.entries(customRates).some(([id, rate]) => id !== shardId && isOverride(id, rate));
+      setHasChanges(isOverride(shardId, newRate) || otherOverrides);
     },
     [updateRate, defaultRates, customRates],
   );
@@ -117,17 +151,13 @@ export const SettingsPage: React.FC = () => {
     }
   }, [isPrices, priceSourceLabel, resetRates, resetPrices]);
 
-  const handleSave = useCallback(() => {
-    setHasChanges(false);
-  }, []);
-
-  const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilterChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   }, []);
 
   // Focusing the box starts a new search, so it clears the old one - unless the browser is
   // just handing focus back after the user alt-tabbed away mid-search.
-  const handleFilterFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+  const handleFilterFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
     if (isFocusRestoredByWindow(e.target)) return;
     setFilter("");
   }, []);
@@ -139,6 +169,34 @@ export const SettingsPage: React.FC = () => {
       </div>
     );
   }
+
+  // The mobile and desktop control rows share these; only their wrappers differ.
+  const filterControls = (
+    <>
+      <RarityDropdown value={rarityFilter} onChange={setRarityFilter} />
+      <TypeDropdown value={typeFilter} onChange={setTypeFilter} />
+      <ActionButton color="indigo" onClick={() => setDetailedShard((prev) => !prev)}>
+        <AlignLeft className="w-5 h-5 text-indigo-400" />
+        <span>{detailedShard ? "Hide Details" : "Show Details"}</span>
+      </ActionButton>
+    </>
+  );
+
+  const resetAndSave = (
+    <>
+      <ActionButton color="red" onClick={handleResetAll}>
+        <RotateCcw className="w-4 h-4" />
+        <span>Reset</span>
+      </ActionButton>
+      {/* Edits persist as they're typed; "Save" only acknowledges them and hides itself. */}
+      {hasChanges && (
+        <ActionButton color="green" onClick={() => setHasChanges(false)}>
+          <Save className="w-4 h-4" />
+          <span>Save</span>
+        </ActionButton>
+      )}
+    </>
+  );
 
   return (
     <div className="min-h-screen flex flex-col space-y-4 py-4">
@@ -184,140 +242,17 @@ export const SettingsPage: React.FC = () => {
           )}
         </div>
         <div className="md:hidden space-y-3">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-slate-400" />
-            </div>
-            <input
-              type="text"
-              value={filter}
-              onChange={handleFilterChange}
-              onFocus={handleFilterFocus}
-              placeholder="Search by name, perk, or description..."
-              className="
-                w-full pl-10 pr-4 py-2.5 
-                bg-white/5 border border-white/10 
-                rounded-md text-white placeholder-slate-400
-                focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50
-                transition-colors duration-200
-              "
-            />
-          </div>
-
+          <SearchBox value={filter} onChange={handleFilterChange} onFocus={handleFilterFocus} />
           <div className="flex flex-wrap gap-3">
-            <RarityDropdown value={rarityFilter} onChange={setRarityFilter} />
-            <TypeDropdown value={typeFilter} onChange={setTypeFilter} />
-            <button
-              onClick={() => setDetailedShard((prev) => !prev)}
-              className="
-                px-3 py-2.5 bg-indigo-500/20 hover:bg-indigo-500/30 
-                text-indigo-400 font-medium rounded-md 
-                border border-indigo-500/20 hover:border-indigo-500/30
-                transition-colors duration-200
-                flex items-center space-x-2 cursor-pointer
-              "
-            >
-              <AlignLeft className="w-5 h-5 text-indigo-400" />
-              <span>{detailedShard ? "Hide Details" : "Show Details"}</span>
-            </button>
-            <button
-              onClick={handleResetAll}
-              className="
-                px-3 py-2.5 bg-red-500/20 hover:bg-red-500/30 
-                text-red-400 font-medium rounded-md 
-                border border-red-500/20 hover:border-red-500/30
-                transition-colors duration-200
-                flex items-center space-x-2 cursor-pointer
-              "
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Reset</span>
-            </button>
-            {hasChanges && (
-              <button
-                onClick={handleSave}
-                className="
-                  px-3 py-2.5 bg-green-500/20 hover:bg-green-500/30 
-                  text-green-400 font-medium rounded-md 
-                  border border-green-500/20 hover:border-green-500/30
-                  transition-colors duration-200
-                  flex items-center space-x-2 cursor-pointer
-                "
-              >
-                <Save className="w-4 h-4" />
-                <span>Save</span>
-              </button>
-            )}
+            {filterControls}
+            {resetAndSave}
           </div>
         </div>
 
         <div className="hidden md:flex md:flex-wrap gap-3">
-          <div className="flex-1 min-w-[400px] relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-slate-400" />
-            </div>
-            <input
-              type="text"
-              value={filter}
-              onChange={handleFilterChange}
-              onFocus={handleFilterFocus}
-              placeholder="Search by name, perk, or description..."
-              className="
-                w-full pl-10 pr-4 py-2.5 
-                bg-white/5 border border-white/10 
-                rounded-md text-white placeholder-slate-400
-                focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50
-                transition-colors duration-200
-              "
-            />
-          </div>
-
-          <RarityDropdown value={rarityFilter} onChange={setRarityFilter} />
-          <TypeDropdown value={typeFilter} onChange={setTypeFilter} />
-          <button
-            onClick={() => setDetailedShard((prev) => !prev)}
-            className="
-                px-3 py-2.5 bg-indigo-500/20 hover:bg-indigo-500/30 
-                text-indigo-400 font-medium rounded-md 
-                border border-indigo-500/20 hover:border-indigo-500/30
-                transition-colors duration-200
-                flex items-center space-x-2 cursor-pointer
-              "
-          >
-            <AlignLeft className="w-5 h-5 text-indigo-400" />
-            <span>{detailedShard ? "Hide Details" : "Show Details"}</span>
-          </button>
-          <div className="flex gap-2">
-            <button
-              onClick={handleResetAll}
-              className="
-                px-3 py-2.5 bg-red-500/20 hover:bg-red-500/30 
-                text-red-400 font-medium rounded-md 
-                border border-red-500/20 hover:border-red-500/30
-                transition-colors duration-200
-                flex items-center space-x-2 cursor-pointer
-              "
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Reset</span>
-            </button>
-
-            {hasChanges && (
-              <button
-                onClick={handleSave}
-                className="
-                  px-3 py-2.5 bg-green-500/20 hover:bg-green-500/30 
-                  text-green-400 font-medium rounded-md 
-                  border border-green-500/20 hover:border-green-500/30
-                  transition-colors duration-200
-                  flex items-center space-x-2 cursor-pointer
-                "
-              >
-                <Save className="w-4 h-4" />
-                <span>Save</span>
-              </button>
-            )}
-          </div>
+          <SearchBox value={filter} onChange={handleFilterChange} onFocus={handleFilterFocus} className="flex-1 min-w-[400px]" />
+          {filterControls}
+          <div className="flex gap-2">{resetAndSave}</div>
         </div>
 
         <div className="mt-3 text-sm text-slate-400">
@@ -340,13 +275,7 @@ export const SettingsPage: React.FC = () => {
                   title={desc?.title || shard.name}
                   description={<ShardDescription record={desc} fallback="No description." collapsibleHowToHunt />}
                   detailed={detailedShard}
-                  rate={
-                    isPrices
-                      ? (customPrices.get(shard.id) ?? livePrices[shard.id] ?? 0)
-                      : customRates[shard.id] !== undefined
-                        ? customRates[shard.id]!
-                        : defaultRates[shard.id]
-                  }
+                  rate={isPrices ? (customPrices.get(shard.id) ?? livePrices[shard.id] ?? 0) : (customRates[shard.id] ?? defaultRates[shard.id])}
                   defaultRate={isPrices ? (livePrices[shard.id] ?? 0) : defaultRates[shard.id]}
                   defaultLabel={isPrices ? "Live" : "Default"}
                   onRateChange={isPrices ? handlePriceChange : handleRateChange}
