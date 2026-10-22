@@ -30,8 +30,8 @@ const plainPath = async (target: string, quantity: number, params = PARAMS, over
   const data = await svc.parseData(params);
   const { choices } = svc.computeMinCosts(data, params, overrides);
   const cycleNodes = svc.findCycleNodes(choices);
-  const tree = svc.buildRecipeTree(data, target, choices, cycleNodes, params, overrides);
-  svc.assignQuantities(tree, quantity, data, { total: 0 }, choices, svc.calculateMultipliers(params).crocodileMultiplier, params, overrides);
+  const tree = svc.buildRecipeTree(data, target, choices, cycleNodes, params);
+  svc.assignQuantities(tree, quantity, data, { total: 0 }, svc.calculateMultipliers(params).crocodileMultiplier);
 
   const { craftsNeeded, craftTime, totalQuantities } = svc.collectTreeStats(tree, params);
   return { data, totalQuantities, craftsNeeded, totalTime: svc.calculateTotalTimeFromQuantities(totalQuantities, craftTime, data, params) };
