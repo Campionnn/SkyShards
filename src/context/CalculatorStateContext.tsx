@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import type { CalculationFormData } from "../schemas";
-import type { CalculationResult, Data } from "../types/types";
 import { saveFormData, loadFormData, clearFormData, getSaveEnabled, setSaveEnabled } from "../utilities";
 import { CalculatorStateContext, type CalculatorStateContextType } from "./contexts";
 
@@ -39,14 +38,11 @@ const loadInitialForm = (): CalculationFormData => {
 };
 
 /**
- * Calculator form + last result, lifted above the router so they survive page
- * navigation. The form auto-saves to localStorage while saving is enabled.
+ * Calculator form, lifted above the router so it survives page navigation (the
+ * Shards page reads it too). Auto-saves to localStorage while saving is enabled.
  */
 export const CalculatorStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [form, setForm] = useState<CalculationFormData>(loadInitialForm);
-  const [result, setResult] = useState<CalculationResult | null>(null);
-  const [calculationData, setCalculationData] = useState<Data | null>(null);
-  const [targetShardName, setTargetShardName] = useState("");
   const [saveEnabled, setSaveEnabledLocal] = useState(getSaveEnabled);
 
   useEffect(() => {
@@ -60,27 +56,7 @@ export const CalculatorStateProvider: React.FC<{ children: React.ReactNode }> = 
     if (!enabled) clearFormData();
   }, []);
 
-  const resetForm = useCallback(() => {
-    setForm(DEFAULT_FORM);
-    if (saveEnabled) clearFormData();
-  }, [saveEnabled]);
-
-  const value = useMemo<CalculatorStateContextType>(
-    () => ({
-      form,
-      setForm,
-      resetForm,
-      result,
-      setResult,
-      calculationData,
-      setCalculationData,
-      targetShardName,
-      setTargetShardName,
-      saveEnabled,
-      setSaveEnabledState,
-    }),
-    [form, resetForm, result, calculationData, targetShardName, saveEnabled, setSaveEnabledState],
-  );
+  const value = useMemo<CalculatorStateContextType>(() => ({ form, setForm, saveEnabled, setSaveEnabledState }), [form, saveEnabled, setSaveEnabledState]);
 
   return <CalculatorStateContext.Provider value={value}>{children}</CalculatorStateContext.Provider>;
 };

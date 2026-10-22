@@ -1,6 +1,6 @@
 import { createContext } from "react";
 import type { CalculationFormData } from "../schemas";
-import type { CalculationResult, Data, Shard } from "../types/types";
+import type { Shard } from "../types/types";
 
 // Context objects live apart from their providers so the provider files export only
 // components (react-refresh). Read them through `useCalculatorState` / `useRecipeState`.
@@ -8,13 +8,6 @@ import type { CalculationResult, Data, Shard } from "../types/types";
 export interface CalculatorStateContextType {
   form: CalculationFormData;
   setForm: (data: CalculationFormData) => void;
-  resetForm: () => void;
-  result: CalculationResult | null;
-  setResult: (result: CalculationResult | null) => void;
-  calculationData: Data | null;
-  setCalculationData: (data: Data | null) => void;
-  targetShardName: string;
-  setTargetShardName: (name: string) => void;
   saveEnabled: boolean;
   setSaveEnabledState: (enabled: boolean) => void;
 }
