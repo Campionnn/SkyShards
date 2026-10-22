@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Background,
   Controls,
@@ -35,7 +35,7 @@ import {
 
 const nodeTypes = { shard: ShardGraphNode };
 
-const FusionGraphInner: React.FC = () => {
+const FusionGraphInner = () => {
   const { fusionData, rates, loading } = useFusionData();
   const { fitView, setCenter } = useReactFlow();
   const updateNodeInternals = useUpdateNodeInternals();
@@ -48,7 +48,9 @@ const FusionGraphInner: React.FC = () => {
   const [edgeFilter, setEdgeFilter] = useState<EdgeFilter>("both");
   const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
-  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Hiding results on blur is delayed so a click on a result lands first.
+  const blurTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(blurTimer.current), []);
   const didFit = useRef(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -115,13 +117,11 @@ const FusionGraphInner: React.FC = () => {
 
   const displayNodes = useMemo(
     () =>
-      nodes
-        .filter(isTypeVisible)
-        .map((node) =>
-          (connectedLine ? !connectedLine.has(node.id) : false) === node.data.dimmed
-            ? node
-            : { ...node, data: { ...node.data, dimmed: connectedLine ? !connectedLine.has(node.id) : false } },
-        ),
+      nodes.filter(isTypeVisible).map((node) => {
+        const dimmed = connectedLine ? !connectedLine.has(node.id) : false;
+        // Reuse unchanged nodes so React Flow and the memoised node component skip them.
+        return dimmed === node.data.dimmed ? node : { ...node, data: { ...node.data, dimmed } };
+      }),
     [nodes, connectedLine, isTypeVisible],
   );
 
@@ -219,7 +219,7 @@ const FusionGraphInner: React.FC = () => {
           {showResults && searchResults.length > 0 && (
             <div
               className="absolute mt-1 max-h-72 w-full overflow-y-auto rounded-lg border border-slate-700 bg-slate-900/98 shadow-xl"
-              onMouseDown={() => blurTimer.current && clearTimeout(blurTimer.current)}
+              onMouseDown={() => clearTimeout(blurTimer.current)}
             >
               {searchResults.map((node) => (
                 <button key={node.id} onClick={() => focusShard(node)} className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-purple-500/20">
@@ -268,7 +268,7 @@ const FusionGraphInner: React.FC = () => {
   );
 };
 
-export const FusionGraphPage: React.FC = () => (
+export const FusionGraphPage = () => (
   <ReactFlowProvider>
     <FusionGraphInner />
   </ReactFlowProvider>
