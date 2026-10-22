@@ -1,18 +1,8 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type PropsWithChildren } from "react";
 import { X } from "lucide-react";
-import { ToastContext, type ToastContextValue } from "./toastContext";
+import { ToastContext, type ToastContextValue, type ToastOptions, type ToastVariant } from "./toastContext";
 
-export type ToastVariant = "success" | "error" | "info" | "warning";
-
-export type ToastOptions = {
-  id?: string;
-  title: string;
-  description?: string;
-  variant?: ToastVariant;
-  duration?: number; // ms
-};
-
-export type Toast = Required<Omit<ToastOptions, "id">> & { id: string };
+type Toast = Required<ToastOptions>;
 
 const variantStyles: Record<ToastVariant, { container: string; badge: string }> = {
   success: {
@@ -33,9 +23,11 @@ const variantStyles: Record<ToastVariant, { container: string; badge: string }> 
   },
 };
 
+const MAX_TOASTS = 5;
+
 const genId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-export const ToastProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const ToastProvider = ({ children }: PropsWithChildren) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const timers = useRef<Map<string, number>>(new Map());
 
@@ -55,6 +47,12 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({ children }) =
     },
     [clearTimer],
   );
+
+  // Don't let pending auto-dismiss timers fire after the provider unmounts.
+  useEffect(() => {
+    const pending = timers.current;
+    return () => pending.forEach((t) => window.clearTimeout(t));
+  }, []);
 
   const dismissAll = useCallback<ToastContextValue["dismissAll"]>(() => {
     timers.current.forEach((t) => window.clearTimeout(t));
@@ -76,17 +74,19 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({ children }) =
       };
 
       setToasts((prev) => {
-        const arr = [...prev, entry];
-        if (arr.length > 5) arr.shift();
-        return arr;
+        const arr = [...prev.filter((t) => t.id !== id), entry];
+        return arr.length > MAX_TOASTS ? arr.slice(-MAX_TOASTS) : arr;
       });
 
-      const timeout = window.setTimeout(() => dismiss(id), duration);
-      timers.current.set(id, timeout);
+      clearTimer(id);
+      timers.current.set(
+        id,
+        window.setTimeout(() => dismiss(id), duration),
+      );
 
       return id;
     },
-    [dismiss],
+    [clearTimer, dismiss],
   );
 
   const value = useMemo<ToastContextValue>(() => ({ toast, dismiss, dismissAll }), [toast, dismiss, dismissAll]);
@@ -94,9 +94,6 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({ children }) =
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <style>{`
-        @keyframes toastProgress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
-      `}</style>
       <div className="fixed top-3 right-3 z-[60] flex flex-col gap-2 w-[min(92vw,380px)]">
         {toasts.map((t) => {
           const s = variantStyles[t.variant];
@@ -118,12 +115,7 @@ export const ToastProvider: React.FC<React.PropsWithChildren> = ({ children }) =
               </div>
               <div
                 className="absolute left-0 bottom-0 h-0.5 w-full bg-white origin-left"
-                style={{
-                  animationName: "toastProgress",
-                  animationDuration: `${t.duration}ms`,
-                  animationTimingFunction: "linear",
-                  animationFillMode: "forwards",
-                }}
+                style={{ animation: `toast-progress ${t.duration}ms linear forwards` }}
               />
             </div>
           );

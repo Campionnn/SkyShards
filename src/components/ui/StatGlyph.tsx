@@ -4,7 +4,7 @@ interface StatGlyphProps {
   char: string;
 }
 
-export const StatGlyph: React.FC<StatGlyphProps> = ({ char }) => {
+export const StatGlyph = ({ char }: StatGlyphProps) => {
   const glyph = GLYPH_MAP[char];
   if (!glyph) return <>{char}</>;
   return (

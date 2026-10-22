@@ -1,4 +1,3 @@
-import React from "react";
 import type { LucideIcon } from "lucide-react";
 
 interface SummaryCardProps {
@@ -9,7 +8,7 @@ interface SummaryCardProps {
   additionalValue?: string;
 }
 
-export const SummaryCard: React.FC<SummaryCardProps> = ({ icon: Icon, iconColor, label, value, additionalValue }) => (
+export const SummaryCard = ({ icon: Icon, iconColor, label, value, additionalValue }: SummaryCardProps) => (
   <div className="bg-slate-800 border border-slate-600 rounded-md p-2">
     <div className="flex items-center space-x-2">
       <div className="w-8 h-8 bg-slate-700 rounded-md flex items-center justify-center">

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 /**
@@ -32,7 +32,7 @@ const FOCUSABLE_SELECTOR = [
 export interface ModalProps {
   open: boolean;
   onClose: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
   /** Classes for the panel itself — size, colours, scroll behaviour. */
   panelClassName?: string;
   /** Backdrop tint and padding. Defaults to the variant most modals use. */
@@ -41,7 +41,7 @@ export interface ModalProps {
   labelledBy?: string;
 }
 
-export const Modal: React.FC<ModalProps> = ({ open, onClose, children, panelClassName = "", backdropClassName = "bg-black/50 p-4", labelledBy }) => {
+export const Modal = ({ open, onClose, children, panelClassName = "", backdropClassName = "bg-black/50 p-4", labelledBy }: ModalProps) => {
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Call sites pass inline arrows, so read onClose through a ref rather than
@@ -106,7 +106,7 @@ export const Modal: React.FC<ModalProps> = ({ open, onClose, children, panelClas
   if (!open) return null;
 
   /** Keeps Tab inside the dialog instead of wandering onto the page behind it. */
-  const handlePanelKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const handlePanelKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "Tab" || !panelRef.current) return;
 
     const focusable = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(

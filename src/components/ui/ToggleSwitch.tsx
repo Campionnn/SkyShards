@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import { useCallback, type MouseEvent, type ReactNode } from "react";
 import { Tooltip } from "./Tooltip";
 
 /**
@@ -37,12 +37,12 @@ interface ToggleSwitchProps {
   size?: ToggleSize;
   accent?: ToggleAccent;
   /** Help bubble rendered between the label and the switch. */
-  tooltip?: React.ReactNode;
+  tooltip?: ReactNode;
   /** Overrides the label's colour. */
   labelClassName?: string;
 }
 
-export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
+export const ToggleSwitch = ({
   label,
   checked,
   onChange,
@@ -51,9 +51,9 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   accent = "fuchsia",
   tooltip,
   labelClassName = "text-slate-200",
-}) => {
+}: ToggleSwitchProps) => {
   const handleToggle = useCallback(
-    (e: React.MouseEvent) => {
+    (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       onChange(!checked);

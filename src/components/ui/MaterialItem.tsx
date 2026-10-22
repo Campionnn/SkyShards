@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Info } from "lucide-react";
 import { formatLargeNumber, formatNumber, formatTime, getRarityColor, shardIconUrl } from "../../utilities";
 import { Tooltip } from "./Tooltip";
@@ -15,7 +15,7 @@ interface MaterialItemProps {
   allShards?: { [shardId: string]: Shard }; // Required if breakdown is provided
 }
 
-export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, ironManView, breakdown, allShards }) => {
+export const MaterialItem = ({ shard, quantity, ironManView, breakdown, allShards }: MaterialItemProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const hasBreakdown = breakdown && breakdown.size > 0 && allShards;
   const timeNeeded = quantity / shard.rate;

@@ -1,4 +1,4 @@
-import React from "react";
+import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { ShardNode } from "../../utilities/fusionGraphLayout";
 import { getRarityColor, shardIconUrl } from "../../utilities";
@@ -11,7 +11,7 @@ const rarityBorder: Record<string, string> = {
   legendary: "border-yellow-400/70",
 };
 
-const ShardGraphNodeComponent: React.FC<NodeProps<ShardNode>> = ({ data, selected }) => {
+export const ShardGraphNode = memo(({ data, selected }: NodeProps<ShardNode>) => {
   const { shardId, name, rarity, shared, dimmed } = data;
 
   return (
@@ -38,6 +38,4 @@ const ShardGraphNodeComponent: React.FC<NodeProps<ShardNode>> = ({ data, selecte
       <Handle id="r" type="source" position={Position.Right} isConnectable={false} className="!h-2 !w-2 !border-slate-600 !bg-slate-500" />
     </div>
   );
-};
-
-export const ShardGraphNode = React.memo(ShardGraphNodeComponent);
+});

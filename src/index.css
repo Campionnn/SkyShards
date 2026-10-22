@@ -65,6 +65,16 @@ html.ads-blocked .pn-page {
   display: block;
 }
 
+/* Toast auto-dismiss progress bar (ui/Toast.tsx) */
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
 /* Remove number input spinners */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {

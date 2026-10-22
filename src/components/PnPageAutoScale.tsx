@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 interface PnPageAutoScaleProps {
-  children: React.ReactNode;
+  children: ReactNode;
   minWidth?: number;
   mobileBreakpoint?: number;
   /**
@@ -13,9 +13,8 @@ interface PnPageAutoScaleProps {
   disabled?: boolean;
 }
 
-export const PnPageAutoScale: React.FC<PnPageAutoScaleProps> = ({ children, minWidth = 1920, mobileBreakpoint = 1280, disabled = false }) => {
+export const PnPageAutoScale = ({ children, minWidth = 1920, mobileBreakpoint = 1280, disabled = false }: PnPageAutoScaleProps) => {
   const [scale, setScale] = useState(1);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (disabled) return;
@@ -43,7 +42,6 @@ export const PnPageAutoScale: React.FC<PnPageAutoScaleProps> = ({ children, minW
 
   return (
     <div
-      ref={containerRef}
       style={{
         width: scale < 1 ? `${100 / scale}%` : "100%",
         transformOrigin: "top left",
