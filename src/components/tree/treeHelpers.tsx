@@ -49,6 +49,29 @@ export const useExpansionState = (expandedStates: Map<string, boolean>) => {
 };
 
 /**
+ * Owns the expand/collapse Map for one rendered tree. Every update copies the Map so
+ * React sees a new value; nodes seed their defaults into it through `useExpansionState`.
+ * A change of `resetKey` (e.g. a different tree) starts again from an empty Map.
+ */
+export const useTreeExpansion = (resetKey?: unknown) => {
+  const [expandedStates, setExpandedStates] = React.useState(() => new Map<string, boolean>());
+  const [lastResetKey, setLastResetKey] = React.useState(resetKey);
+  if (resetKey !== lastResetKey) {
+    setLastResetKey(resetKey);
+    setExpandedStates(new Map());
+  }
+
+  const toggle = React.useCallback((nodeId: string) => {
+    setExpandedStates((prev) => new Map(prev).set(nodeId, !prev.get(nodeId)));
+  }, []);
+  const setAll = (expanded: boolean) => setExpandedStates((prev) => new Map(Array.from(prev.keys(), (key) => [key, expanded])));
+  const expandAll = React.useCallback(() => setAll(true), []);
+  const collapseAll = React.useCallback(() => setAll(false), []);
+
+  return { expandedStates, toggle, expandAll, collapseAll };
+};
+
+/**
  * How many Pure Reptile procs the player needs for this node, or null when
  * Crocodile can't double anything here.
  *
