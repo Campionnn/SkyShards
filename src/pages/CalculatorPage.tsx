@@ -54,11 +54,11 @@ export const CalculatorPage = () => {
     ownedAttributes,
   });
 
-  // The last committed form: handleCalculate compares against it before the new one commits.
+  // Assigned during render, not in an effect: CalculatorForm's effects run before this
+  // component's, and when one of them resubmits the form, handleCalculate must already
+  // compare against the form that was just rendered.
   const formRef = useRef(form);
-  useEffect(() => {
-    formRef.current = form;
-  });
+  formRef.current = form;
 
   const handleCalculate = useCallback(
     (formData: CalculationFormData) => {
