@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type WheelEvent } from "react";
+import { type KeyboardEvent, useEffect, useMemo, useRef, useState, type WheelEvent } from "react";
 import { Modal } from "../ui";
 import { X, Package, RefreshCw, User, ChevronDown, AlertTriangle, Check, Eye, EyeOff, Trash2 } from "lucide-react";
 import { hypixelService } from "../../services";

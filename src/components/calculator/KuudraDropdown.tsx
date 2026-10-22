@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useClickOutside } from "../../hooks";
 import { KUUDRA_TIERS } from "../../constants";
 
 /** The only values this dropdown can emit — KUUDRA_TIERS is `as const`. */
@@ -11,19 +12,11 @@ interface KuudraDropdownProps {
   label: string;
 }
 
-export const KuudraDropdown: React.FC<KuudraDropdownProps> = React.memo(({ value, onChange, label }) => {
+export const KuudraDropdown = memo(({ value, onChange, label }: KuudraDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
   const handleSelect = (tierValue: KuudraTier) => {
     onChange(tierValue);

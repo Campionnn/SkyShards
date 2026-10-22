@@ -1,4 +1,4 @@
-import React from "react";
+import { type MouseEvent, type ReactNode } from "react";
 import { GiGecko } from "react-icons/gi";
 import { MoveRight, Settings } from "lucide-react";
 import { formatLargeNumber, formatNumber, formatQuantity, getRarityColor, shardIconUrl } from "../../utilities";
@@ -15,7 +15,7 @@ import type { AlternativeSelectionContext, Data, Recipe, Shard } from "../../typ
  */
 
 /** Wrap a handler so the click doesn't also toggle the row it sits in. */
-const stopping = (handler: () => void) => (event: React.MouseEvent) => {
+const stopping = (handler: () => void) => (event: MouseEvent) => {
   event.stopPropagation();
   handler();
 };
@@ -27,7 +27,7 @@ interface ShardInfoProps {
 }
 
 /** Per-hour rate (ironman) or total coin value (bazaar) of `quantity` shards. */
-const ShardRate: React.FC<Omit<ShardInfoProps, "showRate">> = ({ quantity, shard, ironManView }) =>
+const ShardRate = ({ quantity, shard, ironManView }: Omit<ShardInfoProps, "showRate">) =>
   ironManView ? (
     <>
       <span className="text-slate-300 text-xs font-medium">{formatNumber(shard.rate)}</span>
@@ -39,7 +39,7 @@ const ShardRate: React.FC<Omit<ShardInfoProps, "showRate">> = ({ quantity, shard
   );
 
 /** `<n>x <icon> <name>` plus the per-hour rate (ironman) or coin value (bazaar). */
-export const ShardInfo: React.FC<ShardInfoProps> = ({ quantity, shard, ironManView, showRate = true }) => (
+export const ShardInfo = ({ quantity, shard, ironManView, showRate = true }: ShardInfoProps) => (
   <>
     <span className="text-white">{formatQuantity(quantity)}x</span>
     <ShardChip shard={shard} />
@@ -51,7 +51,7 @@ export const ShardInfo: React.FC<ShardInfoProps> = ({ quantity, shard, ironManVi
   </>
 );
 
-const DirectBadge: React.FC<{ ironManView: boolean }> = ({ ironManView }) => (
+const DirectBadge = ({ ironManView }: { ironManView: boolean }) => (
   <span className="px-1 py-0.4 text-xs bg-green-500/20 text-green-400 border border-green-500/30 rounded-md flex-shrink-0">
     {ironManView ? "Direct" : "Bazaar"}
   </span>
@@ -67,7 +67,7 @@ interface DirectShardNodeProps {
 }
 
 /** A leaf node: shards gathered directly (ironman) or bought from the bazaar. */
-export const DirectShardNode: React.FC<DirectShardNodeProps> = ({ quantity, shard, ironManView, inCycle = false, onShowAlternatives }) => (
+export const DirectShardNode = ({ quantity, shard, ironManView, inCycle = false, onShowAlternatives }: DirectShardNodeProps) => (
   <div className={`flex items-center justify-between pl-3.5 pr-1 py-1 ${inCycle ? "bg-slate-900" : "bg-slate-800"} rounded-md border border-slate-600`}>
     <div className="flex items-center space-x-2 p-0.5 text-sm">
       <div className="w-2 h-2 bg-green-400 rounded-full mr-2.5" />
@@ -84,7 +84,7 @@ export const DirectShardNode: React.FC<DirectShardNodeProps> = ({ quantity, shar
 );
 
 /** Compact leaf used inside the sub-recipe rows of a cycle. */
-export const DirectShardRow: React.FC<Omit<DirectShardNodeProps, "inCycle" | "onShowAlternatives">> = ({ quantity, shard, ironManView }) => (
+export const DirectShardRow = ({ quantity, shard, ironManView }: Omit<DirectShardNodeProps, "inCycle" | "onShowAlternatives">) => (
   <div className="rounded border border-slate-400/50 flex items-center justify-between px-3 py-1.5 text-sm font-medium gap-2">
     <div className="flex items-center gap-2 min-w-0">
       <div className="w-2 h-2 bg-green-400 rounded-full" />
@@ -108,11 +108,11 @@ interface SubRecipeRowProps {
   isExpanded: boolean;
   onToggle: () => void;
   /** The recipe's inputs, rendered when expanded. */
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 /** A collapsible `<out> = <in1> + <in2>` row nested under a cycle step or fodder. */
-export const SubRecipeRow: React.FC<SubRecipeRowProps> = ({ quantity, craftsNeeded, recipe, outputShard, shards, isExpanded, onToggle, children }) => {
+export const SubRecipeRow = ({ quantity, craftsNeeded, recipe, outputShard, shards, isExpanded, onToggle, children }: SubRecipeRowProps) => {
   const input1Shard = shards[recipe.inputs[0]];
   const input2Shard = shards[recipe.inputs[1]];
 
@@ -160,11 +160,11 @@ interface RecipeNodeProps {
   onToggle: () => void;
   onShowAlternatives?: () => void;
   /** The two input subtrees, rendered when expanded. */
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 /** A fusion node: headline recipe row, fusion count, and its two inputs beneath. */
-export const RecipeNode: React.FC<RecipeNodeProps> = ({
+export const RecipeNode = ({
   outputQuantity,
   outputShard,
   input1Quantity,
@@ -178,7 +178,7 @@ export const RecipeNode: React.FC<RecipeNodeProps> = ({
   onToggle,
   onShowAlternatives,
   children,
-}) => (
+}: RecipeNodeProps) => (
   <div className={`${inCycle ? "bg-slate-900" : "bg-slate-800"} border border-slate-600 rounded-md overflow-hidden`}>
     <div
       className="flex items-center justify-between w-full pl-3 pr-1 py-1 hover:bg-slate-700/30 transition-colors cursor-pointer"
@@ -207,7 +207,7 @@ export const RecipeNode: React.FC<RecipeNodeProps> = ({
   </div>
 );
 
-const FusionCount: React.FC<{ crafts: number }> = ({ crafts }) => (
+const FusionCount = ({ crafts }: { crafts: number }) => (
   <div className="text-right">
     <div className="flex py-1 px-1.5 gap-1 items-center cursor-pointer">
       <span className="text-xs text-slate-400">fusions</span>
@@ -236,13 +236,13 @@ interface CycleNodeProps {
   /** Step 1 is the only step with its own input; it expands to show it. */
   firstStepExpanded: boolean;
   onToggleFirstStep: () => void;
-  firstStepInput: React.ReactNode;
+  firstStepInput: ReactNode;
   /** The fodder subtrees fed into every run of the cycle. */
-  fodder: React.ReactNode;
+  fodder: ReactNode;
 }
 
 /** A cycle node: header, its steps (last step first), then the cycle fodder. */
-export const CycleNode: React.FC<CycleNodeProps> = ({
+export const CycleNode = ({
   tree,
   shards,
   crocProcs,
@@ -254,7 +254,7 @@ export const CycleNode: React.FC<CycleNodeProps> = ({
   onToggleFirstStep,
   firstStepInput,
   fodder,
-}) => (
+}: CycleNodeProps) => (
   <div className="flex flex-col border border-slate-400/50 rounded-md bg-slate-900">
     <CycleHeader
       shard={shards[tree.shard]}
@@ -363,7 +363,7 @@ interface RecipeDisplayProps {
 }
 
 /** Compact `<out> = <in1> + <in2>` used for cycle steps and sub-recipes. */
-export const RecipeDisplay: React.FC<RecipeDisplayProps> = ({
+export const RecipeDisplay = ({
   outputQuantity,
   outputShard,
   input1Quantity,
@@ -372,7 +372,7 @@ export const RecipeDisplay: React.FC<RecipeDisplayProps> = ({
   input2Shard,
   showStep = false,
   stepNumber,
-}) => (
+}: RecipeDisplayProps) => (
   <div className="flex flex-wrap items-center gap-x-2 text-sm font-medium">
     {showStep && <span className="font-normal text-xs text-amber-300">Step {stepNumber} :</span>}
 
@@ -403,7 +403,7 @@ interface TreeShardChipProps {
  * fits on one row. Distinct enough from ui/ShardChip (different spacing, truncation,
  * inline alignment) that sharing one component would mean styling both by prop.
  */
-const TreeShardChip: React.FC<TreeShardChipProps> = ({ shard, emphasis = false }) => {
+const TreeShardChip = ({ shard, emphasis = false }: TreeShardChipProps) => {
   const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
 
   return (
@@ -451,7 +451,7 @@ interface RecipeSummaryProps {
  * formatted rather than floored so a fractional one would read as "0.2x" — visibly
  * odd — instead of silently collapsing to a "0x" node that still lists full inputs.
  */
-export const RecipeSummary: React.FC<RecipeSummaryProps> = ({ outputQuantity, outputShard, input1Quantity, input1Shard, input2Quantity, input2Shard }) => (
+export const RecipeSummary = ({ outputQuantity, outputShard, input1Quantity, input1Shard, input2Quantity, input2Shard }: RecipeSummaryProps) => (
   <div className="text-white flex items-center">
     <span className="font-medium text-sm">{formatQuantity(outputQuantity)}x</span>
 
@@ -472,7 +472,7 @@ export const RecipeSummary: React.FC<RecipeSummaryProps> = ({ outputQuantity, ou
 );
 
 /** How many Pure Reptile procs the node needs, shown beside the fusion count. */
-export const CrocodileProcsBadge: React.FC<{ procs: number }> = ({ procs }) => (
+export const CrocodileProcsBadge = ({ procs }: { procs: number }) => (
   <Tooltip
     content={
       <>
@@ -495,7 +495,7 @@ export const CrocodileProcsBadge: React.FC<{ procs: number }> = ({ procs }) => (
 );
 
 /** The gear that opens the alternative-recipe picker. Sits on every node kind. */
-export const AlternativesButton: React.FC<{ onClick: (event: React.MouseEvent) => void }> = ({ onClick }) => (
+export const AlternativesButton = ({ onClick }: { onClick: (event: MouseEvent) => void }) => (
   <button
     onClick={onClick}
     className="p-1 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/20 hover:border-blue-500/30 rounded transition-colors cursor-pointer"
@@ -517,7 +517,7 @@ interface CycleHeaderProps {
 }
 
 /** Header row of a cycle node — the toggle, craft count, and Pure Reptile badge. */
-const CycleHeader: React.FC<CycleHeaderProps> = ({ shard, quantity, runCount, crocProcs, isExpanded, ironManView, onToggle, onShowAlternatives }) => (
+const CycleHeader = ({ shard, quantity, runCount, crocProcs, isExpanded, ironManView, onToggle, onShowAlternatives }: CycleHeaderProps) => (
   <div className="flex items-center justify-between w-full pl-3 pr-1 py-1 hover:bg-slate-800/50 transition-colors cursor-pointer" onClick={stopping(onToggle)}>
     <div className="flex-1 text-left">
       <div className="flex items-center space-x-2">

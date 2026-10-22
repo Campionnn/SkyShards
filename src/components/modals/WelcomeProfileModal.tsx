@@ -1,4 +1,3 @@
-import React from "react";
 import { Modal } from "../ui";
 import { X, Star, BookOpen } from "lucide-react";
 
@@ -10,7 +9,7 @@ interface WelcomeProfileModalProps {
 
 const GUIDE_URL = "/guide";
 
-export const WelcomeProfileModal: React.FC<WelcomeProfileModalProps> = ({ open, onSelectProfile, onClose }) => {
+export const WelcomeProfileModal = ({ open, onSelectProfile, onClose }: WelcomeProfileModalProps) => {
   if (!open) return null;
 
   return (

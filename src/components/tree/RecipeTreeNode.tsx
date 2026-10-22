@@ -1,4 +1,4 @@
-import type React from "react";
+import { type ReactNode } from "react";
 import type { AlternativeSelectionContext, Data, RecipeTree } from "../../types/types";
 import { CycleNode, DirectShardNode, DirectShardRow, RecipeNode, SubRecipeRow } from "./shared";
 import { getCrocodileProcs, useExpansionState } from "./treeHelpers";
@@ -30,7 +30,7 @@ export const RecipeTreeNode = ({
   const shard = data.shards[tree.shard];
 
   // Inside a cycle the tree is drawn with compact rows rather than full nodes.
-  const renderSubRecipe = (subTree: RecipeTree, nodePrefix: string): React.ReactNode => {
+  const renderSubRecipe = (subTree: RecipeTree, nodePrefix: string): ReactNode => {
     const subShard = data.shards[subTree.shard];
     if (subTree.method === "direct") return <DirectShardRow quantity={subTree.quantity} shard={subShard} ironManView={ironManView} />;
     if (subTree.method !== "recipe") return null;

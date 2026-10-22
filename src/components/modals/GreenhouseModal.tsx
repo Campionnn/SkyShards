@@ -1,4 +1,3 @@
-import React from "react";
 import { X } from "lucide-react";
 import { Modal } from "../ui";
 
@@ -9,7 +8,7 @@ interface GreenhouseModalProps {
 
 const GREENHOUSE_URL = "https://greenhouse.skyshards.com";
 
-export const GreenhouseModal: React.FC<GreenhouseModalProps> = ({ open, onClose }) => {
+export const GreenhouseModal = ({ open, onClose }: GreenhouseModalProps) => {
   return (
     <Modal
       open={open}

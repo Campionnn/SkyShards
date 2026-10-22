@@ -1,4 +1,4 @@
-import type React from "react";
+import { type ReactNode } from "react";
 import { Package } from "lucide-react";
 import type { AlternativeSelectionContext, Data, InventoryRecipeTree, Shard } from "../../types/types";
 import { CycleNode, DirectShardNode, RecipeNode, ShardInfo, SubRecipeRow } from "./shared";
@@ -93,7 +93,7 @@ export const InventoryRecipeTreeNode = ({
   );
 
   // Rows inside a cycle, so everything here sits on the cycle's background.
-  const renderSubRecipe = (subTree: InventoryRecipeTree, nodePrefix: string): React.ReactNode => {
+  const renderSubRecipe = (subTree: InventoryRecipeTree, nodePrefix: string): ReactNode => {
     if (Array.isArray(subTree)) {
       return subTree.map((branch, index) => <div key={`${nodePrefix}-${index}`}>{renderSubRecipe(branch, `${nodePrefix}-${index}`)}</div>);
     }

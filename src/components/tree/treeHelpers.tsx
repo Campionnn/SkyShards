@@ -1,4 +1,4 @@
-import React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type { Data, InventoryRecipeTree, Recipe, Shard } from "../../types/types";
 
@@ -27,9 +27,9 @@ export const renderChevron = (isExpanded: boolean) =>
  * flip a defaulted-open node straight back to open.
  */
 export const useExpansionState = (expandedStates: Map<string, boolean>) => {
-  const pendingDefaults = React.useRef<Map<string, boolean>>(new Map());
+  const pendingDefaults = useRef<Map<string, boolean>>(new Map());
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (pendingDefaults.current.size === 0) return;
     for (const [id, value] of pendingDefaults.current) {
       if (!expandedStates.has(id)) {
@@ -54,19 +54,19 @@ export const useExpansionState = (expandedStates: Map<string, boolean>) => {
  * A change of `resetKey` (e.g. a different tree) starts again from an empty Map.
  */
 export const useTreeExpansion = (resetKey?: unknown) => {
-  const [expandedStates, setExpandedStates] = React.useState(() => new Map<string, boolean>());
-  const [lastResetKey, setLastResetKey] = React.useState(resetKey);
+  const [expandedStates, setExpandedStates] = useState(() => new Map<string, boolean>());
+  const [lastResetKey, setLastResetKey] = useState(resetKey);
   if (resetKey !== lastResetKey) {
     setLastResetKey(resetKey);
     setExpandedStates(new Map());
   }
 
-  const toggle = React.useCallback((nodeId: string) => {
+  const toggle = useCallback((nodeId: string) => {
     setExpandedStates((prev) => new Map(prev).set(nodeId, !prev.get(nodeId)));
   }, []);
   const setAll = (expanded: boolean) => setExpandedStates((prev) => new Map(Array.from(prev.keys(), (key) => [key, expanded])));
-  const expandAll = React.useCallback(() => setAll(true), []);
-  const collapseAll = React.useCallback(() => setAll(false), []);
+  const expandAll = useCallback(() => setAll(true), []);
+  const collapseAll = useCallback(() => setAll(false), []);
 
   return { expandedStates, toggle, expandAll, collapseAll };
 };

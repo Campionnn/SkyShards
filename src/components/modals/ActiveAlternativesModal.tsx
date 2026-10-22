@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Modal } from "../ui";
 import { X, Star, Trash2 } from "lucide-react";
 import { getRarityColor, shardIconUrl } from "../../utilities";
@@ -14,7 +14,7 @@ interface ActiveAlternativesModalProps {
   onRemoveAll: () => void;
 }
 
-export const ActiveAlternativesModal: React.FC<ActiveAlternativesModalProps> = ({ open, onClose, recipeOverrides, rateAsCoinValue, onRemove, onRemoveAll }) => {
+export const ActiveAlternativesModal = ({ open, onClose, recipeOverrides, rateAsCoinValue, onRemove, onRemoveAll }: ActiveAlternativesModalProps) => {
   const { shards } = useShards();
 
   const shardsById = useMemo(() => {

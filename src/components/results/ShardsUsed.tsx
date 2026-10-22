@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Package, Eye, EyeOff } from "lucide-react";
 import { getRarityColor, shardIconUrl } from "../../utilities";
 import type { Data } from "../../types/types";
@@ -11,7 +11,7 @@ interface ShardsUsedProps {
   onDisabledShardsChange: (disabled: Set<string>) => void;
 }
 
-export const ShardsUsed: React.FC<ShardsUsedProps> = ({ inventory, remainingInventory, data, disabledShards, onDisabledShardsChange }) => {
+export const ShardsUsed = ({ inventory, remainingInventory, data, disabledShards, onDisabledShardsChange }: ShardsUsedProps) => {
   // Compute shards used: inventory amount minus remaining
   const shardsUsed = useMemo(() => {
     const used: { shardId: string; amountUsed: number; remaining: number; total: number }[] = [];

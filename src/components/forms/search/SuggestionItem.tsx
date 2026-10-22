@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import { memo, type MouseEvent, useCallback } from "react";
 import { getRarityColor, shardIconUrl } from "../../../utilities";
 import type { Shard } from "../../../types/types";
 
@@ -11,9 +11,9 @@ interface SuggestionItemProps {
   setFocusedIndex: (index: number) => void;
 }
 
-export const SuggestionItem: React.FC<SuggestionItemProps> = React.memo(({ shard, index, focusedIndex, onSelect, isSelecting, setFocusedIndex }) => {
+export const SuggestionItem = memo(({ shard, index, focusedIndex, onSelect, isSelecting, setFocusedIndex }: SuggestionItemProps) => {
   const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+    (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       onSelect(shard);

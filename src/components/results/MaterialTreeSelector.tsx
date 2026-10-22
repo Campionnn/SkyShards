@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search, X, ChevronDown } from "lucide-react";
 import type { CalculationResult, Shard } from "../../types/types";
 import { getRarityColor, isFocusRestoredByWindow, shardIconUrl } from "../../utilities";
@@ -11,7 +11,7 @@ interface MaterialTreeSelectorProps {
   onChange: (key: string) => void;
 }
 
-export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shards, shardCalculationData, value, onChange }) => {
+export const MaterialTreeSelector = ({ shards, shardCalculationData, value, onChange }: MaterialTreeSelectorProps) => {
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -41,7 +41,7 @@ export const MaterialTreeSelector: React.FC<MaterialTreeSelectorProps> = ({ shar
   );
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: KeyboardEvent) => {
       if (!isOpen || suggestions.length === 0) return;
 
       switch (e.key) {

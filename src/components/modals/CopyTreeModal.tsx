@@ -1,4 +1,3 @@
-import React from "react";
 import { Modal } from "../ui";
 import { X, ClipboardCopy } from "lucide-react";
 
@@ -11,7 +10,7 @@ interface CopyTreeModalProps {
   materialsOnly?: boolean;
 }
 
-export const CopyTreeModal: React.FC<CopyTreeModalProps> = ({ open, onClose, onCopySkyOcean, onCopyNoFrills, onCopySkyHanni, materialsOnly = false }) => {
+export const CopyTreeModal = ({ open, onClose, onCopySkyOcean, onCopyNoFrills, onCopySkyHanni, materialsOnly = false }: CopyTreeModalProps) => {
   if (!open) return null;
 
   const handleCopySkyOcean = () => {

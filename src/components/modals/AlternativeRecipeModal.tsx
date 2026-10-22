@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { type RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "../ui";
 import { X, Star, Search, Plus, ChevronDown } from "lucide-react";
 import { NAME_AND_FAMILY_FILTER_CONFIG, formatLargeNumber, formatTime, getRarityColor, matchesSearchQuery, shardIconUrl } from "../../utilities";

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { type ChangeEvent, type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search, X, LayoutGrid } from "lucide-react";
 import { DataService } from "../../../services";
 import { debounce, isFocusRestoredByWindow } from "../../../utilities";
@@ -16,7 +16,7 @@ interface ShardAutocompleteProps {
   searchMode?: "enhanced" | "name-only";
 }
 
-export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({
+export const ShardAutocomplete = ({
   value,
   onChange,
   onSelect,
@@ -24,7 +24,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({
   placeholder = "Search for a shard...",
   className = "",
   searchMode = "enhanced",
-}) => {
+}: ShardAutocompleteProps) => {
   const [suggestions, setSuggestions] = useState<Shard[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -68,7 +68,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({
   );
 
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
       setIsSelecting(false);
       onChange(newValue);
@@ -107,7 +107,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({
   );
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: KeyboardEvent) => {
       if (!isOpen || suggestions.length === 0 || isSelecting) return;
 
       switch (e.key) {

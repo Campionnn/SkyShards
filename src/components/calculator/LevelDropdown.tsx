@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import { memo, type ReactNode, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useClickOutside } from "../../hooks";
 
 import { Tooltip } from "../ui";
 import { SHARD_LEVELS } from "../../constants";
@@ -9,7 +10,7 @@ interface LevelDropdownProps {
   onChange: (value: number) => void;
   label: string;
   tooltipTitle?: string;
-  tooltipContent?: React.ReactNode;
+  tooltipContent?: ReactNode;
   tooltipShardName?: string;
   tooltipShardIcon?: string;
   tooltipRarity?: string;
@@ -18,21 +19,24 @@ interface LevelDropdownProps {
   tooltipType?: string;
 }
 
-export const LevelDropdown: React.FC<LevelDropdownProps> = React.memo(
-  ({ value, onChange, label, tooltipTitle, tooltipContent, tooltipShardName, tooltipShardIcon, tooltipRarity, tooltipWarning, tooltipFamily, tooltipType }) => {
-    const levels = useMemo(() => SHARD_LEVELS, []); // 0-10
+export const LevelDropdown = memo(
+  ({
+    value,
+    onChange,
+    label,
+    tooltipTitle,
+    tooltipContent,
+    tooltipShardName,
+    tooltipShardIcon,
+    tooltipRarity,
+    tooltipWarning,
+    tooltipFamily,
+    tooltipType,
+  }: LevelDropdownProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-          setIsOpen(false);
-        }
-      };
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+    useClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
     const handleSelect = (level: number) => {
       onChange(level);
@@ -70,7 +74,7 @@ export const LevelDropdown: React.FC<LevelDropdownProps> = React.memo(
           />
           {isOpen && (
             <div className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-md shadow-xl max-h-48 overflow-y-auto">
-              {levels.map((level) => (
+              {SHARD_LEVELS.map((level) => (
                 <button
                   key={level}
                   type="button"

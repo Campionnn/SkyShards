@@ -1,4 +1,3 @@
-import React from "react";
 import { Modal } from "../ui";
 import { X, Package } from "lucide-react";
 import { formatNumber, getRarityColor, shardIconUrl } from "../../utilities";
@@ -13,7 +12,7 @@ interface MaterialBreakdownModalProps {
   ironManView: boolean;
 }
 
-export const MaterialBreakdownModal: React.FC<MaterialBreakdownModalProps> = ({ isOpen, onClose, materialShard, breakdown, allShards, ironManView }) => {
+export const MaterialBreakdownModal = ({ isOpen, onClose, materialShard, breakdown, allShards, ironManView }: MaterialBreakdownModalProps) => {
   if (!isOpen) return null;
 
   const totalQuantity = Array.from(breakdown.values()).reduce((sum, qty) => sum + qty, 0);
