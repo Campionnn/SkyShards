@@ -12,4 +12,3 @@ export * from "./imagePreloader";
 export * from "./gzipBase64";
 export * from "./clipboard";
 export * from "./shardIcon";
-export { isValidShardName } from "./isValidShardName";

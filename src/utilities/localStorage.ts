@@ -300,6 +300,15 @@ const KNOWN_KEYS: ReadonlySet<string> = new Set([
   "ss_ads_blocked",
 ]);
 
+/** Wipes every key for this origin ("Reset Everything"). */
+export const clearAllStorage = (): void => {
+  try {
+    localStorage.clear();
+  } catch (error) {
+    console.warn("Failed to clear localStorage:", error);
+  }
+};
+
 export const pruneUnknownStorageKeys = (): void => {
   try {
     for (let i = localStorage.length - 1; i >= 0; i--) {
