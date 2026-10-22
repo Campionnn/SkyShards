@@ -1,39 +1,15 @@
-import type { CalculationParams, CalculationResult, RecipeOverride, Data, RecipeChoice } from "../types/types";
+import type { CalculationParams, CalculationResult, RecipeOverride } from "../types/types";
+import type { CalculationTarget, WorkerProgress, WorkerRequest, WorkerResponse } from "../workers/workerProtocol";
 
-type ProgressPhase = "parsing" | "computing" | "building" | "assigning" | "finalizing";
+export type { WorkerProgress } from "../workers/workerProtocol";
 
-export type WorkerProgress = {
-  phase: ProgressPhase;
-  progress: number;
-  message: string;
-};
+const MAX_WORKERS = 8;
 
-type WorkerMsg = ({ type: "progress" } & WorkerProgress) | { type: "result"; result: CalculationResult } | { type: "error"; message: string };
+const spawnWorker = () => new Worker(new URL("../workers/calculationWorker.ts", import.meta.url), { type: "module" });
 
-type WorkerStartMsg = {
-  type: "start";
-  targetShard: string;
-  requiredQuantity: number;
-  params: CalculationParams;
-  recipeOverrides: RecipeOverride[];
-};
+const postRequest = (worker: Worker, request: WorkerRequest) => worker.postMessage(request);
 
-type WorkerBatchStartWithDataMsg = {
-  type: "batch-start-with-data";
-  targets: Array<{ shard: string; quantity: number }>;
-
-  params: CalculationParams;
-  recipeOverrides: RecipeOverride[];
-  parsedData: Data;
-  choices: Record<string, RecipeChoice>;
-  cycleNodes: string[][];
-};
-
-type WorkerBatchMsg =
-  | ({ type: "progress" } & WorkerProgress)
-  | { type: "batch-result"; results: CalculationResult[]; materialBreakdown?: Map<string, Map<string, number>> }
-  | { type: "error"; message: string };
-
+/** Calculates one shard in a worker. `cancel` terminates it; the promise then never settles. */
 export function calculateOptimalPathWithWorker(
   targetShard: string,
   requiredQuantity: number,
@@ -41,230 +17,149 @@ export function calculateOptimalPathWithWorker(
   recipeOverrides: RecipeOverride[] = [],
   onProgress?: (p: WorkerProgress) => void,
 ): { promise: Promise<CalculationResult>; cancel: () => void } {
-  const worker = new Worker(new URL("../workers/calculationWorker.ts", import.meta.url), { type: "module" });
+  const worker = spawnWorker();
 
   const promise = new Promise<CalculationResult>((resolve, reject) => {
-    worker.onmessage = (event: MessageEvent<WorkerMsg>) => {
-      const data = event.data;
-      if (!data || !("type" in data)) return;
-      if (data.type === "progress") {
+    worker.onmessage = ({ data }: MessageEvent<WorkerResponse>) => {
+      if (data?.type === "progress") {
         onProgress?.({ phase: data.phase, progress: data.progress, message: data.message });
-      } else if (data.type === "result") {
+      } else if (data?.type === "result") {
         worker.terminate();
         resolve(data.result);
-      } else if (data.type === "error") {
+      } else if (data?.type === "error") {
         worker.terminate();
         reject(new Error(data.message || "Worker calculation failed"));
       }
     };
-
     worker.onerror = (err) => {
       worker.terminate();
       reject(err);
     };
 
-    const startMsg: WorkerStartMsg = {
-      type: "start",
-      targetShard,
-      requiredQuantity,
-      params,
-      recipeOverrides,
-    };
-    worker.postMessage(startMsg);
+    postRequest(worker, { type: "start", targetShard, requiredQuantity, params, recipeOverrides });
   });
 
-  const cancel = () => {
-    worker.terminate();
-  };
-
-  return { promise, cancel };
+  return { promise, cancel: () => worker.terminate() };
 }
 
+/**
+ * Calculates many shards across up to 8 workers. Min costs are solved once here and
+ * shipped to every worker with its chunk of targets. Results come back in target
+ * order, each carrying the same merged materialBreakdown (material -> target -> qty).
+ */
 export function calculateMultipleShardsParallel(
-  targets: Array<{ shard: string; quantity: number }>,
+  targets: CalculationTarget[],
   params: CalculationParams,
   recipeOverrides: RecipeOverride[] = [],
   onProgress?: (p: WorkerProgress) => void,
 ): { promise: Promise<CalculationResult[]>; cancel: () => void } {
-  // Determine optimal number of workers (use CPU cores, max 8 to avoid overhead)
-  const maxWorkers = Math.min(navigator.hardwareConcurrency || 4, 8, targets.length);
-
+  const workerCount = Math.min(navigator.hardwareConcurrency || 4, MAX_WORKERS, targets.length);
   const workers: Worker[] = [];
-  const completedChunks: Map<number, CalculationResult[]> = new Map();
-  const completedBreakdowns: Map<number, Map<string, Map<string, number>>> = new Map();
-  const chunkProgress: Map<number, number> = new Map(); // Track progress per chunk
   let cancelled = false;
-  const totalShards = targets.length;
+  const terminateAll = () => workers.forEach((w) => w.terminate());
 
-  const promise = new Promise<CalculationResult[]>((resolve, reject) => {
-    (async () => {
-      try {
-        // parse data and compute min costs
-        onProgress?.({
-          phase: "parsing",
-          progress: 0,
-          message: "Parsing data...",
-        });
+  const run = async (): Promise<CalculationResult[]> => {
+    onProgress?.({ phase: "parsing", progress: 0, message: "Parsing data..." });
+    const [{ CalculationService }, { computeMinCosts, findCycleNodesIfNeeded }] = await Promise.all([
+      import("./calculationService"),
+      import("./minCostSolver"),
+    ]);
+    const parsedData = await CalculationService.getInstance().parseData(params);
 
-        const { CalculationService } = await import("../services/calculationService");
-        const service = CalculationService.getInstance();
-        const parsedData = await service.parseData(params);
+    onProgress?.({ phase: "computing", progress: 0, message: "Computing optimal costs..." });
+    const { choices } = computeMinCosts(parsedData, params, recipeOverrides);
+    const cycleNodes = findCycleNodesIfNeeded(choices, params, recipeOverrides);
+    const choicesObj = Object.fromEntries(choices);
+    // Cancelled while solving: don't spawn workers nobody will terminate.
+    if (cancelled) return new Promise<never>(() => {});
 
-        onProgress?.({
-          phase: "computing",
-          progress: 0,
-          message: "Computing optimal costs...",
-        });
+    onProgress?.({ phase: "building", progress: 0, message: `Starting ${workerCount} parallel workers...` });
 
-        const { choices } = service.computeMinCosts(parsedData, params, recipeOverrides);
-        const cycleNodes = params.crocodileLevel > 0 || recipeOverrides.length > 0 ? service.findCycleNodes(choices) : [];
+    const chunkSize = Math.ceil(targets.length / workerCount);
+    const chunks: CalculationTarget[][] = [];
+    for (let i = 0; i < targets.length; i += chunkSize) {
+      chunks.push(targets.slice(i, i + chunkSize));
+    }
 
-        const choicesObj: Record<string, RecipeChoice> = {};
-        choices.forEach((value, key) => {
-          choicesObj[key] = value;
-        });
+    // Fraction complete per chunk, weighted by chunk size into shards completed.
+    const chunkProgress = chunks.map(() => 0);
+    const shardsCompleted = () => chunkProgress.reduce((sum, progress, i) => sum + progress * chunks[i].length, 0);
 
-        onProgress?.({
-          phase: "building",
-          progress: 0,
-          message: `Starting ${Math.min(maxWorkers, targets.length)} parallel workers...`,
-        });
+    const chunkResults = await Promise.all(
+      chunks.map(
+        (chunk, chunkIndex) =>
+          new Promise<{ results: CalculationResult[]; materialBreakdown?: Map<string, Map<string, number>> }>((resolve, reject) => {
+            const worker = spawnWorker();
+            workers.push(worker);
 
-        // split targets into chunks for each worker
-        const chunkSize = Math.ceil(targets.length / maxWorkers);
-        const chunks: Array<Array<{ shard: string; quantity: number }>> = [];
-
-        for (let i = 0; i < targets.length; i += chunkSize) {
-          chunks.push(targets.slice(i, i + chunkSize));
-        }
-
-        // progress tracking for each chunk
-        chunks.forEach((_, idx) => {
-          chunkProgress.set(idx, 0);
-        });
-
-        const reportOverallProgress = () => {
-          // calculate total shards completed across all workers
-          let totalCompleted = 0;
-          chunkProgress.forEach((progress, chunkIdx) => {
-            totalCompleted += progress * chunks[chunkIdx].length;
-          });
-
-          const overallProgress = totalCompleted / totalShards;
-          const shardsCompleted = Math.floor(totalCompleted);
-
-          onProgress?.({
-            phase: "building",
-            progress: overallProgress,
-            message: `Calculating ${shardsCompleted} of ${totalShards} shards...`,
-          });
-        };
-
-        // Create workers for each chunk
-        chunks.forEach((chunk, chunkIndex) => {
-          const worker = new Worker(new URL("../workers/calculationWorker.ts", import.meta.url), { type: "module" });
-          workers.push(worker);
-
-          worker.onmessage = (event: MessageEvent<WorkerBatchMsg>) => {
-            if (cancelled) return;
-
-            const data = event.data;
-            if (!data || !("type" in data)) return;
-
-            if (data.type === "progress") {
-              // Update this chunk's progress
-              chunkProgress.set(chunkIndex, data.progress);
-              reportOverallProgress();
-            } else if (data.type === "batch-result") {
-              worker.terminate();
-              completedChunks.set(chunkIndex, data.results);
-              if (data.materialBreakdown) {
-                completedBreakdowns.set(chunkIndex, data.materialBreakdown);
-              }
-              chunkProgress.set(chunkIndex, 1); // Mark as 100% complete
-
-              // Calculate how many total shards are done
-              let totalCompleted = 0;
-              chunkProgress.forEach((progress, idx) => {
-                totalCompleted += progress * chunks[idx].length;
-              });
-
-              // Update progress to show completed shards
-              onProgress?.({
-                phase: "finalizing",
-                progress: totalCompleted / totalShards,
-                message: `Completed ${Math.floor(totalCompleted)} of ${totalShards} shards...`,
-              });
-
-              // Check if all workers completed
-              if (completedChunks.size === chunks.length) {
-                // Combine results in order
-                const allResults: CalculationResult[] = [];
-                for (let i = 0; i < chunks.length; i++) {
-                  const chunkResults = completedChunks.get(i);
-                  if (chunkResults) {
-                    allResults.push(...chunkResults);
-                  }
-                }
-
-                // Merge all material breakdowns
-                const globalMaterialBreakdown = new Map<string, Map<string, number>>();
-                completedBreakdowns.forEach((breakdown) => {
-                  breakdown.forEach((targetMap, materialId) => {
-                    if (!globalMaterialBreakdown.has(materialId)) {
-                      globalMaterialBreakdown.set(materialId, new Map());
-                    }
-                    const globalTargetMap = globalMaterialBreakdown.get(materialId)!;
-                    targetMap.forEach((qty, targetId) => {
-                      globalTargetMap.set(targetId, (globalTargetMap.get(targetId) || 0) + qty);
-                    });
-                  });
+            worker.onmessage = ({ data }: MessageEvent<WorkerResponse>) => {
+              if (cancelled) return;
+              if (data?.type === "progress") {
+                chunkProgress[chunkIndex] = data.progress;
+                const completed = shardsCompleted();
+                onProgress?.({
+                  phase: "building",
+                  progress: completed / targets.length,
+                  message: `Calculating ${Math.floor(completed)} of ${targets.length} shards...`,
                 });
-
-                // Add the merged breakdown to all results
-                allResults.forEach((result) => {
-                  result.materialBreakdown = globalMaterialBreakdown;
+              } else if (data?.type === "batch-result") {
+                worker.terminate();
+                chunkProgress[chunkIndex] = 1;
+                const completed = shardsCompleted();
+                onProgress?.({
+                  phase: "finalizing",
+                  progress: completed / targets.length,
+                  message: `Completed ${Math.floor(completed)} of ${targets.length} shards...`,
                 });
-
-                resolve(allResults);
+                resolve(data);
+              } else if (data?.type === "error") {
+                terminateAll();
+                reject(new Error(data.message || "Worker calculation failed"));
               }
-            } else if (data.type === "error") {
-              worker.terminate();
-              workers.forEach((w) => w.terminate());
-              reject(new Error(data.message || "Worker calculation failed"));
-            }
-          };
+            };
+            worker.onerror = (err) => {
+              if (cancelled) return;
+              terminateAll();
+              reject(err);
+            };
 
-          worker.onerror = (err) => {
-            if (cancelled) return;
-            worker.terminate();
-            workers.forEach((w) => w.terminate());
-            reject(err);
-          };
+            postRequest(worker, {
+              type: "batch-start-with-data",
+              targets: chunk,
+              params,
+              recipeOverrides,
+              parsedData,
+              choices: choicesObj,
+              cycleNodes,
+            });
+          }),
+      ),
+    );
 
-          // Send pre-computed data to worker
-          const startMsg: WorkerBatchStartWithDataMsg = {
-            type: "batch-start-with-data",
-            targets: chunk,
-            params,
-            recipeOverrides,
-            parsedData,
-            choices: choicesObj,
-            cycleNodes,
-          };
-          worker.postMessage(startMsg);
-        });
-      } catch (err) {
-        workers.forEach((w) => w.terminate());
-        reject(err);
-      }
-    })();
-  });
+    const materialBreakdown = new Map<string, Map<string, number>>();
+    for (const chunk of chunkResults) {
+      chunk.materialBreakdown?.forEach((perTarget, materialId) => {
+        const merged = materialBreakdown.get(materialId) ?? new Map<string, number>();
+        perTarget.forEach((qty, targetId) => merged.set(targetId, (merged.get(targetId) || 0) + qty));
+        materialBreakdown.set(materialId, merged);
+      });
+    }
 
-  const cancel = () => {
-    cancelled = true;
-    workers.forEach((w) => w.terminate());
+    const allResults = chunkResults.flatMap((chunk) => chunk.results);
+    for (const result of allResults) result.materialBreakdown = materialBreakdown;
+    return allResults;
   };
 
-  return { promise, cancel };
+  const promise = run().catch((err) => {
+    terminateAll();
+    throw err;
+  });
+
+  return {
+    promise,
+    cancel: () => {
+      cancelled = true;
+      terminateAll();
+    },
+  };
 }
