@@ -25,7 +25,11 @@ export const calculationSchema = z.object({
   craftPenalty: z.number().min(0),
   materialsOnly: z.boolean(),
   selectedShardKeys: z.array(z.string()).optional(),
-  shardQuantities: z.array(z.any()).optional(),
+  /**
+   * Per-shard quantities for multi-select mode. Callers store whole `Shard` objects, but
+   * only `shard.id` is ever read, so that is all the schema keeps when a saved form is loaded.
+   */
+  shardQuantities: z.array(z.object({ shard: z.object({ id: z.string() }), quantity: z.number() })).optional(),
 });
 
 export type CalculationFormData = z.infer<typeof calculationSchema>;

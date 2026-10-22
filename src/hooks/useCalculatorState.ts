@@ -1,8 +1,8 @@
 import { useContext } from "react";
-import { CalculatorStateContext } from "../context/CalculatorStateContext";
+import { CalculatorStateContext } from "../context/contexts";
 
 export const useCalculatorState = () => {
-  const ctx = useContext(CalculatorStateContext);
-  if (!ctx) throw new Error("useCalculatorState must be used within CalculatorStateProvider");
-  return ctx;
+  const context = useContext(CalculatorStateContext);
+  if (!context) throw new Error("useCalculatorState must be used within a CalculatorStateProvider");
+  return context;
 };
