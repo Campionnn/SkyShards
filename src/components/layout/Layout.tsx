@@ -1,24 +1,25 @@
-import React, { useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { Navigation } from "./Navigation";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { PnPageAutoScale } from "../PnPageAutoScale";
 import { GreenhouseModal } from "../modals";
 import { hasSeenGreenhouseModal, markGreenhouseModalSeen } from "../../utilities";
 
-export const Layout: React.FC = () => {
+const FOOTER_LINK = "text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium";
+
+const FooterSeparator = () => <span className="text-slate-600">•</span>;
+
+export const Layout = () => {
   const location = useLocation();
   const [showGreenhouseModal, setShowGreenhouseModal] = useState(() => !hasSeenGreenhouseModal());
 
-  const cleanPath = location.pathname.replace(/\/+$/, "");
-  // The fusion graph hosts a React Flow canvas, which breaks under an ancestor CSS
-  // scale — render it without PnPageAutoScale's transform.
-  const disablePageScale = cleanPath.endsWith("/fusion-lines");
-  // Pages that need full-width layout should opt out of the reserved ad columns.
+  // The fusion graph hosts a React Flow canvas, which breaks under an ancestor CSS scale, and
+  // needs the full width — so it skips both PnPageAutoScale's transform and the ad columns.
   // Ad-blocker users are handled separately: index.html detects the blocker and sets
   // `html.ads-blocked`, and CSS collapses the ad slots (see src/index.css). Keeping that
   // out of React means it applies on first paint without a re-render or layout shift.
-  const disableAds = cleanPath.endsWith("/fusion-lines");
+  const isFullBleed = location.pathname.replace(/\/+$/, "").endsWith("/fusion-lines");
 
   const handleCloseGreenhouseModal = () => {
     markGreenhouseModalSeen();
@@ -30,12 +31,12 @@ export const Layout: React.FC = () => {
       <Navigation />
       <main className="px-1 sm:px-2 lg:px-4 py-3">
         <div className="w-full">
-          <div className={disableAds ? undefined : "pn-page"}>
-            {!disableAds && <div className="pn-left" aria-hidden />}
-            <div className={disableAds ? undefined : "pn-content"}>
-              <PnPageAutoScale disabled={disablePageScale}>
+          <div className={isFullBleed ? undefined : "pn-page"}>
+            {!isFullBleed && <div className="pn-left" aria-hidden />}
+            <div className={isFullBleed ? undefined : "pn-content"}>
+              <PnPageAutoScale disabled={isFullBleed}>
                 <div className="max-w-screen-2xl mx-auto w-full">
-                  {!disableAds && <div className="pn-leaderboard" />}
+                  {!isFullBleed && <div className="pn-leaderboard" />}
 
                   <ErrorBoundary>
                     <Outlet key={location.pathname} />
@@ -43,7 +44,7 @@ export const Layout: React.FC = () => {
                 </div>
               </PnPageAutoScale>
             </div>
-            {!disableAds && <aside className="pn-sidebar" aria-label="Advertisement" />}
+            {!isFullBleed && <aside className="pn-sidebar" aria-label="Advertisement" />}
           </div>
         </div>
       </main>
@@ -56,27 +57,22 @@ export const Layout: React.FC = () => {
           <p className="mt-1 text-slate-500">Thanks to MegaMew14, HsFearless, MaxLunar, and WhatYouThing for the data</p>
           <div className="h-px w-1/2 bg-slate-800/50 mx-auto my-3"></div>
           <div className="flex justify-center items-center space-x-4">
-            <a
-              href="https://github.com/Campionnn/SkyShards"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium"
-            >
+            <a href="https://github.com/Campionnn/SkyShards" target="_blank" rel="noopener noreferrer" className={FOOTER_LINK}>
               GitHub
             </a>
-            <span className="text-slate-600">•</span>
-            <a href="/about" className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium">
+            <FooterSeparator />
+            <Link to="/about" className={FOOTER_LINK}>
               About
-            </a>
-            <span className="text-slate-600">•</span>
-            <a href="/contact" className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium">
+            </Link>
+            <FooterSeparator />
+            <Link to="/contact" className={FOOTER_LINK}>
               Contact
-            </a>
-            <span className="text-slate-600">•</span>
-            <a href="https://skyshards.com/privacy-policy" className="text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium">
+            </Link>
+            <FooterSeparator />
+            <Link to="/privacy-policy" className={FOOTER_LINK}>
               Privacy Policy
-            </a>
-            <span className="text-slate-600">•</span>
+            </Link>
+            <FooterSeparator />
             <span className="text-slate-600 text-xs">© {new Date().getFullYear()} SkyShards</span>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { Info, Check, Mail, Copy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { DiscordIcon } from "../components/ui/DiscordIcon";
+import { DiscordIcon } from "../components/ui/BrandIcons";
 import { copyText } from "../utilities";
 
 const Divider = () => <hr className="my-6 border-slate-700" />;
