@@ -4,20 +4,9 @@ import "./index.css";
 import { App } from "./App";
 import { pruneUnknownStorageKeys } from "./utilities";
 
-/**
- * GitHub Pages serves public/404.html for deep links; it stashes the requested path and
- * bounces to "/". Put the original path back and let the (already created) router see it.
- */
-const restoreRedirectedPath = () => {
-  const target = sessionStorage.getItem("pathToRedirect");
-  sessionStorage.removeItem("pathToRedirect");
-  if (!target || target === window.location.pathname + window.location.search + window.location.hash) return;
-  window.history.replaceState(null, "", target);
-  window.dispatchEvent(new PopStateEvent("popstate"));
-};
-
+// Deep links (/recipes, /shards, ...) are served directly as dist/<route>.html (see
+// vite.config.ts), so the URL the app boots on is already the page's real URL.
 pruneUnknownStorageKeys();
-restoreRedirectedPath();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
