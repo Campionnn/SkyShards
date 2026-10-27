@@ -42,7 +42,7 @@ const calculateKuudraRate = (kuudraTier: string, moneyPerHour: number, customTim
   return tier.multiplier * (3600 / (totalTime + costTime));
 };
 
-/** Hunter fortune (plus rarity pets, King Cobra) and rate bonuses (Frog, Python) applied to a base rate. */
+/** Hunting Fortune (plus rarity pets, King Cobra) and rate bonuses (Frog, Python) applied to a base rate. */
 const applyFortuneModifiers = (
   rate: number,
   shardId: string,

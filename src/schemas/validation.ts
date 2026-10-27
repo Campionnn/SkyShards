@@ -3,7 +3,7 @@ import { z } from "zod";
 export const calculationSchema = z.object({
   shard: z.string().min(1, "Please select a shard"),
   quantity: z.number().min(1, "Quantity must be at least 1"),
-  hunterFortune: z.number().min(0, "Hunter Fortune must be non-negative"),
+  hunterFortune: z.number().min(0, "Hunting Fortune must be non-negative"),
   excludeChameleon: z.boolean(),
   frogBonus: z.boolean(),
   newtLevel: z.number().min(0).max(10),

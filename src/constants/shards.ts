@@ -4,7 +4,7 @@ import DESC_JSON from "../desc.json";
 /** Exporter-generated titles, descriptions and how-to-hunt text, keyed by shard id. */
 export const SHARD_DESCRIPTIONS = DESC_JSON as unknown as ShardDescriptions;
 
-/** Shards whose acquisition rate ignores Hunter Fortune. */
+/** Shards whose acquisition rate ignores Hunting Fortune. */
 export const NO_FORTUNE_SHARDS: readonly string[] = ["C19", "U4", "U16", "U28", "R24", "R25", "R27", "R60", "R64", "L4", "L15", "L30", "L33", "L48", "L51"];
 
 /** Shards caught with wooden bait; excluded when the "no wooden bait" option is on. */
