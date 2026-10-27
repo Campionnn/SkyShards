@@ -376,7 +376,7 @@ export const CalculatorForm = ({ onSubmit, ownedAttributes, useInventory, onUseI
             {form.ironManView && (
               <div>
                 <SectionTitle color="fuchsia" className="mb-2">
-                  <span>Hunter Fortune</span>
+                  <span>Hunting Fortune</span>
                   <div className="-mb-[5px]">
                     <HunterFortuneTooltip />
                   </div>

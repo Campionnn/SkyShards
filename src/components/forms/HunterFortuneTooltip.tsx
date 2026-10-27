@@ -11,7 +11,7 @@ const SOURCES: [bonus: number, source: string][] = [
   [1, "Starborn Century Cake"],
 ];
 
-/** Hunter Fortune from every universal source; "Max Stats" sets the form to this. */
+/** Hunting Fortune from every universal source; "Max Stats" sets the form to this. */
 export const MAX_HUNTER_FORTUNE = SOURCES.reduce((sum, [bonus]) => sum + bonus, 0);
 
 /** Extra fortune per rarity from the maxed leveled shard that grants it. */
@@ -23,10 +23,10 @@ const RARITY_BONUSES = [
   { rarity: "Legendary", color: "text-yellow-400", bonus: 0, shard: "" },
 ];
 
-/** Where Hunter Fortune comes from, and the per-rarity totals at max. */
+/** Where Hunting Fortune comes from, and the per-rarity totals at max. */
 export const HunterFortuneTooltip = () => (
   <Tooltip
-    shardName="Hunter Fortune"
+    shardName="Hunting Fortune"
     rarity="legendary"
     title=""
     showRomanNumerals={false}
