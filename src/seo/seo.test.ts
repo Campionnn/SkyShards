@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { describe, expect, it } from "vitest";
-import { LEGACY_REDIRECTS, SITE_ROUTES, buildRedirects, titleForPath } from "./routes";
+import { DISCORD_INVITE_URL, DISCORD_PATH, LEGACY_REDIRECTS, SITE_ROUTES, buildRedirects, titleForPath } from "./routes";
 import { buildNotFoundPage, buildRoutePages, buildSitemap } from "./staticPages";
 
 const template = `<!DOCTYPE html><html><head>
@@ -54,6 +54,11 @@ describe("routes", () => {
     const live = new Set(SITE_ROUTES.map((r) => r.path));
     for (const [from] of LEGACY_REDIRECTS) expect(live.has(from), from).toBe(false);
     expect(buildRedirects()).toContain("/smart / 301");
+  });
+
+  it("redirects the Discord short link to the invite", () => {
+    expect(buildRedirects()).toContain(`/discord ${DISCORD_INVITE_URL} 301`);
+    expect(SITE_ROUTES.map((r) => r.path)).not.toContain(DISCORD_PATH);
   });
 });
 

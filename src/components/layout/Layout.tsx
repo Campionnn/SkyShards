@@ -5,6 +5,7 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import { PnPageAutoScale } from "../PnPageAutoScale";
 import { GreenhouseModal } from "../modals";
 import { hasSeenGreenhouseModal, markGreenhouseModalSeen } from "../../utilities";
+import { DISCORD_PATH } from "../../seo/routes";
 
 const FOOTER_LINK = "text-slate-500 hover:text-purple-400 transition-colors duration-200 text-xs font-medium";
 
@@ -59,6 +60,10 @@ export const Layout = () => {
           <div className="flex justify-center items-center space-x-4">
             <a href="https://github.com/Campionnn/SkyShards" target="_blank" rel="noopener noreferrer" className={FOOTER_LINK}>
               GitHub
+            </a>
+            <FooterSeparator />
+            <a href={DISCORD_PATH} target="_blank" rel="noopener noreferrer" className={FOOTER_LINK}>
+              Discord
             </a>
             <FooterSeparator />
             <Link to="/about" className={FOOTER_LINK}>

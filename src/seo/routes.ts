@@ -21,6 +21,10 @@ export interface SiteRoute {
 
 export const SITE_URL = "https://skyshards.com";
 
+/** The short link the header and footer use; it leaves for the Discord invite. */
+export const DISCORD_PATH = "/discord";
+export const DISCORD_INVITE_URL = "https://discord.gg/NtbtdJRUMJ";
+
 export const SITE_ROUTES: SiteRoute[] = [
   {
     path: "/",
@@ -80,7 +84,8 @@ export function titleForPath(pathname: string): string {
 /**
  * Cloudflare Pages _redirects: permanent redirects for URLs that used to exist
  * (old sitemaps, removed pages, the old greenhouse pages), so Google drops them
- * instead of reporting them as 404s.
+ * instead of reporting them as 404s. Also the /discord short link used by the
+ * header and footer, which leaves for the Discord invite.
  */
 export const LEGACY_REDIRECTS: Array<[from: string, to: string]> = [
   ["/smart", "/"],
@@ -98,6 +103,8 @@ export const LEGACY_REDIRECTS: Array<[from: string, to: string]> = [
 
 export function buildRedirects(): string {
   const lines = ["# Generated at build time from src/seo/routes.ts. Edit there, not in dist/."];
+  // The header/footer short link: a real 301 to the Discord invite.
+  lines.push(`${DISCORD_PATH} ${DISCORD_INVITE_URL} 301`);
   for (const [from, to] of LEGACY_REDIRECTS) lines.push(`${from} ${to} 301`);
   return `${lines.join("\n")}\n`;
 }

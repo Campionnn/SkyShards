@@ -1,9 +1,10 @@
 import { useState, type ComponentType } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Calculator, Settings, Shuffle, Share2, Menu, X, ExternalLink } from "lucide-react";
-import { GitHubIcon, KofiIcon } from "../ui/BrandIcons";
+import { DiscordIcon, GitHubIcon, KofiIcon } from "../ui/BrandIcons";
+import { DISCORD_PATH } from "../../seo/routes";
 
-type NavColor = "purple" | "green" | "blue" | "yellow" | "gray" | "amber";
+type NavColor = "purple" | "green" | "blue" | "yellow" | "gray" | "amber" | "indigo";
 
 // Full class strings so Tailwind can find them; `ring` marks the active page.
 const COLOR_CLASSES: Record<NavColor, { base: string; ring: string }> = {
@@ -13,6 +14,7 @@ const COLOR_CLASSES: Record<NavColor, { base: string; ring: string }> = {
   yellow: { base: "bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/20 hover:border-yellow-500/30", ring: "ring-yellow-300" },
   gray: { base: "bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 border border-gray-500/20 hover:border-gray-500/30", ring: "ring-gray-300" },
   amber: { base: "bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/20 hover:border-amber-500/30", ring: "ring-amber-300" },
+  indigo: { base: "bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/30", ring: "ring-indigo-300" },
 };
 
 const NAV_ITEMS: { path: string; label: string; icon: ComponentType<{ className?: string }>; color: NavColor }[] = [
@@ -32,6 +34,8 @@ const EXTERNAL_LINKS: {
 }[] = [
   { href: "https://greenhouse.skyshards.com", label: "Greenhouse", icon: ExternalLink, color: "green" },
   { href: "https://github.com/Campionnn/SkyShards", label: "Github", icon: GitHubIcon, color: "gray" },
+  // The short link (/discord) 301s to the invite; the header link and the mobile menu entry.
+  { href: DISCORD_PATH, label: "Discord", icon: DiscordIcon, color: "indigo", title: "Join the SkyShards Discord" },
   {
     href: "https://ko-fi.com/skyshards",
     label: "Buy us a coffee!",

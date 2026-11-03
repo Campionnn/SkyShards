@@ -12,6 +12,7 @@ const GuidePage = lazy(() => import("./pages/GuidePage").then((m) => ({ default:
 const AboutPage = lazy(() => import("./pages/AboutPage").then((m) => ({ default: m.AboutPage })));
 const ContactPage = lazy(() => import("./pages/ContactPage").then((m) => ({ default: m.ContactPage })));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy").then((m) => ({ default: m.PrivacyPolicy })));
+const DiscordRedirect = lazy(() => import("./pages/DiscordRedirect").then((m) => ({ default: m.DiscordRedirect })));
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center py-12">
@@ -56,12 +57,24 @@ const pageRoutes: RouteObject[] = PAGES.map(({ path, Page }) => {
   return path ? { path, element } : { index: true, element };
 });
 
+/** Short links that leave the site. Not in PAGES: they are not pages and have no SITE_ROUTES entry. */
+const redirectRoutes: RouteObject[] = [
+  {
+    path: "discord",
+    element: (
+      <Suspense fallback={<LoadingSpinner />}>
+        <DiscordRedirect />
+      </Suspense>
+    ),
+  },
+];
+
 // "/" normally; "/SkyShards/" for the GitHub Pages build (see vite.config.ts).
 const basename = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const router = createBrowserRouter(
   [
-    { path: "/", element: <RootLayout />, children: pageRoutes },
+    { path: "/", element: <RootLayout />, children: [...pageRoutes, ...redirectRoutes] },
     { path: "*", element: <Navigate to="/" replace /> },
   ],
   { basename },
