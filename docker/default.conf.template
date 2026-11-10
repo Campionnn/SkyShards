@@ -1,0 +1,43 @@
+# Mirrors the Cloudflare Pages behaviour the build is made for (see vite.config.ts):
+# /x is served from x.html with a 200, anything unknown gets 404.html with a 404 status,
+# and the redirects from src/seo/routes.ts (dist/_redirects) become 301s.
+# The API_UPSTREAM env var is filled in by the nginx image's envsubst at container start.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    # Keep redirects relative so they work behind any host port or reverse proxy.
+    absolute_redirect off;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml text/markdown;
+
+    # Inventory scan: /api/skyshards/profile/<name> -> ${API_UPSTREAM}/skyshards/profile/<name>.
+    # Same-origin for the browser, so no CORS. The trailing slash strips the /api prefix.
+    location /api/ {
+        proxy_pass ${API_UPSTREAM}/;
+        proxy_set_header Host $proxy_host;
+        proxy_ssl_server_name on;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 10s;
+        proxy_read_timeout 30s;
+    }
+
+    # Generated from dist/_redirects at image build time.
+    include /etc/nginx/skyshards-redirects.conf;
+
+    # Vite puts content-hashed files in /assets, so they never change.
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        try_files $uri =404;
+    }
+
+    location / {
+        try_files $uri $uri.html $uri/ =404;
+    }
+
+    error_page 404 /404.html;
+}
