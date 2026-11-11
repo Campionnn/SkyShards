@@ -4,17 +4,20 @@ import { X, ClipboardCopy } from "lucide-react";
 interface CopyTreeModalProps {
   open: boolean;
   onClose: () => void;
-  onCopySkyOcean: () => void;
+  /** Leave out to hide the SkyOcean option (its tree format has no way to express inventory shards). */
+  onCopySkyOcean?: () => void;
   onCopyNoFrills: () => void;
   onCopySkyHanni: () => void;
   materialsOnly?: boolean;
+  /** Extra line under the description, e.g. what an inventory export leaves out. */
+  note?: string;
 }
 
-export const CopyTreeModal = ({ open, onClose, onCopySkyOcean, onCopyNoFrills, onCopySkyHanni, materialsOnly = false }: CopyTreeModalProps) => {
+export const CopyTreeModal = ({ open, onClose, onCopySkyOcean, onCopyNoFrills, onCopySkyHanni, materialsOnly = false, note }: CopyTreeModalProps) => {
   if (!open) return null;
 
   const handleCopySkyOcean = () => {
-    onCopySkyOcean();
+    onCopySkyOcean?.();
     onClose();
   };
 
@@ -58,11 +61,12 @@ export const CopyTreeModal = ({ open, onClose, onCopySkyOcean, onCopyNoFrills, o
               ? "Copy your materials list to paste into a mod for tracking."
               : "Choose the format you want to copy. You can paste it into the respective mod or share with others."}
           </p>
+          {note && <p className="text-sm text-slate-300 mt-2">{note}</p>}
           <div className="text-xs text-slate-400">JSONs are Gzipped + base64 encoded strings</div>
         </div>
 
         <div className="space-y-3">
-          {!materialsOnly && (
+          {!materialsOnly && onCopySkyOcean && (
             <button
               type="button"
               onClick={handleCopySkyOcean}

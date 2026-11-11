@@ -1,4 +1,4 @@
-import type { Data, RecipeTree } from "../../types/types";
+import type { Data, InventoryRecipeTree, RecipeTree } from "../../types/types";
 import { gzipBase64 } from "../../utilities";
 
 /**
@@ -62,11 +62,21 @@ const toSkyOcean = (tree: RecipeTree): SkyOceanTree => {
   };
 };
 
-/** Sum node quantities by `keyOf(node)`, visiting every node (keyOf returns null to skip one). */
-const sumNodes = (tree: RecipeTree, keyOf: (node: RecipeTree) => string | null): Map<string, number> => {
+/** A single tree node: an inventory tree without its split (array) nodes. A RecipeTree node is one too. */
+type TreeNode = Exclude<InventoryRecipeTree, InventoryRecipeTree[]>;
+
+/**
+ * Sum node quantities by `keyOf(node)`, visiting every node (keyOf returns null to skip one).
+ * Takes inventory trees too: split nodes are walked into, and inventory leaves have no children.
+ */
+const sumNodes = (tree: InventoryRecipeTree, keyOf: (node: TreeNode) => string | null): Map<string, number> => {
   const totals = new Map<string, number>();
-  const visit = (node: RecipeTree | undefined) => {
+  const visit = (node: InventoryRecipeTree | undefined) => {
     if (!node) return;
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
+    }
     const key = keyOf(node);
     if (key !== null) totals.set(key, (totals.get(key) || 0) + node.quantity);
     if (node.method === "recipe") node.inputs?.forEach(visit);
@@ -88,9 +98,9 @@ const toMaterialList = (quantities: Map<string, number>, data: Data): MaterialLi
 
 export const skyOceanTreeString = (tree: RecipeTree): string => encode("<SkyOceanRecipe>(V2):", toSkyOcean(tree));
 
-/** Every node, tagged with how it is obtained. */
-export const noFrillsTreeString = (tree: RecipeTree, data: Data): string => {
-  const totals = sumNodes(tree, (node) => `${node.shard}|${NO_FRILLS_SOURCE[node.method]}`);
+/** Every node, tagged with how it is obtained. Shards taken from the inventory are left out: they need no work. */
+export const noFrillsTreeString = (tree: InventoryRecipeTree, data: Data): string => {
+  const totals = sumNodes(tree, (node) => (node.method === "inventory" ? null : `${node.shard}|${NO_FRILLS_SOURCE[node.method]}`));
   const list = Array.from(totals, ([key, needed]) => {
     const [shardId, source] = key.split("|");
     return { name: data.shards[shardId].name, needed, source: source as NoFrillsSource };
@@ -98,8 +108,8 @@ export const noFrillsTreeString = (tree: RecipeTree, data: Data): string => {
   return encode("<NoFrillsRecipe>(V1):", list);
 };
 
-/** Only the directly-gathered leaves. */
-export const skyHanniTreeString = (tree: RecipeTree, data: Data): string =>
+/** Only the directly-gathered leaves (so never the ones covered by the inventory). */
+export const skyHanniTreeString = (tree: InventoryRecipeTree, data: Data): string =>
   encode(
     "<SkyHanniRecipe>(V1):",
     toMaterialList(
