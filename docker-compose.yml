@@ -1,0 +1,10 @@
+services:
+  skyshards:
+    build: .
+    image: skyshards:latest
+    ports:
+      - "${PORT:-8080}:80"
+    environment:
+      # Backend for the inventory scan, proxied under /api (default: https://api.skyshards.com)
+      API_UPSTREAM: ${API_UPSTREAM:-https://api.skyshards.com}
+    restart: unless-stopped
