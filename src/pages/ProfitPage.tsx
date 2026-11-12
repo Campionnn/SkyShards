@@ -14,7 +14,6 @@ import {
   getFarmFusionRows,
   getFlipRows,
   getFusionRows,
-  getSpread,
   type BuyMode,
   type FarmFusionRow,
   type FarmingRow,
@@ -277,18 +276,19 @@ const useSort = (initial: string) => {
   return { sort, toggle };
 };
 
+/** Compares names like localeCompare, but set up once instead of on every comparison. */
+const nameCollator = new Intl.Collator();
+
+/** Sorts by the given column. Each row's sort value is worked out once, not on every comparison. */
 const sortRows = <R,>(rows: R[], sort: SortState, columns: ColumnDef<R>[]) => {
   const sortValue = columns.find((column) => column.id === sort.column)?.sortValue;
   if (!sortValue) return rows;
   const factor = sort.direction === "asc" ? 1 : -1;
-  return [...rows].sort((a, b) => {
-    const va = sortValue(a);
-    const vb = sortValue(b);
-    return (typeof va === "string" ? va.localeCompare(vb as string) : va - (vb as number)) * factor;
-  });
+  return rows
+    .map((row) => ({ row, key: sortValue(row) }))
+    .sort((a, b) => (typeof a.key === "string" ? nameCollator.compare(a.key, b.key as string) : a.key - (b.key as number)) * factor)
+    .map(({ row }) => row);
 };
-
-const matchesQuery = (data: Data, shardIds: string[], query: string) => !query || shardIds.some((id) => data.shards[id]?.name.toLowerCase().includes(query));
 
 /** A fill time: "instant", minutes, hours or days; a dash when that side doesn't trade. */
 const formatHours = (hours: number) => {
@@ -416,113 +416,137 @@ const ShowMoreFooter = ({ shown, total, onShowMore, onShowLess }: { shown: numbe
 
 // ─── Column definitions ───
 
-const farmingColumns = ({ data, sellOverrides, orderBooks }: Loaded, openBook: (shardId: string) => void): ColumnDef<FarmingRow>[] => [
-  {
-    id: "name",
-    label: "Shard",
-    align: "left",
-    alwaysVisible: true,
-    sortValue: (row) => data.shards[row.shardId]?.name ?? "",
-    render: (row) => <ShardName data={data} shardId={row.shardId} onOpen={openBook} />,
-  },
-  {
-    id: "rate",
-    label: "Rate/h",
-    title: "Shards you hunt per hour",
-    sortValue: (row) => row.rate,
-    render: (row) => <span className="text-slate-300">{formatQuantity(row.rate)}</span>,
-  },
-  {
-    id: "price",
-    label: "Price",
-    title: "Sale price per shard, before tax",
-    sortValue: (row) => row.price,
-    render: (row) => (
-      <span className="text-slate-300">
-        <Price value={row.price} overridden={sellOverrides.has(row.shardId)} />
-      </span>
-    ),
-  },
-  {
-    id: "volume",
-    label: "Volume/h",
-    title: "Shards the Bazaar takes per hour on your selling side (7-day average)",
-    sortValue: (row) => row.volume,
-    render: (row) => <span className="text-slate-400">{formatLargeNumber(row.volume)}</span>,
-  },
-  {
-    id: "spread",
-    label: "Spread",
-    title: "Cheapest sell offer minus highest buy order",
-    sortValue: (row) => getSpread(orderBooks[row.shardId])?.spread ?? 0,
-    render: (row) => <SpreadValue spread={getSpread(orderBooks[row.shardId])} />,
-  },
-  {
-    id: "spreadPercent",
-    label: "Spread %",
-    title: "Spread as a share of the highest buy order",
-    sortValue: (row) => getSpread(orderBooks[row.shardId])?.percent ?? 0,
-    render: (row) => <SpreadValue spread={getSpread(orderBooks[row.shardId])} percent />,
-  },
-  {
-    id: "tenPercentOffer",
-    label: "10% offer",
-    title: 'The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread',
-    sortValue: (row) => getSpread(orderBooks[row.shardId])?.tenPercentOffer ?? 0,
-    render: (row) => {
-      const spread = getSpread(orderBooks[row.shardId]);
-      return spread ? <span className="text-slate-300">{formatLargeNumber(spread.tenPercentOffer)}</span> : <span className="text-slate-500">–</span>;
-    },
-  },
-  {
-    id: "coinsPerHour",
-    label: "Coins/h",
-    title: "Rate × price after tax, ignoring market volume",
-    sortValue: (row) => row.coinsPerHour,
-    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.coinsPerHour)}</span>,
-  },
-  {
-    id: "realisticCoinsPerHour",
-    label: "Realistic/h",
-    title: "Coins/h, selling at most your market share of the volume",
-    sortValue: (row) => row.realisticCoinsPerHour,
-    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.realisticCoinsPerHour)}</span>,
-  },
-  {
-    id: "realPrice",
-    label: "Real price",
-    title: "Average sale price when selling an hour's worth at once, from the order book (instant sell only)",
-    sortValue: (row) => row.realPrice,
-    render: (row) => (
-      <span className="text-slate-300">
-        <Price value={row.realPrice} overridden={sellOverrides.has(row.shardId)} />
-      </span>
-    ),
-  },
-  {
-    id: "realCoinsPerHour",
-    label: "Real/h",
-    title: "Realistic/h at the real price, and at most what the order book holds",
-    sortValue: (row) => row.realCoinsPerHour,
-    render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.realCoinsPerHour)}</span>,
-  },
-  {
-    id: "competitors",
-    label: "Competition",
-    title: "Sell offers already listed: the players you compete with when selling",
-    sortValue: (row) => row.competitors,
-    render: (row) => <span className="text-slate-300">{row.competitors}</span>,
-  },
-  {
-    id: "sellHours",
-    label: "Sell time",
-    title: "Time to sell an hour's worth: instant when selling instantly, else how long your sell offer waits behind the ones at the best price",
-    sortValue: (row) => sortableHours(row.sellHours),
-    render: (row) => <FillTime hours={row.sellHours} />,
-  },
-];
+type OpenBook = (shardId: string) => void;
 
-const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: (shardId: string) => void): ColumnDef<FusionRow>[] => {
+/** How a number column shows its value. */
+const show = {
+  coins: (value: number) => <span className="text-slate-300">{formatLargeNumber(value)}</span>,
+  volume: (value: number) => <span className="text-slate-400">{formatLargeNumber(value)}</span>,
+  quantity: (value: number) => <span className="text-slate-300">{formatQuantity(value)}</span>,
+  count: (value: number) => <span className="text-slate-300">{value}</span>,
+  /** Green when positive, red when negative. */
+  signed: (value: number) => <span className={coinClass(value)}>{formatLargeNumber(value)}</span>,
+  signedBold: (value: number) => <span className={`font-medium ${coinClass(value)}`}>{formatLargeNumber(value)}</span>,
+  /** The column a table is sorted by by default. */
+  best: (value: number) => <span className="font-medium text-green-400">{formatLargeNumber(value)}</span>,
+};
+
+/** A sortable number column: `value` is both what's shown and what's sorted by. */
+const numberColumn = <R,>(id: string, label: string, title: string, value: (row: R) => number, render = show.coins): ColumnDef<R> => ({
+  id,
+  label,
+  title,
+  sortValue: value,
+  render: (row) => render(value(row)),
+});
+
+/** A coins column that marks values coming from the user's price overrides. */
+const priceColumn = <R,>(id: string, label: string, title: string, value: (row: R) => number, overridden: (row: R) => boolean): ColumnDef<R> => ({
+  id,
+  label,
+  title,
+  sortValue: value,
+  render: (row) => (
+    <span className="text-slate-300">
+      <Price value={value(row)} overridden={overridden(row)} />
+    </span>
+  ),
+});
+
+/** A fill-time column; "never" sorts last. */
+const hoursColumn = <R,>(id: string, label: string, title: string, value: (row: R) => number): ColumnDef<R> => ({
+  id,
+  label,
+  title,
+  sortValue: (row) => sortableHours(value(row)),
+  render: (row) => <FillTime hours={value(row)} />,
+});
+
+/** The shard a row is about (Farming, Flips). */
+const shardColumn = <R extends { shardId: string }>(data: Data, openBook: OpenBook): ColumnDef<R> => ({
+  id: "name",
+  label: "Shard",
+  align: "left",
+  alwaysVisible: true,
+  sortValue: (row) => data.shards[row.shardId]?.name ?? "",
+  render: (row) => <ShardName data={data} shardId={row.shardId} onOpen={openBook} />,
+});
+
+/** The result of a fusion (Fusions, Fuse your farm). */
+const resultColumn = <R extends { outputId: string; outputQuantity: number }>(data: Data, openBook: OpenBook): ColumnDef<R> => ({
+  id: "output",
+  label: "Result",
+  align: "left",
+  alwaysVisible: true,
+  sortValue: (row) => data.shards[row.outputId]?.name ?? "",
+  render: (row) => <ShardName data={data} shardId={row.outputId} amount={row.outputQuantity} onOpen={openBook} />,
+});
+
+/** A spread in coins or percent, or a dash when one side of the book is empty. */
+const SpreadValue = ({ spread, percent = false }: { spread: Spread | null; percent?: boolean }) =>
+  spread ? (
+    <span className="text-slate-300">{percent ? `${(spread.percent * 100).toFixed(1)}%` : formatLargeNumber(spread.spread)}</span>
+  ) : (
+    <span className="text-slate-500">–</span>
+  );
+
+const TEN_PERCENT_OFFER = 'The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread';
+
+const farmingColumns = ({ data, sellOverrides }: Loaded, openBook: OpenBook): ColumnDef<FarmingRow>[] => {
+  const overridden = (row: FarmingRow) => sellOverrides.has(row.shardId);
+  return [
+    shardColumn(data, openBook),
+    numberColumn("rate", "Rate/h", "Shards you hunt per hour", (row) => row.rate, show.quantity),
+    priceColumn("price", "Price", "Sale price per shard, before tax", (row) => row.price, overridden),
+    numberColumn("volume", "Volume/h", "Shards the Bazaar takes per hour on your selling side (7-day average)", (row) => row.volume, show.volume),
+    {
+      id: "spread",
+      label: "Spread",
+      title: "Cheapest sell offer minus highest buy order",
+      sortValue: (row) => row.spread?.spread ?? 0,
+      render: (row) => <SpreadValue spread={row.spread} />,
+    },
+    {
+      id: "spreadPercent",
+      label: "Spread %",
+      title: "Spread as a share of the highest buy order",
+      sortValue: (row) => row.spread?.percent ?? 0,
+      render: (row) => <SpreadValue spread={row.spread} percent />,
+    },
+    {
+      id: "tenPercentOffer",
+      label: "10% offer",
+      title: TEN_PERCENT_OFFER,
+      sortValue: (row) => row.spread?.tenPercentOffer ?? 0,
+      render: (row) => (row.spread ? show.coins(row.spread.tenPercentOffer) : <span className="text-slate-500">–</span>),
+    },
+    numberColumn("coinsPerHour", "Coins/h", "Rate × price after tax, ignoring market volume", (row) => row.coinsPerHour),
+    numberColumn("realisticCoinsPerHour", "Realistic/h", "Coins/h, selling at most your market share of the volume", (row) => row.realisticCoinsPerHour),
+    priceColumn(
+      "realPrice",
+      "Real price",
+      "Average sale price when selling an hour's worth at once, from the order book (instant sell only)",
+      (row) => row.realPrice,
+      overridden,
+    ),
+    numberColumn(
+      "realCoinsPerHour",
+      "Real/h",
+      "Realistic/h at the real price, and at most what the order book holds",
+      (row) => row.realCoinsPerHour,
+      show.best,
+    ),
+    numberColumn("competitors", "Competition", "Sell offers already listed: the players you compete with when selling", (row) => row.competitors, show.count),
+    hoursColumn(
+      "sellHours",
+      "Sell time",
+      "Time to sell an hour's worth: instant when selling instantly, else how long your sell offer waits behind the ones at the best price",
+      (row) => row.sellHours,
+    ),
+  ];
+};
+
+const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: OpenBook): ColumnDef<FusionRow>[] => {
   const inputsOverridden = (row: FusionRow) => buyOverrides.has(row.inputs[0]) || buyOverrides.has(row.inputs[1]);
   return [
     {
@@ -538,36 +562,15 @@ const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: 
         </span>
       ),
     },
-    {
-      id: "output",
-      label: "Result",
-      align: "left",
-      alwaysVisible: true,
-      sortValue: (row) => data.shards[row.outputId]?.name ?? "",
-      render: (row) => <ShardName data={data} shardId={row.outputId} amount={row.outputQuantity} onOpen={openBook} />,
-    },
-    {
-      id: "cost",
-      label: "Cost",
-      title: "Coins to buy the inputs of one fusion",
-      sortValue: (row) => row.cost,
-      render: (row) => (
-        <span className="text-slate-300">
-          <Price value={row.cost} overridden={inputsOverridden(row)} />
-        </span>
-      ),
-    },
-    {
-      id: "revenue",
-      label: "Value",
-      title: "What the result of one fusion sells for, after tax",
-      sortValue: (row) => row.revenue,
-      render: (row) => (
-        <span className="text-slate-300">
-          <Price value={row.revenue} overridden={sellOverrides.has(row.outputId)} />
-        </span>
-      ),
-    },
+    resultColumn(data, openBook),
+    priceColumn("cost", "Cost", "Coins to buy the inputs of one fusion", (row) => row.cost, inputsOverridden),
+    priceColumn(
+      "revenue",
+      "Value",
+      "What the result of one fusion sells for, after tax",
+      (row) => row.revenue,
+      (row) => sellOverrides.has(row.outputId),
+    ),
     {
       id: "profit",
       label: "Profit",
@@ -590,97 +593,32 @@ const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: 
       sortValue: (row) => row.margin,
       render: (row) => <span className={coinClass(row.margin)}>{(row.margin * 100).toFixed(1)}%</span>,
     },
-    {
-      id: "volume",
-      label: "Volume/h",
-      title: "Hourly Bazaar volume of the least traded shard in this fusion",
-      sortValue: (row) => row.volume,
-      render: (row) => <span className="text-slate-400">{formatLargeNumber(row.volume)}</span>,
-    },
-    {
-      id: "fusionsPerHour",
-      label: "Max/h",
-      title: "Fusions per hour the market allows at your market share",
-      sortValue: (row) => row.fusionsPerHour,
-      render: (row) => <span className="text-slate-300">{formatQuantity(row.fusionsPerHour)}</span>,
-    },
-    {
-      id: "profitPerHour",
-      label: "Profit/h",
-      title: "Profit × Max/h",
-      sortValue: (row) => row.profitPerHour,
-      render: (row) => <span className="text-slate-300">{formatLargeNumber(row.profitPerHour)}</span>,
-    },
-    {
-      id: "realProfit",
-      label: "Real profit",
-      title: "Profit per fusion when an hour's worth is bought and sold at once, at order book prices (instant trades only)",
-      sortValue: (row) => row.realProfit,
-      render: (row) => <span className={coinClass(row.realProfit)}>{formatLargeNumber(row.realProfit)}</span>,
-    },
-    {
-      id: "realFusionsPerHour",
-      label: "Real max/h",
-      title: "Max/h, also limited by how much the order books hold",
-      sortValue: (row) => row.realFusionsPerHour,
-      render: (row) => <span className="text-slate-300">{formatQuantity(row.realFusionsPerHour)}</span>,
-    },
-    {
-      id: "realProfitPerHour",
-      label: "Real profit/h",
-      title: "Real profit × Real max/h",
-      sortValue: (row) => row.realProfitPerHour,
-      render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.realProfitPerHour)}</span>,
-    },
-    {
-      id: "fillHours",
-      label: "Fill time",
-      title:
-        "Time until an hour's worth of orders fills, waiting behind the orders at the best price: the slowest of buying the inputs and selling the result. Instant trades don't wait.",
-      sortValue: (row) => sortableHours(row.fillHours),
-      render: (row) => <FillTime hours={row.fillHours} />,
-    },
+    numberColumn("volume", "Volume/h", "Hourly Bazaar volume of the least traded shard in this fusion", (row) => row.volume, show.volume),
+    numberColumn("fusionsPerHour", "Max/h", "Fusions per hour the market allows at your market share", (row) => row.fusionsPerHour, show.quantity),
+    numberColumn("profitPerHour", "Profit/h", "Profit × Max/h", (row) => row.profitPerHour),
+    numberColumn(
+      "realProfit",
+      "Real profit",
+      "Profit per fusion when an hour's worth is bought and sold at once, at order book prices (instant trades only)",
+      (row) => row.realProfit,
+      show.signed,
+    ),
+    numberColumn("realFusionsPerHour", "Real max/h", "Max/h, also limited by how much the order books hold", (row) => row.realFusionsPerHour, show.quantity),
+    numberColumn("realProfitPerHour", "Real profit/h", "Real profit × Real max/h", (row) => row.realProfitPerHour, show.best),
+    hoursColumn(
+      "fillHours",
+      "Fill time",
+      "Time until an hour's worth of orders fills, waiting behind the orders at the best price: the slowest of buying the inputs and selling the result. Instant trades don't wait.",
+      (row) => row.fillHours,
+    ),
   ];
 };
 
-/** A spread in coins or percent, or a dash when one side of the book is empty. */
-const SpreadValue = ({ spread, percent = false }: { spread: Spread | null; percent?: boolean }) =>
-  spread ? (
-    <span className="text-slate-300">{percent ? `${(spread.percent * 100).toFixed(1)}%` : formatLargeNumber(spread.spread)}</span>
-  ) : (
-    <span className="text-slate-500">–</span>
-  );
-
-const flipColumns = ({ data }: Loaded, openBook: (shardId: string) => void): ColumnDef<FlipRow>[] => [
-  {
-    id: "name",
-    label: "Shard",
-    align: "left",
-    alwaysVisible: true,
-    sortValue: (row) => data.shards[row.shardId]?.name ?? "",
-    render: (row) => <ShardName data={data} shardId={row.shardId} onOpen={openBook} />,
-  },
-  {
-    id: "buyOrder",
-    label: "Buy at",
-    title: "Highest buy order: where your buy order goes",
-    sortValue: (row) => row.buyOrder,
-    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.buyOrder)}</span>,
-  },
-  {
-    id: "sellOffer",
-    label: "Sell at",
-    title: "Cheapest sell offer: where your sell offer goes",
-    sortValue: (row) => row.sellOffer,
-    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.sellOffer)}</span>,
-  },
-  {
-    id: "spread",
-    label: "Spread",
-    title: "Sell at minus buy at",
-    sortValue: (row) => row.spread,
-    render: (row) => <SpreadValue spread={row} />,
-  },
+const flipColumns = ({ data }: Loaded, openBook: OpenBook): ColumnDef<FlipRow>[] => [
+  shardColumn(data, openBook),
+  numberColumn("buyOrder", "Buy at", "Highest buy order: where your buy order goes", (row) => row.buyOrder),
+  numberColumn("sellOffer", "Sell at", "Cheapest sell offer: where your sell offer goes", (row) => row.sellOffer),
+  { id: "spread", label: "Spread", title: "Sell at minus buy at", sortValue: (row) => row.spread, render: (row) => <SpreadValue spread={row} /> },
   {
     id: "spreadPercent",
     label: "Spread %",
@@ -688,80 +626,37 @@ const flipColumns = ({ data }: Loaded, openBook: (shardId: string) => void): Col
     sortValue: (row) => row.percent,
     render: (row) => <SpreadValue spread={row} percent />,
   },
-  {
-    id: "profit",
-    label: "Profit",
-    title: "Per shard: sell price after tax minus buy price",
-    sortValue: (row) => row.profit,
-    render: (row) => <span className={`font-medium ${coinClass(row.profit)}`}>{formatLargeNumber(row.profit)}</span>,
-  },
-  {
-    id: "volume",
-    label: "Volume/h",
-    title: "Shards per hour on the slower side: buy orders fill with instant sells, sell offers with instant buys (7-day average)",
-    sortValue: (row) => row.volume,
-    render: (row) => <span className="text-slate-400">{formatLargeNumber(row.volume)}</span>,
-  },
-  {
-    id: "flipsPerHour",
-    label: "Max/h",
-    title: "Shards per hour you can flip at your market share",
-    sortValue: (row) => row.flipsPerHour,
-    render: (row) => <span className="text-slate-300">{formatQuantity(row.flipsPerHour)}</span>,
-  },
-  {
-    id: "profitPerHour",
-    label: "Profit/h",
-    title: "Profit × Max/h",
-    sortValue: (row) => row.profitPerHour,
-    render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.profitPerHour)}</span>,
-  },
-  {
-    id: "tenPercentOffer",
-    label: "10% offer",
-    title: 'The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread. Undercuts the others, so it fills sooner.',
-    sortValue: (row) => row.tenPercentOffer,
-    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.tenPercentOffer)}</span>,
-  },
-  {
-    id: "tenPercentProfit",
-    label: "Profit 10%",
-    title: 'Profit per shard when selling with the "10% of spread" offer, after tax',
-    sortValue: (row) => row.tenPercentProfit,
-    render: (row) => <span className={coinClass(row.tenPercentProfit)}>{formatLargeNumber(row.tenPercentProfit)}</span>,
-  },
-  {
-    id: "tenPercentProfitPerHour",
-    label: "Profit/h 10%",
-    title: "Profit 10% × Max/h",
-    sortValue: (row) => row.tenPercentProfitPerHour,
-    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.tenPercentProfitPerHour)}</span>,
-  },
-  {
-    id: "buyOrderCount",
-    label: "Buy orders",
-    title: "Buy orders already listed: who you compete with when buying",
-    sortValue: (row) => row.buyOrderCount,
-    render: (row) => <span className="text-slate-300">{row.buyOrderCount}</span>,
-  },
-  {
-    id: "sellOfferCount",
-    label: "Sell offers",
-    title: "Sell offers already listed: who you compete with when selling",
-    sortValue: (row) => row.sellOfferCount,
-    render: (row) => <span className="text-slate-300">{row.sellOfferCount}</span>,
-  },
-  {
-    id: "fillHours",
-    label: "Fill time",
-    title: "Time for an hour's worth to go through both queues at the best prices: first your buy order, then your sell offer",
-    sortValue: (row) => sortableHours(row.fillHours),
-    render: (row) => <FillTime hours={row.fillHours} />,
-  },
+  numberColumn("profit", "Profit", "Per shard: sell price after tax minus buy price", (row) => row.profit, show.signedBold),
+  numberColumn(
+    "volume",
+    "Volume/h",
+    "Shards per hour on the slower side: buy orders fill with instant sells, sell offers with instant buys (7-day average)",
+    (row) => row.volume,
+    show.volume,
+  ),
+  numberColumn("flipsPerHour", "Max/h", "Shards per hour you can flip at your market share", (row) => row.flipsPerHour, show.quantity),
+  numberColumn("profitPerHour", "Profit/h", "Profit × Max/h", (row) => row.profitPerHour, show.best),
+  numberColumn("tenPercentOffer", "10% offer", `${TEN_PERCENT_OFFER}. Undercuts the others, so it fills sooner.`, (row) => row.tenPercentOffer),
+  numberColumn(
+    "tenPercentProfit",
+    "Profit 10%",
+    'Profit per shard when selling with the "10% of spread" offer, after tax',
+    (row) => row.tenPercentProfit,
+    show.signed,
+  ),
+  numberColumn("tenPercentProfitPerHour", "Profit/h 10%", "Profit 10% × Max/h", (row) => row.tenPercentProfitPerHour),
+  numberColumn("buyOrderCount", "Buy orders", "Buy orders already listed: who you compete with when buying", (row) => row.buyOrderCount, show.count),
+  numberColumn("sellOfferCount", "Sell offers", "Sell offers already listed: who you compete with when selling", (row) => row.sellOfferCount, show.count),
+  hoursColumn(
+    "fillHours",
+    "Fill time",
+    "Time for an hour's worth to go through both queues at the best prices: first your buy order, then your sell offer",
+    (row) => row.fillHours,
+  ),
 ];
 
 /** The two inputs of a fusion, with the farmed one marked. */
-const FarmedInputs = ({ data, row, openBook }: { data: Data; row: FarmFusionRow; openBook: (shardId: string) => void }) => (
+const FarmedInputs = ({ data, row, openBook }: { data: Data; row: FarmFusionRow; openBook: OpenBook }) => (
   <span className="inline-flex items-center gap-2">
     {row.inputs.map((shardId, index) => (
       <span key={index} className="inline-flex items-center gap-2">
@@ -779,90 +674,123 @@ const FarmedInputs = ({ data, row, openBook }: { data: Data; row: FarmFusionRow;
   </span>
 );
 
-const farmFusionColumns = ({ data }: Loaded, openBook: (shardId: string) => void): ColumnDef<FarmFusionRow>[] => [
-  {
-    id: "inputs",
-    label: "Inputs",
-    align: "left",
-    alwaysVisible: true,
-    render: (row) => <FarmedInputs data={data} row={row} openBook={openBook} />,
-  },
-  {
-    id: "output",
-    label: "Result",
-    align: "left",
-    alwaysVisible: true,
-    sortValue: (row) => data.shards[row.outputId]?.name ?? "",
-    render: (row) => <ShardName data={data} shardId={row.outputId} amount={row.outputQuantity} onOpen={openBook} />,
-  },
-  {
-    id: "farmRate",
-    label: "Farm/h",
-    title: "Your farming rate of the marked shard",
-    sortValue: (row) => row.farmRate,
-    render: (row) => <span className="text-slate-300">{formatQuantity(row.farmRate)}</span>,
-  },
-  {
-    id: "sellValue",
-    label: "Sell value",
-    title: "What the farmed shards of one fusion would sell for instead, after tax",
-    sortValue: (row) => row.sellValue,
-    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.sellValue)}</span>,
-  },
-  {
-    id: "boughtCost",
-    label: "Buy cost",
-    title: "Coins to buy the other input of one fusion",
-    sortValue: (row) => row.boughtCost,
-    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.boughtCost)}</span>,
-  },
-  {
-    id: "revenue",
-    label: "Value",
-    title: "What the result of one fusion sells for, after tax",
-    sortValue: (row) => row.revenue,
-    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.revenue)}</span>,
-  },
-  {
-    id: "gain",
-    label: "Gain",
-    title: "Per fusion: value minus sell value minus buy cost. Positive means fusing beats selling the farmed shards.",
-    sortValue: (row) => row.gain,
-    render: (row) => <span className={`font-medium ${coinClass(row.gain)}`}>{formatLargeNumber(row.gain)}</span>,
-  },
-  {
-    id: "volume",
-    label: "Volume/h",
-    title: "Hourly Bazaar volume of the least traded of the bought input and the result",
-    sortValue: (row) => row.volume,
-    render: (row) => <span className="text-slate-400">{formatLargeNumber(row.volume)}</span>,
-  },
-  {
-    id: "fusionsPerHour",
-    label: "Fusions/h",
-    title: "Limited by your farming rate and by the market for the bought input and the result",
-    sortValue: (row) => row.fusionsPerHour,
-    render: (row) => <span className="text-slate-300">{formatQuantity(row.fusionsPerHour)}</span>,
-  },
-  {
-    id: "gainPerHour",
-    label: "Gain/h",
-    title: "Gain × Fusions/h: extra coins per hour compared with selling what you farm",
-    sortValue: (row) => row.gainPerHour,
-    render: (row) => (
-      <span className={`font-medium ${row.gainPerHour > 0 ? "text-green-400" : coinClass(row.gainPerHour)}`}>{formatLargeNumber(row.gainPerHour)}</span>
-    ),
-  },
+const farmFusionColumns = ({ data }: Loaded, openBook: OpenBook): ColumnDef<FarmFusionRow>[] => [
+  { id: "inputs", label: "Inputs", align: "left", alwaysVisible: true, render: (row) => <FarmedInputs data={data} row={row} openBook={openBook} /> },
+  resultColumn(data, openBook),
+  numberColumn("farmRate", "Farm/h", "Your farming rate of the marked shard", (row) => row.farmRate, show.quantity),
+  numberColumn("sellValue", "Sell value", "What the farmed shards of one fusion would sell for instead, after tax", (row) => row.sellValue),
+  numberColumn("boughtCost", "Buy cost", "Coins to buy the other input of one fusion", (row) => row.boughtCost),
+  numberColumn("revenue", "Value", "What the result of one fusion sells for, after tax", (row) => row.revenue),
+  numberColumn(
+    "gain",
+    "Gain",
+    "Per fusion: value minus sell value minus buy cost. Positive means fusing beats selling the farmed shards.",
+    (row) => row.gain,
+    show.signedBold,
+  ),
+  numberColumn("volume", "Volume/h", "Hourly Bazaar volume of the least traded of the bought input and the result", (row) => row.volume, show.volume),
+  numberColumn(
+    "fusionsPerHour",
+    "Fusions/h",
+    "Limited by your farming rate and by the market for the bought input and the result",
+    (row) => row.fusionsPerHour,
+    show.quantity,
+  ),
+  numberColumn(
+    "gainPerHour",
+    "Gain/h",
+    "Gain × Fusions/h: extra coins per hour compared with selling what you farm",
+    (row) => row.gainPerHour,
+    show.signedBold,
+  ),
 ];
+
+// ─── Tabs ───
 
 type TableId = "farming" | "fusions" | "flips" | "farmFusions";
 
-const TABS: { id: TableId; label: string; icon: LucideIcon }[] = [
-  { id: "farming", label: "Farming", icon: Pickaxe },
-  { id: "fusions", label: "Fusions", icon: Hammer },
-  { id: "flips", label: "Flips", icon: Repeat },
-  { id: "farmFusions", label: "Fuse your farm", icon: Sprout },
-];
+/** Everything that makes one tab: its texts, its rows and its columns. */
+interface TableConfig<R> {
+  id: TableId;
+  label: string;
+  icon: LucideIcon;
+  description: string;
+  rows: (loaded: Loaded, settings: MarketSettings) => R[];
+  columns: (loaded: Loaded, openBook: OpenBook) => ColumnDef<R>[];
+  initialSort: string;
+  rowKey: (row: R) => string;
+  /** Shards the search matches against. */
+  shardIdsOf: (row: R) => string[];
+  /** With it, the tab gets an "Only profitable" filter (on by default). */
+  profitOf?: (row: R) => number;
+  searchPlaceholder: string;
+  emptyText: string;
+}
+
+const farmingTable: TableConfig<FarmingRow> = {
+  id: "farming",
+  label: "Farming",
+  icon: Pickaxe,
+  description:
+    "Shards you can hunt directly, with your rate from the calculator settings. Realistic/h only counts what the Bazaar takes at your market share; Real/h also prices it from the order book.",
+  rows: (loaded, settings) => getFarmingRows(loaded.data, loaded, settings),
+  columns: farmingColumns,
+  initialSort: "realCoinsPerHour",
+  rowKey: (row) => row.shardId,
+  shardIdsOf: (row) => [row.shardId],
+  searchPlaceholder: "Search shards...",
+  emptyText: "No shards found.",
+};
+
+const fusionTable: TableConfig<FusionRow> = {
+  id: "fusions",
+  label: "Fusions",
+  icon: Hammer,
+  description:
+    "Buy the inputs, fuse, sell the result. Profit is per fusion after tax; Max/h is how many fusions the Bazaar volume allows at your market share. The Real columns price an hour's worth from the order book.",
+  rows: (loaded, settings) => getFusionRows(loaded.data, loaded, settings, loaded.crocodileMultiplier),
+  columns: fusionColumns,
+  initialSort: "realProfitPerHour",
+  rowKey: (row) => `${row.outputId}|${row.inputs[0]}|${row.inputs[1]}|${row.outputQuantity}`,
+  shardIdsOf: (row) => [row.outputId, ...row.inputs],
+  profitOf: (row) => row.profit,
+  searchPlaceholder: "Search input or result...",
+  emptyText: "No fusions found.",
+};
+
+const flipTable: TableConfig<FlipRow> = {
+  id: "flips",
+  label: "Flips",
+  icon: Repeat,
+  description:
+    "Buy with a buy order at the highest buy order, sell with a sell offer at the cheapest sell offer. Profit is per shard after tax; works for every shard on the Bazaar, farmable or not.",
+  rows: (loaded, settings) => getFlipRows(loaded, settings),
+  columns: flipColumns,
+  initialSort: "profitPerHour",
+  rowKey: (row) => row.shardId,
+  shardIdsOf: (row) => [row.shardId],
+  profitOf: (row) => row.profit,
+  searchPlaceholder: "Search shards...",
+  emptyText: "No flips found.",
+};
+
+const farmFusionTable: TableConfig<FarmFusionRow> = {
+  id: "farmFusions",
+  label: "Fuse your farm",
+  icon: Sprout,
+  description:
+    "Fuse the shards you farm (marked) instead of selling them, buying the other input. Gain compares it with selling the farmed shards; Fusions/h is limited by your farming rate and the market.",
+  rows: (loaded, settings) => getFarmFusionRows(loaded.data, loaded, settings, loaded.crocodileMultiplier),
+  columns: farmFusionColumns,
+  initialSort: "gainPerHour",
+  rowKey: (row) => `${row.outputId}|${row.inputs[0]}|${row.inputs[1]}|${row.outputQuantity}|${row.farmedId}`,
+  shardIdsOf: (row) => [row.outputId, ...row.inputs],
+  profitOf: (row) => row.gain,
+  searchPlaceholder: "Search input or result...",
+  emptyText: "No fusions found.",
+};
+
+const TABS = [farmingTable, fusionTable, flipTable, farmFusionTable].map(({ id, label, icon }) => ({ id, label, icon }));
 
 /** The tabs on the left; `extra` (the Columns menu) on the right of the same row. */
 const TabBar = ({ active, onChange, extra }: { active: TableId; onChange: (tab: TableId) => void; extra?: ReactNode }) => (
@@ -899,12 +827,17 @@ const visibleColumns = <R,>(columns: ColumnDef<R>[], table: TableId, hidden: str
 
 // ─── Column menu ───
 
-const ColumnPicker = ({
-  groups,
+/** Checkboxes for the current tab's columns. */
+const ColumnPicker = <R,>({
+  table,
+  label,
+  columns,
   hidden,
   onChange,
 }: {
-  groups: { table: TableId; label: string; columns: ColumnDef<never>[] }[];
+  table: TableId;
+  label: string;
+  columns: ColumnDef<R>[];
   hidden: string[];
   onChange: (hidden: string[]) => void;
 }) => {
@@ -924,22 +857,20 @@ const ColumnPicker = ({
           {/* Clicking anywhere outside the menu closes it. */}
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute right-0 z-20 mt-2 w-64 p-3 space-y-3 bg-slate-800 border border-slate-600 rounded-md shadow-xl">
-            {groups.map((group) => (
-              <div key={group.table} className="space-y-1">
-                <div className="text-xs font-semibold text-slate-300">{group.label}</div>
-                {group.columns
-                  .filter((column) => !column.alwaysVisible)
-                  .map((column) => {
-                    const key = columnKey(group.table, column.id);
-                    return (
-                      <label key={key} className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer" title={column.title}>
-                        <input type="checkbox" checked={!hidden.includes(key)} onChange={() => toggle(key)} className="accent-emerald-500" />
-                        {column.label}
-                      </label>
-                    );
-                  })}
-              </div>
-            ))}
+            <div className="space-y-1">
+              <div className="text-xs font-semibold text-slate-300">{label}</div>
+              {columns
+                .filter((column) => !column.alwaysVisible)
+                .map((column) => {
+                  const key = columnKey(table, column.id);
+                  return (
+                    <label key={key} className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer" title={column.title}>
+                      <input type="checkbox" checked={!hidden.includes(key)} onChange={() => toggle(key)} className="accent-emerald-500" />
+                      {column.label}
+                    </label>
+                  );
+                })}
+            </div>
             {hidden.length > 0 && (
               <button type="button" onClick={() => onChange([])} className="text-xs text-emerald-300 hover:underline cursor-pointer">
                 Show all columns
@@ -1021,7 +952,7 @@ const OrderBookModal = ({ data, shardId, book, onClose }: { data: Data; shardId:
           </div>
           {book ? (
             <>
-              <DepthChart buyOrders={book.buyOrders} sellOffers={book.sellOffers} />
+              <DepthChart book={book} />
               <button type="button" onClick={() => setShowList((current) => !current)} className="text-xs text-emerald-300 hover:underline cursor-pointer">
                 {showList ? "Hide order list" : "Show order list"}
               </button>
@@ -1044,103 +975,83 @@ const OrderBookModal = ({ data, shardId, book, onClose }: { data: Data; shardId:
   );
 };
 
-// ─── Table sections ───
+// ─── The active tab ───
 
 /**
- * A foldable card with one searchable, sortable, paged table. Farming, Fusions and Flips
- * only differ in their rows, columns and texts.
+ * The tab bar (with the Columns menu) and the active tab's table: search, filters, sorting and
+ * paging. Only this tab's rows are worked out; the fusion tables hold well over 100,000 rows.
  */
-const TableSection = <R,>({
-  icon,
-  title,
-  description,
-  data,
-  rows,
-  columns,
-  allColumns,
-  initialSort,
-  rowKey,
-  shardIdsOf,
-  volumeOf,
-  profitOf,
+const ActiveTable = <R extends { volume: number }>({
+  config,
+  loaded,
+  marketSettings,
   minVolume,
-  searchPlaceholder,
-  emptyText,
+  hiddenColumns,
+  onHiddenColumnsChange,
+  onTabChange,
+  openBook,
 }: {
-  icon: ReactNode;
-  title: string;
-  description: string;
-  data: Data;
-  rows: R[];
-  /** Visible columns. */
-  columns: ColumnDef<R>[];
-  /** Every column, so sorting keeps working when the sorted column is hidden. */
-  allColumns: ColumnDef<R>[];
-  initialSort: string;
-  rowKey: (row: R) => string;
-  /** Shards the search matches against. */
-  shardIdsOf: (row: R) => string[];
-  /** Volume compared with the Min. volume setting. */
-  volumeOf: (row: R) => number;
-  /** With it, the section gets an "Only profitable" filter (on by default). */
-  profitOf?: (row: R) => number;
+  config: TableConfig<R>;
+  loaded: Loaded;
+  marketSettings: MarketSettings;
   minVolume: number;
-  searchPlaceholder: string;
-  emptyText: string;
+  hiddenColumns: string[];
+  onHiddenColumnsChange: (hidden: string[]) => void;
+  onTabChange: (tab: TableId) => void;
+  openBook: OpenBook;
 }) => {
+  const { data } = loaded;
   const [query, setQuery] = useState("");
   const [onlyProfitable, setOnlyProfitable] = useState(true);
-  const { sort, toggle } = useSort(initialSort);
+  const { sort, toggle } = useSort(config.initialSort);
   const lowerQuery = query.trim().toLowerCase();
-  const filterProfit = profitOf !== undefined && onlyProfitable;
+  const filterProfit = config.profitOf !== undefined && onlyProfitable;
   const { limit, showMore, showLess } = usePaging(`${lowerQuery}|${filterProfit}|${minVolume}|${sort.column}|${sort.direction}`);
 
-  const filtered = useMemo(
-    () =>
-      sortRows(
-        rows.filter((row) => (!filterProfit || profitOf(row) > 0) && volumeOf(row) >= minVolume && matchesQuery(data, shardIdsOf(row), lowerQuery)),
-        sort,
-        allColumns,
-      ),
-    [rows, data, lowerQuery, filterProfit, profitOf, volumeOf, shardIdsOf, minVolume, sort, allColumns],
-  );
-  const shown = filtered.slice(0, limit);
+  const rows = useMemo(() => config.rows(loaded, marketSettings), [config, loaded, marketSettings]);
+  // Every column, so sorting keeps working when the sorted column is hidden; and the visible ones.
+  const allColumns = useMemo(() => config.columns(loaded, openBook), [config, loaded, openBook]);
+  const columns = useMemo(() => visibleColumns(allColumns, config.id, hiddenColumns), [allColumns, config.id, hiddenColumns]);
+  // Lower-case names once, instead of once per row on every keystroke.
+  const lowerNames = useMemo(() => new Map(Object.entries(data.shards).map(([id, shard]) => [id, shard.name.toLowerCase()])), [data]);
+
+  const filtered = useMemo(() => {
+    const { profitOf, shardIdsOf } = config;
+    const matches = (row: R) => !lowerQuery || shardIdsOf(row).some((id) => lowerNames.get(id)?.includes(lowerQuery));
+    return rows.filter((row) => (!filterProfit || (profitOf?.(row) ?? 0) > 0) && row.volume >= minVolume && matches(row));
+  }, [rows, config, lowerQuery, lowerNames, filterProfit, minVolume]);
+  const sorted = useMemo(() => sortRows(filtered, sort, allColumns), [filtered, sort, allColumns]);
+  const shown = sorted.slice(0, limit);
 
   return (
-    <Section
-      icon={icon}
-      title={title}
-      description={description}
-      actions={
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          {profitOf && (
-            <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer whitespace-nowrap">
-              <input type="checkbox" checked={onlyProfitable} onChange={(e) => setOnlyProfitable(e.target.checked)} className="accent-emerald-500" />
-              Only profitable
-            </label>
-          )}
-          <SearchBox value={query} onChange={setQuery} placeholder={searchPlaceholder} />
-        </div>
-      }
-    >
-      <DataTable columns={columns} rows={shown} rowKey={rowKey} sort={sort} onSort={toggle} emptyText={emptyText} />
-      <ShowMoreFooter shown={shown.length} total={filtered.length} onShowMore={showMore} onShowLess={showLess} />
-    </Section>
+    <>
+      <TabBar
+        active={config.id}
+        onChange={onTabChange}
+        extra={<ColumnPicker table={config.id} label={config.label} columns={allColumns} hidden={hiddenColumns} onChange={onHiddenColumnsChange} />}
+      />
+      <Section
+        icon={<config.icon className="w-5 h-5 text-emerald-400" />}
+        title={config.label}
+        description={config.description}
+        actions={
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            {config.profitOf && (
+              <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer whitespace-nowrap">
+                <input type="checkbox" checked={onlyProfitable} onChange={(e) => setOnlyProfitable(e.target.checked)} className="accent-emerald-500" />
+                Only profitable
+              </label>
+            )}
+            <SearchBox value={query} onChange={setQuery} placeholder={config.searchPlaceholder} />
+          </div>
+        }
+      >
+        <DataTable columns={columns} rows={shown} rowKey={config.rowKey} sort={sort} onSort={toggle} emptyText={config.emptyText} />
+        <ShowMoreFooter shown={shown.length} total={sorted.length} onShowMore={showMore} onShowLess={showLess} />
+      </Section>
+    </>
   );
 };
-
-// Row accessors for the sections. Module-level, so they keep their identity between renders.
-const farmingKey = (row: FarmingRow) => row.shardId;
-const farmingShards = (row: FarmingRow) => [row.shardId];
-const fusionKey = (row: FusionRow) => `${row.outputId}|${row.inputs[0]}|${row.inputs[1]}|${row.outputQuantity}`;
-const fusionShards = (row: FusionRow) => [row.outputId, ...row.inputs];
-const flipKey = (row: FlipRow) => row.shardId;
-const flipShards = (row: FlipRow) => [row.shardId];
-const farmFusionKey = (row: FarmFusionRow) => `${row.outputId}|${row.inputs[0]}|${row.inputs[1]}|${row.outputQuantity}|${row.farmedId}`;
-const farmFusionShards = (row: FarmFusionRow) => [row.outputId, ...row.inputs];
-const farmFusionGain = (row: FarmFusionRow) => row.gain;
-const rowVolume = (row: { volume: number }) => row.volume;
-const rowProfit = (row: { profit: number }) => row.profit;
 
 // ─── Page ───
 
@@ -1207,39 +1118,18 @@ export const ProfitPage = () => {
     () => ({ buyMode, sellMode, taxPercent: settings.taxPercent, marketShare: settings.marketSharePercent / 100 }),
     [buyMode, sellMode, settings.taxPercent, settings.marketSharePercent],
   );
-  // Only the active tab's rows are worked out: the fusion tables hold well over 100,000 rows.
   const tab = settings.activeTab;
-  const farmingRows = useMemo(() => (loaded && tab === "farming" ? getFarmingRows(loaded.data, loaded, marketSettings) : []), [loaded, marketSettings, tab]);
-  const fusionRows = useMemo(
-    () => (loaded && tab === "fusions" ? getFusionRows(loaded.data, loaded, marketSettings, loaded.crocodileMultiplier) : []),
-    [loaded, marketSettings, tab],
-  );
-  const flipRows = useMemo(() => (loaded && tab === "flips" ? getFlipRows(loaded, marketSettings) : []), [loaded, marketSettings, tab]);
-  const farmFusionRows = useMemo(
-    () => (loaded && tab === "farmFusions" ? getFarmFusionRows(loaded.data, loaded, marketSettings, loaded.crocodileMultiplier) : []),
-    [loaded, marketSettings, tab],
-  );
-
-  // setBookShardId is stable, so the column definitions only rebuild when the data does.
-  const allFarmingColumns = useMemo(() => (loaded ? farmingColumns(loaded, setBookShardId) : []), [loaded]);
-  const allFusionColumns = useMemo(() => (loaded ? fusionColumns(loaded, setBookShardId) : []), [loaded]);
-  const allFlipColumns = useMemo(() => (loaded ? flipColumns(loaded, setBookShardId) : []), [loaded]);
-  const allFarmFusionColumns = useMemo(() => (loaded ? farmFusionColumns(loaded, setBookShardId) : []), [loaded]);
-  const shownFarmingColumns = useMemo(() => visibleColumns(allFarmingColumns, "farming", settings.hiddenColumns), [allFarmingColumns, settings.hiddenColumns]);
-  const shownFusionColumns = useMemo(() => visibleColumns(allFusionColumns, "fusions", settings.hiddenColumns), [allFusionColumns, settings.hiddenColumns]);
-  const shownFlipColumns = useMemo(() => visibleColumns(allFlipColumns, "flips", settings.hiddenColumns), [allFlipColumns, settings.hiddenColumns]);
-  const shownFarmFusionColumns = useMemo(
-    () => visibleColumns(allFarmFusionColumns, "farmFusions", settings.hiddenColumns),
-    [allFarmFusionColumns, settings.hiddenColumns],
-  );
-
-  const overrideCount = loaded ? new Set([...loaded.buyOverrides, ...loaded.sellOverrides]).size : 0;
-  const pickerColumns: Record<TableId, ColumnDef<never>[]> = {
-    farming: allFarmingColumns,
-    fusions: allFusionColumns,
-    flips: allFlipColumns,
-    farmFusions: allFarmFusionColumns,
+  // Shared by every tab; setBookShardId is stable, so the tables only rebuild when the data does.
+  const tableProps = loaded && {
+    loaded,
+    marketSettings,
+    minVolume: settings.minVolume,
+    hiddenColumns: settings.hiddenColumns,
+    onHiddenColumnsChange: (hiddenColumns: string[]) => update({ hiddenColumns }),
+    onTabChange: (activeTab: TableId) => update({ activeTab }),
+    openBook: setBookShardId,
   };
+  const overrideCount = loaded ? new Set([...loaded.buyOverrides, ...loaded.sellOverrides]).size : 0;
 
   return (
     <div className="min-h-screen px-2 sm:px-4 py-4">
@@ -1360,94 +1250,12 @@ export const ProfitPage = () => {
             <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
           </div>
         )}
-        {loaded && (
+        {tableProps && (
           <>
-            <TabBar
-              active={tab}
-              onChange={(activeTab) => update({ activeTab })}
-              extra={
-                <ColumnPicker
-                  groups={[{ table: tab, label: TABS.find((item) => item.id === tab)?.label ?? "", columns: pickerColumns[tab] }]}
-                  hidden={settings.hiddenColumns}
-                  onChange={(hiddenColumns) => update({ hiddenColumns })}
-                />
-              }
-            />
-            {tab === "farming" && (
-              <TableSection
-                icon={<Pickaxe className="w-5 h-5 text-emerald-400" />}
-                title="Farming"
-                description="Shards you can hunt directly, with your rate from the calculator settings. Realistic/h only counts what the Bazaar takes at your market share; Real/h also prices it from the order book."
-                data={loaded.data}
-                rows={farmingRows}
-                columns={shownFarmingColumns}
-                allColumns={allFarmingColumns}
-                initialSort="realCoinsPerHour"
-                rowKey={farmingKey}
-                shardIdsOf={farmingShards}
-                volumeOf={rowVolume}
-                minVolume={settings.minVolume}
-                searchPlaceholder="Search shards..."
-                emptyText="No shards found."
-              />
-            )}
-            {tab === "fusions" && (
-              <TableSection
-                icon={<Hammer className="w-5 h-5 text-emerald-400" />}
-                title="Fusions"
-                description="Buy the inputs, fuse, sell the result. Profit is per fusion after tax; Max/h is how many fusions the Bazaar volume allows at your market share. The Real columns price an hour's worth from the order book."
-                data={loaded.data}
-                rows={fusionRows}
-                columns={shownFusionColumns}
-                allColumns={allFusionColumns}
-                initialSort="realProfitPerHour"
-                rowKey={fusionKey}
-                shardIdsOf={fusionShards}
-                volumeOf={rowVolume}
-                profitOf={rowProfit}
-                minVolume={settings.minVolume}
-                searchPlaceholder="Search input or result..."
-                emptyText="No fusions found."
-              />
-            )}
-            {tab === "flips" && (
-              <TableSection
-                icon={<Repeat className="w-5 h-5 text-emerald-400" />}
-                title="Flips"
-                description="Buy with a buy order at the highest buy order, sell with a sell offer at the cheapest sell offer. Profit is per shard after tax; works for every shard on the Bazaar, farmable or not."
-                data={loaded.data}
-                rows={flipRows}
-                columns={shownFlipColumns}
-                allColumns={allFlipColumns}
-                initialSort="profitPerHour"
-                rowKey={flipKey}
-                shardIdsOf={flipShards}
-                volumeOf={rowVolume}
-                profitOf={rowProfit}
-                minVolume={settings.minVolume}
-                searchPlaceholder="Search shards..."
-                emptyText="No flips found."
-              />
-            )}
-            {tab === "farmFusions" && (
-              <TableSection
-                icon={<Sprout className="w-5 h-5 text-emerald-400" />}
-                title="Fuse your farm"
-                description="Fuse the shards you farm (marked) instead of selling them, buying the other input. Gain compares it with selling the farmed shards; Fusions/h is limited by your farming rate and the market."
-                data={loaded.data}
-                rows={farmFusionRows}
-                columns={shownFarmFusionColumns}
-                allColumns={allFarmFusionColumns}
-                initialSort="gainPerHour"
-                rowKey={farmFusionKey}
-                shardIdsOf={farmFusionShards}
-                volumeOf={rowVolume}
-                profitOf={farmFusionGain}
-                minVolume={settings.minVolume}
-                searchPlaceholder="Search input or result..."
-                emptyText="No fusions found."
-              />
-            )}
+            {tab === "farming" && <ActiveTable config={farmingTable} {...tableProps} />}
+            {tab === "fusions" && <ActiveTable config={fusionTable} {...tableProps} />}
+            {tab === "flips" && <ActiveTable config={flipTable} {...tableProps} />}
+            {tab === "farmFusions" && <ActiveTable config={farmFusionTable} {...tableProps} />}
           </>
         )}
         {loaded && (

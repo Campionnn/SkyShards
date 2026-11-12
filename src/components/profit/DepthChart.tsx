@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import type { OrderLevel } from "../../services";
+import { countOrders, getSpread, type OrderBook, type OrderLevel } from "../../services";
 import { formatLargeNumber } from "../../utilities";
 
 /*
@@ -19,9 +19,6 @@ const HEIGHT = 276;
 const PAD = { top: 12, right: 16, bottom: 44, left: 70 };
 const PLOT_W = WIDTH - PAD.left - PAD.right;
 const PLOT_H = HEIGHT - PAD.top - PAD.bottom;
-
-/** The in-game "10% of spread" sell offer undercuts the cheapest offer by this share of the spread. */
-const SPREAD_UNDERCUT = 0.1;
 
 /** Levels further than this factor from the best prices would squash the chart, so they're cut off. */
 const RANGE_FACTOR = 2;
@@ -67,7 +64,7 @@ const SideSummary = ({
   totalText: string;
   alignRight?: boolean;
 }) => {
-  const orders = levels.reduce((sum, level) => sum + level.orders, 0);
+  const orders = countOrders(levels);
   const amount = levels.reduce((sum, level) => sum + level.amount, 0);
   return (
     <div className={`min-w-0 space-y-0.5 ${alignRight ? "text-right" : ""}`}>
@@ -91,7 +88,8 @@ interface Hover {
   color: string;
 }
 
-export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[]; sellOffers: OrderLevel[] }) => {
+export const DepthChart = ({ book }: { book: OrderBook }) => {
+  const { buyOrders, sellOffers } = book;
   const svgRef = useRef<SVGSVGElement>(null);
   const [hover, setHover] = useState<Hover | null>(null);
 
@@ -139,15 +137,9 @@ export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[];
     const buyShape = stepShape(buy, PAD.left);
     const sellShape = stepShape(sell, PAD.left + PLOT_W);
 
-    // Where a "10% of spread" sell offer would go; only exists with both sides.
-    const tenPercentOffer = bestBuy !== undefined && bestSell !== undefined ? bestSell - (bestSell - bestBuy) * SPREAD_UNDERCUT : undefined;
-
-    const spread = bestBuy !== undefined && bestSell !== undefined ? bestSell - bestBuy : undefined;
-
     return {
-      spread,
-      spreadPercent: spread !== undefined && bestBuy! > 0 ? spread / bestBuy! : undefined,
-      tenPercentOffer,
+      // Spread and "10% of spread" offer; null unless both sides have orders.
+      spread: getSpread(book),
       buy,
       sell,
       bestBuy,
@@ -162,9 +154,10 @@ export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[];
       xTicks: niceTicks(xMin, xMax, 6).filter((tick) => tick >= xMin && tick <= xMax),
       yTicks: niceTicks(0, yMax, 4).filter((tick) => tick <= yMax),
     };
-  }, [buyOrders, sellOffers]);
+  }, [book, buyOrders, sellOffers]);
 
   if (!chart) return <p className="text-sm text-slate-400 py-6">No orders on either side.</p>;
+  const tenPercentX = chart.spread ? chart.x(chart.spread.tenPercentOffer) : null;
 
   const onMove = (event: ReactPointerEvent<SVGSVGElement>) => {
     const rect = svgRef.current?.getBoundingClientRect();
@@ -200,19 +193,17 @@ export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[];
         />
         <div className="text-center">
           <div className="text-slate-400">Spread</div>
-          {chart.spread !== undefined ? (
+          {chart.spread ? (
             <>
-              <div className="text-sm font-semibold text-white">{formatLargeNumber(chart.spread)}</div>
-              <div className="text-slate-300">{chart.spreadPercent !== undefined ? `${(chart.spreadPercent * 100).toFixed(1)}%` : ""}</div>
-              {chart.tenPercentOffer !== undefined && (
-                <div
-                  className="mt-1 inline-flex items-center gap-1.5 text-slate-400"
-                  title='The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread'
-                >
-                  <span className="w-3 border-t-2 border-dashed" style={{ borderColor: SELL_COLOR }} />
-                  10% offer {formatLargeNumber(chart.tenPercentOffer)}
-                </div>
-              )}
+              <div className="text-sm font-semibold text-white">{formatLargeNumber(chart.spread.spread)}</div>
+              <div className="text-slate-300">{`${(chart.spread.percent * 100).toFixed(1)}%`}</div>
+              <div
+                className="mt-1 inline-flex items-center gap-1.5 text-slate-400"
+                title='The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread'
+              >
+                <span className="w-3 border-t-2 border-dashed" style={{ borderColor: SELL_COLOR }} />
+                10% offer {formatLargeNumber(chart.spread.tenPercentOffer)}
+              </div>
             </>
           ) : (
             <div className="text-slate-500">–</div>
@@ -276,22 +267,14 @@ export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[];
               ),
           )}
 
-          {chart.tenPercentOffer !== undefined && (
+          {tenPercentX !== null && (
             <g>
-              <line
-                x1={chart.x(chart.tenPercentOffer)}
-                x2={chart.x(chart.tenPercentOffer)}
-                y1={PAD.top}
-                y2={chart.y(0)}
-                stroke={SELL_COLOR}
-                strokeWidth={1.5}
-                strokeDasharray="6 4"
-              />
+              <line x1={tenPercentX} x2={tenPercentX} y1={PAD.top} y2={chart.y(0)} stroke={SELL_COLOR} strokeWidth={1.5} strokeDasharray="6 4" />
+              {/* The label sits left of the line, or right of it when the line is near the left edge. */}
               <text
-                // The label sits left of the line, or right of it when the line is near the left edge.
-                x={chart.x(chart.tenPercentOffer) + (chart.x(chart.tenPercentOffer) < PAD.left + 100 ? 4 : -4)}
+                x={tenPercentX + (tenPercentX < PAD.left + 100 ? 4 : -4)}
                 y={PAD.top + 10}
-                textAnchor={chart.x(chart.tenPercentOffer) < PAD.left + 100 ? "start" : "end"}
+                textAnchor={tenPercentX < PAD.left + 100 ? "start" : "end"}
                 fontSize={11}
                 fill="#cbd5e1"
               >

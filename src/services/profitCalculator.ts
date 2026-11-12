@@ -104,6 +104,58 @@ const buyOrderHours = (shardId: string, amount: number, market: MarketData) =>
 const sellOfferHours = (shardId: string, amount: number, market: MarketData) =>
   hoursToFill(market.orderBooks[shardId]?.sellOffers, amount, market.volumes[shardId]?.instantBuy ?? 0);
 
+/** One fusion recipe, with what the calculations need from it. */
+interface Fusion {
+  outputId: string;
+  inputs: [string, string];
+  /** Shards of each input consumed by one fusion (their fuse amounts). */
+  inputAmounts: [number, number];
+  /** Shards produced by one fusion; fractional for reptile recipes with a Crocodile pet. */
+  outputQuantity: number;
+  /** Shards needed per fusion, by shard: one entry when both inputs are the same shard. */
+  needed: [shardId: string, amount: number][];
+  /** Sale price of the result, before tax. */
+  outputPrice: number;
+}
+
+/**
+ * Calls `visit` for every recipe whose result has a sale price and whose inputs are known shards.
+ * `include` can skip recipes early, before any work is done for them.
+ */
+const forEachFusion = (
+  data: Data,
+  market: MarketData,
+  crocodileMultiplier: number,
+  visit: (fusion: Fusion) => void,
+  include?: (inputs: [string, string]) => boolean,
+) => {
+  for (const [outputId, recipes] of Object.entries(data.recipes)) {
+    const outputPrice = market.sellPrices[outputId];
+    if (outputPrice === undefined) continue;
+    for (const recipe of recipes) {
+      const [input1, input2] = recipe.inputs;
+      const shard1 = data.shards[input1];
+      const shard2 = data.shards[input2];
+      if (!shard1 || !shard2 || (include && !include(recipe.inputs))) continue;
+      const inputAmounts: [number, number] = [shard1.fuse_amount, shard2.fuse_amount];
+      visit({
+        outputId,
+        inputs: recipe.inputs,
+        inputAmounts,
+        outputQuantity: getEffectiveOutputQuantity(recipe, crocodileMultiplier),
+        needed:
+          input1 === input2
+            ? [[input1, inputAmounts[0] + inputAmounts[1]]]
+            : [
+                [input1, inputAmounts[0]],
+                [input2, inputAmounts[1]],
+              ],
+        outputPrice,
+      });
+    }
+  }
+};
+
 export interface FarmingRow {
   shardId: string;
   /** Shards per hour, with the player's Hunting Fortune and pet bonuses applied. */
@@ -120,6 +172,8 @@ export interface FarmingRow {
   realPrice: number;
   /** realisticCoinsPerHour at realPrice, and at most what the order book holds. */
   realCoinsPerHour: number;
+  /** The shard's spread, or null when one side of its order book is empty. */
+  spread: Spread | null;
   /** Sell offers already listed: the players you compete with when selling. */
   competitors: number;
   /** Hours to sell an hour's worth: 0 when selling instantly, else the sell offer queue time. */
@@ -146,6 +200,7 @@ export const getFarmingRows = (data: Data, market: MarketData, settings: MarketS
       realisticCoinsPerHour: sellable * price * keep,
       realPrice,
       realCoinsPerHour: fill.amount * realPrice * keep,
+      spread: getSpread(market.orderBooks[shardId]),
       competitors: countOrders(market.orderBooks[shardId]?.sellOffers),
       sellHours: settings.sellMode === "instant" ? 0 : sellOfferHours(shardId, sellable, market),
     });
@@ -186,82 +241,67 @@ export interface FusionRow {
 /** Every recipe whose inputs can be bought and whose output can be sold. */
 export const getFusionRows = (data: Data, market: MarketData, settings: MarketSettings, crocodileMultiplier: number): FusionRow[] => {
   const keep = afterTax(settings.taxPercent);
-  const { buyMode, sellMode } = settings;
+  const { buyMode, sellMode, marketShare } = settings;
   const rows: FusionRow[] = [];
-  for (const [outputId, recipes] of Object.entries(data.recipes)) {
-    const outputPrice = market.sellPrices[outputId];
-    if (outputPrice === undefined) continue;
+  forEachFusion(data, market, crocodileMultiplier, ({ outputId, inputs, inputAmounts, outputQuantity, needed, outputPrice }) => {
+    const price1 = market.buyPrices[inputs[0]];
+    const price2 = market.buyPrices[inputs[1]];
+    if (price1 === undefined || price2 === undefined) return;
+
+    const cost = inputAmounts[0] * price1 + inputAmounts[1] * price2;
+    const revenue = outputQuantity * outputPrice * keep;
+    const profit = revenue - cost;
+
     const outputVolume = sellVolume(market.volumes[outputId], sellMode);
-    for (const recipe of recipes) {
-      const [input1, input2] = recipe.inputs;
-      const price1 = market.buyPrices[input1];
-      const price2 = market.buyPrices[input2];
-      const shard1 = data.shards[input1];
-      const shard2 = data.shards[input2];
-      if (price1 === undefined || price2 === undefined || !shard1 || !shard2) continue;
+    let volume = outputVolume;
+    let fusionsLimit = outputVolume / outputQuantity;
+    for (const [shardId, amount] of needed) {
+      const inputVolume = buyVolume(market.volumes[shardId], buyMode);
+      volume = Math.min(volume, inputVolume);
+      fusionsLimit = Math.min(fusionsLimit, inputVolume / amount);
+    }
+    const fusionsPerHour = fusionsLimit * marketShare;
 
-      const inputAmounts: [number, number] = [shard1.fuse_amount, shard2.fuse_amount];
-      const outputQuantity = getEffectiveOutputQuantity(recipe, crocodileMultiplier);
-      const cost = inputAmounts[0] * price1 + inputAmounts[1] * price2;
-      const revenue = outputQuantity * outputPrice * keep;
-      const profit = revenue - cost;
-
-      // Shards needed per fusion, by shard: both inputs can be the same shard.
-      const needed = new Map<string, number>([[input1, inputAmounts[0]]]);
-      needed.set(input2, (needed.get(input2) ?? 0) + inputAmounts[1]);
-      let volume = outputVolume;
-      let fusionsLimit = outputVolume / outputQuantity;
-      for (const [shardId, amount] of needed) {
-        const inputVolume = buyVolume(market.volumes[shardId], buyMode);
-        volume = Math.min(volume, inputVolume);
-        fusionsLimit = Math.min(fusionsLimit, inputVolume / amount);
-      }
-      const fusionsPerHour = fusionsLimit * settings.marketShare;
-
+    let realFusionsPerHour = 0;
+    let realProfit = profit;
+    let fillHours = Infinity;
+    if (fusionsPerHour > 0) {
       // Real values: first see how many fusions the order books can supply and take,
       // then price exactly that many at the books' average prices.
-      let realFusionsPerHour = 0;
-      let realProfit = profit;
-      if (fusionsPerHour > 0) {
-        realFusionsPerHour = Math.min(fusionsPerHour, sellFill(outputId, fusionsPerHour * outputQuantity, market, sellMode).amount / outputQuantity);
-        for (const [shardId, amount] of needed) {
-          realFusionsPerHour = Math.min(realFusionsPerHour, buyFill(shardId, fusionsPerHour * amount, market, buyMode).amount / amount);
-        }
-        if (realFusionsPerHour > 0) {
-          let realCost = 0;
-          for (const [shardId, amount] of needed) realCost += amount * buyFill(shardId, realFusionsPerHour * amount, market, buyMode).average;
-          const realRevenue = outputQuantity * sellFill(outputId, realFusionsPerHour * outputQuantity, market, sellMode).average * keep;
-          realProfit = realRevenue - realCost;
-        }
+      realFusionsPerHour = Math.min(fusionsPerHour, sellFill(outputId, fusionsPerHour * outputQuantity, market, sellMode).amount / outputQuantity);
+      for (const [shardId, amount] of needed) {
+        realFusionsPerHour = Math.min(realFusionsPerHour, buyFill(shardId, fusionsPerHour * amount, market, buyMode).amount / amount);
+      }
+      if (realFusionsPerHour > 0) {
+        let realCost = 0;
+        for (const [shardId, amount] of needed) realCost += amount * buyFill(shardId, realFusionsPerHour * amount, market, buyMode).average;
+        realProfit = outputQuantity * sellFill(outputId, realFusionsPerHour * outputQuantity, market, sellMode).average * keep - realCost;
       }
 
       // Orders queue behind the best price; instant trades don't wait.
-      let fillHours = fusionsPerHour > 0 ? 0 : Infinity;
-      if (fusionsPerHour > 0) {
-        if (buyMode === "order")
-          for (const [shardId, amount] of needed) fillHours = Math.max(fillHours, buyOrderHours(shardId, fusionsPerHour * amount, market));
-        if (sellMode === "offer") fillHours = Math.max(fillHours, sellOfferHours(outputId, fusionsPerHour * outputQuantity, market));
-      }
-
-      rows.push({
-        outputId,
-        inputs: recipe.inputs,
-        inputAmounts,
-        outputQuantity,
-        cost,
-        revenue,
-        profit,
-        margin: cost > 0 ? profit / cost : 0,
-        volume,
-        fusionsPerHour,
-        profitPerHour: profit > 0 ? profit * fusionsPerHour : 0,
-        realFusionsPerHour,
-        realProfit,
-        realProfitPerHour: realProfit > 0 ? realProfit * realFusionsPerHour : 0,
-        fillHours,
-      });
+      fillHours = 0;
+      if (buyMode === "order") for (const [shardId, amount] of needed) fillHours = Math.max(fillHours, buyOrderHours(shardId, fusionsPerHour * amount, market));
+      if (sellMode === "offer") fillHours = Math.max(fillHours, sellOfferHours(outputId, fusionsPerHour * outputQuantity, market));
     }
-  }
+
+    rows.push({
+      outputId,
+      inputs,
+      inputAmounts,
+      outputQuantity,
+      cost,
+      revenue,
+      profit,
+      margin: cost > 0 ? profit / cost : 0,
+      volume,
+      fusionsPerHour,
+      profitPerHour: profit > 0 ? profit * fusionsPerHour : 0,
+      realFusionsPerHour,
+      realProfit,
+      realProfitPerHour: realProfit > 0 ? realProfit * realFusionsPerHour : 0,
+      fillHours,
+    });
+  });
   return rows;
 };
 
@@ -380,28 +420,21 @@ export interface FarmFusionRow {
  */
 export const getFarmFusionRows = (data: Data, market: MarketData, settings: MarketSettings, crocodileMultiplier: number): FarmFusionRow[] => {
   const keep = afterTax(settings.taxPercent);
+  const { buyMode, sellMode, marketShare } = settings;
   const rows: FarmFusionRow[] = [];
-  for (const [outputId, recipes] of Object.entries(data.recipes)) {
-    const outputPrice = market.sellPrices[outputId];
-    if (outputPrice === undefined) continue;
-    const outputVolume = sellVolume(market.volumes[outputId], settings.sellMode);
-    for (const recipe of recipes) {
-      const [input1, input2] = recipe.inputs;
-      const shard1 = data.shards[input1];
-      const shard2 = data.shards[input2];
-      if (!shard1 || !shard2) continue;
-      const inputAmounts: [number, number] = [shard1.fuse_amount, shard2.fuse_amount];
-      const outputQuantity = getEffectiveOutputQuantity(recipe, crocodileMultiplier);
+  forEachFusion(
+    data,
+    market,
+    crocodileMultiplier,
+    ({ outputId, inputs, inputAmounts, outputQuantity, needed, outputPrice }) => {
       const revenue = outputQuantity * outputPrice * keep;
+      const outputVolume = sellVolume(market.volumes[outputId], sellMode);
 
-      const candidates = input1 === input2 ? [input1] : [input1, input2];
-      for (const farmedId of candidates) {
+      for (const [farmedId, farmedAmount] of needed) {
         const farmRate = data.shards[farmedId]?.rate ?? 0;
         if (farmRate <= 0) continue;
-        const sameShard = input1 === input2;
-        const farmedAmount = sameShard ? inputAmounts[0] + inputAmounts[1] : farmedId === input1 ? inputAmounts[0] : inputAmounts[1];
-        const boughtId = sameShard ? null : farmedId === input1 ? input2 : input1;
-        const boughtAmount = boughtId === null ? 0 : boughtId === input1 ? inputAmounts[0] : inputAmounts[1];
+        // The other input is bought; there is none when both inputs are the farmed shard.
+        const [boughtId, boughtAmount] = needed.find(([shardId]) => shardId !== farmedId) ?? [null, 0];
         const boughtPrice = boughtId === null ? 0 : market.buyPrices[boughtId];
         if (boughtPrice === undefined) continue;
 
@@ -411,16 +444,16 @@ export const getFarmFusionRows = (data: Data, market: MarketData, settings: Mark
         const gain = revenue - sellValue - boughtCost;
 
         let volume = outputVolume;
-        let fusionsPerHour = Math.min(farmRate / farmedAmount, (outputVolume * settings.marketShare) / outputQuantity);
+        let fusionsPerHour = Math.min(farmRate / farmedAmount, (outputVolume * marketShare) / outputQuantity);
         if (boughtId !== null) {
-          const boughtVolume = buyVolume(market.volumes[boughtId], settings.buyMode);
+          const boughtVolume = buyVolume(market.volumes[boughtId], buyMode);
           volume = Math.min(volume, boughtVolume);
-          fusionsPerHour = Math.min(fusionsPerHour, (boughtVolume * settings.marketShare) / boughtAmount);
+          fusionsPerHour = Math.min(fusionsPerHour, (boughtVolume * marketShare) / boughtAmount);
         }
 
         rows.push({
           outputId,
-          inputs: recipe.inputs,
+          inputs,
           inputAmounts,
           outputQuantity,
           farmedId,
@@ -437,7 +470,9 @@ export const getFarmFusionRows = (data: Data, market: MarketData, settings: Mark
           gainPerHour: gain * fusionsPerHour,
         });
       }
-    }
-  }
+    },
+    // Only recipes with an input you can farm; most have none.
+    ([input1, input2]) => (data.shards[input1]?.rate ?? 0) > 0 || (data.shards[input2]?.rate ?? 0) > 0,
+  );
   return rows;
 };
