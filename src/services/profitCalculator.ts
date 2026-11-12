@@ -274,7 +274,12 @@ export interface Spread {
   spread: number;
   /** spread / buyOrder (0.1 = 10 %). */
   percent: number;
+  /** The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread. */
+  tenPercentOffer: number;
 }
+
+/** Share of the spread the in-game "10% of spread" sell offer undercuts by. */
+export const SPREAD_UNDERCUT = 0.1;
 
 /** The spread of an order book, or null when one side is empty. */
 export const getSpread = (book: OrderBook | undefined): Spread | null => {
@@ -282,7 +287,7 @@ export const getSpread = (book: OrderBook | undefined): Spread | null => {
   const sellOffer = book?.sellOffers[0]?.price;
   if (buyOrder === undefined || sellOffer === undefined) return null;
   const spread = sellOffer - buyOrder;
-  return { buyOrder, sellOffer, spread, percent: buyOrder > 0 ? spread / buyOrder : 0 };
+  return { buyOrder, sellOffer, spread, percent: buyOrder > 0 ? spread / buyOrder : 0, tenPercentOffer: sellOffer - spread * SPREAD_UNDERCUT };
 };
 
 export interface FlipRow extends Spread {
@@ -295,6 +300,10 @@ export interface FlipRow extends Spread {
   flipsPerHour: number;
   /** profit × flipsPerHour (0 for unprofitable flips). */
   profitPerHour: number;
+  /** Profit per shard when selling with the "10% of spread" offer instead of matching the cheapest one. */
+  tenPercentProfit: number;
+  /** tenPercentProfit × flipsPerHour (0 when unprofitable). */
+  tenPercentProfitPerHour: number;
   /** Buy orders and sell offers already listed: the players you compete with on each side. */
   buyOrderCount: number;
   sellOfferCount: number;
@@ -315,6 +324,7 @@ export const getFlipRows = (market: MarketData, settings: Pick<MarketSettings, "
     const volume = market.volumes[shardId];
     const flipVolume = volume ? Math.min(volume.instantBuy, volume.instantSell) : 0;
     const profit = spread.sellOffer * keep - spread.buyOrder;
+    const tenPercentProfit = spread.tenPercentOffer * keep - spread.buyOrder;
     const flipsPerHour = flipVolume * settings.marketShare;
     rows.push({
       shardId,
@@ -323,6 +333,8 @@ export const getFlipRows = (market: MarketData, settings: Pick<MarketSettings, "
       volume: flipVolume,
       flipsPerHour,
       profitPerHour: profit > 0 ? profit * flipsPerHour : 0,
+      tenPercentProfit,
+      tenPercentProfitPerHour: tenPercentProfit > 0 ? tenPercentProfit * flipsPerHour : 0,
       buyOrderCount: countOrders(book.buyOrders),
       sellOfferCount: countOrders(book.sellOffers),
       fillHours: flipsPerHour > 0 ? buyOrderHours(shardId, flipsPerHour, market) + sellOfferHours(shardId, flipsPerHour, market) : Infinity,

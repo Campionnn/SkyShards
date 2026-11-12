@@ -19,6 +19,9 @@ const PAD = { top: 12, right: 16, bottom: 28, left: 52 };
 const PLOT_W = WIDTH - PAD.left - PAD.right;
 const PLOT_H = HEIGHT - PAD.top - PAD.bottom;
 
+/** The in-game "10% of spread" sell offer undercuts the cheapest offer by this share of the spread. */
+const SPREAD_UNDERCUT = 0.1;
+
 /** Levels further than this factor from the best prices would squash the chart, so they're cut off. */
 const RANGE_FACTOR = 2;
 
@@ -100,7 +103,11 @@ export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[];
     const buyShape = stepShape(buy, PAD.left);
     const sellShape = stepShape(sell, PAD.left + PLOT_W);
 
+    // Where a "10% of spread" sell offer would go; only exists with both sides.
+    const tenPercentOffer = bestBuy !== undefined && bestSell !== undefined ? bestSell - (bestSell - bestBuy) * SPREAD_UNDERCUT : undefined;
+
     return {
+      tenPercentOffer,
       buy,
       sell,
       bestBuy,
@@ -150,6 +157,15 @@ export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[];
           <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: SELL_COLOR }} />
           Sell offers{chart.bestSell !== undefined && <span className="text-slate-400">(best {formatLargeNumber(chart.bestSell)})</span>}
         </span>
+        {chart.tenPercentOffer !== undefined && (
+          <span
+            className="inline-flex items-center gap-1.5"
+            title='The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread'
+          >
+            <span className="w-4 border-t-2 border-dashed" style={{ borderColor: SELL_COLOR }} />
+            10% of spread offer <span className="text-slate-400">({formatLargeNumber(chart.tenPercentOffer)})</span>
+          </span>
+        )}
       </div>
 
       <div className="relative">
@@ -191,6 +207,29 @@ export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[];
               ),
           )}
 
+          {chart.tenPercentOffer !== undefined && (
+            <g>
+              <line
+                x1={chart.x(chart.tenPercentOffer)}
+                x2={chart.x(chart.tenPercentOffer)}
+                y1={PAD.top}
+                y2={chart.y(0)}
+                stroke={SELL_COLOR}
+                strokeWidth={1.5}
+                strokeDasharray="6 4"
+              />
+              <text
+                // The label sits left of the line, or right of it when the line is near the left edge.
+                x={chart.x(chart.tenPercentOffer) + (chart.x(chart.tenPercentOffer) < PAD.left + 100 ? 4 : -4)}
+                y={PAD.top + 10}
+                textAnchor={chart.x(chart.tenPercentOffer) < PAD.left + 100 ? "start" : "end"}
+                fontSize={11}
+                fill="#cbd5e1"
+              >
+                10% of spread
+              </text>
+            </g>
+          )}
           {hover && <line x1={hover.x} x2={hover.x} y1={PAD.top} y2={chart.y(0)} stroke="#e2e8f0" strokeWidth={1} strokeDasharray="3 3" />}
         </svg>
 

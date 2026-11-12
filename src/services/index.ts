@@ -10,6 +10,7 @@ export {
   afterTax,
   takeFromBook,
   getSpread,
+  SPREAD_UNDERCUT,
   getFlipRows,
   countOrders,
   hoursToFill,

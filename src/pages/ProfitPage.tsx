@@ -466,6 +466,16 @@ const farmingColumns = ({ data, sellOverrides, orderBooks }: Loaded, openBook: (
     render: (row) => <SpreadValue spread={getSpread(orderBooks[row.shardId])} percent />,
   },
   {
+    id: "tenPercentOffer",
+    label: "10% offer",
+    title: 'The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread',
+    sortValue: (row) => getSpread(orderBooks[row.shardId])?.tenPercentOffer ?? 0,
+    render: (row) => {
+      const spread = getSpread(orderBooks[row.shardId]);
+      return spread ? <span className="text-slate-300">{formatLargeNumber(spread.tenPercentOffer)}</span> : <span className="text-slate-500">–</span>;
+    },
+  },
+  {
     id: "coinsPerHour",
     label: "Coins/h",
     title: "Rate × price after tax, ignoring market volume",
@@ -706,6 +716,27 @@ const flipColumns = ({ data }: Loaded, openBook: (shardId: string) => void): Col
     title: "Profit × Max/h",
     sortValue: (row) => row.profitPerHour,
     render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.profitPerHour)}</span>,
+  },
+  {
+    id: "tenPercentOffer",
+    label: "10% offer",
+    title: 'The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread. Undercuts the others, so it fills sooner.',
+    sortValue: (row) => row.tenPercentOffer,
+    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.tenPercentOffer)}</span>,
+  },
+  {
+    id: "tenPercentProfit",
+    label: "Profit 10%",
+    title: 'Profit per shard when selling with the "10% of spread" offer, after tax',
+    sortValue: (row) => row.tenPercentProfit,
+    render: (row) => <span className={coinClass(row.tenPercentProfit)}>{formatLargeNumber(row.tenPercentProfit)}</span>,
+  },
+  {
+    id: "tenPercentProfitPerHour",
+    label: "Profit/h 10%",
+    title: "Profit 10% × Max/h",
+    sortValue: (row) => row.tenPercentProfitPerHour,
+    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.tenPercentProfitPerHour)}</span>,
   },
   {
     id: "buyOrderCount",
