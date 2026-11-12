@@ -1,0 +1,217 @@
+import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import type { OrderLevel } from "../../services";
+import { formatLargeNumber } from "../../utilities";
+
+/*
+ * Market depth chart, like the Steam Community Market's: price along the bottom, and for every
+ * price the number of shards you could trade there. Buy orders build up to the left of the best
+ * buy order ("wanted at this price or more"), sell offers to the right of the cheapest sell offer
+ * ("for sale at this price or less"); the empty band in the middle is the spread.
+ */
+
+// Categorical slots 1 and 2 of the reference palette, dark steps; validated on the dialog surface.
+const BUY_COLOR = "#3987e5";
+const SELL_COLOR = "#d95926";
+
+const WIDTH = 640;
+const HEIGHT = 260;
+const PAD = { top: 12, right: 16, bottom: 28, left: 52 };
+const PLOT_W = WIDTH - PAD.left - PAD.right;
+const PLOT_H = HEIGHT - PAD.top - PAD.bottom;
+
+/** Levels further than this factor from the best prices would squash the chart, so they're cut off. */
+const RANGE_FACTOR = 2;
+
+/** Cumulative depth: each level with the total amount at its price or better. */
+interface Step {
+  price: number;
+  total: number;
+}
+
+const cumulate = (levels: OrderLevel[]): Step[] => {
+  let total = 0;
+  return levels.map((level) => ({ price: level.price, total: (total += level.amount) }));
+};
+
+/** About `count` round tick values covering 0..max (or min..max). */
+const niceTicks = (min: number, max: number, count: number): number[] => {
+  const span = max - min;
+  if (span <= 0) return [min];
+  const raw = span / count;
+  const magnitude = 10 ** Math.floor(Math.log10(raw));
+  const step = [1, 2, 2.5, 5, 10].map((f) => f * magnitude).find((s) => span / s <= count + 1) ?? 10 * magnitude;
+  const ticks: number[] = [];
+  for (let value = Math.ceil(min / step) * step; value <= max + step * 1e-9; value += step) ticks.push(value);
+  return ticks;
+};
+
+interface Hover {
+  x: number;
+  price: number;
+  text: string;
+  color: string;
+}
+
+export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[]; sellOffers: OrderLevel[] }) => {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [hover, setHover] = useState<Hover | null>(null);
+
+  const chart = useMemo(() => {
+    const bestBuy = buyOrders[0]?.price;
+    const bestSell = sellOffers[0]?.price;
+    if (bestBuy === undefined && bestSell === undefined) return null;
+
+    // Price window: around the spread, at most RANGE_FACTOR away from the best prices.
+    const low = (bestBuy ?? bestSell!) / RANGE_FACTOR;
+    const high = (bestSell ?? bestBuy!) * RANGE_FACTOR;
+    const buyShown = buyOrders.filter((level) => level.price >= low);
+    const sellShown = sellOffers.filter((level) => level.price <= high);
+    const hidden = buyOrders.length - buyShown.length + sellOffers.length - sellShown.length;
+
+    const buy = cumulate(buyShown);
+    const sell = cumulate(sellShown);
+    const prices = [...buy, ...sell].map((step) => step.price);
+    // A little room on both sides so the outermost steps are visible as steps.
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const margin = (maxPrice - minPrice) * 0.05 || maxPrice * 0.05 || 1;
+    const xMin = Math.max(0, minPrice - margin);
+    const xMax = maxPrice + margin;
+    const yMax = Math.max(buy.at(-1)?.total ?? 0, sell.at(-1)?.total ?? 0, 1) * 1.1;
+
+    const x = (price: number) => PAD.left + ((price - xMin) / (xMax - xMin)) * PLOT_W;
+    const y = (amount: number) => PAD.top + PLOT_H - (amount / yMax) * PLOT_H;
+    const base = y(0);
+
+    /**
+     * The step outline from the best price outwards to `edge`, plus the same shape closed
+     * along the baseline for the fill. Only the outline is stroked, like on Steam.
+     */
+    const stepShape = (steps: Step[], edge: number) => {
+      if (steps.length === 0) return null;
+      let line = `M ${x(steps[0].price)} ${base}`;
+      steps.forEach((step, i) => {
+        const next = steps[i + 1];
+        line += ` L ${x(step.price)} ${y(step.total)} L ${next ? x(next.price) : edge} ${y(step.total)}`;
+      });
+      return { line, area: `${line} L ${edge} ${base} Z` };
+    };
+    // Buy orders step down to the left edge, sell offers up to the right edge.
+    const buyShape = stepShape(buy, PAD.left);
+    const sellShape = stepShape(sell, PAD.left + PLOT_W);
+
+    return {
+      buy,
+      sell,
+      bestBuy,
+      bestSell,
+      hidden,
+      xMin,
+      xMax,
+      x,
+      y,
+      buyShape,
+      sellShape,
+      xTicks: niceTicks(xMin, xMax, 6).filter((tick) => tick >= xMin && tick <= xMax),
+      yTicks: niceTicks(0, yMax, 4).filter((tick) => tick <= yMax),
+    };
+  }, [buyOrders, sellOffers]);
+
+  if (!chart) return <p className="text-sm text-slate-400 py-6">No orders on either side.</p>;
+
+  const onMove = (event: ReactPointerEvent<SVGSVGElement>) => {
+    const rect = svgRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const svgX = ((event.clientX - rect.left) / rect.width) * WIDTH;
+    if (svgX < PAD.left || svgX > PAD.left + PLOT_W) return setHover(null);
+    const price = chart.xMin + ((svgX - PAD.left) / PLOT_W) * (chart.xMax - chart.xMin);
+
+    if (chart.bestBuy !== undefined && price <= chart.bestBuy) {
+      // Buy orders at this price or higher.
+      const total = chart.buy.filter((step) => step.price >= price).at(-1)?.total ?? 0;
+      setHover({ x: svgX, price, color: BUY_COLOR, text: `${total.toLocaleString()} shards wanted at ${formatLargeNumber(price)} or more` });
+    } else if (chart.bestSell !== undefined && price >= chart.bestSell) {
+      // Sell offers at this price or lower.
+      const total = chart.sell.filter((step) => step.price <= price).at(-1)?.total ?? 0;
+      setHover({ x: svgX, price, color: SELL_COLOR, text: `${total.toLocaleString()} shards for sale at ${formatLargeNumber(price)} or less` });
+    } else {
+      setHover({ x: svgX, price, color: "#94a3b8", text: `${formatLargeNumber(price)}: inside the spread, no orders` });
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: BUY_COLOR }} />
+          Buy orders{chart.bestBuy !== undefined && <span className="text-slate-400">(best {formatLargeNumber(chart.bestBuy)})</span>}
+        </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: SELL_COLOR }} />
+          Sell offers{chart.bestSell !== undefined && <span className="text-slate-400">(best {formatLargeNumber(chart.bestSell)})</span>}
+        </span>
+      </div>
+
+      <div className="relative">
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          className="w-full h-auto touch-pan-y select-none"
+          role="img"
+          aria-label="Market depth chart: buy orders and sell offers by price"
+          onPointerMove={onMove}
+          onPointerLeave={() => setHover(null)}
+        >
+          {/* Recessive grid and axes. */}
+          {chart.yTicks.map((tick) => (
+            <g key={`y${tick}`}>
+              <line x1={PAD.left} x2={PAD.left + PLOT_W} y1={chart.y(tick)} y2={chart.y(tick)} stroke="#334155" strokeWidth={1} />
+              <text x={PAD.left - 6} y={chart.y(tick)} textAnchor="end" dominantBaseline="middle" fontSize={11} fill="#94a3b8">
+                {formatLargeNumber(tick)}
+              </text>
+            </g>
+          ))}
+          {chart.xTicks.map((tick) => (
+            <text key={`x${tick}`} x={chart.x(tick)} y={HEIGHT - 8} textAnchor="middle" fontSize={11} fill="#94a3b8">
+              {formatLargeNumber(tick)}
+            </text>
+          ))}
+          <line x1={PAD.left} x2={PAD.left + PLOT_W} y1={chart.y(0)} y2={chart.y(0)} stroke="#475569" strokeWidth={1} />
+
+          {[
+            { shape: chart.buyShape, color: BUY_COLOR },
+            { shape: chart.sellShape, color: SELL_COLOR },
+          ].map(
+            ({ shape, color }) =>
+              shape && (
+                <g key={color}>
+                  <path d={shape.area} fill={color} fillOpacity={0.25} />
+                  <path d={shape.line} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />
+                </g>
+              ),
+          )}
+
+          {hover && <line x1={hover.x} x2={hover.x} y1={PAD.top} y2={chart.y(0)} stroke="#e2e8f0" strokeWidth={1} strokeDasharray="3 3" />}
+        </svg>
+
+        {hover && (
+          <div
+            className="absolute top-2 pointer-events-none px-2 py-1 rounded-md bg-slate-800 border border-slate-600 text-xs text-slate-100 whitespace-nowrap shadow-lg"
+            // Keep the tooltip on the side of the crosshair that has room.
+            style={hover.x / WIDTH < 0.5 ? { left: `calc(${(hover.x / WIDTH) * 100}% + 8px)` } : { right: `calc(${(1 - hover.x / WIDTH) * 100}% + 8px)` }}
+          >
+            <span className="inline-block w-2 h-2 rounded-sm mr-1.5 align-middle" style={{ backgroundColor: hover.color }} />
+            {hover.text}
+          </div>
+        )}
+      </div>
+
+      {chart.hidden > 0 && (
+        <p className="text-xs text-slate-500">
+          {chart.hidden} price {chart.hidden === 1 ? "level lies" : "levels lie"} far from the spread and {chart.hidden === 1 ? "isn't" : "aren't"} drawn; the
+          order list has them.
+        </p>
+      )}
+    </div>
+  );
+};

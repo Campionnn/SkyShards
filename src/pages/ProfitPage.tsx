@@ -3,6 +3,7 @@ import { Coins, Coffee, Columns3, Hammer, Pickaxe, Repeat, Sprout, ArrowDown, Ar
 import { Link, useNavigate } from "react-router-dom";
 import { useCalculatorState, useCustomRates } from "../hooks";
 import { Modal, Tooltip } from "../components/ui";
+import { DepthChart } from "../components/profit/DepthChart";
 import { ShardDescription } from "../components/ui/ShardDescription";
 import { SHARD_DESCRIPTIONS } from "../constants";
 import {
@@ -979,6 +980,7 @@ const SpreadLine = ({ spread }: { spread: Spread | null }) =>
 
 const OrderBookModal = ({ data, shardId, book, onClose }: { data: Data; shardId: string | null; book: OrderBook | undefined; onClose: () => void }) => {
   const navigate = useNavigate();
+  const [showList, setShowList] = useState(false);
   // Clicking the shard in the heading (the second click) goes to the Shards page, showing only that shard.
   const openOnShardsPage = (id: string) => navigate(`/shards?shard=${encodeURIComponent(id)}`);
   return (
@@ -1000,10 +1002,18 @@ const OrderBookModal = ({ data, shardId, book, onClose }: { data: Data; shardId:
           </div>
           {book && <SpreadLine spread={getSpread(book)} />}
           {book ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <OrderSide title="Sell offers" hint="What instant buys take, cheapest first." levels={book.sellOffers} />
-              <OrderSide title="Buy orders" hint="What instant sells fill, highest first." levels={book.buyOrders} />
-            </div>
+            <>
+              <DepthChart buyOrders={book.buyOrders} sellOffers={book.sellOffers} />
+              <button type="button" onClick={() => setShowList((current) => !current)} className="text-xs text-emerald-300 hover:underline cursor-pointer">
+                {showList ? "Hide order list" : "Show order list"}
+              </button>
+              {showList && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <OrderSide title="Buy orders" hint="What instant sells fill, highest first." levels={book.buyOrders} />
+                  <OrderSide title="Sell offers" hint="What instant buys take, cheapest first." levels={book.sellOffers} />
+                </div>
+              )}
+            </>
           ) : (
             <p className="text-sm text-slate-400">This shard isn't on the Bazaar.</p>
           )}
