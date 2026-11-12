@@ -11,6 +11,8 @@ export {
   takeFromBook,
   getSpread,
   getFlipRows,
+  countOrders,
+  hoursToFill,
   type BuyMode,
   type SellMode,
   type MarketData,

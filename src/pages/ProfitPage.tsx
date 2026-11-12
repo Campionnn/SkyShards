@@ -8,6 +8,7 @@ import {
   DataService,
   buildCalculationParams,
   getFarmingRows,
+  countOrders,
   getFlipRows,
   getFusionRows,
   getSpread,
@@ -269,6 +270,23 @@ const sortRows = <R,>(rows: R[], sort: SortState, columns: ColumnDef<R>[]) => {
 
 const matchesQuery = (data: Data, shardIds: string[], query: string) => !query || shardIds.some((id) => data.shards[id]?.name.toLowerCase().includes(query));
 
+/** A fill time: "instant", minutes, hours or days; a dash when that side doesn't trade. */
+const formatHours = (hours: number) => {
+  if (!Number.isFinite(hours)) return "–";
+  if (hours === 0) return "instant";
+  const minutes = hours * 60;
+  if (minutes < 1) return "<1m";
+  if (minutes < 60) return `${Math.round(minutes)}m`;
+  if (hours < 48) return `${hours.toFixed(1)}h`;
+  return `${Math.round(hours / 24)}d`;
+};
+
+/** Fill times longer than an hour are highlighted: the queue holds more than the market trades in an hour. */
+const FillTime = ({ hours }: { hours: number }) => <span className={hours > 1 ? "text-amber-300" : "text-slate-300"}>{formatHours(hours)}</span>;
+
+/** Infinity can't be subtracted when sorting, so "never" sorts as the largest number. */
+const sortableHours = (hours: number) => (Number.isFinite(hours) ? hours : Number.MAX_VALUE);
+
 const coinClass = (value: number) => (value > 0 ? "text-green-400" : value < 0 ? "text-red-400" : "text-slate-300");
 
 // Both tables share one fixed row height, so rows line up whatever the cells contain.
@@ -458,6 +476,20 @@ const farmingColumns = ({ data, sellOverrides, orderBooks }: Loaded, openBook: (
     sortValue: (row) => row.realCoinsPerHour,
     render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.realCoinsPerHour)}</span>,
   },
+  {
+    id: "competitors",
+    label: "Competition",
+    title: "Sell offers already listed: the players you compete with when selling",
+    sortValue: (row) => row.competitors,
+    render: (row) => <span className="text-slate-300">{row.competitors}</span>,
+  },
+  {
+    id: "sellHours",
+    label: "Sell time",
+    title: "Time to sell an hour's worth: instant when selling instantly, else how long your sell offer waits behind the ones at the best price",
+    sortValue: (row) => sortableHours(row.sellHours),
+    render: (row) => <FillTime hours={row.sellHours} />,
+  },
 ];
 
 const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: (shardId: string) => void): ColumnDef<FusionRow>[] => {
@@ -570,6 +602,14 @@ const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: 
       sortValue: (row) => row.realProfitPerHour,
       render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.realProfitPerHour)}</span>,
     },
+    {
+      id: "fillHours",
+      label: "Fill time",
+      title:
+        "Time until an hour's worth of orders fills, waiting behind the orders at the best price: the slowest of buying the inputs and selling the result. Instant trades don't wait.",
+      sortValue: (row) => sortableHours(row.fillHours),
+      render: (row) => <FillTime hours={row.fillHours} />,
+    },
   ];
 };
 
@@ -646,6 +686,27 @@ const flipColumns = ({ data }: Loaded, openBook: (shardId: string) => void): Col
     sortValue: (row) => row.profitPerHour,
     render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.profitPerHour)}</span>,
   },
+  {
+    id: "buyOrderCount",
+    label: "Buy orders",
+    title: "Buy orders already listed: who you compete with when buying",
+    sortValue: (row) => row.buyOrderCount,
+    render: (row) => <span className="text-slate-300">{row.buyOrderCount}</span>,
+  },
+  {
+    id: "sellOfferCount",
+    label: "Sell offers",
+    title: "Sell offers already listed: who you compete with when selling",
+    sortValue: (row) => row.sellOfferCount,
+    render: (row) => <span className="text-slate-300">{row.sellOfferCount}</span>,
+  },
+  {
+    id: "fillHours",
+    label: "Fill time",
+    title: "Time for an hour's worth to go through both queues at the best prices: first your buy order, then your sell offer",
+    sortValue: (row) => sortableHours(row.fillHours),
+    render: (row) => <FillTime hours={row.fillHours} />,
+  },
 ];
 
 type TableId = "farming" | "fusions" | "flips";
@@ -717,11 +778,15 @@ const ColumnPicker = ({
 /** One side of an order book, with a running total so you can see how deep each price goes. */
 const OrderSide = ({ title, hint, levels }: { title: string; hint: string; levels: OrderLevel[] }) => {
   let total = 0;
+  const amount = levels.reduce((sum, level) => sum + level.amount, 0);
   return (
     <div className="min-w-0 space-y-1">
       <div>
         <h3 className="text-sm font-semibold text-white">{title}</h3>
         <p className="text-xs text-slate-400">{hint}</p>
+        <p className="text-xs text-slate-300">
+          {countOrders(levels)} orders, {amount.toLocaleString()} shards
+        </p>
       </div>
       {levels.length === 0 ? (
         <p className="text-sm text-slate-500 py-4">No orders.</p>

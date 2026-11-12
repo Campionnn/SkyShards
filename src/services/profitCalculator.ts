@@ -86,6 +86,24 @@ const sellFill = (shardId: string, amount: number, market: MarketData, mode: Sel
   return takeFromBook(book.buyOrders, amount);
 };
 
+/** Number of orders on one side of a book (top 30 price levels). */
+export const countOrders = (levels: OrderLevel[] | undefined): number => (levels ?? []).reduce((sum, level) => sum + level.orders, 0);
+
+/**
+ * Hours until an order of `amount` placed at the best price fills: everything already waiting at
+ * that price goes first, then yours, at `volumePerHour`. Infinity when that side doesn't trade.
+ */
+export const hoursToFill = (levels: OrderLevel[] | undefined, amount: number, volumePerHour: number): number =>
+  volumePerHour > 0 ? ((levels?.[0]?.amount ?? 0) + amount) / volumePerHour : Infinity;
+
+/** Hours to fill a buy order: it waits behind the buy orders at the top and fills with instant sells. */
+const buyOrderHours = (shardId: string, amount: number, market: MarketData) =>
+  hoursToFill(market.orderBooks[shardId]?.buyOrders, amount, market.volumes[shardId]?.instantSell ?? 0);
+
+/** Hours to fill a sell offer: it waits behind the sell offers at the top and fills with instant buys. */
+const sellOfferHours = (shardId: string, amount: number, market: MarketData) =>
+  hoursToFill(market.orderBooks[shardId]?.sellOffers, amount, market.volumes[shardId]?.instantBuy ?? 0);
+
 export interface FarmingRow {
   shardId: string;
   /** Shards per hour, with the player's Hunting Fortune and pet bonuses applied. */
@@ -102,6 +120,10 @@ export interface FarmingRow {
   realPrice: number;
   /** realisticCoinsPerHour at realPrice, and at most what the order book holds. */
   realCoinsPerHour: number;
+  /** Sell offers already listed: the players you compete with when selling. */
+  competitors: number;
+  /** Hours to sell an hour's worth: 0 when selling instantly, else the sell offer queue time. */
+  sellHours: number;
 }
 
 /** Every directly obtainable shard that has a sale price. */
@@ -124,6 +146,8 @@ export const getFarmingRows = (data: Data, market: MarketData, settings: MarketS
       realisticCoinsPerHour: sellable * price * keep,
       realPrice,
       realCoinsPerHour: fill.amount * realPrice * keep,
+      competitors: countOrders(market.orderBooks[shardId]?.sellOffers),
+      sellHours: settings.sellMode === "instant" ? 0 : sellOfferHours(shardId, sellable, market),
     });
   }
   return rows;
@@ -155,6 +179,8 @@ export interface FusionRow {
   realProfit: number;
   /** realProfit × realFusionsPerHour (0 for unprofitable fusions). */
   realProfitPerHour: number;
+  /** Hours until an hour's worth of orders fills: the slowest of buying the inputs and selling the result (0 if all instant). */
+  fillHours: number;
 }
 
 /** Every recipe whose inputs can be bought and whose output can be sold. */
@@ -209,6 +235,14 @@ export const getFusionRows = (data: Data, market: MarketData, settings: MarketSe
         }
       }
 
+      // Orders queue behind the best price; instant trades don't wait.
+      let fillHours = fusionsPerHour > 0 ? 0 : Infinity;
+      if (fusionsPerHour > 0) {
+        if (buyMode === "order")
+          for (const [shardId, amount] of needed) fillHours = Math.max(fillHours, buyOrderHours(shardId, fusionsPerHour * amount, market));
+        if (sellMode === "offer") fillHours = Math.max(fillHours, sellOfferHours(outputId, fusionsPerHour * outputQuantity, market));
+      }
+
       rows.push({
         outputId,
         inputs: recipe.inputs,
@@ -224,6 +258,7 @@ export const getFusionRows = (data: Data, market: MarketData, settings: MarketSe
         realFusionsPerHour,
         realProfit,
         realProfitPerHour: realProfit > 0 ? realProfit * realFusionsPerHour : 0,
+        fillHours,
       });
     }
   }
@@ -260,6 +295,11 @@ export interface FlipRow extends Spread {
   flipsPerHour: number;
   /** profit × flipsPerHour (0 for unprofitable flips). */
   profitPerHour: number;
+  /** Buy orders and sell offers already listed: the players you compete with on each side. */
+  buyOrderCount: number;
+  sellOfferCount: number;
+  /** Hours for an hour's worth to go through both queues: buy order, then sell offer. */
+  fillHours: number;
 }
 
 /**
@@ -276,7 +316,17 @@ export const getFlipRows = (market: MarketData, settings: Pick<MarketSettings, "
     const flipVolume = volume ? Math.min(volume.instantBuy, volume.instantSell) : 0;
     const profit = spread.sellOffer * keep - spread.buyOrder;
     const flipsPerHour = flipVolume * settings.marketShare;
-    rows.push({ shardId, ...spread, profit, volume: flipVolume, flipsPerHour, profitPerHour: profit > 0 ? profit * flipsPerHour : 0 });
+    rows.push({
+      shardId,
+      ...spread,
+      profit,
+      volume: flipVolume,
+      flipsPerHour,
+      profitPerHour: profit > 0 ? profit * flipsPerHour : 0,
+      buyOrderCount: countOrders(book.buyOrders),
+      sellOfferCount: countOrders(book.sellOffers),
+      fillHours: flipsPerHour > 0 ? buyOrderHours(shardId, flipsPerHour, market) + sellOfferHours(shardId, flipsPerHour, market) : Infinity,
+    });
   }
   return rows;
 };
