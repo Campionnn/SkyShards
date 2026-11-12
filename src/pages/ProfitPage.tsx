@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Coins, Coffee, Columns3, Hammer, Pickaxe, Repeat, Sprout, ArrowDown, ArrowUp, ChevronDown, ChevronRight, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCalculatorState, useCustomRates } from "../hooks";
-import { Modal } from "../components/ui";
+import { Modal, Tooltip } from "../components/ui";
+import { ShardDescription } from "../components/ui/ShardDescription";
+import { SHARD_DESCRIPTIONS } from "../constants";
 import {
   CalculationService,
   DataService,
@@ -156,22 +158,51 @@ const NumberSetting = ({
   </label>
 );
 
-/** Icon and name of a shard. With `onOpen`, the name opens that shard's order book. */
-const ShardName = ({ data, shardId, amount, onOpen }: { data: Data; shardId: string; amount?: number; onOpen?: (shardId: string) => void }) => {
+/**
+ * Icon and name of a shard. Hovering shows the same description overlay as the calculator;
+ * with `onOpen`, clicking the name runs it (open the order book, or go to the Shards page).
+ */
+const ShardName = ({
+  data,
+  shardId,
+  amount,
+  onOpen,
+  openLabel = "Show order book",
+}: {
+  data: Data;
+  shardId: string;
+  amount?: number;
+  onOpen?: (shardId: string) => void;
+  openLabel?: string;
+}) => {
   const shard = data.shards[shardId];
   if (!shard) return null;
+  const description = SHARD_DESCRIPTIONS[shardId as keyof typeof SHARD_DESCRIPTIONS];
   const name = <span className={`text-sm font-medium ${getRarityColor(shard.rarity)}`}>{shard.name}</span>;
   return (
     <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
       {amount !== undefined && <span className="text-xs text-slate-400">{formatQuantity(amount)}×</span>}
-      <img src={shardIconUrl(shardId)} alt="" className="w-4 h-4 object-contain" loading="lazy" />
-      {onOpen ? (
-        <button type="button" onClick={() => onOpen(shardId)} className="cursor-pointer hover:underline" title="Show order book">
-          {name}
-        </button>
-      ) : (
-        name
-      )}
+      <Tooltip
+        openOn="hover"
+        content={<ShardDescription record={description} />}
+        title={description?.title}
+        shardName={shard.name}
+        shardIcon={shardId}
+        rarity={shard.rarity}
+        family={shard.family}
+        type={shard.type}
+        shardId={shardId}
+        className="inline-flex items-center gap-1.5"
+      >
+        <img src={shardIconUrl(shardId)} alt="" className="w-4 h-4 object-contain" loading="lazy" />
+        {onOpen ? (
+          <button type="button" onClick={() => onOpen(shardId)} className="cursor-pointer hover:underline" aria-label={`${openLabel}: ${shard.name}`}>
+            {name}
+          </button>
+        ) : (
+          name
+        )}
+      </Tooltip>
     </span>
   );
 };
@@ -932,37 +963,44 @@ const SpreadLine = ({ spread }: { spread: Spread | null }) =>
     </p>
   );
 
-const OrderBookModal = ({ data, shardId, book, onClose }: { data: Data; shardId: string | null; book: OrderBook | undefined; onClose: () => void }) => (
-  <Modal
-    open={shardId !== null}
-    onClose={onClose}
-    labelledBy="order-book-title"
-    panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto p-4 space-y-4"
-  >
-    {shardId && (
-      <>
-        <div className="flex items-center justify-between gap-2">
-          <h2 id="order-book-title" className="flex items-center gap-2 text-lg font-semibold text-white">
-            Order book: <ShardName data={data} shardId={shardId} />
-          </h2>
-          <button type="button" onClick={onClose} className="p-1 text-slate-400 hover:text-white cursor-pointer" aria-label="Close">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        {book && <SpreadLine spread={getSpread(book)} />}
-        {book ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            <OrderSide title="Sell offers" hint="What instant buys take, cheapest first." levels={book.sellOffers} />
-            <OrderSide title="Buy orders" hint="What instant sells fill, highest first." levels={book.buyOrders} />
+const OrderBookModal = ({ data, shardId, book, onClose }: { data: Data; shardId: string | null; book: OrderBook | undefined; onClose: () => void }) => {
+  const navigate = useNavigate();
+  // Clicking the shard in the heading (the second click) goes to the Shards page, showing only that shard.
+  const openOnShardsPage = (id: string) => navigate(`/shards?shard=${encodeURIComponent(id)}`);
+  return (
+    <Modal
+      open={shardId !== null}
+      onClose={onClose}
+      labelledBy="order-book-title"
+      panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto p-4 space-y-4"
+    >
+      {shardId && (
+        <>
+          <div className="flex items-center justify-between gap-2">
+            <h2 id="order-book-title" className="flex items-center gap-2 text-lg font-semibold text-white">
+              Order book: <ShardName data={data} shardId={shardId} onOpen={openOnShardsPage} openLabel="Open on the Shards page" />
+            </h2>
+            <button type="button" onClick={onClose} className="p-1 text-slate-400 hover:text-white cursor-pointer" aria-label="Close">
+              <X className="w-5 h-5" />
+            </button>
           </div>
-        ) : (
-          <p className="text-sm text-slate-400">This shard isn't on the Bazaar.</p>
-        )}
-        <p className="text-xs text-slate-500">The Bazaar API shows the top 30 price levels per side, as of when this page loaded.</p>
-      </>
-    )}
-  </Modal>
-);
+          {book && <SpreadLine spread={getSpread(book)} />}
+          {book ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <OrderSide title="Sell offers" hint="What instant buys take, cheapest first." levels={book.sellOffers} />
+              <OrderSide title="Buy orders" hint="What instant sells fill, highest first." levels={book.buyOrders} />
+            </div>
+          ) : (
+            <p className="text-sm text-slate-400">This shard isn't on the Bazaar.</p>
+          )}
+          <p className="text-xs text-slate-500">
+            The Bazaar API shows the top 30 price levels per side, as of when this page loaded. Click the shard's name above to open it on the Shards page.
+          </p>
+        </>
+      )}
+    </Modal>
+  );
+};
 
 // ─── Table sections ───
 
