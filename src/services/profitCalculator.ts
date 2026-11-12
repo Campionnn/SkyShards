@@ -229,3 +229,54 @@ export const getFusionRows = (data: Data, market: MarketData, settings: MarketSe
   }
   return rows;
 };
+
+/** Gap between the cheapest sell offer and the highest buy order. */
+export interface Spread {
+  /** Highest buy order: what you get selling instantly, and where a new buy order starts. */
+  buyOrder: number;
+  /** Cheapest sell offer: what you pay buying instantly, and where a new sell offer starts. */
+  sellOffer: number;
+  spread: number;
+  /** spread / buyOrder (0.1 = 10 %). */
+  percent: number;
+}
+
+/** The spread of an order book, or null when one side is empty. */
+export const getSpread = (book: OrderBook | undefined): Spread | null => {
+  const buyOrder = book?.buyOrders[0]?.price;
+  const sellOffer = book?.sellOffers[0]?.price;
+  if (buyOrder === undefined || sellOffer === undefined) return null;
+  const spread = sellOffer - buyOrder;
+  return { buyOrder, sellOffer, spread, percent: buyOrder > 0 ? spread / buyOrder : 0 };
+};
+
+export interface FlipRow extends Spread {
+  shardId: string;
+  /** Coins per shard: sell offer after tax minus buy order. */
+  profit: number;
+  /** Shards per hour the slower side trades: buy orders fill with instant sells, sell offers with instant buys. */
+  volume: number;
+  /** Shards per hour you can flip at your market share. */
+  flipsPerHour: number;
+  /** profit × flipsPerHour (0 for unprofitable flips). */
+  profitPerHour: number;
+}
+
+/**
+ * Bazaar flips: place a buy order at the highest buy order, then sell with a sell offer at the
+ * cheapest sell offer. Always uses live order book prices; price overrides don't apply here.
+ */
+export const getFlipRows = (market: MarketData, settings: Pick<MarketSettings, "taxPercent" | "marketShare">): FlipRow[] => {
+  const keep = afterTax(settings.taxPercent);
+  const rows: FlipRow[] = [];
+  for (const [shardId, book] of Object.entries(market.orderBooks)) {
+    const spread = getSpread(book);
+    if (!spread) continue;
+    const volume = market.volumes[shardId];
+    const flipVolume = volume ? Math.min(volume.instantBuy, volume.instantSell) : 0;
+    const profit = spread.sellOffer * keep - spread.buyOrder;
+    const flipsPerHour = flipVolume * settings.marketShare;
+    rows.push({ shardId, ...spread, profit, volume: flipVolume, flipsPerHour, profitPerHour: profit > 0 ? profit * flipsPerHour : 0 });
+  }
+  return rows;
+};

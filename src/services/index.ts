@@ -9,6 +9,8 @@ export {
   getFusionRows,
   afterTax,
   takeFromBook,
+  getSpread,
+  getFlipRows,
   type BuyMode,
   type SellMode,
   type MarketData,
@@ -16,4 +18,6 @@ export {
   type FarmingRow,
   type FusionRow,
   type Fill,
+  type FlipRow,
+  type Spread,
 } from "./profitCalculator";
