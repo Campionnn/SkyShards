@@ -14,8 +14,9 @@ const BUY_COLOR = "#3987e5";
 const SELL_COLOR = "#d95926";
 
 const WIDTH = 640;
-const HEIGHT = 260;
-const PAD = { top: 12, right: 16, bottom: 28, left: 52 };
+const HEIGHT = 276;
+// Bottom and left leave room for the tick labels plus the axis titles.
+const PAD = { top: 12, right: 16, bottom: 44, left: 70 };
 const PLOT_W = WIDTH - PAD.left - PAD.right;
 const PLOT_H = HEIGHT - PAD.top - PAD.bottom;
 
@@ -248,11 +249,19 @@ export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[];
             </g>
           ))}
           {chart.xTicks.map((tick) => (
-            <text key={`x${tick}`} x={chart.x(tick)} y={HEIGHT - 8} textAnchor="middle" fontSize={11} fill="#94a3b8">
+            <text key={`x${tick}`} x={chart.x(tick)} y={PAD.top + PLOT_H + 18} textAnchor="middle" fontSize={11} fill="#94a3b8">
               {formatLargeNumber(tick)}
             </text>
           ))}
           <line x1={PAD.left} x2={PAD.left + PLOT_W} y1={chart.y(0)} y2={chart.y(0)} stroke="#475569" strokeWidth={1} />
+
+          {/* Axis titles. */}
+          <text x={PAD.left + PLOT_W / 2} y={HEIGHT - 4} textAnchor="middle" fontSize={11} fill="#cbd5e1">
+            Price per shard (coins)
+          </text>
+          <text x={14} y={PAD.top + PLOT_H / 2} textAnchor="middle" fontSize={11} fill="#cbd5e1" transform={`rotate(-90 14 ${PAD.top + PLOT_H / 2})`}>
+            Shards (total)
+          </text>
 
           {[
             { shape: chart.buyShape, color: BUY_COLOR },
