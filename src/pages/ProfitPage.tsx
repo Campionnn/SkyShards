@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Coins, Hammer, Pickaxe, ArrowDown, ArrowUp, ChevronDown, ChevronRight } from "lucide-react";
+import { Coins, Coffee, Hammer, Pickaxe, ArrowDown, ArrowUp, ChevronDown, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCalculatorState, useCustomRates } from "../hooks";
 import {
@@ -20,6 +20,11 @@ import { formatLargeNumber, formatQuantity, getRarityColor, loadCustomPrices, sh
 import type { Data } from "../types/types";
 
 type SortDirection = "asc" | "desc";
+
+/** Author credit and support link shown at the top of the page. Leave SUPPORT_URL empty to hide the button. */
+const AUTHOR_NAME = "MoltenOre";
+const AUTHOR_URL = "https://github.com/MoltenOre";
+const SUPPORT_URL = "https://ko-fi.com/moltenore";
 
 const PAGE_SIZE = 50;
 
@@ -568,9 +573,30 @@ export const ProfitPage = () => {
     <div className="min-h-screen px-2 sm:px-4 py-4">
       <div className="max-w-[1800px] mx-auto space-y-4">
         <div className="bg-slate-800 border border-slate-600 rounded-md p-3 space-y-3">
-          <div className="flex items-center gap-2">
-            <Coins className="w-5 h-5 text-emerald-400" />
-            <h1 className="text-xl font-semibold text-white">Profits</h1>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Coins className="w-5 h-5 text-emerald-400" />
+              <h1 className="text-xl font-semibold text-white">Profits</h1>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-slate-400">
+              <span>
+                Profits Page Created by{" "}
+                <a href={AUTHOR_URL} target="_blank" rel="noopener noreferrer" className="text-emerald-300 hover:underline">
+                  {AUTHOR_NAME}
+                </a>
+              </span>
+              {SUPPORT_URL && (
+                <a
+                  href={SUPPORT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-200 border border-yellow-400/30 hover:border-yellow-400/50 transition-colors duration-200"
+                >
+                  <Coffee className="w-4 h-4" />
+                  Buy him a coffee
+                </a>
+              )}
+            </div>
           </div>
           <p className="text-sm text-slate-400">
             Rates use your Hunting Fortune, pets and custom rates from the{" "}
