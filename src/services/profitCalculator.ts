@@ -1,5 +1,5 @@
 import type { Data } from "../types/types";
-import type { ShardVolume } from "./dataService";
+import type { OrderBook, OrderLevel, ShardVolume } from "./dataService";
 import { getEffectiveOutputQuantity } from "./fusionMath";
 
 /*
@@ -10,6 +10,11 @@ import { getEffectiveOutputQuantity } from "./fusionMath";
  * Market volume keeps the estimates realistic: you can only sell as fast as the other
  * side of the Bazaar takes shards, and only buy as fast as it supplies them. `marketShare`
  * is the part of that hourly volume you expect to get, since other players trade too.
+ *
+ * The "real" values go one step further for instant trades: buying or selling an hour's
+ * worth at once walks down the order book, so the average price is worse than the best one,
+ * and you can't trade more than the book holds. Orders (buy orders, sell offers) set their
+ * own price, and price overrides are taken as fixed, so those keep the plain price.
  */
 
 /** Share of the sale price kept after the Bazaar tax, e.g. 1.25 % -> 0.9875. */
@@ -26,12 +31,60 @@ export interface MarketSettings {
   marketShare: number;
 }
 
+/** Everything the calculations read about the Bazaar. */
+export interface MarketData {
+  /** Price per shard when buying, with the user's overrides applied. */
+  buyPrices: Record<string, number>;
+  /** Price per shard when selling (before tax), with the user's overrides applied. */
+  sellPrices: Record<string, number>;
+  volumes: Record<string, ShardVolume>;
+  orderBooks: Record<string, OrderBook>;
+  /** Shards whose buy / sell price is a user override rather than a Bazaar price. */
+  buyOverrides: ReadonlySet<string>;
+  sellOverrides: ReadonlySet<string>;
+}
+
 /**
  * The volume that limits a trade. Instant buys and new sell offers both depend on players
  * buying instantly; buy orders and instant sells both depend on players selling instantly.
  */
 const buyVolume = (volume: ShardVolume | undefined, mode: BuyMode) => (volume ? (mode === "instant" ? volume.instantBuy : volume.instantSell) : 0);
 const sellVolume = (volume: ShardVolume | undefined, mode: SellMode) => (volume ? (mode === "offer" ? volume.instantBuy : volume.instantSell) : 0);
+
+/** A trade of several shards at once: how many it got and their average price. */
+export interface Fill {
+  amount: number;
+  average: number;
+}
+
+/** Takes up to `amount` shards from order book levels (best price first). */
+export const takeFromBook = (levels: OrderLevel[], amount: number): Fill => {
+  let left = amount;
+  let taken = 0;
+  let coins = 0;
+  for (const level of levels) {
+    if (left <= 0) break;
+    const take = Math.min(left, level.amount);
+    taken += take;
+    coins += take * level.price;
+    left -= take;
+  }
+  return { amount: taken, average: taken > 0 ? coins / taken : 0 };
+};
+
+/** Buying `amount` shards at once. Orders and overrides fill at the plain price, without a depth limit. */
+const buyFill = (shardId: string, amount: number, market: MarketData, mode: BuyMode): Fill => {
+  const book = market.orderBooks[shardId];
+  if (mode === "order" || market.buyOverrides.has(shardId) || !book) return { amount, average: market.buyPrices[shardId] ?? 0 };
+  return takeFromBook(book.sellOffers, amount);
+};
+
+/** Selling `amount` shards at once (price before tax). */
+const sellFill = (shardId: string, amount: number, market: MarketData, mode: SellMode): Fill => {
+  const book = market.orderBooks[shardId];
+  if (mode === "offer" || market.sellOverrides.has(shardId) || !book) return { amount, average: market.sellPrices[shardId] ?? 0 };
+  return takeFromBook(book.buyOrders, amount);
+};
 
 export interface FarmingRow {
   shardId: string;
@@ -45,23 +98,33 @@ export interface FarmingRow {
   volume: number;
   /** Like coinsPerHour, but selling at most marketShare × volume per hour. */
   realisticCoinsPerHour: number;
+  /** Average sale price when selling an hour's worth at once, before tax. */
+  realPrice: number;
+  /** realisticCoinsPerHour at realPrice, and at most what the order book holds. */
+  realCoinsPerHour: number;
 }
 
 /** Every directly obtainable shard that has a sale price. */
-export const getFarmingRows = (
-  data: Data,
-  sellPrices: Record<string, number>,
-  volumes: Record<string, ShardVolume>,
-  settings: MarketSettings,
-): FarmingRow[] => {
+export const getFarmingRows = (data: Data, market: MarketData, settings: MarketSettings): FarmingRow[] => {
   const keep = afterTax(settings.taxPercent);
   const rows: FarmingRow[] = [];
   for (const [shardId, shard] of Object.entries(data.shards)) {
-    const price = sellPrices[shardId];
+    const price = market.sellPrices[shardId];
     if (shard.rate <= 0 || price === undefined) continue;
-    const volume = sellVolume(volumes[shardId], settings.sellMode);
+    const volume = sellVolume(market.volumes[shardId], settings.sellMode);
     const sellable = Math.min(shard.rate, volume * settings.marketShare);
-    rows.push({ shardId, rate: shard.rate, price, coinsPerHour: shard.rate * price * keep, volume, realisticCoinsPerHour: sellable * price * keep });
+    const fill = sellFill(shardId, sellable, market, settings.sellMode);
+    const realPrice = fill.amount > 0 ? fill.average : price;
+    rows.push({
+      shardId,
+      rate: shard.rate,
+      price,
+      coinsPerHour: shard.rate * price * keep,
+      volume,
+      realisticCoinsPerHour: sellable * price * keep,
+      realPrice,
+      realCoinsPerHour: fill.amount * realPrice * keep,
+    });
   }
   return rows;
 };
@@ -86,27 +149,27 @@ export interface FusionRow {
   fusionsPerHour: number;
   /** profit × fusionsPerHour (0 for unprofitable fusions). */
   profitPerHour: number;
+  /** fusionsPerHour, also limited by what the order books hold. */
+  realFusionsPerHour: number;
+  /** Profit per fusion when an hour's worth is bought and sold at once, at order book prices. */
+  realProfit: number;
+  /** realProfit × realFusionsPerHour (0 for unprofitable fusions). */
+  realProfitPerHour: number;
 }
 
 /** Every recipe whose inputs can be bought and whose output can be sold. */
-export const getFusionRows = (
-  data: Data,
-  buyPrices: Record<string, number>,
-  sellPrices: Record<string, number>,
-  volumes: Record<string, ShardVolume>,
-  settings: MarketSettings,
-  crocodileMultiplier: number,
-): FusionRow[] => {
+export const getFusionRows = (data: Data, market: MarketData, settings: MarketSettings, crocodileMultiplier: number): FusionRow[] => {
   const keep = afterTax(settings.taxPercent);
+  const { buyMode, sellMode } = settings;
   const rows: FusionRow[] = [];
   for (const [outputId, recipes] of Object.entries(data.recipes)) {
-    const outputPrice = sellPrices[outputId];
+    const outputPrice = market.sellPrices[outputId];
     if (outputPrice === undefined) continue;
-    const outputVolume = sellVolume(volumes[outputId], settings.sellMode);
+    const outputVolume = sellVolume(market.volumes[outputId], sellMode);
     for (const recipe of recipes) {
       const [input1, input2] = recipe.inputs;
-      const price1 = buyPrices[input1];
-      const price2 = buyPrices[input2];
+      const price1 = market.buyPrices[input1];
+      const price2 = market.buyPrices[input2];
       const shard1 = data.shards[input1];
       const shard2 = data.shards[input2];
       if (price1 === undefined || price2 === undefined || !shard1 || !shard2) continue;
@@ -123,11 +186,28 @@ export const getFusionRows = (
       let volume = outputVolume;
       let fusionsLimit = outputVolume / outputQuantity;
       for (const [shardId, amount] of needed) {
-        const inputVolume = buyVolume(volumes[shardId], settings.buyMode);
+        const inputVolume = buyVolume(market.volumes[shardId], buyMode);
         volume = Math.min(volume, inputVolume);
         fusionsLimit = Math.min(fusionsLimit, inputVolume / amount);
       }
       const fusionsPerHour = fusionsLimit * settings.marketShare;
+
+      // Real values: first see how many fusions the order books can supply and take,
+      // then price exactly that many at the books' average prices.
+      let realFusionsPerHour = 0;
+      let realProfit = profit;
+      if (fusionsPerHour > 0) {
+        realFusionsPerHour = Math.min(fusionsPerHour, sellFill(outputId, fusionsPerHour * outputQuantity, market, sellMode).amount / outputQuantity);
+        for (const [shardId, amount] of needed) {
+          realFusionsPerHour = Math.min(realFusionsPerHour, buyFill(shardId, fusionsPerHour * amount, market, buyMode).amount / amount);
+        }
+        if (realFusionsPerHour > 0) {
+          let realCost = 0;
+          for (const [shardId, amount] of needed) realCost += amount * buyFill(shardId, realFusionsPerHour * amount, market, buyMode).average;
+          const realRevenue = outputQuantity * sellFill(outputId, realFusionsPerHour * outputQuantity, market, sellMode).average * keep;
+          realProfit = realRevenue - realCost;
+        }
+      }
 
       rows.push({
         outputId,
@@ -141,6 +221,9 @@ export const getFusionRows = (
         volume,
         fusionsPerHour,
         profitPerHour: profit > 0 ? profit * fusionsPerHour : 0,
+        realFusionsPerHour,
+        realProfit,
+        realProfitPerHour: realProfit > 0 ? realProfit * realFusionsPerHour : 0,
       });
     }
   }

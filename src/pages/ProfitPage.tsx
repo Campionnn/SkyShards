@@ -12,11 +12,11 @@ import {
   type BuyMode,
   type FarmingRow,
   type FusionRow,
+  type MarketData,
   type MarketSettings,
   type OrderBook,
   type OrderLevel,
   type SellMode,
-  type ShardVolume,
 } from "../services";
 import { calculateMultipliers } from "../services/fusionMath";
 import { formatLargeNumber, formatQuantity, getRarityColor, loadCustomPrices, shardIconUrl } from "../utilities";
@@ -77,15 +77,9 @@ const saveSettings = (settings: ProfitSettings) => {
   }
 };
 
-interface Loaded {
+/** Shard data plus the Bazaar view the calculations read (prices with overrides, volumes, order books). */
+interface Loaded extends MarketData {
   data: Data;
-  buyPrices: Record<string, number>;
-  sellPrices: Record<string, number>;
-  /** Shards whose buy / sell price comes from the user's overrides on the Shards page. */
-  buyOverrides: Set<string>;
-  sellOverrides: Set<string>;
-  volumes: Record<string, ShardVolume>;
-  orderBooks: Record<string, OrderBook>;
   crocodileMultiplier: number;
 }
 
@@ -424,7 +418,25 @@ const farmingColumns = ({ data, sellOverrides }: Loaded, openBook: (shardId: str
     label: "Realistic/h",
     title: "Coins/h, selling at most your market share of the volume",
     sortValue: (row) => row.realisticCoinsPerHour,
-    render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.realisticCoinsPerHour)}</span>,
+    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.realisticCoinsPerHour)}</span>,
+  },
+  {
+    id: "realPrice",
+    label: "Real price",
+    title: "Average sale price when selling an hour's worth at once, from the order book (instant sell only)",
+    sortValue: (row) => row.realPrice,
+    render: (row) => (
+      <span className="text-slate-300">
+        <Price value={row.realPrice} overridden={sellOverrides.has(row.shardId)} />
+      </span>
+    ),
+  },
+  {
+    id: "realCoinsPerHour",
+    label: "Real/h",
+    title: "Realistic/h at the real price, and at most what the order book holds",
+    sortValue: (row) => row.realCoinsPerHour,
+    render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.realCoinsPerHour)}</span>,
   },
 ];
 
@@ -515,7 +527,28 @@ const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: 
       label: "Profit/h",
       title: "Profit × Max/h",
       sortValue: (row) => row.profitPerHour,
-      render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.profitPerHour)}</span>,
+      render: (row) => <span className="text-slate-300">{formatLargeNumber(row.profitPerHour)}</span>,
+    },
+    {
+      id: "realProfit",
+      label: "Real profit",
+      title: "Profit per fusion when an hour's worth is bought and sold at once, at order book prices (instant trades only)",
+      sortValue: (row) => row.realProfit,
+      render: (row) => <span className={coinClass(row.realProfit)}>{formatLargeNumber(row.realProfit)}</span>,
+    },
+    {
+      id: "realFusionsPerHour",
+      label: "Real max/h",
+      title: "Max/h, also limited by how much the order books hold",
+      sortValue: (row) => row.realFusionsPerHour,
+      render: (row) => <span className="text-slate-300">{formatQuantity(row.realFusionsPerHour)}</span>,
+    },
+    {
+      id: "realProfitPerHour",
+      label: "Real profit/h",
+      title: "Real profit × Real max/h",
+      sortValue: (row) => row.realProfitPerHour,
+      render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.realProfitPerHour)}</span>,
     },
   ];
 };
@@ -685,7 +718,7 @@ const FarmingTable = ({
   onToggle: () => void;
 }) => {
   const [query, setQuery] = useState("");
-  const { sort, toggle } = useSort("realisticCoinsPerHour");
+  const { sort, toggle } = useSort("realCoinsPerHour");
   const lowerQuery = query.trim().toLowerCase();
   const { limit, showMore, showLess } = usePaging(`${lowerQuery}|${minVolume}|${sort.column}|${sort.direction}`);
 
@@ -704,7 +737,7 @@ const FarmingTable = ({
     <Section
       icon={<Pickaxe className="w-5 h-5 text-emerald-400" />}
       title="Farming"
-      description="Shards you can hunt directly, with your rate from the calculator settings. Realistic/h only counts what the Bazaar takes at your market share."
+      description="Shards you can hunt directly, with your rate from the calculator settings. Realistic/h only counts what the Bazaar takes at your market share; Real/h also prices it from the order book."
       actions={<SearchBox value={query} onChange={setQuery} placeholder="Search shards..." />}
       open={open}
       onToggle={onToggle}
@@ -738,7 +771,7 @@ const FusionTable = ({
 }) => {
   const [query, setQuery] = useState("");
   const [onlyProfitable, setOnlyProfitable] = useState(true);
-  const { sort, toggle } = useSort("profitPerHour");
+  const { sort, toggle } = useSort("realProfitPerHour");
   const lowerQuery = query.trim().toLowerCase();
   const { limit, showMore, showLess } = usePaging(`${lowerQuery}|${onlyProfitable}|${minVolume}|${sort.column}|${sort.direction}`);
 
@@ -757,7 +790,7 @@ const FusionTable = ({
     <Section
       icon={<Hammer className="w-5 h-5 text-emerald-400" />}
       title="Fusions"
-      description="Buy the inputs, fuse, sell the result. Profit is per fusion after tax; Max/h is how many fusions the Bazaar volume allows at your market share."
+      description="Buy the inputs, fuse, sell the result. Profit is per fusion after tax; Max/h is how many fusions the Bazaar volume allows at your market share. The Real columns price an hour's worth from the order book."
       actions={
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer whitespace-nowrap">
@@ -844,15 +877,12 @@ export const ProfitPage = () => {
     };
   }, [form, customRates, buyMode, sellMode]);
 
-  const market: MarketSettings = useMemo(
+  const marketSettings: MarketSettings = useMemo(
     () => ({ buyMode, sellMode, taxPercent: settings.taxPercent, marketShare: settings.marketSharePercent / 100 }),
     [buyMode, sellMode, settings.taxPercent, settings.marketSharePercent],
   );
-  const farmingRows = useMemo(() => (loaded ? getFarmingRows(loaded.data, loaded.sellPrices, loaded.volumes, market) : []), [loaded, market]);
-  const fusionRows = useMemo(
-    () => (loaded ? getFusionRows(loaded.data, loaded.buyPrices, loaded.sellPrices, loaded.volumes, market, loaded.crocodileMultiplier) : []),
-    [loaded, market],
-  );
+  const farmingRows = useMemo(() => (loaded ? getFarmingRows(loaded.data, loaded, marketSettings) : []), [loaded, marketSettings]);
+  const fusionRows = useMemo(() => (loaded ? getFusionRows(loaded.data, loaded, marketSettings, loaded.crocodileMultiplier) : []), [loaded, marketSettings]);
 
   // setBookShardId is stable, so the column definitions only rebuild when the data does.
   const allFarmingColumns = useMemo(() => (loaded ? farmingColumns(loaded, setBookShardId) : []), [loaded]);
