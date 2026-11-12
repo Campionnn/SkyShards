@@ -267,7 +267,37 @@ const Section = ({
 
 const coinClass = (value: number) => (value > 0 ? "text-green-400" : value < 0 ? "text-red-400" : "text-slate-300");
 
-const cell = "px-2 py-1.5 text-right whitespace-nowrap";
+// Both tables share one fixed row height, so rows line up whatever the cells contain.
+const rowClass = "h-10 border-b border-slate-700/50 hover:bg-slate-700/30";
+const nameCell = "px-2 py-1.5 align-middle whitespace-nowrap";
+const cell = "px-2 py-1.5 align-middle text-right whitespace-nowrap";
+
+/**
+ * Shows PAGE_SIZE rows, plus PAGE_SIZE more per "Show more" click. The count belongs to
+ * `resetKey` (filters and sort), so changing any of them starts again at the first page.
+ */
+const usePaging = (resetKey: string) => {
+  const [paging, setPaging] = useState({ key: resetKey, limit: PAGE_SIZE });
+  const limit = paging.key === resetKey ? paging.limit : PAGE_SIZE;
+  return { limit, showMore: () => setPaging({ key: resetKey, limit: limit + PAGE_SIZE }) };
+};
+
+const ShowMoreFooter = ({ shown, total, onShowMore }: { shown: number; total: number; onShowMore: () => void }) => (
+  <div className="flex items-center justify-between text-xs text-slate-400">
+    <span>
+      Showing {shown} of {total}
+    </span>
+    {shown < total && (
+      <button
+        type="button"
+        onClick={onShowMore}
+        className="px-3 py-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 cursor-pointer"
+      >
+        Show {Math.min(PAGE_SIZE, total - shown)} more
+      </button>
+    )}
+  </div>
+);
 
 // ─── Farming ───
 
@@ -290,8 +320,9 @@ const FarmingTable = ({
   const [query, setQuery] = useState("");
   const { sort, header } = useSort<FarmingColumn>("realisticCoinsPerHour");
   const lowerQuery = query.trim().toLowerCase();
+  const { limit, showMore } = usePaging(`${lowerQuery}|${minVolume}|${sort.column}|${sort.direction}`);
 
-  const shown = useMemo(
+  const filtered = useMemo(
     () =>
       sortRows(
         rows.filter((row) => row.volume >= minVolume && matchesQuery(data, [row.shardId], lowerQuery)),
@@ -300,6 +331,7 @@ const FarmingTable = ({
       ),
     [rows, data, minVolume, lowerQuery, sort],
   );
+  const shown = filtered.slice(0, limit);
 
   return (
     <Section
@@ -336,8 +368,8 @@ const FarmingTable = ({
           </thead>
           <tbody>
             {shown.map((row) => (
-              <tr key={row.shardId} className="border-b border-slate-700/50 hover:bg-slate-700/30">
-                <td className="px-2 py-1.5">
+              <tr key={row.shardId} className={rowClass}>
+                <td className={nameCell}>
                   <ShardName data={data} shardId={row.shardId} />
                 </td>
                 <td className={`${cell} text-slate-300`}>{formatQuantity(row.rate)}</td>
@@ -351,8 +383,9 @@ const FarmingTable = ({
             ))}
           </tbody>
         </table>
-        {shown.length === 0 && <p className="text-center text-slate-500 py-6">No shards found.</p>}
+        {filtered.length === 0 && <p className="text-center text-slate-500 py-6">No shards found.</p>}
       </div>
+      <ShowMoreFooter shown={shown.length} total={filtered.length} onShowMore={showMore} />
     </Section>
   );
 };
@@ -379,10 +412,7 @@ const FusionTable = ({
   const [onlyProfitable, setOnlyProfitable] = useState(true);
   const { sort, header } = useSort<FusionColumn>("profitPerHour");
   const lowerQuery = query.trim().toLowerCase();
-  // "Show more" counts per filter and sort, so changing either starts again at the first page.
-  const pageKey = `${lowerQuery}|${onlyProfitable}|${minVolume}|${sort.column}|${sort.direction}`;
-  const [paging, setPaging] = useState({ key: pageKey, limit: PAGE_SIZE });
-  const limit = paging.key === pageKey ? paging.limit : PAGE_SIZE;
+  const { limit, showMore } = usePaging(`${lowerQuery}|${onlyProfitable}|${minVolume}|${sort.column}|${sort.direction}`);
 
   const filtered = useMemo(
     () =>
@@ -444,18 +474,15 @@ const FusionTable = ({
             {shown.map((row) => {
               const overridden = buyOverrides.has(row.inputs[0]) || buyOverrides.has(row.inputs[1]) || sellOverrides.has(row.outputId);
               return (
-                <tr
-                  key={`${row.outputId}|${row.inputs[0]}|${row.inputs[1]}|${row.outputQuantity}`}
-                  className="border-b border-slate-700/50 hover:bg-slate-700/30"
-                >
-                  <td className="px-2 py-1.5">
+                <tr key={`${row.outputId}|${row.inputs[0]}|${row.inputs[1]}|${row.outputQuantity}`} className={rowClass}>
+                  <td className={nameCell}>
                     <span className="inline-flex items-center gap-2">
                       <ShardName data={data} shardId={row.inputs[0]} amount={row.inputAmounts[0]} />
                       <span className="text-slate-500">+</span>
                       <ShardName data={data} shardId={row.inputs[1]} amount={row.inputAmounts[1]} />
                     </span>
                   </td>
-                  <td className="px-2 py-1.5">
+                  <td className={nameCell}>
                     <ShardName data={data} shardId={row.outputId} amount={row.outputQuantity} />
                   </td>
                   <td className={`${cell} text-slate-300`}>
@@ -479,20 +506,7 @@ const FusionTable = ({
         </table>
         {filtered.length === 0 && <p className="text-center text-slate-500 py-6">No fusions found.</p>}
       </div>
-      <div className="flex items-center justify-between text-xs text-slate-400">
-        <span>
-          Showing {shown.length} of {filtered.length}
-        </span>
-        {shown.length < filtered.length && (
-          <button
-            type="button"
-            onClick={() => setPaging({ key: pageKey, limit: limit + PAGE_SIZE })}
-            className="px-3 py-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 cursor-pointer"
-          >
-            Show {Math.min(PAGE_SIZE, filtered.length - shown.length)} more
-          </button>
-        )}
-      </div>
+      <ShowMoreFooter shown={shown.length} total={filtered.length} onShowMore={showMore} />
     </Section>
   );
 };
