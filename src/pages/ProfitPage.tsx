@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Coins, Coffee, Hammer, Pickaxe, ArrowDown, ArrowUp, ChevronDown, ChevronRight } from "lucide-react";
+import { Coins, Coffee, Columns3, Hammer, Pickaxe, ArrowDown, ArrowUp, ChevronDown, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCalculatorState, useCustomRates } from "../hooks";
 import {
@@ -41,6 +41,8 @@ interface ProfitSettings {
   minVolume: number;
   farmingOpen: boolean;
   fusionsOpen: boolean;
+  /** Switched-off columns, as "table:column" keys (see columnKey). */
+  hiddenColumns: string[];
 }
 
 const SETTINGS_KEY = "profit_page_settings";
@@ -52,6 +54,7 @@ const DEFAULT_SETTINGS: ProfitSettings = {
   minVolume: 0,
   farmingOpen: true,
   fusionsOpen: true,
+  hiddenColumns: [],
 };
 
 const loadSettings = (): ProfitSettings => {
@@ -164,58 +167,6 @@ const Price = ({ value, overridden }: { value: number; overridden: boolean }) =>
   </span>
 );
 
-interface SortHeaderProps {
-  active: boolean;
-  direction: SortDirection;
-  onClick: () => void;
-}
-
-/** A sortable column header; clicking the active column flips the direction. */
-const SortHeader = ({
-  active,
-  direction,
-  onClick,
-  children,
-  align = "right",
-  title,
-}: SortHeaderProps & { children: ReactNode; align?: "left" | "right"; title?: string }) => {
-  const Arrow = direction === "asc" ? ArrowUp : ArrowDown;
-  return (
-    <th className={`px-2 py-2 font-medium whitespace-nowrap ${align === "right" ? "text-right" : "text-left"}`} title={title}>
-      <button
-        type="button"
-        onClick={onClick}
-        className={`inline-flex items-center gap-1 cursor-pointer hover:text-white ${active ? "text-emerald-300" : "text-slate-400"}`}
-      >
-        {children}
-        {active && <Arrow className="w-3 h-3" />}
-      </button>
-    </th>
-  );
-};
-
-/** Sort state plus `header(column)`, the props for that column's SortHeader. New columns start descending. */
-const useSort = <C extends string>(initial: C) => {
-  const [sort, setSort] = useState<{ column: C; direction: SortDirection }>({ column: initial, direction: "desc" });
-  const header = (column: C): SortHeaderProps => ({
-    active: sort.column === column,
-    direction: sort.direction,
-    onClick: () => setSort((current) => ({ column, direction: current.column === column && current.direction === "desc" ? "asc" : "desc" })),
-  });
-  return { sort, header };
-};
-
-const sortRows = <T, C extends string>(rows: T[], sort: { column: C; direction: SortDirection }, valueOf: (row: T, column: C) => number | string) => {
-  const factor = sort.direction === "asc" ? 1 : -1;
-  return [...rows].sort((a, b) => {
-    const va = valueOf(a, sort.column);
-    const vb = valueOf(b, sort.column);
-    return (typeof va === "string" ? va.localeCompare(vb as string) : va - (vb as number)) * factor;
-  });
-};
-
-const matchesQuery = (data: Data, shardIds: string[], query: string) => !query || shardIds.some((id) => data.shards[id]?.name.toLowerCase().includes(query));
-
 const SearchBox = ({ value, onChange, placeholder }: { value: string; onChange: (value: string) => void; placeholder: string }) => (
   <input
     type="text"
@@ -265,12 +216,111 @@ const Section = ({
   );
 };
 
+// ─── Tables ───
+
+/** One table column. The id is unique per table and is what the Columns menu stores. */
+interface ColumnDef<R> {
+  id: string;
+  label: string;
+  /** Tooltip on the header. */
+  title?: string;
+  align?: "left" | "right";
+  /** Value to sort by; columns without one can't be sorted. */
+  sortValue?: (row: R) => number | string;
+  render: (row: R) => ReactNode;
+  /** Columns that identify a row (shard, inputs, result) always stay visible. */
+  alwaysVisible?: boolean;
+}
+
+interface SortState {
+  column: string;
+  direction: SortDirection;
+}
+
+/** New columns start descending; clicking the active column flips the direction. */
+const useSort = (initial: string) => {
+  const [sort, setSort] = useState<SortState>({ column: initial, direction: "desc" });
+  const toggle = (column: string) => setSort((current) => ({ column, direction: current.column === column && current.direction === "desc" ? "asc" : "desc" }));
+  return { sort, toggle };
+};
+
+const sortRows = <R,>(rows: R[], sort: SortState, columns: ColumnDef<R>[]) => {
+  const sortValue = columns.find((column) => column.id === sort.column)?.sortValue;
+  if (!sortValue) return rows;
+  const factor = sort.direction === "asc" ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    const va = sortValue(a);
+    const vb = sortValue(b);
+    return (typeof va === "string" ? va.localeCompare(vb as string) : va - (vb as number)) * factor;
+  });
+};
+
+const matchesQuery = (data: Data, shardIds: string[], query: string) => !query || shardIds.some((id) => data.shards[id]?.name.toLowerCase().includes(query));
+
 const coinClass = (value: number) => (value > 0 ? "text-green-400" : value < 0 ? "text-red-400" : "text-slate-300");
 
 // Both tables share one fixed row height, so rows line up whatever the cells contain.
 const rowClass = "h-10 border-b border-slate-700/50 hover:bg-slate-700/30";
-const nameCell = "px-2 py-1.5 align-middle whitespace-nowrap";
-const cell = "px-2 py-1.5 align-middle text-right whitespace-nowrap";
+const cellClass = (align: "left" | "right" = "right") => `px-2 py-1.5 align-middle whitespace-nowrap ${align === "right" ? "text-right" : "text-left"}`;
+
+/** A sortable table built from column definitions. `rows` are already filtered and sorted. */
+const DataTable = <R,>({
+  columns,
+  rows,
+  rowKey,
+  sort,
+  onSort,
+  emptyText,
+}: {
+  columns: ColumnDef<R>[];
+  rows: R[];
+  rowKey: (row: R) => string;
+  sort: SortState;
+  onSort: (column: string) => void;
+  emptyText: string;
+}) => (
+  <div className="overflow-x-auto">
+    <table className="w-full text-sm">
+      <thead className="border-b border-slate-700">
+        <tr>
+          {columns.map((column) => {
+            const align = column.align ?? "right";
+            const active = sort.column === column.id;
+            const Arrow = sort.direction === "asc" ? ArrowUp : ArrowDown;
+            return (
+              <th key={column.id} className={`px-2 py-2 font-medium whitespace-nowrap ${align === "right" ? "text-right" : "text-left"}`} title={column.title}>
+                {column.sortValue ? (
+                  <button
+                    type="button"
+                    onClick={() => onSort(column.id)}
+                    className={`inline-flex items-center gap-1 cursor-pointer hover:text-white ${active ? "text-emerald-300" : "text-slate-400"}`}
+                  >
+                    {column.label}
+                    {active && <Arrow className="w-3 h-3" />}
+                  </button>
+                ) : (
+                  <span className="text-slate-400">{column.label}</span>
+                )}
+              </th>
+            );
+          })}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr key={rowKey(row)} className={rowClass}>
+            {columns.map((column) => (
+              <td key={column.id} className={cellClass(column.align)}>
+                {column.render(row)}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    {rows.length === 0 && <p className="text-center text-slate-500 py-6">{emptyText}</p>}
+  </div>
+);
 
 /**
  * Shows PAGE_SIZE rows, plus PAGE_SIZE more per "Show more" click; "Show less" goes back to the
@@ -314,26 +364,237 @@ const ShowMoreFooter = ({ shown, total, onShowMore, onShowLess }: { shown: numbe
   </div>
 );
 
+// ─── Column definitions ───
+
+const farmingColumns = ({ data, sellOverrides }: Loaded): ColumnDef<FarmingRow>[] => [
+  {
+    id: "name",
+    label: "Shard",
+    align: "left",
+    alwaysVisible: true,
+    sortValue: (row) => data.shards[row.shardId]?.name ?? "",
+    render: (row) => <ShardName data={data} shardId={row.shardId} />,
+  },
+  {
+    id: "rate",
+    label: "Rate/h",
+    title: "Shards you hunt per hour",
+    sortValue: (row) => row.rate,
+    render: (row) => <span className="text-slate-300">{formatQuantity(row.rate)}</span>,
+  },
+  {
+    id: "price",
+    label: "Price",
+    title: "Sale price per shard, before tax",
+    sortValue: (row) => row.price,
+    render: (row) => (
+      <span className="text-slate-300">
+        <Price value={row.price} overridden={sellOverrides.has(row.shardId)} />
+      </span>
+    ),
+  },
+  {
+    id: "volume",
+    label: "Volume/h",
+    title: "Shards the Bazaar takes per hour on your selling side (7-day average)",
+    sortValue: (row) => row.volume,
+    render: (row) => <span className="text-slate-400">{formatLargeNumber(row.volume)}</span>,
+  },
+  {
+    id: "coinsPerHour",
+    label: "Coins/h",
+    title: "Rate × price after tax, ignoring market volume",
+    sortValue: (row) => row.coinsPerHour,
+    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.coinsPerHour)}</span>,
+  },
+  {
+    id: "realisticCoinsPerHour",
+    label: "Realistic/h",
+    title: "Coins/h, selling at most your market share of the volume",
+    sortValue: (row) => row.realisticCoinsPerHour,
+    render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.realisticCoinsPerHour)}</span>,
+  },
+];
+
+const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded): ColumnDef<FusionRow>[] => {
+  const inputsOverridden = (row: FusionRow) => buyOverrides.has(row.inputs[0]) || buyOverrides.has(row.inputs[1]);
+  return [
+    {
+      id: "inputs",
+      label: "Inputs",
+      align: "left",
+      alwaysVisible: true,
+      render: (row) => (
+        <span className="inline-flex items-center gap-2">
+          <ShardName data={data} shardId={row.inputs[0]} amount={row.inputAmounts[0]} />
+          <span className="text-slate-500">+</span>
+          <ShardName data={data} shardId={row.inputs[1]} amount={row.inputAmounts[1]} />
+        </span>
+      ),
+    },
+    {
+      id: "output",
+      label: "Result",
+      align: "left",
+      alwaysVisible: true,
+      sortValue: (row) => data.shards[row.outputId]?.name ?? "",
+      render: (row) => <ShardName data={data} shardId={row.outputId} amount={row.outputQuantity} />,
+    },
+    {
+      id: "cost",
+      label: "Cost",
+      title: "Coins to buy the inputs of one fusion",
+      sortValue: (row) => row.cost,
+      render: (row) => (
+        <span className="text-slate-300">
+          <Price value={row.cost} overridden={inputsOverridden(row)} />
+        </span>
+      ),
+    },
+    {
+      id: "revenue",
+      label: "Value",
+      title: "What the result of one fusion sells for, after tax",
+      sortValue: (row) => row.revenue,
+      render: (row) => (
+        <span className="text-slate-300">
+          <Price value={row.revenue} overridden={sellOverrides.has(row.outputId)} />
+        </span>
+      ),
+    },
+    {
+      id: "profit",
+      label: "Profit",
+      title: "Value minus cost, per fusion",
+      sortValue: (row) => row.profit,
+      render: (row) => {
+        const overridden = inputsOverridden(row) || sellOverrides.has(row.outputId);
+        return (
+          <span className={`font-medium ${overridden ? "text-amber-300" : coinClass(row.profit)}`} title={overridden ? "Uses your price overrides" : undefined}>
+            {formatLargeNumber(row.profit)}
+            {overridden && "*"}
+          </span>
+        );
+      },
+    },
+    {
+      id: "margin",
+      label: "Margin",
+      title: "Profit as a share of the cost",
+      sortValue: (row) => row.margin,
+      render: (row) => <span className={coinClass(row.margin)}>{(row.margin * 100).toFixed(1)}%</span>,
+    },
+    {
+      id: "volume",
+      label: "Volume/h",
+      title: "Hourly Bazaar volume of the least traded shard in this fusion",
+      sortValue: (row) => row.volume,
+      render: (row) => <span className="text-slate-400">{formatLargeNumber(row.volume)}</span>,
+    },
+    {
+      id: "fusionsPerHour",
+      label: "Max/h",
+      title: "Fusions per hour the market allows at your market share",
+      sortValue: (row) => row.fusionsPerHour,
+      render: (row) => <span className="text-slate-300">{formatQuantity(row.fusionsPerHour)}</span>,
+    },
+    {
+      id: "profitPerHour",
+      label: "Profit/h",
+      title: "Profit × Max/h",
+      sortValue: (row) => row.profitPerHour,
+      render: (row) => <span className="font-medium text-green-400">{formatLargeNumber(row.profitPerHour)}</span>,
+    },
+  ];
+};
+
+type TableId = "farming" | "fusions";
+
+/** Key of a column in ProfitSettings.hiddenColumns. */
+const columnKey = (table: TableId, columnId: string) => `${table}:${columnId}`;
+
+/** Columns of one table that are switched on, in their original order. */
+const visibleColumns = <R,>(columns: ColumnDef<R>[], table: TableId, hidden: string[]) =>
+  columns.filter((column) => column.alwaysVisible || !hidden.includes(columnKey(table, column.id)));
+
+// ─── Column menu ───
+
+const ColumnPicker = ({
+  groups,
+  hidden,
+  onChange,
+}: {
+  groups: { table: TableId; label: string; columns: ColumnDef<never>[] }[];
+  hidden: string[];
+  onChange: (hidden: string[]) => void;
+}) => {
+  const [open, setOpen] = useState(false);
+  const toggle = (key: string) => onChange(hidden.includes(key) ? hidden.filter((item) => item !== key) : [...hidden, key]);
+
+  return (
+    <div className="relative">
+      <button type="button" className={segmentClass(open)} onClick={() => setOpen((current) => !current)} aria-expanded={open}>
+        <span className="inline-flex items-center gap-1.5">
+          <Columns3 className="w-3.5 h-3.5" />
+          Columns
+        </span>
+      </button>
+      {open && (
+        <>
+          {/* Clicking anywhere outside the menu closes it. */}
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 z-20 mt-2 w-64 p-3 space-y-3 bg-slate-800 border border-slate-600 rounded-md shadow-xl">
+            {groups.map((group) => (
+              <div key={group.table} className="space-y-1">
+                <div className="text-xs font-semibold text-slate-300">{group.label}</div>
+                {group.columns
+                  .filter((column) => !column.alwaysVisible)
+                  .map((column) => {
+                    const key = columnKey(group.table, column.id);
+                    return (
+                      <label key={key} className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer" title={column.title}>
+                        <input type="checkbox" checked={!hidden.includes(key)} onChange={() => toggle(key)} className="accent-emerald-500" />
+                        {column.label}
+                      </label>
+                    );
+                  })}
+              </div>
+            ))}
+            {hidden.length > 0 && (
+              <button type="button" onClick={() => onChange([])} className="text-xs text-emerald-300 hover:underline cursor-pointer">
+                Show all columns
+              </button>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 // ─── Farming ───
 
-type FarmingColumn = "name" | "rate" | "price" | "volume" | "coinsPerHour" | "realisticCoinsPerHour";
-
 const FarmingTable = ({
-  loaded,
+  data,
   rows,
+  columns,
+  allColumns,
   minVolume,
   open,
   onToggle,
 }: {
-  loaded: Loaded;
+  data: Data;
   rows: FarmingRow[];
+  /** Visible columns. */
+  columns: ColumnDef<FarmingRow>[];
+  /** Every column, so sorting keeps working when the sorted column is hidden. */
+  allColumns: ColumnDef<FarmingRow>[];
   minVolume: number;
   open: boolean;
   onToggle: () => void;
 }) => {
-  const { data, sellOverrides } = loaded;
   const [query, setQuery] = useState("");
-  const { sort, header } = useSort<FarmingColumn>("realisticCoinsPerHour");
+  const { sort, toggle } = useSort("realisticCoinsPerHour");
   const lowerQuery = query.trim().toLowerCase();
   const { limit, showMore, showLess } = usePaging(`${lowerQuery}|${minVolume}|${sort.column}|${sort.direction}`);
 
@@ -342,9 +603,9 @@ const FarmingTable = ({
       sortRows(
         rows.filter((row) => row.volume >= minVolume && matchesQuery(data, [row.shardId], lowerQuery)),
         sort,
-        (row, column) => (column === "name" ? (data.shards[row.shardId]?.name ?? "") : row[column]),
+        allColumns,
       ),
-    [rows, data, minVolume, lowerQuery, sort],
+    [rows, data, minVolume, lowerQuery, sort, allColumns],
   );
   const shown = filtered.slice(0, limit);
 
@@ -357,49 +618,7 @@ const FarmingTable = ({
       open={open}
       onToggle={onToggle}
     >
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="border-b border-slate-700">
-            <tr>
-              <SortHeader {...header("name")} align="left">
-                Shard
-              </SortHeader>
-              <SortHeader {...header("rate")} title="Shards you hunt per hour">
-                Rate/h
-              </SortHeader>
-              <SortHeader {...header("price")} title="Sale price per shard, before tax">
-                Price
-              </SortHeader>
-              <SortHeader {...header("volume")} title="Shards the Bazaar takes per hour on your selling side (7-day average)">
-                Volume/h
-              </SortHeader>
-              <SortHeader {...header("coinsPerHour")} title="Rate × price after tax, ignoring market volume">
-                Coins/h
-              </SortHeader>
-              <SortHeader {...header("realisticCoinsPerHour")} title="Coins/h, selling at most your market share of the volume">
-                Realistic/h
-              </SortHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {shown.map((row) => (
-              <tr key={row.shardId} className={rowClass}>
-                <td className={nameCell}>
-                  <ShardName data={data} shardId={row.shardId} />
-                </td>
-                <td className={`${cell} text-slate-300`}>{formatQuantity(row.rate)}</td>
-                <td className={`${cell} text-slate-300`}>
-                  <Price value={row.price} overridden={sellOverrides.has(row.shardId)} />
-                </td>
-                <td className={`${cell} text-slate-400`}>{formatLargeNumber(row.volume)}</td>
-                <td className={`${cell} text-slate-300`}>{formatLargeNumber(row.coinsPerHour)}</td>
-                <td className={`${cell} font-medium text-green-400`}>{formatLargeNumber(row.realisticCoinsPerHour)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {filtered.length === 0 && <p className="text-center text-slate-500 py-6">No shards found.</p>}
-      </div>
+      <DataTable columns={columns} rows={shown} rowKey={(row) => row.shardId} sort={sort} onSort={toggle} emptyText="No shards found." />
       <ShowMoreFooter shown={shown.length} total={filtered.length} onShowMore={showMore} onShowLess={showLess} />
     </Section>
   );
@@ -407,25 +626,28 @@ const FarmingTable = ({
 
 // ─── Fusions ───
 
-type FusionColumn = "output" | "cost" | "profit" | "margin" | "volume" | "fusionsPerHour" | "profitPerHour";
-
 const FusionTable = ({
-  loaded,
+  data,
   rows,
+  columns,
+  allColumns,
   minVolume,
   open,
   onToggle,
 }: {
-  loaded: Loaded;
+  data: Data;
   rows: FusionRow[];
+  /** Visible columns. */
+  columns: ColumnDef<FusionRow>[];
+  /** Every column, so sorting keeps working when the sorted column is hidden. */
+  allColumns: ColumnDef<FusionRow>[];
   minVolume: number;
   open: boolean;
   onToggle: () => void;
 }) => {
-  const { data, buyOverrides, sellOverrides } = loaded;
   const [query, setQuery] = useState("");
   const [onlyProfitable, setOnlyProfitable] = useState(true);
-  const { sort, header } = useSort<FusionColumn>("profitPerHour");
+  const { sort, toggle } = useSort("profitPerHour");
   const lowerQuery = query.trim().toLowerCase();
   const { limit, showMore, showLess } = usePaging(`${lowerQuery}|${onlyProfitable}|${minVolume}|${sort.column}|${sort.direction}`);
 
@@ -434,9 +656,9 @@ const FusionTable = ({
       sortRows(
         rows.filter((row) => (!onlyProfitable || row.profit > 0) && row.volume >= minVolume && matchesQuery(data, [row.outputId, ...row.inputs], lowerQuery)),
         sort,
-        (row, column) => (column === "output" ? (data.shards[row.outputId]?.name ?? "") : row[column]),
+        allColumns,
       ),
-    [rows, data, lowerQuery, onlyProfitable, minVolume, sort],
+    [rows, data, lowerQuery, onlyProfitable, minVolume, sort, allColumns],
   );
   const shown = filtered.slice(0, limit);
 
@@ -457,70 +679,14 @@ const FusionTable = ({
       open={open}
       onToggle={onToggle}
     >
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="border-b border-slate-700">
-            <tr>
-              <th className="px-2 py-2 font-medium text-left text-slate-400">Inputs</th>
-              <SortHeader {...header("output")} align="left">
-                Result
-              </SortHeader>
-              <SortHeader {...header("cost")} title="Coins to buy the inputs of one fusion">
-                Cost
-              </SortHeader>
-              <SortHeader {...header("profit")} title="Sale value after tax minus cost, per fusion (hover a value for the sale value)">
-                Profit
-              </SortHeader>
-              <SortHeader {...header("margin")} title="Profit as a share of the cost">
-                Margin
-              </SortHeader>
-              <SortHeader {...header("volume")} title="Hourly Bazaar volume of the least traded shard in this fusion">
-                Volume/h
-              </SortHeader>
-              <SortHeader {...header("fusionsPerHour")} title="Fusions per hour the market allows at your market share">
-                Max/h
-              </SortHeader>
-              <SortHeader {...header("profitPerHour")} title="Profit × Max/h">
-                Profit/h
-              </SortHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {shown.map((row) => {
-              const overridden = buyOverrides.has(row.inputs[0]) || buyOverrides.has(row.inputs[1]) || sellOverrides.has(row.outputId);
-              return (
-                <tr key={`${row.outputId}|${row.inputs[0]}|${row.inputs[1]}|${row.outputQuantity}`} className={rowClass}>
-                  <td className={nameCell}>
-                    <span className="inline-flex items-center gap-2">
-                      <ShardName data={data} shardId={row.inputs[0]} amount={row.inputAmounts[0]} />
-                      <span className="text-slate-500">+</span>
-                      <ShardName data={data} shardId={row.inputs[1]} amount={row.inputAmounts[1]} />
-                    </span>
-                  </td>
-                  <td className={nameCell}>
-                    <ShardName data={data} shardId={row.outputId} amount={row.outputQuantity} />
-                  </td>
-                  <td className={`${cell} text-slate-300`}>
-                    <Price value={row.cost} overridden={buyOverrides.has(row.inputs[0]) || buyOverrides.has(row.inputs[1])} />
-                  </td>
-                  <td
-                    className={`${cell} font-medium ${overridden ? "text-amber-300" : coinClass(row.profit)}`}
-                    title={`Sells for ${formatLargeNumber(row.revenue)} after tax${overridden ? " (uses your price overrides)" : ""}`}
-                  >
-                    {formatLargeNumber(row.profit)}
-                    {overridden && "*"}
-                  </td>
-                  <td className={`${cell} ${coinClass(row.margin)}`}>{(row.margin * 100).toFixed(1)}%</td>
-                  <td className={`${cell} text-slate-400`}>{formatLargeNumber(row.volume)}</td>
-                  <td className={`${cell} text-slate-300`}>{formatQuantity(row.fusionsPerHour)}</td>
-                  <td className={`${cell} font-medium text-green-400`}>{formatLargeNumber(row.profitPerHour)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {filtered.length === 0 && <p className="text-center text-slate-500 py-6">No fusions found.</p>}
-      </div>
+      <DataTable
+        columns={columns}
+        rows={shown}
+        rowKey={(row) => `${row.outputId}|${row.inputs[0]}|${row.inputs[1]}|${row.outputQuantity}`}
+        sort={sort}
+        onSort={toggle}
+        emptyText="No fusions found."
+      />
       <ShowMoreFooter shown={shown.length} total={filtered.length} onShowMore={showMore} onShowLess={showLess} />
     </Section>
   );
@@ -593,6 +759,11 @@ export const ProfitPage = () => {
     () => (loaded ? getFusionRows(loaded.data, loaded.buyPrices, loaded.sellPrices, loaded.volumes, market, loaded.crocodileMultiplier) : []),
     [loaded, market],
   );
+
+  const allFarmingColumns = useMemo(() => (loaded ? farmingColumns(loaded) : []), [loaded]);
+  const allFusionColumns = useMemo(() => (loaded ? fusionColumns(loaded) : []), [loaded]);
+  const shownFarmingColumns = useMemo(() => visibleColumns(allFarmingColumns, "farming", settings.hiddenColumns), [allFarmingColumns, settings.hiddenColumns]);
+  const shownFusionColumns = useMemo(() => visibleColumns(allFusionColumns, "fusions", settings.hiddenColumns), [allFusionColumns, settings.hiddenColumns]);
 
   const overrideCount = loaded ? new Set([...loaded.buyOverrides, ...loaded.sellOverrides]).size : 0;
   // Side by side on wide screens while both are open; a folded section gives its space to the other.
@@ -687,6 +858,16 @@ export const ProfitPage = () => {
               suffix="/h"
               title="Hide shards and fusions whose least traded shard sells fewer than this many per hour."
             />
+            {loaded && (
+              <ColumnPicker
+                groups={[
+                  { table: "farming", label: "Farming", columns: allFarmingColumns },
+                  { table: "fusions", label: "Fusions", columns: allFusionColumns },
+                ]}
+                hidden={settings.hiddenColumns}
+                onChange={(hiddenColumns) => update({ hiddenColumns })}
+              />
+            )}
           </div>
         </div>
 
@@ -699,15 +880,19 @@ export const ProfitPage = () => {
         {loaded && (
           <div className={`grid gap-4 items-start ${bothOpen ? "xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]" : ""}`}>
             <FarmingTable
-              loaded={loaded}
+              data={loaded.data}
               rows={farmingRows}
+              columns={shownFarmingColumns}
+              allColumns={allFarmingColumns}
               minVolume={settings.minVolume}
               open={settings.farmingOpen}
               onToggle={() => update({ farmingOpen: !settings.farmingOpen })}
             />
             <FusionTable
-              loaded={loaded}
+              data={loaded.data}
               rows={fusionRows}
+              columns={shownFusionColumns}
+              allColumns={allFusionColumns}
               minVolume={settings.minVolume}
               open={settings.fusionsOpen}
               onToggle={() => update({ fusionsOpen: !settings.fusionsOpen })}
