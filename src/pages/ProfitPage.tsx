@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Coins, Coffee, Columns3, Hammer, Pickaxe, ArrowDown, ArrowUp, ChevronDown, ChevronRight } from "lucide-react";
+import { Coins, Coffee, Columns3, Hammer, Pickaxe, ArrowDown, ArrowUp, ChevronDown, ChevronRight, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCalculatorState, useCustomRates } from "../hooks";
+import { Modal } from "../components/ui";
 import {
   CalculationService,
   DataService,
@@ -12,6 +13,8 @@ import {
   type FarmingRow,
   type FusionRow,
   type MarketSettings,
+  type OrderBook,
+  type OrderLevel,
   type SellMode,
   type ShardVolume,
 } from "../services";
@@ -82,6 +85,7 @@ interface Loaded {
   buyOverrides: Set<string>;
   sellOverrides: Set<string>;
   volumes: Record<string, ShardVolume>;
+  orderBooks: Record<string, OrderBook>;
   crocodileMultiplier: number;
 }
 
@@ -147,14 +151,22 @@ const NumberSetting = ({
   </label>
 );
 
-const ShardName = ({ data, shardId, amount }: { data: Data; shardId: string; amount?: number }) => {
+/** Icon and name of a shard. With `onOpen`, the name opens that shard's order book. */
+const ShardName = ({ data, shardId, amount, onOpen }: { data: Data; shardId: string; amount?: number; onOpen?: (shardId: string) => void }) => {
   const shard = data.shards[shardId];
   if (!shard) return null;
+  const name = <span className={`text-sm font-medium ${getRarityColor(shard.rarity)}`}>{shard.name}</span>;
   return (
     <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
       {amount !== undefined && <span className="text-xs text-slate-400">{formatQuantity(amount)}×</span>}
       <img src={shardIconUrl(shardId)} alt="" className="w-4 h-4 object-contain" loading="lazy" />
-      <span className={`text-sm font-medium ${getRarityColor(shard.rarity)}`}>{shard.name}</span>
+      {onOpen ? (
+        <button type="button" onClick={() => onOpen(shardId)} className="cursor-pointer hover:underline" title="Show order book">
+          {name}
+        </button>
+      ) : (
+        name
+      )}
     </span>
   );
 };
@@ -366,14 +378,14 @@ const ShowMoreFooter = ({ shown, total, onShowMore, onShowLess }: { shown: numbe
 
 // ─── Column definitions ───
 
-const farmingColumns = ({ data, sellOverrides }: Loaded): ColumnDef<FarmingRow>[] => [
+const farmingColumns = ({ data, sellOverrides }: Loaded, openBook: (shardId: string) => void): ColumnDef<FarmingRow>[] => [
   {
     id: "name",
     label: "Shard",
     align: "left",
     alwaysVisible: true,
     sortValue: (row) => data.shards[row.shardId]?.name ?? "",
-    render: (row) => <ShardName data={data} shardId={row.shardId} />,
+    render: (row) => <ShardName data={data} shardId={row.shardId} onOpen={openBook} />,
   },
   {
     id: "rate",
@@ -416,7 +428,7 @@ const farmingColumns = ({ data, sellOverrides }: Loaded): ColumnDef<FarmingRow>[
   },
 ];
 
-const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded): ColumnDef<FusionRow>[] => {
+const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: (shardId: string) => void): ColumnDef<FusionRow>[] => {
   const inputsOverridden = (row: FusionRow) => buyOverrides.has(row.inputs[0]) || buyOverrides.has(row.inputs[1]);
   return [
     {
@@ -426,9 +438,9 @@ const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded): ColumnDef
       alwaysVisible: true,
       render: (row) => (
         <span className="inline-flex items-center gap-2">
-          <ShardName data={data} shardId={row.inputs[0]} amount={row.inputAmounts[0]} />
+          <ShardName data={data} shardId={row.inputs[0]} amount={row.inputAmounts[0]} onOpen={openBook} />
           <span className="text-slate-500">+</span>
-          <ShardName data={data} shardId={row.inputs[1]} amount={row.inputAmounts[1]} />
+          <ShardName data={data} shardId={row.inputs[1]} amount={row.inputAmounts[1]} onOpen={openBook} />
         </span>
       ),
     },
@@ -438,7 +450,7 @@ const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded): ColumnDef
       align: "left",
       alwaysVisible: true,
       sortValue: (row) => data.shards[row.outputId]?.name ?? "",
-      render: (row) => <ShardName data={data} shardId={row.outputId} amount={row.outputQuantity} />,
+      render: (row) => <ShardName data={data} shardId={row.outputId} amount={row.outputQuantity} onOpen={openBook} />,
     },
     {
       id: "cost",
@@ -572,6 +584,85 @@ const ColumnPicker = ({
   );
 };
 
+// ─── Order book ───
+
+/** One side of an order book, with a running total so you can see how deep each price goes. */
+const OrderSide = ({ title, hint, levels }: { title: string; hint: string; levels: OrderLevel[] }) => {
+  let total = 0;
+  return (
+    <div className="min-w-0 space-y-1">
+      <div>
+        <h3 className="text-sm font-semibold text-white">{title}</h3>
+        <p className="text-xs text-slate-400">{hint}</p>
+      </div>
+      {levels.length === 0 ? (
+        <p className="text-sm text-slate-500 py-4">No orders.</p>
+      ) : (
+        <div className="overflow-y-auto max-h-[50vh]">
+          <table className="w-full text-xs">
+            <thead className="sticky top-0 bg-slate-900 border-b border-slate-700 text-slate-400">
+              <tr>
+                <th className="px-2 py-1.5 text-right font-medium">Price</th>
+                <th className="px-2 py-1.5 text-right font-medium">Amount</th>
+                <th className="px-2 py-1.5 text-right font-medium" title="Number of orders at this price">
+                  Orders
+                </th>
+                <th className="px-2 py-1.5 text-right font-medium" title="Amount at this price or better">
+                  Total
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {levels.map((level) => {
+                total += level.amount;
+                return (
+                  <tr key={level.price} className="border-b border-slate-700/50">
+                    <td className="px-2 py-1 text-right text-slate-200">{formatLargeNumber(level.price)}</td>
+                    <td className="px-2 py-1 text-right text-slate-300">{level.amount.toLocaleString()}</td>
+                    <td className="px-2 py-1 text-right text-slate-400">{level.orders}</td>
+                    <td className="px-2 py-1 text-right text-slate-400">{total.toLocaleString()}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const OrderBookModal = ({ data, shardId, book, onClose }: { data: Data; shardId: string | null; book: OrderBook | undefined; onClose: () => void }) => (
+  <Modal
+    open={shardId !== null}
+    onClose={onClose}
+    labelledBy="order-book-title"
+    panelClassName="bg-slate-900 border border-slate-700 rounded-lg shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto p-4 space-y-4"
+  >
+    {shardId && (
+      <>
+        <div className="flex items-center justify-between gap-2">
+          <h2 id="order-book-title" className="flex items-center gap-2 text-lg font-semibold text-white">
+            Order book: <ShardName data={data} shardId={shardId} />
+          </h2>
+          <button type="button" onClick={onClose} className="p-1 text-slate-400 hover:text-white cursor-pointer" aria-label="Close">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        {book ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <OrderSide title="Sell offers" hint="What instant buys take, cheapest first." levels={book.sellOffers} />
+            <OrderSide title="Buy orders" hint="What instant sells fill, highest first." levels={book.buyOrders} />
+          </div>
+        ) : (
+          <p className="text-sm text-slate-400">This shard isn't on the Bazaar.</p>
+        )}
+        <p className="text-xs text-slate-500">The Bazaar API shows the top 30 price levels per side, as of when this page loaded.</p>
+      </>
+    )}
+  </Modal>
+);
+
 // ─── Farming ───
 
 const FarmingTable = ({
@@ -700,6 +791,7 @@ export const ProfitPage = () => {
   const [settings, setSettings] = useState<ProfitSettings>(loadSettings);
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [bookShardId, setBookShardId] = useState<string | null>(null);
   const { buyMode, sellMode } = settings;
 
   const update = (changes: Partial<ProfitSettings>) =>
@@ -722,11 +814,12 @@ export const ProfitPage = () => {
       // Price overrides are stored per side the same way, so each side gets its own.
       const buyFromOffers = buyMode === "instant";
       const sellToOffers = sellMode === "offer";
-      const [data, bazaarBuy, bazaarSell, volumes] = await Promise.all([
+      const [data, bazaarBuy, bazaarSell, volumes, orderBooks] = await Promise.all([
         CalculationService.getInstance().parseData(params),
         dataService.loadShardCosts(buyFromOffers),
         dataService.loadShardCosts(sellToOffers),
         dataService.loadShardVolumes(),
+        dataService.loadShardOrderBooks(),
       ]);
       const buyOverrides = loadCustomPrices(buyFromOffers);
       const sellOverrides = loadCustomPrices(sellToOffers);
@@ -738,6 +831,7 @@ export const ProfitPage = () => {
           buyOverrides: new Set(buyOverrides.keys()),
           sellOverrides: new Set(sellOverrides.keys()),
           volumes,
+          orderBooks,
           crocodileMultiplier: calculateMultipliers(params).crocodileMultiplier,
         });
       }
@@ -760,8 +854,9 @@ export const ProfitPage = () => {
     [loaded, market],
   );
 
-  const allFarmingColumns = useMemo(() => (loaded ? farmingColumns(loaded) : []), [loaded]);
-  const allFusionColumns = useMemo(() => (loaded ? fusionColumns(loaded) : []), [loaded]);
+  // setBookShardId is stable, so the column definitions only rebuild when the data does.
+  const allFarmingColumns = useMemo(() => (loaded ? farmingColumns(loaded, setBookShardId) : []), [loaded]);
+  const allFusionColumns = useMemo(() => (loaded ? fusionColumns(loaded, setBookShardId) : []), [loaded]);
   const shownFarmingColumns = useMemo(() => visibleColumns(allFarmingColumns, "farming", settings.hiddenColumns), [allFarmingColumns, settings.hiddenColumns]);
   const shownFusionColumns = useMemo(() => visibleColumns(allFusionColumns, "fusions", settings.hiddenColumns), [allFusionColumns, settings.hiddenColumns]);
 
@@ -898,6 +993,14 @@ export const ProfitPage = () => {
               onToggle={() => update({ fusionsOpen: !settings.fusionsOpen })}
             />
           </div>
+        )}
+        {loaded && (
+          <OrderBookModal
+            data={loaded.data}
+            shardId={bookShardId}
+            book={bookShardId ? loaded.orderBooks[bookShardId] : undefined}
+            onClose={() => setBookShardId(null)}
+          />
         )}
       </div>
     </div>

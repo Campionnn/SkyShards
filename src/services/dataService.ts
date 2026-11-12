@@ -33,6 +33,21 @@ export interface ShardVolume {
   instantSell: number;
 }
 
+/** One price level of the Bazaar order book: all orders at the same price. */
+export interface OrderLevel {
+  price: number;
+  amount: number;
+  orders: number;
+}
+
+/** The top (up to 30) price levels on each side of a shard's Bazaar order book, best price first. */
+export interface OrderBook {
+  /** What you buy from when buying instantly. Cheapest first. */
+  sellOffers: OrderLevel[];
+  /** What you sell into when selling instantly. Highest first. */
+  buyOrders: OrderLevel[];
+}
+
 /** Loads and caches the shard data files and Bazaar prices. */
 export class DataService {
   private static instance: DataService | undefined;
@@ -47,6 +62,7 @@ export class DataService {
   private defaultRatesCache: Promise<Record<string, number>> | null = null;
   private bazaarPriceCache: Record<string, Record<string, number>> | null = null;
   private bazaarVolumeCache: Record<string, ShardVolume> | null = null;
+  private orderBookCache: Record<string, OrderBook> | null = null;
   // One Bazaar request per page load, shared by prices and volumes (promise-cached like fusion-data).
   private bazaarCache: Promise<BazaarData> | null = null;
 
@@ -149,6 +165,28 @@ export class DataService {
     }
 
     return this.bazaarPriceCache[cacheKey];
+  }
+
+  /** Each shard's order book. Shards the Bazaar doesn't list are left out. */
+  async loadShardOrderBooks(): Promise<Record<string, OrderBook>> {
+    if (this.orderBookCache) return this.orderBookCache;
+
+    const toLevels = (summary: Record<number, { amount: number; pricePerUnit: number; orders: number }>) =>
+      Object.values(summary).map((level) => ({ price: level.pricePerUnit, amount: level.amount, orders: level.orders }));
+
+    const [bazaarData, shards] = await Promise.all([this.loadBazaar(), this.loadShards()]);
+    const books: Record<string, OrderBook> = {};
+    for (const shard of shards) {
+      const product = bazaarData.products[shard.internal_id];
+      if (!product) continue;
+      // Hypixel names the sides from the order's point of view: buy_summary holds the sell
+      // offers a buyer takes, sell_summary the buy orders a seller fills.
+      books[shard.id] = {
+        sellOffers: toLevels(product.buy_summary).sort((a, b) => a.price - b.price),
+        buyOrders: toLevels(product.sell_summary).sort((a, b) => b.price - a.price),
+      };
+    }
+    return (this.orderBookCache = books);
   }
 
   /** Units traded per hour on each side of the Bazaar, averaged over the last 7 days. Shards without data are left out. */
