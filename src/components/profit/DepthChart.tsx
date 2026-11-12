@@ -48,6 +48,41 @@ const niceTicks = (min: number, max: number, count: number): number[] => {
   return ticks;
 };
 
+/** One side's headline above the chart: best price, what it is, and how much is listed in total. */
+const SideSummary = ({
+  title,
+  color,
+  best,
+  hint,
+  levels,
+  totalText,
+  alignRight = false,
+}: {
+  title: string;
+  color: string;
+  best: number | undefined;
+  hint: string;
+  levels: OrderLevel[];
+  totalText: string;
+  alignRight?: boolean;
+}) => {
+  const orders = levels.reduce((sum, level) => sum + level.orders, 0);
+  const amount = levels.reduce((sum, level) => sum + level.amount, 0);
+  return (
+    <div className={`min-w-0 space-y-0.5 ${alignRight ? "text-right" : ""}`}>
+      <div className={`flex items-center gap-1.5 text-sm font-semibold text-white ${alignRight ? "justify-end" : ""}`}>
+        <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: color }} />
+        {title}
+        {best !== undefined && <span className="font-normal text-slate-400">(best {formatLargeNumber(best)})</span>}
+      </div>
+      <p className="text-slate-400">{hint}</p>
+      <p className="text-slate-300">
+        {orders} orders, {amount.toLocaleString()} {totalText}
+      </p>
+    </div>
+  );
+};
+
 interface Hover {
   x: number;
   price: number;
@@ -106,7 +141,11 @@ export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[];
     // Where a "10% of spread" sell offer would go; only exists with both sides.
     const tenPercentOffer = bestBuy !== undefined && bestSell !== undefined ? bestSell - (bestSell - bestBuy) * SPREAD_UNDERCUT : undefined;
 
+    const spread = bestBuy !== undefined && bestSell !== undefined ? bestSell - bestBuy : undefined;
+
     return {
+      spread,
+      spreadPercent: spread !== undefined && bestBuy! > 0 ? spread / bestBuy! : undefined,
       tenPercentOffer,
       buy,
       sell,
@@ -148,24 +187,45 @@ export const DepthChart = ({ buyOrders, sellOffers }: { buyOrders: OrderLevel[];
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-300">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: BUY_COLOR }} />
-          Buy orders{chart.bestBuy !== undefined && <span className="text-slate-400">(best {formatLargeNumber(chart.bestBuy)})</span>}
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: SELL_COLOR }} />
-          Sell offers{chart.bestSell !== undefined && <span className="text-slate-400">(best {formatLargeNumber(chart.bestSell)})</span>}
-        </span>
-        {chart.tenPercentOffer !== undefined && (
-          <span
-            className="inline-flex items-center gap-1.5"
-            title='The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread'
-          >
-            <span className="w-4 border-t-2 border-dashed" style={{ borderColor: SELL_COLOR }} />
-            10% of spread offer <span className="text-slate-400">({formatLargeNumber(chart.tenPercentOffer)})</span>
-          </span>
-        )}
+      {/* Buy side on the left, the spread in the middle, sell side on the right: the same order as the chart. */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3 text-xs">
+        <SideSummary
+          title="Buy orders"
+          color={BUY_COLOR}
+          best={chart.bestBuy}
+          hint="What instant sells fill, highest first."
+          levels={buyOrders}
+          totalText="total shards can be bought"
+        />
+        <div className="text-center">
+          <div className="text-slate-400">Spread</div>
+          {chart.spread !== undefined ? (
+            <>
+              <div className="text-sm font-semibold text-white">{formatLargeNumber(chart.spread)}</div>
+              <div className="text-slate-300">{chart.spreadPercent !== undefined ? `${(chart.spreadPercent * 100).toFixed(1)}%` : ""}</div>
+              {chart.tenPercentOffer !== undefined && (
+                <div
+                  className="mt-1 inline-flex items-center gap-1.5 text-slate-400"
+                  title='The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread'
+                >
+                  <span className="w-3 border-t-2 border-dashed" style={{ borderColor: SELL_COLOR }} />
+                  10% offer {formatLargeNumber(chart.tenPercentOffer)}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-slate-500">–</div>
+          )}
+        </div>
+        <SideSummary
+          title="Sell offers"
+          color={SELL_COLOR}
+          best={chart.bestSell}
+          hint="What instant buys take, cheapest first."
+          levels={sellOffers}
+          totalText="total shards can be sold"
+          alignRight
+        />
       </div>
 
       <div className="relative">

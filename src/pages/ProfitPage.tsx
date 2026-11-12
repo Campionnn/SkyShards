@@ -11,7 +11,6 @@ import {
   DataService,
   buildCalculationParams,
   getFarmingRows,
-  countOrders,
   getFarmFusionRows,
   getFlipRows,
   getFusionRows,
@@ -956,18 +955,11 @@ const ColumnPicker = ({
 // ─── Order book ───
 
 /** One side of an order book, with a running total so you can see how deep each price goes. */
-const OrderSide = ({ title, hint, levels }: { title: string; hint: string; levels: OrderLevel[] }) => {
+const OrderSide = ({ title, levels }: { title: string; levels: OrderLevel[] }) => {
   let total = 0;
-  const amount = levels.reduce((sum, level) => sum + level.amount, 0);
   return (
     <div className="min-w-0 space-y-1">
-      <div>
-        <h3 className="text-sm font-semibold text-white">{title}</h3>
-        <p className="text-xs text-slate-400">{hint}</p>
-        <p className="text-xs text-slate-300">
-          {countOrders(levels)} orders, {amount.toLocaleString()} shards
-        </p>
-      </div>
+      <h3 className="text-sm font-semibold text-white">{title}</h3>
       {levels.length === 0 ? (
         <p className="text-sm text-slate-500 py-4">No orders.</p>
       ) : (
@@ -1005,14 +997,6 @@ const OrderSide = ({ title, hint, levels }: { title: string; hint: string; level
   );
 };
 
-const SpreadLine = ({ spread }: { spread: Spread | null }) =>
-  spread && (
-    <p className="text-sm text-slate-300">
-      Spread: <span className="font-medium text-white">{formatLargeNumber(spread.spread)}</span> ({(spread.percent * 100).toFixed(1)}%) between the highest buy
-      order ({formatLargeNumber(spread.buyOrder)}) and the cheapest sell offer ({formatLargeNumber(spread.sellOffer)}).
-    </p>
-  );
-
 const OrderBookModal = ({ data, shardId, book, onClose }: { data: Data; shardId: string | null; book: OrderBook | undefined; onClose: () => void }) => {
   const navigate = useNavigate();
   const [showList, setShowList] = useState(false);
@@ -1035,7 +1019,6 @@ const OrderBookModal = ({ data, shardId, book, onClose }: { data: Data; shardId:
               <X className="w-5 h-5" />
             </button>
           </div>
-          {book && <SpreadLine spread={getSpread(book)} />}
           {book ? (
             <>
               <DepthChart buyOrders={book.buyOrders} sellOffers={book.sellOffers} />
@@ -1044,8 +1027,8 @@ const OrderBookModal = ({ data, shardId, book, onClose }: { data: Data; shardId:
               </button>
               {showList && (
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <OrderSide title="Buy orders" hint="What instant sells fill, highest first." levels={book.buyOrders} />
-                  <OrderSide title="Sell offers" hint="What instant buys take, cheapest first." levels={book.sellOffers} />
+                  <OrderSide title="Buy orders" levels={book.buyOrders} />
+                  <OrderSide title="Sell offers" levels={book.sellOffers} />
                 </div>
               )}
             </>
@@ -1289,8 +1272,9 @@ export const ProfitPage = () => {
           </div>
           <div className="space-y-2 text-sm text-slate-400">
             <p>
-              Find the best way to turn shards into coins: farm and sell them, fuse them, flip them on the Bazaar, or fuse the shards you farm. Rates use your
-              Hunting Fortune, pets and custom rates from the{" "}
+              Find the best way to turn shards into coins: farm and sell them, fuse them, flip them on the Bazaar, or fuse the shards you farm.
+              <br />
+              Rates use your Hunting Fortune, pets and custom rates from the{" "}
               <Link to="/" className="text-purple-300 hover:underline">
                 Calculator
               </Link>{" "}
