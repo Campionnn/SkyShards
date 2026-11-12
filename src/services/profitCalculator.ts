@@ -330,3 +330,102 @@ export const getFlipRows = (market: MarketData, settings: Pick<MarketSettings, "
   }
   return rows;
 };
+
+export interface FarmFusionRow {
+  outputId: string;
+  inputs: [string, string];
+  inputAmounts: [number, number];
+  outputQuantity: number;
+  /** The input you farm; the other one is bought. */
+  farmedId: string;
+  /** Farmed shards one fusion uses (both inputs when they are the same shard). */
+  farmedAmount: number;
+  /** The bought input, or null when both inputs are the farmed shard. */
+  boughtId: string | null;
+  boughtAmount: number;
+  /** Your farming rate of the farmed shard, per hour. */
+  farmRate: number;
+  /** What the farmed shards of one fusion would sell for instead, after tax. */
+  sellValue: number;
+  /** Coins to buy the other input of one fusion. */
+  boughtCost: number;
+  /** What the result of one fusion sells for, after tax. */
+  revenue: number;
+  /** revenue − sellValue − boughtCost: positive when fusing beats selling the farmed shards. */
+  gain: number;
+  /** Lowest hourly Bazaar volume of the bought input and the result. */
+  volume: number;
+  /** Fusions per hour: limited by your farming rate and by the market for the bought input and the result. */
+  fusionsPerHour: number;
+  /** gain × fusionsPerHour. Negative means selling the farmed shards earns more. */
+  gainPerHour: number;
+}
+
+/**
+ * Fusing shards you farm instead of selling them. The farmed shards count at what they would
+ * sell for, since that's what fusing gives up. One row per fusion and farmable input: you can
+ * only hunt one shard at a time at your full rate, so the other input is bought.
+ */
+export const getFarmFusionRows = (data: Data, market: MarketData, settings: MarketSettings, crocodileMultiplier: number): FarmFusionRow[] => {
+  const keep = afterTax(settings.taxPercent);
+  const rows: FarmFusionRow[] = [];
+  for (const [outputId, recipes] of Object.entries(data.recipes)) {
+    const outputPrice = market.sellPrices[outputId];
+    if (outputPrice === undefined) continue;
+    const outputVolume = sellVolume(market.volumes[outputId], settings.sellMode);
+    for (const recipe of recipes) {
+      const [input1, input2] = recipe.inputs;
+      const shard1 = data.shards[input1];
+      const shard2 = data.shards[input2];
+      if (!shard1 || !shard2) continue;
+      const inputAmounts: [number, number] = [shard1.fuse_amount, shard2.fuse_amount];
+      const outputQuantity = getEffectiveOutputQuantity(recipe, crocodileMultiplier);
+      const revenue = outputQuantity * outputPrice * keep;
+
+      const candidates = input1 === input2 ? [input1] : [input1, input2];
+      for (const farmedId of candidates) {
+        const farmRate = data.shards[farmedId]?.rate ?? 0;
+        if (farmRate <= 0) continue;
+        const sameShard = input1 === input2;
+        const farmedAmount = sameShard ? inputAmounts[0] + inputAmounts[1] : farmedId === input1 ? inputAmounts[0] : inputAmounts[1];
+        const boughtId = sameShard ? null : farmedId === input1 ? input2 : input1;
+        const boughtAmount = boughtId === null ? 0 : boughtId === input1 ? inputAmounts[0] : inputAmounts[1];
+        const boughtPrice = boughtId === null ? 0 : market.buyPrices[boughtId];
+        if (boughtPrice === undefined) continue;
+
+        // A farmed shard without a Bazaar price can't be sold, so fusing gives nothing up.
+        const sellValue = farmedAmount * (market.sellPrices[farmedId] ?? 0) * keep;
+        const boughtCost = boughtAmount * boughtPrice;
+        const gain = revenue - sellValue - boughtCost;
+
+        let volume = outputVolume;
+        let fusionsPerHour = Math.min(farmRate / farmedAmount, (outputVolume * settings.marketShare) / outputQuantity);
+        if (boughtId !== null) {
+          const boughtVolume = buyVolume(market.volumes[boughtId], settings.buyMode);
+          volume = Math.min(volume, boughtVolume);
+          fusionsPerHour = Math.min(fusionsPerHour, (boughtVolume * settings.marketShare) / boughtAmount);
+        }
+
+        rows.push({
+          outputId,
+          inputs: recipe.inputs,
+          inputAmounts,
+          outputQuantity,
+          farmedId,
+          farmedAmount,
+          boughtId,
+          boughtAmount,
+          farmRate,
+          sellValue,
+          boughtCost,
+          revenue,
+          gain,
+          volume,
+          fusionsPerHour,
+          gainPerHour: gain * fusionsPerHour,
+        });
+      }
+    }
+  }
+  return rows;
+};

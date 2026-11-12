@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Coins, Coffee, Columns3, Hammer, Pickaxe, Repeat, ArrowDown, ArrowUp, ChevronDown, ChevronRight, X } from "lucide-react";
+import { Coins, Coffee, Columns3, Hammer, Pickaxe, Repeat, Sprout, ArrowDown, ArrowUp, ChevronDown, ChevronRight, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCalculatorState, useCustomRates } from "../hooks";
 import { Modal } from "../components/ui";
@@ -9,10 +9,12 @@ import {
   buildCalculationParams,
   getFarmingRows,
   countOrders,
+  getFarmFusionRows,
   getFlipRows,
   getFusionRows,
   getSpread,
   type BuyMode,
+  type FarmFusionRow,
   type FarmingRow,
   type FlipRow,
   type FusionRow,
@@ -50,6 +52,7 @@ interface ProfitSettings {
   farmingOpen: boolean;
   fusionsOpen: boolean;
   flipsOpen: boolean;
+  farmFusionsOpen: boolean;
   /** Switched-off columns, as "table:column" keys (see columnKey). */
   hiddenColumns: string[];
 }
@@ -64,6 +67,7 @@ const DEFAULT_SETTINGS: ProfitSettings = {
   farmingOpen: true,
   fusionsOpen: true,
   flipsOpen: true,
+  farmFusionsOpen: true,
   hiddenColumns: [],
 };
 
@@ -709,7 +713,102 @@ const flipColumns = ({ data }: Loaded, openBook: (shardId: string) => void): Col
   },
 ];
 
-type TableId = "farming" | "fusions" | "flips";
+/** The two inputs of a fusion, with the farmed one marked. */
+const FarmedInputs = ({ data, row, openBook }: { data: Data; row: FarmFusionRow; openBook: (shardId: string) => void }) => (
+  <span className="inline-flex items-center gap-2">
+    {row.inputs.map((shardId, index) => (
+      <span key={index} className="inline-flex items-center gap-2">
+        {index === 1 && <span className="text-slate-500">+</span>}
+        <span className="inline-flex items-center gap-1">
+          <ShardName data={data} shardId={shardId} amount={row.inputAmounts[index]} onOpen={openBook} />
+          {shardId === row.farmedId && (
+            <span title="You farm this one">
+              <Pickaxe className="w-3.5 h-3.5 text-emerald-400" />
+            </span>
+          )}
+        </span>
+      </span>
+    ))}
+  </span>
+);
+
+const farmFusionColumns = ({ data }: Loaded, openBook: (shardId: string) => void): ColumnDef<FarmFusionRow>[] => [
+  {
+    id: "inputs",
+    label: "Inputs",
+    align: "left",
+    alwaysVisible: true,
+    render: (row) => <FarmedInputs data={data} row={row} openBook={openBook} />,
+  },
+  {
+    id: "output",
+    label: "Result",
+    align: "left",
+    alwaysVisible: true,
+    sortValue: (row) => data.shards[row.outputId]?.name ?? "",
+    render: (row) => <ShardName data={data} shardId={row.outputId} amount={row.outputQuantity} onOpen={openBook} />,
+  },
+  {
+    id: "farmRate",
+    label: "Farm/h",
+    title: "Your farming rate of the marked shard",
+    sortValue: (row) => row.farmRate,
+    render: (row) => <span className="text-slate-300">{formatQuantity(row.farmRate)}</span>,
+  },
+  {
+    id: "sellValue",
+    label: "Sell value",
+    title: "What the farmed shards of one fusion would sell for instead, after tax",
+    sortValue: (row) => row.sellValue,
+    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.sellValue)}</span>,
+  },
+  {
+    id: "boughtCost",
+    label: "Buy cost",
+    title: "Coins to buy the other input of one fusion",
+    sortValue: (row) => row.boughtCost,
+    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.boughtCost)}</span>,
+  },
+  {
+    id: "revenue",
+    label: "Value",
+    title: "What the result of one fusion sells for, after tax",
+    sortValue: (row) => row.revenue,
+    render: (row) => <span className="text-slate-300">{formatLargeNumber(row.revenue)}</span>,
+  },
+  {
+    id: "gain",
+    label: "Gain",
+    title: "Per fusion: value minus sell value minus buy cost. Positive means fusing beats selling the farmed shards.",
+    sortValue: (row) => row.gain,
+    render: (row) => <span className={`font-medium ${coinClass(row.gain)}`}>{formatLargeNumber(row.gain)}</span>,
+  },
+  {
+    id: "volume",
+    label: "Volume/h",
+    title: "Hourly Bazaar volume of the least traded of the bought input and the result",
+    sortValue: (row) => row.volume,
+    render: (row) => <span className="text-slate-400">{formatLargeNumber(row.volume)}</span>,
+  },
+  {
+    id: "fusionsPerHour",
+    label: "Fusions/h",
+    title: "Limited by your farming rate and by the market for the bought input and the result",
+    sortValue: (row) => row.fusionsPerHour,
+    render: (row) => <span className="text-slate-300">{formatQuantity(row.fusionsPerHour)}</span>,
+  },
+  {
+    id: "gainPerHour",
+    label: "Gain/h",
+    title: "Gain × Fusions/h: extra coins per hour compared with selling what you farm",
+    sortValue: (row) => row.gainPerHour,
+    render: (row) => (
+      <span className={`font-medium ${row.gainPerHour > 0 ? "text-green-400" : coinClass(row.gainPerHour)}`}>{formatLargeNumber(row.gainPerHour)}</span>
+    ),
+  },
+];
+
+type TableId = "farming" | "fusions" | "flips" | "farmFusions";
 
 /** Key of a column in ProfitSettings.hiddenColumns. */
 const columnKey = (table: TableId, columnId: string) => `${table}:${columnId}`;
@@ -963,6 +1062,9 @@ const fusionKey = (row: FusionRow) => `${row.outputId}|${row.inputs[0]}|${row.in
 const fusionShards = (row: FusionRow) => [row.outputId, ...row.inputs];
 const flipKey = (row: FlipRow) => row.shardId;
 const flipShards = (row: FlipRow) => [row.shardId];
+const farmFusionKey = (row: FarmFusionRow) => `${row.outputId}|${row.inputs[0]}|${row.inputs[1]}|${row.outputQuantity}|${row.farmedId}`;
+const farmFusionShards = (row: FarmFusionRow) => [row.outputId, ...row.inputs];
+const farmFusionGain = (row: FarmFusionRow) => row.gain;
 const rowVolume = (row: { volume: number }) => row.volume;
 const rowProfit = (row: { profit: number }) => row.profit;
 
@@ -1034,14 +1136,23 @@ export const ProfitPage = () => {
   const farmingRows = useMemo(() => (loaded ? getFarmingRows(loaded.data, loaded, marketSettings) : []), [loaded, marketSettings]);
   const fusionRows = useMemo(() => (loaded ? getFusionRows(loaded.data, loaded, marketSettings, loaded.crocodileMultiplier) : []), [loaded, marketSettings]);
   const flipRows = useMemo(() => (loaded ? getFlipRows(loaded, marketSettings) : []), [loaded, marketSettings]);
+  const farmFusionRows = useMemo(
+    () => (loaded ? getFarmFusionRows(loaded.data, loaded, marketSettings, loaded.crocodileMultiplier) : []),
+    [loaded, marketSettings],
+  );
 
   // setBookShardId is stable, so the column definitions only rebuild when the data does.
   const allFarmingColumns = useMemo(() => (loaded ? farmingColumns(loaded, setBookShardId) : []), [loaded]);
   const allFusionColumns = useMemo(() => (loaded ? fusionColumns(loaded, setBookShardId) : []), [loaded]);
   const allFlipColumns = useMemo(() => (loaded ? flipColumns(loaded, setBookShardId) : []), [loaded]);
+  const allFarmFusionColumns = useMemo(() => (loaded ? farmFusionColumns(loaded, setBookShardId) : []), [loaded]);
   const shownFarmingColumns = useMemo(() => visibleColumns(allFarmingColumns, "farming", settings.hiddenColumns), [allFarmingColumns, settings.hiddenColumns]);
   const shownFusionColumns = useMemo(() => visibleColumns(allFusionColumns, "fusions", settings.hiddenColumns), [allFusionColumns, settings.hiddenColumns]);
   const shownFlipColumns = useMemo(() => visibleColumns(allFlipColumns, "flips", settings.hiddenColumns), [allFlipColumns, settings.hiddenColumns]);
+  const shownFarmFusionColumns = useMemo(
+    () => visibleColumns(allFarmFusionColumns, "farmFusions", settings.hiddenColumns),
+    [allFarmFusionColumns, settings.hiddenColumns],
+  );
 
   const overrideCount = loaded ? new Set([...loaded.buyOverrides, ...loaded.sellOverrides]).size : 0;
   // Side by side on wide screens while both are open; a folded section gives its space to the other.
@@ -1142,6 +1253,7 @@ export const ProfitPage = () => {
                   { table: "farming", label: "Farming", columns: allFarmingColumns },
                   { table: "fusions", label: "Fusions", columns: allFusionColumns },
                   { table: "flips", label: "Flips", columns: allFlipColumns },
+                  { table: "farmFusions", label: "Fuse your farm", columns: allFarmFusionColumns },
                 ]}
                 hidden={settings.hiddenColumns}
                 onChange={(hiddenColumns) => update({ hiddenColumns })}
@@ -1216,6 +1328,27 @@ export const ProfitPage = () => {
             emptyText="No flips found."
             open={settings.flipsOpen}
             onToggle={() => update({ flipsOpen: !settings.flipsOpen })}
+          />
+        )}
+        {loaded && (
+          <TableSection
+            icon={<Sprout className="w-5 h-5 text-emerald-400" />}
+            title="Fuse your farm"
+            description="Fuse the shards you farm (marked) instead of selling them, buying the other input. Gain compares it with selling the farmed shards; Fusions/h is limited by your farming rate and the market."
+            data={loaded.data}
+            rows={farmFusionRows}
+            columns={shownFarmFusionColumns}
+            allColumns={allFarmFusionColumns}
+            initialSort="gainPerHour"
+            rowKey={farmFusionKey}
+            shardIdsOf={farmFusionShards}
+            volumeOf={rowVolume}
+            profitOf={farmFusionGain}
+            minVolume={settings.minVolume}
+            searchPlaceholder="Search input or result..."
+            emptyText="No fusions found."
+            open={settings.farmFusionsOpen}
+            onToggle={() => update({ farmFusionsOpen: !settings.farmFusionsOpen })}
           />
         )}
         {loaded && (

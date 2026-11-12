@@ -13,6 +13,7 @@ export {
   getFlipRows,
   countOrders,
   hoursToFill,
+  getFarmFusionRows,
   type BuyMode,
   type SellMode,
   type MarketData,
@@ -22,4 +23,5 @@ export {
   type Fill,
   type FlipRow,
   type Spread,
+  type FarmFusionRow,
 } from "./profitCalculator";
