@@ -273,29 +273,44 @@ const nameCell = "px-2 py-1.5 align-middle whitespace-nowrap";
 const cell = "px-2 py-1.5 align-middle text-right whitespace-nowrap";
 
 /**
- * Shows PAGE_SIZE rows, plus PAGE_SIZE more per "Show more" click. The count belongs to
- * `resetKey` (filters and sort), so changing any of them starts again at the first page.
+ * Shows PAGE_SIZE rows, plus PAGE_SIZE more per "Show more" click; "Show less" goes back to the
+ * first PAGE_SIZE. The count belongs to `resetKey` (filters and sort), so changing any of them
+ * starts again at the first page.
  */
 const usePaging = (resetKey: string) => {
   const [paging, setPaging] = useState({ key: resetKey, limit: PAGE_SIZE });
   const limit = paging.key === resetKey ? paging.limit : PAGE_SIZE;
-  return { limit, showMore: () => setPaging({ key: resetKey, limit: limit + PAGE_SIZE }) };
+  return {
+    limit,
+    showMore: () => setPaging({ key: resetKey, limit: limit + PAGE_SIZE }),
+    showLess: () => setPaging({ key: resetKey, limit: PAGE_SIZE }),
+  };
 };
 
-const ShowMoreFooter = ({ shown, total, onShowMore }: { shown: number; total: number; onShowMore: () => void }) => (
-  <div className="flex items-center justify-between text-xs text-slate-400">
+const pagingButton = "px-3 py-1.5 rounded-md border cursor-pointer transition-colors duration-200";
+
+/** Fixed height, so the card doesn't shrink when a button appears or disappears. */
+const ShowMoreFooter = ({ shown, total, onShowMore, onShowLess }: { shown: number; total: number; onShowMore: () => void; onShowLess: () => void }) => (
+  <div className="h-8 flex items-center justify-between gap-2 text-xs text-slate-400">
     <span>
       Showing {shown} of {total}
     </span>
-    {shown < total && (
-      <button
-        type="button"
-        onClick={onShowMore}
-        className="px-3 py-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 cursor-pointer"
-      >
-        Show {Math.min(PAGE_SIZE, total - shown)} more
-      </button>
-    )}
+    <div className="flex items-center gap-2">
+      {shown > PAGE_SIZE && (
+        <button type="button" onClick={onShowLess} className={`${pagingButton} border-slate-600/50 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300`}>
+          Show less
+        </button>
+      )}
+      {shown < total && (
+        <button
+          type="button"
+          onClick={onShowMore}
+          className={`${pagingButton} border-emerald-500/30 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300`}
+        >
+          Show {Math.min(PAGE_SIZE, total - shown)} more
+        </button>
+      )}
+    </div>
   </div>
 );
 
@@ -320,7 +335,7 @@ const FarmingTable = ({
   const [query, setQuery] = useState("");
   const { sort, header } = useSort<FarmingColumn>("realisticCoinsPerHour");
   const lowerQuery = query.trim().toLowerCase();
-  const { limit, showMore } = usePaging(`${lowerQuery}|${minVolume}|${sort.column}|${sort.direction}`);
+  const { limit, showMore, showLess } = usePaging(`${lowerQuery}|${minVolume}|${sort.column}|${sort.direction}`);
 
   const filtered = useMemo(
     () =>
@@ -385,7 +400,7 @@ const FarmingTable = ({
         </table>
         {filtered.length === 0 && <p className="text-center text-slate-500 py-6">No shards found.</p>}
       </div>
-      <ShowMoreFooter shown={shown.length} total={filtered.length} onShowMore={showMore} />
+      <ShowMoreFooter shown={shown.length} total={filtered.length} onShowMore={showMore} onShowLess={showLess} />
     </Section>
   );
 };
@@ -412,7 +427,7 @@ const FusionTable = ({
   const [onlyProfitable, setOnlyProfitable] = useState(true);
   const { sort, header } = useSort<FusionColumn>("profitPerHour");
   const lowerQuery = query.trim().toLowerCase();
-  const { limit, showMore } = usePaging(`${lowerQuery}|${onlyProfitable}|${minVolume}|${sort.column}|${sort.direction}`);
+  const { limit, showMore, showLess } = usePaging(`${lowerQuery}|${onlyProfitable}|${minVolume}|${sort.column}|${sort.direction}`);
 
   const filtered = useMemo(
     () =>
@@ -506,7 +521,7 @@ const FusionTable = ({
         </table>
         {filtered.length === 0 && <p className="text-center text-slate-500 py-6">No fusions found.</p>}
       </div>
-      <ShowMoreFooter shown={shown.length} total={filtered.length} onShowMore={showMore} />
+      <ShowMoreFooter shown={shown.length} total={filtered.length} onShowMore={showMore} onShowLess={showLess} />
     </Section>
   );
 };
