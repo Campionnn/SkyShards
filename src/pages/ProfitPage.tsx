@@ -834,25 +834,29 @@ const TABS: { id: TableId; label: string; icon: LucideIcon }[] = [
   { id: "farmFusions", label: "Fuse your farm", icon: Sprout },
 ];
 
-const TabBar = ({ active, onChange }: { active: TableId; onChange: (tab: TableId) => void }) => (
-  <div className="flex flex-wrap gap-2" role="tablist">
-    {TABS.map(({ id, label, icon: Icon }) => (
-      <button
-        key={id}
-        type="button"
-        role="tab"
-        aria-selected={active === id}
-        onClick={() => onChange(id)}
-        className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium border transition-colors duration-200 cursor-pointer ${
-          active === id
-            ? "bg-emerald-500/30 text-emerald-200 border-emerald-400/50"
-            : "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-600 hover:border-slate-500"
-        }`}
-      >
-        <Icon className="w-4 h-4" />
-        {label}
-      </button>
-    ))}
+/** The tabs on the left; `extra` (the Columns menu) on the right of the same row. */
+const TabBar = ({ active, onChange, extra }: { active: TableId; onChange: (tab: TableId) => void; extra?: ReactNode }) => (
+  <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="flex flex-wrap gap-2" role="tablist">
+      {TABS.map(({ id, label, icon: Icon }) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={active === id}
+          onClick={() => onChange(id)}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium border transition-colors duration-200 cursor-pointer ${
+            active === id
+              ? "bg-emerald-500/30 text-emerald-200 border-emerald-400/50"
+              : "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-600 hover:border-slate-500"
+          }`}
+        >
+          <Icon className="w-4 h-4" />
+          {label}
+        </button>
+      ))}
+    </div>
+    {extra}
   </div>
 );
 
@@ -1252,73 +1256,86 @@ export const ProfitPage = () => {
               )}
             </div>
           </div>
-          <p className="text-sm text-slate-400">
-            Rates use your Hunting Fortune, pets and custom rates from the{" "}
-            <Link to="/" className="text-purple-300 hover:underline">
-              Calculator
-            </Link>{" "}
-            and{" "}
-            <Link to="/shards" className="text-purple-300 hover:underline">
-              Shards
-            </Link>{" "}
-            pages. Prices are live from the Bazaar
-            {overrideCount > 0 && (
-              <>
-                , with <span className="text-amber-300">{overrideCount} price overrides*</span> from the Shards page
-              </>
-            )}
-            . Volumes are 7-day Bazaar averages.
-          </p>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <Segmented<BuyMode>
-              label="Buy inputs via"
-              value={buyMode}
-              onChange={(value) => update({ buyMode: value })}
-              options={[
-                ["instant", "Instant buy"],
-                ["order", "Buy order"],
-              ]}
-            />
-            <Segmented<SellMode>
-              label="Sell via"
-              value={sellMode}
-              onChange={(value) => update({ sellMode: value })}
-              options={[
-                ["instant", "Instant sell"],
-                ["offer", "Sell offer"],
-              ]}
-            />
-            <NumberSetting
-              label="Bazaar tax"
-              value={settings.taxPercent}
-              onChange={(value) => update({ taxPercent: Math.min(value, 100) })}
-              step={0.125}
-              suffix="%"
-              title="Taken from every sale. Hypixel's base tax is 1.25 %."
-            />
-            <NumberSetting
-              label="Market share"
-              value={settings.marketSharePercent}
-              onChange={(value) => update({ marketSharePercent: Math.min(value, 100) })}
-              step={1}
-              suffix="%"
-              title="How much of the hourly Bazaar volume you expect to get, since other players trade too. Used for Realistic/h, Max/h and Profit/h."
-            />
-            <NumberSetting
-              label="Min. volume"
-              value={settings.minVolume}
-              onChange={(value) => update({ minVolume: value })}
-              step={10}
-              suffix="/h"
-              title="Hide shards and fusions whose least traded shard sells fewer than this many per hour."
-            />
-            {loaded && (
-              <ColumnPicker
-                groups={[{ table: tab, label: TABS.find((item) => item.id === tab)?.label ?? "", columns: pickerColumns[tab] }]}
-                hidden={settings.hiddenColumns}
-                onChange={(hiddenColumns) => update({ hiddenColumns })}
+          <div className="space-y-2 text-sm text-slate-400">
+            <p>
+              Find the best way to turn shards into coins: farm and sell them, fuse them, flip them on the Bazaar, or fuse the shards you farm. Rates use your
+              Hunting Fortune, pets and custom rates from the{" "}
+              <Link to="/" className="text-purple-300 hover:underline">
+                Calculator
+              </Link>{" "}
+              and{" "}
+              <Link to="/shards" className="text-purple-300 hover:underline">
+                Shards
+              </Link>{" "}
+              pages. Prices are live from the Bazaar
+              {overrideCount > 0 && (
+                <>
+                  , with <span className="text-amber-300">{overrideCount} of your price overrides*</span> from the Shards page
+                </>
+              )}
+              ; volumes are 7-day Bazaar averages.
+            </p>
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-300">How to use</h2>
+              <ul className="mt-1 grid gap-x-6 gap-y-0.5 md:grid-cols-2 list-disc pl-5 text-xs">
+                <li>Pick a tab: Farming, Fusions, Flips or Fuse your farm.</li>
+                <li>Hover a shard to see its description and how to hunt it.</li>
+                <li>Click a shard&apos;s name to open its order book as a depth chart.</li>
+                <li>In the order book, click the name again to open the shard on the Shards page, e.g. to set your own price.</li>
+                <li>Click a column header to sort, click it again to flip the order. Hover it to see what it means.</li>
+                <li>Use Columns (next to the tabs) to choose which statistics the current tab shows.</li>
+                <li>Search by shard name; &quot;Only profitable&quot; hides trades that lose coins.</li>
+                <li>Hover a setting below for an explanation. All settings are remembered in this browser.</li>
+              </ul>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              <NumberSetting
+                label="Market share"
+                value={settings.marketSharePercent}
+                onChange={(value) => update({ marketSharePercent: Math.min(value, 100) })}
+                step={1}
+                suffix="%"
+                title="How much of the hourly Bazaar volume you expect to get, since other players trade too. Used for Realistic/h, Max/h and Profit/h."
               />
-            )}
+              <NumberSetting
+                label="Min. volume"
+                value={settings.minVolume}
+                onChange={(value) => update({ minVolume: value })}
+                step={10}
+                suffix="/h"
+                title="Hide shards and fusions whose least traded shard sells fewer than this many per hour."
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              <Segmented<BuyMode>
+                label="Buy inputs via"
+                value={buyMode}
+                onChange={(value) => update({ buyMode: value })}
+                options={[
+                  ["instant", "Instant buy"],
+                  ["order", "Buy order"],
+                ]}
+              />
+              <Segmented<SellMode>
+                label="Sell via"
+                value={sellMode}
+                onChange={(value) => update({ sellMode: value })}
+                options={[
+                  ["instant", "Instant sell"],
+                  ["offer", "Sell offer"],
+                ]}
+              />
+              <NumberSetting
+                label="Bazaar tax"
+                value={settings.taxPercent}
+                onChange={(value) => update({ taxPercent: Math.min(value, 100) })}
+                step={0.125}
+                suffix="%"
+                title="Taken from every sale. Hypixel's base tax is 1.25 %."
+              />
+            </div>
           </div>
         </div>
 
@@ -1330,7 +1347,17 @@ export const ProfitPage = () => {
         )}
         {loaded && (
           <>
-            <TabBar active={tab} onChange={(activeTab) => update({ activeTab })} />
+            <TabBar
+              active={tab}
+              onChange={(activeTab) => update({ activeTab })}
+              extra={
+                <ColumnPicker
+                  groups={[{ table: tab, label: TABS.find((item) => item.id === tab)?.label ?? "", columns: pickerColumns[tab] }]}
+                  hidden={settings.hiddenColumns}
+                  onChange={(hiddenColumns) => update({ hiddenColumns })}
+                />
+              }
+            />
             {tab === "farming" && (
               <TableSection
                 icon={<Pickaxe className="w-5 h-5 text-emerald-400" />}
