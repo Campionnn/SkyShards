@@ -8,7 +8,7 @@ import { FusionTreeView } from "./FusionTreeView";
 import { MaterialTreeSelector } from "./MaterialTreeSelector";
 import { FusionTreeSortDropdown, type FusionTreeSort } from "./FusionTreeSortDropdown";
 import { MaterialsNeeded } from "./MaterialsNeeded";
-import { noFrillsMaterialsString, skyHanniMaterialsString } from "./treeExport";
+import { noFrillsMaterialsString, noFrillsTreesString, skyHanniMaterialsString, skyHanniTreesString } from "./treeExport";
 
 interface CalculationResultsProps {
   result: CalculationResult;
@@ -77,6 +77,12 @@ export const CalculationResults = ({
 
   const selectedTreeResult = materialTreeShardKey ? materialShardResults?.get(materialTreeShardKey) : undefined;
 
+  // Multi-shard mode: every selected shard's tree, for the "all fusion trees" export.
+  const allTrees = useMemo(
+    () => Array.from(materialShardResults?.values() ?? []).flatMap((shardResult) => (shardResult.tree ? [shardResult.tree] : [])),
+    [materialShardResults],
+  );
+
   const treeProps = { data, params, recipeOverrides, onRecipeOverridesUpdate, onShowActiveAlternatives, ironManView };
 
   return (
@@ -138,9 +144,18 @@ export const CalculationResults = ({
         open={copyModalOpen}
         onClose={() => setCopyModalOpen(false)}
         onCopySkyOcean={() => void copyToClipboard("", "SkyOcean", "list")}
-        onCopyNoFrills={() => void copyToClipboard(noFrillsMaterialsString(result.totalQuantities, data), "NoFrills", "list")}
-        onCopySkyHanni={() => void copyToClipboard(skyHanniMaterialsString(result.totalQuantities, data), "SkyHanni", "list")}
+        onCopyNoFrills={(options) =>
+          void (options.allTrees
+            ? copyToClipboard(noFrillsTreesString(allTrees, data, options), "NoFrills", "trees")
+            : copyToClipboard(noFrillsMaterialsString(result.totalQuantities, data), "NoFrills", "list"))
+        }
+        onCopySkyHanni={(options) =>
+          void (options.allTrees
+            ? copyToClipboard(skyHanniTreesString(allTrees, data, options), "SkyHanni", "trees")
+            : copyToClipboard(skyHanniMaterialsString(result.totalQuantities, data), "SkyHanni", "list"))
+        }
         materialsOnly
+        canExportAllTrees={allTrees.length > 0}
       />
     </div>
   );
