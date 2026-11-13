@@ -143,6 +143,14 @@ export const skyHanniTreeString = (tree: InventoryRecipeTree, data: Data, option
   return encode("<SkyHanniRecipe>(V1):", toMaterialList(totals, data));
 };
 
+/**
+ * Several trees as one export (multi-shard mode). A list of trees is walked like a split node,
+ * so amounts of the same shard are added up across trees.
+ */
+export const noFrillsTreesString = (trees: RecipeTree[], data: Data, options?: TreeExportOptions): string => noFrillsTreeString(trees, data, options);
+
+export const skyHanniTreesString = (trees: RecipeTree[], data: Data, options?: TreeExportOptions): string => skyHanniTreeString(trees, data, options);
+
 /** A flat material total (multi-shard mode), every entry treated as directly gathered. */
 export const noFrillsMaterialsString = (totalQuantities: Map<string, number>, data: Data): string =>
   encode(

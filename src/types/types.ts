@@ -183,6 +183,8 @@ export interface TreeExportOptions {
   countOwned: boolean;
   /** SkyHanni: also list fused shards, not only the directly gathered ones. */
   includeFused: boolean;
+  /** Multi-shard mode: export every selected shard's fusion tree instead of the materials list. */
+  allTrees: boolean;
 }
 
 export type InventoryRecipeTree =

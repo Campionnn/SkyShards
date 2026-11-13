@@ -76,6 +76,6 @@ export const DEFAULT_CALCULATION_PARAMS: CalculationParams = {
 
 /**
  * countOwned: SkyHanni's tracker compares the exported amount with the shards you own,
- * so it needs the full total. includeFused off keeps SkyHanni's original direct-only list.
+ * so it needs the full total. includeFused and allTrees off keep the original exports.
  */
-export const DEFAULT_TREE_EXPORT_OPTIONS: TreeExportOptions = { countOwned: true, includeFused: false };
+export const DEFAULT_TREE_EXPORT_OPTIONS: TreeExportOptions = { countOwned: true, includeFused: false, allTrees: false };
