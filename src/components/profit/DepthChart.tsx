@@ -189,7 +189,7 @@ export const DepthChart = ({ book }: { book: OrderBook }) => {
           best={chart.bestBuy}
           hint="What instant sells fill, highest first."
           levels={buyOrders}
-          totalText="total shards can be bought"
+          totalText="total shards can be sold"
         />
         <div className="text-center">
           <div className="text-slate-400">Spread</div>
@@ -215,7 +215,7 @@ export const DepthChart = ({ book }: { book: OrderBook }) => {
           best={chart.bestSell}
           hint="What instant buys take, cheapest first."
           levels={sellOffers}
-          totalText="total shards can be sold"
+          totalText="total shards can be bought"
           alignRight
         />
       </div>
