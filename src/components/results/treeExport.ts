@@ -1,4 +1,5 @@
-import type { Data, InventoryRecipeTree, RecipeTree } from "../../types/types";
+import type { Data, InventoryRecipeTree, RecipeTree, TreeExportOptions } from "../../types/types";
+import { DEFAULT_TREE_EXPORT_OPTIONS } from "../../constants";
 import { gzipBase64 } from "../../utilities";
 
 /**
@@ -89,6 +90,18 @@ const sumNodes = (tree: InventoryRecipeTree, keyOf: (node: TreeNode) => string |
   return totals;
 };
 
+/**
+ * Adds shards taken from the inventory to the entry `keyFor` picks for that shard. A shard
+ * with no entry is skipped: it is fully covered by the inventory, so there is nothing to track.
+ */
+const addOwned = (totals: Map<string, number>, tree: InventoryRecipeTree, keyFor: (shardId: string) => string | undefined): void => {
+  const owned = sumNodes(tree, (node) => (node.method === "inventory" ? node.shard : null));
+  for (const [shardId, quantity] of owned) {
+    const key = keyFor(shardId);
+    if (key !== undefined) totals.set(key, (totals.get(key) || 0) + quantity);
+  }
+};
+
 const NO_FRILLS_SOURCE: Record<RecipeTree["method"], NoFrillsSource> = { direct: "Direct", recipe: "Fuse", cycle: "Cycle" };
 
 const encode = (prefix: string, payload: unknown) => prefix + gzipBase64(JSON.stringify(payload));
@@ -98,9 +111,14 @@ const toMaterialList = (quantities: Map<string, number>, data: Data): MaterialLi
 
 export const skyOceanTreeString = (tree: RecipeTree): string => encode("<SkyOceanRecipe>(V2):", toSkyOcean(tree));
 
-/** Every node, tagged with how it is obtained. Shards taken from the inventory are left out: they need no work. */
-export const noFrillsTreeString = (tree: InventoryRecipeTree, data: Data): string => {
+/**
+ * Every node, tagged with how it is obtained. With `countOwned`, shards taken from the inventory
+ * are added to the entry of the same shard; without it they are left out, so only the remaining
+ * work is listed.
+ */
+export const noFrillsTreeString = (tree: InventoryRecipeTree, data: Data, options: TreeExportOptions = DEFAULT_TREE_EXPORT_OPTIONS): string => {
   const totals = sumNodes(tree, (node) => (node.method === "inventory" ? null : `${node.shard}|${NO_FRILLS_SOURCE[node.method]}`));
+  if (options.countOwned) addOwned(totals, tree, (shardId) => Array.from(totals.keys()).find((key) => key.startsWith(`${shardId}|`)));
   const list = Array.from(totals, ([key, needed]) => {
     const [shardId, source] = key.split("|");
     return { name: data.shards[shardId].name, needed, source: source as NoFrillsSource };
@@ -108,15 +126,22 @@ export const noFrillsTreeString = (tree: InventoryRecipeTree, data: Data): strin
   return encode("<NoFrillsRecipe>(V1):", list);
 };
 
-/** Only the directly-gathered leaves (so never the ones covered by the inventory). */
-export const skyHanniTreeString = (tree: InventoryRecipeTree, data: Data): string =>
-  encode(
-    "<SkyHanniRecipe>(V1):",
-    toMaterialList(
-      sumNodes(tree, (node) => (node.method === "direct" ? node.shard : null)),
-      data,
-    ),
-  );
+/**
+ * Directly-gathered shards, plus:
+ * - `includeFused`: fused (and cycled) shards, so the tracker also shows when enough are fused.
+ * - `countOwned`: shards taken from the inventory, added to the listed shard they belong to.
+ *   SkyHanni's tracker compares `needed` with the shards the player owns, so it needs the full
+ *   amount; without them it shows owned / missing instead of owned / total.
+ */
+export const skyHanniTreeString = (tree: InventoryRecipeTree, data: Data, options: TreeExportOptions = DEFAULT_TREE_EXPORT_OPTIONS): string => {
+  const totals = sumNodes(tree, (node) => {
+    if (node.method === "direct") return node.shard;
+    if (node.method === "inventory") return null;
+    return options.includeFused ? node.shard : null;
+  });
+  if (options.countOwned) addOwned(totals, tree, (shardId) => (totals.has(shardId) ? shardId : undefined));
+  return encode("<SkyHanniRecipe>(V1):", toMaterialList(totals, data));
+};
 
 /** A flat material total (multi-shard mode), every entry treated as directly gathered. */
 export const noFrillsMaterialsString = (totalQuantities: Map<string, number>, data: Data): string =>

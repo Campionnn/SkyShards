@@ -177,5 +177,13 @@ export interface InventoryCalculationResult {
  * across several ways of satisfying it (e.g. part from inventory, part crafted).
  * A RecipeTree is structurally assignable to this type.
  */
+/** Choices in the Copy Tree dialog, persisted in localStorage. */
+export interface TreeExportOptions {
+  /** Inventory results: count shards taken from the inventory towards the exported amounts. */
+  countOwned: boolean;
+  /** SkyHanni: also list fused shards, not only the directly gathered ones. */
+  includeFused: boolean;
+}
+
 export type InventoryRecipeTree =
   InventoryRecipeTree[] | DirectTreeNode | InventoryTreeNode | FusionTreeNode<InventoryRecipeTree> | CycleTreeNode<InventoryRecipeTree>;

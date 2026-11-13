@@ -108,9 +108,9 @@ export const InventoryCalculationResults = ({
         <CopyTreeModal
           open={copyModalOpen}
           onClose={() => setCopyModalOpen(false)}
-          onCopyNoFrills={() => void copyToClipboard(noFrillsTreeString(tree, data), "NoFrills")}
-          onCopySkyHanni={() => void copyToClipboard(skyHanniTreeString(tree, data), "SkyHanni")}
-          note="Shards covered by your inventory are left out, so the export only lists what you still need to get."
+          onCopyNoFrills={(options) => void copyToClipboard(noFrillsTreeString(tree, data, options), "NoFrills")}
+          onCopySkyHanni={(options) => void copyToClipboard(skyHanniTreeString(tree, data, options), "SkyHanni")}
+          inventoryMode
         />
       )}
     </div>
