@@ -22,6 +22,11 @@ interface TooltipProps {
   showRomanNumerals?: boolean;
   /** Pass false to disable the tooltip entirely. */
   visible?: boolean;
+  /**
+   * "click" (default) toggles the tooltip and swallows the click. "hover" shows it while the
+   * pointer is over the trigger and lets clicks through, so the trigger can do its own thing.
+   */
+  openOn?: "click" | "hover";
 }
 
 export const Tooltip = ({
@@ -39,10 +44,13 @@ export const Tooltip = ({
   shardId,
   showRomanNumerals = true,
   visible,
+  openOn = "click",
 }: TooltipProps) => {
   const [internalVisible, setInternalVisible] = useState(false);
   const isVisible = visible === false ? false : internalVisible;
   const [position, setPosition] = useState({ top: 0, left: 0 });
+  // Hover tooltips mount fresh each time, so they stay transparent until they have been placed.
+  const [placed, setPlaced] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +60,18 @@ export const Tooltip = ({
     e.stopPropagation();
     setInternalVisible((v) => !v);
   };
+
+  const triggerHandlers =
+    openOn === "hover"
+      ? {
+          onMouseEnter: () => {
+            setPlaced(false);
+            setInternalVisible(true);
+          },
+          onMouseLeave: () => setInternalVisible(false),
+        }
+      : { onClick: toggleTooltip };
+  const shown = isVisible && (openOn === "click" || placed);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -68,6 +88,7 @@ export const Tooltip = ({
       const left = Math.max(VIEWPORT_PADDING, Math.min(centredLeft, window.innerWidth - tooltipRect.width - VIEWPORT_PADDING));
 
       setPosition({ top, left });
+      setPlaced(true);
     };
 
     // Measure on the next frame, once the portalled tooltip has rendered.
@@ -108,7 +129,7 @@ export const Tooltip = ({
     <div
       ref={tooltipRef}
       className={`fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 transition-opacity duration-200 ${
-        isVisible ? "opacity-100" : "opacity-0 pointer-events-none select-none"
+        shown ? "opacity-100" : "opacity-0 pointer-events-none select-none"
       }`}
       style={{ top: position.top, left: position.left }}
     >
@@ -142,7 +163,7 @@ export const Tooltip = ({
 
   return (
     <>
-      <div ref={triggerRef} onClick={toggleTooltip} className={`cursor-pointer ${className}`} aria-label="Show description">
+      <div ref={triggerRef} {...triggerHandlers} className={`cursor-pointer ${className}`} aria-label="Show description">
         {children || (
           <button
             type="button"
@@ -154,7 +175,8 @@ export const Tooltip = ({
         )}
       </div>
 
-      {createPortal(tooltipEl, document.body)}
+      {/* Click tooltips stay mounted for their fade; hover ones only exist while shown, since a page can hold many. */}
+      {(openOn === "click" || isVisible) && createPortal(tooltipEl, document.body)}
     </>
   );
 };

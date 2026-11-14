@@ -55,6 +55,13 @@ export const SITE_ROUTES: SiteRoute[] = [
     indexed: true,
   },
   {
+    path: "/profits",
+    name: "Profits",
+    title: "Shard Farming and Fusion Profits | SkyShards",
+    description: "Which Hypixel SkyBlock shards earn the most coins per hour, and which shard fusions are profitable on the Bazaar.",
+    indexed: true,
+  },
+  {
     path: "/guide",
     name: "Guide",
     title: "Fusion Calculator Guide | SkyShards",

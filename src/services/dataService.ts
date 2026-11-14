@@ -23,6 +23,31 @@ const fetchPublicFile = <T>(filename: string) => fetchJson<T>(`${import.meta.env
 /** Public Hypixel Skyblock API (no key needed). */
 const fetchSkyblockApi = <T>(endpoint: string) => fetchJson<T>(`https://api.hypixel.net/v2/skyblock${endpoint}`, `Failed to fetch API endpoint ${endpoint}`);
 
+const HOURS_PER_WEEK = 7 * 24;
+
+/** Bazaar trade volume of one shard, in units per hour. */
+export interface ShardVolume {
+  /** Bought instantly from sell offers: how fast sell offers fill. */
+  instantBuy: number;
+  /** Sold instantly into buy orders: how fast buy orders fill. */
+  instantSell: number;
+}
+
+/** One price level of the Bazaar order book: all orders at the same price. */
+export interface OrderLevel {
+  price: number;
+  amount: number;
+  orders: number;
+}
+
+/** The top (up to 30) price levels on each side of a shard's Bazaar order book, best price first. */
+export interface OrderBook {
+  /** What you buy from when buying instantly. Cheapest first. */
+  sellOffers: OrderLevel[];
+  /** What you sell into when selling instantly. Highest first. */
+  buyOrders: OrderLevel[];
+}
+
 /** Loads and caches the shard data files and Bazaar prices. */
 export class DataService {
   private static instance: DataService | undefined;
@@ -36,6 +61,18 @@ export class DataService {
   private fusionJsonCache: Promise<FusionJson> | null = null;
   private defaultRatesCache: Promise<Record<string, number>> | null = null;
   private bazaarPriceCache: Record<string, Record<string, number>> | null = null;
+  private bazaarVolumeCache: Record<string, ShardVolume> | null = null;
+  private orderBookCache: Record<string, OrderBook> | null = null;
+  // One Bazaar request per page load, shared by prices and volumes (promise-cached like fusion-data).
+  private bazaarCache: Promise<BazaarData> | null = null;
+
+  private loadBazaar(): Promise<BazaarData> {
+    this.bazaarCache ??= fetchSkyblockApi<BazaarData>("/bazaar").catch((error) => {
+      this.bazaarCache = null;
+      throw error;
+    });
+    return this.bazaarCache;
+  }
 
   async loadShards(): Promise<Shard[]> {
     if (this.shardsCache) {
@@ -109,7 +146,7 @@ export class DataService {
       return this.bazaarPriceCache[cacheKey];
     }
 
-    const bazaarData = await fetchSkyblockApi<BazaarData>("/bazaar");
+    const bazaarData = await this.loadBazaar();
     const shards = await this.loadShards();
     this.bazaarPriceCache = this.bazaarPriceCache ?? {};
     this.bazaarPriceCache[cacheKey] = {};
@@ -128,6 +165,41 @@ export class DataService {
     }
 
     return this.bazaarPriceCache[cacheKey];
+  }
+
+  /** Each shard's order book. Shards the Bazaar doesn't list are left out. */
+  async loadShardOrderBooks(): Promise<Record<string, OrderBook>> {
+    if (this.orderBookCache) return this.orderBookCache;
+
+    const toLevels = (summary: Record<number, { amount: number; pricePerUnit: number; orders: number }>) =>
+      Object.values(summary).map((level) => ({ price: level.pricePerUnit, amount: level.amount, orders: level.orders }));
+
+    const [bazaarData, shards] = await Promise.all([this.loadBazaar(), this.loadShards()]);
+    const books: Record<string, OrderBook> = {};
+    for (const shard of shards) {
+      const product = bazaarData.products[shard.internal_id];
+      if (!product) continue;
+      // Hypixel names the sides from the order's point of view: buy_summary holds the sell
+      // offers a buyer takes, sell_summary the buy orders a seller fills.
+      books[shard.id] = {
+        sellOffers: toLevels(product.buy_summary).sort((a, b) => a.price - b.price),
+        buyOrders: toLevels(product.sell_summary).sort((a, b) => b.price - a.price),
+      };
+    }
+    return (this.orderBookCache = books);
+  }
+
+  /** Units traded per hour on each side of the Bazaar, averaged over the last 7 days. Shards without data are left out. */
+  async loadShardVolumes(): Promise<Record<string, ShardVolume>> {
+    if (this.bazaarVolumeCache) return this.bazaarVolumeCache;
+
+    const [bazaarData, shards] = await Promise.all([this.loadBazaar(), this.loadShards()]);
+    const volumes: Record<string, ShardVolume> = {};
+    for (const shard of shards) {
+      const status = bazaarData.products[shard.internal_id]?.quick_status;
+      if (status) volumes[shard.id] = { instantBuy: status.buyMovingWeek / HOURS_PER_WEEK, instantSell: status.sellMovingWeek / HOURS_PER_WEEK };
+    }
+    return (this.bazaarVolumeCache = volumes);
   }
 
   private sortShardsByQuery(shards: Shard[], query: string): Shard[] {

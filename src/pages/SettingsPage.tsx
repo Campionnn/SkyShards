@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, type ChangeEvent, type FocusEvent, type ReactNode } from "react";
 import { Search, RotateCcw, Save, AlignLeft } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { useShardsWithRecipes, useCustomRates, useCustomPrices, useCalculatorState } from "../hooks";
 import { debounce, filterShards, DEFAULT_FILTER_CONFIG, isFocusRestoredByWindow } from "../utilities";
 import { ShardDescription } from "../components/ui/ShardDescription";
@@ -68,6 +69,20 @@ export const SettingsPage = () => {
   const { customRates, defaultRates, updateRate, resetRates } = useCustomRates();
   const { customPrices, updatePrice, resetPrices } = useCustomPrices(instantBuy);
   const [filter, setFilter] = useState("");
+  // ?shard=<id> (e.g. from the Profits page) shows just that one shard until cleared.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const onlyShardId = searchParams.get("shard");
+  const showAllShards = useCallback(
+    () =>
+      setSearchParams(
+        (params) => {
+          params.delete("shard");
+          return params;
+        },
+        { replace: true },
+      ),
+    [setSearchParams],
+  );
   const [rarityFilter, setRarityFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [hasChanges, setHasChanges] = useState(false);
@@ -109,13 +124,14 @@ export const SettingsPage = () => {
   }, []);
 
   const filteredShards = useMemo(() => {
+    if (onlyShardId) return shards.filter((shard) => shard.id === onlyShardId);
     return filterShards<ShardWithDirectInfo>(shards, {
       query: debouncedFilter,
       rarity: rarityFilter,
       type: typeFilter as "all" | "direct" | "fuse",
       searchConfig: DEFAULT_FILTER_CONFIG,
     });
-  }, [shards, debouncedFilter, rarityFilter, typeFilter]);
+  }, [shards, onlyShardId, debouncedFilter, rarityFilter, typeFilter]);
 
   const handleRateChange = useCallback(
     (shardId: string, newRate: number | undefined) => {
@@ -151,9 +167,14 @@ export const SettingsPage = () => {
     }
   }, [isPrices, priceSourceLabel, resetRates, resetPrices]);
 
-  const handleFilterChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value);
-  }, []);
+  // Typing a search means looking for something else, so it leaves the single-shard view.
+  const handleFilterChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setFilter(e.target.value);
+      if (onlyShardId) showAllShards();
+    },
+    [onlyShardId, showAllShards],
+  );
 
   // Focusing the box starts a new search, so it clears the old one - unless the browser is
   // just handing focus back after the user alt-tabbed away mid-search.
@@ -260,6 +281,14 @@ export const SettingsPage = () => {
             {isPrices ? `${instantBuy ? "Instant buy" : "Buy order"} prices (coins/shard)` : "Base rates (shards/hour)"} • Showing {filteredShards.length} of{" "}
             {shards.length} shards
           </p>
+          {onlyShardId && (
+            <p className="mt-1 text-purple-300">
+              Showing only {shards.find((shard) => shard.id === onlyShardId)?.name ?? onlyShardId}.{" "}
+              <button type="button" onClick={showAllShards} className="underline hover:text-purple-200 cursor-pointer">
+                Show all shards
+              </button>
+            </p>
+          )}
         </div>
       </div>
 

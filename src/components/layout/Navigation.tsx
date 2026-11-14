@@ -1,10 +1,10 @@
 import { useState, type ComponentType } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Calculator, Settings, Shuffle, Share2, Menu, X, ExternalLink } from "lucide-react";
+import { Calculator, Settings, Shuffle, Share2, Coins, Menu, X, ExternalLink } from "lucide-react";
 import { DiscordIcon, GitHubIcon, KofiIcon } from "../ui/BrandIcons";
 import { DISCORD_PATH } from "../../seo/routes";
 
-type NavColor = "purple" | "green" | "blue" | "yellow" | "gray" | "amber" | "indigo";
+type NavColor = "purple" | "green" | "blue" | "yellow" | "gray" | "amber" | "indigo" | "emerald";
 
 // Full class strings so Tailwind can find them; `ring` marks the active page.
 const COLOR_CLASSES: Record<NavColor, { base: string; ring: string }> = {
@@ -15,6 +15,10 @@ const COLOR_CLASSES: Record<NavColor, { base: string; ring: string }> = {
   gray: { base: "bg-gray-500/20 hover:bg-gray-500/30 text-gray-300 border border-gray-500/20 hover:border-gray-500/30", ring: "ring-gray-300" },
   amber: { base: "bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/20 hover:border-amber-500/30", ring: "ring-amber-300" },
   indigo: { base: "bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/20 hover:border-indigo-500/30", ring: "ring-indigo-300" },
+  emerald: {
+    base: "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/20 hover:border-emerald-500/30",
+    ring: "ring-emerald-300",
+  },
 };
 
 const NAV_ITEMS: { path: string; label: string; icon: ComponentType<{ className?: string }>; color: NavColor }[] = [
@@ -22,6 +26,7 @@ const NAV_ITEMS: { path: string; label: string; icon: ComponentType<{ className?
   { path: "/recipes", label: "Recipes", icon: Shuffle, color: "green" },
   { path: "/shards", label: "Shards", icon: Settings, color: "blue" },
   { path: "/fusion-lines", label: "Fusion Lines", icon: Share2, color: "yellow" },
+  { path: "/profits", label: "Profits", icon: Coins, color: "emerald" },
 ];
 
 const EXTERNAL_LINKS: {
