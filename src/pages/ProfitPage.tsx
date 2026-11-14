@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Coins, Coffee, Columns3, Hammer, Pickaxe, Repeat, Sprout, ArrowDown, ArrowUp, X, type LucideIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCalculatorState, useCustomRates } from "../hooks";
-import { Modal, Tooltip } from "../components/ui";
+import { Modal, ToggleSwitch, Tooltip } from "../components/ui";
 import { DepthChart } from "../components/profit/DepthChart";
 import { ShardDescription } from "../components/ui/ShardDescription";
 import { SHARD_DESCRIPTIONS } from "../constants";
@@ -50,6 +50,8 @@ interface ProfitSettings {
   marketSharePercent: number;
   /** Hide rows whose (bottleneck) volume is below this many shards per hour. */
   minVolume: number;
+  /** Use the price overrides from the Shards page; off means live Bazaar prices only. */
+  useOverrides: boolean;
   /** The tab that is shown. */
   activeTab: TableId;
   /** Switched-off columns, as "table:column" keys (see columnKey). */
@@ -63,6 +65,7 @@ const DEFAULT_SETTINGS: ProfitSettings = {
   taxPercent: 1.25,
   marketSharePercent: 10,
   minVolume: 0,
+  useOverrides: true,
   activeTab: "farming",
   hiddenColumns: [],
 };
@@ -1062,7 +1065,7 @@ export const ProfitPage = () => {
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [bookShardId, setBookShardId] = useState<string | null>(null);
-  const { buyMode, sellMode } = settings;
+  const { buyMode, sellMode, useOverrides } = settings;
 
   const update = (changes: Partial<ProfitSettings>) =>
     setSettings((current) => {
@@ -1091,8 +1094,9 @@ export const ProfitPage = () => {
         dataService.loadShardVolumes(),
         dataService.loadShardOrderBooks(),
       ]);
-      const buyOverrides = loadCustomPrices(buyFromOffers);
-      const sellOverrides = loadCustomPrices(sellToOffers);
+      const noOverrides = new Map<string, number>();
+      const buyOverrides = useOverrides ? loadCustomPrices(buyFromOffers) : noOverrides;
+      const sellOverrides = useOverrides ? loadCustomPrices(sellToOffers) : noOverrides;
       if (!cancelled) {
         setLoaded({
           data,
@@ -1112,7 +1116,7 @@ export const ProfitPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [form, customRates, buyMode, sellMode]);
+  }, [form, customRates, buyMode, sellMode, useOverrides]);
 
   const marketSettings: MarketSettings = useMemo(
     () => ({ buyMode, sellMode, taxPercent: settings.taxPercent, marketShare: settings.marketSharePercent / 100 }),
@@ -1173,12 +1177,12 @@ export const ProfitPage = () => {
                 Shards
               </Link>{" "}
               pages. Prices are live from the Bazaar
-              {overrideCount > 0 && (
+              {useOverrides && overrideCount > 0 && (
                 <>
                   , with <span className="text-amber-300">{overrideCount} of your price overrides*</span> from the Shards page
                 </>
               )}
-              ; volumes are 7-day Bazaar averages.
+              {!useOverrides && " only (your price overrides are switched off)"}; volumes are 7-day Bazaar averages.
             </p>
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-300">How to use</h2>
@@ -1211,6 +1215,15 @@ export const ProfitPage = () => {
                 step={10}
                 suffix="/h"
                 title="Hide shards and fusions whose least traded shard sells fewer than this many per hour."
+              />
+              <ToggleSwitch
+                label="Use my price overrides"
+                checked={useOverrides}
+                onChange={(value) => update({ useOverrides: value })}
+                size="sm"
+                accent="emerald"
+                labelClassName="text-xs text-slate-400"
+                tooltip="On: the prices you set on the Shards page replace Bazaar prices (marked with *). Off: live Bazaar prices only."
               />
             </div>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
