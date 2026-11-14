@@ -9,6 +9,7 @@ export {
   getFusionRows,
   getFlipRows,
   getFarmFusionRows,
+  getInventoryRows,
   getSpread,
   countOrders,
   type BuyMode,
@@ -19,5 +20,6 @@ export {
   type FusionRow,
   type FlipRow,
   type FarmFusionRow,
+  type InventoryRow,
   type Spread,
 } from "./profitCalculator";

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Coins, Coffee, Columns3, Hammer, Pickaxe, Repeat, Sprout, ArrowDown, ArrowUp, X, type LucideIcon } from "lucide-react";
+import { Backpack, Coins, Coffee, Columns3, Hammer, Pickaxe, Repeat, Sprout, ArrowDown, ArrowUp, X, type LucideIcon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCalculatorState, useCustomRates } from "../hooks";
 import { Modal, ToggleSwitch, Tooltip } from "../components/ui";
@@ -13,12 +13,14 @@ import {
   getFarmingRows,
   getFarmFusionRows,
   getFlipRows,
+  getInventoryRows,
   getFusionRows,
   type BuyMode,
   type FarmFusionRow,
   type FarmingRow,
   type FlipRow,
   type FusionRow,
+  type InventoryRow,
   type MarketData,
   type MarketSettings,
   type OrderBook,
@@ -27,7 +29,7 @@ import {
   type Spread,
 } from "../services";
 import { calculateMultipliers } from "../services/fusionMath";
-import { formatLargeNumber, formatQuantity, getRarityColor, loadCustomPrices, shardIconUrl } from "../utilities";
+import { formatLargeNumber, formatQuantity, getRarityColor, loadCustomPrices, loadInventory, shardIconUrl } from "../utilities";
 import type { Data } from "../types/types";
 
 type SortDirection = "asc" | "desc";
@@ -93,6 +95,8 @@ const saveSettings = (settings: ProfitSettings) => {
 interface Loaded extends MarketData {
   data: Data;
   crocodileMultiplier: number;
+  /** The player's shards from the Calculator's inventory import: shard id to count. */
+  inventory: ReadonlyMap<string, number>;
 }
 
 /** Bazaar prices with the user's overrides for the same order-book side on top. */
@@ -710,7 +714,7 @@ const farmFusionColumns = ({ data }: Loaded, openBook: OpenBook): ColumnDef<Farm
 
 // ─── Tabs ───
 
-type TableId = "farming" | "fusions" | "flips" | "farmFusions";
+type TableId = "farming" | "fusions" | "flips" | "farmFusions" | "inventory";
 
 /** Everything that makes one tab: its texts, its rows and its columns. */
 interface TableConfig<R> {
@@ -728,6 +732,10 @@ interface TableConfig<R> {
   profitOf?: (row: R) => number;
   searchPlaceholder: string;
   emptyText: string;
+  /** Rows this tab always shows, whatever the Min. volume setting (e.g. your own shards). */
+  ignoreMinVolume?: boolean;
+  /** A line above the table, e.g. a total over all rows. */
+  summary?: (rows: R[]) => ReactNode;
 }
 
 const farmingTable: TableConfig<FarmingRow> = {
@@ -793,7 +801,94 @@ const farmFusionTable: TableConfig<FarmFusionRow> = {
   emptyText: "No fusions found.",
 };
 
-const TABS = [farmingTable, fusionTable, flipTable, farmFusionTable].map(({ id, label, icon }) => ({ id, label, icon }));
+const inventoryColumns = ({ data, sellOverrides }: Loaded, openBook: OpenBook): ColumnDef<InventoryRow>[] => {
+  const overridden = (row: InventoryRow) => sellOverrides.has(row.shardId);
+  /** A price, or a dash for shards that aren't on the Bazaar. */
+  const optionalPrice = (value: (row: InventoryRow) => number | null, id: string, label: string, title: string): ColumnDef<InventoryRow> => ({
+    id,
+    label,
+    title,
+    sortValue: (row) => value(row) ?? -1,
+    render: (row) => {
+      const price = value(row);
+      return price === null ? (
+        <span className="text-slate-500">–</span>
+      ) : (
+        <span className="text-slate-300">
+          <Price value={price} overridden={overridden(row)} />
+        </span>
+      );
+    },
+  });
+  return [
+    shardColumn(data, openBook),
+    numberColumn("owned", "Owned", "How many of this shard you have", (row) => row.owned, show.count),
+    optionalPrice((row) => row.price, "price", "Price", "Sale price per shard, before tax"),
+    numberColumn("value", "Value", "Owned × price, after tax: what your stack is worth at that price", (row) => row.value),
+    optionalPrice(
+      (row) => row.realPrice,
+      "realPrice",
+      "Real price",
+      "Average price when selling the whole stack at once, from the order book (instant sell only)",
+    ),
+    numberColumn(
+      "realValue",
+      "Real value",
+      "What selling the whole stack at once brings, after tax; at most what the order book holds",
+      (row) => row.realValue,
+      show.best,
+    ),
+    numberColumn("volume", "Volume/h", "Shards the Bazaar takes per hour on your selling side (7-day average)", (row) => row.volume, show.volume),
+    {
+      id: "spread",
+      label: "Spread",
+      title: "Cheapest sell offer minus highest buy order",
+      sortValue: (row) => row.spread?.spread ?? 0,
+      render: (row) => <SpreadValue spread={row.spread} />,
+    },
+    {
+      id: "tenPercentOffer",
+      label: "10% offer",
+      title: TEN_PERCENT_OFFER,
+      sortValue: (row) => row.spread?.tenPercentOffer ?? 0,
+      render: (row) => (row.spread ? show.coins(row.spread.tenPercentOffer) : <span className="text-slate-500">–</span>),
+    },
+    numberColumn("competitors", "Competition", "Sell offers already listed: who you compete with when selling", (row) => row.competitors, show.count),
+    hoursColumn(
+      "sellHours",
+      "Sell time",
+      "Time to sell the whole stack: instant when selling instantly, else how long your sell offer waits behind the ones at the best price",
+      (row) => row.sellHours,
+    ),
+  ];
+};
+
+const inventoryTable: TableConfig<InventoryRow> = {
+  id: "inventory",
+  label: "Inventory",
+  icon: Backpack,
+  description:
+    "The shards in your inventory, imported on the Calculator page. Value uses the sale price; Real value is what selling the whole stack at once actually brings, from the order book.",
+  rows: (loaded, settings) => getInventoryRows(loaded.data, loaded, settings, loaded.inventory),
+  columns: inventoryColumns,
+  initialSort: "realValue",
+  rowKey: (row) => row.shardId,
+  shardIdsOf: (row) => [row.shardId],
+  searchPlaceholder: "Search shards...",
+  emptyText: "No inventory imported yet. Import it in the Inventory panel on the Calculator page.",
+  ignoreMinVolume: true,
+  summary: (rows) =>
+    rows.length > 0 && (
+      <p className="text-sm text-slate-300">
+        {rows.reduce((sum, row) => sum + row.owned, 0).toLocaleString()} shards worth{" "}
+        <span className="font-medium text-white">{formatLargeNumber(rows.reduce((sum, row) => sum + row.value, 0))}</span> coins at their price, or{" "}
+        <span className="font-medium text-green-400">{formatLargeNumber(rows.reduce((sum, row) => sum + row.realValue, 0))}</span> when sold all at once (after
+        tax).
+      </p>
+    ),
+};
+
+const TABS = [farmingTable, fusionTable, flipTable, farmFusionTable, inventoryTable].map(({ id, label, icon }) => ({ id, label, icon }));
 
 /** The tabs on the left; `extra` (the Columns menu) on the right of the same row. */
 const TabBar = ({ active, onChange, extra }: { active: TableId; onChange: (tab: TableId) => void; extra?: ReactNode }) => (
@@ -1021,7 +1116,7 @@ const ActiveTable = <R extends { volume: number }>({
   const filtered = useMemo(() => {
     const { profitOf, shardIdsOf } = config;
     const matches = (row: R) => !lowerQuery || shardIdsOf(row).some((id) => lowerNames.get(id)?.includes(lowerQuery));
-    return rows.filter((row) => (!filterProfit || (profitOf?.(row) ?? 0) > 0) && row.volume >= minVolume && matches(row));
+    return rows.filter((row) => (!filterProfit || (profitOf?.(row) ?? 0) > 0) && (config.ignoreMinVolume || row.volume >= minVolume) && matches(row));
   }, [rows, config, lowerQuery, lowerNames, filterProfit, minVolume]);
   const sorted = useMemo(() => sortRows(filtered, sort, allColumns), [filtered, sort, allColumns]);
   const shown = sorted.slice(0, limit);
@@ -1049,6 +1144,7 @@ const ActiveTable = <R extends { volume: number }>({
           </div>
         }
       >
+        {config.summary?.(rows)}
         <DataTable columns={columns} rows={shown} rowKey={config.rowKey} sort={sort} onSort={toggle} emptyText={config.emptyText} />
         <ShowMoreFooter shown={shown.length} total={sorted.length} onShowMore={showMore} onShowLess={showLess} />
       </Section>
@@ -1106,6 +1202,7 @@ export const ProfitPage = () => {
           sellOverrides: new Set(sellOverrides.keys()),
           volumes,
           orderBooks,
+          inventory: loadInventory(),
           crocodileMultiplier: calculateMultipliers(params).crocodileMultiplier,
         });
       }
@@ -1187,7 +1284,7 @@ export const ProfitPage = () => {
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-300">How to use</h2>
               <ul className="mt-1 grid gap-x-6 gap-y-0.5 md:grid-cols-2 list-disc pl-5 text-xs">
-                <li>Pick a tab: Farming, Fusions, Flips or Fuse your farm.</li>
+                <li>Pick a tab: Farming, Fusions, Flips, Fuse your farm or Inventory (your own shards from the Calculator).</li>
                 <li>Hover a shard to see its description and how to hunt it.</li>
                 <li>Click a shard&apos;s name to open its order book as a depth chart.</li>
                 <li>In the order book, click the name again to open the shard on the Shards page, e.g. to set your own price.</li>
@@ -1269,6 +1366,7 @@ export const ProfitPage = () => {
             {tab === "fusions" && <ActiveTable config={fusionTable} {...tableProps} />}
             {tab === "flips" && <ActiveTable config={flipTable} {...tableProps} />}
             {tab === "farmFusions" && <ActiveTable config={farmFusionTable} {...tableProps} />}
+            {tab === "inventory" && <ActiveTable config={inventoryTable} {...tableProps} />}
           </>
         )}
         {loaded && (

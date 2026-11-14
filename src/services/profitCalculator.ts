@@ -476,3 +476,48 @@ export const getFarmFusionRows = (data: Data, market: MarketData, settings: Mark
   );
   return rows;
 };
+
+export interface InventoryRow {
+  shardId: string;
+  /** How many you own. */
+  owned: number;
+  /** Sale price per shard (before tax), or null when the shard has no Bazaar price. */
+  price: number | null;
+  /** owned × price after tax: what your stack is worth at that price. */
+  value: number;
+  /** Shards per hour the Bazaar takes on your selling side. */
+  volume: number;
+  /** Average price when selling the whole stack at once, from the order book (instant sell only). */
+  realPrice: number | null;
+  /** What selling the whole stack at once actually brings, after tax; at most what the order book holds. */
+  realValue: number;
+  spread: Spread | null;
+  /** Sell offers already listed: who you compete with when selling. */
+  competitors: number;
+  /** Hours to sell the whole stack: 0 when selling instantly, else the sell offer queue time. */
+  sellHours: number;
+}
+
+/** Every shard in the player's inventory, valued at the sale price and at what the order book would pay. */
+export const getInventoryRows = (data: Data, market: MarketData, settings: MarketSettings, inventory: ReadonlyMap<string, number>): InventoryRow[] => {
+  const keep = afterTax(settings.taxPercent);
+  const rows: InventoryRow[] = [];
+  for (const [shardId, owned] of inventory) {
+    if (owned <= 0 || !data.shards[shardId]) continue;
+    const price = market.sellPrices[shardId] ?? null;
+    const fill = price === null ? { amount: 0, average: 0 } : sellFill(shardId, owned, market, settings.sellMode);
+    rows.push({
+      shardId,
+      owned,
+      price,
+      value: owned * (price ?? 0) * keep,
+      volume: sellVolume(market.volumes[shardId], settings.sellMode),
+      realPrice: fill.amount > 0 ? fill.average : price,
+      realValue: fill.amount * fill.average * keep,
+      spread: getSpread(market.orderBooks[shardId]),
+      competitors: countOrders(market.orderBooks[shardId]?.sellOffers),
+      sellHours: settings.sellMode === "instant" ? 0 : sellOfferHours(shardId, owned, market),
+    });
+  }
+  return rows;
+};
