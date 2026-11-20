@@ -12,6 +12,7 @@ import {
   getSpread,
   hoursToFill,
   takeFromBook,
+  worstSpread,
   type MarketData,
   type MarketSettings,
 } from "./profitCalculator";
@@ -108,6 +109,13 @@ describe("helpers", () => {
     expect(getSpread({ sellOffers: [], buyOrders: [level(100, 1)] })).toBeNull();
     expect(getSpread(undefined)).toBeNull();
   });
+
+  it("finds the worst spread, treating an empty side or a missing book as unbounded", () => {
+    const books = { X: { sellOffers: [level(12, 1)], buyOrders: [level(10, 1)] }, Y: { sellOffers: [level(30, 1)], buyOrders: [level(10, 1)] } };
+    expect(worstSpread(["X", "Y"], books)).toBeCloseTo(2);
+    expect(worstSpread(["X", "missing"], books)).toBe(Infinity);
+    expect(worstSpread([], books)).toBe(0);
+  });
 });
 
 describe("getFusionRows", () => {
@@ -162,6 +170,26 @@ describe("getFusionRows", () => {
     expect(fusion.outputQuantity).toBe(3);
     // F trades 100/h when bought instantly, 4 per fusion -> 25 fusions per hour at most.
     expect(fusion.fusionsPerHour).toBeCloseTo(25);
+  });
+
+  it("prices instant and patient strategies from both sides, whatever the selected modes", () => {
+    const sides = { sellOffer: market().buyPrices, buyOrder: market().sellPrices };
+    const fusion = row(getFusionRows(data, market({ sides }), { ...INSTANT, buyMode: "order", sellMode: "offer", taxPercent: 10 }, 1));
+    // Instant: buy at the sell offers (2×100 + 50), sell at the buy order (360).
+    expect(fusion.instantProfit).toBeCloseTo(360 * 0.9 - 250);
+    // Patient: buy orders at the bids (2×90 + 45), sell offer at the ask (400).
+    expect(fusion.patientProfit).toBeCloseTo(400 * 0.9 - 225);
+    // Without both sides, only the selected strategy is priced.
+    expect(row(getFusionRows(data, market(), INSTANT, 1)).instantProfit).toBeNull();
+  });
+
+  it("reports the widest spread among the shards it prices", () => {
+    // A: 100/90 → 11.1 %, B: 50/45 → 11.1 %, C: 400/360 → 11.1 %.
+    expect(row(getFusionRows(data, market(), INSTANT, 1)).maxSpread).toBeCloseTo(40 / 360);
+    const books = { ...market().orderBooks, B: { sellOffers: [level(50, 10)], buyOrders: [level(5, 10)] } };
+    expect(row(getFusionRows(data, market({ orderBooks: books }), INSTANT, 1)).maxSpread).toBeCloseTo(9);
+    const emptySide = { ...market().orderBooks, A: { sellOffers: [level(100, 10)], buyOrders: [] } };
+    expect(row(getFusionRows(data, market({ orderBooks: emptySide }), INSTANT, 1)).maxSpread).toBe(Infinity);
   });
 
   it("skips recipes whose prices are missing", () => {

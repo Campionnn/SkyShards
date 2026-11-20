@@ -8,8 +8,12 @@ import type { TableId } from "./profitSettings";
 export interface Loaded extends MarketData {
   data: Data;
   crocodileMultiplier: number;
+  /** The Calculator's Crocodile level, for the multi-step solver (which works from params). */
+  crocodileLevel: number;
   /** The player's shards from the Calculator's inventory import: shard id to count. */
   inventory: ReadonlyMap<string, number>;
+  /** When Hypixel last refreshed the Bazaar snapshot these prices come from (ms since epoch). */
+  updatedAt: number;
 }
 
 /** Opens a shard's order book. */
@@ -58,4 +62,6 @@ export interface TableConfig<R> {
   ignoreMinVolume?: boolean;
   /** A line above the table, e.g. a total over all rows. */
   summary?: (rows: R[]) => ReactNode;
+  /** With it, a row can be clicked open to show this below it (e.g. a fusion tree). */
+  details?: (row: R, loaded: Loaded, settings: MarketSettings) => ReactNode;
 }

@@ -42,7 +42,47 @@ export interface MarketData {
   /** Shards whose buy / sell price is a user override rather than a Bazaar price. */
   buyOverrides: ReadonlySet<string>;
   sellOverrides: ReadonlySet<string>;
+  /**
+   * Both price sides, with overrides applied, for comparing strategies regardless of the
+   * selected modes: `sellOffer` is what instant buys pay and sell offers ask; `buyOrder` is
+   * what instant sells get and buy orders bid. Optional: without them, only the selected
+   * strategy is priced.
+   */
+  sides?: { sellOffer: Record<string, number>; buyOrder: Record<string, number> };
 }
+
+/**
+ * Profit per fusion with both legs priced by the opposite strategies: instant (buy at the
+ * cheapest sell offer, sell at the highest buy order) and patient (buy order at the highest
+ * buy order, sell offer at the cheapest sell offer). Null when a price is missing.
+ */
+const strategyProfit = (
+  sides: NonNullable<MarketData["sides"]>,
+  inputs: [string, string],
+  inputAmounts: [number, number],
+  outputId: string,
+  outputQuantity: number,
+  keep: number,
+  patient: boolean,
+): number | null => {
+  const buy = patient ? sides.buyOrder : sides.sellOffer;
+  const sell = patient ? sides.sellOffer : sides.buyOrder;
+  const price1 = buy[inputs[0]];
+  const price2 = buy[inputs[1]];
+  const outputPrice = sell[outputId];
+  if (price1 === undefined || price2 === undefined || outputPrice === undefined) return null;
+  return outputQuantity * outputPrice * keep - (inputAmounts[0] * price1 + inputAmounts[1] * price2);
+};
+
+/** Largest spread (as a share of the buy order) among the given shards; Infinity when a book has an empty side. */
+export const worstSpread = (shardIds: Iterable<string>, orderBooks: Record<string, OrderBook>): number => {
+  let worst = 0;
+  for (const shardId of shardIds) {
+    const spread = getSpread(orderBooks[shardId]);
+    worst = Math.max(worst, spread ? spread.percent : Infinity);
+  }
+  return worst;
+};
 
 /**
  * The volume that limits a trade. Instant buys and new sell offers both depend on players
@@ -236,6 +276,15 @@ export interface FusionRow {
   realProfitPerHour: number;
   /** Hours until an hour's worth of orders fills: the slowest of buying the inputs and selling the result (0 if all instant). */
   fillHours: number;
+  /**
+   * Largest spread among the inputs and the result, as a share of the buy order. A huge spread
+   * means a near-empty or lowball side, where the listed price is unlikely to hold.
+   */
+  maxSpread: number;
+  /** Profit per fusion buying instantly and selling instantly, or null without both price sides. */
+  instantProfit: number | null;
+  /** Profit per fusion with a buy order for the inputs and a sell offer for the result. */
+  patientProfit: number | null;
 }
 
 /** Every recipe whose inputs can be bought and whose output can be sold. */
@@ -300,6 +349,9 @@ export const getFusionRows = (data: Data, market: MarketData, settings: MarketSe
       realProfit,
       realProfitPerHour: realProfit > 0 ? realProfit * realFusionsPerHour : 0,
       fillHours,
+      maxSpread: worstSpread([outputId, ...inputs], market.orderBooks),
+      instantProfit: market.sides ? strategyProfit(market.sides, inputs, inputAmounts, outputId, outputQuantity, keep, false) : null,
+      patientProfit: market.sides ? strategyProfit(market.sides, inputs, inputAmounts, outputId, outputQuantity, keep, true) : null,
     });
   });
   return rows;
@@ -411,6 +463,8 @@ export interface FarmFusionRow {
   fusionsPerHour: number;
   /** gain × fusionsPerHour. Negative means selling the farmed shards earns more. */
   gainPerHour: number;
+  /** Largest spread among the shards priced here (both inputs and the result), as a share of the buy order. */
+  maxSpread: number;
 }
 
 /**
@@ -468,6 +522,8 @@ export const getFarmFusionRows = (data: Data, market: MarketData, settings: Mark
           volume,
           fusionsPerHour,
           gainPerHour: gain * fusionsPerHour,
+          // The farmed shard is priced too: what it would sell for is what fusing gives up.
+          maxSpread: worstSpread([outputId, ...inputs], market.orderBooks),
         });
       }
     },

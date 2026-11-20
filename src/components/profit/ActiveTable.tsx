@@ -103,7 +103,7 @@ export const ActiveTable = <R extends { volume: number }>({
                 onChange={onMaxSpreadPercentChange}
                 step={10}
                 suffix="%"
-                title="Hide shards whose spread is more than this share of the buy price. Huge spreads usually mean an empty or manipulated order book, not a flip you can repeat. 0 shows everything."
+                title="Hide rows where a shard's spread is more than this share of its buy price (Worst spread column). Huge spreads usually mean an empty, lowball or manipulated order book, so the listed price won't hold. 0 shows everything."
               />
             )}
             {config.profitOf && (
@@ -117,8 +117,22 @@ export const ActiveTable = <R extends { volume: number }>({
         }
       >
         {config.summary?.(rows)}
-        <DataTable columns={columns} rows={shown} rowKey={config.rowKey} sort={sort} onSort={toggle} emptyText={config.emptyText} />
+        <DataTable
+          columns={columns}
+          rows={shown}
+          rowKey={config.rowKey}
+          sort={sort}
+          onSort={toggle}
+          emptyText={config.emptyText}
+          details={config.details && ((row: R) => config.details!(row, loaded, marketSettings))}
+        />
         <ShowMoreFooter shown={shown.length} total={sorted.length} onShowMore={showMore} onShowLess={showLess} />
+        {rows.length > filtered.length && (
+          <p className="text-xs text-slate-500">
+            {rows.length - filtered.length} of {rows.length} rows hidden by the filters
+            {config.spreadOf && maxSpreadPercent > 0 ? " (including Max spread)" : ""}.
+          </p>
+        )}
       </Section>
     </>
   );

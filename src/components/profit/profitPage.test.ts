@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_PROFIT_SETTINGS, parseProfitSettings } from "./profitSettings";
+import { taxMultiplierFrom, taxMultiplierSource } from "./tax";
+import type { ElectionData } from "../../types/hypixelApiTypes";
 import { filterRows, formatHours, sortRows } from "./tableState";
 import type { ColumnDef, TableConfig } from "./types";
 
@@ -82,6 +84,28 @@ describe("sortRows", () => {
 
   it("leaves the order alone for a column it can't sort", () => {
     expect(ids(sortRows(rows, { column: "missing", direction: "desc" }, columns))).toEqual(["a", "b", "c", "d"]);
+  });
+});
+
+describe("mayor tax", () => {
+  const election = (mayor: ElectionData["mayor"]): ElectionData => ({ success: true, mayor });
+
+  it("quadruples tax while Derpy's QUAD TAXES is active", () => {
+    const derpy = election({ name: "Derpy", perks: [{ name: "QUAD TAXES!!!" }, { name: "TURBO MINIONS!!!" }] });
+    expect(taxMultiplierFrom(derpy)).toBe(4);
+    expect(taxMultiplierSource(derpy)).toBe("Derpy");
+  });
+
+  it("also catches the perk on a minister", () => {
+    const minister = election({ name: "Aatrox", perks: [], minister: { name: "Derpy", perk: { name: "QUAD TAXES!!!", minister: true } } });
+    expect(taxMultiplierFrom(minister)).toBe(4);
+    expect(taxMultiplierSource(minister)).toBe("Derpy");
+  });
+
+  it("leaves tax alone otherwise, or when the election couldn't be loaded", () => {
+    expect(taxMultiplierFrom(election({ name: "Aatrox", perks: [{ name: "SLASHED Pricing" }] }))).toBe(1);
+    expect(taxMultiplierFrom(null)).toBe(1);
+    expect(taxMultiplierSource(null)).toBeNull();
   });
 });
 

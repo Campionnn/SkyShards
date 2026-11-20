@@ -1,4 +1,4 @@
-import type { BazaarData } from "../types/hypixelApiTypes";
+import type { BazaarData, ElectionData } from "../types/hypixelApiTypes";
 import type { FusionJson, Shard } from "../types/types";
 import { sortShardsByNameWithPrefixAwareness, filterShards, BASIC_FILTER_CONFIG, NAME_ONLY_FILTER_CONFIG, type ShardFilterConfig } from "../utilities";
 
@@ -65,6 +65,7 @@ export class DataService {
   private orderBookCache: Record<string, OrderBook> | null = null;
   // One Bazaar request per page load, shared by prices and volumes (promise-cached like fusion-data).
   private bazaarCache: Promise<BazaarData> | null = null;
+  private electionCache: Promise<ElectionData> | null = null;
 
   private loadBazaar(): Promise<BazaarData> {
     this.bazaarCache ??= fetchSkyblockApi<BazaarData>("/bazaar").catch((error) => {
@@ -72,6 +73,32 @@ export class DataService {
       throw error;
     });
     return this.bazaarCache;
+  }
+
+  /**
+   * Drops the cached Bazaar snapshot and everything derived from it, so the next load
+   * fetches fresh prices. Hypixel updates the endpoint about once a minute.
+   */
+  refreshBazaar(): void {
+    this.bazaarCache = null;
+    this.bazaarPriceCache = null;
+    this.bazaarVolumeCache = null;
+    this.orderBookCache = null;
+  }
+
+  /** When Hypixel last updated the cached Bazaar snapshot (ms since epoch), loading it if needed. */
+  async loadBazaarUpdatedAt(): Promise<number> {
+    const bazaar = await this.loadBazaar();
+    return typeof bazaar.lastUpdated === "number" && Number.isFinite(bazaar.lastUpdated) ? bazaar.lastUpdated : Date.now();
+  }
+
+  /**
+   * The current mayor and minister, for perks that change Bazaar tax. A failed request is
+   * not retried within the page load; callers treat it as "no tax change".
+   */
+  loadElection(): Promise<ElectionData> {
+    this.electionCache ??= fetchJson<ElectionData>("https://api.hypixel.net/v2/resources/skyblock/election", "Failed to fetch the SkyBlock election");
+    return this.electionCache;
   }
 
   async loadShards(): Promise<Shard[]> {

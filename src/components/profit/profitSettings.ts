@@ -2,20 +2,25 @@ import type { BuyMode, SellMode } from "../../services";
 import { loadProfitSettings, saveProfitSettings } from "../../utilities";
 
 /** The Profits page tabs, in the order they are shown. */
-export const TABLE_IDS = ["farming", "fusions", "flips", "farmFusions", "inventory"] as const;
+export const TABLE_IDS = ["farming", "fusions", "chains", "flips", "farmFusions", "inventory"] as const;
 export type TableId = (typeof TABLE_IDS)[number];
 
 /** The Profits page settings, remembered in the browser. */
 export interface ProfitSettings {
   buyMode: BuyMode;
   sellMode: SellMode;
-  /** Hypixel's base Bazaar tax is 1.25 %. */
+  /** Your Bazaar tax before mayor perks: 1.25 % base, 1.125 / 1 % with Bazaar Flipper. */
   taxPercent: number;
+  /** Apply the current mayor's tax perk (Derpy's QUAD TAXES: ×4) on top of taxPercent. */
+  applyMayorTax: boolean;
   /** Percent of the hourly Bazaar volume you expect to get. */
   marketSharePercent: number;
   /** Hide rows whose (bottleneck) volume is below this many shards per hour. */
   minVolume: number;
-  /** Flips: hide shards whose spread is more than this percent of the buy price; 0 means no limit. */
+  /**
+   * Hide rows whose widest spread (Flips: the shard; fusion tabs: any shard they price) is more
+   * than this percent of the buy price; 0 means no limit.
+   */
   maxSpreadPercent: number;
   /** Use the price overrides from the Shards page; off means live Bazaar prices only. */
   useOverrides: boolean;
@@ -29,6 +34,7 @@ export const DEFAULT_PROFIT_SETTINGS: ProfitSettings = {
   buyMode: "instant",
   sellMode: "instant",
   taxPercent: 1.25,
+  applyMayorTax: true,
   marketSharePercent: 10,
   minVolume: 0,
   // Half the shards on the Bazaar have a spread above ~65 %; above 100 % the "profit" is
@@ -56,6 +62,7 @@ export const parseProfitSettings = (raw: Record<string, unknown> | null): Profit
     buyMode: oneOf(raw.buyMode, ["instant", "order"], defaults.buyMode),
     sellMode: oneOf(raw.sellMode, ["instant", "offer"], defaults.sellMode),
     taxPercent: numberIn(raw.taxPercent, 100, defaults.taxPercent),
+    applyMayorTax: typeof raw.applyMayorTax === "boolean" ? raw.applyMayorTax : defaults.applyMayorTax,
     marketSharePercent: numberIn(raw.marketSharePercent, 100, defaults.marketSharePercent),
     minVolume: numberIn(raw.minVolume, Number.MAX_VALUE, defaults.minVolume),
     maxSpreadPercent: numberIn(raw.maxSpreadPercent, Number.MAX_VALUE, defaults.maxSpreadPercent),

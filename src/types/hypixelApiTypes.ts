@@ -1,5 +1,7 @@
 export interface BazaarData {
   success: boolean;
+  /** When Hypixel last refreshed the snapshot, in ms since the epoch. */
+  lastUpdated?: number;
   products: {
     [key: string]: {
       productId: string;
@@ -24,6 +26,28 @@ export interface BazaarData {
         /** Units sold instantly (filled into buy orders). */
         sellMovingWeek: number;
       };
+    };
+  };
+}
+
+/** A mayor or minister perk. */
+export interface ElectionPerk {
+  name: string;
+  description?: string;
+  minister?: boolean;
+}
+
+/** The parts of /v2/resources/skyblock/election the app reads: who is in office and their perks. */
+export interface ElectionData {
+  success: boolean;
+  mayor?: {
+    key?: string;
+    name?: string;
+    perks?: ElectionPerk[];
+    minister?: {
+      key?: string;
+      name?: string;
+      perk?: ElectionPerk;
     };
   };
 }

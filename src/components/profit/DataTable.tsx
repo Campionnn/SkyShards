@@ -1,11 +1,14 @@
-import { useState } from "react";
-import { ArrowDown, ArrowUp, Columns3 } from "lucide-react";
+import { Fragment, useState, type ReactNode } from "react";
+import { ArrowDown, ArrowUp, ChevronRight, Columns3 } from "lucide-react";
 import type { ColumnDef, SortState } from "./types";
 import type { TableId } from "./profitSettings";
 import { cellClass, pagingButton, rowClass, segmentClass } from "./styles";
 import { PAGE_SIZE, columnKey } from "./tableState";
 
-/** A sortable table built from column definitions. `rows` are already filtered and sorted. */
+/**
+ * A sortable table built from column definitions. `rows` are already filtered and sorted.
+ * With `details`, every row gets a toggle that shows `details(row)` in a full-width row below it.
+ */
 export const DataTable = <R,>({
   columns,
   rows,
@@ -13,6 +16,7 @@ export const DataTable = <R,>({
   sort,
   onSort,
   emptyText,
+  details,
 }: {
   columns: ColumnDef<R>[];
   rows: R[];
@@ -20,49 +24,85 @@ export const DataTable = <R,>({
   sort: SortState;
   onSort: (column: string) => void;
   emptyText: string;
-}) => (
-  <div className="overflow-x-auto">
-    <table className="w-full text-sm">
-      <thead className="border-b border-slate-700">
-        <tr>
-          {columns.map((column) => {
-            const align = column.align ?? "right";
-            const active = sort.column === column.id;
-            const Arrow = sort.direction === "asc" ? ArrowUp : ArrowDown;
+  details?: (row: R) => ReactNode;
+}) => {
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const span = columns.length + (details ? 1 : 0);
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead className="border-b border-slate-700">
+          <tr>
+            {details && <th className="w-6" aria-label="Details" />}
+            {columns.map((column) => {
+              const align = column.align ?? "right";
+              const active = sort.column === column.id;
+              const Arrow = sort.direction === "asc" ? ArrowUp : ArrowDown;
+              return (
+                <th
+                  key={column.id}
+                  className={`px-2 py-2 font-medium whitespace-nowrap ${align === "right" ? "text-right" : "text-left"}`}
+                  title={column.title}
+                >
+                  {column.sortValue ? (
+                    <button
+                      type="button"
+                      onClick={() => onSort(column.id)}
+                      className={`inline-flex items-center gap-1 cursor-pointer hover:text-white ${active ? "text-emerald-300" : "text-slate-400"}`}
+                    >
+                      {column.label}
+                      {active && <Arrow className="w-3 h-3" />}
+                    </button>
+                  ) : (
+                    <span className="text-slate-400">{column.label}</span>
+                  )}
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => {
+            const key = rowKey(row);
+            const open = details !== undefined && openKey === key;
             return (
-              <th key={column.id} className={`px-2 py-2 font-medium whitespace-nowrap ${align === "right" ? "text-right" : "text-left"}`} title={column.title}>
-                {column.sortValue ? (
-                  <button
-                    type="button"
-                    onClick={() => onSort(column.id)}
-                    className={`inline-flex items-center gap-1 cursor-pointer hover:text-white ${active ? "text-emerald-300" : "text-slate-400"}`}
-                  >
-                    {column.label}
-                    {active && <Arrow className="w-3 h-3" />}
-                  </button>
-                ) : (
-                  <span className="text-slate-400">{column.label}</span>
+              <Fragment key={key}>
+                <tr className={rowClass}>
+                  {details && (
+                    <td className="pl-1">
+                      <button
+                        type="button"
+                        onClick={() => setOpenKey(open ? null : key)}
+                        className="p-0.5 text-slate-400 hover:text-white cursor-pointer"
+                        aria-expanded={open}
+                        aria-label={open ? "Hide details" : "Show details"}
+                      >
+                        <ChevronRight className={`w-4 h-4 transition-transform duration-150 ${open ? "rotate-90" : ""}`} />
+                      </button>
+                    </td>
+                  )}
+                  {columns.map((column) => (
+                    <td key={column.id} className={cellClass(column.align)}>
+                      {column.render(row)}
+                    </td>
+                  ))}
+                </tr>
+                {open && (
+                  <tr className="border-b border-slate-700/50 bg-slate-900/40">
+                    <td colSpan={span} className="p-3">
+                      {details(row)}
+                    </td>
+                  </tr>
                 )}
-              </th>
+              </Fragment>
             );
           })}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <tr key={rowKey(row)} className={rowClass}>
-            {columns.map((column) => (
-              <td key={column.id} className={cellClass(column.align)}>
-                {column.render(row)}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-    {rows.length === 0 && <p className="text-center text-slate-500 py-6">{emptyText}</p>}
-  </div>
-);
+        </tbody>
+      </table>
+      {rows.length === 0 && <p className="text-center text-slate-500 py-6">{emptyText}</p>}
+    </div>
+  );
+};
 
 /** Fixed height, so the card doesn't shrink when a button appears or disappears. */
 export const ShowMoreFooter = ({ shown, total, onShowMore, onShowLess }: { shown: number; total: number; onShowMore: () => void; onShowLess: () => void }) => (

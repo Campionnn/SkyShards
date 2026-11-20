@@ -1,24 +1,31 @@
-import { Backpack, Hammer, Pickaxe, Repeat, Sprout } from "lucide-react";
+import { createElement } from "react";
+import { Backpack, GitFork, Hammer, Pickaxe, Repeat, Sprout } from "lucide-react";
 import {
+  CHAIN_BATCH_SIZE,
+  getChainRows,
   getFarmFusionRows,
   getFarmingRows,
   getFlipRows,
   getFusionRows,
   getInventoryRows,
+  type ChainResult,
+  type ChainRow,
   type FarmFusionRow,
   type FarmingRow,
   type FlipRow,
   type FusionRow,
   type InventoryRow,
+  type MarketSettings,
 } from "../../services";
 import { formatLargeNumber, formatQuantity } from "../../utilities";
 import type { Data } from "../../types/types";
+import { ChainDetails } from "./ChainDetails";
 import { FarmedInputs, FillTime, Price, ShardName, SpreadValue } from "./controls";
 import { coinClass } from "./styles";
 import { sortableHours } from "./tableState";
 import type { ColumnDef, Loaded, OpenBook, TableConfig } from "./types";
 
-/* The five Profits tabs: their columns, rows and texts. */
+/* The Profits tabs: their columns, rows and texts. */
 
 // ─── Column builders ───
 
@@ -89,6 +96,35 @@ const resultColumn = <R extends { outputId: string; outputQuantity: number }>(da
 });
 
 const TEN_PERCENT_OFFER = 'The in-game "10% of spread" sell offer: the cheapest sell offer minus a tenth of the spread';
+
+/** Widest spread among the shards a row prices: high means one of them has a thin or lowball book. */
+const worstSpreadColumn = <R extends { maxSpread: number }>(): ColumnDef<R> => ({
+  id: "maxSpread",
+  label: "Worst spread",
+  title:
+    "Widest spread (as a share of the buy order) among the shards this row prices. A huge spread usually means a near-empty or lowball order book, where the listed price won't hold.",
+  sortValue: (row) => (Number.isFinite(row.maxSpread) ? row.maxSpread : Number.MAX_VALUE),
+  render: (row) =>
+    Number.isFinite(row.maxSpread) ? (
+      <span className={row.maxSpread > 1 ? "text-amber-300" : "text-slate-300"}>{(row.maxSpread * 100).toFixed(0)}%</span>
+    ) : (
+      <span className="text-amber-300" title="One side of an order book is empty">
+        empty
+      </span>
+    ),
+});
+
+/** A profit that may be missing (no price on one side), green/red when present. */
+const optionalProfitColumn = <R,>(id: string, label: string, title: string, value: (row: R) => number | null): ColumnDef<R> => ({
+  id,
+  label,
+  title,
+  sortValue: (row) => value(row) ?? -Number.MAX_VALUE,
+  render: (row) => {
+    const profit = value(row);
+    return profit === null ? dash : show.signed(profit);
+  },
+});
 
 /** Spread, Spread % and 10% offer of a row's order book (Farming, Inventory). */
 const spreadColumns = <R extends { spread: FarmingRow["spread"] }>(withPercent: boolean): ColumnDef<R>[] => [
@@ -236,6 +272,19 @@ const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: 
     ),
     numberColumn("realFusionsPerHour", "Real max/h", "Max/h, also limited by how much the order books hold", (row) => row.realFusionsPerHour, show.quantity),
     numberColumn("realProfitPerHour", "Real profit/h", "Real profit × Real max/h", (row) => row.realProfitPerHour, show.best),
+    optionalProfitColumn(
+      "instantProfit",
+      "Instant",
+      "Profit per fusion buying the inputs instantly and selling the result instantly, whatever the Buy/Sell settings above",
+      (row) => row.instantProfit,
+    ),
+    optionalProfitColumn(
+      "patientProfit",
+      "Patient",
+      "Profit per fusion with a buy order for the inputs and a sell offer for the result (slower, usually better), whatever the Buy/Sell settings above",
+      (row) => row.patientProfit,
+    ),
+    worstSpreadColumn<FusionRow>(),
     hoursColumn(
       "fillHours",
       "Fill time",
@@ -257,8 +306,106 @@ export const fusionTable: TableConfig<FusionRow> = {
   rowKey: (row) => `${row.outputId}|${row.inputs[0]}|${row.inputs[1]}|${row.outputQuantity}`,
   shardIdsOf: (row) => [row.outputId, ...row.inputs],
   profitOf: (row) => row.profit,
+  spreadOf: (row) => row.maxSpread,
   searchPlaceholder: "Search input or result...",
   emptyText: "No fusions found.",
+};
+
+// ─── Fusion chains ───
+
+/**
+ * The multi-step solve, once per loaded snapshot and settings: the rows and every row's
+ * details need the same result, and solving takes ~50 ms.
+ */
+const chainCache = new WeakMap<Loaded, { key: string; result: ChainResult }>();
+const chainsFor = (loaded: Loaded, settings: MarketSettings): ChainResult => {
+  const key = `${settings.taxPercent}|${settings.sellMode}`;
+  const cached = chainCache.get(loaded);
+  if (cached?.key === key) return cached.result;
+  const result = getChainRows(loaded.data, loaded, settings, loaded.crocodileLevel);
+  chainCache.set(loaded, { key, result });
+  return result;
+};
+
+const chainColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: OpenBook): ColumnDef<ChainRow>[] => [
+  resultColumn(data, openBook),
+  {
+    id: "recipe",
+    label: "Last fusion",
+    align: "left",
+    title: "The final fusion of the cheapest path; open the row to see the whole tree",
+    render: (row) => (
+      <span className="inline-flex items-center gap-2">
+        <ShardName data={data} shardId={row.recipe.inputs[0]} amount={data.shards[row.recipe.inputs[0]]?.fuse_amount} onOpen={openBook} />
+        <span className="text-slate-500">+</span>
+        <ShardName data={data} shardId={row.recipe.inputs[1]} amount={data.shards[row.recipe.inputs[1]]?.fuse_amount} onOpen={openBook} />
+      </span>
+    ),
+  },
+  numberColumn(
+    "depth",
+    "Steps",
+    "Fusion steps on the longest branch: 1 means both inputs are bought, more means some are fused first",
+    (row) => row.depth,
+    show.count,
+  ),
+  priceColumn(
+    "costPerShard",
+    "Cost/shard",
+    "Coins per shard made the cheapest way: buying raw shards instantly and fusing up",
+    (row) => row.costPerShard,
+    (row) => [...row.materials.keys()].some((id) => buyOverrides.has(id)),
+  ),
+  priceColumn(
+    "price",
+    "Sells for",
+    "Sale price per shard, before tax",
+    (row) => row.price,
+    (row) => sellOverrides.has(row.outputId),
+  ),
+  {
+    id: "profit",
+    label: "Profit/shard",
+    title: "Sale price after tax minus cost, per shard",
+    sortValue: (row) => row.profit,
+    render: (row) => (
+      <span
+        className={`font-medium ${row.usesOverride ? "text-amber-300" : coinClass(row.profit)}`}
+        title={row.usesOverride ? "Uses your price overrides" : undefined}
+      >
+        {formatLargeNumber(row.profit)}
+        {row.usesOverride && "*"}
+      </span>
+    ),
+  },
+  {
+    id: "margin",
+    label: "Margin",
+    title: "Profit as a share of the cost",
+    sortValue: (row) => row.margin,
+    render: (row) => <span className={coinClass(row.margin)}>{(row.margin * 100).toFixed(1)}%</span>,
+  },
+  numberColumn("batchProfit", `Profit ×${CHAIN_BATCH_SIZE}`, `Profit for a batch of ${CHAIN_BATCH_SIZE} shards`, (row) => row.batchProfit, show.best),
+  numberColumn("fusionsPerBatch", "Fusions", `Fusions for a batch of ${CHAIN_BATCH_SIZE}, counting every step`, (row) => row.fusionsPerBatch, show.count),
+  numberColumn("volume", "Volume/h", "Shards of the result the Bazaar takes per hour on your selling side (7-day average)", (row) => row.volume, show.volume),
+  worstSpreadColumn<ChainRow>(),
+];
+
+export const chainTable: TableConfig<ChainRow> = {
+  id: "chains",
+  label: "Fusion chains",
+  icon: GitFork,
+  description: `Multi-step fusions: buy the raw shards, fuse up the cheapest way (inputs may be fused themselves), sell the result. The same solver as the calculator, with instant-buy prices as costs. Open a row to see the tree and the shopping list for ${CHAIN_BATCH_SIZE} shards.`,
+  rows: (loaded, settings) => chainsFor(loaded, settings).rows,
+  columns: chainColumns,
+  initialSort: "profit",
+  rowKey: (row) => row.outputId,
+  shardIdsOf: (row) => [row.outputId, ...row.materials.keys()],
+  profitOf: (row) => row.profit,
+  spreadOf: (row) => row.maxSpread,
+  searchPlaceholder: "Search result or material...",
+  emptyText: "No fusion chains found.",
+  details: (row, loaded, settings) => createElement(ChainDetails, { row, chains: chainsFor(loaded, settings), data: loaded.data, buyPrices: loaded.buyPrices }),
 };
 
 // ─── Flips ───
@@ -352,6 +499,7 @@ const farmFusionColumns = ({ data }: Loaded, openBook: OpenBook): ColumnDef<Farm
     (row) => row.gainPerHour,
     show.signedBold,
   ),
+  worstSpreadColumn<FarmFusionRow>(),
 ];
 
 export const farmFusionTable: TableConfig<FarmFusionRow> = {
@@ -366,6 +514,7 @@ export const farmFusionTable: TableConfig<FarmFusionRow> = {
   rowKey: (row) => `${row.outputId}|${row.inputs[0]}|${row.inputs[1]}|${row.outputQuantity}|${row.farmedId}`,
   shardIdsOf: (row) => [row.outputId, ...row.inputs],
   profitOf: (row) => row.gain,
+  spreadOf: (row) => row.maxSpread,
   searchPlaceholder: "Search input or result...",
   emptyText: "No fusions found.",
 };
@@ -447,4 +596,4 @@ export const inventoryTable: TableConfig<InventoryRow> = {
 };
 
 /** Every tab, in order. */
-export const allTables = [farmingTable, fusionTable, flipTable, farmFusionTable, inventoryTable] as const;
+export const allTables = [farmingTable, fusionTable, chainTable, flipTable, farmFusionTable, inventoryTable] as const;
