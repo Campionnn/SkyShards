@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Coins, RefreshCw } from "lucide-react";
+import { Coffee, Coins, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCalculatorState, useCustomRates } from "../hooks";
 import { ToggleSwitch } from "../components/ui";
@@ -18,6 +18,11 @@ import { loadCustomPrices, loadInventory } from "../utilities";
 
 /** Bazaar prices with the user's overrides for the same order-book side on top. */
 const withOverrides = (bazaar: Record<string, number>, overrides: Map<string, number>) => ({ ...bazaar, ...Object.fromEntries(overrides) });
+
+/** Author credit and support link shown at the top of the page. Leave SUPPORT_URL empty to hide the button. */
+const AUTHOR_NAME = "MoltenOre";
+const AUTHOR_URL = "https://github.com/MoltenOre";
+const SUPPORT_URL = "https://ko-fi.com/moltenore";
 
 /** Hypixel refreshes the Bazaar about once a minute; older prices are refetched when the tab is focused again. */
 const STALE_AFTER_MS = 60_000;
@@ -177,7 +182,27 @@ export const ProfitPage = () => {
               <Coins className="w-5 h-5 text-emerald-400" />
               <h1 className="text-xl font-semibold text-white">Profits</h1>
             </div>
-            <div className="flex items-center gap-2 text-xs text-slate-400">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+              <span>
+                Profits Page Created by{" "}
+                <a href={AUTHOR_URL} target="_blank" rel="noopener noreferrer" className="text-emerald-300 hover:underline">
+                  {AUTHOR_NAME}
+                </a>
+              </span>
+              {SUPPORT_URL && (
+                <a
+                  href={SUPPORT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-200 border border-yellow-400/30 hover:border-yellow-400/50 transition-colors duration-200"
+                >
+                  <Coffee className="w-4 h-4" />
+                  Buy him a coffee
+                </a>
+              )}
+              <span className="hidden sm:inline text-slate-600" aria-hidden>
+                |
+              </span>
               {loaded && (
                 <span title={new Date(loaded.updatedAt).toLocaleString()}>
                   Bazaar prices from <span className="text-slate-300">{formatAge(now - loaded.updatedAt)}</span>
