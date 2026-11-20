@@ -172,11 +172,6 @@ export interface InventoryCalculationResult {
   remainingInventory?: Map<string, number>;
 }
 
-/**
- * RecipeTree plus inventory leaves and array nodes. An array is one shard demand split
- * across several ways of satisfying it (e.g. part from inventory, part crafted).
- * A RecipeTree is structurally assignable to this type.
- */
 /** Choices in the Copy Tree dialog, persisted in localStorage. */
 export interface TreeExportOptions {
   /** Inventory results: count shards taken from the inventory towards the exported amounts. */
@@ -187,5 +182,10 @@ export interface TreeExportOptions {
   allTrees: boolean;
 }
 
+/**
+ * RecipeTree plus inventory leaves and array nodes. An array is one shard demand split
+ * across several ways of satisfying it (e.g. part from inventory, part crafted).
+ * A RecipeTree is structurally assignable to this type.
+ */
 export type InventoryRecipeTree =
   InventoryRecipeTree[] | DirectTreeNode | InventoryTreeNode | FusionTreeNode<InventoryRecipeTree> | CycleTreeNode<InventoryRecipeTree>;

@@ -279,6 +279,30 @@ const profileTypeSlot = createStorageSlot<ProfileType>("skyshards_profile_type",
 });
 export const saveProfileType = (type: ProfileType): void => profileTypeSlot.write(type);
 
+// ─── Copy Tree dialog ───
+
+/**
+ * Merged over the defaults so an older or partial entry still loads; a field that isn't a
+ * boolean (hand-edited, or from a future build) falls back to its default.
+ */
+const treeExportOptionsSlot = createStorageSlot<TreeExportOptions>("tree_export_options", {
+  label: "export options",
+  fallback: () => ({ ...DEFAULT_TREE_EXPORT_OPTIONS }),
+  deserialize: (raw) => {
+    const parsed: unknown = JSON.parse(raw);
+    const options = { ...DEFAULT_TREE_EXPORT_OPTIONS };
+    if (!isPlainObject(parsed)) return options;
+    for (const key of Object.keys(options) as (keyof TreeExportOptions)[]) {
+      const value = parsed[key];
+      if (typeof value === "boolean") options[key] = value;
+    }
+    return options;
+  },
+});
+
+export const loadTreeExportOptions = (): TreeExportOptions => treeExportOptionsSlot.read();
+export const saveTreeExportOptions = (options: TreeExportOptions): void => treeExportOptionsSlot.write(options);
+
 // ─── Housekeeping ───
 
 /**
@@ -298,6 +322,7 @@ const KNOWN_KEYS: ReadonlySet<string> = new Set([
   "custom_prices_buy_order",
   "custom_prices_instant_buy",
   "greenhouse_modal_seen",
+  "tree_export_options",
   // Owned by the inline ad-block detector in index.html (first-paint cache), not by a slot here.
   "ss_ads_blocked",
 ]);
@@ -321,13 +346,3 @@ export const pruneUnknownStorageKeys = (): void => {
     console.warn("Failed to prune localStorage:", error);
   }
 };
-
-// Copy Tree dialog choices. Merged over the defaults so an older or partial entry still loads.
-const treeExportOptionsSlot = createStorageSlot<TreeExportOptions>("tree_export_options", {
-  label: "export options",
-  fallback: () => ({ ...DEFAULT_TREE_EXPORT_OPTIONS }),
-  deserialize: (raw) => ({ ...DEFAULT_TREE_EXPORT_OPTIONS, ...JSON.parse(raw) }),
-});
-
-export const loadTreeExportOptions = (): TreeExportOptions => treeExportOptionsSlot.read();
-export const saveTreeExportOptions = (options: TreeExportOptions): void => treeExportOptionsSlot.write(options);
