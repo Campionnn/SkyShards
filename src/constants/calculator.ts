@@ -1,5 +1,5 @@
 import type { CalculationFormData } from "../schemas";
-import type { CalculationParams } from "../types/types";
+import type { CalculationParams, TreeExportOptions } from "../types/types";
 
 /**
  * The nine shards whose attribute level the player sets by hand. Drives both the
@@ -73,3 +73,9 @@ export const DEFAULT_CALCULATION_PARAMS: CalculationParams = {
   rateAsCoinValue: false,
   craftPenalty: 0,
 };
+
+/**
+ * countOwned: SkyHanni's tracker compares the exported amount with the shards you own,
+ * so it needs the full total. includeFused and allTrees off keep the original exports.
+ */
+export const DEFAULT_TREE_EXPORT_OPTIONS: TreeExportOptions = { countOwned: true, includeFused: false, allTrees: false };

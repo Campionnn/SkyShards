@@ -10,8 +10,11 @@ import {
   saveInventory,
   saveCustomPrices,
   loadCustomPrices,
+  loadTreeExportOptions,
+  saveTreeExportOptions,
   pruneUnknownStorageKeys,
 } from "./localStorage";
+import { DEFAULT_TREE_EXPORT_OPTIONS } from "../constants";
 
 /**
  * Minimal in-memory `localStorage`. The vitest environment is `node`, so there isn't
@@ -245,6 +248,29 @@ describe("custom price validation", () => {
   it("drops non-numeric prices", () => {
     storage.seed("custom_prices_buy_order", JSON.stringify({ C35: "abc", U8: 12 }));
     expect(loadCustomPrices(false)).toEqual(new Map([["U8", 12]]));
+  });
+});
+
+describe("tree export options", () => {
+  it("falls back to the defaults when nothing is stored", () => {
+    expect(loadTreeExportOptions()).toEqual(DEFAULT_TREE_EXPORT_OPTIONS);
+  });
+
+  it("round-trips a saved choice", () => {
+    const options = { countOwned: false, includeFused: true, allTrees: true };
+    saveTreeExportOptions(options);
+    expect(loadTreeExportOptions()).toEqual(options);
+  });
+
+  it("fills missing fields from the defaults and ignores non-boolean ones", () => {
+    storage.seed("tree_export_options", JSON.stringify({ includeFused: true, allTrees: "yes", stale: 1 }));
+    expect(loadTreeExportOptions()).toEqual({ ...DEFAULT_TREE_EXPORT_OPTIONS, includeFused: true });
+  });
+
+  it("survives the startup prune", () => {
+    saveTreeExportOptions({ countOwned: false, includeFused: true, allTrees: false });
+    pruneUnknownStorageKeys();
+    expect(loadTreeExportOptions()).toEqual({ countOwned: false, includeFused: true, allTrees: false });
   });
 });
 

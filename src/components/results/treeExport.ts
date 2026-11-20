@@ -1,4 +1,5 @@
-import type { Data, RecipeTree } from "../../types/types";
+import type { Data, InventoryRecipeTree, RecipeTree, TreeExportOptions } from "../../types/types";
+import { DEFAULT_TREE_EXPORT_OPTIONS } from "../../constants";
 import { gzipBase64 } from "../../utilities";
 
 /**
@@ -62,11 +63,21 @@ const toSkyOcean = (tree: RecipeTree): SkyOceanTree => {
   };
 };
 
-/** Sum node quantities by `keyOf(node)`, visiting every node (keyOf returns null to skip one). */
-const sumNodes = (tree: RecipeTree, keyOf: (node: RecipeTree) => string | null): Map<string, number> => {
+/** A single tree node: an inventory tree without its split (array) nodes. A RecipeTree node is one too. */
+type TreeNode = Exclude<InventoryRecipeTree, InventoryRecipeTree[]>;
+
+/**
+ * Sum node quantities by `keyOf(node)`, visiting every node (keyOf returns null to skip one).
+ * Takes inventory trees too: split nodes are walked into, and inventory leaves have no children.
+ */
+const sumNodes = (tree: InventoryRecipeTree, keyOf: (node: TreeNode) => string | null): Map<string, number> => {
   const totals = new Map<string, number>();
-  const visit = (node: RecipeTree | undefined) => {
+  const visit = (node: InventoryRecipeTree | undefined) => {
     if (!node) return;
+    if (Array.isArray(node)) {
+      node.forEach(visit);
+      return;
+    }
     const key = keyOf(node);
     if (key !== null) totals.set(key, (totals.get(key) || 0) + node.quantity);
     if (node.method === "recipe") node.inputs?.forEach(visit);
@@ -79,6 +90,18 @@ const sumNodes = (tree: RecipeTree, keyOf: (node: RecipeTree) => string | null):
   return totals;
 };
 
+/**
+ * Adds shards taken from the inventory to the entry `keyFor` picks for that shard. A shard
+ * with no entry is skipped: it is fully covered by the inventory, so there is nothing to track.
+ */
+const addOwned = (totals: Map<string, number>, tree: InventoryRecipeTree, keyFor: (shardId: string) => string | undefined): void => {
+  const owned = sumNodes(tree, (node) => (node.method === "inventory" ? node.shard : null));
+  for (const [shardId, quantity] of owned) {
+    const key = keyFor(shardId);
+    if (key !== undefined) totals.set(key, (totals.get(key) || 0) + quantity);
+  }
+};
+
 const NO_FRILLS_SOURCE: Record<RecipeTree["method"], NoFrillsSource> = { direct: "Direct", recipe: "Fuse", cycle: "Cycle" };
 
 const encode = (prefix: string, payload: unknown) => prefix + gzipBase64(JSON.stringify(payload));
@@ -88,9 +111,14 @@ const toMaterialList = (quantities: Map<string, number>, data: Data): MaterialLi
 
 export const skyOceanTreeString = (tree: RecipeTree): string => encode("<SkyOceanRecipe>(V2):", toSkyOcean(tree));
 
-/** Every node, tagged with how it is obtained. */
-export const noFrillsTreeString = (tree: RecipeTree, data: Data): string => {
-  const totals = sumNodes(tree, (node) => `${node.shard}|${NO_FRILLS_SOURCE[node.method]}`);
+/**
+ * Every node, tagged with how it is obtained. With `countOwned`, shards taken from the inventory
+ * are added to the entry of the same shard; without it they are left out, so only the remaining
+ * work is listed.
+ */
+export const noFrillsTreeString = (tree: InventoryRecipeTree, data: Data, options: TreeExportOptions = DEFAULT_TREE_EXPORT_OPTIONS): string => {
+  const totals = sumNodes(tree, (node) => (node.method === "inventory" ? null : `${node.shard}|${NO_FRILLS_SOURCE[node.method]}`));
+  if (options.countOwned) addOwned(totals, tree, (shardId) => Array.from(totals.keys()).find((key) => key.startsWith(`${shardId}|`)));
   const list = Array.from(totals, ([key, needed]) => {
     const [shardId, source] = key.split("|");
     return { name: data.shards[shardId].name, needed, source: source as NoFrillsSource };
@@ -98,15 +126,30 @@ export const noFrillsTreeString = (tree: RecipeTree, data: Data): string => {
   return encode("<NoFrillsRecipe>(V1):", list);
 };
 
-/** Only the directly-gathered leaves. */
-export const skyHanniTreeString = (tree: RecipeTree, data: Data): string =>
-  encode(
-    "<SkyHanniRecipe>(V1):",
-    toMaterialList(
-      sumNodes(tree, (node) => (node.method === "direct" ? node.shard : null)),
-      data,
-    ),
-  );
+/**
+ * Directly-gathered shards, plus:
+ * - `includeFused`: fused (and cycled) shards, so the tracker also shows when enough are fused.
+ * - `countOwned`: shards taken from the inventory, added to the listed shard they belong to.
+ *   SkyHanni's tracker compares `needed` with the shards the player owns, so it needs the full
+ *   amount; without them it shows owned / missing instead of owned / total.
+ */
+export const skyHanniTreeString = (tree: InventoryRecipeTree, data: Data, options: TreeExportOptions = DEFAULT_TREE_EXPORT_OPTIONS): string => {
+  const totals = sumNodes(tree, (node) => {
+    if (node.method === "direct") return node.shard;
+    if (node.method === "inventory") return null;
+    return options.includeFused ? node.shard : null;
+  });
+  if (options.countOwned) addOwned(totals, tree, (shardId) => (totals.has(shardId) ? shardId : undefined));
+  return encode("<SkyHanniRecipe>(V1):", toMaterialList(totals, data));
+};
+
+/**
+ * Several trees as one export (multi-shard mode). A list of trees is walked like a split node,
+ * so amounts of the same shard are added up across trees.
+ */
+export const noFrillsTreesString = (trees: RecipeTree[], data: Data, options?: TreeExportOptions): string => noFrillsTreeString(trees, data, options);
+
+export const skyHanniTreesString = (trees: RecipeTree[], data: Data, options?: TreeExportOptions): string => skyHanniTreeString(trees, data, options);
 
 /** A flat material total (multi-shard mode), every entry treated as directly gathered. */
 export const noFrillsMaterialsString = (totalQuantities: Map<string, number>, data: Data): string =>
