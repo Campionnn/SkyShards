@@ -1,30 +1,64 @@
-import { Modal } from "../ui";
+import { useState } from "react";
+import { Modal, ToggleSwitch } from "../ui";
 import { X, ClipboardCopy } from "lucide-react";
+import type { TreeExportOptions } from "../../types/types";
+import { loadTreeExportOptions, saveTreeExportOptions } from "../../utilities";
 
 interface CopyTreeModalProps {
   open: boolean;
   onClose: () => void;
-  onCopySkyOcean: () => void;
-  onCopyNoFrills: () => void;
-  onCopySkyHanni: () => void;
+  /** Leave out to hide the SkyOcean option (its tree format has no way to express inventory shards). */
+  onCopySkyOcean?: () => void;
+  onCopyNoFrills: (options: TreeExportOptions) => void;
+  onCopySkyHanni: (options: TreeExportOptions) => void;
   materialsOnly?: boolean;
+  /** Inventory results: offer the "count shards you already own" switch. */
+  inventoryMode?: boolean;
+  /** Multi-shard mode with per-shard trees: offer exporting all of them instead of the materials list. */
+  canExportAllTrees?: boolean;
 }
 
-export const CopyTreeModal = ({ open, onClose, onCopySkyOcean, onCopyNoFrills, onCopySkyHanni, materialsOnly = false }: CopyTreeModalProps) => {
+export const CopyTreeModal = ({
+  open,
+  onClose,
+  onCopySkyOcean,
+  onCopyNoFrills,
+  onCopySkyHanni,
+  materialsOnly = false,
+  inventoryMode = false,
+  canExportAllTrees = false,
+}: CopyTreeModalProps) => {
+  const [options, setOptions] = useState<TreeExportOptions>(loadTreeExportOptions);
+
   if (!open) return null;
 
+  const setOption = (key: keyof TreeExportOptions, value: boolean) => {
+    const next = { ...options, [key]: value };
+    setOptions(next);
+    saveTreeExportOptions(next);
+  };
+
+  // Options that don't apply here are passed as off, so they can't change the output unseen.
+  const allTrees = materialsOnly && canExportAllTrees && options.allTrees;
+  const exportsTrees = !materialsOnly || allTrees;
+  const effectiveOptions: TreeExportOptions = {
+    countOwned: inventoryMode && options.countOwned,
+    includeFused: exportsTrees && options.includeFused,
+    allTrees,
+  };
+
   const handleCopySkyOcean = () => {
-    onCopySkyOcean();
+    onCopySkyOcean?.();
     onClose();
   };
 
   const handleCopyNoFrills = () => {
-    onCopyNoFrills();
+    onCopyNoFrills(effectiveOptions);
     onClose();
   };
 
   const handleCopySkyHanni = () => {
-    onCopySkyHanni();
+    onCopySkyHanni(effectiveOptions);
     onClose();
   };
 
@@ -61,8 +95,40 @@ export const CopyTreeModal = ({ open, onClose, onCopySkyOcean, onCopyNoFrills, o
           <div className="text-xs text-slate-400">JSONs are Gzipped + base64 encoded strings</div>
         </div>
 
+        {(inventoryMode || exportsTrees || (materialsOnly && canExportAllTrees)) && (
+          <div className="mb-4 p-3 rounded-lg border border-slate-700 bg-slate-800/30 space-y-1">
+            {materialsOnly && canExportAllTrees && (
+              <ToggleSwitch
+                label="Export all selected fusion trees"
+                checked={options.allTrees}
+                onChange={(value) => setOption("allTrees", value)}
+                accent="emerald"
+                tooltip="On: the fusion trees of every selected shard as one export, so fused shards and targets can be tracked too. Amounts of the same shard are added up. Off: only the materials list."
+              />
+            )}
+            {inventoryMode && (
+              <ToggleSwitch
+                label="Count shards you already own"
+                checked={options.countOwned}
+                onChange={(value) => setOption("countOwned", value)}
+                accent="purple"
+                tooltip="On: amounts include the shards from your inventory, so a mod that counts what you own shows owned / total. Off: only what you still need to get."
+              />
+            )}
+            {exportsTrees && (
+              <ToggleSwitch
+                label="Include fused shards (SkyHanni)"
+                checked={options.includeFused}
+                onChange={(value) => setOption("includeFused", value)}
+                accent="blue"
+                tooltip="Also list the shards you fuse, including the target, so the tracker shows when you have fused enough. NoFrills always lists them."
+              />
+            )}
+          </div>
+        )}
+
         <div className="space-y-3">
-          {!materialsOnly && (
+          {!materialsOnly && onCopySkyOcean && (
             <button
               type="button"
               onClick={handleCopySkyOcean}
@@ -113,7 +179,7 @@ export const CopyTreeModal = ({ open, onClose, onCopySkyOcean, onCopyNoFrills, o
                 </div>
               </div>
               <span className="px-1 py-0.5 text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-md">
-                {materialsOnly ? "Shard Tracker (Only Direct)" : "Shard Tracker"}
+                {materialsOnly && !allTrees ? "Shard Tracker (Only Direct)" : "Shard Tracker"}
               </span>
             </div>
           </button>

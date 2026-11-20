@@ -172,6 +172,16 @@ export interface InventoryCalculationResult {
   remainingInventory?: Map<string, number>;
 }
 
+/** Choices in the Copy Tree dialog, persisted in localStorage. */
+export interface TreeExportOptions {
+  /** Inventory results: count shards taken from the inventory towards the exported amounts. */
+  countOwned: boolean;
+  /** SkyHanni: also list fused shards, not only the directly gathered ones. */
+  includeFused: boolean;
+  /** Multi-shard mode: export every selected shard's fusion tree instead of the materials list. */
+  allTrees: boolean;
+}
+
 /**
  * RecipeTree plus inventory leaves and array nodes. An array is one shard demand split
  * across several ways of satisfying it (e.g. part from inventory, part crafted).

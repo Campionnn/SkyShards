@@ -64,8 +64,8 @@ export const FusionTreeView = ({
         open={copyModalOpen}
         onClose={() => setCopyModalOpen(false)}
         onCopySkyOcean={() => void copyToClipboard(skyOceanTreeString(tree), "SkyOcean")}
-        onCopyNoFrills={() => void copyToClipboard(noFrillsTreeString(tree, data), "NoFrills")}
-        onCopySkyHanni={() => void copyToClipboard(skyHanniTreeString(tree, data), "SkyHanni")}
+        onCopyNoFrills={(options) => void copyToClipboard(noFrillsTreeString(tree, data, options), "NoFrills")}
+        onCopySkyHanni={(options) => void copyToClipboard(skyHanniTreeString(tree, data, options), "SkyHanni")}
       />
     </>
   );

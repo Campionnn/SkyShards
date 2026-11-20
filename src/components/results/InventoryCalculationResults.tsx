@@ -1,9 +1,13 @@
+import { useState } from "react";
 import type { InventoryCalculationResult, Data, CalculationParams, RecipeOverride } from "../../types/types";
+import { useCopyToClipboard } from "../../hooks";
+import { CopyTreeModal } from "../modals";
 import { InventoryRecipeTreeNode } from "../tree";
 import { ResultSummaryCards } from "./ResultSummaryCards";
 import { MaterialsNeeded } from "./MaterialsNeeded";
 import { FusionTreePanel } from "./FusionTreePanel";
 import { ShardsUsed } from "./ShardsUsed";
+import { noFrillsTreeString, skyHanniTreeString } from "./treeExport";
 
 interface InventoryCalculationResultsProps {
   result: InventoryCalculationResult;
@@ -44,6 +48,8 @@ export const InventoryCalculationResults = ({
   onDisabledShardsChange,
 }: InventoryCalculationResultsProps) => {
   const { tree } = result;
+  const [copyModalOpen, setCopyModalOpen] = useState(false);
+  const copyToClipboard = useCopyToClipboard();
 
   return (
     <div className="space-y-3">
@@ -79,6 +85,7 @@ export const InventoryCalculationResults = ({
           onShowActiveAlternatives={onShowActiveAlternatives}
           onExpandAll={onExpandAll}
           onCollapseAll={onCollapseAll}
+          onCopyTree={() => setCopyModalOpen(true)}
         >
           {(showAlternatives) => (
             <InventoryRecipeTreeNode
@@ -95,6 +102,16 @@ export const InventoryCalculationResults = ({
             />
           )}
         </FusionTreePanel>
+      )}
+
+      {tree && (
+        <CopyTreeModal
+          open={copyModalOpen}
+          onClose={() => setCopyModalOpen(false)}
+          onCopyNoFrills={(options) => void copyToClipboard(noFrillsTreeString(tree, data, options), "NoFrills")}
+          onCopySkyHanni={(options) => void copyToClipboard(skyHanniTreeString(tree, data, options), "SkyHanni")}
+          inventoryMode
+        />
       )}
     </div>
   );
