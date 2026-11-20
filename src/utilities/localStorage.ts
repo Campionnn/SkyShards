@@ -65,7 +65,7 @@ const createStorageSlot = <T>(key: string, { label, fallback, serialize = JSON.s
 const isPlainObject = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 
 /**
- * `Map<string, number>` <-> plain object, for the two count-keyed slots.
+ * `Map<string, number>` <-> plain object, for the shard-keyed number slots.
  *
  * Entries that don't parse to a finite number are dropped rather than stored as
  * `NaN` — `Number("")` is 0 and `Number("abc")` is `NaN`, and a `NaN` count
@@ -158,16 +158,30 @@ export const setSaveEnabled = (enabled: boolean): void => saveEnabledSlot.write(
 /** Nothing has written the auto-save preference yet, so this is a brand-new visitor. */
 export const isFirstVisit = (): boolean => saveEnabledSlot.isUnset();
 
-// ─── Inventory and attributes ───
+// ─── Inventory, attributes, and prices ───
 
 const inventorySlot = countMapSlot("inventory", "inventory");
 const ownedAttributesSlot = countMapSlot("owned_attributes", "owned attributes");
+/** Price overrides, stored separately per Bazaar price source. */
+const customPriceSlots = {
+  buyOrder: countMapSlot("custom_prices_buy_order", "custom buy order prices"),
+  instantBuy: countMapSlot("custom_prices_instant_buy", "custom instant buy prices"),
+};
+const customPriceSlot = (instantBuy: boolean) => (instantBuy ? customPriceSlots.instantBuy : customPriceSlots.buyOrder);
 
 export const saveInventory = (inventory: Map<string, number>): void => inventorySlot.write(inventory);
 export const loadInventory = (): Map<string, number> => inventorySlot.read();
 
 export const saveOwnedAttributes = (attributes: Map<string, number>): void => ownedAttributesSlot.write(attributes);
 export const loadOwnedAttributes = (): Map<string, number> => ownedAttributesSlot.read();
+
+/** An empty map clears the entry. */
+export const saveCustomPrices = (instantBuy: boolean, prices: Map<string, number>): void => {
+  const slot = customPriceSlot(instantBuy);
+  if (prices.size === 0) slot.clear();
+  else slot.write(prices);
+};
+export const loadCustomPrices = (instantBuy: boolean): Map<string, number> => customPriceSlot(instantBuy).read();
 
 // ─── Hypixel profile metadata ───
 
@@ -214,3 +228,94 @@ const disabledShardsSlot = createStorageSlot<Set<string>>("inventory_disabled_sh
 export const saveDisabledShards = (disabled: Set<string>): void => disabledShardsSlot.write(disabled);
 export const loadDisabledShards = (): Set<string> => disabledShardsSlot.read();
 export const clearDisabledShards = (): void => disabledShardsSlot.clear();
+
+// ─── Custom acquisition rates (ironman) ───
+
+/** Only rates that differ from rates.json are stored. */
+const customRatesSlot = createStorageSlot<Record<string, number>>("customRates", {
+  label: "custom rates",
+  fallback: () => ({}),
+  deserialize: (raw) => {
+    const parsed: unknown = JSON.parse(raw);
+    if (!isPlainObject(parsed)) return {};
+    return Object.fromEntries(Object.entries(parsed).filter((entry): entry is [string, number] => typeof entry[1] === "number" && Number.isFinite(entry[1])));
+  },
+});
+
+export const loadCustomRates = (): Record<string, number> => customRatesSlot.read();
+/** An empty record clears the entry. */
+export const saveCustomRates = (rates: Record<string, number>): void => {
+  if (Object.keys(rates).length === 0) customRatesSlot.clear();
+  else customRatesSlot.write(rates);
+};
+
+// ─── Flags ───
+
+const booleanSlot = (key: string, label: string) =>
+  createStorageSlot<boolean>(key, {
+    label,
+    fallback: () => false,
+    serialize: (value) => String(value),
+    deserialize: (raw) => raw === "true",
+  });
+
+const useInventorySlot = booleanSlot("skyshards_use_inventory", "use inventory toggle");
+export const loadUseInventory = (): boolean => useInventorySlot.read();
+export const saveUseInventory = (enabled: boolean): void => useInventorySlot.write(enabled);
+
+const greenhouseSeenSlot = booleanSlot("greenhouse_modal_seen", "greenhouse modal seen");
+export const hasSeenGreenhouseModal = (): boolean => greenhouseSeenSlot.read();
+export const markGreenhouseModalSeen = (): void => greenhouseSeenSlot.write(true);
+
+export type ProfileType = "ironman" | "normal";
+
+const profileTypeSlot = createStorageSlot<ProfileType>("skyshards_profile_type", {
+  label: "profile type",
+  fallback: () => "ironman",
+  serialize: (type) => type,
+  deserialize: (raw) => (raw === "normal" ? "normal" : "ironman"),
+});
+export const saveProfileType = (type: ProfileType): void => profileTypeSlot.write(type);
+
+// ─── Housekeeping ───
+
+/**
+ * Every key this app writes. Anything else is left over from an older build and is
+ * removed on startup by `pruneUnknownStorageKeys` — so a new slot must be listed here.
+ */
+const KNOWN_KEYS: ReadonlySet<string> = new Set([
+  "calculator_data",
+  "calculator_save_enabled",
+  "customRates",
+  "skyshards_profile_type",
+  "skyshards_use_inventory",
+  "inventory",
+  "owned_attributes",
+  "hypixel_profile_meta",
+  "inventory_disabled_shards",
+  "custom_prices_buy_order",
+  "custom_prices_instant_buy",
+  "greenhouse_modal_seen",
+  // Owned by the inline ad-block detector in index.html (first-paint cache), not by a slot here.
+  "ss_ads_blocked",
+]);
+
+/** Wipes every key for this origin ("Reset Everything"). */
+export const clearAllStorage = (): void => {
+  try {
+    localStorage.clear();
+  } catch (error) {
+    console.warn("Failed to clear localStorage:", error);
+  }
+};
+
+export const pruneUnknownStorageKeys = (): void => {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key !== null && !KNOWN_KEYS.has(key)) localStorage.removeItem(key);
+    }
+  } catch (error) {
+    console.warn("Failed to prune localStorage:", error);
+  }
+};

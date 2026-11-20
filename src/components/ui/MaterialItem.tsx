@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Info } from "lucide-react";
 import { formatLargeNumber, formatNumber, formatTime, getRarityColor, shardIconUrl } from "../../utilities";
 import { Tooltip } from "./Tooltip";
@@ -15,7 +15,7 @@ interface MaterialItemProps {
   allShards?: { [shardId: string]: Shard }; // Required if breakdown is provided
 }
 
-export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, ironManView, breakdown, allShards }) => {
+export const MaterialItem = ({ shard, quantity, ironManView, breakdown, allShards }: MaterialItemProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const hasBreakdown = breakdown && breakdown.size > 0 && allShards;
   const timeNeeded = quantity / shard.rate;
@@ -38,7 +38,12 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
             className="cursor-pointer"
           >
             <span className={`mt-0 font-medium text-sm ${getRarityColor(shard.rarity)} flex items-center min-w-0`}>
-              <img src={shardIconUrl(shard.id)} alt={shard.name} className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-2" loading="lazy" />
+              <img
+                src={shardIconUrl(shard.id)}
+                alt={shard.name}
+                className="w-5 h-5 object-contain flex-shrink-0 inline-block align-middle mr-2"
+                loading="lazy"
+              />
               <span className="truncate">{shard.name}</span>
             </span>
           </Tooltip>
@@ -49,7 +54,11 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
               <div className="flex items-center gap-1.5">
                 <div className="text-sm text-slate-400 whitespace-nowrap">{formatLargeNumber(quantity * shard.rate)}</div>
                 {hasBreakdown && (
-                  <button className="flex-shrink-0 transition-colors text-slate-400 hover:text-slate-200 cursor-pointer" onClick={() => setIsModalOpen(true)} title="View usage breakdown">
+                  <button
+                    className="flex-shrink-0 transition-colors text-slate-400 hover:text-slate-200 cursor-pointer"
+                    onClick={() => setIsModalOpen(true)}
+                    title="View usage breakdown"
+                  >
                     <Info className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -68,7 +77,11 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
                   <span className="text-slate-500">hr</span>
                 </div>
                 {hasBreakdown && (
-                  <button className="flex-shrink-0 transition-colors text-amber-400 hover:text-amber-200 cursor-pointer" onClick={() => setIsModalOpen(true)} title="View usage breakdown">
+                  <button
+                    className="flex-shrink-0 transition-colors text-amber-400 hover:text-amber-200 cursor-pointer"
+                    onClick={() => setIsModalOpen(true)}
+                    title="View usage breakdown"
+                  >
                     <Info className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -81,7 +94,14 @@ export const MaterialItem: React.FC<MaterialItemProps> = ({ shard, quantity, iro
 
       {/* Breakdown Modal */}
       {hasBreakdown && breakdown && allShards && (
-        <MaterialBreakdownModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} materialShard={shard} breakdown={breakdown} allShards={allShards} ironManView={ironManView} />
+        <MaterialBreakdownModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          materialShard={shard}
+          breakdown={breakdown}
+          allShards={allShards}
+          ironManView={ironManView}
+        />
       )}
     </>
   );

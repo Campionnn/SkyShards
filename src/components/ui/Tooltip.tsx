@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
-import ReactDOM from "react-dom";
+import { useState, useRef, useEffect, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { getRarityColor, shardIconUrl } from "../../utilities";
 import { MoveRight } from "lucide-react";
 
+const VIEWPORT_PADDING = 8;
+
 interface TooltipProps {
-  content: React.ReactNode;
+  content: ReactNode;
   title?: string;
   shardName?: string;
   className?: string;
@@ -14,13 +16,15 @@ interface TooltipProps {
   warning?: string;
   family?: string;
   type?: string;
-  children?: React.ReactNode;
-  shardId?: string; // Add shardId prop
-  showRomanNumerals?: boolean; // Add prop to control Roman numeral display
+  children?: ReactNode;
+  shardId?: string;
+  /** Show the "I → X" tier range after the title. */
+  showRomanNumerals?: boolean;
+  /** Pass false to disable the tooltip entirely. */
   visible?: boolean;
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({
+export const Tooltip = ({
   content,
   title,
   shardName,
@@ -35,48 +39,39 @@ export const Tooltip: React.FC<TooltipProps> = ({
   shardId,
   showRomanNumerals = true,
   visible,
-}) => {
+}: TooltipProps) => {
   const [internalVisible, setInternalVisible] = useState(false);
   const isVisible = visible === false ? false : internalVisible;
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
-  const updatePosition = () => {
-    if (!triggerRef.current || !tooltipRef.current) return;
-
-    const triggerRect = triggerRef.current.getBoundingClientRect();
-    const tooltipRect = tooltipRef.current.getBoundingClientRect();
-    const viewportPadding = 8;
-
-    // Calculate position above trigger by default
-    let top = triggerRect.top - tooltipRect.height - viewportPadding;
-    let left = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
-
-    // Adjust if tooltip would go off screen
-    if (top < viewportPadding) {
-      top = triggerRect.bottom + viewportPadding;
-    }
-
-    left = Math.max(viewportPadding, Math.min(left, window.innerWidth - tooltipRect.width - viewportPadding));
-
-    setPosition({ top, left });
-  };
-
-  const toggleTooltip = (e: React.MouseEvent) => {
+  const toggleTooltip = (e: ReactMouseEvent) => {
     if (visible === false) return;
     e.preventDefault();
     e.stopPropagation();
-    setInternalVisible(!internalVisible);
+    setInternalVisible((v) => !v);
   };
 
   useEffect(() => {
     if (!isVisible) return;
 
-    // Use requestAnimationFrame to ensure DOM is ready for measuring
-    const raf = requestAnimationFrame(() => {
-      updatePosition();
-    });
+    // Sit above the trigger, flip below if there's no room, and clamp horizontally to the viewport.
+    const updatePosition = () => {
+      if (!triggerRef.current || !tooltipRef.current) return;
+      const triggerRect = triggerRef.current.getBoundingClientRect();
+      const tooltipRect = tooltipRef.current.getBoundingClientRect();
+
+      let top = triggerRect.top - tooltipRect.height - VIEWPORT_PADDING;
+      if (top < VIEWPORT_PADDING) top = triggerRect.bottom + VIEWPORT_PADDING;
+      const centredLeft = triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+      const left = Math.max(VIEWPORT_PADDING, Math.min(centredLeft, window.innerWidth - tooltipRect.width - VIEWPORT_PADDING));
+
+      setPosition({ top, left });
+    };
+
+    // Measure on the next frame, once the portalled tooltip has rendered.
+    let raf = requestAnimationFrame(updatePosition);
 
     const handleOutsideClick = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -86,9 +81,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
     };
 
     const handleResize = () => {
-      requestAnimationFrame(() => {
-        updatePosition();
-      });
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(updatePosition);
     };
 
     const handleScrollClose = () => {
@@ -116,14 +110,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       className={`fixed z-[9999] max-w-xs bg-slate-800 border border-slate-600 rounded-md shadow-xl p-3 transition-opacity duration-200 ${
         isVisible ? "opacity-100" : "opacity-0 pointer-events-none select-none"
       }`}
-      style={{
-        top: position.top,
-        left: position.left,
-        userSelect: isVisible ? "text" : "none",
-        WebkitUserSelect: isVisible ? "text" : "none",
-        MozUserSelect: isVisible ? "text" : "none",
-        msUserSelect: isVisible ? "text" : "none",
-      }}
+      style={{ top: position.top, left: position.left }}
     >
       {(title || shardName) && (
         <div className="flex items-center gap-2 mb-2 text-left">
@@ -167,7 +154,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         )}
       </div>
 
-      {ReactDOM.createPortal(tooltipEl, document.body)}
+      {createPortal(tooltipEl, document.body)}
     </>
   );
 };

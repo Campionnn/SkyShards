@@ -1,31 +1,15 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { AppWithRedirect } from "./components/AppWithRedirect";
+import { App } from "./App";
+import { pruneUnknownStorageKeys } from "./utilities";
 
-// Clean up legacy/unused localStorage keys
-const VALID_KEYS = [
-  "calculator_data",
-  "calculator_save_enabled",
-  "customRates",
-  "skyshards_profile_type",
-  "inventory",
-  "owned_attributes",
-  "hypixel_profile_meta",
-  "greenhouse_modal_seen"
-];
-function cleanupLocalStorage() {
-  for (let i = localStorage.length - 1; i >= 0; i--) {
-    const key = localStorage.key(i);
-    if (key && !VALID_KEYS.includes(key)) {
-      localStorage.removeItem(key);
-    }
-  }
-}
-cleanupLocalStorage();
+// Deep links (/recipes, /shards, ...) are served directly as dist/<route>.html (see
+// vite.config.ts), so the URL the app boots on is already the page's real URL.
+pruneUnknownStorageKeys();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AppWithRedirect />
-  </StrictMode>
+    <App />
+  </StrictMode>,
 );

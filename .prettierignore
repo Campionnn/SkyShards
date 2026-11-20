@@ -1,0 +1,13 @@
+dist
+node_modules
+pnpm-lock.yaml
+public
+src/desc.json
+src/data/font-default.json
+src/data/glyphMap.ts
+src/services/__snapshots__
+.claude/settings.local.json
+.design-sync
+.ds-sync
+.idea
+*.md

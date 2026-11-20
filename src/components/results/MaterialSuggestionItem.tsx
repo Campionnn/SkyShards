@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import { memo, type MouseEvent, useCallback } from "react";
 import { formatTime, getRarityColor, shardIconUrl } from "../../utilities";
 import type { Shard } from "../../types/types";
 
@@ -12,14 +12,14 @@ interface MaterialSuggestionItemProps {
   setFocusedIndex: (index: number) => void;
 }
 
-export const MaterialSuggestionItem: React.FC<MaterialSuggestionItemProps> = React.memo(({ shard, index, focusedIndex, time, onSelect, isSelecting, setFocusedIndex }) => {
+export const MaterialSuggestionItem = memo(({ shard, index, focusedIndex, time, onSelect, isSelecting, setFocusedIndex }: MaterialSuggestionItemProps) => {
   const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+    (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       onSelect(shard);
     },
-    [onSelect, shard]
+    [onSelect, shard],
   );
 
   const handleMouseEnter = useCallback(() => {
@@ -43,11 +43,7 @@ export const MaterialSuggestionItem: React.FC<MaterialSuggestionItemProps> = Rea
             </div>
           </div>
         </div>
-        {time > 0 && (
-          <div className="text-xs font-mono bg-slate-900/50 px-2 py-1 rounded-md ml-2 flex-shrink-0">
-            {formatTime(time)}
-          </div>
-        )}
+        {time > 0 && <div className="text-xs font-mono bg-slate-900/50 px-2 py-1 rounded-md ml-2 flex-shrink-0">{formatTime(time)}</div>}
       </div>
     </li>
   );

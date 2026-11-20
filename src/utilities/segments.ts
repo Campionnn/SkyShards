@@ -10,7 +10,7 @@ export function formatRangeValue(value: number | null): string {
 }
 
 /** Flatten segments to plain text (glyphs stripped, ranges as "2→20%") for search. */
-export function flattenSegments(segments: Segment[]): string {
+function flattenSegments(segments: Segment[]): string {
   return segments
     .map((seg) => {
       if (isRangeSegment(seg)) {
@@ -30,9 +30,7 @@ export function getShardSearchText(key: string): string {
   let text = searchTextCache.get(key);
   if (text === undefined) {
     const record = SHARD_DESCRIPTIONS[key];
-    text = record
-      ? [flattenSegments(record.description), ...record.how_to_hunt.map(flattenSegments)].join("\n").toLowerCase()
-      : "";
+    text = record ? [flattenSegments(record.description), ...record.how_to_hunt.map(flattenSegments)].join("\n").toLowerCase() : "";
     searchTextCache.set(key, text);
   }
   return text;

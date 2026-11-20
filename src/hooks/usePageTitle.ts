@@ -1,25 +1,12 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { titleForPath } from "../seo/routes";
 
-export const usePageTitle = () => {
-  const location = useLocation();
+/** Keeps `document.title` as "SkyShards · <page>" for the current route (names live in src/seo/routes.ts). */
+export const usePageTitle = (): void => {
+  const { pathname } = useLocation();
 
   useEffect(() => {
-    const getTitle = () => {
-      const path = location.pathname;
-
-      switch (path) {
-        case "/":
-          return "SkyShards · Calculator";
-        case "/recipes":
-          return "SkyShards · Recipes";
-        case "/shards":
-          return "SkyShards · Shards";
-        default:
-          return "SkyShards · Calculator";
-      }
-    };
-
-    document.title = getTitle();
-  }, [location.pathname]);
+    document.title = titleForPath(pathname);
+  }, [pathname]);
 };

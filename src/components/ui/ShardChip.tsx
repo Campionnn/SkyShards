@@ -1,4 +1,3 @@
-import React from "react";
 import { getRarityColor, shardIconUrl } from "../../utilities";
 import { Tooltip } from "./Tooltip";
 import { ShardDescription } from "./ShardDescription";
@@ -12,7 +11,7 @@ interface ShardChipProps {
 }
 
 /** Icon + rarity-coloured name, wrapped in the shard description tooltip. */
-export const ShardChip: React.FC<ShardChipProps> = ({ shard, fallbackTitleToName = false }) => {
+export const ShardChip = ({ shard, fallbackTitleToName = false }: ShardChipProps) => {
   const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
 
   return (

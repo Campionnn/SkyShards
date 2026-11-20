@@ -1,5 +1,3 @@
-import React from "react";
-
 interface MoneyInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -8,7 +6,7 @@ interface MoneyInputProps {
   placeholder?: string;
 }
 
-export const MoneyInput: React.FC<MoneyInputProps> = ({ value, onChange, onEnterPress, className = "", placeholder = "" }) => (
+export const MoneyInput = ({ value, onChange, onEnterPress, className = "", placeholder = "" }: MoneyInputProps) => (
   <div className="relative">
     <input
       type="text"

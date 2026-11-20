@@ -151,9 +151,9 @@ const walk = (tree: RecipeTree, visit: (node: RecipeTree) => void): void => {
 const buildTree = (data: Data, params: CalculationParams, target: string, quantity: number, overrides: RecipeOverride[] = []) => {
   const { choices } = svc.computeMinCosts(data, params, overrides);
   const cycleNodes = svc.findCycleNodes(choices);
-  const tree = svc.buildRecipeTree(data, target, choices, cycleNodes, params, overrides);
+  const tree = svc.buildRecipeTree(data, target, choices, cycleNodes, params);
   const craftCounter = { total: 0 };
-  svc.assignQuantities(tree, quantity, data, craftCounter, choices, svc.calculateMultipliers(params).crocodileMultiplier, params, overrides);
+  svc.assignQuantities(tree, quantity, data, craftCounter, svc.calculateMultipliers(params).crocodileMultiplier);
   return { tree, craftCounter };
 };
 

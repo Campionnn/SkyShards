@@ -1,4 +1,4 @@
-# Mediavine Ads.txt v20260904
+# Mediavine Ads.txt v20261016
 managerdomain=mediavine.com
 contact=sales@mediavine.com
 ownerdomain=skyshards.com
@@ -51,9 +51,9 @@ themediagrid.com, U1NDYR, DIRECT, 35d5010d7789b49d
 themediagrid.com, ICAFX4, DIRECT, 35d5010d7789b49d
 improvedigital.com, 1625, DIRECT
 conversantmedia.com, 41025, DIRECT, 03113cd04947736d
-smartadserver.com, 3860, DIRECT
+smartadserver.com, 3860, DIRECT, 060d053dcf45cbf3
 sharethrough.com, 47b99924, DIRECT, d53b998a7bd4ecd2
-sharethrough.com, 3860, RESELLER, d53b998a7bd4ecd2
+sharethrough.com, 3860, DIRECT, 060d053dcf45cbf3
 nativo.com, 5705, DIRECT, 59521ca7cc5e9fee
 nativo.com, 6153, DIRECT, 59521ca7cc5e9fee
 nativo.com, 6078, RESELLER, 59521ca7cc5e9fee

@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useClickOutside } from "../../hooks";
 import { KUUDRA_TIERS } from "../../constants";
 
 /** The only values this dropdown can emit — KUUDRA_TIERS is `as const`. */
@@ -11,19 +12,11 @@ interface KuudraDropdownProps {
   label: string;
 }
 
-export const KuudraDropdown: React.FC<KuudraDropdownProps> = React.memo(({ value, onChange, label }) => {
+export const KuudraDropdown = memo(({ value, onChange, label }: KuudraDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  useClickOutside(dropdownRef, () => setIsOpen(false), isOpen);
 
   const handleSelect = (tierValue: KuudraTier) => {
     onChange(tierValue);
@@ -43,7 +36,9 @@ export const KuudraDropdown: React.FC<KuudraDropdownProps> = React.memo(({ value
         >
           {selectedTier?.label || "Select tier"}
         </button>
-        <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        />
         {isOpen && (
           <div className="absolute z-50 w-full mt-1 bg-slate-800/95 backdrop-blur-sm border border-white/20 rounded-md shadow-xl max-h-48 overflow-y-auto">
             {KUUDRA_TIERS.map((tier) => (

@@ -1,4 +1,4 @@
-import React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type { Data, InventoryRecipeTree, Recipe, Shard } from "../../types/types";
 
@@ -7,11 +7,12 @@ import type { Data, InventoryRecipeTree, Recipe, Shard } from "../../types/types
  * file exports only components (react-refresh/only-export-components).
  */
 
-export const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard | undefined, input2Shard: Shard | undefined): boolean => {
+const isReptileRecipe = (recipe: Recipe | undefined, input1Shard: Shard | undefined, input2Shard: Shard | undefined): boolean => {
   return (recipe?.isReptile || input1Shard?.family?.toLowerCase().includes("reptile") || input2Shard?.family?.toLowerCase().includes("reptile")) as boolean;
 };
 
-export const renderChevron = (isExpanded: boolean) => (isExpanded ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-amber-400" />);
+export const renderChevron = (isExpanded: boolean) =>
+  isExpanded ? <ChevronDown className="w-4 h-4 text-amber-400" /> : <ChevronRight className="w-4 h-4 text-amber-400" />;
 
 /**
  * Read a node's expand/collapse state, seeding a default the first time an id is seen.
@@ -26,9 +27,9 @@ export const renderChevron = (isExpanded: boolean) => (isExpanded ? <ChevronDown
  * flip a defaulted-open node straight back to open.
  */
 export const useExpansionState = (expandedStates: Map<string, boolean>) => {
-  const pendingDefaults = React.useRef<Map<string, boolean>>(new Map());
+  const pendingDefaults = useRef<Map<string, boolean>>(new Map());
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (pendingDefaults.current.size === 0) return;
     for (const [id, value] of pendingDefaults.current) {
       if (!expandedStates.has(id)) {
@@ -45,6 +46,29 @@ export const useExpansionState = (expandedStates: Map<string, boolean>) => {
     pendingDefaults.current.set(id, defaultState);
     return defaultState;
   };
+};
+
+/**
+ * Owns the expand/collapse Map for one rendered tree. Every update copies the Map so
+ * React sees a new value; nodes seed their defaults into it through `useExpansionState`.
+ * A change of `resetKey` (e.g. a different tree) starts again from an empty Map.
+ */
+export const useTreeExpansion = (resetKey?: unknown) => {
+  const [expandedStates, setExpandedStates] = useState(() => new Map<string, boolean>());
+  const [lastResetKey, setLastResetKey] = useState(resetKey);
+  if (resetKey !== lastResetKey) {
+    setLastResetKey(resetKey);
+    setExpandedStates(new Map());
+  }
+
+  const toggle = useCallback((nodeId: string) => {
+    setExpandedStates((prev) => new Map(prev).set(nodeId, !prev.get(nodeId)));
+  }, []);
+  const setAll = (expanded: boolean) => setExpandedStates((prev) => new Map(Array.from(prev.keys(), (key) => [key, expanded])));
+  const expandAll = useCallback(() => setAll(true), []);
+  const collapseAll = useCallback(() => setAll(false), []);
+
+  return { expandedStates, toggle, expandAll, collapseAll };
 };
 
 /**

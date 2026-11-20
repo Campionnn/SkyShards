@@ -1,4 +1,3 @@
-import React from "react";
 import type { ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 
@@ -9,7 +8,7 @@ interface DropdownButtonProps {
   className?: string;
 }
 
-export const DropdownButton: React.FC<DropdownButtonProps> = ({ children, isOpen, onClick, className = "" }) => (
+export const DropdownButton = ({ children, isOpen, onClick, className = "" }: DropdownButtonProps) => (
   <button
     type="button"
     className={`w-full flex items-center justify-between gap-1 lg:gap-2 px-1 lg:px-2 py-1 lg:py-2 text-slate-200 rounded shadow-sm border cursor-pointer bg-slate-800 border-slate-700 hover:bg-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-200 ${className}`}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { Segment, ShardDescRecord, TextSegment } from "../../types/shardDescription";
 import { isRangeSegment } from "../../types/shardDescription";
 import { resolveMinecraftColor } from "../../utilities/minecraftColors";
@@ -7,8 +7,8 @@ import { GLYPH_MAP, GLYPH_REGEX } from "../../data/glyphMap";
 import { StatGlyph } from "./StatGlyph";
 import { ChevronDown } from "lucide-react";
 
-function textStyle(seg: TextSegment): React.CSSProperties {
-  const style: React.CSSProperties = { color: resolveMinecraftColor(seg.c) };
+function textStyle(seg: TextSegment): CSSProperties {
+  const style: CSSProperties = { color: resolveMinecraftColor(seg.c) };
   if (seg.bold) style.fontWeight = 600;
   if (seg.italic) style.fontStyle = "italic";
   const decorations = [seg.underlined && "underline", seg.strikethrough && "line-through"].filter(Boolean);
@@ -17,7 +17,7 @@ function textStyle(seg: TextSegment): React.CSSProperties {
   return style;
 }
 
-const SegmentSpan: React.FC<{ seg: Segment }> = ({ seg }) => {
+const SegmentSpan = ({ seg }: { seg: Segment }) => {
   if (isRangeSegment(seg)) {
     const [low, high] = seg.range;
     return (
@@ -29,14 +29,10 @@ const SegmentSpan: React.FC<{ seg: Segment }> = ({ seg }) => {
   }
   if (typeof seg.t !== "string") return null;
   const parts = seg.t.split(GLYPH_REGEX);
-  return (
-    <span style={textStyle(seg)}>
-      {parts.map((part, i) => (part in GLYPH_MAP ? <StatGlyph key={i} char={part} /> : part))}
-    </span>
-  );
+  return <span style={textStyle(seg)}>{parts.map((part, i) => (part in GLYPH_MAP ? <StatGlyph key={i} char={part} /> : part))}</span>;
 };
 
-export const SegmentLine: React.FC<{ segments: Segment[] }> = ({ segments }) => (
+const SegmentLine = ({ segments }: { segments: Segment[] }) => (
   <span>
     {segments.map((seg, i) => (
       <SegmentSpan key={i} seg={seg} />
@@ -47,9 +43,7 @@ export const SegmentLine: React.FC<{ segments: Segment[] }> = ({ segments }) => 
 // Drops the trailing "Buffed by <attribute> attribute." tag appended to some descriptions,
 // along with any whitespace-only segments that precede it.
 function stripBuffedBy(segments: Segment[]): Segment[] {
-  const idx = segments.findIndex(
-    (seg) => !isRangeSegment(seg) && typeof seg.t === "string" && seg.t.trimStart().toLowerCase().startsWith("buffed by"),
-  );
+  const idx = segments.findIndex((seg) => !isRangeSegment(seg) && typeof seg.t === "string" && seg.t.trimStart().toLowerCase().startsWith("buffed by"));
   if (idx === -1) return segments;
   let end = idx;
   while (end > 0) {
@@ -60,7 +54,7 @@ function stripBuffedBy(segments: Segment[]): Segment[] {
   return segments.slice(0, end);
 }
 
-const HowToHuntLines: React.FC<{ lines: Segment[][] }> = ({ lines }) => (
+const HowToHuntLines = ({ lines }: { lines: Segment[][] }) => (
   <>
     {lines.map((line, i) => (
       <div key={i}>
@@ -72,7 +66,7 @@ const HowToHuntLines: React.FC<{ lines: Segment[][] }> = ({ lines }) => (
 
 // Collapsible "How to hunt" section that only reveals its own content and pushes
 // the surrounding content down (used on the Shards list where cards sit in a grid).
-const HowToHuntDropdown: React.FC<{ lines: Segment[][] }> = ({ lines }) => {
+const HowToHuntDropdown = ({ lines }: { lines: Segment[][] }) => {
   const [open, setOpen] = useState(false);
   return (
     <div className="mt-2">
@@ -105,7 +99,12 @@ interface ShardDescriptionProps {
   collapsibleHowToHunt?: boolean;
 }
 
-export const ShardDescription: React.FC<ShardDescriptionProps> = ({ record, fallback = "No description available.", showHowToHunt = true, collapsibleHowToHunt = false }) => {
+export const ShardDescription = ({
+  record,
+  fallback = "No description available.",
+  showHowToHunt = true,
+  collapsibleHowToHunt = false,
+}: ShardDescriptionProps) => {
   if (!record) return <>{fallback}</>;
   const hasHowToHunt = showHowToHunt && record.how_to_hunt.length > 0;
   return (

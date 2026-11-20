@@ -56,7 +56,7 @@ const referenceCycleMath = (
   steps: Step[],
   requiredQuantity: number,
   data: Data,
-  crocodileMultiplier: number
+  crocodileMultiplier: number,
 ): { roundedCrafts: number; stepCount: number; inputQuantities: Map<string, number> } | null => {
   const outputStep = steps.find((step) => step.outputShard === treeShard);
   if (!outputStep) return null;
@@ -78,10 +78,7 @@ const referenceCycleMath = (
   });
 
   const netOutputPerCycle = expectedOutput - totalInputsConsumed * 100;
-  const expectedCrafts =
-    netOutputPerCycle > 0
-      ? exactCeilDiv(requiredQuantity * 100, netOutputPerCycle)
-      : exactCeilDiv(requiredQuantity * 100, expectedOutput);
+  const expectedCrafts = netOutputPerCycle > 0 ? exactCeilDiv(requiredQuantity * 100, netOutputPerCycle) : exactCeilDiv(requiredQuantity * 100, expectedOutput);
   const stepCount = steps.length;
   const roundedCrafts = Math.ceil(expectedCrafts / stepCount) * stepCount;
 
@@ -154,7 +151,7 @@ const randomCycle = (next: () => number) => {
 
 describe("computeCycleQuantities matches exact integer arithmetic", () => {
   it("agrees on 20000 randomly generated cycles", () => {
-    const next = rng(0x5EED);
+    const next = rng(0x5eed);
     const mismatches: string[] = [];
     let nulls = 0;
     let infinite = 0;

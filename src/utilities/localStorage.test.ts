@@ -1,6 +1,17 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { CalculationFormData } from "../schemas";
-import { loadDisabledShards, loadFormData, loadHypixelProfileMeta, loadInventory, saveDisabledShards, saveFormData, saveInventory } from "./localStorage";
+import {
+  loadDisabledShards,
+  loadFormData,
+  loadHypixelProfileMeta,
+  loadInventory,
+  saveDisabledShards,
+  saveFormData,
+  saveInventory,
+  saveCustomPrices,
+  loadCustomPrices,
+  pruneUnknownStorageKeys,
+} from "./localStorage";
 
 /**
  * Minimal in-memory `localStorage`. The vitest environment is `node`, so there isn't
@@ -19,6 +30,12 @@ class FakeStorage {
   }
   seed(key: string, value: string): void {
     this.map.set(key, value);
+  }
+  get length(): number {
+    return this.map.size;
+  }
+  key(index: number): string | null {
+    return [...this.map.keys()][index] ?? null;
   }
 }
 
@@ -72,7 +89,17 @@ describe("saved form round trip", () => {
   });
 
   it("keeps a freshly-defaulted form intact", () => {
-    const defaults: CalculationFormData = { ...validForm, hunterFortune: 0, crocodileLevel: 0, kuudraTier: "none", customKuudraTime: false, kuudraTimeSeconds: null, craftPenalty: 1000, selectedShardKeys: [], shardQuantities: [] };
+    const defaults: CalculationFormData = {
+      ...validForm,
+      hunterFortune: 0,
+      crocodileLevel: 0,
+      kuudraTier: "none",
+      customKuudraTime: false,
+      kuudraTimeSeconds: null,
+      craftPenalty: 1000,
+      selectedShardKeys: [],
+      shardQuantities: [],
+    };
     saveFormData(defaults);
     expect(loadFormData()).toEqual(persistedPart(defaults));
   });
@@ -132,7 +159,10 @@ describe("saved form validation", () => {
 
 describe("inventory validation", () => {
   it("round trips counts unchanged", () => {
-    const inventory = new Map([["C35", 40], ["L6", 2]]);
+    const inventory = new Map([
+      ["C35", 40],
+      ["L6", 2],
+    ]);
     saveInventory(inventory);
     expect(loadInventory()).toEqual(inventory);
   });
@@ -140,7 +170,14 @@ describe("inventory validation", () => {
   it("drops entries that are not finite numbers instead of storing NaN", () => {
     storage.seed("inventory", JSON.stringify({ C35: 40, U8: "abc", R8: null, E5: 12, L6: "7" }));
     // "7" coerces cleanly and is kept; "abc" -> NaN and null -> 0 are the interesting cases.
-    expect(loadInventory()).toEqual(new Map([["C35", 40], ["R8", 0], ["E5", 12], ["L6", 7]]));
+    expect(loadInventory()).toEqual(
+      new Map([
+        ["C35", 40],
+        ["R8", 0],
+        ["E5", 12],
+        ["L6", 7],
+      ]),
+    );
   });
 
   it("falls back to empty when the stored value is not an object", () => {
@@ -177,5 +214,51 @@ describe("profile meta validation", () => {
     const meta = { username: "someone", profileName: "Mango", lastImportTime: 1_700_000_000_000 };
     storage.seed("hypixel_profile_meta", JSON.stringify(meta));
     expect(loadHypixelProfileMeta()).toEqual(meta);
+  });
+});
+
+describe("custom price validation", () => {
+  it("makes an empty map even when nothing is written", () => {
+    expect(loadCustomPrices(false)).toEqual(new Map());
+    expect(loadCustomPrices(true)).toEqual(new Map());
+  });
+
+  it("accepts a valid entry", () => {
+    const newPrice = new Map([["C35", 72315]]);
+    saveCustomPrices(false, newPrice);
+    expect(loadCustomPrices(false)).toEqual(newPrice);
+  });
+
+  it("keeps buy order and instant buy overrides separate", () => {
+    saveCustomPrices(false, new Map([["C35", 100]]));
+    saveCustomPrices(true, new Map([["C35", 250]]));
+    expect(loadCustomPrices(false)).toEqual(new Map([["C35", 100]]));
+    expect(loadCustomPrices(true)).toEqual(new Map([["C35", 250]]));
+  });
+
+  it("removes the entry when saving an empty map", () => {
+    saveCustomPrices(true, new Map([["C35", 250]]));
+    saveCustomPrices(true, new Map());
+    expect(storage.getItem("custom_prices_instant_buy")).toBeNull();
+  });
+
+  it("drops non-numeric prices", () => {
+    storage.seed("custom_prices_buy_order", JSON.stringify({ C35: "abc", U8: 12 }));
+    expect(loadCustomPrices(false)).toEqual(new Map([["U8", 12]]));
+  });
+});
+
+describe("pruneUnknownStorageKeys", () => {
+  it("keeps known keys and drops unknown ones", () => {
+    const known = ["calculator_data", "inventory", "skyshards_use_inventory", "ss_ads_blocked"];
+    for (const key of known) storage.seed(key, "x");
+    storage.seed("old_build_leftover", "x");
+    storage.seed("theme", "x");
+
+    pruneUnknownStorageKeys();
+
+    for (const key of known) expect(storage.getItem(key)).toBe("x");
+    expect(storage.getItem("old_build_leftover")).toBeNull();
+    expect(storage.getItem("theme")).toBeNull();
   });
 });

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { type ChangeEvent, type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Search, X, LayoutGrid } from "lucide-react";
 import { DataService } from "../../../services";
 import { debounce, isFocusRestoredByWindow } from "../../../utilities";
@@ -16,7 +16,15 @@ interface ShardAutocompleteProps {
   searchMode?: "enhanced" | "name-only";
 }
 
-export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onChange, onSelect, onFocus, placeholder = "Search for a shard...", className = "", searchMode = "enhanced" }) => {
+export const ShardAutocomplete = ({
+  value,
+  onChange,
+  onSelect,
+  onFocus,
+  placeholder = "Search for a shard...",
+  className = "",
+  searchMode = "enhanced",
+}: ShardAutocompleteProps) => {
   const [suggestions, setSuggestions] = useState<Shard[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -56,11 +64,11 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           setIsSearching(false);
         }
       }, 100),
-    [isSelecting, searchMode]
+    [isSelecting, searchMode],
   );
 
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: ChangeEvent<HTMLInputElement>) => {
       const newValue = e.target.value;
       setIsSelecting(false);
       onChange(newValue);
@@ -71,7 +79,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
 
       debouncedSearch(newValue);
     },
-    [onChange, debouncedSearch]
+    [onChange, debouncedSearch],
   );
 
   const handleSelect = useCallback(
@@ -95,11 +103,11 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
         }
       }, 50);
     },
-    [onChange, onSelect]
+    [onChange, onSelect],
   );
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: KeyboardEvent) => {
       if (!isOpen || suggestions.length === 0 || isSelecting) return;
 
       switch (e.key) {
@@ -125,7 +133,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           break;
       }
     },
-    [isOpen, suggestions, isSelecting, focusedIndex, handleSelect]
+    [isOpen, suggestions, isSelecting, focusedIndex, handleSelect],
   );
 
   const handleClear = useCallback(() => {
@@ -173,7 +181,7 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
         setIsSelecting(false);
       }, 50);
     },
-    [onChange, onSelect]
+    [onChange, onSelect],
   );
 
   useEffect(() => {
@@ -203,7 +211,11 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
     <div className={`relative ${className}`}>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          {isSearching ? <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" /> : <Search className="h-4 w-4 text-slate-400" />}
+          {isSearching ? (
+            <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Search className="h-4 w-4 text-slate-400" />
+          )}
         </div>
         <input
           ref={inputRef}
@@ -246,7 +258,15 @@ export const ShardAutocomplete: React.FC<ShardAutocompleteProps> = ({ value, onC
           style={{ width: dropdownWidth ? `${dropdownWidth}px` : "100%" }}
         >
           {suggestions.map((shard, index) => (
-            <SuggestionItem key={shard.id} shard={shard} index={index} focusedIndex={focusedIndex} onSelect={handleSelect} isSelecting={isSelecting} setFocusedIndex={setFocusedIndex} />
+            <SuggestionItem
+              key={shard.id}
+              shard={shard}
+              index={index}
+              focusedIndex={focusedIndex}
+              onSelect={handleSelect}
+              isSelecting={isSelecting}
+              setFocusedIndex={setFocusedIndex}
+            />
           ))}
         </ul>
       )}

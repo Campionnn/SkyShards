@@ -3,7 +3,7 @@ import { z } from "zod";
 export const calculationSchema = z.object({
   shard: z.string().min(1, "Please select a shard"),
   quantity: z.number().min(1, "Quantity must be at least 1"),
-  hunterFortune: z.number().min(0, "Hunter Fortune must be non-negative"),
+  hunterFortune: z.number().min(0, "Hunting Fortune must be non-negative"),
   excludeChameleon: z.boolean(),
   frogBonus: z.boolean(),
   newtLevel: z.number().min(0).max(10),
@@ -25,7 +25,11 @@ export const calculationSchema = z.object({
   craftPenalty: z.number().min(0),
   materialsOnly: z.boolean(),
   selectedShardKeys: z.array(z.string()).optional(),
-  shardQuantities: z.array(z.any()).optional(),
+  /**
+   * Per-shard quantities for multi-select mode. Callers store whole `Shard` objects, but
+   * only `shard.id` is ever read, so that is all the schema keeps when a saved form is loaded.
+   */
+  shardQuantities: z.array(z.object({ shard: z.object({ id: z.string() }), quantity: z.number() })).optional(),
 });
 
 export type CalculationFormData = z.infer<typeof calculationSchema>;

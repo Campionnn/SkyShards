@@ -53,11 +53,7 @@ export const BASIC_FILTER_CONFIG: ShardFilterConfig = {
   description: false,
 };
 
-export function matchesSearchQuery(
-  shard: Shard,
-  query: string,
-  config: ShardFilterConfig = DEFAULT_FILTER_CONFIG
-): boolean {
+export function matchesSearchQuery(shard: Shard, query: string, config: ShardFilterConfig = DEFAULT_FILTER_CONFIG): boolean {
   if (!query.trim()) return true;
 
   const search = query.toLowerCase();
@@ -84,9 +80,7 @@ export function matchesSearchQuery(
 
   // Check descriptions
   if (config.title || config.description) {
-    const shardDesc = SHARD_DESCRIPTIONS[shard.id as keyof typeof SHARD_DESCRIPTIONS];
-
-    if (config.title && shardDesc?.title?.toLowerCase().includes(search)) {
+    if (config.title && SHARD_DESCRIPTIONS[shard.id]?.title?.toLowerCase().includes(search)) {
       return true;
     }
 
@@ -105,28 +99,18 @@ export interface ShardFilterOptions {
   searchConfig?: ShardFilterConfig;
 }
 
-export function filterShards<T extends Shard>(
-  shards: T[],
-  options: ShardFilterOptions = {}
-): T[] {
-  const {
-    query = "",
-    rarity = "all",
-    type = "all",
-    searchConfig = DEFAULT_FILTER_CONFIG,
-  } = options;
+export function filterShards<T extends Shard>(shards: T[], options: ShardFilterOptions = {}): T[] {
+  const { query = "", rarity = "all", type = "all", searchConfig = DEFAULT_FILTER_CONFIG } = options;
 
   return shards.filter((shard) => {
     const matchesSearch = matchesSearchQuery(shard, query, searchConfig);
 
     const matchesRarity = rarity === "all" || shard.rarity.toLowerCase() === rarity.toLowerCase();
 
-    const matchesType =
-      type === "all" ||
-      (type === "direct" && "isDirect" in shard && (shard as { isDirect: boolean }).isDirect) ||
-      (type === "fuse" && "isDirect" in shard && !(shard as { isDirect: boolean }).isDirect);
+    // Only `ShardWithDirectInfo` carries `isDirect`; plain shards match neither "direct" nor "fuse".
+    const isDirect = "isDirect" in shard ? Boolean(shard.isDirect) : undefined;
+    const matchesType = type === "all" || (type === "direct" && isDirect === true) || (type === "fuse" && isDirect === false);
 
     return matchesSearch && matchesRarity && matchesType;
   });
 }
-
