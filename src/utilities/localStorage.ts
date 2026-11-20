@@ -303,6 +303,25 @@ const treeExportOptionsSlot = createStorageSlot<TreeExportOptions>("tree_export_
 export const loadTreeExportOptions = (): TreeExportOptions => treeExportOptionsSlot.read();
 export const saveTreeExportOptions = (options: TreeExportOptions): void => treeExportOptionsSlot.write(options);
 
+// ─── Profits page ───
+
+/**
+ * The Profits page's settings, kept as the raw object: the page owns its shape and
+ * validates every field (see `parseProfitSettings`), so a stale or hand-edited entry
+ * can't break it.
+ */
+const profitSettingsSlot = createStorageSlot<Record<string, unknown> | null>("profit_page_settings", {
+  label: "profit page settings",
+  fallback: () => null,
+  deserialize: (raw) => {
+    const parsed: unknown = JSON.parse(raw);
+    return isPlainObject(parsed) ? parsed : null;
+  },
+});
+
+export const loadProfitSettings = (): Record<string, unknown> | null => profitSettingsSlot.read();
+export const saveProfitSettings = (settings: object): void => profitSettingsSlot.write({ ...settings });
+
 // ─── Housekeeping ───
 
 /**
@@ -323,6 +342,7 @@ const KNOWN_KEYS: ReadonlySet<string> = new Set([
   "custom_prices_instant_buy",
   "greenhouse_modal_seen",
   "tree_export_options",
+  "profit_page_settings",
   // Owned by the inline ad-block detector in index.html (first-paint cache), not by a slot here.
   "ss_ads_blocked",
 ]);

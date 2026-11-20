@@ -7,6 +7,7 @@ import { usePageTitle, useShardIconPreload } from "./hooks";
 const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then((m) => ({ default: m.CalculatorPage })));
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then((m) => ({ default: m.SettingsPage })));
 const RecipePage = lazy(() => import("./pages/RecipePage").then((m) => ({ default: m.RecipePage })));
+const ProfitPage = lazy(() => import("./pages/ProfitPage").then((m) => ({ default: m.ProfitPage })));
 const FusionGraphPage = lazy(() => import("./pages/FusionGraphPage").then((m) => ({ default: m.FusionGraphPage })));
 const GuidePage = lazy(() => import("./pages/GuidePage").then((m) => ({ default: m.GuidePage })));
 const AboutPage = lazy(() => import("./pages/AboutPage").then((m) => ({ default: m.AboutPage })));
@@ -41,6 +42,7 @@ const PAGES: Array<{ path?: string; Page: LazyExoticComponent<ComponentType> }> 
   { path: "shards", Page: SettingsPage },
   { path: "recipes", Page: RecipePage },
   { path: "fusion-lines", Page: FusionGraphPage },
+  { path: "profits", Page: ProfitPage },
   { path: "guide", Page: GuidePage },
   { path: "about", Page: AboutPage },
   { path: "contact", Page: ContactPage },
