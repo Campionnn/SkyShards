@@ -113,11 +113,14 @@ export const CalculatorPage = () => {
     setShowOptimizer(true);
   };
 
-  // A step of the optimizer's plan, opened as an inventory calculation.
-  const handleOpenFromOptimizer = async (shardKey: string, quantity: number) => {
+  // A step of the optimizer's plan, opened as an inventory calculation. The target is everything
+  // left to max it, not the step's own quantity: the step already counts the target's owned shards
+  // as absorbed, and the calculator (with Use Inventory) takes those same shards from the inventory.
+  const handleOpenFromOptimizer = async (shardKey: string) => {
     const shards = await DataService.getInstance().loadShards();
     const shard = shards.find((s) => s.id === shardKey);
     if (!shard) return;
+    const quantity = remainingToMax(shard.rarity, ownedAttributes.get(shardKey));
     const updatedForm = { ...formRef.current, shard: shard.name, quantity, materialsOnly: false };
     setUseInventory(true);
     setForm(updatedForm);
@@ -236,8 +239,8 @@ export const CalculatorPage = () => {
         onSettingsChange={optimizer.setSettings}
         isStale={optimizer.isStale}
         onRecalculate={optimizer.recalculate}
-        onOpenInCalculator={(shardKey, quantity) => {
-          handleOpenFromOptimizer(shardKey, quantity).catch((error) => console.error("Failed to open shard from optimizer:", error));
+        onOpenInCalculator={(shardKey) => {
+          handleOpenFromOptimizer(shardKey).catch((error) => console.error("Failed to open shard from optimizer:", error));
         }}
       />
 

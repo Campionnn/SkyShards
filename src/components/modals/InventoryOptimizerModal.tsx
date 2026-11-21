@@ -32,10 +32,7 @@ export interface InventoryOptimizerOutcome {
 }
 
 export type InventoryOptimizerState =
-  | { status: "idle" }
-  | { status: "running"; progress: number }
-  | { status: "done"; outcome: InventoryOptimizerOutcome }
-  | { status: "error"; message: string };
+  { status: "idle" } | { status: "running"; progress: number } | { status: "done"; outcome: InventoryOptimizerOutcome } | { status: "error"; message: string };
 
 interface InventoryOptimizerModalProps {
   open: boolean;
@@ -48,8 +45,8 @@ interface InventoryOptimizerModalProps {
   /** The plan was made for a different inventory or calculator settings. */
   isStale: boolean;
   onRecalculate: () => void;
-  /** Opens the calculator on `shardId` for `quantity`. */
-  onOpenInCalculator: (shardId: string, quantity: number) => void;
+  /** Opens the calculator on `shardId`, for what is left to max it. */
+  onOpenInCalculator: (shardId: string) => void;
 }
 
 /**
@@ -85,8 +82,8 @@ export const InventoryOptimizerModal = ({
       return next;
     });
 
-  const openInCalculator = (shardId: string, quantity: number) => {
-    onOpenInCalculator(shardId, quantity);
+  const openInCalculator = (shardId: string) => {
+    onOpenInCalculator(shardId);
     onClose();
   };
 
@@ -276,7 +273,7 @@ interface PlanProps {
   outcome: InventoryOptimizerOutcome;
   expandedSteps: Set<string>;
   onToggleStep: (shardId: string) => void;
-  onOpenInCalculator: (shardId: string, quantity: number) => void;
+  onOpenInCalculator: (shardId: string) => void;
 }
 
 const Plan = ({ outcome, expandedSteps, onToggleStep, onOpenInCalculator }: PlanProps) => {
@@ -398,7 +395,7 @@ interface CompletionRowProps {
   expanded: boolean;
   onToggle: () => void;
   formatCost: (cost: number) => string;
-  onOpenInCalculator: (shardId: string, quantity: number) => void;
+  onOpenInCalculator: (shardId: string) => void;
 }
 
 const CompletionRow = ({ index, step, data, ironManView, expanded, onToggle, formatCost, onOpenInCalculator }: CompletionRowProps) => {
@@ -431,7 +428,7 @@ const CompletionRow = ({ index, step, data, ironManView, expanded, onToggle, for
           <button
             onClick={(event) => {
               event.stopPropagation();
-              onOpenInCalculator(step.shardId, step.quantity);
+              onOpenInCalculator(step.shardId);
             }}
             className="p-1.5 rounded-md text-purple-300 bg-purple-500/10 hover:bg-purple-500/25 border border-purple-500/20 cursor-pointer"
             title="Open in calculator (this plan is kept)"
