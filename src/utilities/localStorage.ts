@@ -1,6 +1,6 @@
 import { calculationSchema, type CalculationFormData } from "../schemas";
 import { DEFAULT_TREE_EXPORT_OPTIONS } from "../constants";
-import type { TreeExportOptions } from "../types/types";
+import type { Shard, TreeExportOptions } from "../types/types";
 
 /**
  * One persisted value. Every slot needs the same three things — a key, a way in and
@@ -343,6 +343,7 @@ const KNOWN_KEYS: ReadonlySet<string> = new Set([
   "greenhouse_modal_seen",
   "tree_export_options",
   "profit_page_settings",
+  "optimizer_settings",
   // Owned by the inline ad-block detector in index.html (first-paint cache), not by a slot here.
   "ss_ads_blocked",
 ]);
@@ -366,3 +367,39 @@ export const pruneUnknownStorageKeys = (): void => {
     console.warn("Failed to prune localStorage:", error);
   }
 };
+
+// ─── Inventory optimizer ───
+
+type Rarity = Shard["rarity"];
+const RARITIES: readonly Rarity[] = ["common", "uncommon", "rare", "epic", "legendary"];
+
+/** The player's choices for "Optimize Inventory". */
+export interface OptimizerSettings {
+  /** Rarities to max, in order; a rarity left out is skipped. */
+  rarityOrder: Rarity[];
+  /** 0-100: how much of an attribute's normal cost the surplus must save before extra shards are farmed or bought for it. */
+  minSavingsPercent: number;
+}
+
+export const DEFAULT_OPTIMIZER_SETTINGS: OptimizerSettings = { rarityOrder: [...RARITIES], minSavingsPercent: 25 };
+
+/** Drops unknown or repeated rarities (an empty order means all of them) and clamps the percentage, so a hand-edited entry still loads. */
+export const sanitizeOptimizerSettings = (value: Partial<OptimizerSettings> | null | undefined): OptimizerSettings => {
+  const order = Array.isArray(value?.rarityOrder)
+    ? value.rarityOrder.filter((rarity, index, all) => RARITIES.includes(rarity) && all.indexOf(rarity) === index)
+    : null;
+  const percent = Number(value?.minSavingsPercent);
+  return {
+    rarityOrder: order && order.length > 0 ? order : [...DEFAULT_OPTIMIZER_SETTINGS.rarityOrder],
+    minSavingsPercent: Number.isFinite(percent) ? Math.min(100, Math.max(0, Math.round(percent))) : DEFAULT_OPTIMIZER_SETTINGS.minSavingsPercent,
+  };
+};
+
+const optimizerSettingsSlot = createStorageSlot<OptimizerSettings>("optimizer_settings", {
+  label: "optimizer settings",
+  fallback: () => sanitizeOptimizerSettings(DEFAULT_OPTIMIZER_SETTINGS),
+  deserialize: (raw) => sanitizeOptimizerSettings(JSON.parse(raw)),
+});
+
+export const loadOptimizerSettings = (): OptimizerSettings => optimizerSettingsSlot.read();
+export const saveOptimizerSettings = (settings: OptimizerSettings): void => optimizerSettingsSlot.write(settings);

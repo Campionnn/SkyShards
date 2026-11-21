@@ -64,14 +64,50 @@ export class InvCalculationService {
     recipeOverrides: RecipeOverride[] = [],
     ownedAttributes: Map<string, number> = new Map(),
   ): Promise<InventoryCalculationResult> {
+    const planner = await this.createPlanner(params, recipeOverrides, ownedAttributes);
+    return planner.plan(targetShard, requiredQuantity, inventory);
+  }
+
+  /**
+   * Solves min costs once for these params, for callers that plan many targets
+   * against changing inventories (the attribute optimizer).
+   */
+  async createPlanner(
+    params: CalculationParams,
+    recipeOverrides: RecipeOverride[] = [],
+    ownedAttributes: Map<string, number> = new Map(),
+  ): Promise<InventoryPlanner> {
     const data = await this.service.parseData(params);
-    if (!data.shards[targetShard]) return emptyCalculationResult(targetShard);
+    return new InventoryPlanner(data, params, recipeOverrides, ownedAttributes, this.service.getDefaultRates());
+  }
+}
 
+/**
+ * Inventory-aware planning for one set of params: min costs, cycle nodes and
+ * exclusivity are solved once in the constructor, then `plan` can run for any target
+ * and inventory. `plan` never mutates the inventory it is given.
+ */
+export class InventoryPlanner {
+  readonly data: Data;
+  readonly params: CalculationParams;
+  readonly minCosts: Map<string, number>;
+  private ctx: InventoryContext;
+  private readonly defaultRates: Record<string, number>;
+
+  constructor(
+    data: Data,
+    params: CalculationParams,
+    recipeOverrides: RecipeOverride[],
+    ownedAttributes: Map<string, number>,
+    defaultRates: Record<string, number>,
+  ) {
     const { minCosts, choices } = computeMinCosts(data, params, recipeOverrides);
-    const defaultRates = this.service.getDefaultRates();
     const { crocodileMultiplier, craftPenalty } = calculateMultipliers(params);
-
-    const ctx: InventoryContext = {
+    this.data = data;
+    this.params = params;
+    this.minCosts = minCosts;
+    this.defaultRates = defaultRates;
+    this.ctx = {
       data,
       params,
       choices,
@@ -79,19 +115,34 @@ export class InvCalculationService {
       recipeOverrides,
       minCosts,
       exclusivityScores: computeExclusivityScores(data, minCosts),
-      freelyUsableShards: computeFreelyUsableShards(
-        data,
-        ownedAttributes,
-        (id) => (defaultRates[id] ?? 0) > 0,
-        (id) => minCosts.get(id) ?? Infinity,
-      ),
+      freelyUsableShards: this.freelyUsable(ownedAttributes),
       crocodileMultiplier,
       craftPenalty,
     };
+  }
+
+  /** Re-derive which shards are freely usable after attributes changed (e.g. some were maxed). */
+  updateOwnedAttributes(ownedAttributes: Map<string, number>): void {
+    this.ctx = { ...this.ctx, freelyUsableShards: this.freelyUsable(ownedAttributes) };
+  }
+
+  private freelyUsable(ownedAttributes: Map<string, number>): Set<string> {
+    return computeFreelyUsableShards(
+      this.data,
+      ownedAttributes,
+      (id) => (this.defaultRates[id] ?? 0) > 0,
+      (id) => this.minCosts.get(id) ?? Infinity,
+    );
+  }
+
+  plan(targetShard: string, requiredQuantity: number, inventory: Map<string, number>): InventoryCalculationResult {
+    const { data, params } = this;
+    const ctx = this.ctx;
+    if (!data.shards[targetShard]) return emptyCalculationResult(targetShard);
 
     const evaluate = (allowAlternatives: boolean) => {
       const remainingInventory = new Map(inventory);
-      const plainTree: InventoryRecipeTree = buildQuantifiedTree(data, targetShard, requiredQuantity, choices, ctx.cycleNodes, params);
+      const plainTree: InventoryRecipeTree = buildQuantifiedTree(data, targetShard, requiredQuantity, ctx.choices, ctx.cycleNodes, params);
       const tree = new InventorySubstitution(ctx, remainingInventory, plainTree).run(allowAlternatives);
       const { craftsNeeded, craftTime, totalQuantities } = collectTreeStats(tree, params);
       const totalTime = calculateTotalTimeFromQuantities(totalQuantities, craftTime, data, params);

@@ -1,6 +1,8 @@
 export { CalculationService } from "./calculationService";
 export { buildCalculationParams } from "./calculationParams";
-export { InvCalculationService } from "./invCalculationService";
+export { InvCalculationService, InventoryPlanner } from "./invCalculationService";
+export { optimizeAttributes, RARITY_ORDER, MIN_SAVINGS_SHARE, NON_ATTRIBUTE_SHARDS } from "./attributeOptimizer";
+export type { AttributeOptimization, AbsorbStep, CompletionStep, Rarity } from "./attributeOptimizer";
 export * from "./dataService";
 export { hypixelService } from "./hypixelService";
 export type { ShardOwned, AttributeOwned, ProfileSummary, ProfileData, HypixelProfileResponse } from "./hypixelService";

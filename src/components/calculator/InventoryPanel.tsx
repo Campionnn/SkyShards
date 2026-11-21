@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Package } from "lucide-react";
+import { ChevronDown, ChevronRight, Package, Sparkles } from "lucide-react";
 
 const plural = (count: number, noun: string) => `${noun}${count !== 1 ? "s" : ""}`;
 
@@ -7,11 +7,15 @@ interface InventoryPanelProps {
   inventorySize: number;
   attributeCount: number;
   onManage: () => void;
+  /** Opens the inventory optimizer; needs both an inventory and attribute levels. */
+  onOptimize: () => void;
 }
 
 /** Collapsible sidebar summary of the imported inventory, with the button that opens its modal. */
-export const InventoryPanel = ({ inventorySize, attributeCount, onManage }: InventoryPanelProps) => {
+export const InventoryPanel = ({ inventorySize, attributeCount, onManage, onOptimize }: InventoryPanelProps) => {
   const [expanded, setExpanded] = useState(true);
+  // Without attribute levels the optimizer cannot tell what is unfinished or what is surplus.
+  const canOptimize = inventorySize > 0 && attributeCount > 0;
 
   return (
     <div className="bg-purple-500/10 border border-purple-500/20 rounded-md overflow-hidden">
@@ -51,6 +55,17 @@ export const InventoryPanel = ({ inventorySize, attributeCount, onManage }: Inve
           >
             <Package className="w-4 h-4" />
             <span>Manage Inventory</span>
+          </button>
+          <button
+            onClick={onOptimize}
+            disabled={!canOptimize}
+            title={
+              canOptimize ? "Max as many attributes as your shards allow" : "Import your profile first: the optimizer needs your shards and attribute levels"
+            }
+            className="w-full px-3 py-2 bg-emerald-500/15 border border-emerald-500/30 hover:border-emerald-400/40 rounded-md text-emerald-300 hover:bg-emerald-500/25 flex items-center justify-center gap-2 transition-colors duration-200 text-sm font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-500/15"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>Optimize Inventory</span>
           </button>
         </div>
       )}
