@@ -6,11 +6,13 @@ import {
   Ban,
   Calculator,
   ChevronDown,
+  Check,
   ChevronRight,
   GripVertical,
   Hammer,
   Package,
   RefreshCw,
+  RotateCcw,
   Sparkles,
   Target,
   X,
@@ -150,13 +152,50 @@ export const InventoryOptimizerModal = ({
   );
 };
 
-/** Which rarities to max and in what order, and the minimum saving for steps that need extra shards. */
+const sameOrder = (a: readonly Rarity[], b: readonly Rarity[]) => a.length === b.length && a.every((rarity, index) => rarity === b[index]);
+
+/**
+ * Which rarities to max and in what order, and the minimum saving for steps that need extra shards.
+ * Reordering only edits a draft: the plan is redone when the player presses Apply, not on every swap.
+ */
 const SettingsBar = ({ settings, onChange, disabled }: { settings: OptimizerSettings; onChange: (settings: OptimizerSettings) => void; disabled: boolean }) => {
   const { rarityOrder, minSavingsPercent } = settings;
 
+  const [draftOrder, setDraftOrder] = useState<Rarity[]>(rarityOrder);
+  // Follow the saved order when it changes from outside (applied, or sanitized on save).
+  const [savedOrder, setSavedOrder] = useState(rarityOrder);
+  if (!sameOrder(savedOrder, rarityOrder)) {
+    setSavedOrder(rarityOrder);
+    setDraftOrder(rarityOrder);
+  }
+  const orderChanged = !sameOrder(draftOrder, rarityOrder);
+
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center gap-3 text-sm">
-      <RarityOrderPicker order={rarityOrder} disabled={disabled} onChange={(order) => onChange({ ...settings, rarityOrder: order })} />
+    <div className="flex flex-col lg:flex-row lg:items-start gap-3 text-sm">
+      <div className="flex flex-col gap-2 min-w-0 flex-1">
+        <RarityOrderPicker order={draftOrder} disabled={disabled} onChange={setDraftOrder} />
+        {orderChanged && (
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-amber-200/80">Order changed: apply it to plan again.</span>
+            <button
+              onClick={() => onChange({ ...settings, rarityOrder: draftOrder })}
+              disabled={disabled}
+              className="px-2 py-1 rounded-md bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-200 flex items-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Check className="w-3 h-3" />
+              Apply order
+            </button>
+            <button
+              onClick={() => setDraftOrder(rarityOrder)}
+              disabled={disabled}
+              className="px-2 py-1 rounded-md bg-slate-700/60 hover:bg-slate-700 border border-slate-600 text-slate-300 flex items-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Reset
+            </button>
+          </div>
+        )}
+      </div>
       <MinSavingsInput value={minSavingsPercent} disabled={disabled} onCommit={(percent) => onChange({ ...settings, minSavingsPercent: percent })} />
     </div>
   );
@@ -180,8 +219,9 @@ interface DragState {
 const DRAG_THRESHOLD = 4;
 
 /**
- * The rarities to max, in order, as one row of chips sorted by dragging, with a slot at
- * the end for the rarities to ignore. Works with mouse, touch and pen (pointer events),
+ * The rarities to max, in order, as a row of chips sorted by dragging, with a second row
+ * underneath for the rarities to ignore. Changes go to `onChange` as a draft; applying
+ * them is up to the caller. Works with mouse, touch and pen (pointer events),
  * and from the keyboard: arrows move a chip, Delete ignores it, Enter brings it back.
  * At least one rarity always stays in the order.
  */
@@ -229,7 +269,7 @@ const RarityOrderPicker = ({ order, disabled, onChange }: { order: Rarity[]; dis
     if (inside(ignoreZoneRef.current, 8)) {
       return currentOrder.length > 1 || !currentOrder.includes(rarity) ? { zone: "ignore" } : null;
     }
-    if (inside(orderZoneRef.current, 16)) {
+    if (inside(orderZoneRef.current, 4)) {
       let index = 0;
       for (const other of currentOrder) {
         if (other === rarity) continue;
@@ -354,29 +394,41 @@ const RarityOrderPicker = ({ order, disabled, onChange }: { order: Rarity[]; dis
   };
 
   return (
-    <div className="flex items-center gap-2 min-w-0 overflow-x-auto">
-      <span className="text-slate-400 text-xs whitespace-nowrap" title="Drag the rarities into the order to max them in. Drop one on Ignore to skip it.">
-        Max in this order:
-      </span>
-      <div ref={orderZoneRef} className="flex items-center gap-1.5" aria-label="Rarity order">
-        {order.map((rarity, index) =>
-          chip(rarity, `${index + 1}. ${RARITY_LABELS[rarity]}`, "bg-slate-700/60 border-slate-600" + (!disabled ? " hover:border-slate-400" : "")),
-        )}
-      </div>
-      <div
-        ref={ignoreZoneRef}
-        aria-label="Ignored rarities"
-        title="Rarities dropped here are not maxed."
-        className={`flex items-center gap-1.5 min-h-[26px] pl-1.5 pr-1 py-0.5 rounded-md border border-dashed transition-colors ${
-          ignoreTargeted ? "border-red-400 bg-red-500/10" : "border-slate-600"
-        }`}
-      >
-        <span className="flex items-center gap-1 text-xs text-slate-500 whitespace-nowrap">
-          <Ban className="w-3 h-3" />
-          Ignore{ignored.length === 0 ? ":" : ""}
+    <div className="flex flex-col gap-2 min-w-0">
+      <div className="flex items-center gap-2 min-w-0">
+        <span
+          className="w-28 flex-shrink-0 text-slate-400 text-xs whitespace-nowrap"
+          title="Drag the rarities into the order to max them in. Drop one in the row below to skip it."
+        >
+          Max in this order:
         </span>
-        {ignored.length === 0 && <span className="text-xs text-slate-600 italic whitespace-nowrap pr-1">drop here</span>}
-        {ignored.map((rarity) => chip(rarity, RARITY_LABELS[rarity], "bg-slate-800/60 border-slate-700 line-through decoration-slate-500"))}
+        <div
+          ref={orderZoneRef}
+          aria-label="Rarity order"
+          className={`flex-1 flex items-center gap-1.5 min-h-[30px] px-1.5 py-1 rounded-md border transition-colors overflow-x-auto ${
+            target?.zone === "order" ? "border-purple-400/60 bg-purple-500/5" : "border-slate-700"
+          }`}
+        >
+          {order.map((rarity, index) =>
+            chip(rarity, `${index + 1}. ${RARITY_LABELS[rarity]}`, "bg-slate-700/60 border-slate-600" + (!disabled ? " hover:border-slate-400" : "")),
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="w-28 flex-shrink-0 flex items-center gap-1 text-xs text-slate-500 whitespace-nowrap" title="Rarities dropped here are not maxed.">
+          <Ban className="w-3 h-3" />
+          Ignore:
+        </span>
+        <div
+          ref={ignoreZoneRef}
+          aria-label="Ignored rarities"
+          className={`flex-1 flex items-center gap-1.5 min-h-[30px] px-1.5 py-1 rounded-md border border-dashed transition-colors overflow-x-auto ${
+            ignoreTargeted ? "border-red-400 bg-red-500/10" : "border-slate-600"
+          }`}
+        >
+          {ignored.length === 0 && <span className="text-xs text-slate-600 italic whitespace-nowrap">Drop a rarity here to skip it</span>}
+          {ignored.map((rarity) => chip(rarity, RARITY_LABELS[rarity], "bg-slate-800/60 border-slate-700 line-through decoration-slate-500"))}
+        </div>
       </div>
 
       {active &&
