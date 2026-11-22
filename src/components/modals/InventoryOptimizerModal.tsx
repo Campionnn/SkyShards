@@ -19,6 +19,9 @@ import {
 } from "lucide-react";
 import { Modal, ShardChip, SummaryCard } from "../ui";
 import { InventoryRecipeTreeNode, useTreeExpansion } from "../tree";
+import { CopyTreeModal } from "./CopyTreeModal";
+import { noFrillsTreeString, skyHanniTreeString } from "../results/treeExport";
+import { useCopyToClipboard } from "../../hooks";
 import { fusedCountToTierLevel } from "../../constants";
 import { formatLargeNumber, formatQuantity, formatTime, getRarityColor, shardIconUrl, type OptimizerSettings } from "../../utilities";
 import type { AbsorbStep, AttributeOptimization, CompletionStep, Rarity } from "../../services";
@@ -688,14 +691,24 @@ const CompletionRow = ({ index, step, data, ironManView, expanded, onToggle, for
   );
 };
 
-/** The step's fusion tree, as in the calculator's inventory results, with its own expand state. */
+/** The step's fusion tree, as in the calculator's inventory results, with its own expand state and export. */
 const StepTree = ({ step, data, ironManView }: { step: CompletionStep; data: Data; ironManView: boolean }) => {
   const { expandedStates, toggle, expandAll, collapseAll } = useTreeExpansion(step);
-  if (!step.tree) return null;
+  const [copyModalOpen, setCopyModalOpen] = useState(false);
+  const copyToClipboard = useCopyToClipboard();
+  const { tree } = step;
+  if (!tree) return null;
 
   return (
     <div className="bg-slate-800 border border-slate-600 rounded-md p-2">
       <div className="flex items-center justify-end gap-2 mb-2">
+        <button
+          onClick={() => setCopyModalOpen(true)}
+          className="px-2 py-1 rounded-md text-xs bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/20 cursor-pointer"
+          title="Export this step's fusion tree for the NoFrills or SkyHanni shard tracker"
+        >
+          Copy Tree
+        </button>
         <button
           onClick={expandAll}
           className="px-2 py-1 rounded-md text-xs bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/20 cursor-pointer"
@@ -712,7 +725,7 @@ const StepTree = ({ step, data, ironManView }: { step: CompletionStep; data: Dat
       <div className="overflow-x-auto">
         <div className="min-w-[760px]">
           <InventoryRecipeTreeNode
-            tree={step.tree}
+            tree={tree}
             data={data}
             isTopLevel
             totalShardsProduced={step.quantity}
@@ -724,6 +737,15 @@ const StepTree = ({ step, data, ironManView }: { step: CompletionStep; data: Dat
           />
         </div>
       </div>
+
+      {/* Opens over the optimizer; the Modal stack closes only this one on Escape. */}
+      <CopyTreeModal
+        open={copyModalOpen}
+        onClose={() => setCopyModalOpen(false)}
+        onCopyNoFrills={(options) => void copyToClipboard(noFrillsTreeString(tree, data, options), "NoFrills")}
+        onCopySkyHanni={(options) => void copyToClipboard(skyHanniTreeString(tree, data, options), "SkyHanni")}
+        inventoryMode
+      />
     </div>
   );
 };
