@@ -7,6 +7,7 @@ import {
   WelcomeProfileModal,
   InventoryManagementModal,
   ActiveAlternativesModal,
+  InventoryOptimizerModal,
   InventoryPanel,
   CalculationProgress,
   CalculatorEmptyState,
@@ -22,6 +23,7 @@ import { isFirstVisit, setSaveEnabled, saveProfileType, type ProfileType } from 
 import { hasTarget, isTargetChange } from "./calculator/calculations";
 import { useCalculation } from "./calculator/useCalculation";
 import { useInventoryState } from "./calculator/useInventoryState";
+import { useInventoryOptimizer } from "./calculator/useInventoryOptimizer";
 
 /**
  * The calculator: settings form in the sidebar, results on the right.
@@ -41,6 +43,7 @@ export const CalculatorPage = () => {
   const [showWelcome, setShowWelcome] = useState(isFirstVisit);
   const [showInventoryModal, setShowInventoryModal] = useState(false);
   const [activeAlternativesOpen, setActiveAlternativesOpen] = useState(false);
+  const [showOptimizer, setShowOptimizer] = useState(false);
   /** Multi-shard mode: the selected shard whose own tree is shown. */
   const [materialTreeShardKey, setMaterialTreeShardKey] = useState("");
   const inventoryTree = useTreeExpansion();
@@ -103,6 +106,27 @@ export const CalculatorPage = () => {
     }
   };
 
+  // The plan lives here, not in the modal, so closing it (e.g. to open a step in the calculator) keeps it.
+  const optimizer = useInventoryOptimizer({ form, customRates, recipeOverrides, inventory, disabledShards, ownedAttributes });
+  const openOptimizer = () => {
+    optimizer.ensurePlan();
+    setShowOptimizer(true);
+  };
+
+  // A step of the optimizer's plan, opened as an inventory calculation. The target is everything
+  // left to max it, not the step's own quantity: the step already counts the target's owned shards
+  // as absorbed, and the calculator (with Use Inventory) takes those same shards from the inventory.
+  const handleOpenFromOptimizer = async (shardKey: string) => {
+    const shards = await DataService.getInstance().loadShards();
+    const shard = shards.find((s) => s.id === shardKey);
+    if (!shard) return;
+    const quantity = remainingToMax(shard.rarity, ownedAttributes.get(shardKey));
+    const updatedForm = { ...formRef.current, shard: shard.name, quantity, materialsOnly: false };
+    setUseInventory(true);
+    setForm(updatedForm);
+    schedule(updatedForm, 100);
+  };
+
   // No explicit recalculation: the import also replaces the inventory, which triggers one.
   const handleShardLevelsImport = (levels: Partial<Pick<CalculationFormData, ShardLevelKey>>) => setForm({ ...form, ...levels });
 
@@ -137,7 +161,12 @@ export const CalculatorPage = () => {
             </div>
 
             <div className={`${sidebarOpen ? "block" : "hidden xl:block"} space-y-3`}>
-              <InventoryPanel inventorySize={inventory.size} attributeCount={ownedAttributes.size} onManage={() => setShowInventoryModal(true)} />
+              <InventoryPanel
+                inventorySize={inventory.size}
+                attributeCount={ownedAttributes.size}
+                onManage={() => setShowInventoryModal(true)}
+                onOptimize={openOptimizer}
+              />
               <CalculatorForm
                 onSubmit={handleCalculate}
                 ownedAttributes={ownedAttributes}
@@ -200,6 +229,19 @@ export const CalculatorPage = () => {
         onDisabledShardsChange={setDisabledShards}
         onShardClick={handleShardClickFromInventory}
         onShardLevelsImport={handleShardLevelsImport}
+      />
+
+      <InventoryOptimizerModal
+        open={showOptimizer}
+        onClose={() => setShowOptimizer(false)}
+        state={optimizer.state}
+        settings={optimizer.settings}
+        onSettingsChange={optimizer.setSettings}
+        isStale={optimizer.isStale}
+        onRecalculate={optimizer.recalculate}
+        onOpenInCalculator={(shardKey) => {
+          handleOpenFromOptimizer(shardKey).catch((error) => console.error("Failed to open shard from optimizer:", error));
+        }}
       />
 
       {/* Lives here, not in the results, so it stays open while the tree recalculates. */}
