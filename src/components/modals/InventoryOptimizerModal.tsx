@@ -1,14 +1,15 @@
-import { useEffect, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import {
   AlertTriangle,
   ArrowRight,
+  Ban,
   Calculator,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
+  GripVertical,
   Hammer,
   Package,
-  Plus,
   RefreshCw,
   Sparkles,
   Target,
@@ -152,67 +153,244 @@ export const InventoryOptimizerModal = ({
 /** Which rarities to max and in what order, and the minimum saving for steps that need extra shards. */
 const SettingsBar = ({ settings, onChange, disabled }: { settings: OptimizerSettings; onChange: (settings: OptimizerSettings) => void; disabled: boolean }) => {
   const { rarityOrder, minSavingsPercent } = settings;
-  const skipped = RARITIES.filter((rarity) => !rarityOrder.includes(rarity));
-
-  const move = (index: number, delta: number) => {
-    const order = [...rarityOrder];
-    [order[index], order[index + delta]] = [order[index + delta], order[index]];
-    onChange({ ...settings, rarityOrder: order });
-  };
-  const remove = (rarity: Rarity) => onChange({ ...settings, rarityOrder: rarityOrder.filter((r) => r !== rarity) });
-  const add = (rarity: Rarity) => onChange({ ...settings, rarityOrder: [...rarityOrder, rarity] });
-
-  const iconButton = "p-0.5 rounded hover:bg-slate-600 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed";
 
   return (
     <div className="flex flex-col lg:flex-row lg:items-center gap-3 text-sm">
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-slate-400 text-xs">Max in this order:</span>
-        {rarityOrder.map((rarity, index) => (
-          <span key={rarity} className="flex items-center gap-0.5 pl-1 pr-0.5 py-0.5 rounded-md bg-slate-700/60 border border-slate-600">
-            <button
-              className={iconButton}
-              onClick={() => move(index, -1)}
-              disabled={disabled || index === 0}
-              aria-label={`Move ${RARITY_LABELS[rarity]} earlier`}
-            >
-              <ChevronLeft className="w-3.5 h-3.5 text-slate-300" />
-            </button>
-            <span className={`text-xs font-medium px-1 ${getRarityColor(rarity)}`}>
-              {index + 1}. {RARITY_LABELS[rarity]}
-            </span>
-            <button
-              className={iconButton}
-              onClick={() => move(index, 1)}
-              disabled={disabled || index === rarityOrder.length - 1}
-              aria-label={`Move ${RARITY_LABELS[rarity]} later`}
-            >
-              <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
-            </button>
-            <button
-              className={iconButton}
-              onClick={() => remove(rarity)}
-              disabled={disabled || rarityOrder.length === 1}
-              aria-label={`Skip ${RARITY_LABELS[rarity]}`}
-            >
-              <X className="w-3.5 h-3.5 text-slate-400" />
-            </button>
-          </span>
-        ))}
-        {skipped.map((rarity) => (
-          <button
-            key={rarity}
-            onClick={() => add(rarity)}
-            disabled={disabled}
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded-md border border-dashed border-slate-600 text-xs text-slate-400 hover:text-slate-200 hover:border-slate-400 cursor-pointer disabled:opacity-50"
-            title={`${RARITY_LABELS[rarity]} is skipped; add it back`}
-          >
-            <Plus className="w-3 h-3" />
-            {RARITY_LABELS[rarity]}
-          </button>
-        ))}
-      </div>
+      <RarityOrderPicker order={rarityOrder} disabled={disabled} onChange={(order) => onChange({ ...settings, rarityOrder: order })} />
       <MinSavingsInput value={minSavingsPercent} disabled={disabled} onCommit={(percent) => onChange({ ...settings, minSavingsPercent: percent })} />
+    </div>
+  );
+};
+
+type DropTarget = { zone: "order"; index: number } | { zone: "ignore" };
+
+interface DragState {
+  rarity: Rarity;
+  pointerId: number;
+  startX: number;
+  startY: number;
+  /** Where in the chip it was grabbed, so the floating copy stays under the pointer. */
+  offsetX: number;
+  offsetY: number;
+  width: number;
+  /** False until the pointer has moved a few pixels, so a plain click never drags. */
+  active: boolean;
+}
+
+const DRAG_THRESHOLD = 4;
+
+/**
+ * The rarities to max, in order, as one row of chips sorted by dragging, with a slot at
+ * the end for the rarities to ignore. Works with mouse, touch and pen (pointer events),
+ * and from the keyboard: arrows move a chip, Delete ignores it, Enter brings it back.
+ * At least one rarity always stays in the order.
+ */
+const RarityOrderPicker = ({ order, disabled, onChange }: { order: Rarity[]; disabled: boolean; onChange: (order: Rarity[]) => void }) => {
+  const ignored = RARITIES.filter((rarity) => !order.includes(rarity));
+
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
+  const [target, setTarget] = useState<DropTarget | null>(null);
+
+  const orderZoneRef = useRef<HTMLDivElement>(null);
+  const ignoreZoneRef = useRef<HTMLDivElement>(null);
+  const chipRefs = useRef(new Map<Rarity, HTMLElement>());
+
+  // The window listeners below read these instead of re-subscribing on every render.
+  const latest = useRef({ order, onChange, drag, target });
+  useEffect(() => {
+    latest.current = { order, onChange, drag, target };
+  });
+
+  const canIgnore = (rarity: Rarity) => order.length > 1 || !order.includes(rarity);
+
+  const apply = (rarity: Rarity, drop: DropTarget, currentOrder: Rarity[]) => {
+    const rest = currentOrder.filter((r) => r !== rarity);
+    if (drop.zone === "ignore") {
+      if (rest.length === 0 || rest.length === currentOrder.length) return;
+      onChangeIfDifferent(currentOrder, rest);
+      return;
+    }
+    const next = [...rest];
+    next.splice(Math.max(0, Math.min(drop.index, rest.length)), 0, rarity);
+    onChangeIfDifferent(currentOrder, next);
+  };
+  const onChangeIfDifferent = (before: Rarity[], after: Rarity[]) => {
+    if (before.length !== after.length || before.some((rarity, index) => rarity !== after[index])) latest.current.onChange(after);
+  };
+
+  const hitTest = (x: number, y: number, rarity: Rarity): DropTarget | null => {
+    const inside = (element: HTMLElement | null, pad: number) => {
+      if (!element) return false;
+      const box = element.getBoundingClientRect();
+      return x >= box.left - pad && x <= box.right + pad && y >= box.top - pad && y <= box.bottom + pad;
+    };
+    const currentOrder = latest.current.order;
+    if (inside(ignoreZoneRef.current, 8)) {
+      return currentOrder.length > 1 || !currentOrder.includes(rarity) ? { zone: "ignore" } : null;
+    }
+    if (inside(orderZoneRef.current, 16)) {
+      let index = 0;
+      for (const other of currentOrder) {
+        if (other === rarity) continue;
+        const chip = chipRefs.current.get(other);
+        if (chip) {
+          const box = chip.getBoundingClientRect();
+          if (x > box.left + box.width / 2) index++;
+        }
+      }
+      return { zone: "order", index };
+    }
+    return null;
+  };
+
+  const draggedRarity = drag?.rarity ?? null;
+  useEffect(() => {
+    if (!draggedRarity) return;
+
+    const reset = () => {
+      setDrag(null);
+      setPointer(null);
+      setTarget(null);
+    };
+    const onMove = (event: PointerEvent) => {
+      const current = latest.current.drag;
+      if (!current || event.pointerId !== current.pointerId) return;
+      if (!current.active) {
+        if (Math.hypot(event.clientX - current.startX, event.clientY - current.startY) < DRAG_THRESHOLD) return;
+        setDrag({ ...current, active: true });
+      }
+      event.preventDefault();
+      setPointer({ x: event.clientX, y: event.clientY });
+      setTarget(hitTest(event.clientX, event.clientY, current.rarity));
+    };
+    const onUp = (event: PointerEvent) => {
+      const { drag: current, target: drop, order: currentOrder } = latest.current;
+      if (!current || event.pointerId !== current.pointerId) return;
+      if (current.active && drop) apply(current.rarity, drop, currentOrder);
+      reset();
+    };
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        reset();
+      }
+    };
+
+    window.addEventListener("pointermove", onMove, { passive: false });
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", reset);
+    window.addEventListener("keydown", onKey, true);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", reset);
+      window.removeEventListener("keydown", onKey, true);
+    };
+    // hitTest and apply only read refs, so the drag's rarity is all this depends on.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draggedRarity]);
+
+  const startDrag = (rarity: Rarity) => (event: ReactPointerEvent<HTMLElement>) => {
+    if (disabled || event.button !== 0) return;
+    const box = event.currentTarget.getBoundingClientRect();
+    setDrag({
+      rarity,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      offsetX: event.clientX - box.left,
+      offsetY: event.clientY - box.top,
+      width: box.width,
+      active: false,
+    });
+  };
+
+  const onChipKeyDown = (rarity: Rarity) => (event: KeyboardEvent<HTMLElement>) => {
+    if (disabled) return;
+    const index = order.indexOf(rarity);
+    const inOrder = index !== -1;
+    let drop: DropTarget | null = null;
+    if (inOrder && event.key === "ArrowLeft" && index > 0) drop = { zone: "order", index: index - 1 };
+    else if (inOrder && event.key === "ArrowRight" && index < order.length - 1) drop = { zone: "order", index: index + 1 };
+    else if (inOrder && (event.key === "Delete" || event.key === "Backspace") && canIgnore(rarity)) drop = { zone: "ignore" };
+    else if (!inOrder && (event.key === "Enter" || event.key === " ")) drop = { zone: "order", index: order.length };
+    if (!drop) return;
+    event.preventDefault();
+    apply(rarity, drop, order);
+  };
+
+  const active = drag?.active ? drag : null;
+  // The chip the insertion line is drawn on: before the chip now at the drop index, or after the last one.
+  const rest = active ? order.filter((rarity) => rarity !== active.rarity) : order;
+  const insertBefore = target?.zone === "order" && target.index < rest.length ? rest[target.index] : null;
+  const insertAfter = target?.zone === "order" && target.index >= rest.length ? rest[rest.length - 1] : null;
+  const ignoreTargeted = target?.zone === "ignore";
+
+  const chip = (rarity: Rarity, label: string, extra: string) => {
+    const isDragged = active?.rarity === rarity;
+    return (
+      <span
+        key={rarity}
+        ref={(element) => {
+          if (element) chipRefs.current.set(rarity, element);
+          else chipRefs.current.delete(rarity);
+        }}
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        aria-disabled={disabled}
+        onPointerDown={startDrag(rarity)}
+        onKeyDown={onChipKeyDown(rarity)}
+        className={`relative flex items-center gap-0.5 pl-0.5 pr-1.5 py-0.5 rounded-md border text-xs font-medium whitespace-nowrap select-none touch-none focus:outline-none focus-visible:ring-1 focus-visible:ring-purple-400 ${
+          disabled ? "opacity-50 cursor-not-allowed" : "cursor-grab active:cursor-grabbing"
+        } ${isDragged ? "opacity-30" : ""} ${extra}`}
+      >
+        <GripVertical className="w-3 h-3 text-slate-500 flex-shrink-0" />
+        <span className={getRarityColor(rarity)}>{label}</span>
+        {insertBefore === rarity && <span className="absolute -left-[5px] top-0 bottom-0 w-0.5 rounded bg-purple-400" />}
+        {insertAfter === rarity && <span className="absolute -right-[5px] top-0 bottom-0 w-0.5 rounded bg-purple-400" />}
+      </span>
+    );
+  };
+
+  return (
+    <div className="flex items-center gap-2 min-w-0 overflow-x-auto">
+      <span className="text-slate-400 text-xs whitespace-nowrap" title="Drag the rarities into the order to max them in. Drop one on Ignore to skip it.">
+        Max in this order:
+      </span>
+      <div ref={orderZoneRef} className="flex items-center gap-1.5" aria-label="Rarity order">
+        {order.map((rarity, index) =>
+          chip(rarity, `${index + 1}. ${RARITY_LABELS[rarity]}`, "bg-slate-700/60 border-slate-600" + (!disabled ? " hover:border-slate-400" : "")),
+        )}
+      </div>
+      <div
+        ref={ignoreZoneRef}
+        aria-label="Ignored rarities"
+        title="Rarities dropped here are not maxed."
+        className={`flex items-center gap-1.5 min-h-[26px] pl-1.5 pr-1 py-0.5 rounded-md border border-dashed transition-colors ${
+          ignoreTargeted ? "border-red-400 bg-red-500/10" : "border-slate-600"
+        }`}
+      >
+        <span className="flex items-center gap-1 text-xs text-slate-500 whitespace-nowrap">
+          <Ban className="w-3 h-3" />
+          Ignore{ignored.length === 0 ? ":" : ""}
+        </span>
+        {ignored.length === 0 && <span className="text-xs text-slate-600 italic whitespace-nowrap pr-1">drop here</span>}
+        {ignored.map((rarity) => chip(rarity, RARITY_LABELS[rarity], "bg-slate-800/60 border-slate-700 line-through decoration-slate-500"))}
+      </div>
+
+      {active &&
+        pointer &&
+        createPortal(
+          <span
+            style={{ position: "fixed", left: pointer.x - active.offsetX, top: pointer.y - active.offsetY, width: active.width, zIndex: 9999 }}
+            className="pointer-events-none flex items-center gap-0.5 pl-0.5 pr-1.5 py-0.5 rounded-md border border-purple-400 bg-slate-700 text-xs font-medium whitespace-nowrap shadow-lg shadow-black/40"
+          >
+            <GripVertical className="w-3 h-3 text-slate-400 flex-shrink-0" />
+            <span className={getRarityColor(active.rarity)}>{RARITY_LABELS[active.rarity]}</span>
+          </span>,
+          document.body,
+        )}
     </div>
   );
 };
@@ -238,9 +416,9 @@ const MinSavingsInput = ({ value, disabled, onCommit }: { value: number; disable
   return (
     <label
       className="flex items-center gap-2 lg:ml-auto text-xs text-slate-400"
-      title="For attributes your spare shards can't finish alone: only plan them when the spares save at least this much of the normal cost."
+      title="Some attributes can't be maxed from your spare shards alone and need extra shards farmed or bought. Those are only planned when using your spares saves at least this much of the time or coins it would take to farm or buy the whole attribute from scratch."
     >
-      Min. saving with extra shards
+      Min. time/coin saving vs. farming or buying
       <span className="flex items-center gap-1">
         <input
           type="number"
