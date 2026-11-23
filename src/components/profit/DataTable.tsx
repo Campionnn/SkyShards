@@ -1,13 +1,14 @@
 import { Fragment, useState, type ReactNode } from "react";
-import { ArrowDown, ArrowUp, ChevronRight, Columns3 } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ChevronUp, Columns3, GripVertical } from "lucide-react";
 import type { ColumnDef, SortState } from "./types";
 import type { TableId } from "./profitSettings";
-import { cellClass, pagingButton, rowClass, segmentClass } from "./styles";
-import { PAGE_SIZE, columnKey } from "./tableState";
+import { cellClass, partCellClass, pagingButton, rowClass, rowLine, segmentClass } from "./styles";
+import { PAGE_SIZE, columnKey, moveColumn } from "./tableState";
 
 /**
  * A sortable table built from column definitions. `rows` are already filtered and sorted.
  * With `details`, every row gets a toggle that shows `details(row)` in a full-width row below it.
+ * With `onMoveColumn`, headers can be dragged onto another header to move that column there.
  */
 export const DataTable = <R,>({
   columns,
@@ -17,6 +18,7 @@ export const DataTable = <R,>({
   onSort,
   emptyText,
   details,
+  onMoveColumn,
 }: {
   columns: ColumnDef<R>[];
   rows: R[];
@@ -25,25 +27,64 @@ export const DataTable = <R,>({
   onSort: (column: string) => void;
   emptyText: string;
   details?: (row: R) => ReactNode;
+  /** Moves column `from` to where column `to` is. */
+  onMoveColumn?: (from: string, to: string) => void;
 }) => {
   const [openKey, setOpenKey] = useState<string | null>(null);
-  const span = columns.length + (details ? 1 : 0);
+  // The header being dragged, and the one it is over (highlighted as the drop target).
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+  const endDrag = () => {
+    setDragId(null);
+    setOverId(null);
+  };
+  const dragIndex = dragId ? columns.findIndex((column) => column.id === dragId) : -1;
+  const span = columns.reduce((sum, column) => sum + (column.cells?.length ?? 1), 0) + (details ? 1 : 0);
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead className="border-b border-slate-700">
+      {/* Separate borders (no gaps), with the lines on the cells: collapsed borders lose some lines when scaled. */}
+      <table className="w-full text-sm border-separate border-spacing-0">
+        <thead>
           <tr>
-            {details && <th className="w-6" aria-label="Details" />}
-            {columns.map((column) => {
+            {details && <th className="w-6 border-b border-slate-700" aria-label="Details" />}
+            {columns.map((column, index) => {
               const align = column.align ?? "right";
               const active = sort.column === column.id;
               const Arrow = sort.direction === "asc" ? ArrowUp : ArrowDown;
+              const isTarget = overId === column.id && dragId !== null && dragId !== column.id;
+              // The marker goes on the side the dragged column will land on.
+              const marker = isTarget ? (index > dragIndex ? "shadow-[inset_-2px_0_0_0_rgb(52_211_153)]" : "shadow-[inset_2px_0_0_0_rgb(52_211_153)]") : "";
               return (
                 <th
                   key={column.id}
-                  className={`px-2 py-2 font-medium whitespace-nowrap ${align === "right" ? "text-right" : "text-left"}`}
-                  title={column.title}
+                  colSpan={column.cells?.length}
+                  className={`group px-2 py-2 font-medium border-b border-slate-700 whitespace-nowrap ${align === "right" ? "text-right" : "text-left"} ${marker} ${
+                    dragId === column.id ? "opacity-40" : ""
+                  } ${onMoveColumn ? "cursor-grab active:cursor-grabbing" : ""}`}
+                  title={onMoveColumn ? `${column.title ? `${column.title}\n\n` : ""}Drag to move this column.` : column.title}
+                  draggable={onMoveColumn !== undefined}
+                  onDragStart={(event) => {
+                    setDragId(column.id);
+                    event.dataTransfer.effectAllowed = "move";
+                    // Firefox only starts a drag when some data is set.
+                    event.dataTransfer.setData("text/plain", column.id);
+                  }}
+                  onDragOver={(event) => {
+                    if (!dragId) return;
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                    if (overId !== column.id) setOverId(column.id);
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    if (dragId && dragId !== column.id) onMoveColumn?.(dragId, column.id);
+                    endDrag();
+                  }}
+                  onDragEnd={endDrag}
                 >
+                  {onMoveColumn && (
+                    <GripVertical className="inline-block w-3 h-3 mr-0.5 -ml-1 align-[-2px] text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  )}
                   {column.sortValue ? (
                     <button
                       type="button"
@@ -69,7 +110,7 @@ export const DataTable = <R,>({
               <Fragment key={key}>
                 <tr className={rowClass}>
                   {details && (
-                    <td className="pl-1">
+                    <td className={`pl-1 ${rowLine}`}>
                       <button
                         type="button"
                         onClick={() => setOpenKey(open ? null : key)}
@@ -81,15 +122,23 @@ export const DataTable = <R,>({
                       </button>
                     </td>
                   )}
-                  {columns.map((column) => (
-                    <td key={column.id} className={cellClass(column.align)}>
-                      {column.render(row)}
-                    </td>
-                  ))}
+                  {columns.map((column) =>
+                    column.cells ? (
+                      column.cells.map((cell, part) => (
+                        <td key={`${column.id}:${part}`} className={partCellClass(part === 0)}>
+                          {cell(row)}
+                        </td>
+                      ))
+                    ) : (
+                      <td key={column.id} className={cellClass(column.align)}>
+                        {column.render(row)}
+                      </td>
+                    ),
+                  )}
                 </tr>
                 {open && (
-                  <tr className="border-b border-slate-700/50 bg-slate-900/40">
-                    <td colSpan={span} className="p-3">
+                  <tr className="bg-slate-900/40">
+                    <td colSpan={span} className={`p-3 ${rowLine}`}>
                       {details(row)}
                     </td>
                   </tr>
@@ -129,22 +178,32 @@ export const ShowMoreFooter = ({ shown, total, onShowMore, onShowLess }: { shown
   </div>
 );
 
-/** Checkboxes for the current tab's columns. */
+/** Checkboxes for the current tab's columns, with arrows to change their order. `columns` are in the current order. */
 export const ColumnPicker = <R,>({
   table,
   label,
   columns,
   hidden,
   onChange,
+  onOrderChange,
+  customOrder,
 }: {
   table: TableId;
   label: string;
   columns: ColumnDef<R>[];
   hidden: string[];
   onChange: (hidden: string[]) => void;
+  /** The new order of all of this tab's column ids; undefined goes back to the default order. */
+  onOrderChange: (order: string[] | undefined) => void;
+  /** Whether this tab has an order of its own, so "Reset order" is offered. */
+  customOrder: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const toggle = (key: string) => onChange(hidden.includes(key) ? hidden.filter((item) => item !== key) : [...hidden, key]);
+  const ids = columns.map((column) => column.id);
+  const move = (index: number, by: -1 | 1) => onOrderChange(moveColumn(ids, ids[index], ids[index + by]));
+  const arrowClass =
+    "p-0.5 rounded text-slate-400 hover:text-white hover:bg-slate-700 disabled:opacity-25 disabled:hover:bg-transparent cursor-pointer disabled:cursor-default";
 
   return (
     <div className="relative">
@@ -158,26 +217,65 @@ export const ColumnPicker = <R,>({
         <>
           {/* Clicking anywhere outside the menu closes it. */}
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-20 mt-2 w-64 p-3 space-y-3 bg-slate-800 border border-slate-600 rounded-md shadow-xl">
+          <div className="absolute right-0 z-20 mt-2 w-72 p-3 space-y-3 bg-slate-800 border border-slate-600 rounded-md shadow-xl">
             <div className="space-y-1">
               <div className="text-xs font-semibold text-slate-300">{label}</div>
-              {columns
-                .filter((column) => !column.alwaysVisible)
-                .map((column) => {
+              <p className="text-[11px] text-slate-500">Tick to show, use the arrows (or drag a column header) to change the order.</p>
+              <div className="max-h-[60vh] overflow-y-auto pr-1 space-y-0.5">
+                {columns.map((column, index) => {
                   const key = columnKey(table, column.id);
                   return (
-                    <label key={key} className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer" title={column.title}>
-                      <input type="checkbox" checked={!hidden.includes(key)} onChange={() => toggle(key)} className="accent-emerald-500" />
-                      {column.label}
-                    </label>
+                    <div key={key} className="flex items-center justify-between gap-2 rounded px-1 hover:bg-slate-700/40">
+                      <label
+                        className={`flex items-center gap-2 text-xs text-slate-300 py-0.5 ${column.alwaysVisible ? "" : "cursor-pointer"}`}
+                        title={column.title}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={column.alwaysVisible || !hidden.includes(key)}
+                          disabled={column.alwaysVisible}
+                          onChange={() => toggle(key)}
+                          className="accent-emerald-500 disabled:opacity-50"
+                        />
+                        {column.label}
+                      </label>
+                      <span className="flex items-center">
+                        <button
+                          type="button"
+                          className={arrowClass}
+                          disabled={index === 0}
+                          onClick={() => move(index, -1)}
+                          aria-label={`Move ${column.label} left`}
+                        >
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          className={arrowClass}
+                          disabled={index === columns.length - 1}
+                          onClick={() => move(index, 1)}
+                          aria-label={`Move ${column.label} right`}
+                        >
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        </button>
+                      </span>
+                    </div>
                   );
                 })}
+              </div>
             </div>
-            {hidden.length > 0 && (
-              <button type="button" onClick={() => onChange([])} className="text-xs text-emerald-300 hover:underline cursor-pointer">
-                Show all columns
-              </button>
-            )}
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {hidden.length > 0 && (
+                <button type="button" onClick={() => onChange([])} className="text-xs text-emerald-300 hover:underline cursor-pointer">
+                  Show all columns
+                </button>
+              )}
+              {customOrder && (
+                <button type="button" onClick={() => onOrderChange(undefined)} className="text-xs text-emerald-300 hover:underline cursor-pointer">
+                  Reset order
+                </button>
+              )}
+            </div>
           </div>
         </>
       )}

@@ -4,7 +4,7 @@ import { ColumnPicker, DataTable, ShowMoreFooter } from "./DataTable";
 import { NumberSetting, SearchBox, Section } from "./controls";
 import type { TableId } from "./profitSettings";
 import { allTables } from "./tables";
-import { filterRows, sortRows, useSort, usePaging, visibleColumns } from "./tableState";
+import { filterRows, moveColumn, orderColumns, sortRows, useSort, usePaging, visibleColumns } from "./tableState";
 import type { Loaded, OpenBook, TableConfig } from "./types";
 
 /** The tabs on the left; `extra` (the Columns menu) on the right of the same row. */
@@ -46,8 +46,11 @@ export const ActiveTable = <R extends { volume: number }>({
   onMaxSpreadPercentChange,
   hiddenColumns,
   onHiddenColumnsChange,
+  columnOrder,
+  onColumnOrderChange,
   onTabChange,
   openBook,
+  notice,
 }: {
   config: TableConfig<R>;
   loaded: Loaded;
@@ -57,8 +60,14 @@ export const ActiveTable = <R extends { volume: number }>({
   onMaxSpreadPercentChange: (value: number) => void;
   hiddenColumns: string[];
   onHiddenColumnsChange: (hidden: string[]) => void;
+  /** This tab's saved column order (column ids), if the player changed it. */
+  columnOrder: string[] | undefined;
+  /** Saves this tab's column order; undefined goes back to the default. */
+  onColumnOrderChange: (order: string[] | undefined) => void;
   onTabChange: (tab: TableId) => void;
   openBook: OpenBook;
+  /** Shown above the table, e.g. a prompt to import the inventory. */
+  notice?: ReactNode;
 }) => {
   const { data } = loaded;
   const [query, setQuery] = useState("");
@@ -71,8 +80,17 @@ export const ActiveTable = <R extends { volume: number }>({
 
   const rows = useMemo(() => config.rows(loaded, marketSettings), [config, loaded, marketSettings]);
   // Every column, so sorting keeps working when the sorted column is hidden; and the visible ones.
-  const allColumns = useMemo(() => config.columns(loaded, openBook), [config, loaded, openBook]);
+  // In the player's order; sorting only needs the ids, so the order doesn't matter to it.
+  const allColumns = useMemo(() => orderColumns(config.columns(loaded, openBook), columnOrder), [config, loaded, openBook, columnOrder]);
   const columns = useMemo(() => visibleColumns(allColumns, config.id, hiddenColumns), [allColumns, config.id, hiddenColumns]);
+  const moveTo = (from: string, to: string) =>
+    onColumnOrderChange(
+      moveColumn(
+        allColumns.map((column) => column.id),
+        from,
+        to,
+      ),
+    );
   // Lower-case names once, instead of once per row on every keystroke.
   const lowerNames = useMemo(() => new Map(Object.entries(data.shards).map(([id, shard]) => [id, shard.name.toLowerCase()])), [data]);
 
@@ -88,7 +106,17 @@ export const ActiveTable = <R extends { volume: number }>({
       <TabBar
         active={config.id}
         onChange={onTabChange}
-        extra={<ColumnPicker table={config.id} label={config.label} columns={allColumns} hidden={hiddenColumns} onChange={onHiddenColumnsChange} />}
+        extra={
+          <ColumnPicker
+            table={config.id}
+            label={config.label}
+            columns={allColumns}
+            hidden={hiddenColumns}
+            onChange={onHiddenColumnsChange}
+            onOrderChange={onColumnOrderChange}
+            customOrder={columnOrder !== undefined && columnOrder.length > 0}
+          />
+        }
       />
       <Section
         icon={<config.icon className="w-5 h-5 text-emerald-400" />}
@@ -116,6 +144,7 @@ export const ActiveTable = <R extends { volume: number }>({
           </div>
         }
       >
+        {notice}
         {config.summary?.(rows)}
         <DataTable
           columns={columns}
@@ -125,6 +154,7 @@ export const ActiveTable = <R extends { volume: number }>({
           onSort={toggle}
           emptyText={config.emptyText}
           details={config.details && ((row: R) => config.details!(row, loaded, marketSettings))}
+          onMoveColumn={moveTo}
         />
         <ShowMoreFooter shown={shown.length} total={sorted.length} onShowMore={showMore} onShowLess={showLess} />
         {rows.length > filtered.length && (

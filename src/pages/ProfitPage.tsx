@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Coffee, Coins, RefreshCw } from "lucide-react";
+import { Coffee, Coins, Package, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCalculatorState, useCustomRates } from "../hooks";
 import { ToggleSwitch } from "../components/ui";
+import { InventoryManagementModal } from "../components/modals";
 import { ActiveTable } from "../components/profit/ActiveTable";
 import { NumberSetting, Segmented } from "../components/profit/controls";
 import { OrderBookModal } from "../components/profit/OrderBookModal";
@@ -14,7 +15,10 @@ import type { Loaded } from "../components/profit/types";
 import { CalculationService, DataService, buildCalculationParams, type BuyMode, type MarketSettings, type SellMode } from "../services";
 import { calculateMultipliers } from "../services/fusionMath";
 import type { ElectionData } from "../types/hypixelApiTypes";
-import { loadCustomPrices, loadInventory } from "../utilities";
+import { loadCustomPrices } from "../utilities";
+import { useInventoryState } from "./calculator/useInventoryState";
+import type { CalculationFormData } from "../schemas";
+import type { ShardLevelKey } from "../constants";
 
 /** Bazaar prices with the user's overrides for the same order-book side on top. */
 const withOverrides = (bazaar: Record<string, number>, overrides: Map<string, number>) => ({ ...bazaar, ...Object.fromEntries(overrides) });
@@ -46,11 +50,27 @@ const useNow = (intervalMs: number) => {
   return now;
 };
 
+/** Opens the inventory modal from the Inventory tab's import prompt. */
+const ImportInventoryButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap bg-purple-500/20 border border-purple-500/30 hover:border-purple-400/40 hover:bg-purple-500/30 text-purple-300 transition-colors duration-200 cursor-pointer"
+  >
+    <Package className="w-3.5 h-3.5" />
+    Import inventory
+  </button>
+);
+
 export const ProfitPage = () => {
-  const { form } = useCalculatorState();
+  const { form, setForm } = useCalculatorState();
+  // The same inventory as the Calculator page (both read and save it in this browser).
+  const { inventory, setInventory, ownedAttributes, setOwnedAttributes, disabledShards, setDisabledShards } = useInventoryState();
+  const [showInventoryModal, setShowInventoryModal] = useState(false);
   const { customRates } = useCustomRates();
   const [settings, setSettings] = useState<ProfitSettings>(loadSettings);
-  const [loaded, setLoaded] = useState<Loaded | null>(null);
+  // Everything but the inventory, which is added below so importing it doesn't refetch the Bazaar.
+  const [market, setMarket] = useState<Omit<Loaded, "inventory"> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [bookShardId, setBookShardId] = useState<string | null>(null);
   // Bumped to refetch the Bazaar; the effect below reloads whenever it changes.
@@ -72,6 +92,8 @@ export const ProfitPage = () => {
     setRefreshing(true);
     setReloadKey((key) => key + 1);
   }, []);
+
+  const loaded: Loaded | null = useMemo(() => market && { ...market, inventory }, [market, inventory]);
 
   // Coming back to the tab after a while: the prices are probably stale, so fetch new ones.
   const updatedAt = loaded?.updatedAt;
@@ -123,7 +145,7 @@ export const ProfitPage = () => {
       const buyOverrides = buyFromOffers ? sellOfferOverrides : buyOrderOverrides;
       const sellOverrides = sellToOffers ? sellOfferOverrides : buyOrderOverrides;
       if (!cancelled) {
-        setLoaded({
+        setMarket({
           data,
           buyPrices: buyFromOffers ? sides.sellOffer : sides.buyOrder,
           sellPrices: sellToOffers ? sides.sellOffer : sides.buyOrder,
@@ -132,7 +154,6 @@ export const ProfitPage = () => {
           sides,
           volumes,
           orderBooks,
-          inventory: loadInventory(),
           crocodileMultiplier: calculateMultipliers(params).crocodileMultiplier,
           crocodileLevel: params.crocodileLevel,
           updatedAt,
@@ -168,9 +189,23 @@ export const ProfitPage = () => {
     onMaxSpreadPercentChange: (maxSpreadPercent: number) => update({ maxSpreadPercent }),
     hiddenColumns: settings.hiddenColumns,
     onHiddenColumnsChange: (hiddenColumns: string[]) => update({ hiddenColumns }),
+    columnOrder: settings.columnOrder[tab],
+    onColumnOrderChange: (order: string[] | undefined) => update({ columnOrder: { ...settings.columnOrder, [tab]: order } }),
     onTabChange: (activeTab: TableId) => update({ activeTab }),
     openBook: setBookShardId,
   };
+  const openInventory = () => setShowInventoryModal(true);
+  // The import also reads the leveled shards' levels, which the rates depend on, like on the Calculator page.
+  const handleShardLevelsImport = (levels: Partial<Pick<CalculationFormData, ShardLevelKey>>) => setForm({ ...form, ...levels });
+  const inventoryNotice = inventory.size === 0 && (
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-md bg-purple-500/10 border border-purple-500/20">
+      <p className="text-sm text-slate-300">
+        You haven&apos;t imported your shards yet. Import them from your Hypixel profile (or add them by hand) to see what your inventory is worth.
+      </p>
+      <ImportInventoryButton onClick={openInventory} />
+    </div>
+  );
+
   const overrideCount = loaded ? new Set([...loaded.buyOverrides, ...loaded.sellOverrides]).size : 0;
 
   return (
@@ -243,12 +278,13 @@ export const ProfitPage = () => {
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-300">How to use</h2>
               <ul className="mt-1 grid gap-x-6 gap-y-0.5 md:grid-cols-2 list-disc pl-5 text-xs">
-                <li>Pick a tab: Farming, Fusions, Fusion chains, Flips, Fuse your farm or Inventory (your own shards from the Calculator).</li>
+                <li>Pick a tab: Farming, Fusions, Fusion chains, Flips, Fuse your farm or Inventory (your own shards; import them right there).</li>
                 <li>Hover a shard to see its description and how to hunt it.</li>
                 <li>Click a shard&apos;s name to open its order book as a depth chart.</li>
                 <li>In the order book, click the name again to open the shard on the Shards page, e.g. to set your own price.</li>
                 <li>Click a column header to sort, click it again to flip the order. Hover it to see what it means.</li>
-                <li>Use Columns (next to the tabs) to choose which statistics the current tab shows.</li>
+                <li>Use Columns (next to the tabs) to choose which statistics the current tab shows and in what order.</li>
+                <li>Drag a column header onto another to move it there. The order is remembered per tab.</li>
                 <li>Search by shard name; &quot;Only profitable&quot; hides trades that lose coins.</li>
                 <li>Hover a setting below for an explanation. All settings are remembered in this browser.</li>
               </ul>
@@ -356,7 +392,7 @@ export const ProfitPage = () => {
             {tab === "chains" && <ActiveTable config={chainTable} {...tableProps} />}
             {tab === "flips" && <ActiveTable config={flipTable} {...tableProps} />}
             {tab === "farmFusions" && <ActiveTable config={farmFusionTable} {...tableProps} />}
-            {tab === "inventory" && <ActiveTable config={inventoryTable} {...tableProps} />}
+            {tab === "inventory" && <ActiveTable config={inventoryTable} {...tableProps} notice={inventoryNotice} />}
           </>
         )}
         {loaded && (
@@ -367,6 +403,17 @@ export const ProfitPage = () => {
             onClose={() => setBookShardId(null)}
           />
         )}
+        <InventoryManagementModal
+          open={showInventoryModal}
+          onClose={() => setShowInventoryModal(false)}
+          inventory={inventory}
+          ownedAttributes={ownedAttributes}
+          onInventoryChange={setInventory}
+          onOwnedAttributesChange={setOwnedAttributes}
+          disabledShards={disabledShards}
+          onDisabledShardsChange={setDisabledShards}
+          onShardLevelsImport={handleShardLevelsImport}
+        />
       </div>
     </div>
   );

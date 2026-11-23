@@ -36,6 +36,11 @@ export interface ColumnDef<R> {
   /** Value to sort by; columns without one can't be sorted. */
   sortValue?: (row: R) => number | string;
   render: (row: R) => ReactNode;
+  /**
+   * With it, the column shows these side by side, one table cell each, under its one header,
+   * instead of `render`. Used for "A + B" inputs, so the parts line up in every row.
+   */
+  cells?: ((row: R) => ReactNode)[];
   /** Columns that identify a row (shard, inputs, result) always stay visible. */
   alwaysVisible?: boolean;
 }
