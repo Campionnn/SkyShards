@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_PROFIT_SETTINGS, parseProfitSettings } from "./profitSettings";
 import { taxMultiplierFrom, taxMultiplierSource } from "./tax";
 import type { ElectionData } from "../../types/hypixelApiTypes";
-import { filterRows, formatHours, sortRows } from "./tableState";
+import { filterRows, formatHours, moveColumn, orderColumns, sortRows } from "./tableState";
 import type { ColumnDef, TableConfig } from "./types";
 
 describe("parseProfitSettings", () => {
@@ -21,6 +21,7 @@ describe("parseProfitSettings", () => {
       useOverrides: "yes",
       activeTab: "removed-tab",
       hiddenColumns: ["flips:spread", 4, null],
+      columnOrder: { flips: ["profit", 3, "name"], removed: ["x"], farming: "nope" },
     });
     expect(parsed).toEqual({
       ...DEFAULT_PROFIT_SETTINGS,
@@ -28,6 +29,7 @@ describe("parseProfitSettings", () => {
       taxPercent: 1,
       maxSpreadPercent: 40,
       hiddenColumns: ["flips:spread"],
+      columnOrder: { flips: ["profit", "name"] },
     });
   });
 });
@@ -117,5 +119,27 @@ describe("formatHours", () => {
     expect(formatHours(5)).toBe("5.0h");
     expect(formatHours(72)).toBe("3d");
     expect(formatHours(Infinity)).toBe("–");
+  });
+});
+
+describe("column order", () => {
+  const column = (id: string): ColumnDef<Row> => ({ id, label: id, render: () => null });
+  const columns = ["name", "a", "b", "c"].map(column);
+  const order = (list: ColumnDef<Row>[]) => list.map((item) => item.id);
+
+  it("keeps the default order when nothing is saved", () => {
+    expect(order(orderColumns(columns, undefined))).toEqual(["name", "a", "b", "c"]);
+    expect(order(orderColumns(columns, []))).toEqual(["name", "a", "b", "c"]);
+  });
+
+  it("follows the saved order, dropping unknown ids and placing new columns after their default neighbour", () => {
+    expect(order(orderColumns(columns, ["c", "name", "gone", "a", "c"]))).toEqual(["c", "name", "a", "b"]);
+    expect(order(orderColumns(columns, ["b", "a"]))).toEqual(["name", "b", "c", "a"]);
+  });
+
+  it("moves a column to where another one is", () => {
+    expect(moveColumn(["a", "b", "c", "d"], "a", "c")).toEqual(["b", "c", "a", "d"]);
+    expect(moveColumn(["a", "b", "c", "d"], "d", "b")).toEqual(["a", "d", "b", "c"]);
+    expect(moveColumn(["a", "b"], "a", "missing")).toEqual(["a", "b"]);
   });
 });

@@ -1,4 +1,4 @@
-import { createElement } from "react";
+import { createElement, type ReactNode } from "react";
 import { Backpack, GitFork, Hammer, Pickaxe, Repeat, Sprout } from "lucide-react";
 import {
   CHAIN_BATCH_SIZE,
@@ -20,7 +20,7 @@ import {
 import { formatLargeNumber, formatQuantity } from "../../utilities";
 import type { Data } from "../../types/types";
 import { ChainDetails } from "./ChainDetails";
-import { FarmedInputs, FillTime, Price, ShardName, SpreadValue } from "./controls";
+import { BoughtInput, FarmedInput, FillTime, Price, ShardName, SpreadValue } from "./controls";
 import { coinClass } from "./styles";
 import { sortableHours } from "./tableState";
 import type { ColumnDef, Loaded, OpenBook, TableConfig } from "./types";
@@ -155,6 +155,43 @@ const spreadColumns = <R extends { spread: FarmingRow["spread"] }>(withPercent: 
   },
 ];
 
+const plus = <span className="text-slate-500">+</span>;
+
+/**
+ * The two inputs of a fusion, "left + right", in one column. Each side is its own table cell
+ * (see ColumnDef.cells), so the "+" lines up in every row whatever the shard names are.
+ */
+const inputsColumn = <R,>(
+  id: string,
+  label: string,
+  title: string | undefined,
+  left: (row: R) => ReactNode,
+  right: (row: R) => ReactNode,
+  alwaysVisible = true,
+): ColumnDef<R> => ({
+  id,
+  label,
+  title,
+  align: "left",
+  alwaysVisible,
+  cells: [
+    left,
+    (row) => (
+      <span className="inline-flex items-center gap-2">
+        {plus}
+        {right(row)}
+      </span>
+    ),
+  ],
+  render: (row) => (
+    <span className="inline-flex items-center gap-2">
+      {left(row)}
+      {plus}
+      {right(row)}
+    </span>
+  ),
+});
+
 // ─── Farming ───
 
 const farmingColumns = ({ data, sellOverrides }: Loaded, openBook: OpenBook): ColumnDef<FarmingRow>[] => {
@@ -216,19 +253,13 @@ export const farmingTable: TableConfig<FarmingRow> = {
 const fusionColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: OpenBook): ColumnDef<FusionRow>[] => {
   const inputsOverridden = (row: FusionRow) => buyOverrides.has(row.inputs[0]) || buyOverrides.has(row.inputs[1]);
   return [
-    {
-      id: "inputs",
-      label: "Inputs",
-      align: "left",
-      alwaysVisible: true,
-      render: (row) => (
-        <span className="inline-flex items-center gap-2">
-          <ShardName data={data} shardId={row.inputs[0]} amount={row.inputAmounts[0]} onOpen={openBook} />
-          <span className="text-slate-500">+</span>
-          <ShardName data={data} shardId={row.inputs[1]} amount={row.inputAmounts[1]} onOpen={openBook} />
-        </span>
-      ),
-    },
+    inputsColumn<FusionRow>(
+      "inputs",
+      "Inputs",
+      undefined,
+      (row) => <ShardName data={data} shardId={row.inputs[0]} amount={row.inputAmounts[0]} onOpen={openBook} />,
+      (row) => <ShardName data={data} shardId={row.inputs[1]} amount={row.inputAmounts[1]} onOpen={openBook} />,
+    ),
     resultColumn(data, openBook),
     priceColumn("cost", "Cost", "Coins to buy the inputs of one fusion", (row) => row.cost, inputsOverridden),
     priceColumn(
@@ -329,19 +360,14 @@ const chainsFor = (loaded: Loaded, settings: MarketSettings): ChainResult => {
 
 const chainColumns = ({ data, buyOverrides, sellOverrides }: Loaded, openBook: OpenBook): ColumnDef<ChainRow>[] => [
   resultColumn(data, openBook),
-  {
-    id: "recipe",
-    label: "Last fusion",
-    align: "left",
-    title: "The final fusion of the cheapest path; open the row to see the whole tree",
-    render: (row) => (
-      <span className="inline-flex items-center gap-2">
-        <ShardName data={data} shardId={row.recipe.inputs[0]} amount={data.shards[row.recipe.inputs[0]]?.fuse_amount} onOpen={openBook} />
-        <span className="text-slate-500">+</span>
-        <ShardName data={data} shardId={row.recipe.inputs[1]} amount={data.shards[row.recipe.inputs[1]]?.fuse_amount} onOpen={openBook} />
-      </span>
-    ),
-  },
+  inputsColumn<ChainRow>(
+    "recipe",
+    "Last fusion",
+    "The final fusion of the cheapest path; open the row to see the whole tree",
+    (row) => <ShardName data={data} shardId={row.recipe.inputs[0]} amount={data.shards[row.recipe.inputs[0]]?.fuse_amount} onOpen={openBook} />,
+    (row) => <ShardName data={data} shardId={row.recipe.inputs[1]} amount={data.shards[row.recipe.inputs[1]]?.fuse_amount} onOpen={openBook} />,
+    false,
+  ),
   numberColumn(
     "depth",
     "Steps",
@@ -471,7 +497,13 @@ export const flipTable: TableConfig<FlipRow> = {
 // ─── Fuse your farm ───
 
 const farmFusionColumns = ({ data }: Loaded, openBook: OpenBook): ColumnDef<FarmFusionRow>[] => [
-  { id: "inputs", label: "Inputs", align: "left", alwaysVisible: true, render: (row) => <FarmedInputs data={data} row={row} openBook={openBook} /> },
+  inputsColumn<FarmFusionRow>(
+    "inputs",
+    "Inputs",
+    "Left: the input you buy. Right: the input you farm (pickaxe). When both inputs are the shard you farm, nothing is bought.",
+    (row) => <BoughtInput data={data} row={row} openBook={openBook} />,
+    (row) => <FarmedInput data={data} row={row} openBook={openBook} />,
+  ),
   resultColumn(data, openBook),
   numberColumn("farmRate", "Farm/h", "Your farming rate of the marked shard", (row) => row.farmRate, show.quantity),
   numberColumn("sellValue", "Sell value", "What the farmed shards of one fusion would sell for instead, after tax", (row) => row.sellValue),
@@ -507,7 +539,7 @@ export const farmFusionTable: TableConfig<FarmFusionRow> = {
   label: "Fuse your farm",
   icon: Sprout,
   description:
-    "Fuse the shards you farm (marked) instead of selling them, buying the other input. Gain compares it with selling the farmed shards; Fusions/h is limited by your farming rate and the market.",
+    "Fuse the shards you farm (right, marked with a pickaxe) instead of selling them, with the input you buy (left). Gain compares it with selling the farmed shards; Fusions/h is limited by your farming rate and the market.",
   rows: (loaded, settings) => getFarmFusionRows(loaded.data, loaded, settings, loaded.crocodileMultiplier),
   columns: farmFusionColumns,
   initialSort: "gainPerHour",
@@ -575,14 +607,14 @@ export const inventoryTable: TableConfig<InventoryRow> = {
   label: "Inventory",
   icon: Backpack,
   description:
-    "The shards in your inventory, imported on the Calculator page. Value uses the sale price; Real value is what selling the whole stack at once actually brings, from the order book.",
+    "The shards in your inventory, imported here or on the Calculator page. Value uses the sale price; Real value is what selling the whole stack at once actually brings, from the order book.",
   rows: (loaded, settings) => getInventoryRows(loaded.data, loaded, settings, loaded.inventory),
   columns: inventoryColumns,
   initialSort: "realValue",
   rowKey: (row) => row.shardId,
   shardIdsOf: (row) => [row.shardId],
   searchPlaceholder: "Search shards...",
-  emptyText: "No inventory imported yet. Import it in the Inventory panel on the Calculator page.",
+  emptyText: "No shards to show.",
   ignoreMinVolume: true,
   summary: (rows) =>
     rows.length > 0 && (

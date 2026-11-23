@@ -86,3 +86,34 @@ export const columnKey = (table: TableId, columnId: string) => `${table}:${colum
 /** Columns of one table that are switched on, in their original order. */
 export const visibleColumns = <R>(columns: ColumnDef<R>[], table: TableId, hidden: string[]) =>
   columns.filter((column) => column.alwaysVisible || !hidden.includes(columnKey(table, column.id)));
+
+/**
+ * A table's columns in the player's order. Saved ids that no longer exist are dropped; columns
+ * missing from the saved order (added in a later build) go right after the column they follow
+ * by default, or first if they are first by default.
+ */
+export const orderColumns = <R>(columns: ColumnDef<R>[], order: readonly string[] | undefined): ColumnDef<R>[] => {
+  if (!order || order.length === 0) return columns;
+  const byId = new Map(columns.map((column) => [column.id, column]));
+  const result = order.filter((id, index) => byId.has(id) && order.indexOf(id) === index).map((id) => byId.get(id)!);
+  const placed = new Set(result.map((column) => column.id));
+  columns.forEach((column, index) => {
+    if (placed.has(column.id)) return;
+    const previous = index > 0 ? columns[index - 1].id : null;
+    const at = previous === null ? 0 : result.findIndex((item) => item.id === previous) + 1;
+    result.splice(at, 0, column);
+    placed.add(column.id);
+  });
+  return result;
+};
+
+/** The ids in `ids` with `from` moved to where `to` is now (before it when moving left, after it when moving right). */
+export const moveColumn = (ids: readonly string[], from: string, to: string): string[] => {
+  const fromIndex = ids.indexOf(from);
+  const toIndex = ids.indexOf(to);
+  if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return [...ids];
+  const result = [...ids];
+  result.splice(fromIndex, 1);
+  result.splice(toIndex, 0, from);
+  return result;
+};

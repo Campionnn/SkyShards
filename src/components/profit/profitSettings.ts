@@ -28,6 +28,8 @@ export interface ProfitSettings {
   activeTab: TableId;
   /** Switched-off columns, as "table:column" keys (see columnKey). */
   hiddenColumns: string[];
+  /** Column order per tab, as column ids; tabs or columns missing here keep their default place. */
+  columnOrder: Partial<Record<TableId, string[]>>;
 }
 
 export const DEFAULT_PROFIT_SETTINGS: ProfitSettings = {
@@ -43,6 +45,7 @@ export const DEFAULT_PROFIT_SETTINGS: ProfitSettings = {
   useOverrides: true,
   activeTab: "farming",
   hiddenColumns: [],
+  columnOrder: {},
 };
 
 const oneOf = <T extends string>(value: unknown, options: readonly T[], fallback: T): T =>
@@ -51,13 +54,25 @@ const oneOf = <T extends string>(value: unknown, options: readonly T[], fallback
 const numberIn = (value: unknown, max: number, fallback: number): number =>
   typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= max ? value : fallback;
 
+const stringList = (value: unknown): string[] => (Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []);
+
+/** Only known tabs, each with a list of column ids. */
+const parseColumnOrder = (value: unknown): ProfitSettings["columnOrder"] => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return {};
+  const order: ProfitSettings["columnOrder"] = {};
+  for (const [table, ids] of Object.entries(value)) {
+    if ((TABLE_IDS as readonly string[]).includes(table) && Array.isArray(ids)) order[table as TableId] = stringList(ids);
+  }
+  return order;
+};
+
 /**
  * Settings from storage, field by field: anything missing, out of range or of the wrong type
  * (an older build, a hand-edited entry) falls back to its default instead of breaking the page.
  */
 export const parseProfitSettings = (raw: Record<string, unknown> | null): ProfitSettings => {
   const defaults = DEFAULT_PROFIT_SETTINGS;
-  if (!raw) return { ...defaults, hiddenColumns: [] };
+  if (!raw) return { ...defaults, hiddenColumns: [], columnOrder: {} };
   return {
     buyMode: oneOf(raw.buyMode, ["instant", "order"], defaults.buyMode),
     sellMode: oneOf(raw.sellMode, ["instant", "offer"], defaults.sellMode),
@@ -68,7 +83,8 @@ export const parseProfitSettings = (raw: Record<string, unknown> | null): Profit
     maxSpreadPercent: numberIn(raw.maxSpreadPercent, Number.MAX_VALUE, defaults.maxSpreadPercent),
     useOverrides: typeof raw.useOverrides === "boolean" ? raw.useOverrides : defaults.useOverrides,
     activeTab: oneOf(raw.activeTab, TABLE_IDS, defaults.activeTab),
-    hiddenColumns: Array.isArray(raw.hiddenColumns) ? raw.hiddenColumns.filter((key): key is string => typeof key === "string") : [],
+    hiddenColumns: stringList(raw.hiddenColumns),
+    columnOrder: parseColumnOrder(raw.columnOrder),
   };
 };
 

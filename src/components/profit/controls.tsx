@@ -120,31 +120,36 @@ export const ShardName = ({
   );
 };
 
-/** The two inputs of a "Fuse your farm" fusion, with the farmed one marked. */
-export const FarmedInputs = ({
-  data,
-  row,
-  openBook,
-}: {
-  data: Data;
-  row: Pick<FarmFusionRow, "inputs" | "inputAmounts" | "farmedId">;
-  openBook: (shardId: string) => void;
-}) => (
-  <span className="inline-flex items-center gap-2">
-    {row.inputs.map((shardId, index) => (
-      <span key={index} className="inline-flex items-center gap-2">
-        {index === 1 && <span className="text-slate-500">+</span>}
-        <span className="inline-flex items-center gap-1">
-          <ShardName data={data} shardId={shardId} amount={row.inputAmounts[index]} onOpen={openBook} />
-          {shardId === row.farmedId && (
-            <span title="You farm this one">
-              <Pickaxe className="w-3.5 h-3.5 text-emerald-400" />
-            </span>
-          )}
-        </span>
-      </span>
-    ))}
+type FarmRow = Pick<FarmFusionRow, "inputAmounts" | "boughtId" | "boughtAmount" | "farmedId" | "farmedAmount">;
+type FarmInputProps = { data: Data; row: FarmRow; openBook: (shardId: string) => void };
+
+/** A farmed shard with its pickaxe marker. */
+const FarmedShard = ({ data, shardId, amount, openBook }: { data: Data; shardId: string; amount: number; openBook: (shardId: string) => void }) => (
+  <span className="inline-flex items-center gap-1">
+    <ShardName data={data} shardId={shardId} amount={amount} onOpen={openBook} />
+    <span title="You farm this one">
+      <Pickaxe className="w-3.5 h-3.5 text-emerald-400" />
+    </span>
   </span>
+);
+
+/**
+ * The left input of a "Fuse your farm" fusion: the one you buy. When both inputs are the
+ * farmed shard, nothing is bought, so it shows the first farmed input (one slot's amount).
+ */
+export const BoughtInput = ({ data, row, openBook }: FarmInputProps) =>
+  row.boughtId === null ? (
+    <FarmedShard data={data} shardId={row.farmedId} amount={row.inputAmounts[0]} openBook={openBook} />
+  ) : (
+    <ShardName data={data} shardId={row.boughtId} amount={row.boughtAmount} onOpen={openBook} />
+  );
+
+/**
+ * The right input of a "Fuse your farm" fusion: the one you farm. When both inputs are the
+ * farmed shard, it shows the second slot's amount.
+ */
+export const FarmedInput = ({ data, row, openBook }: FarmInputProps) => (
+  <FarmedShard data={data} shardId={row.farmedId} amount={row.boughtId === null ? row.inputAmounts[1] : row.farmedAmount} openBook={openBook} />
 );
 
 /** A price, marked when it comes from the user's override instead of the Bazaar. */
